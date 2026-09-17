@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 7 – Requirements Modeling with Flow Modeling II · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+      <ol><li><a href="#1-recap-dfd-สไลด์-49">1. Recap: DFD (สไลด์ 4–9)</a></li><li><a href="#2-explaining-the-processes">2. Explaining the Processes</a></li><li><a href="#3-process-specification-pspec">3. Process Specification (PSPEC)</a></li><li><a href="#4-structured-english">4. Structured English</a></li><li><a href="#5-policies-and-decision-tables">5. Policies and Decision Tables</a></li><li><a href="#6-dfds-a-look-ahead-และ-a-design-note">6. DFDs: A Look Ahead และ A Design Note</a></li><li><a href="#7-control-flow-modeling">7. Control Flow Modeling</a></li><li><a href="#8-control-specification-cspec">8. Control Specification (CSPEC)</a></li><li><a href="#9-exercise-dfd-level-1-และ-level-2-ระบบขายบัตรสวนสัตว์">9. Exercise: DFD Level 1 และ Level 2 ระบบขายบัตรสวนสัตว์</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L7</div>
+    <h1 class="lesson-title">Lecture 7 – Requirements Modeling with Flow Modeling II</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> L6 สอนวาด DFD ให้เห็นว่า <strong>ข้อมูลไหลผ่าน process ไหนบ้าง</strong> แต่ DFD ไม่ได้บอกว่า <strong>ข้างในแต่ละ process ทำงานอย่างไร</strong> บทนี้จึงเติมส่วนนั้น</p>
+<ol>
+<li>ทบทวน DFD จาก L6 (สัญลักษณ์, context diagram, hierarchy, numbering, กฎ)</li>
+<li><strong>อธิบาย process</strong> ด้วย <strong>Process Specification (PSPEC)</strong>, <strong>Structured English</strong> และ <strong>Decision Table</strong></li>
+<li>มองต่อว่า DFD และ PSPEC จะ <strong>map ไปเป็น design</strong> อย่างไร</li>
+<li><strong>Control Flow Modeling:</strong> event, control flow (เส้นประ) และ <strong>Control Specification (CSPEC)</strong></li>
+</ol>
+<p>ท้ายบทมีแบบฝึกวาด <strong>DFD Level 1 และ Level 2 ของระบบขายบัตรสวนสัตว์</strong> ต่อจาก context diagram ใน L6</p>
+</blockquote>
+<h2 id="1-recap-dfd-สไลด์-49">1. Recap: DFD (สไลด์ 4–9)</h2>
+<p>สไลด์ช่วงนี้ <strong>ซ้ำกับ L6</strong> (รายละเอียดเต็มดูใน <code>L6\สรุป-L6-Flow-Modeling-I.md</code>) สรุปสั้น ๆ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th>สาระสำคัญ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flow Modeling Notation</strong></td>
+<td>4 สัญลักษณ์: external entity, process, data flow, data store ใน 2 สำนัก คือ <strong>Yourdon/DeMarco</strong> (process = วงกลม) และ <strong>Gane/Sarson</strong> (process = สี่เหลี่ยมมุมมน)</td>
+</tr>
+<tr>
+<td><strong>Context Diagram</strong></td>
+<td>DFD บนสุด, แสดงบริบทของ business process, ทั้งระบบเป็น <strong>process 0</strong> เดียว, แสดง <strong>external entity ทั้งหมด</strong></td>
+</tr>
+<tr>
+<td><strong>Data Flow Hierarchy</strong></td>
+<td>context diagram แตกเป็น Level 1 (Process AA, BB, CC พร้อม Data Store P, Q)</td>
+</tr>
+<tr>
+<td><strong>DFD Numbering + Hierarchical Consistency</strong></td>
+<td>Level 1 = 1, 2, 3 → Level 2 = 1.1, 2.1, 3.1 … โดย input/output ของ parent ต้องตรงกับ child</td>
+</tr>
+<tr>
+<td><strong>Rules for Data Flows</strong></td>
+<td>ต้องมีชื่อเสมอ, ชื่อเชิงตรรกะไม่บอกวิธี implement, <strong>ทุก flow ต้องเริ่มหรือจบที่ process</strong></td>
+</tr>
+<tr>
+<td><strong>Don't Break DFD Rules!</strong></td>
+<td>(1) flow ห้ามแตกเป็นหลายข้อมูล (2) ทุก flow ต้องแตะ process (3) process ต้องมี input และ output อย่างน้อยอย่างละ 1</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-explaining-the-processes">2. Explaining the Processes</h2>
+<p><strong>ทำไมต้องอธิบาย process?</strong>
+DFD บอกแค่ว่า &quot;process <strong>Calculate Gross Pay</strong> รับ Hours Worked กับ Pay Rate แล้วส่ง Gross Pay ออกมา&quot; แต่ไม่บอกว่า <strong>คำนวณอย่างไร</strong> เช่น ทำงานเกิน 40 ชั่วโมงคิดค่าล่วงเวลาไหม ถ้าไม่อธิบาย programmer ต้องเดาเอง</p>
+<p>เครื่องมืออธิบาย process ในบทนี้มี 3 อย่าง:</p>
+<ol>
+<li><strong>Process Specification (PSPEC)</strong></li>
+<li><strong>Structured English</strong></li>
+<li><strong>Decision Table</strong></li>
+</ol>
+<hr />
+<h2 id="3-process-specification-pspec">3. Process Specification (PSPEC)</h2>
+<p><strong>PSPEC</strong> คือเอกสารที่อธิบาย <strong>process หนึ่งตัวใน DFD</strong> (โดยเฉพาะ <strong>primitive process</strong> ระดับล่างสุด ตามกฎ hierarchical consistency ใน L6) เขียนได้หลายรูปแบบ:</p>
+<p><img loading="lazy" src="diagrams/L7-01-pspec-forms.png" alt="รูปแบบของ PSPEC" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>PDL = Program Design Language</strong> เป็น pseudocode ที่ผสมภาษาอังกฤษกับโครงสร้างโปรแกรม <em>(ชื่อเต็มเสริมเอง)</em></p>
+</blockquote>
+<h3 id="ตัวอย่าง-process-ที่ใช้ทั้ง-2-แบบ-analyze-triangle">ตัวอย่าง process ที่ใช้ทั้ง 2 แบบ: Analyze Triangle</h3>
+<p><img loading="lazy" src="diagrams/L7-02-analyze-triangle.png" alt="Process: analyze triangle" /></p>
+<h3 id="pspec-example-1-processing-narrative-แบบบรรยาย">PSPEC Example 1: Processing Narrative (แบบบรรยาย)</h3>
+<blockquote class="callout">
+<p>The analyze-triangle process <strong>accepts values A, B, and C</strong> that represent the side dimensions of a triangle. The process <strong>tests the dimension values to determine whether all values are positive</strong>. <strong>If a negative value is encountered, an error message is produced.</strong> The process evaluates valid input data to determine <strong>whether the dimensions define a valid triangle</strong> and if so, <strong>what type of triangle — equilateral, isosceles or scalene</strong> — is implied by the dimensions. <strong>The type is output.</strong></p>
+</blockquote>
+<p><strong>สรุปไทย</strong></p>
+<ol>
+<li>รับค่า A, B, C ที่เป็นความยาวด้านของสามเหลี่ยม</li>
+<li>ตรวจว่าค่าทั้งหมดเป็นบวก ถ้าเจอค่าติดลบให้ส่ง <strong>error message</strong></li>
+<li>ถ้าข้อมูลถูกต้อง ตรวจว่าเป็นสามเหลี่ยมได้จริงไหม</li>
+<li>ถ้าได้ ระบุชนิด: <strong>equilateral</strong> (ด้านเท่า), <strong>isosceles</strong> (หน้าจั่ว), <strong>scalene</strong> (ด้านไม่เท่า)</li>
+<li>ส่ง <strong>ชนิดสามเหลี่ยม</strong> ออก</li>
+</ol>
+<h3 id="pspec-example-2-pdl-pseudocode">PSPEC Example 2: PDL (pseudocode)</h3>
+<pre><code>read side dimensions;
+if any dimension is negative then produce error message;
+if the largest dimension is less than the sum of the others
+then
+    determine number of equal sides;
+    if three sides are equal then type is equilateral;
+    if two sides are equal then type is isosceles;
+    if no sides are equal then 1) type is scalene; 2) output triangle type;
+else output type = 0, indication that no triangle exists;
+</code></pre>
+<p><strong>อธิบายทีละบรรทัด</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บรรทัด</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read side dimensions</code></td>
+<td>อ่านความยาวด้าน</td>
+</tr>
+<tr>
+<td><code>if any dimension is negative</code></td>
+<td>ถ้ามีด้านติดลบ ให้แจ้ง error</td>
+</tr>
+<tr>
+<td><code>if the largest dimension is less than the sum of the others</code></td>
+<td><strong>กฎสามเหลี่ยม:</strong> ด้านยาวสุดต้องสั้นกว่าผลรวมของอีก 2 ด้าน ถึงจะประกอบเป็นสามเหลี่ยมได้</td>
+</tr>
+<tr>
+<td><code>determine number of equal sides</code></td>
+<td>นับว่ามีด้านเท่ากันกี่ด้าน</td>
+</tr>
+<tr>
+<td>3 ด้านเท่า / 2 ด้านเท่า / ไม่มีด้านเท่า</td>
+<td>equilateral / isosceles / scalene</td>
+</tr>
+<tr>
+<td><code>else output type = 0</code></td>
+<td>ถ้าผิดกฎสามเหลี่ยม ส่ง 0 หมายถึง <strong>ไม่ใช่สามเหลี่ยม</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Narrative vs PDL:</strong> narrative อ่านง่ายสำหรับ stakeholder แต่กำกวมได้ ส่วน PDL ชัดเจน ใกล้โค้ด เหมาะกับ programmer</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อสังเกต <em>(ของผม)</em>: ใน PDL ต้นฉบับ คำว่า &quot;output triangle type&quot; เขียนติดไว้แค่กรณี scalene ถ้าอ่านตามตัวอักษร กรณี equilateral และ isosceles จะไม่ถูกส่งออก ที่ถูกควรส่งออกทุกกรณี เป็นตัวอย่างว่า pseudocode ก็เขียนพลาดได้</p>
+</blockquote>
+<hr />
+<h2 id="4-structured-english">4. Structured English</h2>
+<p><strong>นิยาม:</strong> <strong>ไวยากรณ์ภาษา</strong> สำหรับระบุ <strong>ตรรกะของ process</strong></p>
+<ul>
+<li>ผสม <strong>จุดแข็งของ structured programming</strong> (โครงสร้างชัด ลำดับ เงื่อนไข วนซ้ำ) กับ <strong>ภาษาอังกฤษธรรมชาติ</strong> (อ่านง่าย)</li>
+</ul>
+<h3 id="structured-english-constructs-6-แบบ">Structured English Constructs (6 แบบ)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Construct</th>
+<th>ใช้เมื่อ</th>
+<th>Template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Sequence of steps</strong></td>
+<td>ทำขั้นตอนเรียงกัน <strong>ไม่มีเงื่อนไข</strong></td>
+<td><code>[Step 1]</code><br><code>[Step 2]</code><br><code>...</code><br><code>[Step n]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Simple condition steps</strong></td>
+<td>เงื่อนไขมี <strong>แค่ 2 ค่า</strong> (จริง/ไม่จริง) ถ้าจริงทำชุดแรก ไม่จริงทำชุดที่สอง (<strong>ชุดที่สอง optional</strong>)</td>
+<td><code>If [truth condition]</code><br><code>  then [sequence of steps or other conditional steps]</code><br><code>else [sequence of steps or other conditional steps]</code><br><code>End If</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Complex condition steps</strong></td>
+<td>เงื่อนไขมี <strong>มากกว่า 2 ค่า</strong> ทดสอบค่าแล้วทำชุดที่ตรง</td>
+<td><code>Do the following based on [condition]:</code><br><code>  Case 1: If [condition] = [value] then [steps]</code><br><code>  Case 2: If [condition] = [value] then [steps]</code><br><code>  ...</code><br><code>  Case n: If [condition] = [value] then [steps]</code><br><code>End Case</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Multiple conditions</strong></td>
+<td>ทดสอบ <strong>หลายเงื่อนไขพร้อมกัน</strong> ใช้ <strong>decision table</strong> แทน if-then-else ซ้อนกันหลายชั้น</td>
+<td>ตาราง decision table (หัวข้อ 5) <em>ไม่ใช่ construct ของ Structured English แต่ตั้งชื่อตารางแล้วอ้างถึงใน procedure ได้</em></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>One-to-many iteration</strong></td>
+<td>วนทำจนเงื่อนไขเป็นเท็จ โดย <strong>ต้องทำอย่างน้อย 1 ครั้ง</strong> ไม่ว่าเงื่อนไขตอนแรกจะเป็นอะไร</td>
+<td><code>Repeat the following until [truth condition]:</code><br><code>  [sequence of steps or conditional steps]</code><br><code>End Repeat</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Zero-to-many iteration</strong></td>
+<td>วนทำจนเงื่อนไขเป็นเท็จ โดย <strong>อาจไม่ทำเลยสักครั้ง</strong> ขึ้นกับเงื่อนไขตอนแรก</td>
+<td><code>Do while [truth condition]:</code><br><code>  [steps]</code><br><code>End Do</code><br><strong>หรือ</strong><br><code>For [truth condition]:</code><br><code>  [steps]</code><br><code>End For</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>One-to-many vs Zero-to-many</strong></p>
+<ul>
+<li><strong>Repeat…until</strong> = ตรวจเงื่อนไข <strong>ท้ายรอบ</strong> → ทำอย่างน้อย <strong>1</strong> รอบ (เหมือน <code>do-while</code> ใน C/Java)</li>
+<li><strong>Do while / For</strong> = ตรวจเงื่อนไข <strong>ต้นรอบ</strong> → อาจทำ <strong>0</strong> รอบ (เหมือน <code>while</code> / <code>for</code>)
+<em>(การเทียบกับภาษาโปรแกรมเสริมเอง)</em></li>
+</ul>
+</blockquote>
+<h3 id="ตัวอย่าง-structured-english-ผมเขียนเอง-จาก-process-ในระบบสวนสัตว์">ตัวอย่าง Structured English <em>(ผมเขียนเอง จาก process ในระบบสวนสัตว์)</em></h3>
+<pre><code>Calculate Ticket Price
+  Set total price to 0
+  For each ticket in the order:
+      Do the following based on ticket type:
+          Case 1: If ticket type = &quot;Child&quot; then unit price = child price
+          Case 2: If ticket type = &quot;Adult&quot; then unit price = adult price
+          Case 3: If ticket type = &quot;Senior&quot; then unit price = senior price
+      End Case
+      Add unit price × quantity to total price
+  End For
+  If visit date is a special event day
+      then apply event price rule (see Decision Table: Event Pricing)
+  End If
+  Output total price
+</code></pre>
+<hr />
+<h2 id="5-policies-and-decision-tables">5. Policies and Decision Tables</h2>
+<h3 id="นิยาม">นิยาม</h3>
+<ul>
+<li><strong>Policy</strong> – <strong>ชุดกฎ</strong> ที่กำหนดว่า process ต้องทำอย่างไร</li>
+<li><strong>Decision table</strong> – <strong>ตาราง</strong> ที่ระบุ <strong>ชุดเงื่อนไข</strong> และ <strong>การกระทำที่สอดคล้องกัน</strong> ตามที่ต้องใช้ในการ implement policy</li>
+</ul>
+<h3 id="โครงสร้าง-decision-table">โครงสร้าง Decision Table</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Conditions and Actions</th>
+<th>Rule 1</th>
+<th>Rule 2</th>
+<th>Rule 3</th>
+<th>…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>[Condition]</strong> ← condition stubs</td>
+<td>value</td>
+<td>value</td>
+<td>value</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>[Condition]</strong></td>
+<td>value</td>
+<td>value</td>
+<td>value</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>[Action / sequence of steps]</strong> ← action stubs</td>
+<td>X</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>[Action / sequence of steps]</strong></td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>แถวบน (condition stubs):</strong> เงื่อนไข</li>
+<li><strong>แถวล่าง (action stubs):</strong> การกระทำ</li>
+<li><strong>คอลัมน์ (rules):</strong> แต่ละคอลัมน์คือ <strong>ชุดค่าของเงื่อนไข</strong> 1 ชุด และ <strong>X</strong> บอกว่าต้องทำ action ไหน</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 decision table เหมาะกับตรรกะที่มี <strong>หลายเงื่อนไขผสมกัน</strong> เพราะถ้าเขียนเป็น if-then-else จะซ้อนกันหลายชั้นจนอ่านยาก</p>
+</blockquote>
+<h3 id="ตัวอย่าง-a-simple-decision-table-lmart">ตัวอย่าง: A Simple Decision Table (LMART)</h3>
+<p><strong>Policy statement (บัตรแลกเช็คเป็นเงินสด)</strong></p>
+<blockquote class="callout">
+<p><em>&quot;A customer with check cashing privileges is entitled to cash <strong>personal checks of up to $75.00</strong> and <strong>payroll checks from companies pre-approved by LMART</strong>.&quot;</em></p>
+<p>(ลูกค้าที่มีสิทธิ์ แลกเช็คส่วนตัวได้ไม่เกิน $75 และแลกเช็คเงินเดือนได้เฉพาะจากบริษัทที่ LMART อนุมัติไว้)</p>
+</blockquote>
+<p><strong>Equivalent Policy Decision Table</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Conditions and Actions</th>
+<th>Rule 1</th>
+<th>Rule 2</th>
+<th>Rule 3</th>
+<th>Rule 4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C1:</strong> Type of check</td>
+<td>personal</td>
+<td>payroll</td>
+<td>personal</td>
+<td>payroll</td>
+</tr>
+<tr>
+<td><strong>C2:</strong> Check amount ≤ $75.00</td>
+<td>yes</td>
+<td>doesn't matter</td>
+<td>no</td>
+<td>doesn't matter</td>
+</tr>
+<tr>
+<td><strong>C3:</strong> Company accredited by LMART</td>
+<td>doesn't matter</td>
+<td>yes</td>
+<td>doesn't matter</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>A1:</strong> Cash the check</td>
+<td><strong>X</strong></td>
+<td><strong>X</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>A2:</strong> Don't cash the check</td>
+<td></td>
+<td></td>
+<td><strong>X</strong></td>
+<td><strong>X</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>อ่านแต่ละ rule</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>อ่านว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>เช็ค <strong>ส่วนตัว</strong> ยอด <strong>≤ $75</strong> → <strong>แลกได้</strong> (บริษัทไม่เกี่ยว)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>เช็ค <strong>เงินเดือน</strong> จาก <strong>บริษัทที่อนุมัติ</strong> → <strong>แลกได้</strong> (ยอดไม่เกี่ยว)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>เช็ค <strong>ส่วนตัว</strong> ยอด <strong>&gt; $75</strong> → <strong>แลกไม่ได้</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>เช็ค <strong>เงินเดือน</strong> จาก <strong>บริษัทที่ไม่ได้อนุมัติ</strong> → <strong>แลกไม่ได้</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>&quot;doesn't matter&quot;</strong> ช่วยลดจำนวน rule ถ้าไม่มี ต้องเขียนครบทุกชุด 2 × 2 × 2 = 8 rules <em>(การคำนวณเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="6-dfds-a-look-ahead-และ-a-design-note">6. DFDs: A Look Ahead และ A Design Note</h2>
+<h3 id="dfds-a-look-ahead">DFDs: A Look Ahead</h3>
+<p><img loading="lazy" src="diagrams/L7-03-dfd-look-ahead.png" alt="DFDs: A Look Ahead" /></p>
+<ul>
+<li><strong>DFD ใน analysis model ถูก map ไปเป็น design model</strong> ที่เป็น <strong>โครงสร้างลำดับชั้นของ component</strong> (เรียนในช่วงหลัง midterm: design architecture)</li>
+</ul>
+<h3 id="a-design-note">A Design Note</h3>
+<p><img loading="lazy" src="diagrams/L7-04-design-note.png" alt="A Design Note" /></p>
+<ul>
+<li><strong>PSPEC ของ process หนึ่งตัว</strong> จะกลายเป็น <strong>component หนึ่งตัวหรือมากกว่า</strong> ในการออกแบบซอฟต์แวร์</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ความเชื่อมโยงทั้งวิชา: <strong>Requirement (L3)</strong> → <strong>Use case (L4)</strong> → <strong>DFD + PSPEC (L6–L7)</strong> → <strong>Design components (หลัง midterm)</strong> → Code → Test</p>
+</blockquote>
+<hr />
+<h2 id="7-control-flow-modeling">7. Control Flow Modeling</h2>
+<h3 id="data-flow-vs-control-flow">Data flow vs Control flow</h3>
+<p><strong>DFD ปกติแสดง &quot;ข้อมูล&quot;</strong> แต่บางระบบ (โดยเฉพาะระบบ real-time หรือระบบควบคุม) ต้องแสดง <strong>&quot;เหตุการณ์ (event)&quot;</strong> ที่สั่งให้ process ทำงานด้วย</p>
+<h3 id="control-flow-modeling">Control Flow Modeling</h3>
+<ul>
+<li><strong>Control flow</strong> แทน <strong>&quot;events&quot;</strong> และ <strong>process ที่จัดการ event</strong></li>
+<li><strong>&quot;Event&quot;</strong> คือ <strong>เงื่อนไข Boolean</strong> (จริง/เท็จ) หาได้จาก:
+<ul>
+<li>ลิสต์ <strong>sensor ทั้งหมด</strong> ที่ซอฟต์แวร์ &quot;อ่าน&quot;</li>
+<li>ลิสต์ <strong>interrupt conditions</strong> ทั้งหมด</li>
+<li>ลิสต์ <strong>&quot;switch&quot;</strong> ทั้งหมดที่ผู้ควบคุมกด</li>
+<li>ลิสต์ <strong>data conditions</strong> ทั้งหมด</li>
+<li>ย้อนดู <strong>noun/verb parse</strong> ที่ทำกับ processing narrative แล้วตรวจ <strong>&quot;control items&quot;</strong> ทั้งหมด ที่อาจเป็น input หรือ output ของ <strong>CSPEC</strong></li>
+</ul>
+</li>
+<li><strong>Control flow คือสัญญาณ</strong> ที่ <strong>สั่งให้ทำคำสั่ง</strong> หรือ <strong>บอกว่ามีบางอย่างเกิดขึ้น</strong></li>
+<li><strong>Control flow เกิดขึ้นที่จุดเวลาใดเวลาหนึ่ง (discrete point in time)</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Data flow</strong></th>
+<th><strong>Control flow</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>คืออะไร</td>
+<td>ข้อมูลที่เคลื่อนที่</td>
+<td>สัญญาณหรือ event (Boolean)</td>
+</tr>
+<tr>
+<td>เส้น</td>
+<td>──► <strong>เส้นทึบ</strong></td>
+<td>- - -► <strong>เส้นประ</strong></td>
+</tr>
+<tr>
+<td>ถูกแปลงไหม</td>
+<td>ถูก process แปลง</td>
+<td><strong>ไม่ถูกแปลง</strong> ใช้สั่งหรือแจ้ง <em>(เสริม)</em></td>
+</tr>
+<tr>
+<td>เวลา</td>
+<td>ไหลต่อเนื่องได้</td>
+<td>เกิด ณ <strong>จุดเวลาหนึ่ง</strong></td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td>Hours Worked, Invoice</td>
+<td>&quot;OK&quot;, &quot;Door open&quot;, &quot;Button pressed&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="control-flows-in-dfd">Control Flows in DFD</h3>
+<ul>
+<li>วาดเป็น <strong>ลูกศรเส้นประ</strong> (dotted arrow line)</li>
+<li><strong>หัวลูกศรบอกทิศ</strong> ของ control flow</li>
+<li><strong>เขียนชื่อ event ไว้ข้างลูกศร</strong></li>
+</ul>
+<p><strong>ตัวอย่าง: การหาร</strong></p>
+<p><img loading="lazy" src="diagrams/L7-05-control-flow-divide.png" alt="Control flow ใน DFD: ตัวอย่างการหาร" /></p>
+<ol>
+<li><strong>Divisor</strong> (ตัวหาร) ถูกส่งไปทั้ง process <strong>Divide</strong> และ <strong>Test that Divisor is Not Zero</strong></li>
+<li>ถ้าตัวหารไม่ใช่ 0 → process ทดสอบส่ง <strong>control flow &quot;OK&quot;</strong> (เส้นประ) ไปบอก Divide ว่าทำงานได้</li>
+<li><strong>Divide</strong> รับ Divisor และ <strong>Dividend</strong> (ตัวตั้ง) แล้วส่ง <strong>Quotient</strong> (ผลหาร) และ <strong>Remainder</strong> (เศษ)</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 &quot;OK&quot; <strong>ไม่ใช่ข้อมูลที่ถูกนำไปคำนวณ</strong> แต่เป็น <strong>สัญญาณอนุญาต</strong> ให้ Divide เริ่มทำงาน จึงวาดเป็นเส้นประ</p>
+</blockquote>
+<hr />
+<h2 id="8-control-specification-cspec">8. Control Specification (CSPEC)</h2>
+<p><strong>CSPEC</strong> อธิบายว่าระบบ <strong>ตอบสนองต่อ control flow (event)</strong> อย่างไร <em>(คำอธิบายเสริม: PSPEC อธิบาย process ส่วน CSPEC อธิบายการควบคุม)</em> เขียนได้หลายแบบ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รูปแบบ</th>
+<th>ประเภท</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>State diagram</strong></td>
+<td><strong>sequential spec</strong> (ลำดับของสถานะ)</td>
+</tr>
+<tr>
+<td><strong>State transition table</strong></td>
+<td><strong>combinatorial spec</strong></td>
+</tr>
+<tr>
+<td><strong>Decision tables</strong></td>
+<td><strong>combinatorial spec</strong></td>
+</tr>
+<tr>
+<td><strong>Activation tables</strong></td>
+<td><strong>combinatorial spec</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(ในสไลด์ปีกกา &quot;combinatorial spec&quot; ครอบทั้ง 4 รายการ แต่ state diagram มีวงเล็บว่า &quot;sequential spec&quot; ตาราง key ของ Pressman แยก state diagram เป็น sequential และตารางแบบอื่นเป็น combinatorial)</em></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>PSPEC vs CSPEC</strong></p>
+<ul>
+<li><strong>PSPEC</strong> = อธิบาย <strong>process ทำอะไรกับข้อมูล</strong> (narrative, PDL, Structured English, decision table)</li>
+<li><strong>CSPEC</strong> = อธิบาย <strong>ระบบตอบสนองต่อ event อย่างไร</strong> (state diagram, state transition table, decision table, activation table)</li>
+</ul>
+<p><strong>decision table ใช้ได้ทั้งสองแบบ</strong></p>
+</blockquote>
+<hr />
+<h2 id="9-exercise-dfd-level-1-และ-level-2-ระบบขายบัตรสวนสัตว์">9. Exercise: DFD Level 1 และ Level 2 ระบบขายบัตรสวนสัตว์</h2>
+<p><strong>โจทย์</strong></p>
+<ul>
+<li>ใช้ระบบขายบัตรสวนสัตว์ (Zoo Ticketing System)</li>
+<li>วาด <strong>DFD Level 1</strong></li>
+<li>วาด <strong>DFD Level 2</strong> ของ process หนึ่งตัวใน Level 1</li>
+</ul>
+<blockquote class="callout">
+<p>คำตอบด้านล่างผมวาดเองเป็น <strong>แนวทาง</strong> ต่อจาก context diagram ใน L6 (entity: Visitor, Administrator, Payment Provider) ถ้าอาจารย์ให้รวม Ticket Staff ด้วย ให้เพิ่ม entity และ flow ที่เกี่ยวข้อง</p>
+</blockquote>
+<h3 id="ทบทวน-context-diagram-level-0">ทบทวน Context Diagram (Level 0)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Input เข้าระบบ</th>
+<th>Output จากระบบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Visitor</strong></td>
+<td>Ticket order (type, date, quantity), Payment details, Status inquiry, Cancellation request</td>
+<td>Ticket price, Ticket (Booking ID, QR Code), Ticket details and status, Cancellation result</td>
+</tr>
+<tr>
+<td><strong>Administrator</strong></td>
+<td>Ticket price data, Visit round data</td>
+<td>Sales report</td>
+</tr>
+<tr>
+<td><strong>Payment Provider</strong></td>
+<td>Payment confirmation, Refund confirmation</td>
+<td>Payment request, Refund request</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="แนวทาง-dfd-level-1">แนวทาง DFD Level 1</h3>
+<p><strong>Data stores</strong></p>
+<ul>
+<li><strong>D1 Ticket Prices</strong> (ราคาและรอบเข้าชม)</li>
+<li><strong>D2 Bookings</strong> (ข้อมูลการจองและตั๋ว)</li>
+</ul>
+<p><strong>Processes</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 Manage Pricing</strong></td>
+<td>Ticket price data, Visit round data (จาก Administrator)</td>
+<td>Price record → D1</td>
+</tr>
+<tr>
+<td><strong>2 Process Ticket Order</strong></td>
+<td>Ticket order (จาก Visitor), Price info (จาก D1)</td>
+<td>Ticket price → Visitor, Order details → 3</td>
+</tr>
+<tr>
+<td><strong>3 Process Payment and Issue Ticket</strong></td>
+<td>Order details (จาก 2), Payment details (จาก Visitor), Payment confirmation (จาก Payment Provider)</td>
+<td>Payment request → Payment Provider, Booking record → D2, Ticket (Booking ID, QR Code) → Visitor</td>
+</tr>
+<tr>
+<td><strong>4 Check Ticket Status</strong></td>
+<td>Status inquiry (จาก Visitor), Booking info (จาก D2)</td>
+<td>Ticket details and status → Visitor</td>
+</tr>
+<tr>
+<td><strong>5 Process Cancellation</strong></td>
+<td>Cancellation request (จาก Visitor), Booking info (จาก D2), Refund confirmation (จาก Payment Provider)</td>
+<td>Refund request → Payment Provider, Updated booking status → D2, Cancellation result → Visitor</td>
+</tr>
+<tr>
+<td><strong>6 Generate Sales Report</strong></td>
+<td>Booking data (จาก D2)</td>
+<td>Sales report → Administrator</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="diagrams/L7-06a-zoo-dfd-level1-order.png" alt="แนวทาง DFD Level 1 (ส่วนที่ 1): ราคา สั่งซื้อ ชำระเงิน — process 1–3" /></p>
+<p><img loading="lazy" src="diagrams/L7-06b-zoo-dfd-level1-status.png" alt="แนวทาง DFD Level 1 (ส่วนที่ 2): ตรวจสถานะตั๋ว — process 4" /></p>
+<p><img loading="lazy" src="diagrams/L7-06c-zoo-dfd-level1-cancel.png" alt="แนวทาง DFD Level 1 (ส่วนที่ 3): ยกเลิกตั๋ว — process 5" /></p>
+<p><img loading="lazy" src="diagrams/L7-06d-zoo-dfd-level1-report.png" alt="แนวทาง DFD Level 1 (ส่วนที่ 4): รายงานยอดขาย — process 6" /></p>
+<p><strong>ตรวจกับกฎ</strong></p>
+<ul>
+<li>✅ มี process <strong>6 ตัว</strong> (ไม่เกิน 7)</li>
+<li>✅ ทุก process มีทั้ง input และ output</li>
+<li>✅ <strong>D1</strong> เป็น interface ระหว่าง process 1 และ 2, <strong>D2</strong> เป็น interface ระหว่าง 3, 4, 5, 6</li>
+<li>✅ <strong>Balancing กับ context:</strong> flow ระหว่างระบบกับ entity ทุกเส้นใน Level 0 ยังอยู่ครบ</li>
+<li>✅ ไม่มี flow ต่อ entity → store หรือ store → store</li>
+</ul>
+<h3 id="แนวทาง-dfd-level-2-ของ-process-5-process-cancellation">แนวทาง DFD Level 2 ของ Process 5: Process Cancellation</h3>
+<p><img loading="lazy" src="diagrams/L7-07-zoo-dfd-level2-p5.png" alt="แนวทาง DFD Level 2 ของ Process 5: Process Cancellation" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5.1 Validate Cancellation Request</strong></td>
+<td>ตรวจว่า Booking ID มีอยู่จริง และยังไม่ถึงวันเข้าชม</td>
+</tr>
+<tr>
+<td><strong>5.2 Check Refund Eligibility</strong></td>
+<td>ตรวจเงื่อนไขคืนเงินตามนโยบาย แล้วคำนวณยอดคืน</td>
+</tr>
+<tr>
+<td><strong>5.3 Process Refund</strong></td>
+<td>ส่งคำขอคืนเงินไป Payment Provider และรับผลยืนยัน</td>
+</tr>
+<tr>
+<td><strong>5.4 Update Booking and Notify Visitor</strong></td>
+<td>อัปเดตสถานะการจองใน D2 และแจ้งผลให้ผู้เยี่ยมชม</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตรวจ hierarchical consistency กับ Level 1</strong></p>
+<ul>
+<li>✅ Input ของ process 5 ใน Level 1 (<strong>Cancellation request</strong>, <strong>Booking info</strong>, <strong>Refund confirmation</strong>) อยู่ครบใน Level 2</li>
+<li>✅ Output ของ process 5 (<strong>Refund request</strong>, <strong>Updated booking status</strong>, <strong>Cancellation result</strong>) อยู่ครบ</li>
+<li>✅ เลข process เป็น <strong>5.1–5.4</strong> ตาม parent</li>
+<li>✅ flow ใหม่ภายใน (Valid request, Refund amount, Refund result) เพิ่มได้</li>
+<li>✅ <strong>Invalid request notice</strong> เป็นเส้น <strong>error</strong> ที่ child เพิ่มได้ (หลักใน L6)</li>
+</ul>
+<p><strong>PSPEC ของ 5.2 ด้วย Structured English</strong> <em>(ตัวอย่างใช้เนื้อหาบทนี้ นโยบายคืนเงินสมมติขึ้น)</em></p>
+<pre><code>Check Refund Eligibility
+  Do the following based on days before visit date:
+      Case 1: If days before visit ≥ 7 then refund amount = 100% of ticket price
+      Case 2: If days before visit is 3 to 6 then refund amount = 50% of ticket price
+      Case 3: If days before visit &lt; 3 then refund amount = 0
+  End Case
+  If refund amount &gt; 0
+      then send refund amount to Process Refund
+      else send &quot;not eligible for refund&quot; to Update Booking and Notify Visitor
+  End If
+</code></pre>
+<hr />
+<h1>คำศัพท์สำคัญ</h1>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PSPEC (Process Specification)</strong></td>
+<td>เอกสารอธิบายการทำงานภายใน process หนึ่งตัว</td>
+<td>คู่มือของ bubble</td>
+</tr>
+<tr>
+<td><strong>Processing narrative</strong></td>
+<td>PSPEC แบบข้อความบรรยาย</td>
+<td>เล่าเป็นเรื่อง</td>
+</tr>
+<tr>
+<td><strong>PDL (pseudocode)</strong></td>
+<td>PSPEC แบบรหัสเทียม ใกล้โค้ด</td>
+<td>กึ่งโค้ด</td>
+</tr>
+<tr>
+<td><strong>Structured English</strong></td>
+<td>ไวยากรณ์ผสม structured programming กับภาษาอังกฤษ ใช้ระบุตรรกะของ process</td>
+<td>อังกฤษมีโครงสร้าง</td>
+</tr>
+<tr>
+<td><strong>Sequence</strong></td>
+<td>ทำเรียงกันไม่มีเงื่อนไข</td>
+<td>ทำต่อกัน</td>
+</tr>
+<tr>
+<td><strong>Simple condition</strong></td>
+<td>If-then-else เงื่อนไข 2 ค่า</td>
+<td>ถ้า…ไม่งั้น</td>
+</tr>
+<tr>
+<td><strong>Complex condition</strong></td>
+<td>Case เงื่อนไขมากกว่า 2 ค่า</td>
+<td>เลือกตามกรณี</td>
+</tr>
+<tr>
+<td><strong>One-to-many iteration</strong></td>
+<td>Repeat…until ทำอย่างน้อย 1 รอบ</td>
+<td>ทำก่อนค่อยเช็ก</td>
+</tr>
+<tr>
+<td><strong>Zero-to-many iteration</strong></td>
+<td>Do while / For อาจไม่ทำเลย</td>
+<td>เช็กก่อนค่อยทำ</td>
+</tr>
+<tr>
+<td><strong>Policy</strong></td>
+<td>ชุดกฎที่กำหนดว่า process ต้องทำอย่างไร</td>
+<td>กฎธุรกิจ</td>
+</tr>
+<tr>
+<td><strong>Decision table</strong></td>
+<td>ตารางเงื่อนไข × การกระทำ</td>
+<td>ตารางถ้า-แล้ว</td>
+</tr>
+<tr>
+<td><strong>Condition stubs / Action stubs</strong></td>
+<td>แถวเงื่อนไข / แถวการกระทำในตาราง</td>
+<td>แถวบน / แถวล่าง</td>
+</tr>
+<tr>
+<td><strong>Rule (ใน decision table)</strong></td>
+<td>คอลัมน์หนึ่งชุดค่าเงื่อนไข → action</td>
+<td>1 กรณี</td>
+</tr>
+<tr>
+<td><strong>&quot;Doesn't matter&quot;</strong></td>
+<td>เงื่อนไขนี้ไม่มีผลใน rule นั้น ช่วยลดจำนวน rule</td>
+<td>ไม่สน</td>
+</tr>
+<tr>
+<td><strong>Analysis model → Design model</strong></td>
+<td>DFD map ไปเป็นโครงสร้าง component</td>
+<td>จากแผนที่สู่แบบบ้าน</td>
+</tr>
+<tr>
+<td><strong>Component</strong></td>
+<td>ส่วนประกอบในการออกแบบซอฟต์แวร์ 1 PSPEC อาจกลายเป็นหลาย component</td>
+<td>ชิ้นส่วน</td>
+</tr>
+<tr>
+<td><strong>Event</strong></td>
+<td>เงื่อนไข Boolean เช่น sensor, interrupt, switch, data condition</td>
+<td>เกิด / ไม่เกิด</td>
+</tr>
+<tr>
+<td><strong>Control flow</strong></td>
+<td>สัญญาณสั่งงานหรือบอกเหตุการณ์ เกิด ณ จุดเวลาหนึ่ง วาดเป็นเส้นประ</td>
+<td>เส้นประ</td>
+</tr>
+<tr>
+<td><strong>CSPEC (Control Specification)</strong></td>
+<td>อธิบายการตอบสนองต่อ control flow ด้วย state diagram หรือตาราง</td>
+<td>คู่มือของ event</td>
+</tr>
+<tr>
+<td><strong>Sequential vs Combinatorial spec</strong></td>
+<td>state diagram (มีลำดับสถานะ) vs ตาราง (ผสมเงื่อนไข)</td>
+<td>ลำดับ vs ผสม</td>
+</tr>
+<tr>
+<td><strong>State transition table / Activation table</strong></td>
+<td>ตารางการเปลี่ยนสถานะ / ตารางว่า event ไหนเปิด process ไหน</td>
+<td>ตารางสถานะ / ตารางเปิดงาน</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>สรุปท้ายบท / จุดที่มักออกสอบ</h1>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>ทำไมต้องมี PSPEC:</strong> DFD บอกแค่ข้อมูลเข้าออก ไม่บอกว่าข้างใน process ทำอะไร</li>
+<li><strong>PSPEC 5 รูปแบบ:</strong> narrative, pseudocode (PDL), equations, tables, diagrams/charts</li>
+<li>ตัวอย่าง <strong>Analyze Triangle</strong> ทั้งแบบ narrative และ PDL (ด้านยาวสุด &lt; ผลรวมอีก 2 ด้าน, equilateral/isosceles/scalene, type = 0 ถ้าไม่ใช่สามเหลี่ยม)</li>
+<li><strong>Structured English 6 constructs:</strong> sequence, simple condition, complex condition (case), multiple conditions (decision table), one-to-many iteration (repeat until), zero-to-many iteration (do while / for)</li>
+<li><strong>Decision table:</strong> condition stubs + action stubs + rules, ตัวอย่าง <strong>LMART:</strong> เช็คส่วนตัว ≤ $75 แลกได้, เช็คเงินเดือนจากบริษัทที่อนุมัติแลกได้</li>
+<li><strong>DFD (analysis model) maps into design model</strong> และ <strong>PSPEC กลายเป็นหนึ่งหรือหลาย component</strong></li>
+<li><strong>Control flow:</strong> แทน event (Boolean), เกิด ณ จุดเวลา, วาดเป็น <strong>เส้นประ</strong> พร้อมชื่อ event</li>
+<li><strong>หา event จาก 5 แหล่ง:</strong> sensors, interrupts, switches, data conditions, noun/verb parse</li>
+<li><strong>CSPEC:</strong> state diagram (sequential), state transition table, decision table, activation table</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PSPEC vs CSPEC</strong></td>
+<td>อธิบาย process และข้อมูล vs อธิบายการตอบสนองต่อ event</td>
+</tr>
+<tr>
+<td><strong>Data flow vs Control flow</strong></td>
+<td>เส้นทึบ ข้อมูลถูกแปลง vs เส้นประ สัญญาณ Boolean ณ จุดเวลา</td>
+</tr>
+<tr>
+<td>Narrative vs PDL</td>
+<td>อ่านง่ายแต่กำกวมได้ vs ชัดเจน ใกล้โค้ด</td>
+</tr>
+<tr>
+<td>Simple vs Complex condition</td>
+<td>2 ค่า (if-else) vs มากกว่า 2 ค่า (case)</td>
+</tr>
+<tr>
+<td>Complex condition vs Multiple conditions</td>
+<td>เงื่อนไขเดียวหลายค่า vs หลายเงื่อนไขผสมกัน (ใช้ decision table)</td>
+</tr>
+<tr>
+<td><strong>One-to-many vs Zero-to-many iteration</strong></td>
+<td>repeat until ทำอย่างน้อย 1 รอบ vs do while / for อาจ 0 รอบ</td>
+</tr>
+<tr>
+<td>Condition stubs vs Action stubs</td>
+<td>แถวเงื่อนไข vs แถวการกระทำ</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมใช้ decision table แทน if ซ้อน</strong> เพราะเงื่อนไขหลายตัวผสมกัน ถ้าเขียนเป็น if ซ้อนหลายชั้นจะอ่านยากและตกหล่นกรณีง่าย ตารางเห็นครบทุกกรณี</li>
+<li><strong>ทำไม &quot;doesn't matter&quot; สำคัญ</strong> เพราะลดจำนวน rule จาก 2ⁿ เหลือเฉพาะกรณีที่ต่างกันจริง</li>
+<li><strong>ทำไม &quot;OK&quot; ในตัวอย่างหารเป็นเส้นประ</strong> เพราะเป็นสัญญาณอนุญาต ไม่ใช่ข้อมูลที่ถูกคำนวณ</li>
+<li><strong>โจทย์แปลง policy เป็น decision table:</strong> (1) หาเงื่อนไขทั้งหมด (2) หา action ทั้งหมด (3) ไล่กรณีเป็น rule (4) ใช้ &quot;doesn't matter&quot; รวมกรณีที่ผลเหมือนกัน</li>
+<li><strong>โจทย์วาด Level 1 / Level 2:</strong> ต้อง balance กับ parent, process ≤ 7, ทุก process มี input/output, store อยู่ระหว่าง process, เลข process ถูกต้อง</li>
+</ul>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../l6/index.html"><small>← บทก่อนหน้า</small><span>Lecture 6 – Requirements Modeling with Flow Modeling I (Data Flow Diagram)</span></a><a class="pg next" href="../l8/index.html"><small>บทถัดไป →</small><span>Lecture 8 – User Interface Design</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 7 — VLAN (Virtual LAN) · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+      <ol><li><a href="#1-overview-of-vlans">1. Overview of VLANs</a></li><li><a href="#2-types-of-vlans">2. Types of VLANs ⭐</a></li><li><a href="#3-vlans-ในสภาพแวดล้อมหลาย-switch">3. VLANs ในสภาพแวดล้อมหลาย Switch</a></li><li><a href="#4-voice-vlan">4. Voice VLAN</a></li><li><a href="#5-vlan-configuration">5. VLAN Configuration</a></li><li><a href="#6-vlan-trunks">6. VLAN Trunks</a></li><li><a href="#7-สรุปคำสั่ง">7. สรุปคำสั่ง</a></li><li><a href="#8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</a></li><li><a href="#9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture7-VLAN</div>
+    <h1 class="lesson-title">Lecture 7 — VLAN (Virtual LAN)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p>บทนี้ต่อยอดจาก Lecture 6.2 (Ethernet switch) — <strong>VLAN แบ่ง switched LAN ออกเป็นหลายกลุ่มแบบ logical</strong> โดยไม่ต้องเดินสายใหม่</p>
+<p>เรียนความหมายและประโยชน์ของ VLAN, ชนิดของ VLAN (default, data, native, management, voice), VLAN ข้ามหลาย switch ด้วย <strong>trunk</strong> และ <strong>IEEE 802.1Q tag</strong>, ช่วงหมายเลข VLAN, และ <strong>คำสั่ง Cisco IOS</strong> สำหรับสร้าง กำหนดพอร์ต ตรวจสอบ ลบ VLAN และตั้งค่า trunk (ใช้ใน Lab 7/8)</p>
+<p>หมายเหตุ: หน้า Outline มีหัวข้อ Dynamic Trunking Protocol (DTP) แต่สไลด์ชุดนี้ไม่มีเนื้อหาของ DTP</p>
+</blockquote>
+<h2 id="1-overview-of-vlans">1. Overview of VLANs</h2>
+<h3 id="11-vlan-คืออะไร">1.1 VLAN คืออะไร ⭐</h3>
+<ul>
+<li><strong>VLAN = การเชื่อมต่อแบบ logical</strong> กับอุปกรณ์อื่นที่มีลักษณะคล้ายกัน</li>
+<li>การจัดอุปกรณ์เข้า VLAN ต่าง ๆ มีลักษณะดังนี้:
+<ul>
+<li><strong>แบ่งกลุ่มอุปกรณ์ (segmentation)</strong> แม้อยู่บน switch เดียวกัน</li>
+<li>จัดองค์กรให้ <strong>จัดการง่ายขึ้น</strong>
+<ul>
+<li><strong>broadcast, multicast และ unicast ถูกแยกอยู่ภายในแต่ละ VLAN</strong></li>
+<li><strong>แต่ละ VLAN มีช่วง IP address ของตัวเอง</strong></li>
+<li><strong>broadcast domain เล็กลง</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>ตัวอย่างในภาพ:</strong> ตึก 3 ชั้น แต่ละชั้นมี switch — แต่แบ่ง VLAN ตามแผนก ข้ามชั้นได้: VLAN 2 IT (10.0.2.0/24), VLAN 3 HR (10.0.3.0/24), VLAN 4 Sales (10.0.4.0/24)</p>
+<p><img loading="lazy" src="img/l7-p004.jpg" alt="VLAN Definitions" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 VLAN เหมือนการแบ่ง &quot;ห้องแชทกลุ่ม&quot; ในบริษัท: พนักงานนั่งคนละชั้นก็อยู่กลุ่มเดียวกันได้ และข้อความประกาศ (broadcast) ในกลุ่มหนึ่งไม่รบกวนกลุ่มอื่น</p>
+</blockquote>
+<h3 id="12-ประโยชน์ของ-vlan">1.2 ประโยชน์ของ VLAN ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประโยชน์</th>
+<th>คำอธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Smaller Broadcast Domains</strong></td>
+<td>แบ่ง LAN แล้ว <strong>ลดขนาด broadcast domain</strong> (ตามสไลด์: ลดจำนวนอุปกรณ์ที่ได้รับ broadcast แต่ละครั้ง)</td>
+</tr>
+<tr>
+<td><strong>Improved Security</strong></td>
+<td><strong>เฉพาะผู้ใช้ใน VLAN เดียวกันสื่อสารกันได้</strong></td>
+</tr>
+<tr>
+<td><strong>Improved IT Efficiency</strong></td>
+<td>จัดกลุ่มอุปกรณ์ที่มีความต้องการคล้ายกัน เช่น อาจารย์ vs นักศึกษา</td>
+</tr>
+<tr>
+<td><strong>Reduced Cost</strong></td>
+<td>switch ตัวเดียวรองรับหลายกลุ่ม/หลาย VLAN</td>
+</tr>
+<tr>
+<td><strong>Better Performance</strong></td>
+<td>broadcast domain เล็ก → traffic น้อยลง → bandwidth ดีขึ้น</td>
+</tr>
+<tr>
+<td><strong>Simpler Management</strong></td>
+<td>กลุ่มคล้ายกันใช้แอปและทรัพยากรเครือข่ายคล้ายกัน</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง topology:</strong> R1 ต่อ S1, S1 ต่อ S2 และ S3; PC1/PC4 = Faculty VLAN 10 (172.17.10.x), PC2/PC5 = Student VLAN 20 (172.17.20.x), PC3/PC6 = Guest VLAN 30 (172.17.30.x)</p>
+<p><img loading="lazy" src="img/l7-p005.jpg" alt="Benefits of a VLAN Design" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ อุปกรณ์ต่าง VLAN <strong>คุยกันตรง ๆ ไม่ได้</strong> ที่ layer 2 — ต้องผ่านอุปกรณ์ layer 3 (router) เช่น R1 ในภาพ</p>
+</blockquote>
+<hr />
+<h2 id="2-types-of-vlans">2. Types of VLANs ⭐</h2>
+<h3 id="21-default-vlan">2.1 Default VLAN</h3>
+<p><strong>VLAN 1</strong> มีสถานะเป็น:</p>
+<ul>
+<li><strong>Default VLAN</strong> (ทุกพอร์ตอยู่ VLAN 1 ตั้งแต่แรก)</li>
+<li><strong>Default Native VLAN</strong></li>
+<li><strong>Default Management VLAN</strong></li>
+<li><strong>ลบหรือเปลี่ยนชื่อไม่ได้</strong></li>
+</ul>
+<blockquote class="callout">
+<p><strong>Note:</strong> แม้ลบ VLAN 1 ไม่ได้ แต่ <strong>Cisco แนะนำให้ย้ายหน้าที่ default เหล่านี้ไปไว้ VLAN อื่น</strong> (เพื่อความปลอดภัย)</p>
+</blockquote>
+<p>ผลคำสั่ง <code>show vlan brief</code> บน switch ใหม่: VLAN 1 default (active) มีพอร์ต Fa0/1–Fa0/24, Gi0/1, Gi0/2 และมี VLAN 1002 fddi-default, 1003 token-ring-default, 1004 fddinet-default, 1005 trnet-default (act/unsup)</p>
+<p><img loading="lazy" src="img/l7-p006.jpg" alt="Default VLAN" /></p>
+<h3 id="22-ชนิดอื่น-ๆ">2.2 ชนิดอื่น ๆ</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data VLAN</strong></td>
+<td>สำหรับ <strong>traffic ที่ผู้ใช้สร้าง</strong> (email, web); <strong>VLAN 1 เป็น default data VLAN</strong> เพราะทุก interface อยู่ใน VLAN นี้</td>
+</tr>
+<tr>
+<td><strong>Native VLAN</strong></td>
+<td><strong>ใช้กับ trunk link เท่านั้น</strong>; บน 802.1Q trunk <strong>ทุก frame ถูกติด tag ยกเว้น frame ของ native VLAN</strong></td>
+</tr>
+<tr>
+<td><strong>Management VLAN</strong></td>
+<td>สำหรับ <strong>SSH/Telnet VTY traffic</strong> และ <strong>ไม่ควรปนกับ traffic ผู้ใช้</strong>; โดยทั่วไปคือ VLAN ที่เป็น <strong>SVI (Switched Virtual Interface)</strong> ของ layer 2 switch</td>
+</tr>
+<tr>
+<td><strong>Voice VLAN</strong></td>
+<td>สำหรับ traffic เสียง VoIP (ดูข้อ 4)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-vlans-ในสภาพแวดล้อมหลาย-switch">3. VLANs ในสภาพแวดล้อมหลาย Switch</h2>
+<h3 id="31-vlan-trunk">3.1 VLAN Trunk ⭐</h3>
+<ul>
+<li><strong>Trunk = ลิงก์ point-to-point ระหว่างอุปกรณ์เครือข่าย 2 ตัว</strong></li>
+<li>หน้าที่ของ trunk (Cisco):
+<ul>
+<li><strong>ส่ง traffic ได้มากกว่า 1 VLAN</strong></li>
+<li><strong>ขยาย VLAN ข้ามทั้งเครือข่าย</strong></li>
+<li><strong>ค่าเริ่มต้นรองรับทุก VLAN</strong></li>
+<li>รองรับ <strong>802.1Q trunking</strong></li>
+</ul>
+</li>
+</ul>
+<p>ตัวอย่าง: ลิงก์ S1–S2 (F0/1) และ S1–S3 (F0/3) เป็น trunk ทำให้ Faculty VLAN 10 ที่ S2 และ S3 อยู่ VLAN เดียวกันได้</p>
+<p><img loading="lazy" src="img/l7-p008.jpg" alt="Defining VLAN Trunks" /></p>
+<h3 id="32-เครือข่ายที่ไม่มี-vlan">3.2 เครือข่ายที่ไม่มี VLAN</h3>
+<ul>
+<li><strong>ถ้าไม่มี VLAN อุปกรณ์ทุกเครื่องที่ต่อ switch จะได้รับ traffic unicast, multicast, broadcast ทั้งหมด</strong></li>
+<li>ตัวอย่าง: ทุกเครื่องอยู่เครือข่ายเดียว 172.17.40.0/24 (subnet mask 255.255.255.0, network address 172.17.40.0) → PC1 ส่ง layer 2 broadcast → switch ส่ง broadcast ออกทุกพอร์ต → <strong>ทุกเครื่อง (PC4, PC5, PC6) ได้รับหมด</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l7-p009.jpg" alt="Networks without VLANs" /></p>
+<h3 id="33-vlan-identification-with-a-tag-ieee-8021q">3.3 VLAN Identification with a Tag (IEEE 802.1Q) ⭐⭐</h3>
+<ul>
+<li><strong>802.1Q header (tag) ขนาด 4 bytes</strong> แทรกใน Ethernet frame <strong>ระหว่าง Source MAC กับ Type/Length</strong></li>
+<li>เมื่อใส่ tag → <strong>ต้องคำนวณ FCS ใหม่</strong> (FCS1 ≠ FCS2)</li>
+<li>เมื่อส่งไปยัง end device → <strong>ต้องถอด tag ออก</strong> และคำนวณ FCS กลับเป็นค่าเดิม</li>
+<li><strong>tag ใช้เฉพาะระหว่าง VLAN switch</strong> — ผู้ส่ง/ผู้รับปลายทางเห็น frame ปกติ</li>
+</ul>
+<p><strong>Frame ปกติ:</strong> Dst MAC | Src MAC | Type/Length | Data | FCS
+<strong>Frame ติด tag:</strong> Dst MAC | Src MAC | <strong>Tag</strong> | Type/Length | Data | FCS</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>802.1Q Tag Field</th>
+<th>ขนาด</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Type</strong></td>
+<td>2 bytes</td>
+<td>ค่า <strong>0x8100</strong> เรียกว่า <strong>Tag Protocol ID (TPID)</strong></td>
+</tr>
+<tr>
+<td><strong>User Priority</strong></td>
+<td>3 bits</td>
+<td>ค่าลำดับความสำคัญ (ใช้กับ CoS/QoS)</td>
+</tr>
+<tr>
+<td><strong>CFI (Canonical Format Identifier)</strong></td>
+<td>1 bit</td>
+<td>รองรับ token ring frame บน Ethernet</td>
+</tr>
+<tr>
+<td><strong>VLAN ID (VID)</strong></td>
+<td><strong>12 bits</strong></td>
+<td>หมายเลข VLAN รองรับได้ถึง <strong>4096 VLANs</strong> (2¹²)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7-p010.jpg" alt="802.1Q Tag" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 รวม: 16 + 3 + 1 + 12 = 32 bits = <strong>4 bytes</strong></p>
+</blockquote>
+<hr />
+<h2 id="4-voice-vlan">4. Voice VLAN</h2>
+<h3 id="41-voice-vlan-tagging">4.1 Voice VLAN Tagging</h3>
+<ul>
+<li><strong>โทรศัพท์ VoIP เป็น switch 3 พอร์ต</strong> (P1 ต่อ switch, P2 ต่อ phone ASIC ภายใน, P3 = access port ต่อ PC)</li>
+<li>switch ใช้ <strong>CDP (Cisco Discovery Protocol)</strong> แจ้งโทรศัพท์ว่า Voice VLAN คืออะไร</li>
+<li>โทรศัพท์ <strong>ติด tag traffic เสียงของตัวเอง</strong> และตั้ง <strong>CoS (Class of Service)</strong> ได้ — <strong>CoS = QoS ของ layer 2</strong></li>
+<li>โทรศัพท์ <strong>อาจหรืออาจไม่</strong> ติด tag ให้ frame จาก PC</li>
+</ul>
+<p>ตัวอย่างในภาพ: พอร์ต F0/18 ของ S3 ตั้งค่าให้สั่งโทรศัพท์ติด tag voice ด้วย VLAN 150, จัดลำดับความสำคัญ voice frame และส่ง data frame ไป VLAN 20</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Traffic</th>
+<th>Tagging</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Voice VLAN</strong></td>
+<td>ติด tag พร้อมค่า <strong>Layer 2 CoS priority</strong> ที่เหมาะสม</td>
+</tr>
+<tr>
+<td><strong>Access VLAN</strong></td>
+<td>อาจติด tag พร้อม Layer 2 CoS priority ก็ได้</td>
+</tr>
+<tr>
+<td><strong>Access VLAN</strong></td>
+<td>หรือ <strong>ไม่ติด tag</strong> (ไม่มี CoS priority)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7-p011.jpg" alt="Voice VLAN Tagging" /></p>
+<h3 id="42-voice-vlan-verification">4.2 Voice VLAN Verification</h3>
+<p>คำสั่ง <code>show interfaces fa0/18 switchport</code> แสดงทั้ง data และ voice VLAN ของ interface:</p>
+<ul>
+<li>Administrative/Operational Mode: <strong>static access</strong></li>
+<li><strong>Access Mode VLAN: 20 (student)</strong></li>
+<li>Trunking Native Mode VLAN: 1 (default)</li>
+<li><strong>Voice VLAN: 150 (voice)</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l7-p012.jpg" alt="Voice VLAN Verification" /></p>
+<hr />
+<h2 id="5-vlan-configuration">5. VLAN Configuration</h2>
+<h3 id="51-vlan-ranges-บน-catalyst-switches">5.1 VLAN Ranges บน Catalyst Switches ⭐</h3>
+<p>Catalyst 2960 และ 3650 รองรับ <strong>มากกว่า 4000 VLANs</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Normal Range VLAN 1 – 1005</strong></th>
+<th><strong>Extended Range VLAN 1006 – 4095</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ใช้ในธุรกิจ <strong>ขนาดเล็กถึงกลาง</strong></td>
+<td>ใช้โดย <strong>Service Providers</strong></td>
+</tr>
+<tr>
+<td><strong>1002 – 1005 สงวนไว้สำหรับ legacy VLANs</strong> (FDDI, Token Ring)</td>
+<td>อยู่ใน <strong>running-config</strong></td>
+</tr>
+<tr>
+<td><strong>1, 1002 – 1005 สร้างอัตโนมัติและลบไม่ได้</strong></td>
+<td>รองรับ feature ของ VLAN <strong>น้อยกว่า</strong></td>
+</tr>
+<tr>
+<td><strong>เก็บในไฟล์ vlan.dat ใน flash</strong></td>
+<td>ต้องตั้งค่า <strong>VTP</strong></td>
+</tr>
+<tr>
+<td><strong>VTP</strong> ซิงก์ข้อมูลระหว่าง switch ได้</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7-p013.jpg" alt="VLAN Ranges" /></p>
+<h3 id="52-คำสั่งสร้าง-vlan">5.2 คำสั่งสร้าง VLAN</h3>
+<ul>
+<li>รายละเอียด VLAN เก็บใน <strong>vlan.dat</strong></li>
+<li>สร้าง VLAN ใน <strong>global configuration mode</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>IOS Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เข้า global configuration mode</td>
+<td><code>Switch# configure terminal</code></td>
+</tr>
+<tr>
+<td>สร้าง VLAN ด้วยหมายเลขที่ถูกต้อง</td>
+<td><code>Switch(config)# vlan vlan-id</code></td>
+</tr>
+<tr>
+<td>ตั้งชื่อ VLAN</td>
+<td><code>Switch(config-vlan)# name vlan-name</code></td>
+</tr>
+<tr>
+<td>กลับ privileged EXEC mode</td>
+<td><code>Switch(config-vlan)# end</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="53-คำสั่งกำหนดพอร์ตเข้า-vlan">5.3 คำสั่งกำหนดพอร์ตเข้า VLAN</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เข้า global configuration mode</td>
+<td><code>Switch# configure terminal</code></td>
+</tr>
+<tr>
+<td>เข้า interface configuration mode</td>
+<td><code>Switch(config)# interface interface-id</code></td>
+</tr>
+<tr>
+<td><strong>ตั้งพอร์ตเป็น access mode</strong></td>
+<td><code>Switch(config-if)# switchport mode access</code></td>
+</tr>
+<tr>
+<td><strong>กำหนดพอร์ตให้อยู่ VLAN</strong></td>
+<td><code>Switch(config-if)# switchport access vlan vlan-id</code></td>
+</tr>
+<tr>
+<td>กลับ privileged EXEC mode</td>
+<td><code>Switch(config-if)# end</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง</strong> (สร้าง VLAN 20 ชื่อ student และให้ Fa0/18 อยู่ VLAN นี้):</p>
+<pre><code class="language-text">S1# configure terminal
+S1(config)# vlan 20
+S1(config-vlan)# name student
+S1(config-vlan)# end
+S1# configure terminal
+S1(config)# interface fa0/18
+S1(config-if)# switchport mode access
+S1(config-if)# switchport access vlan 20
+S1(config-if)# end
+</code></pre>
+<h3 id="54-data-และ-voice-vlan-บนพอร์ตเดียว">5.4 Data และ Voice VLAN บนพอร์ตเดียว</h3>
+<ul>
+<li><strong>access port กำหนดได้เพียง 1 data VLAN</strong></li>
+<li>แต่ <strong>กำหนด Voice VLAN เพิ่มได้อีก 1</strong> สำหรับกรณีโทรศัพท์และ end device ต่อผ่านพอร์ตเดียวกัน</li>
+<li>ตัวอย่าง: S3 F0/18 → IP phone → PC5 (Student VLAN 20, 172.17.20.25) — switchport ต้องรองรับ voice traffic ไป IP phone และ data traffic ไป PC5</li>
+</ul>
+<p><img loading="lazy" src="img/l7-p016.jpg" alt="Data and Voice VLANs" /></p>
+<h3 id="55-ตรวจสอบข้อมูล-vlan">5.5 ตรวจสอบข้อมูล VLAN</h3>
+<p>คำสั่ง: <code>show vlan [brief | id vlan-id | name vlan-name | summary]</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Option</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แสดงชื่อ VLAN, สถานะ และพอร์ต <strong>บรรทัดละ 1 VLAN</strong></td>
+<td><code>brief</code></td>
+</tr>
+<tr>
+<td>แสดงข้อมูลตาม <strong>หมายเลข VLAN</strong></td>
+<td><code>id vlan-id</code></td>
+</tr>
+<tr>
+<td>แสดงข้อมูลตาม <strong>ชื่อ VLAN</strong> (ASCII 1–32 ตัวอักษร)</td>
+<td><code>name vlan-name</code></td>
+</tr>
+<tr>
+<td>แสดง <strong>สรุปข้อมูล VLAN</strong></td>
+<td><code>summary</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>show vlan summary</code> → จำนวน VLAN ที่มี, VTP VLANs, extended VLANs</li>
+<li><code>show interface vlan 20</code> → สถานะ SVI เช่น &quot;Vlan20 is up, line protocol is up&quot;, Hardware is EtherSVI, MTU 1500 bytes</li>
+</ul>
+<p><img loading="lazy" src="img/l7-p017.jpg" alt="Verify VLAN Information" /></p>
+<h3 id="56-ลบ-vlan">5.6 ลบ VLAN</h3>
+<ul>
+<li>ลบทีละ VLAN: <strong><code>no vlan vlan-id</code></strong></li>
+<li>⚠️ <strong>ก่อนลบ VLAN ให้ย้ายพอร์ตสมาชิกทั้งหมดไป VLAN อื่นก่อน</strong> (ไม่งั้นพอร์ตเหล่านั้นใช้งานไม่ได้)</li>
+<li>ลบทุก VLAN: <strong><code>delete flash:vlan.dat</code></strong> หรือ <strong><code>delete vlan.dat</code></strong></li>
+<li><strong>reload switch</strong> เมื่อลบทุก VLAN</li>
+<li><strong>คืนค่าโรงงาน:</strong> ถอดสาย data ทั้งหมด → <strong>ลบ startup-configuration</strong> → <strong>ลบไฟล์ vlan.dat</strong> → <strong>reload</strong></li>
+</ul>
+<hr />
+<h2 id="6-vlan-trunks">6. VLAN Trunks</h2>
+<h3 id="61-คำสั่งตั้งค่า-trunk">6.1 คำสั่งตั้งค่า Trunk ⭐</h3>
+<p><strong>Trunk เป็น layer 2 และส่ง traffic ของทุก VLAN</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>IOS Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เข้า global configuration mode</td>
+<td><code>Switch# configure terminal</code></td>
+</tr>
+<tr>
+<td>เข้า interface configuration mode</td>
+<td><code>Switch(config)# interface interface-id</code></td>
+</tr>
+<tr>
+<td><strong>ตั้งพอร์ตเป็น trunk ถาวร</strong></td>
+<td><code>Switch(config-if)# switchport mode trunk</code></td>
+</tr>
+<tr>
+<td><strong>ตั้ง native VLAN ที่ไม่ใช่ VLAN 1</strong></td>
+<td><code>Switch(config-if)# switchport trunk native vlan vlan-id</code></td>
+</tr>
+<tr>
+<td><strong>กำหนดรายการ VLAN ที่ผ่าน trunk ได้</strong></td>
+<td><code>Switch(config-if)# switchport trunk allowed vlan vlan-list</code></td>
+</tr>
+<tr>
+<td>กลับ privileged EXEC mode</td>
+<td><code>Switch(config-if)# end</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-ตัวอย่างตั้งค่า-trunk">6.2 ตัวอย่างตั้งค่า Trunk</h3>
+<p><strong>Subnet ของแต่ละ VLAN:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>VLAN</th>
+<th>ชื่อ</th>
+<th>Subnet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>Faculty/Staff</td>
+<td>172.17.10.0/24</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Students</td>
+<td>172.17.20.0/24</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Guests</td>
+<td>172.17.30.0/24</td>
+</tr>
+<tr>
+<td>99</td>
+<td>Native</td>
+<td>172.17.99.0/24</td>
+</tr>
+</tbody>
+</table></div>
+<p>พอร์ต <strong>F0/1 ของ S1</strong> ตั้งเป็น trunk:</p>
+<pre><code class="language-text">S1(config)# interface fa0/1
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport trunk native vlan 99
+S1(config-if)# switchport trunk allowed vlan 10,20,30,99
+S1(config-if)# end
+</code></pre>
+<blockquote class="callout">
+<p><strong>Note:</strong> ตัวอย่างนี้สมมติเป็น <strong>switch 2960 ที่ใช้ 802.1Q tagging</strong> — <strong>Layer 3 switch ต้องตั้ง encapsulation ก่อน</strong> ตั้ง trunk mode</p>
+</blockquote>
+<p><img loading="lazy" src="img/l7-p020.jpg" alt="Trunk Configuration Example" /></p>
+<h3 id="63-ตรวจสอบ-trunk">6.3 ตรวจสอบ Trunk</h3>
+<p>ตั้ง trunk mode และ native VLAN แล้วใช้ <code>show interfaces fa0/1 switchport</code> จะเห็น:</p>
+<ul>
+<li><strong>Administrative Mode: trunk</strong> (ตั้งเป็น trunk ในการตั้งค่า)</li>
+<li><strong>Operational Mode: trunk</strong> (ทำงานเป็น trunk จริง)</li>
+<li><strong>Encapsulation: dot1q</strong> (802.1Q)</li>
+<li><strong>Trunking Native Mode VLAN: 99</strong></li>
+<li><strong>Trunking VLANs Enabled: ALL</strong> → ทุก VLAN ที่สร้างบน switch ส่ง traffic ผ่าน trunk นี้ได้</li>
+</ul>
+<p><img loading="lazy" src="img/l7-p021.jpg" alt="Verify Trunk Configuration" /></p>
+<h3 id="64-reset-trunk-กลับค่าเริ่มต้น">6.4 Reset Trunk กลับค่าเริ่มต้น</h3>
+<p><strong>(1) คืนค่า trunk เริ่มต้นด้วยคำสั่ง <code>no</code>:</strong></p>
+<pre><code class="language-text">S1(config)# interface fa0/1
+S1(config-if)# no switchport trunk allowed vlan
+S1(config-if)# no switchport trunk native vlan
+S1(config-if)# end
+</code></pre>
+<ul>
+<li><strong>ทุก VLAN ผ่านได้</strong> (Trunking VLANs Enabled: ALL)</li>
+<li><strong>Native VLAN = VLAN 1</strong></li>
+<li>ตรวจด้วย <code>sh int fa0/1 switchport</code></li>
+</ul>
+<p><img loading="lazy" src="img/l7-p022.jpg" alt="Reset Trunk (1)" /></p>
+<p><strong>(2) เปลี่ยน trunk กลับเป็น access mode:</strong></p>
+<pre><code class="language-text">S1(config)# interface fa0/1
+S1(config-if)# switchport mode access
+S1(config-if)# end
+</code></pre>
+<ul>
+<li>Administrative Mode: <strong>static access</strong></li>
+<li>Operational Mode: <strong>static access</strong></li>
+<li>Access Mode VLAN: 1 (default)</li>
+</ul>
+<p><img loading="lazy" src="img/l7-p023.jpg" alt="Reset Trunk (2)" /></p>
+<hr />
+<h2 id="7-สรุปคำสั่ง">7. สรุปคำสั่ง</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ทำอะไร</th>
+<th>คำสั่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>สร้าง VLAN</td>
+<td><code>vlan 10</code> → <code>name faculty</code></td>
+</tr>
+<tr>
+<td>พอร์ตเป็น access</td>
+<td><code>switchport mode access</code></td>
+</tr>
+<tr>
+<td>พอร์ตเข้า VLAN</td>
+<td><code>switchport access vlan 10</code></td>
+</tr>
+<tr>
+<td>ตั้ง voice VLAN</td>
+<td><code>switchport voice vlan 150</code> (คำสั่งนี้ไม่มีในสไลด์ — เสริมจาก Cisco IOS ให้สอดคล้องกับ Voice VLAN 150 ที่เห็นใน show output)</td>
+</tr>
+<tr>
+<td>ดู VLAN</td>
+<td><code>show vlan brief</code> / <code>id</code> / <code>name</code> / <code>summary</code></td>
+</tr>
+<tr>
+<td>ดูพอร์ต</td>
+<td><code>show interfaces fa0/18 switchport</code></td>
+</tr>
+<tr>
+<td>ลบ VLAN</td>
+<td><code>no vlan 10</code></td>
+</tr>
+<tr>
+<td>ลบทุก VLAN</td>
+<td><code>delete flash:vlan.dat</code> แล้ว reload</td>
+</tr>
+<tr>
+<td>ตั้ง trunk</td>
+<td><code>switchport mode trunk</code></td>
+</tr>
+<tr>
+<td>native VLAN</td>
+<td><code>switchport trunk native vlan 99</code></td>
+</tr>
+<tr>
+<td>VLAN ที่ผ่าน trunk</td>
+<td><code>switchport trunk allowed vlan 10,20,30,99</code></td>
+</tr>
+<tr>
+<td>reset trunk</td>
+<td><code>no switchport trunk allowed vlan</code>, <code>no switchport trunk native vlan</code></td>
+</tr>
+<tr>
+<td>trunk → access</td>
+<td><code>switchport mode access</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VLAN</td>
+<td>LAN เสมือน แบ่งกลุ่มแบบ logical</td>
+<td>ห้องแชทกลุ่ม</td>
+</tr>
+<tr>
+<td>Segmentation</td>
+<td>แบ่งกลุ่มอุปกรณ์บน switch เดียวกัน</td>
+<td></td>
+</tr>
+<tr>
+<td>Broadcast domain</td>
+<td>ขอบเขตที่ broadcast ไปถึง</td>
+<td>VLAN ทำให้เล็กลง</td>
+</tr>
+<tr>
+<td>Default VLAN</td>
+<td>VLAN 1 — default/native/management, ลบไม่ได้</td>
+<td></td>
+</tr>
+<tr>
+<td>Data VLAN</td>
+<td>traffic ผู้ใช้</td>
+<td></td>
+</tr>
+<tr>
+<td>Native VLAN</td>
+<td>บน trunk ไม่ติด tag</td>
+<td></td>
+</tr>
+<tr>
+<td>Management VLAN</td>
+<td>SSH/Telnet VTY, เป็น SVI</td>
+<td></td>
+</tr>
+<tr>
+<td>SVI</td>
+<td>Switched Virtual Interface</td>
+<td>IP ของ switch</td>
+</tr>
+<tr>
+<td>Voice VLAN</td>
+<td>traffic VoIP พร้อม CoS</td>
+<td></td>
+</tr>
+<tr>
+<td>Trunk</td>
+<td>ลิงก์ point-to-point ส่งหลาย VLAN</td>
+<td>ท่อรวม</td>
+</tr>
+<tr>
+<td>Access port</td>
+<td>พอร์ตของ 1 data VLAN (+ 1 voice VLAN)</td>
+<td></td>
+</tr>
+<tr>
+<td>IEEE 802.1Q / dot1q</td>
+<td>มาตรฐาน tag 4 bytes</td>
+<td></td>
+</tr>
+<tr>
+<td>TPID</td>
+<td>Tag Protocol ID = 0x8100</td>
+<td></td>
+</tr>
+<tr>
+<td>User Priority</td>
+<td>3 bits priority</td>
+<td></td>
+</tr>
+<tr>
+<td>CFI</td>
+<td>1 bit, token ring</td>
+<td></td>
+</tr>
+<tr>
+<td>VID</td>
+<td>12 bits, 4096 VLANs</td>
+<td></td>
+</tr>
+<tr>
+<td>FCS recalculation</td>
+<td>ใส่/ถอด tag ต้องคำนวณ FCS ใหม่</td>
+<td></td>
+</tr>
+<tr>
+<td>CDP</td>
+<td>Cisco Discovery Protocol แจ้ง voice VLAN</td>
+<td></td>
+</tr>
+<tr>
+<td>CoS</td>
+<td>Class of Service = QoS layer 2</td>
+<td></td>
+</tr>
+<tr>
+<td>Normal / Extended range</td>
+<td>1–1005 / 1006–4095</td>
+<td></td>
+</tr>
+<tr>
+<td>vlan.dat</td>
+<td>ไฟล์ใน flash เก็บ normal-range VLAN</td>
+<td></td>
+</tr>
+<tr>
+<td>VTP</td>
+<td>ซิงก์ VLAN ระหว่าง switch</td>
+<td></td>
+</tr>
+<tr>
+<td>Administrative / Operational mode</td>
+<td>ที่ตั้งค่า / ที่ทำงานจริง</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>VLAN = logical segmentation</strong> — unicast/multicast/broadcast แยกในแต่ละ VLAN, แต่ละ VLAN มี IP range ของตัวเอง, broadcast domain เล็กลง</li>
+<li><strong>ประโยชน์ 6 ข้อ:</strong> smaller broadcast domains, security, IT efficiency, reduced cost, performance, simpler management</li>
+<li><strong>ไม่มี VLAN</strong> → ทุกเครื่องได้รับ broadcast ทั้งหมด</li>
+<li><strong>VLAN 1</strong> = default VLAN, default native VLAN, default management VLAN, ลบ/เปลี่ยนชื่อไม่ได้ — Cisco แนะนำย้ายหน้าที่ไป VLAN อื่น</li>
+<li><strong>Data VLAN</strong> (user traffic), <strong>Native VLAN</strong> (trunk เท่านั้น, frame ไม่ติด tag), <strong>Management VLAN</strong> (SSH/Telnet, SVI), <strong>Voice VLAN</strong></li>
+<li><strong>Trunk:</strong> point-to-point, หลาย VLAN, ขยาย VLAN ทั้งเครือข่าย, default รองรับทุก VLAN, 802.1Q</li>
+<li><strong>802.1Q tag 4 bytes:</strong> TPID 0x8100 (2 bytes), priority 3 bits, CFI 1 bit, <strong>VID 12 bits = 4096 VLANs</strong>; ใส่ระหว่าง Source MAC กับ Type; ใส่/ถอด tag → <strong>คำนวณ FCS ใหม่</strong>; tag ใช้เฉพาะระหว่าง switch</li>
+<li><strong>Voice VLAN:</strong> VoIP phone = switch 3 พอร์ต, switch บอก voice VLAN ด้วย <strong>CDP</strong>, <strong>CoS = QoS layer 2</strong>; access port มีได้ <strong>1 data VLAN + 1 voice VLAN</strong></li>
+<li><strong>VLAN ranges:</strong> normal <strong>1–1005</strong> (vlan.dat, 1002–1005 legacy, 1 และ 1002–1005 ลบไม่ได้, SMB), extended <strong>1006–4095</strong> (running-config, service provider, ต้องใช้ VTP)</li>
+<li><strong>คำสั่ง:</strong> <code>vlan id</code> + <code>name</code>; <code>switchport mode access</code> + <code>switchport access vlan id</code></li>
+<li><strong>show vlan</strong> brief / id / name / summary</li>
+<li><strong>ลบ:</strong> <code>no vlan id</code> (ย้ายพอร์ตก่อน!), ลบทุกอัน <code>delete flash:vlan.dat</code> + reload; factory reset = ถอดสาย + erase startup-config + ลบ vlan.dat + reload</li>
+<li><strong>Trunk:</strong> <code>switchport mode trunk</code>, <code>switchport trunk native vlan 99</code>, <code>switchport trunk allowed vlan 10,20,30,99</code>; layer 3 switch ต้องตั้ง encapsulation ก่อน</li>
+<li><strong>Verify trunk:</strong> administrative/operational = trunk, encapsulation dot1q, native VLAN 99, trunking VLANs enabled ALL</li>
+<li><strong>Reset:</strong> <code>no switchport trunk allowed vlan</code> + <code>no switchport trunk native vlan</code> → ทุก VLAN ผ่าน, native = 1; <code>switchport mode access</code> → กลับเป็น static access</li>
+</ol>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../lecture6.2-ethernet/index.html"><small>← บทก่อนหน้า</small><span>Lecture 6.2 — Ethernet</span></a><span></span></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

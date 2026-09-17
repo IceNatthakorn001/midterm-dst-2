@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Parallel Processors from Client to Cloud</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Parallel Processors from Client to Cloud</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "เป้าหมายหลักของการทำ Multiprocessor ตามที่สไลด์ระบุคืออะไร (นอกจากประสิทธิภาพที่สูงขึ้น)?",
+    choices: [
+      "ทำให้เขียนโปรแกรมง่ายขึ้นเสมอในทุกกรณี",
+      "ลดขนาดของโปรแกรมให้เล็กลงกว่าเดิมมาก",
+      "Scalability, availability, และ power efficiency",
+      "ลดจำนวนคำสั่งในชุดคำสั่ง (ISA) ลงให้เหลือน้อย"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับความจริง เพราะการเขียนโปรแกรมขนานมักยากกว่าโปรแกรมเรียงลำดับ",
+      "ไม่เกี่ยวกับขนาดโปรแกรม",
+      "ถูก — สไลด์ระบุเป้าหมายของ multiprocessor คือ scalability, availability และ power efficiency นอกเหนือจากประสิทธิภาพ",
+      "ไม่เกี่ยวกับจำนวนคำสั่งใน ISA"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามตารางจำแนกของ Flynn ในสไลด์ SISD มีตัวอย่างฮาร์ดแวร์ใด?",
+    choices: ["Intel Xeon e5345", "Intel Pentium 4", "NVIDIA Fermi", "SSE instructions ของ x86"],
+    correct: 1,
+    explain: [
+      "Xeon e5345 ถูกจัดเป็นตัวอย่างของ MIMD ไม่ใช่ SISD",
+      "ถูก — สไลด์ระบุ SISD คือ Intel Pentium 4",
+      "NVIDIA Fermi ไม่ได้อยู่ในตารางจำแนกนี้",
+      "SSE instructions คือตัวอย่างของ SIMD ไม่ใช่ SISD"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามตารางจำแนกของ Flynn ในสไลด์ MIMD มีตัวอย่างฮาร์ดแวร์ใด?",
+    choices: ["Intel Pentium 4", "ไม่มีตัวอย่างในโลกจริงเลย", "SSE instructions ของ x86", "Intel Xeon e5345"],
+    correct: 3,
+    explain: [
+      "Pentium 4 (แบบดั้งเดิม) ถูกจัดเป็น SISD",
+      "สไลด์ระบุว่า \"ไม่มีตัวอย่างในโลกจริง\" คือกรณีของ MISD ไม่ใช่ MIMD",
+      "SSE เป็นตัวอย่างของ SIMD ไม่ใช่ MIMD",
+      "ถูก — สไลด์ระบุ MIMD คือ Intel Xeon e5345"
+    ]
+  },
+  {
+    type: "recall",
+    q: "SPMD ย่อมาจากอะไร?",
+    choices: [
+      "Single Program Multiple Data",
+      "Single Processor Multiple Devices",
+      "Shared Program Multiple Data",
+      "Sequential Program Multiple Data"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงตามที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ส่วนขยาย Vector ของ RISC-V ตามสไลด์ มี vector register กี่ตัว และแต่ละตัวเก็บข้อมูลได้กี่ element (64-bit ต่อ element)?",
+    choices: [
+      "16 register, 32 element ต่อตัว",
+      "8 register, 128 element ต่อตัว",
+      "32 register (v0-v31), 64 element ต่อตัว",
+      "64 register, 16 element ต่อตัว"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ v0 ถึง v31 (32 register) แต่ละตัวเก็บได้ 64 element ขนาด 64-bit",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "DAXPY ในตัวอย่างของสไลด์คำนวณสูตรใด?",
+    choices: ["Y = a × X + Y", "Y = a + X + Y", "Y = X / a + Y", "Y = a × (X + Y)"],
+    correct: 0,
+    explain: [
+      "ถูก — DAXPY ย่อมาจาก Double-precision A*X Plus Y คือ Y = a×X + Y",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ (วงเล็บผิดตำแหน่ง)"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Fine-grain multithreading สลับ thread บ่อยแค่ไหนตามที่สไลด์ระบุ?",
+    choices: [
+      "ไม่มีการสลับเลยระหว่างการทำงาน",
+      "สลับเฉพาะตอน L2-cache miss เท่านั้น",
+      "สลับทุกครั้งที่โปรแกรมจบการทำงาน",
+      "สลับทุกรอบสัญญาณนาฬิกา (every cycle)"
+    ],
+    correct: 3,
+    explain: [
+      "ขัดกับหลักการของ multithreading ที่ต้องมีการสลับ thread",
+      "การสลับเฉพาะตอน stall นาน ๆ อย่าง L2-cache miss คือลักษณะของ coarse-grain ไม่ใช่ fine-grain",
+      "ไม่ตรงกับนิยามของ multithreading",
+      "ถูก — สไลด์ระบุว่า fine-grain multithreading สลับ thread หลังทุกรอบสัญญาณนาฬิกา"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Coarse-grain multithreading สลับ thread เมื่อใดตามที่สไลด์ระบุ?",
+    choices: [
+      "สลับทุกรอบสัญญาณนาฬิกา",
+      "สลับแบบสุ่มไม่มีกฎเกณฑ์",
+      "สลับเฉพาะตอนหยุดรอนาน ๆ เช่น L2-cache miss",
+      "ไม่มีการสลับ thread เลย"
+    ],
+    correct: 2,
+    explain: [
+      "การสลับทุกรอบคือลักษณะของ fine-grain ไม่ใช่ coarse-grain",
+      "ไม่ตรงกับนิยาม การสลับมีเงื่อนไขชัดเจนคือรอเหตุการณ์ long stall",
+      "ถูก — สไลด์ระบุว่า coarse-grain multithreading สลับเฉพาะตอนเกิด long stall เช่น L2-cache miss",
+      "coarse-grain ยังคงมีการสลับ thread เพียงแต่สลับไม่บ่อยเท่า fine-grain"
+    ]
+  },
+  {
+    type: "recall",
+    q: "UMA (Uniform Memory Access) ตามนิยามในสไลด์หมายถึงอะไร?",
+    choices: [
+      "แต่ละตัวประมวลผลมี memory ส่วนตัวแยกกันเด็ดขาด",
+      "ทุกตัวประมวลผลเข้าถึง memory ด้วยเวลาเท่ากันหมด",
+      "เวลาที่เข้าถึง memory ขึ้นกับระยะห่างจากตัวประมวลผล",
+      "ไม่มีการแชร์ memory ระหว่างตัวประมวลผลเลย"
+    ],
+    correct: 1,
+    explain: [
+      "ลักษณะนี้ใกล้เคียงกับระบบ message passing มากกว่า",
+      "ถูก — UMA คือระบบที่ตัวประมวลผลทุกตัวเข้าถึง physical address space เดียวกันด้วยเวลาเท่ากัน",
+      "นี่คือนิยามของ NUMA ไม่ใช่ UMA",
+      "SMP (รวมถึง UMA) มีการแชร์ physical address space ร่วมกัน"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตัวอย่าง NVIDIA Fermi ในสไลด์ แต่ละ SIMD processor มีกี่ SIMD lane?",
+    choices: ["8 lane", "64 lane", "32 lane", "16 lane"],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "32 คือจำนวน element ในหนึ่ง SIMD instruction ไม่ใช่จำนวน lane",
+      "ถูก — สไลด์ระบุว่าแต่ละ SIMD processor มี 16 SIMD lane"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตัวอย่าง Grid computing ที่สไลด์ยกมาคือโปรเจกต์ใด?",
+    choices: ["SETI@home", "CUDA", "OpenGL", "PARSEC"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ยกตัวอย่าง SETI@home และ World Community Grid",
+      "CUDA คือแพลตฟอร์มเขียนโปรแกรมสำหรับ GPU ไม่ใช่ตัวอย่าง grid computing",
+      "OpenGL คือ API สำหรับกราฟิก ไม่เกี่ยวกับ grid computing",
+      "PARSEC คือชุด benchmark ไม่ใช่ตัวอย่าง grid computing"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Benchmark ใดในสไลด์ใช้วัดประสิทธิภาพด้านพีชคณิตเมทริกซ์ (matrix linear algebra)?",
+    choices: ["SPECrate", "Linpack", "NAS", "PARSEC"],
+    correct: 1,
+    explain: [
+      "SPECrate คือการรันโปรแกรม SPEC หลายชุดแบบ job-level parallelism",
+      "ถูก — สไลด์ระบุ Linpack ว่าใช้วัด matrix linear algebra",
+      "NAS คือชุด kernel ด้าน computational fluid dynamics",
+      "PARSEC คือชุด multithreaded application ที่ใช้ Pthreads/OpenMP"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "เพราะเหตุใดสไลด์จึงบอกว่าถ้าการทำขนานไม่ได้ประสิทธิภาพเพิ่มขึ้นอย่างมีนัยสำคัญ ควรใช้ตัวประมวลผลเดียวที่เร็วกว่าแทน?",
+    choices: [
+      "เพราะตัวประมวลผลเดี่ยวมีราคาถูกกว่าตัวประมวลผลหลายตัวเสมอในทุกกรณี",
+      "เพราะฮาร์ดแวร์แบบขนานไม่สามารถผลิตขึ้นมาใช้งานจริงได้เลยในทางปฏิบัติ",
+      "เพราะเขียนโปรแกรมขนานมีต้นทุนความยุ่งยากเพิ่ม (partitioning, coordination) ถ้าไม่คุ้มก็ไม่ควรแบกรับ",
+      "เพราะซอฟต์แวร์ทุกตัวไม่สามารถรันบนฮาร์ดแวร์ขนานได้เลยแม้แต่ตัวเดียว"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่มีข้อมูลนี้ในสไลด์เรื่องราคา",
+      "ขัดกับเนื้อหาทั้งบทที่พูดถึงฮาร์ดแวร์ขนานที่มีอยู่จริงหลายแบบ",
+      "ถูก — สไลด์ระบุอุปสรรคของการเขียนโปรแกรมขนาน (partitioning, coordination, communication overhead) ถ้าประโยชน์ที่ได้ไม่คุ้มกับความยุ่งยากนี้ การใช้ตัวเดียวที่เร็วกว่าจะง่ายกว่า",
+      "สไลด์ระบุว่า sequential/concurrent software รันได้ทั้งบน serial/parallel hardware"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่าง Task-level parallelism กับ Parallel processing program ได้ถูกต้อง?",
+    choices: [
+      "Task-level parallelism คือรันงานอิสระหลายงานพร้อมกัน ส่วน parallel program คือโปรแกรมเดียวที่แบ่งงานให้หลายตัวประมวลผลช่วยกันทำ",
+      "ทั้งสองแบบมีความหมายเหมือนกันทุกประการ ใช้แทนกันได้เสมอในทุกบริบท",
+      "Task-level parallelism เป็นแนวคิดที่ใช้ได้เฉพาะบนสถาปัตยกรรม GPU เท่านั้น",
+      "Parallel program ไม่จำเป็นต้องมีการประสานงานกันระหว่างตัวประมวลผลเลยแม้แต่น้อย"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงกับนิยามในสไลด์ที่แยกสองแนวคิดนี้ออกจากกันชัดเจน",
+      "สองแนวคิดนี้ต่างกัน งานอิสระต่อกันกับโปรแกรมเดียวที่แบ่งงานเป็นคนละสถานการณ์",
+      "ไม่มีข้อจำกัดนี้ในสไลด์ task-level parallelism ใช้ได้ทั่วไป",
+      "parallel program มักต้องมีการประสานงาน (coordination) ตามที่สไลด์ระบุว่าเป็นหนึ่งในอุปสรรคหลัก"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Vector processor จึงลด instruction-fetch bandwidth ได้อย่างมีนัยสำคัญ?",
+    choices: [
+      "เพราะ vector register มีขนาดเล็กกว่า register ทั่วไปมากในทุกสถาปัตยกรรม",
+      "เพราะ vector processor ไม่จำเป็นต้องใช้ memory เลยแม้แต่น้อย",
+      "เพราะ vector instruction ทำงานช้ากว่าคำสั่งทั่วไปมาก จึงต้อง fetch น้อยลง",
+      "เพราะคำสั่งเดียวประมวลผลข้อมูลได้หลายค่าพร้อมกัน แทนที่จะต้อง fetch คำสั่งใหม่ทุกค่า"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่เกี่ยวกับขนาดของ register",
+      "vector processor ยังต้องดึงและเก็บข้อมูลจาก memory เข้า/ออก vector register ตามที่สไลด์ระบุ",
+      "ไม่เกี่ยวกับความเร็วของคำสั่ง เป็นเรื่องจำนวนคำสั่งที่ต้อง fetch",
+      "ถูก — ตัวอย่าง DAXPY แสดงให้เห็นว่าโค้ดแบบ vector ใช้คำสั่งน้อยกว่าการวนลูปแบบปกติมากสำหรับข้อมูลชุดเดียวกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Vector architecture จึงทำให้ฮาร์ดแวร์ต้องตรวจสอบ (checking) น้อยลง เมื่อเทียบกับการเขียนลูปทั่วไป?",
+    choices: [
+      "เพราะ vector instruction ทำงานช้าลงมากจนไม่จำเป็นต้องตรวจสอบอะไรเลย",
+      "เพราะคำสั่ง vector ประกาศชัดเจนว่าไม่มีการพึ่งพากันข้ามรอบ ฮาร์ดแวร์จึงไม่ต้องตรวจสอบเพิ่ม",
+      "เพราะ vector register ไม่มีข้อมูลจริงเก็บอยู่ข้างในเลยแม้แต่ค่าเดียว",
+      "เพราะฮาร์ดแวร์ vector ไม่รองรับการคำนวณเลขทศนิยมเลยแม้แต่น้อย"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่เกี่ยวกับความเร็ว เป็นเรื่องการรับประกันไม่มี dependency ข้ามรอบ",
+      "ถูก — สไลด์ระบุว่า vector คือ explicit statement of absence of loop-carried dependence ทำให้ลดการตรวจสอบในฮาร์ดแวร์ลงได้",
+      "vector register เก็บข้อมูลจริงที่ดึงมาจาก memory",
+      "ไม่ตรงกับเนื้อหา ตัวอย่าง DAXPY ก็เป็นการคำนวณทศนิยม (double precision)"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่าง Vector instruction กับ Multimedia extension (เช่น MMX, SSE) ได้ถูกต้อง?",
+    choices: [
+      "Vector มีความกว้างที่ปรับได้ (variable width) และรองรับ strided access ส่วน multimedia extension มีความกว้างคงที่และไม่รองรับ strided access",
+      "ทั้งสองแบบมีความกว้างคงที่เท่ากันทุกประการในทุกสถาปัตยกรรม",
+      "Multimedia extension รองรับ strided access ส่วน vector กลับไม่รองรับเลย",
+      "Vector ใช้ได้เฉพาะกับข้อมูลชนิดจำนวนเต็มเท่านั้น ไม่รองรับทศนิยม"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงกับที่สไลด์เปรียบเทียบไว้ชัดเจน",
+      "สไลด์ระบุความแตกต่างชัดเจนว่า vector มีความกว้างปรับได้ ส่วน multimedia extension กว้างคงที่",
+      "สลับความหมายกัน ผิด ตามสไลด์ vector ต่างหากที่รองรับ strided access",
+      "ตัวอย่าง DAXPY ใช้ double-precision floating point ไม่ใช่แค่จำนวนเต็ม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Fine-grain multithreading จึงซ่อนการหยุดรอสั้น ๆ (เช่น data hazard) ได้ดีกว่า Coarse-grain?",
+    choices: [
+      "เพราะ fine-grain ใช้ฮาร์ดแวร์ที่ง่ายกว่า coarse-grain เสมอในทุกกรณี",
+      "เพราะ coarse-grain ไม่มีการสลับ thread เลยแม้แต่ครั้งเดียว",
+      "เพราะ fine-grain สลับ thread ได้ทุกรอบสัญญาณนาฬิกา จึงสลับไปทำงานอื่นได้ทันทีแม้หยุดรอสั้น ๆ",
+      "เพราะ fine-grain ทำงานได้เฉพาะตอนเกิด L2-cache miss เท่านั้นเอง"
+    ],
+    correct: 2,
+    explain: [
+      "สไลด์ระบุว่า coarse-grain มีฮาร์ดแวร์ที่ง่ายกว่า ไม่ใช่ fine-grain",
+      "coarse-grain ยังคงสลับ thread เพียงแต่สลับเฉพาะตอน stall นาน ๆ",
+      "ถูก — การสลับได้ทุกรอบทำให้ fine-grain ใช้ประโยชน์จากช่วงหยุดรอสั้น ๆ ได้ ต่างจาก coarse-grain ที่รอจนกว่าจะหยุดรอนาน ๆ ถึงจะสลับ",
+      "สลับกับ coarse-grain ผิด fine-grain สลับทุกรอบสัญญาณนาฬิกา ไม่ใช่เฉพาะตอน L2-cache miss"
+    ]
+  },
+  {
+    type: "understand",
+    q: "Simultaneous Multithreading (SMT) ต่างจาก multithreading แบบพื้นฐานอย่างไร?",
+    choices: [
+      "SMT ทำได้แค่ thread เดียวในแต่ละช่วงเวลาเหมือน multithreading ทั่วไปทุกประการ",
+      "SMT ไม่จำเป็นต้องมี register แยกกันระหว่าง thread เลยแม้แต่ตัวเดียว",
+      "SMT ใช้ได้เฉพาะกับสถาปัตยกรรม GPU เท่านั้น ไม่รองรับ CPU",
+      "SMT ทำงานบนโปรเซสเซอร์ที่ทำหลายคำสั่งต่อรอบอยู่แล้ว ให้หลาย thread แทรกใช้ function unit ว่างพร้อมกันได้"
+    ],
+    correct: 3,
+    explain: [
+      "จุดต่างสำคัญของ SMT คือทำได้มากกว่า thread เดียวพร้อมกันในรอบเดียว",
+      "ตัวอย่าง Pentium-4 HT ในสไลด์ยังคง duplicate register ให้แต่ละ thread",
+      "ตัวอย่างที่สไลด์ยกมาคือ Intel Pentium-4 HT ซึ่งเป็น CPU ไม่ใช่ GPU",
+      "ถูก — สไลด์ระบุว่า SMT อยู่บนโปรเซสเซอร์แบบ multiple-issue dynamically scheduled และให้คำสั่งจากหลาย thread ทำงานพร้อมกันเมื่อ function unit ว่าง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เพราะเหตุใดในตัวอย่าง Sum Reduction จึงต้อง synch() (synchronize) ก่อนเข้าสู่แต่ละรอบของการลดขนาด (half = half/2)?",
+    choices: [
+      "เพื่อให้ตัวประมวลผลทุกตัวได้รับเลข ID ใหม่ทุกรอบการทำงาน",
+      "เพื่อให้แน่ใจว่าทุกตัวประมวลผลเขียนผลบวกย่อยเสร็จก่อน ตัวอื่นจึงค่อยอ่านค่านั้นไปบวกต่อ",
+      "เพื่อให้โปรแกรมทำงานช้าลงโดยตั้งใจโดยไม่มีเหตุผลอื่นใด",
+      "เพราะภาษาที่ใช้เขียนบังคับให้ต้องมี synch() ทุกบรรทัดโดยไม่มีข้อยกเว้น"
+    ],
+    correct: 1,
+    explain: [
+      "ID ของแต่ละตัวประมวลผล (Pn) ถูกกำหนดไว้ตั้งแต่ต้น ไม่ได้เปลี่ยนจาก synch()",
+      "ถูก — ถ้าไม่ synchronize ตัวประมวลผลบางตัวอาจไปอ่านค่า sum ของตัวอื่นที่ยังไม่ถูกเขียนอัปเดตในรอบนั้น ทำให้ผลรวมผิด",
+      "การ synchronize ไม่ได้มีไว้เพื่อทำให้ช้าลง แต่เพื่อความถูกต้องของผลลัพธ์",
+      "synch() มีไว้เพื่อความถูกต้องของข้อมูลระหว่างขั้นตอน ไม่ใช่ข้อบังคับทางภาษา"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด GPU จึงเลือกใช้การสลับ thread จำนวนมากเพื่อซ่อน memory latency แทนที่จะพึ่งพา cache หลายชั้นแบบ CPU?",
+    choices: [
+      "เพราะงานกราฟิกเป็นงาน data-parallel สูงมาก การมี thread จำนวนมากให้สลับใช้งานระหว่างรอ memory จึงมีประสิทธิภาพกว่า",
+      "เพราะ GPU ไม่มี memory เป็นของตัวเองเลยแม้แต่หน่วยเดียว",
+      "เพราะ cache มีราคาถูกกว่าการสลับ thread เสมอในทุกสถานการณ์",
+      "เพราะ GPU ไม่สามารถประมวลผลข้อมูลหลายชุดพร้อมกันได้เลยแม้แต่ชุดเดียว"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า GPU เป็น highly multithreaded และใช้ thread switching hide memory latency แทนการพึ่งพา multi-level cache",
+      "สไลด์ระบุว่า graphics memory มีความกว้างและ bandwidth สูง ซึ่งเป็น memory ของ GPU เอง",
+      "ไม่มีข้อมูลนี้ในสไลด์ และขัดกับเหตุผลที่แท้จริงซึ่งเกี่ยวกับลักษณะงาน data-parallel",
+      "ตรงข้ามกับความจริง เพราะ GPU ถูกออกแบบมาให้ประมวลผลข้อมูลจำนวนมากแบบขนานเป็นหลัก"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Loosely coupled cluster จึงมี bandwidth ระหว่างเครื่องต่ำกว่าการเชื่อมต่อแบบ SMP?",
+    choices: [
+      "เพราะ cluster ใช้ตัวประมวลผลที่ช้ากว่า SMP เสมอในทุกกรณี",
+      "เพราะ cluster ไม่มีการเชื่อมต่อกันระหว่างเครื่องเลยแม้แต่จุดเดียว",
+      "เพราะ SMP ไม่มี memory ให้ใช้ร่วมกันเลยแม้แต่หน่วยเดียว",
+      "เพราะ cluster เชื่อมต่อกันผ่านระบบ I/O ทั่วไป เช่น Ethernet ซึ่งช้ากว่าบัสภายในเครื่องของ SMP มาก"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่เกี่ยวกับความเร็วของตัวประมวลผลเอง เป็นเรื่องความเร็วของการเชื่อมต่อระหว่างเครื่อง",
+      "cluster เชื่อมต่อกันผ่านระบบ I/O เช่น Ethernet/switch/Internet ตามที่สไลด์ระบุ",
+      "SMP คือระบบที่นิยามด้วยการมี physical address space ร่วมกันโดยเฉพาะ",
+      "ถูก — สไลด์ระบุว่าปัญหาของ cluster คือ low interconnect bandwidth เมื่อเทียบกับ processor/memory bandwidth ของ SMP เพราะเชื่อมผ่านระบบ I/O"
+    ]
+  },
+  {
+    type: "understand",
+    q: "arithmetic intensity ที่ต่ำ (FLOPs ต่อไบต์น้อย) บ่งบอกถึงอะไรเกี่ยวกับประสิทธิภาพของโปรแกรมนั้น?",
+    choices: [
+      "โปรแกรมจะได้ประสิทธิภาพเต็มที่ตามค่า peak GFLOPS เสมอไม่ว่ากรณีใด",
+      "โปรแกรมมีแนวโน้มถูกจำกัดด้วยความเร็วในการเข้าถึง memory มากกว่าความเร็วในการคำนวณ",
+      "โปรแกรมไม่จำเป็นต้องเข้าถึง memory เลยแม้แต่ครั้งเดียว",
+      "โปรแกรมจะทำงานเร็วขึ้นเสมอถ้าเพิ่มจำนวนตัวประมวลผลเข้าไป"
+    ],
+    correct: 1,
+    explain: [
+      "ถ้าถูกจำกัดด้วย memory ประสิทธิภาพจริงมักจะต่ำกว่า peak GFLOPS ที่ระบุไว้",
+      "ถูก — เมื่อคำนวณต่อไบต์ข้อมูลน้อย แปลว่าโปรแกรมต้องโหลดข้อมูลบ่อยเทียบกับการคำนวณ จึงมักถูกจำกัดด้วยความเร็ว memory bandwidth มากกว่า",
+      "arithmetic intensity คำนวณจาก FLOPs ต่อไบต์ที่ต้องเข้าถึง memory จึงยังต้องเข้าถึง memory อยู่",
+      "ถ้าถูกจำกัดด้วย memory bandwidth การเพิ่มตัวประมวลผลเฉย ๆ อาจไม่ช่วยถ้า memory bandwidth ไม่พอ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม GPU จึงไม่สามารถจัดเข้ากรอบ SIMD/MIMD แบบดั้งเดิมได้อย่างสมบูรณ์?",
+    choices: [
+      "เพราะ GPU ไม่มีการประมวลผลแบบขนานอยู่เลยแม้แต่น้อย",
+      "เพราะ GPU ใช้ได้เฉพาะกับงานกราฟิกเท่านั้น ไม่เกี่ยวข้องกับ SIMD/MIMD",
+      "เพราะการมี conditional execution ภายใน thread ทำให้ดูเหมือนทำงานแบบ MIMD ได้ แต่แลกมาด้วยประสิทธิภาพที่ลดลง",
+      "เพราะ GPU ทำงานช้ากว่า CPU เสมอในทุกกรณีไม่มีข้อยกเว้น"
+    ],
+    correct: 2,
+    explain: [
+      "GPU เป็นตัวอย่างสถาปัตยกรรมที่ประมวลผลแบบขนานสูงมาก",
+      "สไลด์ระบุแนวโน้ม general purpose GPU ที่ใช้กับงานคำนวณทั่วไปได้ ไม่ใช่แค่กราฟิก",
+      "ถูก — สไลด์ระบุว่า conditional execution ใน thread ของ GPU ให้ \"ภาพลวงตา\" ของ MIMD แต่มี performance degradation ตามมา",
+      "ไม่ตรงกับเนื้อหา GPU เหมาะกับงาน data-parallel สูงและอาจเร็วกว่า CPU มากในงานประเภทนั้น"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "มีงานคูณเมทริกซ์ขนาดใหญ่ที่แต่ละ element ของผลลัพธ์คำนวณได้อย่างอิสระจากกันโดยสมบูรณ์ ควรพิจารณาใช้สถาปัตยกรรมแบบใดเป็นอันดับแรกตามแนวคิดในบทนี้?",
+    choices: [
+      "Message-passing cluster ที่เชื่อมผ่าน Internet",
+      "Vector / SIMD processor",
+      "Grid computing แบบ SETI@home",
+      "Coarse-grain multithreading อย่างเดียว"
+    ],
+    correct: 1,
+    explain: [
+      "cluster ผ่าน Internet มี latency สูงและเหมาะกับงานอิสระระดับ task มากกว่างานคำนวณละเอียดระดับ element",
+      "ถูก — งานที่ data-parallel สูงและไม่มี dependency ระหว่างข้อมูล เหมาะกับ Vector/SIMD ที่ประมวลผลหลายค่าพร้อมกันในคำสั่งเดียว",
+      "grid computing เหมาะกับงานที่แบ่งเป็นหน่วยใหญ่ ๆ ทำงานนาน ไม่เหมาะกับการคำนวณระดับ element ที่ต้องการความเร็วสูง",
+      "multithreading ช่วยซ่อน latency ของ thread เดียว ไม่ได้เพิ่มการประมวลผลแบบขนานระดับข้อมูลเหมือน vector/SIMD"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการรวมผลรวมของอาเรย์ขนาดใหญ่มากบนเครื่อง UMA ที่มีหลายตัวประมวลผล ควรใช้แนวทางใดตามตัวอย่างในสไลด์?",
+    choices: [
+      "ให้ตัวประมวลผลตัวเดียวเท่านั้นรวมค่าทั้งหมดตั้งแต่ต้นจนจบเอง",
+      "ให้ทุกตัวประมวลผลเขียนผลรวมสุดท้ายพร้อมกันเลยโดยไม่ต้อง synchronize",
+      "ใช้ message passing ผ่าน Internet ระหว่างตัวประมวลผลในเครื่องเดียวกัน",
+      "ให้แต่ละตัวประมวลผลรวมส่วนของตัวเองก่อน แล้วใช้ reduction แบบ divide-and-conquer พร้อม synchronize"
+    ],
+    correct: 3,
+    explain: [
+      "วิธีนี้ไม่ได้ใช้ประโยชน์จากการมีหลายตัวประมวลผลเลย เสียเปล่าเมื่อเทียบกับ reduction",
+      "การเขียนพร้อมกันโดยไม่ synchronize อาจทำให้อ่าน/เขียนค่าที่ยังไม่อัปเดต ผลลัพธ์ผิดพลาดได้",
+      "ตัวประมวลผลในเครื่อง UMA เดียวกันสื่อสารผ่าน shared memory ไม่จำเป็นต้องใช้ message passing ผ่าน Internet",
+      "ถูก — ตรงกับตัวอย่าง Sum Reduction ในสไลด์ที่แบ่งงานให้แต่ละตัวประมวลผลรวมก่อน แล้วค่อยรวมผลย่อยแบบ divide-and-conquer พร้อม synch()"
+    ]
+  },
+  {
+    type: "apply",
+    q: "บริษัทมีเว็บเซิร์ฟเวอร์ที่ต้องรองรับผู้ใช้จำนวนมาก แต่ละคำขอ (request) เป็นอิสระต่อกันโดยสิ้นเชิง และงบประมาณจำกัด ควรเลือกสถาปัตยกรรมแบบใดตามแนวคิดในบทนี้?",
+    choices: [
+      "Loosely coupled cluster",
+      "Vector processor ตัวเดียวขนาดใหญ่",
+      "Simultaneous Multithreading บนคอร์เดียว",
+      "Fully connected network ราคาแพงที่สุด"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า cluster เหมาะกับงานที่มี independent task เช่น web server เพราะราคาย่อมเยา ขยายง่าย และพร้อมใช้งานสูง",
+      "vector processor เหมาะกับงานคำนวณข้อมูลจำนวนมากที่เป็นชุดต่อเนื่อง ไม่ใช่ request ที่แยกอิสระจากกันแบบ web server",
+      "SMT ช่วยใช้ทรัพยากรของคอร์เดียวให้คุ้มขึ้น แต่ไม่ได้ช่วยขยายรองรับผู้ใช้จำนวนมากได้เท่า cluster",
+      "Fully connected คือ network topology สำหรับเชื่อมตัวประมวลผลในระบบเดียว ไม่เกี่ยวกับการเลือกสถาปัตยกรรมทั้งระบบ และมีต้นทุนสูงเกินความจำเป็น"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ทีมออกแบบต้องการซ่อน latency จากการรอ L2-cache miss แต่ไม่ต้องการให้ฮาร์ดแวร์ซับซ้อนมากเกินไป ควรเลือก multithreading แบบใด?",
+    choices: [
+      "Fine-grain multithreading",
+      "Simultaneous Multithreading เต็มรูปแบบ",
+      "Coarse-grain multithreading",
+      "ไม่ใช้ multithreading เลย"
+    ],
+    correct: 2,
+    explain: [
+      "fine-grain ซ่อน latency ได้ดีกว่ารวมถึงการหยุดรอสั้น ๆ แต่ต้องแลกกับฮาร์ดแวร์ที่ซับซ้อนกว่า",
+      "SMT ซับซ้อนกว่า multithreading พื้นฐานมาก เพราะต้อง schedule คำสั่งจากหลาย thread พร้อมกันในโปรเซสเซอร์แบบ dynamically scheduled",
+      "ถูก — coarse-grain สลับเฉพาะตอน stall นาน ๆ อย่าง L2-cache miss และมีฮาร์ดแวร์ที่ง่ายกว่า ตรงกับความต้องการนี้พอดี",
+      "การไม่ใช้ multithreading เลยจะทำให้ core ต้องหยุดรอเปล่า ๆ ระหว่าง L2-cache miss ซึ่งเป็นปัญหาที่ต้องการแก้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมหนึ่งมี arithmetic intensity ต่ำมาก (โหลดข้อมูลจำนวนมากแต่คำนวณน้อย) เมื่อรันบนเครื่องที่มี peak GFLOPS สูงมากแต่ peak memory bandwidth ต่ำ ผลลัพธ์ที่คาดว่าจะเกิดขึ้นคือข้อใด?",
+    choices: [
+      "ประสิทธิภาพจริงจะถูกจำกัดโดย memory bandwidth ไม่ใช่ค่า peak GFLOPS ของเครื่อง",
+      "โปรแกรมจะทำงานได้เต็มประสิทธิภาพตามค่า peak GFLOPS พอดี",
+      "โปรแกรมจะไม่สามารถรันได้เลยบนเครื่องนี้ไม่ว่ากรณีใด",
+      "จำนวน core ที่มากขึ้นจะแก้ปัญหานี้ได้เสมอโดยไม่ต้องพิจารณาอย่างอื่น"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — arithmetic intensity ต่ำหมายถึงต้องโหลดข้อมูลบ่อยเทียบกับการคำนวณ ถ้า memory bandwidth ของเครื่องต่ำ ก็จะกลายเป็นคอขวดที่ทำให้ใช้ peak GFLOPS ไม่ได้เต็มที่",
+      "ถ้าถูกจำกัดด้วย memory bandwidth ประสิทธิภาพจริงจะต่ำกว่าค่า peak GFLOPS",
+      "โปรแกรมยังรันได้ เพียงแต่ได้ประสิทธิภาพต่ำกว่าศักยภาพสูงสุดของเครื่อง",
+      "การเพิ่ม core ช่วยเพิ่มความสามารถคำนวณ แต่ถ้า memory bandwidth ยังเป็นคอขวดเท่าเดิม ก็อาจไม่ได้ช่วยตามที่คาดหวัง"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ทีมออกแบบเครือข่ายเชื่อมต่อระหว่างตัวประมวลผลต้องการให้ทุกตัวเชื่อมถึงกันโดยตรงเพื่อ latency ต่ำที่สุดเท่าที่จะเป็นไปได้ (ไม่สนใจต้นทุนที่สูงขึ้น) ควรเลือก topology แบบใดจากตัวเลือกในสไลด์?",
+    choices: ["Bus", "Ring", "2D Mesh", "Fully connected"],
+    correct: 3,
+    explain: [
+      "Bus ให้ทุกตัวประมวลผลใช้สายเชื่อมต่อร่วมกันเส้นเดียว ซึ่งจะเกิดการแย่งใช้งาน (contention) มากกว่า",
+      "Ring เชื่อมต่อกันเป็นวงเป็นทอด ๆ ข้อความอาจต้องผ่านหลายจุดกว่าจะถึงปลายทาง",
+      "2D Mesh เชื่อมต่อเฉพาะเพื่อนบ้านใกล้เคียงเป็นตาราง ยังต้องส่งผ่านหลายจุดเหมือนกันสำหรับตัวประมวลผลที่อยู่ไกลกัน",
+      "ถูก — Fully connected คือ topology ที่ทุกตัวประมวลผลเชื่อมถึงกันโดยตรงทุกคู่ ให้ latency ต่ำที่สุดแต่ต้นทุนสูงที่สุดในกลุ่มตัวเลือกนี้"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

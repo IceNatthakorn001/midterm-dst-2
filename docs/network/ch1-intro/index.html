@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1 — Introduction to Computer Networks (ITDS231) · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+      <ol><li><a href="#0-ข้อมูลรายวิชา">0. ข้อมูลรายวิชา</a></li><li><a href="#1-อินเทอร์เน็ตคืออะไร">1. อินเทอร์เน็ตคืออะไร?</a></li><li><a href="#2-โปรโตคอล-protocol-คืออะไร">2. โปรโตคอล (Protocol) คืออะไร?</a></li><li><a href="#3-network-edge-ขอบเครือข่าย">3. Network Edge (ขอบเครือข่าย)</a></li><li><a href="#4-network-core-แกนกลางเครือข่าย">4. Network Core (แกนกลางเครือข่าย)</a></li><li><a href="#5-performance-delay-loss-throughput">5. Performance: Delay, Loss, Throughput</a></li><li><a href="#6-network-security">6. Network Security</a></li><li><a href="#7-protocol-layers-และ-reference-models">7. Protocol Layers และ Reference Models</a></li><li><a href="#8-ประวัติอินเทอร์เน็ต-internet-history">8. ประวัติอินเทอร์เน็ต (Internet History)</a></li><li><a href="#9-สไลด์เสริม-ภาพสรุปภาษาไทย">9. สไลด์เสริม (ภาพสรุปภาษาไทย)</a></li><li><a href="#10-คำศัพท์สำคัญ">10. คำศัพท์สำคัญ</a></li><li><a href="#11-สรุปท้ายบท-จุดที่มักออกสอบ">11. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Ch1-Intro</div>
+    <h1 class="lesson-title">Chapter 1 — Introduction to Computer Networks (ITDS231)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p>บทนี้เป็นบทปูพื้นฐาน ให้เห็น &quot;ภาพใหญ่&quot; ของเครือข่ายคอมพิวเตอร์และอินเทอร์เน็ต ก่อนเจาะรายละเอียดทีละ layer ในบทต่อ ๆ ไป</p>
+<p>เรียนว่าอินเทอร์เน็ตคืออะไร โปรโตคอลคืออะไร ขอบและแกนกลางของเครือข่าย การสลับแพ็กเก็ตกับการสลับวงจร ความหน่วง/การสูญหาย/throughput ความปลอดภัย การแบ่ง layer (TCP/IP, OSI) และประวัติอินเทอร์เน็ต</p>
+<p>ศัพท์ในบทนี้จะถูกใช้ตลอดทั้งวิชา ถ้าเข้าใจบทนี้ บทอื่นจะง่ายขึ้นมาก</p>
+</blockquote>
+<h2 id="สารบัญ">สารบัญ</h2>
+<ol start="0">
+<li>ข้อมูลรายวิชา</li>
+<li>อินเทอร์เน็ตคืออะไร (มุมมอง nuts &amp; bolts / services)</li>
+<li>โปรโตคอลคืออะไร</li>
+<li>Network Edge: hosts, access networks, physical media</li>
+<li>Network Core: forwarding/routing, packet vs circuit switching, โครงสร้าง ISP</li>
+<li>Performance: delay, loss, throughput</li>
+<li>Network Security</li>
+<li>Protocol Layers &amp; Encapsulation (TCP/IP, OSI)</li>
+<li>ประวัติอินเทอร์เน็ต</li>
+<li>สไลด์เสริม (ภาพสรุปภาษาไทย, Network scale, Ethernet, Wi-Fi, Wireshark)</li>
+<li>คำศัพท์สำคัญ</li>
+<li>จุดที่มักออกสอบ</li>
+</ol>
+<hr />
+<h2 id="0-ข้อมูลรายวิชา">0. ข้อมูลรายวิชา</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>วิชา</td>
+<td>ITDS 231 Computer Networks, 2 (2-0-4) หน่วยกิต</td>
+</tr>
+<tr>
+<td>Prerequisite</td>
+<td>ITDS 122 Data Structures and Algorithms</td>
+</tr>
+<tr>
+<td>เวลา</td>
+<td>Sec1 จันทร์ 9:00–11:00 / Sec2 ศุกร์ 9:00–11:00</td>
+</tr>
+<tr>
+<td>ผู้สอน</td>
+<td>อ.ดร.สกุณา เจริญปัญญาศักดิ์ (sakuna.cha@mahidol.ac.th), ผศ.ดร.ฐิตินันท์ ตันติธรรม (thitinan.tan@mahidol.ac.th)</td>
+</tr>
+<tr>
+<td>Textbook หลัก</td>
+<td>Kurose &amp; Ross, <em>Computer Networking: A Top-Down Approach</em> 9th ed. (2025) + Tanenbaum, Forouzan, Fitzgerald et al., Stallings</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>วัตถุประสงค์:</strong> เข้าใจหลักการทำงานของเครือข่ายตาม OSI และ TCP/IP, เข้าใจหน้าที่แต่ละ layer, ศึกษาด้วยตนเองได้</p>
+<p><strong>การเข้าเรียน:</strong> ต้องเข้าเรียน ≥ 80% ไม่ครบไม่มีสิทธิ์สอบ (นับจากการทำ Quizzes)</p>
+<p><strong>คะแนน:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>%</th>
+<th>สัปดาห์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quizzes</td>
+<td>10</td>
+<td>3, 6, 11, 14</td>
+</tr>
+<tr>
+<td>Exercises</td>
+<td>10</td>
+<td>1–8, 9–15</td>
+</tr>
+<tr>
+<td>NetAcad</td>
+<td>10</td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>สอบ (กลางภาค + ปลายภาค)</td>
+<td>70 (35+35)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เกรด:</strong> A ≥ 85, B+ ≥ 75, B ≥ 70, C+ ≥ 65, C ≥ 60, D+ ≥ 55, D ≥ 40, F &lt; 40</p>
+<p><strong>วันสอบ:</strong> กลางภาค 28 ก.ย.–2 ต.ค. 2569 / ปลายภาค 30 พ.ย.–11 ธ.ค. 2569</p>
+<p><strong>แผนการสอน (ย่อ):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>หัวข้อ</th>
+<th>ผู้สอน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Intro, History, Data communication model &amp; protocol, OSI/TCP-IP, Network model &amp; topology</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Data &amp; signals, Data rate limit, Transmission media, LAN/WAN</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>3–4</td>
+<td>Application layer, Web &amp; HTTP (Quiz#1 wk3)</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Data Link Layer, Flow/Error control</td>
+<td>Thitinan</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Data Link Layer Protocols (Quiz#2)</td>
+<td>Thitinan</td>
+</tr>
+<tr>
+<td>7</td>
+<td>MAC, Ethernet, L2 Switch, VLAN 1/2</td>
+<td>Thitinan</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Spanning Tree Protocol, VLAN 2/2 (EtherChannel)</td>
+<td>Thitinan</td>
+</tr>
+<tr>
+<td>—</td>
+<td><strong>Midterm</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>9–10</td>
+<td>Network layer: IPv4/IPv6, Classes, Subnetting, Routing algorithms, Distance vector, Broadcast/Multicast, Routing protocols</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>11–12</td>
+<td>Transport layer: error/flow control, multiplexing, crash recovery (Quiz#3), UDP/TCP, congestion control, performance</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>13–14</td>
+<td>Wireless &amp; mobile: WiFi, 5G/4G, Bluetooth, satellite, IoT (Quiz#4)</td>
+<td>Sakuna</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Security: securing TCP, network layer security, wireless security</td>
+<td>Sakuna</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="1-อินเทอร์เน็ตคืออะไร">1. อินเทอร์เน็ตคืออะไร?</h2>
+<p>สไลด์มองอินเทอร์เน็ต 2 มุม</p>
+<h3 id="11-มุมมอง-nuts-and-bolts-ชิ้นส่วนที่ประกอบกัน">1.1 มุมมอง &quot;Nuts and Bolts&quot; (ชิ้นส่วนที่ประกอบกัน)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชิ้นส่วน</th>
+<th>คืออะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hosts = End systems</strong></td>
+<td>อุปกรณ์ปลายทางหลายพันล้านเครื่อง (คอม มือถือ เซิร์ฟเวอร์ IoT) ที่ <strong>รันแอปเครือข่าย</strong> อยู่ที่ &quot;ขอบ (edge)&quot; ของอินเทอร์เน็ต</td>
+</tr>
+<tr>
+<td><strong>Packet switches</strong></td>
+<td>อุปกรณ์ส่งต่อแพ็กเก็ต (ก้อนข้อมูล) ได้แก่ <strong>routers</strong> และ <strong>switches</strong></td>
+</tr>
+<tr>
+<td><strong>Communication links</strong></td>
+<td>สายสื่อสาร: fiber, copper, radio, satellite ความเร็วในการส่งเรียกว่า <strong>transmission rate = bandwidth</strong></td>
+</tr>
+<tr>
+<td><strong>Networks</strong></td>
+<td>กลุ่มของอุปกรณ์ router และ link ที่ <strong>องค์กรหนึ่งดูแล</strong> (เช่น home network, enterprise network, datacenter network, mobile network)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Internet = &quot;network of networks&quot;</strong> คือ ISP จำนวนมากที่เชื่อมต่อกัน ไม่มีเจ้าของคนเดียว</li>
+<li><strong>Protocols อยู่ทุกที่</strong> — ควบคุมการส่ง/รับข้อความ เช่น HTTP (Web), streaming video, Skype, TCP, IP, WiFi, 4G/5G, Ethernet</li>
+<li><strong>มาตรฐานอินเทอร์เน็ต:</strong>
+<ul>
+<li><strong>RFC</strong> (Request for Comments) = เอกสารมาตรฐาน</li>
+<li><strong>IETF</strong> (Internet Engineering Task Force) = องค์กรที่ออกมาตรฐาน</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p010.jpg" alt="Internet nuts and bolts view" /></p>
+<h3 id="12-มุมมอง-services-บริการ">1.2 มุมมอง &quot;Services&quot; (บริการ)</h3>
+<ul>
+<li>อินเทอร์เน็ตคือ <strong>โครงสร้างพื้นฐานที่ให้บริการแก่แอปพลิเคชัน</strong> เช่น Web, streaming, video conference, email, เกม, e-commerce, social media, เครื่องใช้ไฟฟ้าที่ต่อเน็ต</li>
+<li>ให้ <strong>programming interface</strong> แก่แอปแบบกระจาย — มี &quot;hooks&quot; ให้แอปเชื่อมต่อและใช้บริการ transport ของอินเทอร์เน็ต</li>
+<li>มีตัวเลือกบริการหลายแบบ <strong>คล้ายไปรษณีย์</strong> (ส่งธรรมดา / ลงทะเบียน / ด่วน)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 สไลด์ภาษาไทยสรุปว่า: อินเทอร์เน็ตไม่ได้ถูกควบคุมจากศูนย์กลางเดียว แต่ขับเคลื่อนด้วย <strong>โปรโตคอลมาตรฐาน (TCP/IP)</strong> ที่ทำให้อุปกรณ์ต่างชนิดคุยกันได้</p>
+<ul>
+<li><strong>Network Core</strong> = โครงข่าย router และสายสัญญาณระดับภูมิภาคที่เชื่อม ISP</li>
+<li><strong>Network Edge</strong> = อุปกรณ์ปลายทาง (เซิร์ฟเวอร์ คอม สมาร์ทโฟน)</li>
+<li><strong>Communication Links</strong> = ตัวกลาง (fiber, copper, radio) ที่ส่งข้อมูลเป็น packets</li>
+</ul>
+</blockquote>
+<p><img loading="lazy" src="img/ch1-p011.jpg" alt="อินเทอร์เน็ตคืออะไร (Network of Networks)" /></p>
+<hr />
+<h2 id="2-โปรโตคอล-protocol-คืออะไร">2. โปรโตคอล (Protocol) คืออะไร?</h2>
+<p><strong>นิยาม:</strong> โปรโตคอลกำหนด <strong>รูปแบบ (format)</strong> และ <strong>ลำดับ (order)</strong> ของข้อความที่ส่ง-รับระหว่างอุปกรณ์ในเครือข่าย และ <strong>การกระทำ (actions)</strong> เมื่อส่งหรือได้รับข้อความ</p>
+<p>จำ 3 อย่าง: <strong>Format – Order – Action</strong></p>
+<ul>
+<li><strong>Human protocol:</strong> &quot;ขอถามเวลาหน่อย&quot; / &quot;มีคำถามครับ&quot; / การแนะนำตัว — มีข้อความเฉพาะ และมีการตอบสนองเมื่อได้ยิน</li>
+<li><strong>Network protocol:</strong> เหมือนกันแต่เป็นเครื่องคุยกับเครื่อง ทุกการสื่อสารบนอินเทอร์เน็ตถูกควบคุมด้วยโปรโตคอล</li>
+</ul>
+<p><strong>ตัวอย่างเทียบกัน:</strong>
+<img loading="lazy" src="img/ch1-p015.jpg" alt="Human protocol vs network protocol" /></p>
+<p>ซ้าย (คน): Hi → Hi → Got the time? → 2:00 / ขวา (คอม): TCP connection request → TCP connection response → GET http://gaia.cs.umass.edu/kurose_ross → &lt;file&gt;</p>
+<blockquote class="callout">
+<p class="c-tip">💡 ถ้าอีกฝ่ายไม่ตอบ &quot;Hi&quot; กลับ คนก็ไม่ถามต่อ — เครื่องก็เหมือนกัน ถ้าไม่ได้ response ก็ไม่ส่ง GET</p>
+</blockquote>
+<hr />
+<h2 id="3-network-edge-ขอบเครือข่าย">3. Network Edge (ขอบเครือข่าย)</h2>
+<h3 id="31-โครงสร้างของอินเทอร์เน็ตแบบละเอียดขึ้น">3.1 โครงสร้างของอินเทอร์เน็ตแบบละเอียดขึ้น</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ประกอบด้วย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Network edge</strong></td>
+<td>hosts แบ่งเป็น <strong>clients</strong> และ <strong>servers</strong> (servers มักอยู่ใน data center)</td>
+</tr>
+<tr>
+<td><strong>Access networks, physical media</strong></td>
+<td>ลิงก์สื่อสารแบบมีสายและไร้สาย ที่ต่อ host เข้ากับ router ตัวแรก</td>
+</tr>
+<tr>
+<td><strong>Network core</strong></td>
+<td>router ที่เชื่อมถึงกัน = network of networks</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-access-networks-ต่อ-end-system-เข้า-edge-router-อย่างไร">3.2 Access Networks — ต่อ end system เข้า edge router อย่างไร?</h3>
+<p>มี 3 กลุ่ม: <strong>residential</strong> (บ้าน), <strong>institutional</strong> (โรงเรียน บริษัท), <strong>mobile</strong> (WiFi, 4G/5G)</p>
+<h4>(ก) Cable-based access (HFC)</h4>
+<ul>
+<li>ใช้ระบบ <strong>cable TV เดิม</strong> ส่ง data และ TV ที่ <strong>ความถี่ต่างกัน</strong> บนสายเส้นเดียวกัน</li>
+<li>ใช้ <strong>FDM (Frequency Division Multiplexing)</strong> = แบ่งช่องสัญญาณตามย่านความถี่ (ช่อง video, data, control)</li>
+<li><strong>HFC = Hybrid Fiber Coax</strong> (ผสมไฟเบอร์กับสาย coax)</li>
+<li><strong>Asymmetric</strong> (ขาลงเร็วกว่าขาขึ้น): downstream 40 Mbps – 1.2 Gbps, upstream 30–100 Mbps</li>
+<li>บ้านหลายหลัง <strong>แชร์</strong> เครือข่ายไปยัง cable headend</li>
+<li>อุปกรณ์: cable modem, splitter → cable headend → <strong>CMTS</strong> (cable modem termination system) → ISP</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p022.jpg" alt="Cable-based access (HFC)" /></p>
+<h4>(ข) DSL (Digital Subscriber Line)</h4>
+<ul>
+<li>ใช้ <strong>สายโทรศัพท์เดิม</strong> ไปยัง central office (ชุมสาย) → <strong>DSLAM</strong> (DSL access multiplexer)</li>
+<li>voice กับ data ส่งที่ความถี่ต่างกัน: data → Internet, voice → เครือข่ายโทรศัพท์</li>
+<li>เป็นสาย <strong>dedicated</strong> (ไม่แชร์) downstream 24–52 Mbps, upstream 3.5–16 Mbps</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p023.jpg" alt="DSL" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ Cable = <strong>shared</strong> / DSL = <strong>dedicated</strong> — ออกสอบบ่อย</p>
+</blockquote>
+<h4>(ค) Home networks</h4>
+<p><img loading="lazy" src="img/ch1-p024.jpg" alt="Home network" /></p>
+<p>อุปกรณ์มีสาย/ไร้สาย → WiFi AP (54, 450 Mbps) หรือ wired Ethernet (1 Gbps) → router + firewall + NAT → cable/DSL modem → headend หรือ central office</p>
+<ul>
+<li>router, AP, modem มักรวมอยู่ใน <strong>กล่องเดียว</strong></li>
+</ul>
+<h4>(ง) Wireless access networks</h4>
+<p>เชื่อม end system กับ router ผ่าน <strong>base station = access point</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ระยะ</th>
+<th>ความเร็ว</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WLAN</strong> (802.11b/g/n = WiFi)</td>
+<td>ในหรือรอบตึก ~100 ft</td>
+<td>11, 54, 450 Mbps</td>
+</tr>
+<tr>
+<td><strong>Wide-area cellular</strong> (4G/5G) โดยผู้ให้บริการมือถือ</td>
+<td>สิบ ๆ km</td>
+<td>สิบ ๆ Mbps</td>
+</tr>
+</tbody>
+</table></div>
+<h4>(จ) Enterprise networks (บริษัท มหาวิทยาลัย)</h4>
+<ul>
+<li>ผสมทั้งมีสายและไร้สาย ต่อ switch และ router หลายตัว</li>
+<li>Ethernet: 100 Mbps, 1 Gbps, 10 Gbps / WiFi: 11, 54, 450 Mbps</li>
+<li>มี institutional router ต่อไป ISP, มี mail/web server ขององค์กร</li>
+</ul>
+<h4>(ฉ) Data center networks</h4>
+<ul>
+<li>ลิงก์ bandwidth สูงมาก (<strong>10s–100s Gbps</strong>) เชื่อมเซิร์ฟเวอร์หลักร้อยถึงหลักพันเครื่องเข้าด้วยกันและเข้าอินเทอร์เน็ต</li>
+</ul>
+<p><strong>ตารางสรุป (จากสไลด์ภาษาไทย):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เทคโนโลยี</th>
+<th>ตัวกลาง</th>
+<th>แบนด์วิดท์</th>
+<th>ความเร็ว</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FTTH (Fiber to the Home)</td>
+<td>ใยแก้วนำแสง (แสง)</td>
+<td>ส่วนตัว (dedicated)</td>
+<td>สูงมาก</td>
+</tr>
+<tr>
+<td>Cable (HFC)</td>
+<td>coax (ทองแดง/แสง)</td>
+<td>แชร์ (shared)</td>
+<td>ไม่สม่ำเสมอ (ดาวน์โหลดเร็วกว่าอัปโหลด)</td>
+</tr>
+<tr>
+<td>DSL</td>
+<td>สายโทรศัพท์ (ทองแดง)</td>
+<td>ส่วนตัว</td>
+<td>จำกัดตามระยะทางจากชุมสาย</td>
+</tr>
+<tr>
+<td>5G / Wireless</td>
+<td>คลื่นวิทยุ</td>
+<td>แชร์</td>
+<td>เน้นความคล่องตัว (mobility)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p029.jpg" alt="Access Networks: เส้นทางแรกเข้าสู่หมานครดิจิทัล" /></p>
+<h3 id="33-host-ส่งข้อมูลอย่างไร">3.3 Host ส่งข้อมูลอย่างไร</h3>
+<ol>
+<li>รับ <strong>application message</strong></li>
+<li>หั่นเป็นก้อนเล็ก ๆ เรียกว่า <strong>packets</strong> ยาว <strong>L bits</strong></li>
+<li>ส่งเข้า access network ด้วยอัตรา <strong>R</strong> (bps) — R เรียกว่า link transmission rate / link capacity / link bandwidth</li>
+</ol>
+<p><strong>Packet transmission delay</strong> = เวลาที่ใช้ &quot;ดัน&quot; แพ็กเก็ต L บิตออกไปบนลิงก์</p>
+<p>$$d_{trans} = \frac{L\ (\text{bits})}{R\ (\text{bits/sec})}$$</p>
+<p><img loading="lazy" src="img/ch1-p028.jpg" alt="Host sends packets" /></p>
+<p><img loading="lazy" src="img/ch1-p062.jpg" alt="Fluid flow analogy and waveform" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 สไลด์ภาพ &quot;Waveform&quot;: ลิงก์ 1 Mbps ใช้ 1 µs ต่อบิต, ลิงก์ 10 Mbps ใช้ 100 ns ต่อบิต → ข้อความเดียวกันส่งเสร็จเร็วกว่า 10 เท่า (bandwidth สูง = บิตสั้นลง ไม่ใช่วิ่งเร็วขึ้น)</p>
+</blockquote>
+<h3 id="34-physical-media-สื่อกลางทางกายภาพ">3.4 Physical Media (สื่อกลางทางกายภาพ)</h3>
+<ul>
+<li><strong>bit</strong> เดินทางระหว่างคู่ transmitter/receiver</li>
+<li><strong>physical link</strong> = สิ่งที่อยู่ระหว่างผู้ส่งกับผู้รับ</li>
+<li><strong>Guided media</strong> = สัญญาณวิ่งในสื่อของแข็ง: copper, fiber, coax</li>
+<li><strong>Unguided media</strong> = สัญญาณกระจายอิสระ เช่น radio</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สื่อ</th>
+<th>ลักษณะ</th>
+<th>จุดเด่น/ตัวเลข</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Twisted pair (TP)</strong></td>
+<td>สายทองแดงหุ้มฉนวน 2 เส้นบิดเกลียว</td>
+<td>Cat 5: 100 Mbps, 1 Gbps Ethernet / Cat 6: 10 Gbps</td>
+</tr>
+<tr>
+<td><strong>Coaxial cable</strong></td>
+<td>ตัวนำทองแดง 2 ชั้น <strong>มีจุดศูนย์กลางร่วมกัน</strong> (co-axial = แกนร่วม)</td>
+<td>bidirectional, <strong>broadband</strong> = หลายช่องความถี่บนสายเดียว, หลายร้อย Mbps ต่อช่อง ใช้ใน cable internet, กล้องวงจรปิด</td>
+</tr>
+<tr>
+<td><strong>Fiber optic</strong></td>
+<td>ใยแก้วส่ง <strong>พัลส์แสง</strong> แต่ละพัลส์ = 1 บิต</td>
+<td>เร็วมาก point-to-point 10s–100s Gbps, <strong>error ต่ำ</strong>, repeater วางห่างกันได้, <strong>ไม่ถูกรบกวนจากคลื่นแม่เหล็กไฟฟ้า</strong></td>
+</tr>
+<tr>
+<td><strong>Wireless radio</strong></td>
+<td>สัญญาณในย่าน &quot;bands&quot; ของสเปกตรัม ไม่มีสาย</td>
+<td>broadcast, <strong>half-duplex</strong>, ได้รับผลจาก reflection, obstruction, interference/noise</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ประเภท radio link:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ความเร็ว / ระยะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wireless LAN (WiFi)</td>
+<td>10–100s Mbps, สิบ ๆ เมตร</td>
+</tr>
+<tr>
+<td>Wide-area (4G/5G)</td>
+<td>สิบ ๆ Mbps (4G) ระยะ ~10 km</td>
+</tr>
+<tr>
+<td>Bluetooth</td>
+<td>ทดแทนสาย ระยะสั้น ความเร็วจำกัด</td>
+</tr>
+<tr>
+<td>Terrestrial microwave</td>
+<td>point-to-point ช่องละ 45 Mbps</td>
+</tr>
+<tr>
+<td>Satellite</td>
+<td>downlink &lt; 100 Mbps (Starlink), delay 270 ms end-to-end (แบบ geostationary)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-network-core-แกนกลางเครือข่าย">4. Network Core (แกนกลางเครือข่าย)</h2>
+<p><strong>Network core</strong> = mesh ของ router ที่ต่อถึงกัน ใช้ <strong>packet switching</strong>: host หั่นข้อความเป็นแพ็กเก็ต แล้วเครือข่ายส่งต่อแพ็กเก็ตจาก router หนึ่งไปอีกตัวตามเส้นทางจนถึงปลายทาง</p>
+<h3 id="41-สองหน้าที่หลักของ-core-forwarding-vs-routing">4.1 สองหน้าที่หลักของ core: Forwarding vs Routing</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Forwarding</strong> (aka switching)</th>
+<th><strong>Routing</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ขอบเขต</td>
+<td><strong>Local</strong> — ทำที่ router ตัวเดียว</td>
+<td><strong>Global</strong> — ทั้งเครือข่าย</td>
+</tr>
+<tr>
+<td>ทำอะไร</td>
+<td>ย้ายแพ็กเก็ตจาก input link ไป output link ที่ถูกต้อง</td>
+<td>หาเส้นทางจากต้นทางถึงปลายทาง</td>
+</tr>
+<tr>
+<td>ใช้อะไร</td>
+<td>ดู destination address ใน header → เปิด <strong>local forwarding table</strong></td>
+<td><strong>routing algorithms</strong> (ซึ่งเป็นตัวสร้าง forwarding table)</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง forwarding table:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>header value</th>
+<th>output link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0100</td>
+<td>3</td>
+</tr>
+<tr>
+<td>0101</td>
+<td>2</td>
+</tr>
+<tr>
+<td>0111</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1001</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p039.jpg" alt="Forwarding and routing" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเทียบ: <strong>Routing</strong> = วางแผนเส้นทางทั้งทริปด้วย Google Maps / <strong>Forwarding</strong> = ตอนถึงแยกหนึ่ง ดูป้ายแล้วเลี้ยวซ้ายหรือขวา</p>
+</blockquote>
+<h3 id="42-packet-switching-store-and-forward">4.2 Packet switching: Store-and-forward</h3>
+<ul>
+<li>ส่งแพ็กเก็ต L บิตบนลิงก์ R bps ใช้เวลา <strong>L/R วินาที</strong></li>
+<li><strong>Store and forward:</strong> router ต้องได้รับแพ็กเก็ต <strong>ครบทั้งก้อน</strong> ก่อน จึงจะส่งต่อไปลิงก์ถัดไปได้</li>
+</ul>
+<p><strong>ตัวอย่าง one-hop:</strong> L = 10 Kbits, R = 100 Mbps
+→ d = 10,000 / 100,000,000 = 10⁻⁴ s = <strong>0.1 msec</strong></p>
+<p><img loading="lazy" src="img/ch1-p042.jpg" alt="Store-and-forward" /></p>
+<h3 id="43-packet-switching-queueing-และ-loss">4.3 Packet switching: Queueing และ Loss</h3>
+<ul>
+<li><strong>Queueing</strong> เกิดเมื่องานเข้ามา <strong>เร็วกว่า</strong> ที่ให้บริการได้ (เช่น A, B ส่งมาที่ 100 Mb/s แต่ลิงก์ขาออกไป D, E มีแค่ 1.5 Mb/s)</li>
+<li>ถ้า arrival rate &gt; transmission rate ของลิงก์เป็นช่วงเวลาหนึ่ง:
+<ul>
+<li>แพ็กเก็ตจะ <strong>ต่อคิว</strong> รอส่งบน output link</li>
+<li>ถ้า <strong>buffer (หน่วยความจำ) ของ router เต็ม</strong> → แพ็กเก็ตถูก <strong>drop (สูญหาย)</strong></li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p044.jpg" alt="Packet queueing and loss" /></p>
+<h3 id="44-circuit-switching-ทางเลือกแทน-packet-switching">4.4 Circuit switching (ทางเลือกแทน packet switching)</h3>
+<ul>
+<li><strong>จองทรัพยากรตลอดเส้นทาง</strong> ไว้ให้ &quot;call&quot; ระหว่างต้นทาง-ปลายทาง</li>
+<li>ตัวอย่างในภาพ: แต่ละลิงก์มี 4 circuits, call ได้ circuit ที่ 2 ของลิงก์บน และ circuit ที่ 1 ของลิงก์ขวา</li>
+<li><strong>Dedicated resources — ไม่แชร์</strong> → ประสิทธิภาพ <strong>รับประกัน</strong> (circuit-like)</li>
+<li>ถ้าไม่มีการส่งข้อมูล circuit นั้น <strong>ว่างเปล่า (idle) เสียเปล่า</strong> คนอื่นใช้ไม่ได้</li>
+<li>ใช้ใน <strong>เครือข่ายโทรศัพท์แบบดั้งเดิม</strong></li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p045.jpg" alt="Circuit switching" /></p>
+<h4>FDM vs TDM (วิธีแบ่ง circuit)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>FDM</strong> (Frequency Division Multiplexing)</th>
+<th><strong>TDM</strong> (Time Division Multiplexing)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แบ่งอะไร</td>
+<td>แบ่ง <strong>ความถี่</strong> เป็นแถบแคบ ๆ</td>
+<td>แบ่ง <strong>เวลา</strong> เป็นช่อง (slot)</td>
+</tr>
+<tr>
+<td>ผู้ใช้ได้อะไร</td>
+<td>ได้ band ของตัวเอง ส่งได้ตลอดเวลา ที่ความเร็วสูงสุดของ band แคบนั้น</td>
+<td>ได้ slot เป็นระยะ ส่งได้ที่ความเร็วของ band <strong>กว้างทั้งหมด</strong> แต่เฉพาะช่วง slot ตัวเอง</td>
+</tr>
+<tr>
+<td>เปรียบเทียบ</td>
+<td>ถนนแบ่งเลน แต่ละคนมีเลนตัวเอง</td>
+<td>ถนนเลนเดียวผลัดกันวิ่งตามคิวเวลา</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p046.jpg" alt="FDM and TDM" /></p>
+<h3 id="45-packet-switching-vs-circuit-switching">4.5 Packet switching vs Circuit switching</h3>
+<p><strong>ตัวอย่างคำนวณ:</strong> ลิงก์ 1 Gb/s, ผู้ใช้แต่ละคนใช้ 100 Mb/s ตอน active และ active แค่ 10% ของเวลา</p>
+<ul>
+<li><strong>Circuit switching:</strong> 1 Gb / 100 Mb = <strong>10 users</strong> (ต้องจองเต็มให้ทุกคน)</li>
+<li><strong>Packet switching:</strong> รองรับ <strong>35 users</strong> ได้ โดยโอกาสที่มีคน active พร้อมกันเกิน 10 คน <strong>&lt; 0.0004</strong>
+(ได้จากการแจกแจงทวินาม — สไลด์บอกเป็นการบ้านสำหรับคนเรียนความน่าจะเป็น)</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p047.jpg" alt="Packet vs circuit switching example" /></p>
+<p><strong>Packet switching เป็น &quot;ผู้ชนะขาด&quot; ไหม?</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อดี</th>
+<th>ข้อเสีย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เหมาะกับข้อมูลแบบ <strong>bursty</strong> (บางช่วงส่งเยอะ บางช่วงไม่ส่ง)</td>
+<td>อาจเกิด <strong>congestion</strong> รุนแรง → delay และ loss จาก buffer overflow</td>
+</tr>
+<tr>
+<td><strong>แชร์ทรัพยากร</strong> ได้คุ้มค่า</td>
+<td>ต้องมีโปรโตคอลช่วยเรื่อง <strong>reliable data transfer</strong> และ <strong>congestion control</strong></td>
+</tr>
+<tr>
+<td>ง่ายกว่า <strong>ไม่ต้อง call setup</strong></td>
+<td>ทำให้เหมือน circuit (รับประกันคุณภาพ) ได้ยาก — &quot;It's complicated&quot; จะเรียนเทคนิคต่อไป</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเทียบกับชีวิตจริง (สไลด์ไทย): <strong>Circuit switching</strong> = จองโต๊ะร้านอาหาร (Reserved) ถ้าไม่มาโต๊ะก็ว่างเสียเปล่า / <strong>Packet switching</strong> = ทางด่วนที่รถทุกคันแชร์กัน ใช้ทรัพยากรเต็มประสิทธิภาพ แต่ถ้ารถมาพร้อมกันเยอะก็ <strong>รถติด (queueing delay)</strong></p>
+<p>สไลด์ภาพ &quot;Blueprint&quot;: Dedicated links = ถนนแยกของแต่ละเมือง ใช้ไม่เต็มที่ (wasted capacity) / Multiplexing = ถนนรวม ใช้ประโยชน์สูง แต่มีความเสี่ยงชนกัน (collision) — และการต่อทุกจุดถึงกันหมด (fully interconnected) มีขีดจำกัด จึงนำไปสู่การประมวลผลแบบกระจาย (centralized → decentralized → distributed)</p>
+</blockquote>
+<p><img loading="lazy" src="img/ch1-p034.jpg" alt="ทำไมอินเทอร์เน็ตถึงใช้ Packet Switching" /></p>
+<p><img loading="lazy" src="img/ch1-p007.jpg" alt="Blueprint: dedicated links vs multiplexing" /></p>
+<p><img loading="lazy" src="img/ch1-p008.jpg" alt="Blueprint: centralized, decentralized, distributed" /></p>
+<h3 id="46-โครงสร้างอินเทอร์เน็ต-network-of-networks">4.6 โครงสร้างอินเทอร์เน็ต: &quot;Network of Networks&quot;</h3>
+<p>host ต่อเน็ตผ่าน <strong>access ISP</strong> และ access ISP ต้องเชื่อมถึงกัน เพื่อให้ host สองเครื่องใดก็ได้ส่งแพ็กเก็ตหากันได้ โครงสร้างที่ได้ซับซ้อนมาก และถูกขับเคลื่อนด้วย <strong>เศรษฐศาสตร์และนโยบายประเทศ</strong></p>
+<p>สไลด์อธิบายแบบทีละขั้น (ตอบคำถาม &quot;มี access ISP เป็นล้าน จะต่อกันยังไง?&quot;):</p>
+<ol>
+<li><strong>ต่อทุก access ISP ถึงกันตรง ๆ</strong> → ไม่ scale ต้องใช้ <strong>O(N²)</strong> การเชื่อมต่อ ❌</li>
+<li><strong>ต่อทุกตัวเข้ากับ global transit ISP ตัวเดียว</strong> → customer กับ provider ISP มี <strong>ข้อตกลงทางเศรษฐกิจ</strong> (จ่ายเงิน)</li>
+<li>ถ้า global ISP ทำกำไรได้ ก็จะมี <strong>คู่แข่ง</strong> (ISP A, B, C)...</li>
+<li>...ที่ต้องเชื่อมต่อกันเอง ผ่าน <strong>peering link</strong> และ <strong>IXP (Internet Exchange Point)</strong></li>
+<li>...อาจเกิด <strong>regional ISP</strong> มาเชื่อม access net เข้ากับ ISP ใหญ่</li>
+<li>...และ <strong>content provider networks</strong> (Google, Microsoft, Akamai) สร้างเครือข่ายตัวเอง เพื่อนำบริการ/เนื้อหาไปใกล้ผู้ใช้</li>
+</ol>
+<p><strong>ที่ &quot;ศูนย์กลาง&quot; มีเครือข่ายใหญ่ไม่กี่เจ้า:</strong></p>
+<ul>
+<li><strong>Tier-1 commercial ISPs</strong> (Level 3, Sprint, AT&amp;T, NTT) ครอบคลุมระดับประเทศและนานาชาติ</li>
+<li><strong>Content provider networks</strong> (Google, Facebook) = เครือข่ายส่วนตัวต่อ data center เข้าอินเทอร์เน็ต มัก <strong>bypass</strong> tier-1 และ regional ISP</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p057.jpg" alt="Internet structure: network of networks" /></p>
+<p><strong>ลำดับชั้น ISP (สไลด์ไทย — ISP Hierarchy):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tier 1 ISPs</strong></td>
+<td>ผู้ให้บริการระดับโลก (AT&amp;T, Sprint) มีเครือข่ายเส้นใยแก้วข้ามทวีป เชื่อมต่อกันเองโดย <strong>ไม่คิดค่าบริการ (settlement-free)</strong></td>
+</tr>
+<tr>
+<td><strong>Regional ISPs</strong></td>
+<td>ระดับภูมิภาค/ประเทศ ทำหน้าที่เชื่อมเครือข่ายท้องถิ่นเข้ากับ Tier 1</td>
+</tr>
+<tr>
+<td><strong>Access ISPs</strong></td>
+<td>ระดับท้องถิ่น (บ้าน องค์กร)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>เงินไหล (money flow)</strong> จากชั้นล่างขึ้นชั้นบน (ลูกค้าจ่าย provider) ข้อมูลไหลทั้งสองทาง</li>
+<li><strong>POP (Point of Presence):</strong> จุดที่ลูกค้าหรือ ISP ย่อยนำเราเตอร์มาเชื่อมกับเครือข่ายของ ISP รายใหญ่</li>
+<li><strong>IXP (Internet Exchange Point):</strong> อาคารศูนย์กลางที่ผู้ให้บริการหลายรายมาเชื่อมต่อกัน</li>
+<li><strong>Peering ผ่าน IXP:</strong> แลกข้อมูลกันโดยตรง → <strong>ลด latency</strong> และ <strong>ประหยัดค่าใช้จ่าย</strong> ไม่ต้องจ่ายให้ Tier-1</li>
+<li><strong>Content Provider Network:</strong> ยักษ์ใหญ่ (Google, Microsoft) สร้าง private network ทั่วโลก <strong>ข้ามลำดับชั้น (bypass)</strong> โดยวางเซิร์ฟเวอร์ใกล้ผู้ใช้ (ผ่าน IXP หรือ access ISP ตรง) → คุมคุณภาพได้ 100%, ลดต้นทุนการส่ง, ให้บริการ YouTube/Search ได้เร็ว</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p035.jpg" alt="ISP Hierarchy" /></p>
+<p><img loading="lazy" src="img/ch1-p036.jpg" alt="IXP และ Peering" /></p>
+<p><img loading="lazy" src="img/ch1-p037.jpg" alt="Content Provider Network" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบ ISP กับระบบถนน: Access ISP = ซอยหน้าบ้าน, Regional = ถนนสายหลักในจังหวัด, Tier-1 = ทางหลวงข้ามประเทศ, IXP = ทางแยกต่างระดับที่หลายถนนมาเจอกัน, Content provider = ทางด่วนส่วนตัวของบริษัทใหญ่</p>
+</blockquote>
+<p><strong>ภาพสรุปการเดินทางของ 1 แพ็กเก็ต (สไลด์ไทย):</strong></p>
+<p><img loading="lazy" src="img/ch1-p059.jpg" alt="บทสรุป: ติดตามการเดินทางของ 1 แพ็กเก็ต" /></p>
+<ol>
+<li><strong>สร้างข้อมูล (Edge):</strong> แอปสร้างคำขอ HTTP และห่อหุ้ม (encapsulate) ผ่าน TCP/IP</li>
+<li><strong>เข้าสู่เครือข่าย (Access):</strong> แพ็กเก็ตวิ่งผ่าน 5G หรือ WiFi เข้าเครือข่ายของ ISP</li>
+<li><strong>นำส่ง (Core):</strong> router ตรวจ IP ปลายทาง แล้ว forwarding ส่งต่อบนสายไฟเบอร์ความเร็วสูง</li>
+<li><strong>ทางลัด (Peering):</strong> ผ่าน IXP ตัดตรงเข้าเครือข่ายผู้ให้บริการเนื้อหา</li>
+<li><strong>ถึงปลายทาง (Edge):</strong> data center รับแพ็กเก็ต แกะกล่อง (decapsulation) และประมวลผล</li>
+</ol>
+<p><strong>The Invisible Infrastructure (3 หลักคิด):</strong></p>
+<ol>
+<li><strong>Intelligence is at the Edge</strong> — ความฉลาดและความซับซ้อนอยู่ที่ปลายทาง (อุปกรณ์ผู้ใช้) แกนกลางมีหน้าที่แค่ส่งให้เร็วที่สุด</li>
+<li><strong>Network of Networks</strong> — ระบบกระจายศูนย์ ไม่มีใครคุมเบ็ดเสร็จ แต่เชื่อมกันด้วยข้อตกลงทางธุรกิจและ IXP</li>
+<li><strong>The Spanning Layer (IP)</strong> — IP เรียบง่าย เป็นกาวที่ผสานฮาร์ดแวร์ทุกยุค รองรับนวัตกรรมในอนาคตได้ไม่จำกัด</li>
+</ol>
+<p><img loading="lazy" src="img/ch1-p060.jpg" alt="The Invisible Infrastructure" /></p>
+<hr />
+<h2 id="5-performance-delay-loss-throughput">5. Performance: Delay, Loss, Throughput</h2>
+<h3 id="51-delay-และ-loss-เกิดขึ้นได้อย่างไร">5.1 Delay และ Loss เกิดขึ้นได้อย่างไร?</h3>
+<ul>
+<li>แพ็กเก็ต <strong>ต่อคิวใน buffer ของ router</strong> รอถึงตาส่ง</li>
+<li>คิวยาวขึ้นเมื่อ arrival rate <strong>ชั่วคราว</strong> เกิน capacity ของลิงก์ขาออก</li>
+<li><strong>Loss</strong> เกิดเมื่อหน่วยความจำสำหรับคิวเต็ม — แพ็กเก็ตที่มาถึงตอนไม่มี free buffer ถูกทิ้ง</li>
+</ul>
+<h3 id="52-packet-delay-4-แหล่ง">5.2 Packet delay: 4 แหล่ง ⭐</h3>
+<p>$$d_{nodal} = d_{proc} + d_{queue} + d_{trans} + d_{prop}$$</p>
+<p><img loading="lazy" src="img/ch1-p064.jpg" alt="Packet delay: four sources" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>คืออะไร</th>
+<th>ขึ้นกับ</th>
+<th>ขนาดโดยทั่วไป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>d_proc</strong> (nodal processing)</td>
+<td>ตรวจ bit errors, ตัดสินใจเลือก output link</td>
+<td>ความเร็ว router</td>
+<td>&lt; microsecs</td>
+</tr>
+<tr>
+<td><strong>d_queue</strong> (queueing)</td>
+<td>เวลารอที่ output link ก่อนได้ส่ง</td>
+<td><strong>ระดับ congestion</strong> ของ router</td>
+<td>ไม่แน่นอน</td>
+</tr>
+<tr>
+<td><strong>d_trans</strong> (transmission)</td>
+<td>เวลา &quot;ดัน&quot; ทุกบิตของแพ็กเก็ตขึ้นลิงก์</td>
+<td><strong>d_trans = L/R</strong> (L = ความยาวแพ็กเก็ต bits, R = link rate bps)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>d_prop</strong> (propagation)</td>
+<td>เวลาที่สัญญาณเดินทางจากต้นลิงก์ถึงปลายลิงก์</td>
+<td><strong>d_prop = d/s</strong> (d = ความยาวสาย, s = ความเร็วสัญญาณ ≈ 2×10⁸ m/s)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>d_trans กับ d_prop ต่างกันมาก!</strong></p>
+<ul>
+<li>d_trans ขึ้นกับ <strong>ขนาดแพ็กเก็ตและ bandwidth</strong> ไม่เกี่ยวกับระยะทาง</li>
+<li>d_prop ขึ้นกับ <strong>ระยะทาง</strong> ไม่เกี่ยวกับขนาดแพ็กเก็ต</li>
+</ul>
+<p class="c-tip">💡 เปรียบกับของเหลว (สไลด์ภาพ): ความเร็วที่เทน้ำลงกรวยเข้าท่อ = transmission delay / เวลาที่น้ำไหลจากต้นท่อถึงปลายท่อ = propagation delay</p>
+</blockquote>
+<h3 id="53-caravan-analogy-ขบวนรถ">5.3 Caravan analogy (ขบวนรถ) ⭐</h3>
+<p><strong>การจับคู่:</strong> รถ = bit, ขบวนรถ = packet, ด่านเก็บเงิน = link transmission (router)</p>
+<p><strong>กรณีที่ 1:</strong> ขบวนรถ 10 คัน, ด่านใช้ 12 วินาที/คัน, รถวิ่ง 100 km/hr, ด่านห่างกัน 100 km
+<strong>ถาม:</strong> นานเท่าไหร่กว่าขบวนจะเรียงแถวหน้าด่านที่ 2?</p>
+<ul>
+<li>เวลาดันรถทั้งขบวนผ่านด่าน (≈ d_trans) = 12 × 10 = 120 s = <strong>2 นาที</strong></li>
+<li>เวลารถคันสุดท้ายวิ่งจากด่าน 1 ถึงด่าน 2 (≈ d_prop) = 100 km / 100 km/hr = <strong>1 ชั่วโมง</strong></li>
+<li><strong>คำตอบ: 62 นาที</strong></li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p066.jpg" alt="Caravan analogy 1" /></p>
+<p><strong>กรณีที่ 2:</strong> รถวิ่ง 1000 km/hr, ด่านใช้ <strong>1 นาที/คัน</strong>
+<strong>ถาม:</strong> รถจะถึงด่าน 2 ก่อนที่ด่าน 1 บริการครบทุกคันไหม?</p>
+<ul>
+<li><strong>ตอบ: ใช่!</strong> คันแรกออกจากด่านที่นาทีที่ 1 วิ่ง 100 km ใช้ 6 นาที → ถึงด่าน 2 ที่ <strong>นาทีที่ 7</strong> ขณะนั้นยังเหลือ <strong>3 คัน</strong> ที่ด่าน 1</li>
+<li>ความหมาย: บิตแรกของแพ็กเก็ตอาจไปถึง router ถัดไปแล้ว ขณะที่บิตหลัง ๆ ยังส่งไม่เสร็จ (เมื่อ d_trans ใหญ่กว่า d_prop)</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p067.jpg" alt="Caravan analogy 2" /></p>
+<h3 id="54-queueing-delay-กับ-traffic-intensity">5.4 Queueing delay กับ Traffic intensity</h3>
+<ul>
+<li><strong>a</strong> = อัตราแพ็กเก็ตมาถึงเฉลี่ย (packets/s), <strong>L</strong> = ความยาวแพ็กเก็ต (bits), <strong>R</strong> = bandwidth (bps)</li>
+</ul>
+<p>$$\text{traffic intensity} = \frac{L \cdot a}{R} = \frac{\text{arrival rate of bits}}{\text{service rate of bits}}$$</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ค่า La/R</th>
+<th>ผลต่อ queueing delay เฉลี่ย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>≈ 0</strong></td>
+<td>delay น้อย</td>
+</tr>
+<tr>
+<td><strong>→ 1</strong></td>
+<td>delay พุ่งสูงมาก (กราฟโค้งขึ้นชันเมื่อเข้าใกล้ 1)</td>
+</tr>
+<tr>
+<td><strong>&gt; 1</strong></td>
+<td>งานเข้ามามากกว่าที่ให้บริการได้ → delay เฉลี่ย <strong>อนันต์!</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p068.jpg" alt="Traffic intensity" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนเคาน์เตอร์คิดเงิน: ถ้าลูกค้าเข้ามาเร็วเกือบเท่าที่แคชเชียร์คิดเงินไหว คิวก็ยาวมากแล้ว ถ้าเข้าเร็วกว่า คิวยาวไม่มีที่สิ้นสุด</p>
+</blockquote>
+<h3 id="55-delay-จริงบนอินเทอร์เน็ต-traceroute">5.5 Delay จริงบนอินเทอร์เน็ต: traceroute</h3>
+<p><strong>traceroute</strong> วัด delay จากต้นทางไปยังแต่ละ router ตามเส้นทาง โดยสำหรับทุก i:</p>
+<ol>
+<li>ส่ง <strong>3 แพ็กเก็ต</strong> ที่จะไปถึง router ที่ i (ตั้งค่า <strong>TTL = i</strong>)</li>
+<li>router ที่ i ส่งแพ็กเก็ตกลับมาหาผู้ส่ง</li>
+<li>ผู้ส่งวัดเวลาระหว่างส่งกับได้รับตอบ</li>
+</ol>
+<p><strong>ตัวอย่าง: gaia.cs.umass.edu → www.eurecom.fr (19 hops)</strong></p>
+<p><img loading="lazy" src="img/ch1-p070.jpg" alt="traceroute output" /></p>
+<ul>
+<li>hop 1–7 (ในอเมริกา): 1–22 ms</li>
+<li>hop 7 → 8: กระโดดจาก ~22 ms เป็น <strong>~104 ms</strong> = <strong>trans-oceanic link</strong> (ข้ามมหาสมุทรแอตแลนติก ระยะทางไกล → d_prop มาก)</li>
+<li>hop 17, 18: <code>* * *</code> = ไม่ตอบ (probe หาย หรือ router ไม่ตอบกลับ)</li>
+<li><strong>&quot;ดูเหมือน delay ลดลง ทำไม?&quot;</strong> (เช่น hop 4 = 16/11/13 ms บางค่ามากกว่า hop ถัด ๆ ไป) — เพราะแต่ละ probe เป็นแพ็กเก็ตแยกกันที่ส่งคนละเวลา เจอ <strong>queueing delay ไม่เท่ากัน</strong> ตามความหนาแน่นของคิวขณะนั้น</li>
+<li>ลองเล่นได้ที่ www.traceroute.org</li>
+</ul>
+<h3 id="56-packet-loss">5.6 Packet loss</h3>
+<ul>
+<li>queue (buffer) หน้าลิงก์มี <strong>ความจุจำกัด</strong></li>
+<li>แพ็กเก็ตที่มาถึงตอนคิวเต็ม → <strong>ถูก drop</strong></li>
+<li>แพ็กเก็ตที่หายอาจถูก <strong>ส่งใหม่</strong> โดย node ก่อนหน้า, โดย source end system, <strong>หรือไม่ส่งใหม่เลย</strong> (ขึ้นกับโปรโตคอล)</li>
+</ul>
+<h3 id="57-throughput">5.7 Throughput ⭐</h3>
+<p><strong>throughput</strong> = อัตรา (bits/หน่วยเวลา) ที่บิตถูกส่งจากผู้ส่งไปถึงผู้รับ</p>
+<ul>
+<li><strong>instantaneous</strong> = อัตรา ณ เวลาหนึ่ง</li>
+<li><strong>average</strong> = อัตราเฉลี่ยในช่วงเวลายาว</li>
+</ul>
+<p>ภาพ: server มีไฟล์ F bits ส่งผ่านท่อ Rs (ฝั่ง server) แล้วต่อท่อ Rc (ฝั่ง client) — เหมือนเทน้ำผ่านท่อ 2 ท่อต่อกัน</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>throughput เฉลี่ย end-to-end</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rs &lt; Rc</td>
+<td><strong>Rs</strong></td>
+</tr>
+<tr>
+<td>Rs &gt; Rc</td>
+<td><strong>Rc</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>→ throughput = <strong>min(Rs, Rc)</strong> ลิงก์ที่ช้าที่สุดเรียกว่า <strong>bottleneck link</strong> (คอขวด)</p>
+<p><img loading="lazy" src="img/ch1-p073.jpg" alt="Throughput bottleneck" /></p>
+<p><strong>Network scenario:</strong> มี 10 connections แชร์ backbone link R bits/sec อย่างเท่าเทียม
+$$\text{per-connection throughput} = \min(R_c,\ R_s,\ R/10)$$</p>
+<ul>
+<li>ในทางปฏิบัติ <strong>Rc หรือ Rs (access link) มักเป็นคอขวด</strong> ไม่ใช่ backbone</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p074.jpg" alt="Throughput network scenario" /></p>
+<ul>
+<li>แบบฝึกเพิ่ม: http://gaia.cs.umass.edu/kurose_ross/</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ท่อน้ำใหญ่แค่ไหน น้ำก็ไหลได้เท่าท่อที่เล็กที่สุดในสาย</p>
+</blockquote>
+<hr />
+<h2 id="6-network-security">6. Network Security</h2>
+<p><strong>ทำไมต้องสนใจ?</strong> อินเทอร์เน็ตแต่แรก <strong>ไม่ได้ออกแบบมาเพื่อความปลอดภัย</strong></p>
+<ul>
+<li>วิสัยทัศน์เดิม: &quot;กลุ่มผู้ใช้ที่ไว้ใจกัน ต่อกับเครือข่ายโปร่งใส&quot; ☺</li>
+<li>ผู้ออกแบบโปรโตคอลจึงต้อง &quot;ไล่ตามแก้&quot; (catch-up)</li>
+<li>ต้องคำนึงถึงความปลอดภัย <strong>ทุก layer</strong></li>
+</ul>
+<p>ต้องคิด 3 เรื่อง: คนร้ายโจมตีได้อย่างไร / ป้องกันอย่างไร / ออกแบบสถาปัตยกรรมให้ทนต่อการโจมตีอย่างไร</p>
+<h3 id="61-รูปแบบการโจมตี">6.1 รูปแบบการโจมตี</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>การโจมตี</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Packet sniffing</strong> (ดักจับแพ็กเก็ต)</td>
+<td>บน broadcast media (shared Ethernet, wireless) network interface แบบ <strong>promiscuous</strong> อ่าน/บันทึกทุกแพ็กเก็ตที่ผ่าน (รวมถึงรหัสผ่าน!) เช่น C ดักอ่านแพ็กเก็ต src:B → dest:A — <strong>Wireshark</strong> ที่ใช้ใน lab ก็เป็น packet sniffer ฟรี</td>
+</tr>
+<tr>
+<td><strong>IP spoofing</strong> (ปลอม IP)</td>
+<td>ใส่แพ็กเก็ตที่มี <strong>source address ปลอม</strong> — ผู้โจมตีสร้างแพ็กเก็ตโดยปลอม IP ผู้ส่งเป็นเครื่องอื่น เพื่อหลอกปลายทางว่ามาจากแหล่งที่น่าเชื่อถือ (C ส่งแพ็กเก็ตแต่อ้างว่า src:B)</td>
+</tr>
+<tr>
+<td><strong>DoS</strong> (Denial of Service)</td>
+<td>ทำให้ทรัพยากร (server, bandwidth) ใช้งานไม่ได้สำหรับผู้ใช้จริง โดยถล่มด้วย traffic ปลอม ทำให้เสียหายหรือช้ามาก — มาจาก <strong>เครื่องเดียว/แหล่งเดียว</strong></td>
+</tr>
+<tr>
+<td><strong>DDoS</strong> (Distributed DoS)</td>
+<td>โจมตีจาก <strong>หลายเครื่องพร้อมกัน</strong> มักใช้เครื่องที่ติดมัลแวร์ (<strong>botnet</strong>) ทั่วโลก → รับมือยากกว่ามาก</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ขั้นตอน DDoS:</strong> 1) เลือกเป้าหมาย → 2) เจาะเข้าเครื่องต่าง ๆ ในเครือข่าย (สร้าง botnet) → 3) สั่งเครื่องที่ถูกยึดส่งแพ็กเก็ตถล่มเป้าหมาย</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Packet sniffing</th>
+<th>IP spoofing</th>
+<th>DoS / DDoS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img loading="lazy" src="img/ch1-p077.jpg" alt="sniffing" /></td>
+<td><img loading="lazy" src="img/ch1-p078.jpg" alt="spoofing" /></td>
+<td><img loading="lazy" src="img/ch1-p079.jpg" alt="DoS" /></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-แนวป้องกัน-lines-of-defense">6.2 แนวป้องกัน (Lines of defense)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>พิสูจน์ว่าคุณเป็นคนที่อ้างจริง — เครือข่ายมือถือมี <strong>SIM card</strong> เป็น hardware identity แต่อินเทอร์เน็ตดั้งเดิมไม่มี</td>
+</tr>
+<tr>
+<td><strong>Confidentiality</strong></td>
+<td>เก็บความลับด้วย <strong>encryption</strong></td>
+</tr>
+<tr>
+<td><strong>Integrity checks</strong></td>
+<td><strong>digital signatures</strong> ป้องกัน/ตรวจจับการแก้ไขข้อมูล</td>
+</tr>
+<tr>
+<td><strong>Access restrictions</strong></td>
+<td>เช่น <strong>VPN</strong> ที่ต้องใช้รหัสผ่าน</td>
+</tr>
+<tr>
+<td><strong>Firewalls</strong></td>
+<td>&quot;middlebox&quot; ใน access และ core network: <strong>off-by-default</strong> กรองแพ็กเก็ตขาเข้าจำกัดผู้ส่ง ผู้รับ แอป / ตรวจจับและรับมือ DoS</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-protocol-layers-และ-reference-models">7. Protocol Layers และ Reference Models</h2>
+<h3 id="71-ทำไมต้องแบ่ง-layer">7.1 ทำไมต้องแบ่ง layer?</h3>
+<p>เครือข่ายซับซ้อนมาก มีหลายชิ้น: hosts, routers, links หลายชนิด, applications, protocols, hardware, software — จะจัดโครงสร้าง (และการพูดถึง) ได้อย่างไร?</p>
+<p><strong>ตัวอย่าง: การเดินทางทางอากาศ</strong>
+<img loading="lazy" src="img/ch1-p087.jpg" alt="Layers of air travel" /></p>
+<ul>
+<li>ระบบทั้งหมด = การส่ง &quot;คน + กระเป๋า&quot; จากต้นทางถึงปลายทาง (end-to-end)</li>
+<li><strong>แต่ละ layer ทำบริการหนึ่งอย่าง</strong> ผ่านการทำงานภายใน layer ตัวเอง และ <strong>พึ่งบริการของ layer ข้างล่าง</strong></li>
+</ul>
+<p><strong>ข้อดีของ layering:</strong></p>
+<ol>
+<li><strong>โครงสร้างชัดเจน</strong> — ระบุชิ้นส่วนและความสัมพันธ์ได้ (ใช้เป็น reference model ในการพูดคุย)</li>
+<li><strong>Modularization</strong> — ดูแลและอัปเดตง่าย เปลี่ยนวิธีทำงานภายใน layer หนึ่ง <strong>ไม่กระทบ</strong> ส่วนอื่น (เช่น เปลี่ยนขั้นตอนที่ gate ไม่กระทบการเช็คอินกระเป๋า)</li>
+</ol>
+<h3 id="72-internet-protocol-stack-tcpip-5-layers">7.2 Internet protocol stack (TCP/IP 5 layers) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>หน้าที่</th>
+<th>ตัวอย่างโปรโตคอล</th>
+<th>หน่วยข้อมูล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5. Application</strong></td>
+<td>รองรับแอปพลิเคชันเครือข่าย</td>
+<td>HTTP, IMAP, SMTP, DNS</td>
+<td><strong>message</strong></td>
+</tr>
+<tr>
+<td><strong>4. Transport</strong></td>
+<td>ส่งข้อมูล <strong>process ↔ process</strong></td>
+<td>TCP, UDP</td>
+<td><strong>segment</strong></td>
+</tr>
+<tr>
+<td><strong>3. Network</strong></td>
+<td>หาเส้นทางส่ง datagram จาก <strong>ต้นทาง → ปลายทาง</strong></td>
+<td>IP, routing protocols</td>
+<td><strong>datagram</strong></td>
+</tr>
+<tr>
+<td><strong>2. Link</strong></td>
+<td>ส่งข้อมูลระหว่าง <strong>อุปกรณ์เพื่อนบ้าน</strong> (node-to-node)</td>
+<td>Ethernet, 802.11 (WiFi), PPP</td>
+<td><strong>frame</strong></td>
+</tr>
+<tr>
+<td><strong>1. Physical</strong></td>
+<td>บิต &quot;บนสาย&quot;</td>
+<td>—</td>
+<td>bits</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p089.jpg" alt="Layered Internet protocol stack" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 จำลำดับจากบนลงล่าง: <strong>A</strong>pplication – <strong>T</strong>ransport – <strong>N</strong>etwork – <strong>L</strong>ink – <strong>P</strong>hysical</p>
+<p class="c-warn">⚠️ Transport = <strong>process-to-process</strong>, Network = <strong>host-to-host</strong>, Link = <strong>neighbor-to-neighbor (hop)</strong> — ต่างกันที่ขอบเขต</p>
+</blockquote>
+<h3 id="73-encapsulation-การห่อหุ้มข้อมูล">7.3 Encapsulation (การห่อหุ้มข้อมูล) ⭐</h3>
+<p>ขาส่ง แต่ละ layer <strong>เติม header</strong> ของตัวเองหน้าข้อมูลที่ได้จาก layer บน:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>สิ่งที่ได้</th>
+<th>ประกอบด้วย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application</td>
+<td><strong>message</strong></td>
+<td>M</td>
+</tr>
+<tr>
+<td>Transport</td>
+<td><strong>segment</strong></td>
+<td>Ht + M</td>
+</tr>
+<tr>
+<td>Network</td>
+<td><strong>datagram</strong></td>
+<td>Hn + Ht + M</td>
+</tr>
+<tr>
+<td>Link</td>
+<td><strong>frame</strong></td>
+<td>Hl + Hn + Ht + M</td>
+</tr>
+<tr>
+<td>Physical</td>
+<td>บิตบนสาย</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p058.jpg" alt="Encapsulation: การบรรจุหีบห่อข้อมูลทีละชั้น" /></p>
+<ol>
+<li><strong>Application</strong> แลก message (M) เพื่อทำบริการของแอป โดยใช้บริการของ transport</li>
+<li><strong>Transport</strong> ห่อ M ด้วย header <strong>Ht</strong> → <strong>segment</strong>; Ht ใช้ทำบริการของ transport (เช่นส่งแบบเชื่อถือได้) จาก process หนึ่งไปอีก process โดยใช้บริการ network layer</li>
+<li><strong>Network</strong> ห่อ segment [Ht|M] ด้วย <strong>Hn</strong> → <strong>datagram</strong>; ส่งจาก host หนึ่งไปอีก host โดยใช้บริการ link layer</li>
+<li><strong>Link</strong> ห่อ datagram [Hn|[Ht|M]] ด้วย <strong>Hl</strong> → <strong>frame</strong>; ส่งจาก host ไปยังเพื่อนบ้านถัดไป</li>
+</ol>
+<ul>
+<li>ฝั่งรับทำกลับกัน = <strong>Decapsulation</strong> แกะ header ทีละชั้นจนเหลือข้อมูลเดิม</li>
+<li>💡 เหมือน <strong>ตุ๊กตาแม่ลูกดก (Matryoshka)</strong> — message อยู่ในสุด segment → datagram → frame ห่อทับออกมา</li>
+</ul>
+<p><strong>Encapsulation แบบ end-to-end (ผ่านอุปกรณ์กลางทาง):</strong>
+<img loading="lazy" src="img/ch1-p095.jpg" alt="Encapsulation end-end view" /></p>
+<ul>
+<li><strong>Switch</strong> (layer 2) ทำงานถึงแค่ link + physical → ดูแค่ <strong>Hl</strong></li>
+<li><strong>Router</strong> (layer 3) ทำงานถึง network → แกะถึง <strong>Hn</strong> เพื่อดู IP ปลายทาง แล้วห่อ Hl ใหม่ส่งต่อ</li>
+<li>มีแค่ <strong>host ปลายทาง</strong> ที่แกะถึง application</li>
+</ul>
+<p><strong>สไลด์ไทย — Encapsulation สรุป:</strong></p>
+<ol>
+<li>Application: สร้างข้อมูล (Message)</li>
+<li>Transport: ใส่หมายเลข <strong>port</strong> ต้นทาง/ปลายทาง (Segment)</li>
+<li>Network: แปะที่อยู่ <strong>IP address</strong> เหมือนจ่าหน้าซองจดหมาย (Datagram)</li>
+<li>Link: บรรจุลงกรอบเพื่อส่งผ่านสายสัญญาณเฉพาะหน้า (Frame)</li>
+</ol>
+<p><strong>การเดินทางของแพ็กเก็ต (Journey of a Packet):</strong> จุดสำคัญคือ อุปกรณ์กลางทาง (routers) อ่านข้อมูลแค่ถึง <strong>Network (IP)</strong> เพื่อตัดสินใจเส้นทาง โดย <strong>ไม่แตะเนื้อหาของแอป</strong></p>
+<p><img loading="lazy" src="img/ch1-p084.jpg" alt="The Journey of a Packet" /></p>
+<p><strong>เลเยอร์ระดับล่าง: Node-to-Node</strong> — มือถือ → (WiFi) → router บ้าน → (Fiber optic) → ISP core switch</p>
+<ul>
+<li>เทคโนโลยีและโปรโตคอล <strong>Link layer เปลี่ยนไปตามสภาพแวดล้อมทางกายภาพในแต่ละช่วง</strong> ของการเดินทาง</li>
+<li>ฮาร์ดแวร์ <strong>Physical</strong> แปลงเฟรมเป็นสัญญาณแสง คลื่นวิทยุ หรือกระแสไฟฟ้า เพื่อข้ามสื่อกลาง</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p085.jpg" alt="Node-to-Node" /></p>
+<h3 id="74-isoosi-reference-model-7-layers">7.4 ISO/OSI Reference Model (7 layers) ⭐</h3>
+<p>7 layers (บนลงล่าง): Application, <strong>Presentation</strong>, <strong>Session</strong>, Transport, Network, Data Link, Physical (ตัวหนา = ไม่มีใน Internet stack)</p>
+<p><img loading="lazy" src="img/ch1-p104.jpg" alt="ISO/OSI reference model" />
+<strong>2 layer ที่ไม่มีใน Internet stack:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Presentation</strong></td>
+<td>ให้แอปตีความ <strong>ความหมายของข้อมูล</strong> ได้ เช่น <strong>encryption, compression</strong>, ข้อตกลงเฉพาะเครื่อง</td>
+</tr>
+<tr>
+<td><strong>Session</strong></td>
+<td><strong>synchronization, checkpointing, recovery</strong> ของการแลกข้อมูล</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Internet stack &quot;ขาด&quot; 2 layer นี้ → ถ้าต้องการบริการเหล่านี้ <strong>ต้องทำเองใน application</strong></li>
+<li>จำเป็นไหม? (คำถามชวนคิดในสไลด์)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ท่องจำ OSI จากล่างขึ้นบน: <strong>&quot;Pizza Delivery Never Takes Sweet Pepperoni Away&quot;</strong> → Physical, Data link, Network, Transport, Session, Presentation, Application</p>
+</blockquote>
+<p><strong>สไลด์ภาพ OSI (thenetworkdna):</strong> ตัวอย่างต่อ layer — L7 HTTP/FTP/SMTP/DNS, L6 SSL/TLS, JPEG, L5 NetBIOS/RPC, L4 TCP/UDP, L3 IP/ICMP, L2 Ethernet/MAC/PPP, L1 สาย/ฮับ/สัญญาณ; ข้อมูลไหลจาก L7 ลงไป L1 ฝั่งส่ง แล้ว L1 ขึ้น L7 ฝั่งรับ</p>
+<h3 id="75-logical-vs-physical-network-diagram">7.5 Logical vs Physical Network Diagram</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Logical diagram</th>
+<th>Physical diagram</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แสดงอะไร</td>
+<td><strong>ข้อมูลไหลอย่างไร</strong> (how data flows) — เน้นหน้าที่และการไหลของข้อมูลระหว่างส่วนประกอบ</td>
+<td><strong>หน้าตาจริง</strong> (what it looks like) — ฮาร์ดแวร์จริงและการต่อสายจริง</td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td>Internet → Router → Firewall → Switch → Users/Devices/Servers (ไอคอน)</td>
+<td>อุปกรณ์ router/firewall/switch ของจริง</td>
+</tr>
+</tbody>
+</table></div>
+<p>ในเครือข่ายสมัยใหม่ใช้ <strong>ทั้งสองแบบ</strong></p>
+<p><img loading="lazy" src="img/ch1-p083.jpg" alt="Logical vs Physical diagram and OSI model" /></p>
+<hr />
+<h2 id="8-ประวัติอินเทอร์เน็ต-internet-history">8. ประวัติอินเทอร์เน็ต (Internet History)</h2>
+<h3 id="19611972-หลักการ-packet-switching-ยุคแรก">1961–1972: หลักการ packet switching ยุคแรก</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เหตุการณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1961</td>
+<td><strong>Kleinrock</strong> — ทฤษฎีคิว (queueing theory) แสดงว่า packet switching มีประสิทธิภาพ</td>
+</tr>
+<tr>
+<td>1964</td>
+<td><strong>Baran</strong> — packet switching ในเครือข่ายทหาร</td>
+</tr>
+<tr>
+<td>1967</td>
+<td><strong>ARPAnet</strong> ถูกคิดขึ้นโดย Advanced Research Projects Agency</td>
+</tr>
+<tr>
+<td>1969</td>
+<td>ARPAnet node แรกเริ่มใช้งาน</td>
+</tr>
+<tr>
+<td>1972</td>
+<td>ARPAnet สาธิตต่อสาธารณะ, <strong>NCP</strong> (Network Control Protocol) = host-host protocol แรก, โปรแกรม <strong>e-mail แรก</strong>, ARPAnet มี <strong>15 nodes</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="19721980-internetworking-เครือข่ายใหม่และแบบ-proprietary">1972–1980: Internetworking, เครือข่ายใหม่และแบบ proprietary</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เหตุการณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1970</td>
+<td><strong>ALOHAnet</strong> เครือข่ายดาวเทียมในฮาวาย</td>
+</tr>
+<tr>
+<td>1974</td>
+<td><strong>Cerf and Kahn</strong> — สถาปัตยกรรมเชื่อมต่อเครือข่ายเข้าด้วยกัน</td>
+</tr>
+<tr>
+<td>1976</td>
+<td><strong>Ethernet</strong> ที่ Xerox PARC</td>
+</tr>
+<tr>
+<td>ปลาย 70s</td>
+<td>สถาปัตยกรรม proprietary: DECnet, SNA, XNA</td>
+</tr>
+<tr>
+<td>1979</td>
+<td>ARPAnet มี <strong>200 nodes</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>หลักการ internetworking ของ Cerf &amp; Kahn</strong> (กำหนดสถาปัตยกรรมอินเทอร์เน็ตทุกวันนี้):</p>
+<ul>
+<li><strong>minimalism, autonomy</strong> — ไม่ต้องเปลี่ยนภายในเครือข่ายเพื่อเชื่อมกัน</li>
+<li><strong>best-effort service model</strong> — พยายามส่งให้ดีที่สุด ไม่รับประกัน</li>
+<li><strong>stateless routing</strong> — router ไม่จำสถานะการเชื่อมต่อ</li>
+<li><strong>decentralized control</strong> — ไม่มีศูนย์ควบคุมกลาง</li>
+</ul>
+<h3 id="19801990-โปรโตคอลใหม่-เครือข่ายเพิ่มขึ้นมาก">1980–1990: โปรโตคอลใหม่ เครือข่ายเพิ่มขึ้นมาก</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เหตุการณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1982</td>
+<td>กำหนด <strong>SMTP</strong> (e-mail)</td>
+</tr>
+<tr>
+<td>1983</td>
+<td>ใช้งาน <strong>TCP/IP</strong>, กำหนด <strong>DNS</strong> (แปลงชื่อ → IP)</td>
+</tr>
+<tr>
+<td>1985</td>
+<td>กำหนด <strong>FTP</strong></td>
+</tr>
+<tr>
+<td>1988</td>
+<td><strong>TCP congestion control</strong></td>
+</tr>
+<tr>
+<td>—</td>
+<td>เครือข่ายระดับชาติใหม่: CSnet, BITnet, NSFnet, Minitel; host 100,000 เครื่อง</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="1990s2000s-การค้า-web-แอปใหม่">1990s–2000s: การค้า, Web, แอปใหม่</h3>
+<ul>
+<li>ต้นยุค 90: <strong>ARPAnet ปลดระวาง</strong></li>
+<li>1991: NSF ยกเลิกข้อจำกัดการใช้ NSFnet เชิงพาณิชย์ (NSFnet ปลดระวางปี 1995)</li>
+<li>ต้นยุค 90: <strong>Web</strong> — hypertext [Bush 1945, Nelson 1960s], <strong>HTML, HTTP: Berners-Lee</strong>, 1994: Mosaic ต่อมาเป็น Netscape, ปลาย 90s: Web เชิงพาณิชย์</li>
+<li>ปลาย 90s–2000s: killer apps ใหม่ (instant messaging, <strong>P2P file sharing</strong>), <strong>network security</strong> ขึ้นมาสำคัญ, ~50 ล้าน host, 100 ล้าน+ ผู้ใช้, backbone วิ่งที่ Gbps</li>
+</ul>
+<h3 id="2005ปัจจุบัน-scale-sdn-mobility-cloud">2005–ปัจจุบัน: scale, SDN, mobility, cloud</h3>
+<ul>
+<li>broadband ตามบ้านขยายตัว (10–100s Mbps)</li>
+<li>2008: <strong>SDN (software-defined networking)</strong></li>
+<li>wireless ความเร็วสูงแพร่หลาย: 4G/5G, WiFi</li>
+<li>ผู้ให้บริการ (Google, FB, Microsoft) <strong>สร้างเครือข่ายตัวเอง</strong> bypass อินเทอร์เน็ตเชิงพาณิชย์ เพื่ออยู่ใกล้ผู้ใช้</li>
+<li>องค์กรรันบริการบน <strong>cloud</strong> (AWS, Microsoft Azure)</li>
+<li>smartphone: อุปกรณ์ mobile มากกว่า fixed บนอินเทอร์เน็ต (<strong>2017</strong>)</li>
+<li>~<strong>15B อุปกรณ์</strong> ต่ออินเทอร์เน็ต (2023, statista.com)</li>
+</ul>
+<hr />
+<h2 id="9-สไลด์เสริม-ภาพสรุปภาษาไทย">9. สไลด์เสริม (ภาพสรุปภาษาไทย)</h2>
+<h3 id="91-การจำแนกเครือข่ายตามขนาด-network-scale-matrix">9.1 การจำแนกเครือข่ายตามขนาด (Network Scale Matrix)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ระยะ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PAN</strong> (Personal Area Network)</td>
+<td>1 m – 10 m</td>
+<td>Bluetooth — ระดับตัวบุคคล/ห้อง</td>
+</tr>
+<tr>
+<td><strong>LAN</strong> (Local Area Network)</td>
+<td>10 m – 1 km</td>
+<td>Wi-Fi — ระดับอาคาร/วิทยาเขต</td>
+</tr>
+<tr>
+<td><strong>MAN</strong> (Metropolitan Area Network)</td>
+<td>~10 km</td>
+<td>WiMAX — ระดับเมือง</td>
+</tr>
+<tr>
+<td><strong>WAN</strong> (Wide Area Network)</td>
+<td>100 km – ทั้งโลก</td>
+<td>Internet — ระดับประเทศ/โลก</td>
+</tr>
+</tbody>
+</table></div>
+<p>ยิ่งระยะไกลขึ้น เทคโนโลยีการเชื่อมต่อและโปรโตคอลก็ต่างกันออกไป</p>
+<p><img loading="lazy" src="img/ch1-p106.jpg" alt="Network Scale Matrix" /></p>
+<h3 id="92-การเชื่อมต่อที่ขอบเครือข่าย-accessing-the-edge">9.2 การเชื่อมต่อที่ขอบเครือข่าย (Accessing the Edge)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Wired Access: <strong>IEEE 802.3 (Ethernet)</strong></th>
+<th>Wireless Access: <strong>IEEE 802.11 (Wi-Fi)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เชื่อมผ่านสายสัญญาณ</td>
+<td>เชื่อมผ่านคลื่นวิทยุ</td>
+</tr>
+<tr>
+<td>เน้นความเร็วสูงสุดและเสถียร</td>
+<td>เน้นความยืดหยุ่นและการเคลื่อนที่ (mobility)</td>
+</tr>
+<tr>
+<td>เหมาะกับคอมตั้งโต๊ะและเซิร์ฟเวอร์</td>
+<td>เหมาะกับอุปกรณ์พกพา</td>
+</tr>
+</tbody>
+</table></div>
+<p>ทั้งสองแบบต่อเข้า Edge Router และ LAN ทั้งสองประเภทต้องใช้เทคโนโลยี <strong>MAC (Medium Access Control)</strong> ที่ต่างกันเพื่อจัดการการส่งข้อมูล</p>
+<p><img loading="lazy" src="img/ch1-p107.jpg" alt="Accessing the Edge" /></p>
+<h3 id="93-วิวัฒนาการของ-ethernet-จากสายส่งร่วม-สู่ช่องทางส่วนตัว">9.3 วิวัฒนาการของ Ethernet (จากสายส่งร่วม สู่ช่องทางส่วนตัว)</h3>
+<ol>
+<li><strong>ยุคเริ่มต้น (Classic Ethernet)</strong> — ใช้สาย <strong>Coaxial ร่วมกัน</strong> หากส่งพร้อมกันจะเกิด <strong>การชนกัน (collisions)</strong></li>
+<li><strong>ยุคกลาง (Hubs)</strong> — เปลี่ยนมาใช้สาย <strong>Twisted Pair</strong> รวมศูนย์ที่ Hub แต่ <strong>ยังแชร์แบนด์วิดท์และเกิดการชนกันได้</strong></li>
+<li><strong>ยุคปัจจุบัน (Switches)</strong> — Switch เป็นกลาง แต่ละพอร์ตมี <strong>ช่องทางเฉพาะ (dedicated lanes)</strong> ขจัดปัญหาการชนกันอย่างสมบูรณ์</li>
+</ol>
+<p><img loading="lazy" src="img/ch1-p108.jpg" alt="วิวัฒนาการของ Ethernet" /></p>
+<p><strong>โครงสร้าง Switched Ethernet:</strong></p>
+<ul>
+<li><strong>Independent Collision Domains:</strong> แต่ละพอร์ตทำงานแยกกันโดยสิ้นเชิง ส่งข้อมูลแบบขนานได้พร้อมกัน</li>
+<li><strong>Full-Duplex:</strong> ส่งและรับข้อมูลได้ในเวลาเดียวกัน</li>
+<li><strong>High-Speed Backplane:</strong> แผงวงจรหลักประมวลผลและส่งต่อแพ็กเก็ต (store-and-forward) ไปยังปลายทางที่ถูกต้องด้วยความเร็วระดับ Gbps</li>
+<li>ความง่าย (plug-and-play), ราคาถูก, ประสิทธิภาพสูง → Ethernet เป็นมาตรฐานเครือข่ายใช้สายที่ไม่มีใครโค่นได้</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p109.jpg" alt="Switched Ethernet" /></p>
+<h3 id="94-wireless-lans-ieee-80211">9.4 Wireless LANs (IEEE 802.11)</h3>
+<ul>
+<li><strong>ทลายข้อจำกัดทางกายภาพ:</strong> ออกแบบเพื่อ mobility ของผู้ใช้ที่ต้องต่ออินเทอร์เน็ตจากทุกที่</li>
+<li><strong>คลื่นวิทยุแทนสายเคเบิล:</strong> ส่งข้อมูลผ่านอากาศด้วยย่านความถี่เฉพาะ แต่เจอ <strong>สัญญาณรบกวน สิ่งกีดขวาง และระยะทาง</strong></li>
+<li>IEEE 802.11 เป็นมาตรฐานหลักทั่วโลก ตั้งแต่บ้าน สำนักงาน ถึงเครื่องบิน</li>
+</ul>
+<p><strong>สถาปัตยกรรม 802.11 (Basic Service Set, BSS):</strong></p>
+<ul>
+<li><strong>Access Point (AP):</strong> เป็นสถานีฐาน (base station) เชื่อมต่อระหว่างเครือข่ายไร้สายกับเครือข่ายใช้สาย</li>
+<li><strong>Wireless Hosts:</strong> สมาร์ทโฟน แล็ปท็อปที่อยู่ในรัศมีสัญญาณ</li>
+<li><strong>Infrastructure Mode:</strong> โหมดหลักที่การสื่อสารต้องวิ่งผ่าน AP เป็นศูนย์กลาง</li>
+<li><strong>Association:</strong> อุปกรณ์ไร้สายต้องลงทะเบียน (associate) กับ AP ก่อน จึงส่งข้อมูลออกอินเทอร์เน็ตได้</li>
+</ul>
+<p><img loading="lazy" src="img/ch1-p110.jpg" alt="Wireless LANs" /></p>
+<p><img loading="lazy" src="img/ch1-p111.jpg" alt="802.11 Basic Service Set" /></p>
+<p><strong>ปัญหา Hidden Terminal:</strong></p>
+<p><img loading="lazy" src="img/ch1-p112.jpg" alt="Hidden Terminal" /></p>
+<ol>
+<li>Node A กำลังส่งข้อมูลให้ B</li>
+<li>Node C ต้องการส่งให้ B เช่นกัน</li>
+<li>C ฟังคลื่นแล้ว <strong>ไม่ได้ยินสัญญาณของ A</strong> (อยู่นอกระยะ) จึงคิดว่าช่องว่างและเริ่มส่ง</li>
+<li>ผล: <strong>ชนกันที่ B</strong> โดยที่ A และ C ไม่รู้ตัว</li>
+</ol>
+<p><strong>Key insight:</strong> เครือข่ายไร้สาย <strong>ใช้การตรวจจับการชน (CSMA/CD) แบบ LAN มีสายไม่ได้</strong> ต้องใช้กลไก <strong>หลีกเลี่ยง (avoidance)</strong> และยืนยันการรับส่งแทน</p>
+<p><strong>สรุปเปรียบเทียบ Link-layer:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Ethernet (Wired)</th>
+<th>Wi-Fi (Wireless)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>สื่อกลาง</td>
+<td>สายทองแดง (twisted pair) / fiber optic</td>
+<td>คลื่นวิทยุ</td>
+</tr>
+<tr>
+<td>การจัดการช่องสัญญาณ</td>
+<td>Switched (แยกช่องทางเด็ดขาด ไม่มี collisions)</td>
+<td>Shared medium (แชร์ช่องสัญญาณ เสี่ยง hidden terminal)</td>
+</tr>
+<tr>
+<td>การเคลื่อนที่</td>
+<td>อุปกรณ์อยู่กับที่ (fixed)</td>
+<td>เคลื่อนที่ได้ และ roaming ข้าม AP ได้</td>
+</tr>
+<tr>
+<td>ความปลอดภัยเบื้องต้น</td>
+<td>อาศัยความปลอดภัยทางกายภาพ (ต้องเสียบสาย)</td>
+<td>สัญญาณกระจายในอากาศ ต้องใช้โปรโตคอลเข้ารหัส (WEP/WPA) เสมอ</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p113.jpg" alt="Wired vs Wireless" /></p>
+<h3 id="95-เส้นทางข้อมูลในโลกยุคใหม่-the-packet-journey">9.5 เส้นทางข้อมูลในโลกยุคใหม่ (The Packet Journey)</h3>
+<ol>
+<li><strong>The Wireless Edge:</strong> อุปกรณ์พกพาส่งข้อมูลผ่านคลื่นวิทยุ 802.11 เข้าสู่ AP</li>
+<li><strong>The Wired LAN:</strong> AP แปลงสัญญาณเข้าสู่ Switched Ethernet ผ่านสายความเร็วสูง โดยไม่เกิดการชนกันของข้อมูล</li>
+<li><strong>The Gateway:</strong> Router ตรวจสอบเส้นทาง (routing) และส่งข้อมูลออกสู่โลกภายนอก</li>
+<li><strong>The Internet Core:</strong> ข้อมูลเดินทางเข้าสู่เครือข่ายของ ISPs แบบ store-and-forward สู่ปลายทางทั่วโลก</li>
+</ol>
+<p><img loading="lazy" src="img/ch1-p114.jpg" alt="The Packet Journey" /></p>
+<h3 id="96-รากฐานของระบบเครือข่าย-architectural-pillars">9.6 รากฐานของระบบเครือข่าย (Architectural Pillars)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>The Internet (Macro)</th>
+<th>Ethernet (Physical Edge)</th>
+<th>Wireless LAN (Invisible Edge)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เครือข่ายของเครือข่าย ขับเคลื่อนด้วยโปรโตคอลสากล (TCP/IP) และสถาปัตยกรรม packet switching ที่เชื่อมคนทั้งโลก</td>
+<td>มาตรฐานทองคำของ LAN วิวัฒนาการสู่ Switch เพื่อความเร็วและเสถียรภาพระดับกิกะบิต</td>
+<td>นวัตกรรม 802.11 ที่ปลดล็อกข้อจำกัดทางกายภาพ นำมาซึ่งความท้าทายทางวิศวกรรมเพื่อการเชื่อมต่อไร้รอยต่อ</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/ch1-p115.jpg" alt="Architectural Pillars" /></p>
+<h3 id="97-customer-visible-properties-vs-engineering-knobs">9.7 Customer-Visible Properties vs Engineering Knobs</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สิ่งที่ลูกค้ามองเห็น (Customer-Visible Properties)</th>
+<th>ปุ่มปรับทางวิศวกรรม (Tunable Engineering Knobs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delivery (ส่งถึงไหม)</td>
+<td>Network Topology</td>
+</tr>
+<tr>
+<td>Correctness (ถูกต้องไหม)</td>
+<td>Communication Protocols</td>
+</tr>
+<tr>
+<td>Fault Tolerance (ทนความผิดพลาด)</td>
+<td>Network Architecture</td>
+</tr>
+<tr>
+<td>Timeliness (ทันเวลา)</td>
+<td>Components</td>
+</tr>
+<tr>
+<td>Cost (ต้นทุน)</td>
+<td>Physical Medium</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ วิศวกรปรับ &quot;knobs&quot; ด้านล่าง เพื่อให้ได้คุณสมบัติที่ลูกค้าต้องการด้านบน</p>
+<p><img loading="lazy" src="img/ch1-p116.jpg" alt="Customer-visible properties and engineering knobs" /></p>
+<h3 id="98-wireshark">9.8 Wireshark</h3>
+<p><img loading="lazy" src="img/ch1-p117.jpg" alt="Wireshark" /></p>
+<ul>
+<li><strong>packet capture (pcap)</strong> เก็บ <strong>สำเนา</strong> ของทุก Ethernet frame ที่ส่ง/รับ</li>
+<li><strong>packet analyzer</strong> แสดงเนื้อหาแยกตาม layer ให้เราดู</li>
+</ul>
+<hr />
+<h2 id="10-คำศัพท์สำคัญ">10. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host / End system</td>
+<td>อุปกรณ์ปลายทางที่รันแอป</td>
+<td>อยู่ที่ &quot;ขอบ&quot;</td>
+</tr>
+<tr>
+<td>Packet switch</td>
+<td>router, switch ส่งต่อแพ็กเก็ต</td>
+<td>พนักงานคัดแยกพัสดุ</td>
+</tr>
+<tr>
+<td>Bandwidth / Transmission rate (R)</td>
+<td>อัตราส่งบิตของลิงก์ (bps)</td>
+<td>ความกว้างของท่อ</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>กฎ format, order, action ของข้อความ</td>
+<td>มารยาทการคุย</td>
+</tr>
+<tr>
+<td>RFC / IETF</td>
+<td>เอกสารมาตรฐาน / องค์กรออกมาตรฐาน</td>
+<td></td>
+</tr>
+<tr>
+<td>Access network</td>
+<td>เครือข่ายที่ต่อ host เข้า edge router</td>
+<td>ซอยหน้าบ้าน</td>
+</tr>
+<tr>
+<td>HFC</td>
+<td>Hybrid Fiber Coax (cable internet)</td>
+<td>shared, asymmetric</td>
+</tr>
+<tr>
+<td>DSL / DSLAM</td>
+<td>อินเทอร์เน็ตผ่านสายโทรศัพท์ / อุปกรณ์รวมสายที่ชุมสาย</td>
+<td>dedicated</td>
+</tr>
+<tr>
+<td>CMTS</td>
+<td>cable modem termination system ที่ headend</td>
+<td></td>
+</tr>
+<tr>
+<td>FDM</td>
+<td>แบ่งช่องตามความถี่</td>
+<td>แบ่งเลน</td>
+</tr>
+<tr>
+<td>TDM</td>
+<td>แบ่งช่องตามเวลา</td>
+<td>ผลัดกันใช้</td>
+</tr>
+<tr>
+<td>Guided / Unguided media</td>
+<td>สื่อมีสาย / ไร้สาย</td>
+<td></td>
+</tr>
+<tr>
+<td>Forwarding</td>
+<td>ย้ายแพ็กเก็ต input → output (local)</td>
+<td>เลี้ยวที่แยก</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>หาเส้นทางทั้งหมด (global)</td>
+<td>วางแผนทริป</td>
+</tr>
+<tr>
+<td>Store-and-forward</td>
+<td>รับครบทั้งแพ็กเก็ตก่อนส่งต่อ</td>
+<td></td>
+</tr>
+<tr>
+<td>Packet switching</td>
+<td>แบ่งแพ็กเก็ต แชร์ทรัพยากร on-demand</td>
+<td>ทางด่วนแชร์กัน</td>
+</tr>
+<tr>
+<td>Circuit switching</td>
+<td>จองทรัพยากรตลอดสาย</td>
+<td>จองโต๊ะร้านอาหาร</td>
+</tr>
+<tr>
+<td>Bursty</td>
+<td>ข้อมูลมาเป็นช่วง ๆ</td>
+<td></td>
+</tr>
+<tr>
+<td>ISP / Tier-1 ISP</td>
+<td>ผู้ให้บริการอินเทอร์เน็ต / ระดับบนสุด ครอบคลุมโลก</td>
+<td>ทางหลวง</td>
+</tr>
+<tr>
+<td>IXP</td>
+<td>จุดที่หลาย ISP มาเชื่อมกัน</td>
+<td>ทางแยกต่างระดับ</td>
+</tr>
+<tr>
+<td>Peering</td>
+<td>แลก traffic กันตรง ๆ ไม่จ่ายเงิน</td>
+<td></td>
+</tr>
+<tr>
+<td>POP</td>
+<td>จุดที่ลูกค้าต่อเข้าเครือข่าย ISP</td>
+<td></td>
+</tr>
+<tr>
+<td>Content provider network</td>
+<td>เครือข่ายส่วนตัวของ Google ฯลฯ</td>
+<td>ทางด่วนส่วนตัว</td>
+</tr>
+<tr>
+<td>d_proc / d_queue / d_trans / d_prop</td>
+<td>processing / queueing / L/R / d/s</td>
+<td>4 ตัวรวมเป็น d_nodal</td>
+</tr>
+<tr>
+<td>Traffic intensity</td>
+<td>La/R</td>
+<td>&gt; 1 = delay อนันต์</td>
+</tr>
+<tr>
+<td>traceroute</td>
+<td>วัด delay ไปแต่ละ router ด้วย TTL</td>
+<td>3 probes/hop</td>
+</tr>
+<tr>
+<td>Throughput</td>
+<td>อัตราบิตถึงผู้รับ</td>
+<td>= min ของลิงก์</td>
+</tr>
+<tr>
+<td>Bottleneck link</td>
+<td>ลิงก์ที่จำกัด throughput</td>
+<td>คอขวด</td>
+</tr>
+<tr>
+<td>Packet sniffing</td>
+<td>ดักอ่านแพ็กเก็ต (promiscuous mode)</td>
+<td>Wireshark</td>
+</tr>
+<tr>
+<td>IP spoofing</td>
+<td>ปลอม source IP</td>
+<td></td>
+</tr>
+<tr>
+<td>DoS / DDoS</td>
+<td>ถล่มจนใช้งานไม่ได้ / จากหลายเครื่อง (botnet)</td>
+<td></td>
+</tr>
+<tr>
+<td>Firewall</td>
+<td>middlebox กรองแพ็กเก็ต off-by-default</td>
+<td>ยาม</td>
+</tr>
+<tr>
+<td>Layering</td>
+<td>แบ่งระบบเป็นชั้น แต่ละชั้นใช้บริการชั้นล่าง</td>
+<td>ระบบสนามบิน</td>
+</tr>
+<tr>
+<td>Encapsulation / Decapsulation</td>
+<td>เติม / แกะ header ทีละชั้น</td>
+<td>ตุ๊กตาแม่ลูกดก</td>
+</tr>
+<tr>
+<td>Message / Segment / Datagram / Frame</td>
+<td>หน่วยข้อมูลของ App / Transport / Network / Link</td>
+<td>M-S-D-F</td>
+</tr>
+<tr>
+<td>Presentation / Session layer</td>
+<td>encryption, compression / sync, checkpoint, recovery</td>
+<td>มีใน OSI ไม่มีใน TCP/IP</td>
+</tr>
+<tr>
+<td>PAN / LAN / MAN / WAN</td>
+<td>ขนาดเครือข่ายตามระยะ</td>
+<td>ตัว → ตึก → เมือง → โลก</td>
+</tr>
+<tr>
+<td>BSS / AP / Association</td>
+<td>ชุดบริการ 802.11 / จุดกระจายสัญญาณ / ลงทะเบียนกับ AP</td>
+<td></td>
+</tr>
+<tr>
+<td>Hidden terminal</td>
+<td>สองโหนดไม่ได้ยินกันแต่ส่งหาโหนดกลางพร้อมกัน → ชน</td>
+<td>ทำให้ใช้ CSMA/CD ไม่ได้</td>
+</tr>
+<tr>
+<td>SDN</td>
+<td>Software-defined networking (2008)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="11-สรุปท้ายบท-จุดที่มักออกสอบ">11. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Internet = network of networks</strong> มอง 2 มุม: nuts &amp; bolts (hosts, packet switches, links, networks) และ services (โครงสร้างพื้นฐาน + programming interface)</li>
+<li><strong>Protocol</strong> = format + order + actions</li>
+<li><strong>Edge vs Core:</strong> edge = hosts (client/server) + access network; core = mesh ของ routers</li>
+<li><strong>Cable (HFC) = shared, asymmetric, ใช้ FDM</strong> vs <strong>DSL = dedicated, ใช้สายโทรศัพท์ → DSLAM</strong></li>
+<li><strong>Fiber:</strong> เร็ว error ต่ำ ไม่โดน EM noise / <strong>Coax:</strong> 2 ตัวนำร่วมศูนย์กลาง broadband / <strong>TP:</strong> Cat5 = 1 Gbps, Cat6 = 10 Gbps / <strong>Satellite geostationary:</strong> delay 270 ms</li>
+<li><strong>Forwarding (local, ใช้ forwarding table)</strong> vs <strong>Routing (global, ใช้ routing algorithm)</strong></li>
+<li><strong>Store-and-forward:</strong> ต้องรับครบแพ็กเก็ตก่อน, d = L/R (ตัวอย่าง 10 Kb / 100 Mbps = 0.1 ms) — ถ้าผ่าน N ลิงก์ เวลาส่งรวม ≈ N·L/R</li>
+<li><strong>Packet vs Circuit switching:</strong> ตัวอย่าง 1 Gbps, 100 Mbps, active 10% → circuit 10 users, packet 35 users (P &gt; 10 active &lt; 0.0004); packet ดีกับ bursty แต่เสี่ยง congestion</li>
+<li><strong>FDM (แบ่งความถี่) vs TDM (แบ่งเวลา)</strong></li>
+<li><strong>โครงสร้าง ISP:</strong> ต่อตรงทุกตัว O(N²) ไม่ scale → global ISP → คู่แข่ง + IXP/peering → regional ISP → content provider network; Tier-1 เชื่อมกัน settlement-free</li>
+<li><strong>4 delays:</strong> d_nodal = d_proc + d_queue + d_trans + d_prop
+<ul>
+<li>⚠️ <strong>d_trans = L/R (ขนาด/bandwidth)</strong> ≠ <strong>d_prop = d/s (ระยะทาง/ความเร็วสัญญาณ ~2×10⁸ m/s)</strong></li>
+</ul>
+</li>
+<li><strong>Caravan:</strong> 12s × 10 คัน + 100 km ที่ 100 km/h = <strong>62 นาที</strong>; กรณี 1 นาที/คัน + 1000 km/h → คันแรกถึงด่าน 2 นาทีที่ 7 เหลือ 3 คัน</li>
+<li><strong>Traffic intensity La/R:</strong> ≈0 น้อย, →1 มาก, &gt;1 อนันต์</li>
+<li><strong>traceroute:</strong> 3 probes ต่อ router, ใช้ TTL = i, <code>*</code> = ไม่ตอบ, delay กระโดด = ลิงก์ข้ามมหาสมุทร, delay &quot;ลดลง&quot; ได้เพราะ queueing ต่างกันในแต่ละ probe</li>
+<li><strong>Loss:</strong> buffer เต็ม → drop; อาจส่งใหม่โดย node ก่อนหน้า / source / ไม่ส่งเลย</li>
+<li><strong>Throughput = min(Rs, Rc)</strong>; มีการแชร์ backbone: <strong>min(Rc, Rs, R/10)</strong>; ปกติ access link เป็นคอขวด</li>
+<li><strong>Security:</strong> sniffing (promiscuous, broadcast media), IP spoofing (ปลอม src), DoS vs <strong>DDoS (botnet)</strong>; ป้องกันด้วย authentication, encryption, digital signature, VPN, firewall</li>
+<li><strong>TCP/IP 5 layers + ตัวอย่างโปรโตคอล + หน่วยข้อมูล</strong> (message, segment, datagram, frame)</li>
+<li><strong>Encapsulation:</strong> Ht → Hn → Hl; switch ดูถึง L2, router ดูถึง L3</li>
+<li><strong>OSI 7 layers:</strong> Presentation + Session <strong>ไม่มี</strong> ใน Internet stack → ต้องทำใน application</li>
+<li><strong>ข้อดี layering:</strong> โครงสร้างชัด + modular (เปลี่ยนชั้นหนึ่งไม่กระทบชั้นอื่น)</li>
+<li><strong>ประวัติสำคัญ:</strong> 1961 Kleinrock, 1969 ARPAnet node แรก, 1972 NCP + e-mail, 1974 Cerf &amp; Kahn, 1976 Ethernet, 1983 TCP/IP + DNS, 1982 SMTP, 1985 FTP, 1988 TCP congestion control, 1990s Web (Berners-Lee), 2008 SDN, 2017 mobile &gt; fixed</li>
+<li><strong>หลักการ Cerf &amp; Kahn:</strong> minimalism/autonomy, best-effort, stateless routing, decentralized control</li>
+<li><strong>สไลด์เสริม:</strong> PAN/LAN/MAN/WAN, Ethernet วิวัฒนาการ coax → hub → switch, hidden terminal ทำให้ Wi-Fi ใช้ CSMA/CD ไม่ได้</li>
+</ol>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><span></span><a class="pg next" href="../ch2-application-layer/index.html"><small>บทถัดไป →</small><span>Chapter 2 — Application Layer (Lecture 3 &amp; 4)</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

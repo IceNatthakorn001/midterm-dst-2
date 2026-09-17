@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Chapter 4 - Memory Hierarchy and Cache Memory</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Chapter 4 - Memory Hierarchy and Cache Memory</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "Temporal locality หมายถึงอะไร?",
+    choices: [
+      "ข้อมูลที่อยู่ใกล้กับข้อมูลที่เพิ่งถูกใช้ มีแนวโน้มจะถูกใช้ตามมา",
+      "ข้อมูล/คำสั่งที่เพิ่งถูกใช้ มีแนวโน้มจะถูกใช้ซ้ำอีกในไม่ช้า",
+      "ข้อมูลทั้งหมดถูกใช้เท่ากันเสมอไม่มีความลำเอียง",
+      "ข้อมูลจะถูกใช้ตามลำดับเวลาที่สร้างขึ้นมาเท่านั้น"
+    ],
+    correct: 1,
+    explain: [
+      "นี่คือนิยามของ spatial locality ไม่ใช่ temporal locality",
+      "ถูก — ตรงตามนิยาม temporal locality ในสไลด์ เช่น ตัวแปรในลูปที่ถูกอ่าน/เขียนซ้ำ ๆ",
+      "ขัดกับหลักการ locality ที่บอกว่าโปรแกรมเข้าถึงข้อมูลบางส่วนบ่อยกว่าส่วนอื่น",
+      "ไม่ตรงกับนิยามที่สไลด์ให้ไว้ temporal locality เกี่ยวกับการใช้ซ้ำ ไม่ใช่ลำดับการสร้าง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "SRAM ต่างจาก DRAM อย่างไรในแง่ราคาและความเร็วตามสไลด์?",
+    choices: [
+      "SRAM ใช้เก็บข้อมูลถาวรเหมือน magnetic disk",
+      "SRAM ช้ากว่าแต่ถูกกว่า DRAM",
+      "ทั้งสองมีราคาและความเร็วเท่ากันทุกประการ",
+      "SRAM เร็วกว่าแต่แพงกว่า DRAM"
+    ],
+    correct: 3,
+    explain: [
+      "SRAM เป็น volatile memory ใช้ทำแคช ไม่ใช่ที่เก็บข้อมูลถาวรแบบ disk",
+      "สลับข้อมูลกัน SRAM เร็วกว่าและแพงกว่า DRAM ไม่ใช่ในทางกลับกัน",
+      "ตัวเลขในสไลด์ต่างกันชัดเจนทั้งราคาและความเร็ว",
+      "ถูก — สไลด์ระบุ SRAM 0.5-2.5ns ราคา $2000-5000/GB ส่วน DRAM 50-70ns ราคา $20-75/GB"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตำแหน่งใน Direct Mapped Cache คำนวณจากสูตรใด?",
+    choices: [
+      "Block address modulo จำนวน blocks ในแคช",
+      "Block address คูณ จำนวน blocks ในแคช",
+      "Block address บวก จำนวน blocks ในแคช",
+      "Block address ลบ จำนวน blocks ในแคช"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ (Block address) modulo (#Blocks in cache) และใช้ low-order bits ของ address",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ",
+      "ไม่ตรงกับสูตรที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Valid bit ในแคชมีค่าเริ่มต้นเป็นเท่าไหร่?",
+    choices: [
+      "เริ่มต้นเป็น 1 เสมอ",
+      "เป็นค่าสุ่มตามฮาร์ดแวร์แต่ละยี่ห้อ",
+      "เริ่มต้นเป็น 0 เสมอ",
+      "ไม่มี valid bit ในการออกแบบแคชเลย"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับสไลด์ ซึ่งระบุค่าเริ่มต้นเป็น 0",
+      "สไลด์ระบุค่าเริ่มต้นที่แน่นอน ไม่ใช่ค่าสุ่ม",
+      "ถูก — สไลด์ระบุ \"Valid bit: 1 = present, 0 = not present, Initially 0\"",
+      "แคชทุกแบบที่กล่าวถึงในสไลด์มี valid bit เพื่อบอกว่าตำแหน่งนั้นมีข้อมูลจริงหรือยัง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Address ที่ใช้เข้าถึงแคชถูกแบ่งออกเป็นกี่ส่วนหลักตามสไลด์?",
+    choices: [
+      "2 ส่วน (Tag, Offset)",
+      "1 ส่วนเดียวคือ Address ทั้งก้อน",
+      "4 ส่วน (Tag, Index, Offset, Valid)",
+      "3 ส่วน (Tag, Index, Offset)"
+    ],
+    correct: 3,
+    explain: [
+      "ขาด Index ไปหนึ่งส่วน",
+      "Address ถูกแบ่งเป็นส่วนย่อยเพื่อใช้งานต่างกัน ไม่ใช่ก้อนเดียว",
+      "Valid bit เป็นบิตที่เก็บแยกต่างหาก ไม่ใช่ส่วนหนึ่งของการแบ่ง address",
+      "ถูก — สไลด์แสดง Address Subdivision เป็น Tag, Index, Offset"
+    ]
+  },
+  {
+    type: "recall",
+    q: "สูตรของ AMAT (Average Memory Access Time) ตามสไลด์คือข้อใด?",
+    choices: [
+      "AMAT = Hit time − Miss rate × Miss penalty",
+      "AMAT = Hit time + Miss rate × Miss penalty",
+      "AMAT = Miss rate / Hit time",
+      "AMAT = Hit time × Miss penalty เท่านั้น"
+    ],
+    correct: 1,
+    explain: [
+      "เครื่องหมายผิด สไลด์ใช้เครื่องหมายบวกไม่ใช่ลบ",
+      "ถูก — สไลด์ระบุ AMAT = Hit time + Miss rate × Miss penalty ตรงตัว",
+      "ไม่ตรงกับสูตรที่สไลด์ให้ไว้",
+      "ไม่ตรงกับสูตรที่สไลด์ให้ไว้ ขาดตัวแปร Miss rate ไป"
+    ]
+  },
+  {
+    type: "recall",
+    q: "แคชแบบใดที่ block หนึ่งสามารถไปอยู่ตำแหน่งไหนก็ได้ในแคชทั้งหมด?",
+    choices: [
+      "Direct mapped",
+      "เฉพาะ n-way set associative เท่านั้น",
+      "Fully associative",
+      "Write-through cache"
+    ],
+    correct: 2,
+    explain: [
+      "Direct mapped มีที่ให้ไปได้แค่ที่เดียวเท่านั้น ตรงข้ามกับคำถาม",
+      "n-way set associative ให้เลือกได้แค่ n ที่ในหนึ่ง set เท่านั้น ไม่ใช่ทั้งแคช",
+      "ถูก — สไลด์ระบุ fully associative ว่า \"Allow a given block to go in any cache entry\"",
+      "Write-through เป็นเรื่องของ write policy ไม่เกี่ยวกับตำแหน่งที่ block ไปอยู่ได้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Miss ที่เกิดจากการเข้าถึง block นั้นเป็นครั้งแรก (ยังไม่เคยอยู่ในแคชมาก่อนเลย) เรียกว่าอะไร?",
+    choices: [
+      "Compulsory miss",
+      "Conflict miss",
+      "Capacity miss",
+      "Coherence miss"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์นิยาม compulsory miss (cold start miss) ว่าคือ \"First access to a block\"",
+      "Conflict miss เกิดจากการแย่งที่กันในแคชที่ไม่ fully associative ไม่ใช่ครั้งแรกที่เข้าถึง",
+      "Capacity miss เกิดจากแคชเล็กเกินไปทำให้ข้อมูลที่เคยอยู่ถูกไล่ออกไปแล้วเรียกใช้ซ้ำ ไม่ใช่ครั้งแรก",
+      "Coherence miss ไม่ได้ถูกจัดเป็นหนึ่งในสามสาเหตุหลักของ miss ในสไลด์นี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "หน่วยของการโยกย้ายข้อมูลใน Virtual Memory (เทียบเท่า block ของแคช) เรียกว่าอะไรตามสไลด์?",
+    choices: [
+      "Segment",
+      "Frame เท่านั้น",
+      "Sector",
+      "Page"
+    ],
+    correct: 3,
+    explain: [
+      "Segment เป็นแนวคิดอื่นที่กล่าวถึงในหัวข้อ Pitfalls (เช่น Intel 80286) ไม่ใช่หน่วยหลักของ virtual memory ในบทนี้",
+      "Frame ไม่ใช่คำที่สไลด์ใช้เรียกหน่วยของ virtual memory ในที่นี้",
+      "Sector เป็นหน่วยของ disk storage ไม่ใช่ของ virtual memory",
+      "ถูก — สไลด์ระบุตรงตัวว่า \"VM block is called a page\""
+    ]
+  },
+  {
+    type: "recall",
+    q: "เมื่อ page ที่ต้องการไม่อยู่ใน memory (การแปล virtual address ไม่สำเร็จ) ใน Virtual Memory เรียกเหตุการณ์นี้ว่าอะไร?",
+    choices: [
+      "Cache miss",
+      "TLB hit",
+      "Page fault",
+      "Segmentation fault เท่านั้น"
+    ],
+    correct: 2,
+    explain: [
+      "Cache miss เป็นศัพท์ที่ใช้กับระดับแคช ไม่ใช่ระดับ virtual memory",
+      "TLB hit คือตอนที่เจอ PTE ใน TLB สำเร็จ ตรงข้ามกับสถานการณ์ในคำถาม",
+      "ถูก — สไลด์ระบุตรงตัวว่า \"VM translation miss is called a page fault\"",
+      "Segmentation fault ไม่ใช่คำที่สไลด์นี้ใช้อธิบายกลไก virtual memory"
+    ]
+  },
+  {
+    type: "recall",
+    q: "TLB ย่อมาจากอะไร?",
+    choices: [
+      "Total Lookup Block",
+      "Translation Look-aside Buffer",
+      "Transfer Logic Bus",
+      "Tag Lookup Buffer"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — ตรงตามที่สไลด์ระบุ \"Called a Translation Look-aside Buffer (TLB)\"",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RISC-V system instruction ตัวใดใช้เรียก environment call (system call เข้า kernel)?",
+    choices: [
+      "ecall",
+      "fence",
+      "wfi",
+      "sret"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ ecall ว่าคือ \"Environment call\"",
+      "fence ใช้บังคับลำดับการเข้าถึง memory ไม่ใช่การเรียก system call",
+      "wfi คือ \"Wait for interrupt\" ใช้พักรอ interrupt ไม่ใช่เรียก system call",
+      "sret คือ \"Supervisor exception return\" ใช้กลับจาก supervisor mode ไม่ใช่เรียกเข้า"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม Memory Hierarchy จึงต้องมีหลายชั้น (cache, main memory, disk) แทนที่จะใช้หน่วยความจำแบบเดียว?",
+    choices: [
+      "เพราะ CPU รุ่นใหม่รองรับการทำงานกับหน่วยความจำหลายชั้นเท่านั้น",
+      "เพราะกฎหมายกำหนดให้คอมพิวเตอร์ต้องมีหน่วยความจำหลายชั้น",
+      "เพราะไม่มีเทคโนโลยีเดียวที่เร็วและใหญ่/ถูกพร้อมกัน จึงต้องผสมหลายชั้น",
+      "เพราะ disk ไม่สามารถต่อเข้ากับ CPU ได้โดยตรงในทางเทคนิค"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่เกี่ยวกับข้อจำกัดของ CPU รุ่นใดรุ่นหนึ่ง",
+      "ไม่มีข้อมูลนี้ในสไลด์ ไม่ใช่เหตุผลทางเทคนิค",
+      "ถูก — เป็นเหตุผลหลักที่สไลด์อธิบาย: fast memories are small, large memories are slow เราจึงต้องผสมผสานหลายชั้นเพื่อได้ทั้งเร็วและใหญ่",
+      "disk ต่อกับระบบได้ผ่าน controller อยู่แล้ว ไม่ใช่เหตุผลที่ต้องมี hierarchy"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เพราะเหตุใด Direct Mapped Cache จึงต้องเก็บ \"tag\" คู่กับข้อมูลไว้ด้วย?",
+    choices: [
+      "เพื่อเช็คว่า block ในตำแหน่งนั้นตรงกับที่ CPU ต้องการจริงหรือไม่",
+      "เพื่อบอกว่าข้อมูลนี้เป็นของโปรแกรมไหนในระบบ",
+      "เพื่อเพิ่มความเร็วในการเขียนข้อมูลลงแคชโดยตรง",
+      "เพื่อลดขนาดโดยรวมของแคชให้เล็กลง"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์อธิบายว่า tag เก็บ high-order bits ของ address เพื่อเช็คว่าใช่ block ที่ต้องการหรือไม่ เพราะหลาย block อาจ map มาที่ index เดียวกัน",
+      "ไม่ใช่จุดประสงค์ของ tag ตามสไลด์ tag ไม่เกี่ยวกับการระบุเจ้าของโปรแกรม",
+      "tag ไม่มีผลต่อความเร็วการเขียนโดยตรง",
+      "tag เป็นข้อมูลเพิ่มเติมที่ต้องเก็บ จึงทำให้แคชใหญ่ขึ้นเล็กน้อย ไม่ใช่ลดขนาด"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม block size ที่ใหญ่ขึ้นจึงไม่ได้แปลว่า performance จะดีขึ้นเสมอไป?",
+    choices: [
+      "เพราะ block ใหญ่ทำให้ valid bit ใช้งานไม่ได้",
+      "เพราะ block ใหญ่ทำให้ CPU ทำงานช้าลงโดยตรงเสมอไม่ว่ากรณีใด",
+      "เพราะ block ใหญ่ทำให้ tag หายไปจากระบบทั้งหมด",
+      "เพราะ block ใหญ่ทำให้จำนวน block ในแคชลดลง เกิดการแย่งที่กันมากขึ้น"
+    ],
+    correct: 3,
+    explain: [
+      "valid bit ไม่เกี่ยวข้องกับขนาดของ block เลย",
+      "ไม่ตรงกับสไลด์ ผลกระทบขึ้นกับหลายปัจจัย ไม่ใช่ช้าลงเสมอโดยตรง",
+      "tag ยังคงต้องใช้อยู่เสมอไม่ว่า block จะขนาดใด",
+      "ถูก — สไลด์ระบุว่า larger blocks → fewer of them → more competition → increased miss rate และ larger miss penalty"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Write-through จึงมักต้องใช้ write buffer ควบคู่ไปด้วย?",
+    choices: [
+      "เพื่อเพิ่มขนาดของแคชโดยตรง",
+      "เพื่อให้ CPU ไม่ต้องรอการเขียนลง memory ที่ช้ากว่าทุกครั้ง",
+      "เพื่อลบ dirty bit ทิ้งจากระบบ",
+      "เพื่อให้ write-back ทำงานได้"
+    ],
+    correct: 1,
+    explain: [
+      "write buffer ไม่เกี่ยวกับขนาดของแคช",
+      "ถูก — สไลด์ระบุว่า write buffer ช่วยให้ CPU continues immediately และหยุดรอเฉพาะตอน write buffer เต็มเท่านั้น",
+      "dirty bit เป็นแนวคิดของ write-back ไม่ใช่ write-through จึงไม่เกี่ยวกับ write buffer",
+      "write buffer เป็นกลไกของ write-through ไม่ใช่ของ write-back"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Associativity ที่สูงขึ้นจึงช่วยลด miss rate แต่ก็มี \"diminishing returns\"?",
+    choices: [
+      "เพราะเพิ่ม associativity ช่วยลด miss ได้มากตอนแรก แต่พอถึงจุดหนึ่งแทบไม่ช่วยอีก",
+      "เพราะ associativity ที่สูงทำให้แคชมีขนาดเล็กลงเสมอ",
+      "เพราะ associativity ไม่มีผลใด ๆ ต่อ miss rate เลยตามที่สไลด์แสดง",
+      "เพราะ associativity สูงทำให้ tag หายไปจากระบบทั้งหมด"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตัวอย่างในสไลด์แสดงชัดว่า miss rate ลดจาก 10.3% (1-way) เหลือ 8.1% (8-way) แต่ส่วนต่างระหว่างแต่ละขั้นเล็กลงเรื่อย ๆ",
+      "ไม่เกี่ยวกับขนาดแคชโดยตรง",
+      "ตรงข้ามกับสไลด์ ซึ่งแสดงตัวเลข miss rate ที่ลดลงชัดเจนเมื่อ associativity เพิ่มขึ้น",
+      "tag ยังคงต้องใช้อยู่ในทุกระดับ associativity"
+    ]
+  },
+  {
+    type: "understand",
+    q: "Conflict miss จะไม่เกิดขึ้นเลยถ้าแคชเป็นแบบใด (เมื่อขนาดรวมเท่ากัน)?",
+    choices: [
+      "Direct mapped",
+      "2-way set associative",
+      "ไม่มีแคชแบบไหนที่ไม่เกิด conflict miss เลย",
+      "Fully associative"
+    ],
+    correct: 3,
+    explain: [
+      "Direct mapped มีโอกาสเกิด conflict miss มากที่สุด เพราะแต่ละ block มีที่ไปได้แค่ที่เดียว",
+      "2-way set associative ยังเกิด conflict miss ได้ เพียงแต่น้อยกว่า direct mapped",
+      "สไลด์ระบุชัดว่า fully associative cache ขนาดเดียวกันจะไม่เกิด conflict miss เลย",
+      "ถูก — สไลด์นิยาม conflict miss ว่าเกิดใน non-fully associative cache เท่านั้น และ \"would not occur in a fully associative cache of the same total size\""
+    ]
+  },
+  {
+    type: "understand",
+    q: "เพราะเหตุใด L1 cache จึงเน้นออกแบบให้ hit time ต่ำที่สุด ในขณะที่ L2 cache เน้นเรื่อง miss rate ต่ำแทน?",
+    choices: [
+      "เพราะ L2 ไม่สามารถทำให้เร็วได้เลยไม่ว่ากรณีใดด้วยข้อจำกัดทางฟิสิกส์",
+      "เพราะ L1 ถูกใช้ทุกครั้งจึงต้องเร็ว ส่วน L2 ถูกใช้แค่ตอน L1 miss จึงเน้น miss rate แทน",
+      "เพราะ L1 มีขนาดใหญ่กว่า L2 เสมอในทุกระบบ",
+      "เพราะ L1 ไม่เกี่ยวข้องกับ hit time เลยตามสไลด์"
+    ],
+    correct: 1,
+    explain: [
+      "L2 ทำให้เร็วได้ เพียงแต่ความสำคัญของความเร็วน้อยกว่าเรื่อง miss rate",
+      "ถูก — สไลด์ระบุ primary cache: focus on minimal hit time, L-2 cache: focus on low miss rate, hit time has less overall impact",
+      "สไลด์ระบุตรงข้าม: L-1 cache usually smaller than a single cache (เล็กกว่า ไม่ใช่ใหญ่กว่า L2)",
+      "L1 คือส่วนที่เน้นเรื่อง hit time มากที่สุดในระบบตามสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Virtual Memory จึงให้ OS เป็นผู้จัดการ page fault แทนที่จะให้ฮาร์ดแวร์จัดการเองทั้งหมดเหมือน cache miss?",
+    choices: [
+      "เพราะ page fault เป็นเหตุการณ์ที่ไม่สำคัญต่อระบบ",
+      "เพราะฮาร์ดแวร์ไม่สามารถอ่านข้อมูลจาก disk ได้เลยในทุกกรณี",
+      "เพราะการโหลดหน้าข้อมูลจาก disk ใช้เวลานานมาก จึงเหมาะให้ OS จัดการแทน",
+      "เพราะ OS ไม่เกี่ยวข้องกับการจัดการ memory เลยตามสไลด์"
+    ],
+    correct: 2,
+    explain: [
+      "page fault มีผลกระทบมากต่อ performance เพราะใช้เวลานานมาก",
+      "ฮาร์ดแวร์อ่านข้อมูลจาก disk ได้ เพียงแต่ตรรกะการจัดการซับซ้อนกว่า cache miss จึงยกให้ซอฟต์แวร์ทำ",
+      "ถูก — สไลด์ระบุว่า page fault ใช้เวลาหลายล้าน clock cycles และ \"Handled by OS code\"",
+      "สไลด์ระบุว่า virtual memory ถูกจัดการร่วมกันโดย \"CPU hardware and the operating system (OS)\""
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใดจึงต้องมี TLB แทนที่จะให้ทุกการเข้าถึง memory ไปอ่าน page table ในหน่วยความจำทุกครั้ง?",
+    choices: [
+      "เพราะการเข้าถึง page table ก็มี locality สูง การแคช PTE ไว้ใน TLB จึงช่วยลด memory access",
+      "เพราะ page table ถูกลบทิ้งโดยอัตโนมัติทุกครั้งที่ใช้งานเสร็จ",
+      "เพราะ TLB ทำให้ page fault หายไปจากระบบทั้งหมด",
+      "เพราะฮาร์ดแวร์ไม่รองรับการมี page table อยู่แล้วโดยธรรมชาติ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า \"access to page tables has good locality\" จึงใช้ TLB เป็น fast cache ของ PTE เพื่อลด extra memory reference",
+      "page table ยังคงอยู่ใน memory ตลอด ไม่ได้ถูกลบทิ้งหลังใช้งาน",
+      "TLB ช่วยลดจำนวนครั้งที่ต้องอ่าน page table แต่ page fault ยังเกิดได้เมื่อ page ไม่อยู่ใน memory จริง ๆ",
+      "page table เป็นกลไกที่ต้องมีอยู่แล้วสำหรับ virtual memory ไม่ใช่สิ่งที่ฮาร์ดแวร์ไม่รองรับ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใดจึงเกิดปัญหา Cache Coherence เมื่อมีหลาย CPU core?",
+    choices: [
+      "เพราะ cache coherence เกิดขึ้นเฉพาะเมื่อ CPU มีแค่ core เดียวเท่านั้น",
+      "เพราะแต่ละ core มี physical memory แยกจากกันอย่างสิ้นเชิงไม่เกี่ยวข้องกัน",
+      "เพราะแต่ละ core มีแคชแยกกันแต่ใช้ physical memory ร่วมกัน ค่าจึงไม่ตรงกันได้",
+      "เพราะฮาร์ดแวร์ไม่รองรับการมีหลาย core อยู่แล้ว"
+    ],
+    correct: 2,
+    explain: [
+      "ปัญหานี้เกิดเฉพาะเมื่อมีหลาย core/หลายแคชเท่านั้น ไม่เกิดกับ single core",
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า CPU cores share a physical address space",
+      "ถูก — สไลด์ยกตัวอย่าง CPU A กับ CPU B ที่มีแคชแยกกันแต่ shared physical address space ทำให้ค่าที่เห็นไม่ตรงกันได้ถ้าไม่มีกลไก coherence",
+      "ระบบ multiprocessor สมัยใหม่รองรับหลาย core ได้ตามปกติ เพียงแต่ต้องมีกลไก coherence มาช่วย"
+    ]
+  },
+  {
+    type: "understand",
+    q: "Snooping protocol แก้ปัญหา cache coherence ด้วยวิธีใด?",
+    choices: [
+      "ห้ามไม่ให้ CPU core ใด ๆ เขียนข้อมูลได้เลยตลอดการทำงาน",
+      "เก็บสมุดบันทึกกลางไว้ที่ memory เพียงจุดเดียวให้ทุก core เช็คก่อนเสมอ",
+      "ลบข้อมูลในแคชทั้งหมดทุกครั้งที่มีการเขียนเกิดขึ้นในระบบ",
+      "แต่ละแคชดักฟัง (snoop) การอ่าน/เขียนบน bus แล้ว invalidate สำเนาตัวเองเมื่อจำเป็น"
+    ],
+    correct: 3,
+    explain: [
+      "ระบบยังคงเขียนข้อมูลได้ตามปกติ เพียงแต่ต้อง broadcast invalidate message ให้แคชอื่นรู้",
+      "นี่คือแนวคิดของ Directory-based protocol ไม่ใช่ Snooping ตามที่สไลด์แยกไว้เป็นคนละแบบ",
+      "snooping ไม่ได้ลบแคชทั้งหมด เพียง invalidate เฉพาะ block ที่ถูกเขียนทับเท่านั้น",
+      "ถูก — สไลด์อธิบาย snooping protocol ว่า \"Each cache monitors bus reads/writes\" เพื่อรู้ว่าต้อง invalidate สำเนาของตัวเองเมื่อไหร่"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Virtual Machine Monitor (VMM) จึงต้องอาศัยกลไก trap เมื่อ guest OS พยายามรันคำสั่งที่มีสิทธิ์สูง?",
+    choices: [
+      "เพราะ guest OS ไม่มีสิทธิ์รันคำสั่งใด ๆ เลยแม้แต่คำสั่งพื้นฐาน",
+      "เพราะ guest OS รันใน user mode คำสั่ง privileged ต้อง trap ให้ VMM จัดการแทนอย่างปลอดภัย",
+      "เพราะ trap ทำให้ VM ทำงานเร็วขึ้นเสมอโดยไม่มีข้อเสีย",
+      "เพราะฮาร์ดแวร์ไม่รองรับการรัน guest OS เลยถ้าไม่มี trap"
+    ],
+    correct: 1,
+    explain: [
+      "guest OS รันคำสั่งทั่วไปได้ปกติในโหมด user เพียงแต่คำสั่งที่ต้องสิทธิ์สูงต้อง trap ให้ VMM จัดการ",
+      "ถูก — สไลด์ระบุว่า guest code runs on native machine in user mode และ \"Traps to VMM on privileged instructions and access to protected resources\"",
+      "สไลด์ระบุว่า virtualization มี performance impact อยู่บ้าง ไม่ใช่ว่าเร็วขึ้นเสมอ",
+      "ฮาร์ดแวร์สมัยใหม่ (เช่น x86) กำลังปรับให้รองรับ virtualization ได้ดีขึ้น การ trap คือกลไกที่ทำให้มันรันได้อย่างปลอดภัย ไม่ใช่ข้อจำกัดที่ทำให้รันไม่ได้"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "แคชมี 8 blocks แบบ direct mapped, 1 word/block ถ้า CPU เข้าถึง word address ที่มี binary address เท่ากับ 10110 (3 บิตท้ายสุดคือ index) ข้อมูลจะถูกเก็บที่ index ใดในแคช?",
+    choices: [
+      "index 110",
+      "index 010",
+      "index 101",
+      "index 011"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — 3 บิตท้ายสุดของ 10110 คือ 110 ตรงกับตัวอย่าง Cache Example ในสไลด์ที่ address 10110 map ไป index 110",
+      "ไม่ตรงกับ 3 บิตท้ายของ binary address 10110",
+      "ไม่ตรงกับ 3 บิตท้ายของ binary address 10110",
+      "ไม่ตรงกับ 3 บิตท้ายของ binary address 10110"
+    ]
+  },
+  {
+    type: "apply",
+    q: "จากตัวอย่างในสไลด์ (block access sequence: 0, 8, 0, 6, 8 บนแคช direct mapped 4-block ที่ block 0 กับ 8 map มาที่ index เดียวกัน) การเข้าถึง block 8 ครั้งที่สอง (ลำดับสุดท้าย) จะเป็น hit หรือ miss?",
+    choices: [
+      "Hit เพราะ block 8 ยังอยู่ในแคชจากรอบก่อนหน้าไม่เปลี่ยนแปลง",
+      "Hit เพราะ direct mapped cache ไม่มีวันเกิด miss ซ้ำในตำแหน่งเดียวกัน",
+      "Miss เพราะ block 0, 6, 8 แย่ง index เดียวกัน จึงเขียนทับกันไปมา",
+      "Miss เพราะแคชเต็มไปหมดแล้วทั้ง 4 ช่อง"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับตัวอย่างในสไลด์ ซึ่งแสดงว่าเกิด miss ในขั้นตอนสุดท้ายของลำดับ 0,8,0,6,8",
+      "ตรงข้ามกับสไลด์ ซึ่งแสดงให้เห็นว่า direct mapped เกิด conflict miss ซ้ำได้ง่ายเมื่อ block แย่ง index เดียวกัน",
+      "ถูก — ตามตารางในสไลด์ (Associativity Example) ลำดับ 0,8,0,6,8 บน direct mapped ล้วนเป็น miss เพราะ block 0, 8 ชนกันที่ index เดียวกันเสมอ ทำให้เขียนทับกันไปมา",
+      "จำนวนช่องในแคชไม่ใช่สาเหตุของ miss ในตัวอย่างนี้ สาเหตุคือการแย่ง index กันของ block 0 และ 8"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ถ้าต้องออกแบบระบบที่มีการเขียนข้อมูลบ่อยมากและต้องการให้ CPU ไม่ต้องหยุดรอ memory ที่ช้าในการเขียนแต่ละครั้ง ควรเลือก write policy แบบใดตามหลักการในสไลด์?",
+    choices: [
+      "Write-through อย่างเดียวโดยไม่มี write buffer",
+      "Write-back (อัปเดตแคชก่อน ค่อยเขียนกลับทีหลัง)",
+      "ห้ามไม่ให้มีการเขียนข้อมูลใด ๆ ทั้งสิ้นในระบบ",
+      "Write-through แต่ปิดการใช้งาน dirty bit ทั้งหมด"
+    ],
+    correct: 1,
+    explain: [
+      "write-through ที่ไม่มี write buffer จะทำให้ CPU ต้องรอ memory ทุกครั้งที่เขียน ขัดกับโจทย์ที่ต้องการความเร็ว",
+      "ถูก — write-back อัปเดตแค่แคชก่อน (เร็ว) แล้วค่อยเขียนกลับ memory ทีเดียวตอน block ถูกแทนที่ ลดจำนวนครั้งที่ต้องเขียน memory ที่ช้า",
+      "ไม่สมเหตุสมผลและไม่ตรงกับโจทย์ที่ต้องมีการเขียนข้อมูลอยู่",
+      "dirty bit เป็นกลไกของ write-back ไม่ใช่ write-through การปิดมันไม่เกี่ยวกับปัญหาความช้าของ write-through"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ระบบมี I-cache miss rate 2%, D-cache miss rate 4%, miss penalty 100 cycles, base CPI (ideal) = 2, load/store เป็น 36% ของคำสั่งทั้งหมด ตามวิธีคิดในตัวอย่างของสไลด์ Effective CPI ของระบบนี้เท่ากับเท่าไหร่?",
+    choices: [
+      "ประมาณ 2.72",
+      "ประมาณ 1.44 เท่านั้น",
+      "ประมาณ 9.0",
+      "ประมาณ 5.44"
+    ],
+    correct: 3,
+    explain: [
+      "2.72 คือค่า \"ideal CPU is X times faster\" ที่ได้จากการหาร 5.44/2 ไม่ใช่ค่า CPI เอง",
+      "1.44 คือ miss cycles per instruction เฉพาะส่วนของ D-cache เท่านั้น ไม่ใช่ CPI รวมทั้งหมด",
+      "9.0 เป็นตัวเลขจากตัวอย่าง Multilevel Cache คนละตัวอย่างกัน ไม่ใช่ของโจทย์นี้",
+      "ถูก — ตามตัวอย่างในสไลด์: I-cache miss cycles = 0.02×100 = 2, D-cache miss cycles = 0.36×0.04×100 = 1.44, Actual CPI = 2+2+1.44 = 5.44"
+    ]
+  },
+  {
+    type: "apply",
+    q: "จากตัวอย่าง Multilevel Cache ในสไลด์ (มีแค่ primary cache ทำให้ CPI = 9 แต่พอเพิ่ม L-2 cache เข้ามาแล้ว) CPI รวมลดลงเหลือเท่าไหร่ และเร็วขึ้นกี่เท่าตามตัวอย่างในสไลด์?",
+    choices: [
+      "CPI ยังคงเป็น 9.0 ไม่เปลี่ยนแปลงเลย",
+      "CPI เหลือ 1.0 และเร็วขึ้นประมาณ 9 เท่า",
+      "CPI เหลือ 3.4 และเร็วขึ้นประมาณ 2.6 เท่า",
+      "CPI เพิ่มขึ้นเป็น 20 และช้าลงกว่าเดิม"
+    ],
+    correct: 2,
+    explain: [
+      "การเพิ่ม L-2 cache ช่วยลด CPI ลงจาก 9 เหลือ 3.4 อย่างชัดเจนตามสไลด์ ไม่ใช่ไม่เปลี่ยนแปลง",
+      "ไม่ตรงกับตัวเลขในสไลด์ ซึ่งได้ CPI = 3.4 ไม่ใช่ 1.0",
+      "ถูก — สไลด์ระบุตรงตัวว่า \"CPI = 1 + 0.02×20 + 0.005×400 = 3.4\" และ \"Performance ratio = 9/3.4 = 2.6\"",
+      "การเพิ่ม L-2 cache ทำให้ระบบเร็วขึ้น ไม่ใช่ช้าลง ตัวเลข CPI ที่ถูกต้องคือลดลงเหลือ 3.4"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมหนึ่งวนลูปเข้าถึง array แบบ row-major ทีละแถวแทนที่จะเข้าถึงทีละคอลัมน์ เหตุใดการเข้าถึงทีละแถวจึงมักให้ cache performance ดีกว่าทีละคอลัมน์ตามที่สไลด์ (หัวข้อ Pitfalls) อธิบาย?",
+    choices: [
+      "เพราะทีละแถวเข้าถึงข้อมูลที่ติดกันต่อเนื่อง ใช้ spatial locality ได้เต็มที่กว่า",
+      "เพราะแถวมีขนาดเล็กกว่าคอลัมน์เสมอในทุกกรณี",
+      "เพราะข้อมูลในคอลัมน์ไม่สามารถเก็บลงแคชได้เลยไม่ว่ากรณีใด",
+      "เพราะการเข้าถึงทีละแถวไม่ผ่านแคชเลยแต่เข้าถึง memory โดยตรง"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุในหัวข้อ Pitfalls ว่า \"Ignoring memory system effects... iterating over rows vs. columns of arrays... Large strides result in poor locality\"",
+      "ขนาดแถวกับคอลัมน์ขึ้นกับมิติของ array ไม่ได้เล็กกว่ากันเสมอ ไม่ใช่เหตุผลที่สไลด์กล่าวถึง",
+      "ข้อมูลในคอลัมน์ยังคงถูกเก็บลงแคชได้ตามปกติ เพียงแต่ pattern การเข้าถึงทำให้ใช้ประโยชน์จาก locality ได้น้อยกว่า",
+      "ทุกการเข้าถึงข้อมูลยังคงผ่านแคชตามปกติ ไม่มีการข้ามแคชไปที่ memory โดยตรงในกรณีนี้"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

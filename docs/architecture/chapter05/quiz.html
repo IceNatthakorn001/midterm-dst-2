@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Chapter 05 - I/O Systems</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Chapter 05 - I/O Systems</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "I/O Module ทำหน้าที่หลักกี่อย่างตามสไลด์?",
+    choices: ["3 อย่าง", "4 อย่าง", "6 อย่าง", "5 อย่าง"],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับจำนวนที่สไลด์แจกแจง",
+      "ไม่ตรงกับจำนวนที่สไลด์แจกแจง",
+      "ไม่ตรงกับจำนวนที่สไลด์แจกแจง",
+      "ถูก — สไลด์แจกแจงไว้ 5 หน้าที่หลักของ I/O module: control/timing, processor communication, device communication, data buffering, error detection"
+    ]
+  },
+  {
+    type: "recall",
+    q: "External devices ในสไลด์แบ่งออกเป็นกี่ประเภท?",
+    choices: ["2 ประเภท", "3 ประเภท", "4 ประเภท", "5 ประเภท"],
+    correct: 1,
+    explain: [
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ 3 ประเภทคือ Human readable, Machine readable, Communication",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "มีกี่เทคนิคหลักสำหรับการทำ I/O ตามที่สไลด์กล่าวถึง?",
+    choices: ["2 เทคนิค", "4 เทคนิค", "3 เทคนิค", "5 เทคนิค"],
+    correct: 2,
+    explain: [
+      "ขาดไปหนึ่งเทคนิค",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ 3 เทคนิคคือ Programmed I/O, Interrupt-driven I/O, และ Direct Memory Access",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "I/O Commands ในสไลด์มีกี่ประเภท อะไรบ้าง?",
+    choices: [
+      "4 ประเภท: Control, Test, Read, Write",
+      "3 ประเภท: Control, Read, Write",
+      "4 ประเภท: Open, Read, Write, Close",
+      "5 ประเภท รวม Reset"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ 4 ประเภท: Control, Test, Read, Write",
+      "ขาด Test ไปหนึ่งประเภท",
+      "ชื่อประเภทไม่ตรงกับที่สไลด์ใช้ (นี่คล้าย system call ของไฟล์มากกว่า)",
+      "ไม่ตรงกับจำนวนและชื่อที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Memory-mapped I/O คือแนวคิดใด?",
+    choices: [
+      "ให้อุปกรณ์ I/O มี address space แยกต่างหากจากหน่วยความจำ",
+      "ให้อุปกรณ์ I/O ไม่มี address เลย",
+      "ให้อุปกรณ์ I/O และหน่วยความจำใช้ address space เดียวกัน",
+      "ให้อุปกรณ์ I/O สื่อสารผ่านเครือข่ายเท่านั้น"
+    ],
+    correct: 2,
+    explain: [
+      "นี่คือนิยามของ Isolated I/O ไม่ใช่ Memory-mapped I/O",
+      "ทุกอุปกรณ์ I/O ต้องมี address เพื่อให้ระบุตัวได้",
+      "ถูก — สไลด์ระบุว่า memory-mapped I/O ให้ device และ memory share address space เดียวกัน",
+      "ไม่เกี่ยวกับเครือข่ายเลย เป็นเรื่องของการ address ภายในเครื่อง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "มีกี่เทคนิคหลักในการระบุอุปกรณ์ที่ก่อ interrupt (Device Identification) ตามสไลด์?",
+    choices: ["2 เทคนิค", "4 เทคนิค", "3 เทคนิค", "5 เทคนิค"],
+    correct: 1,
+    explain: [
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ 4 เทคนิค: Multiple interrupt lines, Software poll, Daisy chain, Bus arbitration",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "USB 2.0 ให้อัตราการส่งข้อมูลสูงสุดเท่าไหร่ตามสไลด์?",
+    choices: ["12 Mbps", "5 Gbps", "10 Gbps", "480 Mbps"],
+    correct: 3,
+    explain: [
+      "12 Mbps คือ Full Speed ของ USB 1.0 ไม่ใช่ USB 2.0",
+      "5 Gbps คือ signaling speed ของ USB 3.0 (SuperSpeed) ไม่ใช่ USB 2.0",
+      "10 Gbps คือ signaling rate ของ USB 3.1 Gen2 (SuperSpeed+) ไม่ใช่ USB 2.0",
+      "ถูก — สไลด์ระบุ USB 2.0 ให้ data rate 480 Mbps"
+    ]
+  },
+  {
+    type: "recall",
+    q: "SATA ให้อัตราการส่งข้อมูลสูงสุดเท่าไหร่ตามสไลด์?",
+    choices: ["6 Gbps", "1 Gbps", "3 Gbps", "10 Gbps"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ SATA ให้ data rate สูงสุด 6 Gbps (ต่อดีไวซ์ 300 Mbps)",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "10 Gbps เป็นของ Thunderbolt ไม่ใช่ SATA"
+    ]
+  },
+  {
+    type: "recall",
+    q: "\"Evolution of the I/O Function\" ในสไลด์แบ่งเป็นกี่ขั้น?",
+    choices: ["4 ขั้น", "6 ขั้น", "5 ขั้น", "8 ขั้น"],
+    correct: 1,
+    explain: [
+      "ไม่ตรงกับจำนวนขั้นที่สไลด์ระบุ",
+      "ถูก — สไลด์แจกแจงวิวัฒนาการของ I/O ไว้ 6 ขั้น ตั้งแต่ CPU ควบคุมอุปกรณ์เองจนถึง I/O channel ที่มีหน่วยความจำของตัวเอง",
+      "ไม่ตรงกับจำนวนขั้นที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนขั้นที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Thunderbolt ถูกพัฒนาขึ้นโดยความร่วมมือของบริษัทใดตามสไลด์?",
+    choices: [
+      "Microsoft ร่วมกับ Sony",
+      "IBM ร่วมกับ Samsung",
+      "Intel ร่วมกับ Apple",
+      "Google ร่วมกับ Dell"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุว่า Thunderbolt developed by Intel with collaboration from Apple",
+      "ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "InfiniBand มุ่งเป้าไปที่ตลาดกลุ่มใดตามสไลด์?",
+    choices: [
+      "ตลาดเซิร์ฟเวอร์ระดับสูง",
+      "อุปกรณ์มือถือระดับล่าง",
+      "อุปกรณ์บ้านอัจฉริยะ",
+      "เครื่องเล่นเกมพกพา"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ InfiniBand เป็น I/O specification aimed at the high-end server market",
+      "ไม่ตรงกับกลุ่มเป้าหมายที่สไลด์ระบุ",
+      "ไม่ตรงกับกลุ่มเป้าหมายที่สไลด์ระบุ",
+      "ไม่ตรงกับกลุ่มเป้าหมายที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ก่อนกระโดดไปทำงานที่ ISR (Interrupt Service Routine) ฮาร์ดแวร์ต้องเซฟค่าใดไว้ก่อนตามสไลด์?",
+    choices: [
+      "ค่าของ Heap ทั้งหมด",
+      "ชื่อไฟล์ที่กำลังเปิดอยู่",
+      "ที่อยู่ IP ของเครื่อง",
+      "PC และ PSW (Status register)"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่เกี่ยวข้องกับขั้นตอนการจัดการ interrupt นี้",
+      "ไม่เกี่ยวข้องกับขั้นตอนการจัดการ interrupt นี้",
+      "ไม่เกี่ยวข้องกับขั้นตอนการจัดการ interrupt นี้",
+      "ถูก — สไลด์ระบุว่าต้องเซฟ PC, PSW (Status register) ไว้ก่อนกระโดดไปที่ ISR"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม Programmed I/O จึงเปลืองเวลา CPU มาก?",
+    choices: [
+      "เพราะ Programmed I/O ใช้ไฟฟ้ามากกว่าเทคนิคอื่น",
+      "เพราะ CPU ต้องรอเฉย ๆ จนกว่า I/O จะเสร็จ ทั้งที่เร็วกว่าอุปกรณ์มาก",
+      "เพราะ Programmed I/O ต้องเขียนโค้ดยาวกว่าเทคนิคอื่นเสมอ",
+      "เพราะ Programmed I/O ใช้ได้กับอุปกรณ์เพียงชนิดเดียวเท่านั้น"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่มีข้อมูลเรื่องการใช้ไฟฟ้าในสไลด์",
+      "ถูก — สไลด์ระบุว่าถ้า processor เร็วกว่า I/O module การรอแบบนี้ \"wasteful of processor time\"",
+      "ความยาวของโค้ดไม่ใช่เหตุผลหลักที่สไลด์กล่าวถึง",
+      "ไม่มีข้อจำกัดเรื่องชนิดอุปกรณ์ในสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่าง Programmed I/O กับ Interrupt-driven I/O ได้ถูกต้อง?",
+    choices: [
+      "ทั้งสองแบบต้องรอ I/O เสร็จเหมือนกันทุกประการ",
+      "Interrupt-driven I/O ไม่ต้องใช้ processor เลย",
+      "Programmed I/O ให้ CPU รอเฉย ๆ จนกว่า I/O จะเสร็จ ส่วน Interrupt-driven ให้ CPU ทำงานอื่นก่อนแล้วรอแจ้งเตือน",
+      "Programmed I/O เร็วกว่า Interrupt-driven I/O เสมอ"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับสไลด์ ซึ่งชี้ว่า Interrupt-driven ไม่ต้องรอเฉย ๆ",
+      "Interrupt-driven I/O ยังคงต้องใช้ processor ในการจัดการ interrupt เมื่อเกิดขึ้น",
+      "ถูก — นี่คือความแตกต่างหลักตามสไลด์: การรอเฉย ๆ เทียบกับการไปทำงานอื่นแล้วถูกแจ้งเตือน",
+      "ตรงข้ามกับสไลด์ ซึ่งชี้ว่า Programmed I/O เปลืองเวลา CPU มากกว่า"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมต้องมี DMA ทั้งที่มี Interrupt-driven I/O อยู่แล้ว?",
+    choices: [
+      "เพราะเทคนิคเดิมยังให้ CPU สั่งคำสั่งจำนวนมากต่อการโอนข้อมูลแต่ละครั้ง ไม่คุ้มเมื่อข้อมูลมาก",
+      "เพราะ Interrupt-driven I/O ใช้ไม่ได้กับอุปกรณ์สมัยใหม่เลย",
+      "เพราะ DMA ทำให้ไม่ต้องมี I/O module อีกต่อไป",
+      "เพราะ Interrupt-driven I/O ทำให้เครื่องค้างบ่อยกว่า"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุจุดอ่อนของทั้งสองเทคนิคว่า CPU ยังต้องเสียเวลาสั่งคำสั่งจำนวนมากต่อการโอนข้อมูลแต่ละครั้ง เมื่อข้อมูลมาก DMA จึงคุ้มกว่า",
+      "Interrupt-driven I/O ยังใช้งานได้และใช้กันอยู่ทั่วไป เพียงแต่มีข้อจำกัดเมื่อข้อมูลมาก",
+      "DMA ยังต้องอาศัย I/O module อยู่ เพียงแต่ I/O module คุยกับ memory ได้เองโดยตรง",
+      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่เหตุผลที่กล่าวถึง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดแยกความแตกต่างระหว่าง Memory-mapped I/O กับ Isolated I/O ได้ถูกต้อง?",
+    choices: [
+      "ทั้งสองแบบใช้ address space เดียวกันเสมอ",
+      "Isolated I/O เร็วกว่า Memory-mapped I/O ในทุกกรณี",
+      "Memory-mapped I/O ใช้ address space ร่วมกับ memory ส่วน Isolated I/O แยกต่างหากและต้องใช้คำสั่งเฉพาะ",
+      "Memory-mapped I/O ใช้ได้เฉพาะกับเครื่องพิมพ์เท่านั้น"
+    ],
+    correct: 2,
+    explain: [
+      "ขัดกับนิยามของ Isolated I/O ที่แยก address space ต่างหาก",
+      "สไลด์ไม่ได้เปรียบเทียบความเร็ว แต่เปรียบเทียบความง่ายในการใช้คำสั่งและจำนวน address space",
+      "ถูก — ตรงกับสไลด์ที่เปรียบเทียบทั้งสองแนวคิดไว้ชัดเจน",
+      "ไม่มีข้อจำกัดเรื่องชนิดอุปกรณ์แบบนี้ในสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Vectored interrupt (เช่นจาก Daisy chain) จึงเร็วกว่า Software poll?",
+    choices: [
+      "เพราะ Daisy chain ใช้ไฟฟ้าน้อยกว่า",
+      "เพราะอุปกรณ์ส่ง vector ของตัวเองกลับมาให้ CPU ทันที ไม่ต้องไล่ถามทีละอุปกรณ์",
+      "เพราะ Software poll ใช้ไม่ได้กับอุปกรณ์สมัยใหม่",
+      "เพราะ Vectored interrupt ไม่ต้องใช้ interrupt เลย"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่มีข้อมูลเรื่องการใช้ไฟฟ้าในสไลด์",
+      "ถูก — สไลด์ระบุว่า vectored interrupt หลีกเลี่ยงการต้องรัน general interrupt-service routine ที่ต้องไล่ถามทีละอุปกรณ์แบบ software poll",
+      "software poll ยังใช้ได้ เพียงแต่ \"time consuming\" กว่า",
+      "vectored interrupt ก็ยังคงเป็น interrupt ประเภทหนึ่ง เพียงแต่มาพร้อมข้อมูลระบุตัวอุปกรณ์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม DMA แบบทั่วไปจึงเริ่มไม่เพียงพอเมื่อความเร็วเครือข่ายเพิ่มขึ้นมาก (เช่น 10-100 Gbps Ethernet)?",
+    choices: [
+      "เพราะ DMA ใช้ไม่ได้กับเครือข่ายเลยตั้งแต่ต้น",
+      "เพราะความเร็วเครือข่ายไม่มีผลต่อ DMA เลย",
+      "เพราะข้อมูลต้องพักผ่าน system buffer ใน memory ก่อนเสมอ ทำให้เกิด cache miss บ่อยขึ้น",
+      "เพราะ DMA ต้องใช้ CPU 100% ตลอดเวลา"
+    ],
+    correct: 2,
+    explain: [
+      "DMA ใช้กับเครือข่ายได้ตามปกติ เพียงแต่เริ่มไม่พอเมื่อความเร็วสูงมาก",
+      "ตรงข้ามกับสไลด์ ซึ่งชี้ว่าความเร็วเครือข่ายที่เพิ่มขึ้นเป็นตัวกดดันให้ DMA แบบเดิมไม่พอ",
+      "ถูก — สไลด์ระบุว่า DMA ไม่ scale พอกับความเร็วเครือข่ายที่เพิ่มขึ้นมาก เพราะการผ่าน system buffer ทำให้เกิดภาระเพิ่มที่ cache",
+      "จุดเด่นของ DMA คือลดการใช้ CPU ไม่ใช่เพิ่ม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "Direct Cache Access (DCA) แก้ปัญหาอะไรเป็นหลัก?",
+    choices: [
+      "ทำให้ไม่ต้องมี cache ในระบบอีกต่อไป",
+      "แทนที่ Ethernet ด้วยเทคโนโลยีใหม่ทั้งหมด",
+      "ลดการรอของ core ในการเข้าถึง system buffer โดยส่ง prefetch hint ให้ core อ่านได้เร็วขึ้น",
+      "ลบ system buffer ออกจาก main memory ถาวร"
+    ],
+    correct: 2,
+    explain: [
+      "DCA ยังต้องพึ่งพา cache เป็นแกนหลักของเทคนิคนี้เลย",
+      "ไม่เกี่ยวกับการแทนที่ Ethernet",
+      "ถูก — DCA ส่ง prefetch hint ให้ core เตรียมข้อมูลไว้ล่วงหน้า หรือใน DDIO core อ่านจาก buffer ได้โดยไม่ต้องผ่าน system buffer ซ้ำ ลด cache miss",
+      "DDIO ลดการพึ่งพา system buffer ในบางกรณี แต่ไม่ได้ลบออกไปทั้งหมดในทุกสถาปัตยกรรม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด \"Evolution of the I/O Function\" จึงมีแนวโน้มโอนภาระงานจาก CPU ไปให้ I/O module มากขึ้นเรื่อย ๆ ในแต่ละขั้น?",
+    choices: [
+      "เพราะกฎหมายกำหนดให้ I/O module ต้องทำงานแทน CPU",
+      "เพราะ CPU รุ่นใหม่ไม่สามารถควบคุมอุปกรณ์ได้เลย",
+      "เพราะต้องการให้ I/O module มีราคาแพงขึ้น",
+      "เพื่อให้ CPU มีเวลาไปทำงานหลักมากขึ้น ไม่ต้องเสียเวลากับรายละเอียดของ I/O"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่มีข้อมูลเรื่องกฎหมายในสไลด์",
+      "CPU รุ่นใหม่ยังควบคุมอุปกรณ์ได้ เพียงแต่เลือกมอบหมายงานบางส่วนให้ I/O module แทน",
+      "ไม่ใช่เหตุผลที่สไลด์กล่าวถึง เป้าหมายคือประสิทธิภาพ ไม่ใช่ราคา",
+      "ถูก — แต่ละขั้นของวิวัฒนาการคือการลดภาระงาน I/O ที่ CPU ต้องจัดการเอง เพื่อให้ CPU ใช้เวลาไปกับงานประมวลผลหลักได้เต็มที่ขึ้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Isolated I/O จึงต้องมีสายสัญญาณ (I/O select line และ memory select line) แยกจากกัน?",
+    choices: [
+      "เพราะสาย I/O ทนไฟฟ้าได้น้อยกว่าสาย memory",
+      "เพราะ address space ของ I/O กับ memory แยกกัน จึงต้องมีสัญญาณบอกปลายทางของคำสั่ง",
+      "เพราะกฎของ USB บังคับไว้",
+      "เพราะ CPU รุ่นเก่าไม่มีสาย select เลย"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่มีข้อมูลเรื่องความทนไฟฟ้าของสายในสไลด์",
+      "ถูก — เมื่อ address space แยกกัน ระบบต้องมีสัญญาณเพิ่มเพื่อบอกว่า address ที่ส่งมานั้นหมายถึง I/O หรือ memory",
+      "ไม่เกี่ยวกับ USB เลย เป็นเรื่องการออกแบบ addressing ของระบบ",
+      "ไม่เกี่ยวข้องกับประเด็นนี้ในสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "หน้าที่ \"Data buffering\" ของ I/O module มีไว้เพื่ออะไร?",
+    choices: [
+      "เพื่อพักข้อมูลชั่วคราว ปรับความเร็วอุปกรณ์ช้ากับ memory/CPU ที่เร็วให้เข้ากันได้",
+      "เพื่อเข้ารหัสข้อมูลก่อนส่งออกเครือข่าย",
+      "เพื่อลบข้อมูลที่ซ้ำกันออกจากดิสก์",
+      "เพื่อเพิ่มความจุของอุปกรณ์ให้ใหญ่ขึ้น"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า data buffering ทำหน้าที่ \"balance device and memory speeds\"",
+      "ไม่เกี่ยวกับการเข้ารหัสข้อมูล",
+      "ไม่เกี่ยวกับการลบข้อมูลซ้ำ",
+      "ไม่เกี่ยวกับการเพิ่มความจุของอุปกรณ์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม I/O channel (ขั้นสุดท้ายของ Evolution of I/O) จึงถูกมองว่าเป็น \"คอมพิวเตอร์อีกเครื่องหนึ่ง\"?",
+    choices: [
+      "เพราะมันใช้จอแสดงผลของตัวเองแยกจากเครื่องหลัก",
+      "เพราะมันไม่ต้องเชื่อมต่อกับ CPU หลักเลย",
+      "เพราะมันมีหน่วยความจำและชุดคำสั่งของตัวเอง ควบคุมอุปกรณ์ได้เองโดย CPU หลักแทบไม่ต้องยุ่ง",
+      "เพราะมันเป็นอุปกรณ์ที่ราคาถูกที่สุดในระบบ"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่มีข้อมูลเรื่องจอแสดงผลแยกในสไลด์",
+      "I/O channel ยังต้องเชื่อมต่อและรายงานผลกับ CPU หลัก เพียงแต่ทำงานส่วนใหญ่ได้เอง",
+      "ถูก — สไลด์ระบุว่าขั้นนี้ I/O module has a local memory of its own and is a computer in its own right",
+      "ไม่มีข้อมูลเรื่องราคาที่สไลด์กล่าวถึง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม DMA จึงมี \"breakpoint\" เฉพาะบางจังหวะของ instruction cycle (เช่น ก่อนหรือหลังคำสั่ง) แทนที่จะแทรกระหว่างที่คำสั่งหนึ่งกำลังทำงานอยู่?",
+    choices: [
+      "เพราะ DMA ไม่สามารถทำงานร่วมกับ CPU ได้เลย",
+      "เพราะกฎหมายกำหนดให้แทรกได้เฉพาะตอนต้นคำสั่งเท่านั้น",
+      "เพราะ instruction cycle ไม่มีจังหวะให้แทรกเลยไม่ว่ากรณีใด",
+      "เพราะ CPU ต้องทำคำสั่งที่กำลังทำอยู่ให้เสร็จก่อน ไม่ให้ผลลัพธ์ผิดเพี้ยนจากการถูกแทรกกลางคัน"
+    ],
+    correct: 3,
+    explain: [
+      "DMA ทำงานร่วมกับ CPU ได้ตามปกติ เพียงแต่ต้องเลือกจังหวะที่เหมาะสมในการแทรก",
+      "ไม่มีข้อมูลเรื่องกฎหมายในสไลด์ เป็นเรื่องของความถูกต้องของการประมวลผล",
+      "สไลด์แสดงชัดเจนว่ามีจุด breakpoint ที่กำหนดไว้ใน instruction cycle ให้ DMA และ interrupt แทรกได้",
+      "ถูก — สไลด์แสดงว่า DMA และ interrupt จะถูกตรวจสอบ ณ จุดที่กำหนดไว้ใน instruction cycle เพื่อไม่ให้คำสั่งที่กำลังทำงานอยู่ถูกขัดจังหวะกลางคันจนผลลัพธ์เพี้ยน"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "ต้องการโอนไฟล์ขนาดใหญ่มากจากดิสก์เข้าหน่วยความจำ โดยอยากให้ CPU ว่างไปทำงานอื่นได้มากที่สุดระหว่างโอน ควรเลือกเทคนิคใด?",
+    choices: ["Programmed I/O", "DMA (Direct Memory Access)", "Interrupt-driven I/O แบบธรรมดา", "Software poll"],
+    correct: 1,
+    explain: [
+      "Programmed I/O จะทำให้ CPU ต้องรอจนกว่าจะโอนเสร็จ ไม่เหมาะกับไฟล์ขนาดใหญ่",
+      "ถูก — DMA ให้ I/O module คุยกับ memory โดยตรง CPU เข้ามาเกี่ยวข้องแค่ตอนเริ่มกับตอนจบ เหมาะกับการโอนข้อมูลจำนวนมากที่สุด",
+      "ยังต้องให้ CPU สั่งคำสั่งจำนวนมากต่อการโอนแต่ละครั้ง ไม่คุ้มกับข้อมูลปริมาณมาก",
+      "Software poll เป็นเทคนิคระบุอุปกรณ์ที่ก่อ interrupt ไม่ใช่เทคนิคโอนข้อมูล"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ระบบมีอุปกรณ์ I/O จำนวนมากเกินกว่าจะให้แต่ละตัวมีสายสัญญาณ interrupt เป็นของตัวเอง และต้องการให้ CPU รู้ตัวอุปกรณ์ที่ก่อ interrupt ได้เร็วโดยไม่ต้องไล่ถามทีละตัว ควรใช้เทคนิคใด?",
+    choices: [
+      "Daisy chain (vectored interrupt)",
+      "Multiple interrupt lines",
+      "Software poll",
+      "ไม่ใช้ interrupt เลย"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — Daisy chain ใช้ vector ที่อุปกรณ์ส่งกลับมาเอง ทำให้ CPU รู้ตัวอุปกรณ์ได้ทันทีโดยไม่ต้องไล่ถาม และไม่ต้องมีสายแยกทุกตัว",
+      "Multiple interrupt lines ต้องการสายสัญญาณเยอะ ซึ่งโจทย์ระบุว่ามีอุปกรณ์เกินกว่าจะให้แต่ละตัวมีสายของตัวเอง",
+      "Software poll ไม่ต้องใช้สายเยอะ แต่เสียเวลาไล่ถามทีละอุปกรณ์ ไม่ตรงกับที่โจทย์ต้องการความเร็ว",
+      "การไม่ใช้ interrupt เลยจะทำให้กลับไปเป็น Programmed I/O ที่เปลืองเวลา CPU"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ออกแบบระบบฝังตัวขนาดเล็กที่ต้องการความง่ายในการเขียนโปรแกรม โดยอยากใช้คำสั่งอ่าน/เขียนแบบเดียวกับที่ใช้กับ memory ทั่วไปในการสั่งงาน I/O ด้วย ควรเลือก addressing แบบใด?",
+    choices: [
+      "Isolated I/O",
+      "ไม่ต้องมี address ให้อุปกรณ์เลย",
+      "Memory-mapped I/O",
+      "ใช้ address แบบสุ่มทุกครั้ง"
+    ],
+    correct: 2,
+    explain: [
+      "Isolated I/O ต้องมีคำสั่งเฉพาะสำหรับ I/O แยกจากคำสั่ง memory ทั่วไป ไม่ตรงกับโจทย์ที่ต้องการความง่าย",
+      "อุปกรณ์ทุกตัวต้องมี address เพื่อให้ระบุตัวและสั่งงานได้",
+      "ถูก — Memory-mapped I/O ให้ใช้คำสั่งอ่าน/เขียน memory ทั่วไปกับ I/O ได้เลย ตรงกับความต้องการความง่ายในโจทย์",
+      "การใช้ address แบบสุ่มจะทำให้ระบบไม่สามารถระบุอุปกรณ์ได้อย่างแน่นอน ใช้งานจริงไม่ได้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "เซิร์ฟเวอร์รับส่งข้อมูลเครือข่ายความเร็ว 100 Gbps และพบว่า core เกิด cache miss บ่อยมากจากการต้องอ่าน system buffer ใน memory ทุกครั้งที่มีแพ็กเก็ตเข้ามา ควรพิจารณาเทคนิคใดเพิ่มเติมจาก DMA ทั่วไป?",
+    choices: [
+      "Programmed I/O",
+      "Software poll",
+      "Daisy chain",
+      "Direct Cache Access (DCA) / DDIO"
+    ],
+    correct: 3,
+    explain: [
+      "Programmed I/O เปลืองเวลา CPU มากกว่าเดิม ไม่ได้แก้ปัญหา cache miss จากเครือข่ายความเร็วสูง",
+      "Software poll เกี่ยวกับการระบุอุปกรณ์ที่ก่อ interrupt ไม่เกี่ยวกับปัญหา cache miss ในการรับส่งข้อมูลเครือข่าย",
+      "Daisy chain เป็นเทคนิคระบุอุปกรณ์ที่ก่อ interrupt ไม่เกี่ยวกับ cache miss ของข้อมูลเครือข่าย",
+      "ถูก — DCA/DDIO ถูกออกแบบมาโดยเฉพาะเพื่อลดการพึ่งพา system buffer ใน memory ซึ่งช่วยลด cache miss ในสถานการณ์นี้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการเลือกเทคโนโลยีเชื่อมต่อที่รวมการส่งข้อมูล วิดีโอ เสียง และไฟเลี้ยงไปยังอุปกรณ์ต่อพ่วง (เช่น ฮาร์ดดิสก์ภายนอก, กล้องจับภาพวิดีโอ) ไว้ในสายเดียว ควรเลือกเทคโนโลยีใดตามสไลด์?",
+    choices: ["SCSI", "Thunderbolt", "Ethernet", "Wi-Fi"],
+    correct: 1,
+    explain: [
+      "SCSI เป็นมาตรฐานเชื่อมต่ออุปกรณ์เก็บข้อมูล ไม่ได้รวมวิดีโอ เสียง และไฟในสายเดียว",
+      "ถูก — สไลด์ระบุว่า Thunderbolt รวม data, video, audio, และ power เข้าด้วยกันในสายเดียว",
+      "Ethernet เป็นเทคโนโลยีเครือข่าย ไม่ได้ออกแบบมาเพื่อส่งไฟเลี้ยงและวิดีโอแบบนี้",
+      "Wi-Fi เป็นเทคโนโลยีไร้สาย ไม่ใช่การเชื่อมต่อด้วยสายที่ส่งไฟเลี้ยงได้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "กำลังออกแบบศูนย์ข้อมูลระดับ mainframe ที่ต้องเชื่อมต่อเซิร์ฟเวอร์ ระบบเก็บข้อมูล และอุปกรณ์เครือข่ายจำนวนมาก (หลักหมื่นเครื่อง) ผ่านโครงสร้าง switch แบบรวมศูนย์ ควรพิจารณาเทคโนโลยีใดตามสไลด์?",
+    choices: ["InfiniBand", "USB", "SATA", "FireWire"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า InfiniBand เชื่อมต่อเซิร์ฟเวอร์ storage และอุปกรณ์เครือข่ายผ่าน switch fabric ได้ถึง 64,000 เครื่อง เหมาะกับ mainframe ระดับสูง",
+      "USB ออกแบบมาสำหรับอุปกรณ์ต่อพ่วงทั่วไป ไม่ได้ออกแบบมาสำหรับเชื่อมต่ออุปกรณ์นับหมื่นในศูนย์ข้อมูล",
+      "SATA เป็นมาตรฐานเชื่อมต่อดิสก์ในเครื่องเดียว ไม่ใช่โครงสร้างเครือข่ายระดับศูนย์ข้อมูล",
+      "FireWire เป็นบัสแบบ daisy chain สำหรับอุปกรณ์ต่อพ่วงส่วนบุคคล ไม่ใช่โครงสร้างระดับศูนย์ข้อมูล"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

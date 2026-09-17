@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Chapter 1 - Basic Computer Components & Intro to Computer Architecture</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Chapter 1 - Basic Computer Components & Intro to Computer Architecture</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "ตามนิยามในสไลด์ Architecture เกี่ยวข้องกับสิ่งใด?",
+    choices: [
+      "cache, pipeline design, bus width",
+      "instruction set, addressing modes, data types",
+      "power supply และ motherboard",
+      "clock speed ของฮาร์ดแวร์"
+    ],
+    correct: 1,
+    explain: [
+      "สิ่งเหล่านี้เป็นตัวอย่างของ Organization ไม่ใช่ Architecture",
+      "ถูก — สไลด์ระบุว่า Architecture คือคุณสมบัติที่โปรแกรมเมอร์มองเห็น เช่น instruction set, addressing modes, data types",
+      "ไม่เกี่ยวกับนิยามของ Architecture ในสไลด์นี้",
+      "clock speed เป็นตัวอย่างของ Organization ไม่ใช่ Architecture"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามนิยามในสไลด์ Organization เกี่ยวข้องกับสิ่งใด?",
+    choices: [
+      "instruction set และ data types",
+      "จำนวนผู้ใช้ในระบบคลาวด์",
+      "ราคาขายของคอมพิวเตอร์",
+      "องค์ประกอบฮาร์ดแวร์ภายใน เช่น cache และ pipeline"
+    ],
+    correct: 3,
+    explain: [
+      "instruction set และ data types เป็นส่วนของ Architecture ไม่ใช่ Organization",
+      "ไม่เกี่ยวข้องกับนิยามของ Organization",
+      "ไม่เกี่ยวข้องกับนิยามของ Organization ในสไลด์",
+      "ถูก — สไลด์ระบุว่า Organization คือหน่วยปฏิบัติการและการเชื่อมต่อฮาร์ดแวร์ (เช่น cache, pipeline, bus width, clock speed) ที่ทำให้ architecture เกิดขึ้นจริง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "\"Old view\" ของ computer architecture ตามสไลด์คือการออกแบบอะไรเป็นหลัก?",
+    choices: [
+      "ISA (Instruction Set Architecture)",
+      "Cloud infrastructure",
+      "Power supply unit",
+      "Motherboard layout"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่ามุมมองเก่าของ computer architecture คือการตัดสินใจเรื่อง ISA design",
+      "ไม่เกี่ยวกับมุมมองเก่าของ computer architecture ตามสไลด์",
+      "ไม่เกี่ยวกับมุมมองเก่าของ computer architecture ตามสไลด์",
+      "ไม่เกี่ยวกับมุมมองเก่าของ computer architecture ตามสไลด์"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Cloud Computing ตามนิยามในสไลด์คือโมเดลอะไร?",
+    choices: [
+      "การเก็บไฟล์ไว้ในฮาร์ดดิสก์ของเครื่องตัวเองเท่านั้น",
+      "การอัปเกรด CPU ให้เร็วขึ้นโดยอัตโนมัติ",
+      "การเข้าถึงทรัพยากรคอมพิวเตอร์ร่วมกันแบบ on-demand ผ่านเครือข่าย",
+      "การลบข้อมูลเก่าออกจากเครื่องเป็นระยะ"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับแนวคิด cloud ซึ่งเน้นทรัพยากรที่แชร์ผ่านเครือข่าย ไม่ใช่เก็บในเครื่องตัวเอง",
+      "ไม่เกี่ยวกับนิยามของ Cloud Computing ในสไลด์",
+      "ถูก — ตรงตามนิยามในสไลด์: ubiquitous, convenient, on-demand network access ต่อ shared pool of configurable computing resources",
+      "ไม่เกี่ยวกับนิยามของ Cloud Computing ในสไลด์"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ข้อใดเป็นส่วนประกอบของคอมพิวเตอร์ตามที่สไลด์แจกแจงไว้?",
+    choices: [
+      "ทุกส่วนที่สไลด์แจกแจงไว้ (Input, CPU, Memory ฯลฯ)",
+      "เฉพาะ CPU และ Memory เท่านั้น",
+      "Cloud Storage และ Cloud Networking เท่านั้น",
+      "Control Unit และ ALU เท่านั้น"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ \"Components of Computers\" แจกแจงไว้ครบ ได้แก่ Input Devices, CPU, Memory, Storage, Motherboard, Output Devices, PSU, GPU",
+      "ขาดส่วนประกอบอื่นไปมาก เช่น Storage, Motherboard, GPU",
+      "เป็นส่วนของ Cloud Computing ไม่ใช่ส่วนประกอบของคอมพิวเตอร์เครื่องหนึ่ง",
+      "Control Unit และ ALU เป็นส่วนย่อยภายใน CPU เท่านั้น ไม่ใช่รายการส่วนประกอบทั้งเครื่อง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "หน้าที่ของ Control Unit ในซีพียูคืออะไร?",
+    choices: [
+      "ทำหน้าที่ประมวลผลข้อมูล เช่น การคำนวณ",
+      "เก็บข้อมูลถาวรของโปรแกรม",
+      "จ่ายไฟให้กับเมนบอร์ด",
+      "ควบคุมการทำงานของ CPU"
+    ],
+    correct: 3,
+    explain: [
+      "เป็นหน้าที่ของ ALU ไม่ใช่ Control Unit",
+      "ไม่ใช่หน้าที่ของ Control Unit",
+      "เป็นหน้าที่ของ Power Supply Unit ไม่ใช่ Control Unit",
+      "ถูก — สไลด์ระบุว่า Control Unit ควบคุมการทำงานของ CPU"
+    ]
+  },
+  {
+    type: "recall",
+    q: "หน้าที่ของ ALU (Arithmetic and Logic Unit) คืออะไร?",
+    choices: [
+      "ควบคุมการทำงานโดยรวมของ CPU",
+      "ทำหน้าที่ประมวลผลข้อมูล เช่น คำนวณและเปรียบเทียบ",
+      "เก็บ instruction ที่กำลังถูกดึงมา",
+      "เชื่อมต่อ CPU กับอุปกรณ์ภายนอก"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นหน้าที่ของ Control Unit ไม่ใช่ ALU",
+      "ถูก — สไลด์ระบุว่า ALU ทำหน้าที่ประมวลผลข้อมูลของคอมพิวเตอร์",
+      "เป็นหน้าที่ของ Instruction Register ไม่ใช่ ALU",
+      "ไม่ใช่หน้าที่หลักของ ALU ตามที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Registers ใดถูกกล่าวถึงในสไลด์ว่าอยู่ใน CPU?",
+    choices: [
+      "Cache register และ GPU register เท่านั้น",
+      "Power register และ Storage register",
+      "Program Counter, Instruction Register, Status register",
+      "Network register และ Cloud register"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ใช่ registers ที่สไลด์กล่าวถึงในหัวข้อนี้",
+      "ไม่มีคำเหล่านี้ในสไลด์",
+      "ถูก — สไลด์ \"Registers in CPU\" ระบุ Program Counter (PC), Instruction Register (IR), และ Status register",
+      "ไม่มีคำเหล่านี้ในสไลด์"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Cache level ใดที่สไลด์ระบุว่าเร็วที่สุดและเล็กที่สุด?",
+    choices: ["L2 cache", "Main memory", "Storage device", "L1 cache"],
+    correct: 3,
+    explain: [
+      "สไลด์ระบุว่า L2 คือ next fastest and smallest รองจาก L1",
+      "Main memory ไม่ใช่ cache และช้ากว่า cache มาก",
+      "Storage device ช้าที่สุดในบรรดาที่กล่าวถึง ไม่ใช่ cache",
+      "ถูก — สไลด์ระบุว่า L1 cache คือ fastest and smallest"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RISC ย่อมาจากอะไร?",
+    choices: [
+      "Reduced Instruction Set Computing",
+      "Rapid Internal System Control",
+      "Real-time Instruction Set Compiler",
+      "Reliable Integrated System Chip"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงตามที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "CISC ย่อมาจากอะไร?",
+    choices: [
+      "Cloud Integrated System Computing",
+      "Complex Instruction Set Computing",
+      "Core Instruction Simplified Chip",
+      "Computer Interconnect System Control"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — ตรงตามที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Flynn's Taxonomy แบ่งประเภทคอมพิวเตอร์ตามอะไร?",
+    choices: [
+      "ราคาของเครื่องและยี่ห้อผู้ผลิต",
+      "จำนวนปีที่เครื่องถูกผลิตออกมา",
+      "จำนวน instruction/data stream ที่ประมวลผลพร้อมกัน",
+      "ขนาดของ storage device"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่เกี่ยวกับ Flynn's Taxonomy",
+      "ไม่เกี่ยวกับ Flynn's Taxonomy",
+      "ถูก — Flynn's Taxonomy แบ่งเป็น SISD, SIMD, MISD, MIMD ตามจำนวน instruction stream และ data stream ที่ประมวลผลพร้อมกัน",
+      "ไม่เกี่ยวกับ Flynn's Taxonomy"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม Architecture กับ Organization จึงต้องถูกแยกออกจากกันอย่างชัดเจน?",
+    choices: [
+      "เพราะโปรแกรมเมอร์เห็นแค่ architecture ไม่ใช่ organization",
+      "เพราะทั้งสองคำมีความหมายเหมือนกันทุกประการ ใช้แทนกันได้",
+      "เพราะ organization ถูกกำหนดโดยโปรแกรมเมอร์เท่านั้น",
+      "เพราะ architecture เปลี่ยนได้บ่อยกว่า organization มาก"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — การแยกสองสิ่งนี้ทำให้ผู้ผลิตปรับปรุงฮาร์ดแวร์ภายใน (organization) ได้ โดยโปรแกรมเดิมยังรันถูกต้องเพราะ architecture ที่เห็นไม่เปลี่ยน",
+      "สองคำนี้มีความหมายต่างกันชัดเจนตามที่สไลด์นิยาม",
+      "organization เป็นเรื่องของฮาร์ดแวร์ที่ผู้ผลิตออกแบบ ไม่ใช่สิ่งที่โปรแกรมเมอร์กำหนด",
+      "ตรงข้ามกับความเป็นจริง organization (เช่น cache, pipeline) มักถูกปรับปรุงบ่อยกว่า architecture ที่ต้องคงเสถียรเพื่อความเข้ากันได้"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด \"Real\" computer architecture จึงต้องคำนึงถึง cost, power, และ availability แทนที่จะออกแบบ ISA อย่างเดียว?",
+    choices: [
+      "เพราะ ISA ไม่มีความสำคัญต่อการออกแบบคอมพิวเตอร์เลย",
+      "เพราะต้นทุนไม่เคยเกี่ยวข้องกับการออกแบบฮาร์ดแวร์",
+      "เพราะ availability หมายถึงจำนวนพนักงานในบริษัทผลิตชิป",
+      "เพราะต้องออกแบบเครื่องที่ใช้งานได้จริงภายใต้ข้อจำกัดของโลกจริง"
+    ],
+    correct: 3,
+    explain: [
+      "ISA ยังคงเป็นส่วนหนึ่งของ real architecture เพียงแต่ไม่ใช่ทั้งหมด",
+      "ต้นทุนเป็นหนึ่งในข้อจำกัดหลักที่สไลด์ระบุไว้ชัดเจน",
+      "availability ในบริบทนี้หมายถึงความพร้อมของเทคโนโลยี/ส่วนประกอบ ไม่ใช่จำนวนพนักงาน",
+      "ถูก — สไลด์ระบุว่า real computer architecture ต้อง design to maximize performance ภายใต้ข้อจำกัดด้าน cost, power, availability"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Embedded systems จึงมักมี real-time constraints ที่เข้มงวด?",
+    choices: [
+      "เพราะ embedded systems มีราคาแพงกว่าคอมพิวเตอร์ทั่วไปเสมอ",
+      "เพราะ embedded systems ไม่เคยเชื่อมต่อกับอุปกรณ์อื่นเลย",
+      "เพราะต้องตอบสนองต่อสภาพแวดล้อมจริงให้ทันเวลาที่กำหนด",
+      "เพราะ embedded systems ใช้ ISA แบบเดียวกับ supercomputer เท่านั้น"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับสไลด์ที่ระบุว่า embedded systems มักมีข้อจำกัดด้านต้นทุนที่เข้มงวด ไม่ใช่แพงกว่าเสมอ",
+      "ตรงข้ามกับนิยาม embedded system ซึ่งฝังตัวอยู่ในระบบ/อุปกรณ์อื่นโดยตรง",
+      "ถูก — สไลด์ระบุว่า embedded systems มักเชื่อมโยงกับสภาพแวดล้อมอย่างใกล้ชิด (tightly coupled) จึงต้องตอบสนองให้ทันเวลาที่กำหนด",
+      "ไม่มีข้อมูลนี้ในสไลด์ และ ISA ของ embedded มักถูกออกแบบให้เล็กและประหยัดพลังงานกว่า"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ความแตกต่างระหว่าง Multi-core กับ Multi-thread คือข้อใด?",
+    choices: [
+      "Multi-core กับ Multi-thread เป็นคำพ้องความหมายที่ใช้แทนกันได้เสมอ",
+      "Multi-core มีแกนจริงหลายแกนทำงานขนาน ส่วน Multi-thread คือแกนเดียวสลับ thread",
+      "Multi-thread มีแกนประมวลผลจริงหลายแกน ส่วน Multi-core คือการสลับงานด้วยซอฟต์แวร์",
+      "ทั้งสองคำไม่เกี่ยวข้องกับการประมวลผลแบบขนานเลย"
+    ],
+    correct: 1,
+    explain: [
+      "สองคำนี้มีกลไกต่างกันชัดเจน ไม่ใช่คำพ้องความหมาย",
+      "ถูก — Multi-core คือฮาร์ดแวร์ที่มีหลาย core ทำงานขนานจริง ส่วน Multi-thread (เช่น Hyper-Threading) คือการสลับ thread บนแกนเดียวให้ดูเหมือนขนาน",
+      "สลับความหมายกัน ผิด",
+      "ทั้งสองคำเกี่ยวข้องโดยตรงกับการทำงานแบบขนาน เพียงแต่ในระดับที่ต่างกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Cache Memory จึงช่วยเพิ่มประสิทธิภาพของระบบโดยรวม?",
+    choices: [
+      "เพราะเก็บข้อมูลที่ใช้ซ้ำบ่อยไว้ใกล้ CPU ไม่ต้องวิ่งไป main memory ทุกครั้ง",
+      "เพราะ cache มีขนาดใหญ่กว่า main memory เสมอ",
+      "เพราะ cache ทำให้ CPU ไม่ต้องประมวลผลคำสั่งอีกต่อไป",
+      "เพราะ cache ลบข้อมูลเก่าออกจากระบบโดยอัตโนมัติ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า cache ใช้เก็บข้อมูลที่มีแนวโน้มถูกใช้ในอนาคตอันใกล้ ทำให้เข้าถึงได้เร็วกว่าไป main memory ทุกครั้ง",
+      "ตรงข้ามกับความจริง cache มีขนาดเล็กกว่า main memory แต่เร็วกว่า",
+      "cache ไม่ได้ทำให้ CPU เลิกประมวลผล เพียงช่วยให้เข้าถึงข้อมูลเร็วขึ้น",
+      "ไม่ใช่หน้าที่หลักของ cache ตามที่สไลด์อธิบาย"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมการมี cache หลายระดับ (L1, L2, L3) จึงช่วยเพิ่มประสิทธิภาพมากกว่ามีระดับเดียว?",
+    choices: [
+      "เพราะยิ่งมีหลายระดับ ราคาของเครื่องยิ่งถูกลง",
+      "เพราะ cache แต่ละระดับเก็บโปรแกรมคนละตัวกัน",
+      "เพราะแต่ละระดับสมดุลความเร็วกับขนาดต่างกัน ใกล้ core ยิ่งเร็วแต่เล็ก",
+      "เพราะ CPU จะสุ่มเลือกใช้ระดับใดก็ได้โดยไม่มีผลต่อความเร็ว"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่เกี่ยวกับราคาของเครื่องโดยตรง",
+      "cache ทุกระดับเก็บข้อมูล/คำสั่งของกระบวนการเดียวกันตามหลัก locality ไม่ใช่แยกโปรแกรมคนละตัว",
+      "ถูก — สไลด์ระบุว่ามีหลายระดับเพื่อเพิ่ม performance โดยระดับที่ใกล้ core (L1) เร็วและเล็ก ระดับที่ไกลออกไป (L2, L3) ใหญ่ขึ้นแต่ช้าลง",
+      "การเลือกใช้ระดับ cache มีผลต่อความเร็วโดยตรง ไม่ใช่การสุ่ม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "RISC กับ CISC ต่างกันอย่างไรในเชิงปรัชญาการออกแบบ?",
+    choices: [
+      "RISC กับ CISC ใช้ปรัชญาการออกแบบเดียวกันทุกประการ",
+      "RISC ใช้ในคอมพิวเตอร์เก่าเท่านั้น ส่วน CISC ใช้ในคอมพิวเตอร์ปัจจุบันทั้งหมด",
+      "CISC ไม่มีการใช้งานในอุตสาหกรรมจริงอีกต่อไป",
+      "RISC เน้นคำสั่งง่ายจำนวนน้อย ส่วน CISC เน้นคำสั่งซับซ้อนทำได้หลายอย่างในคำเดียว"
+    ],
+    correct: 3,
+    explain: [
+      "ชื่อทั้งสองบ่งบอกปรัชญาที่ตรงข้ามกันอย่างชัดเจน",
+      "ไม่ตรงกับข้อเท็จจริง ทั้งสองแนวคิดยังมีการใช้งานและถกเถียงกันในปัจจุบัน",
+      "ไม่ตรงกับข้อเท็จจริง สถาปัตยกรรมแบบ CISC เช่น x86 ยังใช้งานอย่างแพร่หลาย",
+      "ถูก — ตรงกับความหมายของชื่อทั้งสอง: Reduced (RISC) เทียบกับ Complex (CISC) Instruction Set Computing"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด DLP และ TLP จึงถูกจัดเป็น parallelism ระดับ \"application\" ต่างจาก ILP ที่เป็นระดับ \"architecture\"?",
+    choices: [
+      "เพราะ DLP และ TLP ไม่เกี่ยวข้องกับโปรแกรมเลย",
+      "เพราะ DLP/TLP มาจากลักษณะงาน/ข้อมูล ส่วน ILP มาจากการออกแบบฮาร์ดแวร์ให้รันขนาน",
+      "เพราะ ILP เกิดจากผู้ใช้เขียนโปรแกรมเองเท่านั้น",
+      "เพราะทั้งสามอย่างเป็นสิ่งเดียวกัน เพียงแค่เรียกชื่อต่างกัน"
+    ],
+    correct: 1,
+    explain: [
+      "ตรงข้ามกับนิยาม DLP/TLP มาจากลักษณะการประมวลผลข้อมูล/งานของโปรแกรมโดยตรง",
+      "ถูก — สไลด์แยก DLP/TLP ไว้เป็น \"classes of parallelism in applications\" ส่วน ILP อยู่ใน \"classes of architectural parallelism\" ที่มาจากฮาร์ดแวร์",
+      "ILP เป็นเรื่องของการออกแบบฮาร์ดแวร์ให้รันคำสั่งขนานกัน ไม่ใช่สิ่งที่ผู้เขียนโปรแกรมกำหนดโดยตรง",
+      "ทั้งสามอย่างเป็นความขนานคนละระดับ มีกลไกและที่มาต่างกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "SIMD ใน Flynn's Taxonomy เหมาะกับลักษณะงานแบบใดมากที่สุด?",
+    choices: [
+      "งานที่แต่ละคำสั่งต้องทำงานกับข้อมูลคนละชุดโดยไม่เกี่ยวข้องกันเลย",
+      "งานที่ต้องรันบนคอมพิวเตอร์เครื่องเดียวแบบ SISD เท่านั้น",
+      "งานที่ทำ operation เดียวกันกับข้อมูลจำนวนมากพร้อมกัน เช่น graphics",
+      "งานที่ไม่มีข้อมูลให้ประมวลผลเลย"
+    ],
+    correct: 2,
+    explain: [
+      "นี่ใกล้เคียงกับแนวคิด MIMD มากกว่า ไม่ใช่ SIMD",
+      "SIMD กับ SISD เป็นคนละหมวดกันใน Flynn's Taxonomy",
+      "ถูก — สไลด์ระบุ SIMD ใช้ใน vector architecture, multimedia extensions, GPU ซึ่งล้วนเป็นงานที่ทำ operation เดียวกับข้อมูลจำนวนมาก",
+      "SIMD ยังต้องมีข้อมูลจำนวนมากให้ประมวลผลพร้อมกัน จึงจะได้ประโยชน์จากสถาปัตยกรรมนี้"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด MISD จึงแทบไม่มีการใช้งานเชิงพาณิชย์ตามที่สไลด์ระบุ?",
+    choices: [
+      "เพราะการให้หลายคำสั่งประมวลผลข้อมูลเดียวกันพร้อมกันมีประโยชน์ใช้งานจริงน้อยมาก",
+      "เพราะ MISD ต้องใช้พลังงานน้อยที่สุดในบรรดา 4 แบบ",
+      "เพราะ MISD เป็นสถาปัตยกรรมที่ถูกใช้มากที่สุดในมือถือปัจจุบัน",
+      "เพราะ MISD คือสถาปัตยกรรมเดียวกับ SIMD เพียงเปลี่ยนชื่อ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุตรง ๆ ว่า MISD ไม่มี commercial implementation เพราะประโยชน์ใช้งานจริงมีน้อย",
+      "ไม่มีข้อมูลนี้ในสไลด์เกี่ยวกับการใช้พลังงานของ MISD",
+      "ตรงข้ามกับสไลด์ที่ระบุว่า MISD แทบไม่มีการใช้งานเชิงพาณิชย์เลย",
+      "MISD และ SIMD เป็นคนละหมวดใน Flynn's Taxonomy ไม่ใช่สิ่งเดียวกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ความแตกต่างระหว่าง Client-server กับ Microservices คือข้อใด?",
+    choices: [
+      "ทั้งสองแบบมีความหมายเดียวกันทุกประการ",
+      "Client-server แบ่งฝั่งขอ/ให้บริการ ส่วน Microservices แตกเป็นบริการย่อย deploy อิสระ",
+      "Client-server ใช้ได้เฉพาะกับระบบคลาวด์เท่านั้น",
+      "Microservices ต้องรวมทุกฟังก์ชันไว้ในระบบเดียวเสมอ (monolithic)"
+    ],
+    correct: 1,
+    explain: [
+      "สองรูปแบบนี้ต่างกันชัดเจนตามที่สไลด์แจกแจง",
+      "ถูก — ตรงตามที่สไลด์อธิบาย Client-server แบ่งงานระหว่างเครื่องที่ขอบริการกับเครื่องที่ให้บริการ ส่วน Microservices แตกระบบเป็นบริการย่อยที่ deploy อิสระจากกัน",
+      "Client-server เป็นแนวคิดทั่วไป ใช้ได้ทั้งในและนอกคลาวด์",
+      "Microservices คือแนวคิดตรงข้ามกับ monolithic ตามที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมสูตร CPU Time = Instruction Count × CPI × Clock Cycle Time จึงมีประโยชน์ในการวิเคราะห์ performance?",
+    choices: [
+      "เพราะสูตรนี้บอกราคาของเครื่องคอมพิวเตอร์โดยตรง",
+      "เพราะสูตรนี้ใช้ได้กับ embedded system เท่านั้น",
+      "เพราะสูตรนี้ไม่เกี่ยวข้องกับความเร็วของโปรแกรมเลย",
+      "เพราะแยกปัจจัยเป็นส่วนโปรแกรม (IC), สถาปัตยกรรม (CPI), ฮาร์ดแวร์ (clock time) ให้รู้ว่าควรปรับตรงไหน"
+    ],
+    correct: 3,
+    explain: [
+      "สูตรนี้วัดเวลาในการประมวลผล ไม่ใช่ราคาของเครื่อง",
+      "สูตรนี้เป็นหลักการทั่วไปที่ใช้ได้กับคอมพิวเตอร์ทุกประเภท ไม่ใช่เฉพาะ embedded system",
+      "ตรงข้ามกับความจริง สูตรนี้คือตัวชี้วัดความเร็ว/เวลาในการประมวลผลของโปรแกรมโดยตรง",
+      "ถูก — การแยกเป็น 3 ปัจจัยทำให้วิเคราะห์ได้ว่าจะไปลดจำนวนคำสั่ง ลด CPI หรือเพิ่มความเร็วสัญญาณนาฬิกาเพื่อเพิ่มประสิทธิภาพ"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "ต้องออกแบบเครื่องสำหรับงานคำนวณทางวิทยาศาสตร์ขนาดใหญ่ที่ต้องการพลังประมวลผลสูงสุดเท่าที่เป็นไปได้ ควรจัดอยู่ใน class ใดตามสไลด์?",
+    choices: ["Embedded computer", "Cloud storage server", "Supercomputer", "Personal computer ทั่วไป"],
+    correct: 2,
+    explain: [
+      "Embedded computer เน้นข้อจำกัดด้านต้นทุน/พลังงาน ไม่ใช่พลังประมวลผลสูงสุด",
+      "Cloud storage server เน้นการเก็บข้อมูล ไม่ใช่พลังการคำนวณสูงสุดโดยตรง",
+      "ถูก — สไลด์ระบุว่า Supercomputer คือกลุ่มที่ให้ highest capability สำหรับงานวิทยาศาสตร์/วิศวกรรมขนาดใหญ่",
+      "Personal computer ทั่วไปไม่ได้ถูกออกแบบมาเพื่อพลังประมวลผลสูงสุดระดับงานวิทยาศาสตร์ขนาดใหญ่"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องออกแบบชิปควบคุมสำหรับเครื่องใช้ไฟฟ้าที่มีข้อจำกัดด้านพลังงานและต้นทุนที่เข้มงวดมาก ควรจัดอยู่ใน class ใด?",
+    choices: ["Embedded computer", "Supercomputer", "Cloud computing server", "Mainframe"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า Embedded computer มี stringent power/performance/cost constraints ตรงกับโจทย์นี้",
+      "Supercomputer เน้นพลังประมวลผลสูงสุด ไม่ได้เน้นข้อจำกัดด้านต้นทุน/พลังงานแบบนี้",
+      "Cloud computing server เน้นการให้บริการทรัพยากรผ่านเครือข่าย ไม่ใช่ชิปควบคุมในเครื่องใช้ไฟฟ้า",
+      "ไม่ใช่คำที่สไลด์นี้กล่าวถึงในบริบทนี้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมหนึ่งมี Instruction Count = 1,000,000 คำสั่ง, CPI เฉลี่ย = 2, และ Clock Cycle Time = 1 นาโนวินาที จะใช้ CPU Time เท่าไหร่ตามสูตร CPU Time = IC × CPI × Clock Cycle Time?",
+    choices: ["500,000 ns", "2,000,000 ns", "1,000,000 ns", "4,000,000 ns"],
+    correct: 1,
+    explain: [
+      "คำนวณต่ำเกินไป ไม่ตรงกับสูตร",
+      "ถูก — 1,000,000 × 2 × 1 ns = 2,000,000 ns (หรือ 2 มิลลิวินาที)",
+      "ยังไม่ได้คูณ CPI เข้าไปในการคำนวณ",
+      "คำนวณสูงเกินไป ไม่ตรงกับสูตร"
+    ]
+  },
+  {
+    type: "apply",
+    q: "งานประมวลผลภาพที่ต้องทำ operation เดียวกันกับพิกเซลนับล้านจุดพร้อมกัน เหมาะกับสถาปัตยกรรมแบบใดใน Flynn's Taxonomy มากที่สุด?",
+    choices: ["SISD", "MISD", "แบบใดก็ได้ ไม่มีผลต่อประสิทธิภาพ", "SIMD"],
+    correct: 3,
+    explain: [
+      "SISD ประมวลผลคำสั่งเดียวกับข้อมูลเดียวทีละอัน ไม่เหมาะกับข้อมูลจำนวนมากพร้อมกัน",
+      "MISD แทบไม่มีการใช้งานจริง และไม่เหมาะกับลักษณะงานนี้",
+      "การเลือกสถาปัตยกรรมมีผลต่อประสิทธิภาพอย่างมาก โดยเฉพาะงานที่มีลักษณะขนานสูงแบบนี้",
+      "ถูก — SIMD ออกแบบมาสำหรับทำ operation เดียวกันกับข้อมูลจำนวนมากพร้อมกัน ตรงกับงานประมวลผลภาพ/พิกเซล"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ทีมพัฒนาต้องการให้แต่ละบริการ (login, payment, search) พัฒนาและ deploy แยกจากกันได้อย่างอิสระ ควรเลือก pattern ใดตามที่กล่าวในสไลด์?",
+    choices: ["Monolithic", "Client-server แบบดั้งเดิม", "Microservices", "Single unified system"],
+    correct: 2,
+    explain: [
+      "Monolithic รวมทุกอย่างเป็นระบบเดียว ขัดกับความต้องการแยก deploy อิสระ",
+      "Client-server แบ่งแค่ฝั่งขอกับฝั่งให้บริการ ไม่ได้เน้นการแตกเป็นบริการย่อยอิสระ",
+      "ถูก — สไลด์ระบุว่า Microservices คือ modular, independently deployable services ตรงกับโจทย์นี้พอดี",
+      "เป็นอีกชื่อของ Monolithic ซึ่งขัดกับความต้องการในโจทย์"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมหนึ่งเข้าถึงข้อมูลชุดเดิมซ้ำ ๆ บ่อยมากในช่วงเวลาสั้น ๆ ควรอาศัยกลไกฮาร์ดแวร์ใดเพื่อให้เข้าถึงข้อมูลนั้นได้เร็วขึ้นโดยไม่ต้องวิ่งไป main memory ทุกครั้ง?",
+    choices: ["Cache memory", "Power supply unit", "GPU เพียงอย่างเดียว", "Storage device"],
+    correct: 0,
+    explain: [
+      "ถูก — Cache memory ถูกออกแบบมาเพื่อเก็บข้อมูลที่มีแนวโน้มถูกใช้ซ้ำในอนาคตอันใกล้ ให้เข้าถึงได้เร็วกว่าไป main memory",
+      "Power supply unit จ่ายไฟให้ระบบ ไม่เกี่ยวกับความเร็วในการเข้าถึงข้อมูล",
+      "GPU เน้นการประมวลผลกราฟิก/ขนาน ไม่ใช่กลไกหลักสำหรับเก็บข้อมูลที่ใช้ซ้ำบ่อยของ CPU ทั่วไป",
+      "Storage device ช้ากว่า main memory มาก ไม่ใช่คำตอบที่เหมาะกับการเข้าถึงข้อมูลซ้ำบ่อย ๆ ให้เร็วขึ้น"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

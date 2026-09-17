@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Internet Architecture — โครงข่ายพิมพ์เขียว</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Internet Architecture — โครงข่ายพิมพ์เขียว</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  {
+    "type": "recall",
+    "q": "เทคโนโลยี access network ใดเป็นแบบ Shared?",
+    "choices": [
+      "FTTH",
+      "DSL",
+      "HFC (Cable)",
+      "Ethernet"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — FTTH เป็น dedicated",
+      "ผิด — DSL เป็น dedicated",
+      "ถูก — HFC แชร์กับบ้านอื่น (รวมถึง WiFi และ 4G/5G)",
+      "ผิด — Ethernet เป็น dedicated"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "WiFi ใช้คลื่นความถี่แบบใด?",
+    "choices": [
+      "Unlicensed",
+      "Licensed",
+      "Dedicated fiber",
+      "Coaxial"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — WiFi ใช้คลื่นที่ใครก็ใช้ได้โดยไม่ต้องขอใบอนุญาต",
+      "ผิด — licensed คือ 4G/5G ที่ค่ายมือถือประมูล",
+      "ผิด — ไม่ใช่คลื่นวิทยุ",
+      "ผิด — coax เป็นสายสัญญาณ"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ในความหน่วง 4 ประเภท ตัวใดเป็นแบบแปรผันตามสภาพทราฟฟิก?",
+    "choices": [
+      "Processing delay",
+      "Transmission delay",
+      "Propagation delay",
+      "Queuing delay"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — สไลด์จัดเป็นแบบคงที่",
+      "ผิด — L/R คงที่สำหรับแพ็กเก็ตและลิงก์เดียวกัน",
+      "ผิด — d/s คงที่ตามระยะทาง",
+      "ถูก — queuing delay ขึ้นกับความหนาแน่นของคิว"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Propagation delay คำนวณจากสูตรใด?",
+    "choices": [
+      "L/R",
+      "d/s",
+      "La/R",
+      "R/L"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — L/R คือ transmission delay",
+      "ถูก — ระยะทาง / ความเร็วสัญญาณ",
+      "ผิด — La/R คือ traffic intensity",
+      "ผิด — ไม่ใช่สูตร delay"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Throughput แบบ end-to-end ของเส้นทางที่มีหลายลิงก์คำนวณอย่างไร?",
+    "choices": [
+      "ผลรวมของทุกลิงก์",
+      "ค่าเฉลี่ยของทุกลิงก์",
+      "ค่าน้อยที่สุด min(R1, R2, R3)",
+      "ค่ามากที่สุด max(R1, R2, R3)"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ข้อมูลต้องผ่านทุกลิงก์เรียงกัน ไม่ได้บวก",
+      "ผิด — ไม่ใช่ค่าเฉลี่ย",
+      "ถูก — ลิงก์ที่ช้าที่สุด (bottleneck) กำหนดความเร็ว",
+      "ผิด — ลิงก์เร็วไม่ช่วยถ้ามีคอขวด"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "บริเวณที่ traffic intensity I ≥ 1 ในกราฟเรียกว่าอะไร?",
+    "choices": [
+      "Stable region",
+      "Bottleneck link",
+      "Idle region",
+      "Unstable region"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ตรงข้าม",
+      "ผิด — bottleneck ใช้กับ throughput",
+      "ผิด — ไม่ใช่ศัพท์ในสไลด์",
+      "ถูก — ข้อมูลไหลเข้าเร็วกว่าระบาย คิวยาวจน loss"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ใน 5-layer stack หน่วยข้อมูลของ Network layer คืออะไร?",
+    "choices": [
+      "Datagram",
+      "Segment",
+      "Frame",
+      "Message"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — network layer (IP) ใช้ datagram",
+      "ผิด — segment เป็นของ transport",
+      "ผิด — frame เป็นของ link",
+      "ผิด — message เป็นของ application"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "มัลแวร์ที่แพร่และคัดลอกตัวเองไปยังโฮสต์อื่นอัตโนมัติโดยไม่ต้องพึ่งผู้ใช้เรียกว่าอะไร?",
+    "choices": [
+      "Botnet",
+      "Worm",
+      "MITM",
+      "Spoofing"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — botnet คือกลุ่มเครื่องที่ถูกยึดรอคำสั่ง",
+      "ถูก — worm เป็น self-replicating malware",
+      "ผิด — MITM คือการดักกลางทาง",
+      "ผิด — spoofing คือการปลอมที่อยู่"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ในตำรา security ผู้บุกรุกที่แทรกกลางการสื่อสารระหว่าง Alice กับ Bob ชื่ออะไร?",
+    "choices": [
+      "Carol",
+      "Eve",
+      "Trudy",
+      "Dave"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่ใช่ชื่อที่สไลด์ใช้",
+      "ผิด — ตำราบางเล่มใช้ แต่สไลด์นี้ไม่ได้ใช้",
+      "ถูก — Trudy (intruder) ในภาพ MITM",
+      "ผิด — ไม่ใช่ชื่อที่สไลด์ใช้"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "อุปกรณ์กลางทางใดแกะ encapsulation ถึงชั้น Network (L3)?",
+    "choices": [
+      "Link-layer switch",
+      "Hub",
+      "Repeater",
+      "Router"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — switch ดูแค่ถึง L2",
+      "ผิด — hub ทำงานระดับ physical",
+      "ผิด — repeater ทำงานระดับ physical",
+      "ถูก — router ดู header L3 เพื่อหา IP ปลายทาง"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ISP ระดับเดียวกันเชื่อมต่อกันเองหรือผ่าน IXP เพื่อหลีกเลี่ยงค่าใช้จ่ายใด?",
+    "choices": [
+      "Transit fee",
+      "License fee",
+      "Hosting fee",
+      "Domain fee"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — peering ช่วยไม่ต้องจ่ายค่าผ่านทางให้ ISP ระดับบน",
+      "ผิด — ไม่เกี่ยวกับ peering",
+      "ผิด — ไม่เกี่ยวกับ peering",
+      "ผิด — ไม่เกี่ยวกับ peering"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "คุณสมบัติที่ทำให้อุปกรณ์ต่างยี่ห้อสื่อสารกันได้เพราะใช้มาตรฐานเดียวกันเรียกว่าอะไร?",
+    "choices": [
+      "Scalability",
+      "Interoperability",
+      "Mobility",
+      "Latency"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — scalability คือการขยายระบบ",
+      "ถูก — interoperability ทำงานร่วมกันข้ามผู้ผลิตได้",
+      "ผิด — mobility คือการเคลื่อนที่",
+      "ผิด — latency คือความหน่วง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมการซื้อเน็ตแรงขึ้น (R สูงขึ้น) จึงไม่ลด propagation delay?",
+    "choices": [
+      "เพราะ d_prop ขึ้นกับระยะทางและความเร็วสัญญาณเท่านั้น ไม่ขึ้นกับ L หรือ R",
+      "เพราะ d_prop เป็นแบบแปรผัน",
+      "เพราะ R ใช้กับ queuing delay เท่านั้น",
+      "เพราะ d_prop ขึ้นกับขนาดแพ็กเก็ต"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ส่งข้ามมหาสมุทรยังไงก็ใช้เวลาเดินทางเท่าเดิม",
+      "ผิด — d_prop คงที่",
+      "ผิด — R ใช้ใน d_trans และ traffic intensity",
+      "ผิด — d_prop ไม่ขึ้นกับ L"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม packet switching รองรับผู้ใช้ได้มากกว่า circuit switching บนลิงก์ 2 Mbps?",
+    "choices": [
+      "เพราะจองแบนด์วิดท์ให้แต่ละคนน้อยลง",
+      "เพราะผู้ใช้ไม่ได้ส่งข้อมูลพร้อมกันตลอดเวลา จึงแชร์ลิงก์ได้",
+      "เพราะ packet switching ไม่มี queuing delay",
+      "เพราะใช้ TDM slots มากขึ้น"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — packet switching ไม่ได้จองแบนด์วิดท์",
+      "ถูก — ข้อมูล bursty ทำให้รับได้มากกว่า 3 คน ขณะ circuit ได้แค่ 2",
+      "ผิด — packet switching มี queuing delay",
+      "ผิด — TDM slots เป็นของ circuit switching"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ข้อเสียของ circuit switching ตามสไลด์คืออะไร?",
+    "choices": [
+      "ประสิทธิภาพคาดการณ์ไม่ได้",
+      "เกิด packet loss บ่อย",
+      "ทรัพยากรสูญเปล่าเมื่อไม่มีการส่งข้อมูล",
+      "ต้องแบ่งข้อมูลเป็นแพ็กเก็ต"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — circuit คาดการณ์ได้แน่นอน",
+      "ผิด — circuit จองไว้ ไม่มีคิวสะสม",
+      "ถูก — dedicated path ว่างก็เสียเปล่า",
+      "ผิด — นั่นคือ packet switching"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม Google จึงสร้าง private network เชื่อม data center ทั่วโลก?",
+    "choices": [
+      "เพื่อขายบริการ Tier-1 transit",
+      "เพื่อบังคับใช้ circuit switching",
+      "เพื่อหลีกเลี่ยงการใช้ IP",
+      "เพื่อลดค่า transit และนำข้อมูลเข้าใกล้ผู้ใช้มากที่สุด"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ใช่เป้าหมาย",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — ยังใช้ IP",
+      "ถูก — ข้ามลำดับชั้น ISP ลดต้นทุนและ latency"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "เมื่อ traffic intensity I > 1 ต่อเนื่อง จะเกิดผลลัพธ์ใด?",
+    "choices": [
+      "คิวยาวขึ้นเรื่อย ๆ จน buffer เต็มและแพ็กเก็ตถูกทิ้ง",
+      "Propagation delay ลดลง",
+      "Throughput เพิ่มขึ้นไม่จำกัด",
+      "Router ส่งเร็วขึ้นอัตโนมัติ"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ข้อมูลเข้าเร็วกว่าที่ router ระบาย จึงเกิด packet loss",
+      "ผิด — d_prop ไม่ขึ้นกับทราฟฟิก",
+      "ผิด — throughput ถูกจำกัดด้วย R",
+      "ผิด — R ของลิงก์คงที่"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมการแบ่งข้อความเป็นแพ็กเก็ตเล็กจึงลดเวลารวมบนเส้นทางหลายลิงก์?",
+    "choices": [
+      "เพราะแพ็กเก็ตเล็กวิ่งในสายเร็วกว่า",
+      "เพราะไม่ต้องทำ store-and-forward เลย",
+      "เพราะทุกลิงก์ทำงานพร้อมกันแบบ pipeline ไม่ต้องรอทั้งก้อน",
+      "เพราะ header หายไป"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ความเร็วสัญญาณเท่าเดิม",
+      "ผิด — ยัง store-and-forward แต่ทีละชิ้นเล็ก",
+      "ถูก — ลิงก์ถัดไปเริ่มส่งชิ้นแรกได้ขณะลิงก์ก่อนหน้าส่งชิ้นต่อไป",
+      "ผิด — แพ็กเก็ตยังมี header"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ในการเปรียบด่านเก็บเงิน transmission delay ตรงกับข้อใด?",
+    "choices": [
+      "เวลาที่รถวิ่งจากด่านหนึ่งไปอีกด่าน",
+      "เวลาที่ด่านปล่อยรถทีละคันจนครบขบวน",
+      "เวลาที่รถรอคิวหน้าด่าน",
+      "เวลาที่เจ้าหน้าที่ตรวจตั๋ว"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — นั่นคือ propagation delay",
+      "ถูก — ดันบิตทั้งหมดของแพ็กเก็ตลงสาย",
+      "ผิด — นั่นคือ queuing delay",
+      "ผิด — ใกล้กับ processing delay"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "MITM ต่างจาก DDoS อย่างไร?",
+    "choices": [
+      "MITM ถล่มทราฟฟิกใส่เป้าหมาย ส่วน DDoS ดักอ่านข้อมูล",
+      "ทั้งสองคือการแพร่มัลแวร์อัตโนมัติ",
+      "MITM ต้องใช้ botnet เสมอ",
+      "MITM แทรกกลางเพื่ออ่าน/แก้ข้อมูล ส่วน DDoS ใช้เครื่องจำนวนมากถล่มจนระบบล่ม"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — สลับกัน",
+      "ผิด — การแพร่อัตโนมัติคือ worm",
+      "ผิด — MITM ไม่จำเป็นต้องใช้ botnet",
+      "ถูก — เป้าหมายต่างกัน: ขโมย/แก้ข้อมูล vs ทำให้ใช้งานไม่ได้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม switch และ router จึงไม่แกะ encapsulation ถึงชั้น application?",
+    "choices": [
+      "เพราะแต่ละอุปกรณ์อ่านเฉพาะ header ของชั้นที่ตัวเองรับผิดชอบ",
+      "เพราะข้อมูลชั้น application ถูกลบระหว่างทาง",
+      "เพราะ application header อยู่นอกสุด",
+      "เพราะทุกข้อมูลเข้ารหัสเสมอ"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — switch ดู L2 router ดู L3 เหมือนจุดตรวจสนามบินที่ดูเฉพาะป้ายของตน",
+      "ผิด — ข้อมูลยังอยู่ครบถึงปลายทาง",
+      "ผิด — application data อยู่ในสุด",
+      "ผิด — ไม่ใช่เหตุผลในสไลด์"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ข้อใดจับคู่ access network กับการจัดสรรแบนด์วิดท์ได้ถูกต้องทั้งหมด?",
+    "choices": [
+      "DSL = shared, HFC = dedicated",
+      "FTTH = dedicated, 4G/5G = shared",
+      "Ethernet = shared, WiFi = dedicated",
+      "FTTH = shared, DSL = shared"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — สลับกัน",
+      "ถูก — FTTH/DSL/Ethernet dedicated ส่วน HFC/WiFi/4G-5G shared",
+      "ผิด — สลับกัน",
+      "ผิด — ทั้งสองเป็น dedicated"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมโปรโตคอลจึงถูกเปรียบว่าเป็น “ธรรมเนียมปฏิบัติทางการทูต”?",
+    "choices": [
+      "เพราะต้องเจรจาราคาค่าบริการก่อนส่งข้อมูล",
+      "เพราะโปรโตคอลเป็นกฎหมายของแต่ละประเทศ",
+      "เพราะกำหนดลำดับและรูปแบบร่วมกัน ทำให้อุปกรณ์ต่างค่ายสื่อสารกันได้",
+      "เพราะใช้เฉพาะหน่วยงานรัฐ"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่เกี่ยวกับราคา",
+      "ผิด — โปรโตคอลเป็นมาตรฐานทางเทคนิค ไม่ใช่กฎหมาย",
+      "ถูก — ไม่มีมาตรฐานร่วม อุปกรณ์ต่างผู้ผลิตจะคุยกันไม่ได้ (interoperability)",
+      "ผิด — ใช้กับทุกอุปกรณ์"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม 4G/5G จึงใช้คลื่น licensed ขณะที่ WiFi ใช้ unlicensed?",
+    "choices": [
+      "เพราะ WiFi เร็วกว่า 5G เสมอ",
+      "เพราะ 4G/5G เป็นบริการระยะไกลของค่ายมือถือที่ได้สิทธิ์คลื่นมาใช้เฉพาะ ส่วน WiFi ใครก็ตั้งได้ระยะสั้น",
+      "เพราะ WiFi ใช้สายทองแดง",
+      "เพราะ 4G/5G เป็นแบบ dedicated"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่เหตุผล และไม่จริงเสมอไป",
+      "ถูก — licensed ต้องได้รับอนุญาต/ประมูล ส่วน unlicensed ใช้ได้เสรี",
+      "ผิด — WiFi เป็นคลื่นวิทยุ",
+      "ผิด — 4G/5G เป็นแบบ shared"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ส่งแพ็กเก็ต 4,000 bits ผ่านสาย 2 Mbps transmission delay เท่าใด?",
+    "choices": [
+      "0.2 ms",
+      "20 ms",
+      "2 ms",
+      "2 s"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — น้อยไป 10 เท่า",
+      "ผิด — มากไป 10 เท่า",
+      "ถูก — 4,000 / 2,000,000 = 0.002 s = 2 ms",
+      "ผิด — ลืมแปลง Mbps เป็น bps"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "อัปโหลดไฟล์ 5 MB ผ่าน upstream 10 Mbps ใช้ transmission delay เท่าใด?",
+    "choices": [
+      "0.5 วินาที",
+      "4 วินาที",
+      "40 วินาที",
+      "2 วินาที"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ลืมคูณ 8 แปลง bytes เป็น bits",
+      "ถูก — 5×10⁶×8 = 40,000,000 bits ÷ 10,000,000 bps = 4 s",
+      "ผิด — มากไป 10 เท่า",
+      "ผิด — คำนวณผิด"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ส่ง 1,000 bytes บนสาย 10 Mbps ยาว 2,000 km (s = 2×10⁸ m/s) ข้อใดถูก?",
+    "choices": [
+      "d_trans = 10 ms, d_prop = 0.8 ms",
+      "d_trans = 0.1 ms, d_prop = 1 ms",
+      "d_trans = 8 ms, d_prop = 100 ms",
+      "d_trans = 0.8 ms, d_prop = 10 ms"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — สลับค่ากัน",
+      "ผิด — ลืมคูณ 8 และแปลงระยะผิด",
+      "ผิด — ผิดหน่วย 10 เท่า",
+      "ถูก — 8,000/10⁷ = 0.8 ms และ 2×10⁶/2×10⁸ = 10 ms"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "เส้นทาง Server → 2 Mbps → 100 kbps → 1 Mbps → Client throughput เท่าใด?",
+    "choices": [
+      "100 kbps",
+      "1 Mbps",
+      "2 Mbps",
+      "3.1 Mbps"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — min(2 Mbps, 100 kbps, 1 Mbps) = 100 kbps",
+      "ผิด — ลิงก์ 100 kbps ช้ากว่า",
+      "ผิด — ลิงก์ต้นทางเร็วไม่ช่วยถ้ามีคอขวด",
+      "ผิด — throughput ไม่ใช่ผลรวม"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ส่งข้อความ 10⁶ bits ผ่าน 3 ลิงก์ ลิงก์ละ 5 Mbps โดยไม่แบ่งแพ็กเก็ต ใช้เวลารวมเท่าใด?",
+    "choices": [
+      "0.2 s",
+      "0.204 s",
+      "0.6 s",
+      "1.8 s"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — นั่นคือเวลาผ่าน 1 ลิงก์",
+      "ผิด — นั่นคือกรณีแบ่ง 100 แพ็กเก็ต",
+      "ถูก — แต่ละลิงก์ 10⁶/5×10⁶ = 0.2 s × 3 ลิงก์ = 0.6 s",
+      "ผิด — คำนวณเกินจริง"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "จากโจทย์เดียวกัน ถ้าแบ่งเป็น 100 แพ็กเก็ต แพ็กเก็ตละ 10⁴ bits ใช้เวลารวมเท่าใด?",
+    "choices": [
+      "0.006 s",
+      "0.6 s",
+      "0.2 s",
+      "0.204 s"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือเวลาที่แพ็กเก็ตแรกถึง",
+      "ผิด — นั่นคือกรณีไม่แบ่ง",
+      "ผิด — คำนวณแพ็กเก็ตสุดท้ายไม่ครบ",
+      "ถูก — 3×0.002 + 99×0.002 = 0.204 s"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

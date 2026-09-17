@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 5.1 — Error Detection and Correction</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 5.1 — Error Detection and Correction</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  {
+    "type": "recall",
+    "q": "สาเหตุหลักของ bit error ระหว่างการส่งคืออะไร?",
+    "choices": [
+      "Noise (สัญญาณรบกวน)",
+      "Framing ผิดรูปแบบ",
+      "การใช้ IPv6",
+      "การเข้ารหัสด้วย TLS"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — เช่น interference, thermal noise, hardware เสีย, ฟ้าผ่า, EMP",
+      "ผิด — ไม่ใช่สาเหตุที่สไลด์ระบุ",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Error ที่มีบิตเปลี่ยนตั้งแต่ 2 บิตขึ้นไปในช่วงหนึ่งเรียกว่าอะไร?",
+    "choices": [
+      "Single-bit error",
+      "Parity error",
+      "Burst error",
+      "Frame error"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — single-bit เปลี่ยนแค่ 1 บิต",
+      "ผิด — ไม่ใช่ชนิดของ error ในสไลด์",
+      "ถูก — burst error นับจากบิตแรกถึงบิตสุดท้ายที่ผิด",
+      "ผิด — ไม่ใช่ชนิดของ error ในสไลด์"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "แนวทาง error control ที่ตรวจพบ error แล้วขอให้ส่งใหม่คืออะไร?",
+    "choices": [
+      "FEC",
+      "ARQ",
+      "Interleaving",
+      "Hamming code"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — FEC แก้เองจาก redundancy",
+      "ถูก — ARQ = Automatic Repeat reQuest",
+      "ผิด — interleaving สลับบิตเพื่อช่วยแก้ burst",
+      "ผิด — Hamming เป็นวิธีแก้ error (FEC)"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ใน block coding ถ้า dataword k บิต และ redundancy r บิต codeword มีขนาดเท่าใด?",
+    "choices": [
+      "n = k × r",
+      "n = k − r",
+      "n = 2^k",
+      "n = k + r"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ได้คูณกัน",
+      "ผิด — codeword ยาวกว่า dataword",
+      "ผิด — 2^k คือจำนวนแบบของ dataword",
+      "ถูก — codeword = dataword + redundancy"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ผลที่ผู้รับคำนวณจาก codeword เพื่อตรวจ error เรียกว่าอะไร และค่าใดหมายถึงไม่มี error?",
+    "choices": [
+      "Syndrome = 0",
+      "Checksum = 1",
+      "Parity = 1",
+      "Remainder = divisor"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — syndrome 0 ถือว่าไม่มี error ส่วน ≠ 0 มี error",
+      "ผิด — checker ต้องได้ 0 ทั้งหมด",
+      "ผิด — parity 1 ใน checker หมายถึงผิด",
+      "ผิด — เศษต้องเป็น 0"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Internet checksum ใช้เลขคณิตแบบใด?",
+    "choices": [
+      "Two's complement",
+      "Modulo-2 division",
+      "One's complement",
+      "Hamming distance"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่ใช่วิธีของ Internet checksum",
+      "ผิด — นั่นคือ CRC",
+      "ถูก — บวกแล้วนำตัวทดวนกลับมาบวก (wrapped sum) แล้วกลับบิต",
+      "ผิด — ไม่ใช่วิธีคำนวณ checksum"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "IPv4 header checksum ป้องกันข้อมูลส่วนใด?",
+    "choices": [
+      "Header และ data ทั้งหมด",
+      "เฉพาะ IPv4 header",
+      "เฉพาะ transport data",
+      "เฉพาะ Ethernet trailer"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — นั่นคือ TCP/UDP checksum (header + data ของ transport)",
+      "ถูก — IPv4 checksum ครอบคลุมแค่ header",
+      "ผิด — ไม่ใช่ขอบเขตของ IPv4 checksum",
+      "ผิด — Ethernet ใช้ FCS/CRC"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ถ้า CRC divisor มี 4 บิต ต้องเติม 0 ท้าย dataword กี่ตัว?",
+    "choices": [
+      "4 ตัว",
+      "5 ตัว",
+      "2 ตัว",
+      "3 ตัว"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — CRC ต้องน้อยกว่า divisor 1 บิต",
+      "ผิด — มากเกินไป",
+      "ผิด — น้อยเกินไป",
+      "ถูก — divisor n+1 = 4 บิต → CRC n = 3 บิต เติม 0 สามตัว"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Hamming code วาง redundant bits ไว้ที่ตำแหน่งใด?",
+    "choices": [
+      "ตำแหน่งเลขคี่ 1, 3, 5, 7",
+      "ตำแหน่งท้ายสุดของ codeword",
+      "ตำแหน่งกำลังสอง 1, 2, 4, 8",
+      "ตำแหน่งแรกสุดทั้งหมด"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ตำแหน่ง 3, 5, 7 เป็นข้อมูล",
+      "ผิด — นั่นคือแบบ CRC",
+      "ถูก — วางที่ตำแหน่ง 2^k",
+      "ผิด — ไม่ใช่วิธีของ Hamming"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Redundant bit r2 ของ Hamming code (11 บิต) ตรวจตำแหน่งใด?",
+    "choices": [
+      "1, 3, 5, 7, 9, 11",
+      "4, 5, 6, 7",
+      "8, 9, 10, 11",
+      "2, 3, 6, 7, 10, 11"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ r1",
+      "ผิด — นั่นคือ r4",
+      "ผิด — นั่นคือ r8",
+      "ถูก — ตำแหน่งที่หลัก 2 ของเลขฐานสองเป็น 1"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Link technology อย่าง Ethernet มักใช้วิธีใดตรวจ error ใน FCS?",
+    "choices": [
+      "CRC",
+      "Checksum",
+      "1D Parity",
+      "Hamming code"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — CRC ตรวจ burst error ได้ดีกว่ามาก",
+      "ผิด — checksum ใช้ใน IP/TCP/UDP",
+      "ผิด — parity อ่อนเกินไป",
+      "ผิด — Hamming ใช้แก้ error ไม่ใช่ FCS ของ Ethernet"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "วิธีตรวจจับ error 3 แบบหลักในสไลด์คืออะไร?",
+    "choices": [
+      "Hamming, Interleaving, ARQ",
+      "Parity check, CRC, Checksum",
+      "FEC, ARQ, EDC",
+      "Framing, Stuffing, Padding"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — Hamming/interleaving เป็นวิธีแก้ ARQ เป็นกลยุทธ์กู้คืน",
+      "ถูก — detection methods: parity, CRC, checksum",
+      "ผิด — เป็นแนวคิด error control ไม่ใช่ detection methods",
+      "ผิด — เป็นเรื่อง framing ของ Lecture 5.0"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ARQ ต่างจาก FEC อย่างไร?",
+    "choices": [
+      "ARQ ใช้ redundancy มากกว่าและไม่ต้องส่งใหม่",
+      "ARQ ใช้ redundancy น้อยแต่ต้องขอส่งใหม่ ส่วน FEC ใช้ redundancy มากพอให้ผู้รับแก้เอง",
+      "ทั้งสองไม่ต้องมีช่องทางย้อนกลับ",
+      "FEC ทำได้แค่ตรวจจับ ไม่แก้ไข"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — สลับกัน",
+      "ถูก — trade-off ระหว่างปริมาณ redundancy กับการส่งซ้ำ",
+      "ผิด — ARQ ต้องมีช่องทางย้อนกลับเพื่อขอส่งใหม่",
+      "ผิด — FEC แก้ error ได้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม parity check จึงตรวจไม่พบเมื่อมีบิตผิดจำนวนคู่?",
+    "choices": [
+      "เพราะจำนวน 1 ยังคงความเป็นคู่/คี่เดิม",
+      "เพราะ parity bit หายไประหว่างทาง",
+      "เพราะผู้รับไม่ได้นับบิต",
+      "เพราะ parity ใช้การหาร"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — บิตกลับ 2 ตัว ผลรวม 1 เปลี่ยนเป็นเลขคู่ syndrome จึงยังเป็น 0",
+      "ผิด — parity bit ยังอยู่",
+      "ผิด — ผู้รับนับทุกครั้ง",
+      "ผิด — parity ใช้ XOR/บวก ส่วนการหารคือ CRC"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม 2D parity จึงแก้ single-bit error ได้ ขณะที่ 1D parity ทำไม่ได้?",
+    "choices": [
+      "เพราะ 2D ใช้ CRC ร่วมด้วย",
+      "เพราะ 2D ส่งข้อมูลซ้ำสองรอบ",
+      "เพราะแถวและคอลัมน์ที่ parity ผิดตัดกันบอกตำแหน่งบิตที่ผิด",
+      "เพราะ 2D ใช้ odd parity"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่ได้ใช้ CRC",
+      "ผิด — ไม่ได้ส่งซ้ำ",
+      "ถูก — รู้ตำแหน่งแล้วกลับบิตแก้ได้",
+      "ผิด — ชนิด parity ไม่ใช่เหตุผล"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ใน one's complement ตัวทด (carry) ที่ล้นออกทางซ้ายต้องทำอย่างไร?",
+    "choices": [
+      "ทิ้งไป",
+      "เก็บไว้เป็นบิตที่ 9",
+      "คูณสองแล้วบวก",
+      "นำกลับมาบวกทางขวา (wrap around)"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือพฤติกรรมของ two's complement แบบปกติ",
+      "ผิด — ต้องคงความยาว m บิต",
+      "ผิด — ไม่ใช่วิธีที่ถูกต้อง",
+      "ถูก — wrapped addition คือหัวใจของ Internet checksum"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม link layer จึงนิยม CRC มากกว่า checksum?",
+    "choices": [
+      "เพราะ CRC แก้ error ได้",
+      "เพราะ CRC ตรวจจับ burst error ได้ดีกว่ามาก",
+      "เพราะ CRC ไม่ต้องมี redundancy",
+      "เพราะ checksum ใช้ได้เฉพาะ wireless"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — CRC ตรวจจับได้ แต่ไม่ได้แก้",
+      "ถูก — burst error พบบ่อยบนลิงก์ และ CRC ทรงพลังที่สุดในการตรวจ",
+      "ผิด — CRC คือ redundancy",
+      "ผิด — ไม่จริง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม burst error จึงพบบ่อยกว่า single-bit error?",
+    "choices": [
+      "เพราะ noise มักกินเวลานานกว่า 1 บิต โดยเฉพาะเมื่อ data rate สูง",
+      "เพราะ parity สร้าง burst error",
+      "เพราะ CRC ทำให้บิตเปลี่ยน",
+      "เพราะข้อมูลถูกเข้ารหัส"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — noise ช่วงสั้น ๆ ก็ทำให้หลายบิตเสียได้เมื่อบิตสั้นมาก",
+      "ผิด — parity แค่ตรวจ",
+      "ผิด — CRC แค่ตรวจ",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ในการหาร modulo-2 ของ CRC ถ้าบิตซ้ายสุดของตัวตั้งปัจจุบันเป็น 0 ต้องทำอย่างไร?",
+    "choices": [
+      "ใช้ divisor จริงหารตามปกติ",
+      "หยุดการหาร",
+      "XOR ด้วย 000…0 และผลหารบิตนั้นเป็น 0",
+      "ยืมบิตจากหลักถัดไป"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ใช้ divisor เฉพาะเมื่อบิตซ้ายเป็น 1",
+      "ผิด — ยังต้องหารจนครบ",
+      "ถูก — ใช้ 0000 เป็นตัวหารแทน",
+      "ผิด — modulo-2 ไม่มีการยืม"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ใน Hamming code syndrome มีความหมายพิเศษอย่างไร?",
+    "choices": [
+      "บอกจำนวนบิตที่ผิดทั้งหมด",
+      "บอกว่าเป็น burst error หรือไม่",
+      "บอกค่า divisor ที่ใช้",
+      "อ่าน (r8 r4 r2 r1) เป็นเลขฐานสองได้ตำแหน่งของบิตที่ผิด"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — Hamming แก้ได้เฉพาะ single-bit",
+      "ผิด — ไม่ได้บอกชนิด burst",
+      "ผิด — Hamming ไม่ใช้ divisor",
+      "ถูก — เช่น 0111 = ตำแหน่ง 7 แล้วกลับบิตนั้น"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Interleaving ช่วยแก้ burst error ได้อย่างไร?",
+    "choices": [
+      "เพิ่ม CRC ให้ทุก frame",
+      "สลับลำดับการส่งให้ burst ทำลายแค่ 1 บิตต่อหน่วย แล้วแก้ด้วย Hamming",
+      "ส่งข้อมูลซ้ำสามครั้ง",
+      "ลดความเร็วการส่งลง"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ได้เพิ่ม CRC",
+      "ถูก — burst กลายเป็น single-bit error กระจายหลาย codeword",
+      "ผิด — ไม่ได้ส่งซ้ำ",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม codeword ที่ใช้จริงจึงมีน้อยกว่า 2^n แบบ และประโยชน์คืออะไร?",
+    "choices": [
+      "เพราะมี dataword แค่ 2^k แบบ codeword ที่ไม่อยู่ในชุดจึงตรวจได้ว่าผิด",
+      "เพราะ redundancy บิตถูกทิ้งก่อนส่ง",
+      "เพราะผู้ส่งใช้ได้แค่ even parity",
+      "เพราะ n น้อยกว่า k"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ถ้ารับได้ codeword ที่ไม่ valid ก็รู้ว่ามี error",
+      "ผิด — redundancy ถูกทิ้งหลังตรวจที่ผู้รับ",
+      "ผิด — ไม่ใช่เหตุผล",
+      "ผิด — n = k + r มากกว่า k"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Parity bit generator กับ checker สัมพันธ์กันอย่างไร?",
+    "choices": [
+      "ใช้กลไกต่างกันโดยสิ้นเชิง",
+      "Checker ใช้การหาร ส่วน generator ใช้การบวก",
+      "ใช้กลไกเดียวกัน (XOR ทุกบิต) ต่างกันที่ output คือ parity bit กับ syndrome",
+      "Generator อยู่ฝั่งรับ Checker อยู่ฝั่งส่ง"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ใช้กลไกเดียวกัน",
+      "ผิด — ทั้งสองใช้ XOR",
+      "ถูก — ทำฟังก์ชันเดียวกัน ผลที่ผู้รับได้เรียกว่า syndrome",
+      "ผิด — สลับฝั่ง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ถ้าผู้รับ CRC หาร codeword แล้วได้เศษไม่เป็นศูนย์ ควรทำอย่างไร?",
+    "choices": [
+      "ส่ง dataword ขึ้นไปตามปกติ",
+      "กลับบิตตามตำแหน่งเศษ",
+      "เติม 0 แล้วหารใหม่",
+      "Discard (ทิ้ง) เพราะข้อมูลเสีย"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — เศษไม่เป็นศูนย์แปลว่ามี error",
+      "ผิด — CRC ไม่ได้บอกตำแหน่งบิตผิด",
+      "ผิด — ผู้รับหาร codeword ทั้งก้อนเลย ไม่เติม 0",
+      "ถูก — syndrome ≠ 0 → reject/discard"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ข้อมูล 1010110 ใช้ even parity ต้องเติม parity bit เป็นเท่าใด?",
+    "choices": [
+      "1",
+      "0",
+      "2",
+      "ไม่ต้องเติม"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — จะทำให้จำนวน 1 เป็น 5 (คี่)",
+      "ถูก — มี 1 สี่ตัวแล้ว (คู่) จึงเติม 0",
+      "ผิด — parity bit มีแค่ 0 หรือ 1",
+      "ผิด — ทุก data unit ต้องมี parity bit"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "CRC(7,4) ใช้ divisor 1011 dataword 1101 จะได้ codeword ใด?",
+    "choices": [
+      "1101000",
+      "1101010",
+      "1101001",
+      "1101110"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ยังไม่ได้แทน CRC",
+      "ผิด — เศษ 010 เป็นของ dataword 1100",
+      "ถูก — 1101000 ÷ 1011 เหลือเศษ 001 → 1101001",
+      "ผิด — 110 เป็น CRC ของ 0010"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "Checksum แบบ 4 บิตของคำ 5, 9, 14, 3 มีค่าเท่าใด?",
+    "choices": [
+      "14",
+      "1",
+      "15",
+      "31"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — sum 31 = 1 1111 → wrap 10000 → wrap อีกครั้ง 0001 = 1 → complement = 14",
+      "ผิด — 1 คือ wrapped sum ยังไม่ได้ complement",
+      "ผิด — ลืม wrap ตัวทดรอบสอง",
+      "ผิด — 31 เป็นผลรวมดิบ"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "Hamming code ของ dataword 1011001 (d7…d1) คือข้อใด?",
+    "choices": [
+      "10111001110",
+      "10101001110",
+      "10101000110",
+      "10011100101"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — r8 ควรเป็น 0",
+      "ถูก — r1=0, r2=1, r4=1, r8=0 → 10101001110",
+      "ผิด — r4 ควรเป็น 1",
+      "ผิด — นั่นคือ codeword ของ 1001101 จากตัวอย่างในสไลด์"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ส่ง Hamming codeword 10011100101 แต่รับ 10010100101 ควรกลับบิตตำแหน่งใด?",
+    "choices": [
+      "ตำแหน่ง 4",
+      "ตำแหน่ง 11",
+      "ตำแหน่ง 3",
+      "ตำแหน่ง 7"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — syndrome ไม่ใช่ 0100",
+      "ผิด — syndrome ไม่ใช่ 1011",
+      "ผิด — syndrome ไม่ใช่ 0011",
+      "ถูก — syndrome (r8 r4 r2 r1) = 0111 = 7"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ระบบสตรีมเสียงเจอ burst error บ่อย และส่งซ้ำไม่ทัน ควรใช้เทคนิคใดร่วมกัน?",
+    "choices": [
+      "1D parity อย่างเดียว",
+      "ARQ อย่างเดียว",
+      "Interleaving ร่วมกับ Hamming code",
+      "Checksum อย่างเดียว"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ตรวจได้แต่แก้ไม่ได้ และพลาดเมื่อผิดจำนวนคู่",
+      "ผิด — ARQ ต้องส่งซ้ำซึ่งไม่ทัน",
+      "ถูก — กระจาย burst ให้เป็น single-bit แล้วแก้เองได้ (FEC)",
+      "ผิด — ตรวจได้แต่แก้ไม่ได้"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

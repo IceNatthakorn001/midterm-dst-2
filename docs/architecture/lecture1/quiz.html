@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 1 - Introduction to OS</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 1 - Introduction to Operating Systems</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "หนังสือเล่มใดที่เอกสารประกอบการสอนระบุว่าอ่านฟรีออนไลน์ได้?",
+    choices: [
+      "Modern Operating Systems by Tanenbaum",
+      "Operating Systems: Three Easy Pieces",
+      "Operating System Principles by Silberschatz",
+      "Computer Organization and Design"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นหนังสืออ้างอิงอีกเล่มในวิชานี้ แต่ไม่ได้ระบุว่าอ่านฟรีออนไลน์",
+      "ถูก — สไลด์ระบุว่าอ่านฟรีออนไลน์ได้ที่ pages.cs.wisc.edu/~remzi/OSTEP/",
+      "เป็นหนังสืออ้างอิงอีกเล่ม แต่ไม่ได้ระบุว่าฟรีออนไลน์",
+      "ไม่ได้ถูกกล่าวถึงในเลกเชอร์นี้เลย"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามตารางการให้คะแนนในเลกเชอร์นี้ Final Exam มีสัดส่วนกี่เปอร์เซ็นต์ของเกรด?",
+    choices: ["10%", "20%", "50%", "30%"],
+    correct: 3,
+    explain: [
+      "10% คือสัดส่วนของ Quizzes หรือ Homework ไม่ใช่ Final Exam",
+      "ไม่ตรงกับตัวเลขที่ระบุในตาราง",
+      "ไม่ตรงกับตัวเลขที่ระบุ ส่วนที่เหลือมาจากหัวข้ออื่นที่ไม่ได้แจกแจงในสไลด์นี้",
+      "ถูก — ตารางระบุ Final Exam = 30%"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Quizzes มีสัดส่วนกี่เปอร์เซ็นต์ของเกรดตามตารางในเลกเชอร์นี้?",
+    choices: ["10%", "5%", "20%", "30%"],
+    correct: 0,
+    explain: [
+      "ถูก — ตารางระบุ Quizzes = 10%",
+      "ไม่ตรงกับตาราง",
+      "เป็นตัวเลขที่ไม่ปรากฏในตาราง",
+      "30% คือสัดส่วนของ Final Exam ไม่ใช่ Quizzes"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามนโยบายของวิชานี้ หากตรวจพบว่านักเรียนคัดลอกงานหรือโปรเจกต์จากเพื่อนจะเกิดอะไรขึ้น?",
+    choices: [
+      "ตัดคะแนนงานชิ้นนั้น 50%",
+      "ได้ 0 คะแนนเฉพาะคนที่ก็อป",
+      "ทุกคนที่เกี่ยวข้องได้ 0 คะแนนทั้งหมด",
+      "ต้องทำงานชิ้นใหม่ส่งแทน"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับนโยบายที่ระบุไว้ ซึ่งรุนแรงกว่านั้น",
+      "ผิด เพราะนโยบายระบุว่า \"ทุกคนที่เกี่ยวข้อง\" ไม่ใช่แค่คนก็อป",
+      "ถูก — สไลด์ระบุชัดว่า \"result in ZERO CREDIT for all students involved\"",
+      "ไม่ตรงกับนโยบายที่ระบุไว้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "คำว่า \"Extended machine\" ในเลกเชอร์นี้ หมายถึงอะไร?",
+    choices: [
+      "อีกชื่อหนึ่งที่ใช้เรียก Operating System",
+      "ฮาร์ดแวร์รุ่นใหม่ที่มีประสิทธิภาพสูงกว่าเดิม",
+      "โปรแกรมที่ใช้จำลอง (emulate) เครื่องอื่น",
+      "อุปกรณ์ต่อพ่วงเพิ่มเติมของคอมพิวเตอร์"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า OS บางครั้งถูกเรียกว่า \"virtual machine\" หรือ \"extended machine\"",
+      "ไม่เกี่ยวกับฮาร์ดแวร์รุ่นใหม่",
+      "เป็นความหมายที่ใกล้เคียงแต่ไม่ตรงกับที่สไลด์นิยามไว้",
+      "ไม่เกี่ยวกับอุปกรณ์ต่อพ่วง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "\"Spooling\" เป็นคำย่อของข้อใด?",
+    choices: [
+      "Sequential Processing Of Loaded Instructions",
+      "Simultaneous Peripheral Operation On Line",
+      "System Program Operating Line",
+      "Single Process Operation Layer"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายคำย่อจริง แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุไว้ตรงตัว",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายคำย่อจริง แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายคำย่อจริง แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "OS ในยุคที่สอง (Second Generation) ตามเลกเชอร์นี้เรียกว่าอะไร?",
+    choices: ["Human OS", "Personal Computer", "Multiprogramming", "Batch System"],
+    correct: 3,
+    explain: [
+      "เป็นยุคแรก (First generation) ไม่ใช่ยุคที่สอง",
+      "เป็นยุคที่สี่ (Fourth generation)",
+      "เป็นยุคที่สาม (Third generation)",
+      "ถูก — Second Generation คือ Batch System"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ในยุค Batch System เลกเชอร์ระบุว่าใช้ภาษาโปรแกรมใดเป็นหลัก?",
+    choices: ["Python และ Java", "C และ C++", "FORTRAN และ Assembly", "JavaScript และ HTML"],
+    correct: 2,
+    explain: [
+      "เป็นภาษาที่เกิดขึ้นทีหลังยุค Batch System มาก ไม่ตรงกับยุคสมัย",
+      "เป็นภาษาที่เกิดขึ้นทีหลังยุค Batch System มาก ไม่ตรงกับยุคสมัย",
+      "ถูก — สไลด์ระบุว่าใช้ FORTRAN และ Assembly เป็นหลัก",
+      "เป็นภาษาที่เกิดขึ้นทีหลังยุค Batch System มาก ไม่ตรงกับยุคสมัย"
+    ]
+  },
+  {
+    type: "recall",
+    q: "เทคนิคใดในยุค Third Generation ที่ทำให้ OS โหลดหลายงานเข้าหน่วยความจำพร้อมกันแล้วสลับกันทำงาน?",
+    choices: ["Spooling", "Multiprogramming", "Multitasking", "Virtualization"],
+    correct: 1,
+    explain: [
+      "Spooling คือการซ้อน I/O ไม่ใช่การโหลดหลายงานเข้าหน่วยความจำ (แม้จะอยู่ในยุคเดียวกัน)",
+      "ถูก — สไลด์นิยาม Multiprogramming ว่าคือการโหลดหลายงานเข้าหน่วยความจำแล้วสลับเร็ว ๆ",
+      "Multitasking ถูกกล่าวถึงในยุคที่สี่ (Personal Computer) ไม่ใช่ยุคที่สาม",
+      "Virtualization เป็นแนวคิดกว้างกว่า ไม่ใช่ชื่อเทคนิคเฉพาะของยุคนี้ตามที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามสไลด์ Mobile Operating Systems กลายเป็น OS ที่ถูกใช้งานมากที่สุดตั้งแต่ปีใด?",
+    choices: ["2017", "2010", "2007", "2020"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ \"since 2017\"",
+      "ไม่ตรงกับปีที่สไลด์ระบุ",
+      "เป็นปีที่ iPhone เปิดตัว แต่ไม่ใช่ปีที่สไลด์ระบุ",
+      "ไม่ตรงกับปีที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามเลกเชอร์นี้ Components of Computer Systems มีทั้งหมดกี่ส่วน?",
+    choices: [
+      "2 ส่วน: Hardware และ Software",
+      "3 ส่วน: Hardware, OS, Applications",
+      "4 ส่วน: Hardware, OS, Applications, Users",
+      "5 ส่วน รวม Network ด้วย"
+    ],
+    correct: 2,
+    explain: [
+      "แบ่งหยาบเกินไป ไม่ตรงกับที่สไลด์แจกแจง",
+      "ขาด Users ไปหนึ่งส่วน",
+      "ถูก — สไลด์แจกแจงไว้ 4 ส่วนคือ Hardware, OS, Application programs, Users",
+      "สไลด์ไม่ได้แยก Network ออกมาเป็นส่วนที่ 5"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ช่องทางที่โปรแกรมใช้ขอให้ OS ทำงานบางอย่างแทน (เช่น เปิดไฟล์ จองหน่วยความจำ) เรียกว่าอะไร?",
+    choices: ["Job queue", "Fetch cycle", "Spooling", "System call (API)"],
+    correct: 3,
+    explain: [
+      "Job queue คือที่พักงานที่รอ CPU ไม่ใช่ช่องทางขอบริการจาก OS",
+      "Fetch cycle เป็นส่วนหนึ่งของการทำงานของ CPU ไม่ใช่ช่องทางขอบริการจาก OS",
+      "Spooling เป็นเทคนิคซ้อนงาน I/O ไม่เกี่ยวกับการขอบริการ",
+      "ถูก — สไลด์ระบุว่า OS มี APIs (system calls) ให้โปรแกรมเรียกใช้บริการ"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม OS ต้องทำ virtualization ของ CPU?",
+    choices: [
+      "เพิ่มความเร็วสัญญาณนาฬิกาของ CPU",
+      "ให้หลายโปรแกรมเหมือนมี CPU ของตัวเอง",
+      "ลดจำนวนคำสั่งที่แต่ละโปรแกรมต้องใช้",
+      "ย้ายงานคำนวณไปให้การ์ดจอทำแทน"
+    ],
+    correct: 1,
+    explain: [
+      "ผิด — virtualization ไม่เกี่ยวกับความเร็ว clock ของ CPU เลย",
+      "ถูก — CPU มีจำนวนจำกัด OS สลับให้แต่ละโปรแกรมทำงานเร็ว ๆ จนรู้สึกเหมือนมี CPU ของตัวเอง",
+      "ผิด — จำนวนคำสั่งที่โปรแกรมต้องใช้ไม่ได้ลดลงจาก virtualization",
+      "ผิด — เป็นการแบ่งเวลาใช้ CPU เดิม ไม่ใช่ย้ายงานไปการ์ดจอ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดคือลำดับที่ถูกต้องของ Fetch-Decode-Execute cycle?",
+    choices: [
+      "Fetch → Decode → Execute",
+      "Execute → Fetch → Decode",
+      "Decode → Execute → Fetch",
+      "Fetch → Execute → Decode"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ดึงคำสั่งมา (Fetch) → แปลความหมาย (Decode) → ทำตามคำสั่ง (Execute)",
+      "ผิดลำดับ — ยังไม่ได้ดึงคำสั่งมา จะไปทำงาน (execute) ก่อนไม่ได้",
+      "ผิดลำดับ — ต้องดึงคำสั่งมาก่อนถึงจะแปลความหมายได้",
+      "ผิดลำดับ — ต้องแปลความหมายก่อนถึงจะทำตามคำสั่งได้ ไม่ใช่ทำก่อนแปล"
+    ]
+  },
+  {
+    type: "understand",
+    q: "\"Spooling\" ในยุค Third Generation มีประโยชน์อย่างไร?",
+    choices: [
+      "ทำให้ CPU ทำงานเร็วขึ้นโดยตรง",
+      "ลดขนาดของโปรแกรมที่ต้องรัน",
+      "ซ้อนงาน I/O ของงานหนึ่งกับการประมวลผลของอีกงานหนึ่ง",
+      "เปลี่ยนภาษาโปรแกรมจาก FORTRAN เป็นภาษาใหม่"
+    ],
+    correct: 2,
+    explain: [
+      "ผิด — spooling ไม่ได้เพิ่มความเร็ว CPU โดยตรง แต่เพิ่มการใช้งาน CPU ให้คุ้มขึ้น",
+      "ผิด — ไม่เกี่ยวกับขนาดโปรแกรม",
+      "ถูก — ระหว่างประมวลผลงานหนึ่ง OS จะซ้อนอ่าน/พิมพ์ I/O ของอีกงานไปพร้อมกัน ทำให้ CPU utilization สูงขึ้น",
+      "ผิด — spooling ไม่เกี่ยวกับภาษาโปรแกรมที่ใช้เขียน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใด \"ไม่ใช่\" หนึ่งใน 3 บทบาทหลักของ OS ที่กล่าวถึงในเลกเชอร์นี้?",
+    choices: [
+      "Virtualization of physical resources",
+      "Compiler สำหรับแปลภาษาโปรแกรม",
+      "Resource manager (ตัวจัดสรรทรัพยากรของระบบ)",
+      "APIs (standard library)"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นหนึ่งใน 3 บทบาทหลักของ OS ที่กล่าวถึง (ข้อนี้ไม่ใช่คำตอบที่ถูกต้อง)",
+      "ถูก — compiler ไม่ใช่หน้าที่หลักของ OS ตามที่กล่าวในเลกเชอร์นี้ (3 บทบาทคือ virtualization, APIs, resource manager)",
+      "เป็นหนึ่งใน 3 บทบาทหลักของ OS ที่กล่าวถึง (ข้อนี้ไม่ใช่คำตอบที่ถูกต้อง)",
+      "เป็นหนึ่งใน 3 บทบาทหลักของ OS ที่กล่าวถึง (ข้อนี้ไม่ใช่คำตอบที่ถูกต้อง)"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Mobile OS จึงต้องคำนึงถึง \"Energy efficiency\" เป็นพิเศษ เมื่อเทียบกับ OS ยุคก่อนหน้า?",
+    choices: [
+      "เพราะมือถือมีหน่วยความจำมากกว่าคอมพิวเตอร์ตั้งโต๊ะ",
+      "เพราะมือถือไม่จำเป็นต้องมี GUI เลย",
+      "เพราะมือถือไม่มี CPU ของตัวเอง",
+      "เพราะมือถือพกพาใช้แบตเตอรี่ ต้องประหยัดพลังงานให้ใช้ได้นาน"
+    ],
+    correct: 3,
+    explain: [
+      "ผิด — ไม่เกี่ยวกับขนาดหน่วยความจำ และจริง ๆ มือถือมักมีหน่วยความจำน้อยกว่าคอมพิวเตอร์ตั้งโต๊ะด้วยซ้ำ",
+      "ผิด — มือถือก็ต้องมี GUI (user interface) เพียงแต่ต่างรูปแบบจาก PC",
+      "ผิด — มือถือก็มีชิป CPU ของตัวเองอยู่ในเครื่อง",
+      "ถูก — มือถือพกพาและใช้พลังงานจากแบตเตอรี่ ต้องประหยัดพลังงานเพื่อให้ใช้งานได้นานขึ้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่าง Multitasking กับ Multiprocessing ได้ถูกต้องที่สุด?",
+    choices: [
+      "Multitasking คือการรันหลายโปรแกรมบนเครื่องเดียว ส่วน Multiprocessing คือการใช้ CPU หลายตัวพร้อมกัน",
+      "Multitasking คือการมี CPU หลายตัว ส่วน Multiprocessing คือการรันหลายโปรแกรมบน CPU ตัวเดียว",
+      "ทั้งสองคำมีความหมายเดียวกันทุกประการ",
+      "Multitasking ใช้ได้เฉพาะ Mainframe ส่วน Multiprocessing ใช้ได้เฉพาะมือถือ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — Multitasking คือความสามารถรันหลายโปรแกรมพร้อมกันบนเครื่องเดียว ส่วน Multiprocessing คือการใช้ตัวประมวลผลหลายตัวในเครื่องเดียว",
+      "สลับความหมายกัน ผิด",
+      "สองคำนี้มีความหมายต่างกันชัดเจนตามที่สไลด์แยกไว้",
+      "ไม่มีข้อมูลนี้ในสไลด์ และไม่สมเหตุสมผล"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เพราะเหตุใดยุค Third Generation จึงเปลี่ยนจากการใช้ operator มนุษย์ มาเป็น Multiprogramming?",
+    choices: [
+      "เพราะกฎหมายบังคับให้ลดการจ้างงานมนุษย์",
+      "เพราะโปรแกรมในยุคนั้นเขียนด้วยภาษาที่ซับซ้อนเกินมนุษย์จะควบคุม",
+      "เพราะฮาร์ดแวร์เริ่มมีราคาถูกลง ในขณะที่ค่าแรงมนุษย์แพงขึ้น",
+      "เพราะไม่มีการ์ดจอที่รองรับการประมวลผลแบบเดิม"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่มีข้อมูลนี้ในสไลด์",
+      "ไม่ใช่เหตุผลที่สไลด์กล่าวถึง",
+      "ถูก — สไลด์ระบุ \"Hardware cheap, humans expensive\" เป็นเหตุผลของยุคนี้",
+      "การ์ดจอไม่เกี่ยวข้องกับเหตุผลในยุคนี้เลย"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เป้าหมายการออกแบบ OS ด้าน \"Protection\" มีจุดประสงค์หลักเพื่ออะไร?",
+    choices: [
+      "เพิ่มความเร็วในการประมวลผลของโปรแกรม",
+      "แยกโปรแกรมออกจากกัน ป้องกันไม่ให้ทำร้ายกัน",
+      "ทำให้ระบบใช้งานง่ายขึ้นสำหรับผู้ใช้ทั่วไป",
+      "ลดการใช้พลังงานของอุปกรณ์โดยรวม"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นเป้าหมายด้าน Performance ไม่ใช่ Protection",
+      "ถูก — สไลด์นิยาม Protection ว่าคือการ isolate process และป้องกันไม่ให้โปรแกรมทำร้ายกัน",
+      "เป็นเป้าหมายด้าน Abstraction ไม่ใช่ Protection",
+      "เป็นเป้าหมายด้าน Energy-efficient ซึ่งถูกจัดอยู่ใน \"Others\" ไม่ใช่ Protection"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ถ้า OS ไม่มีการทำ virtualization ของหน่วยความจำเลย จะเกิดปัญหาใดตามมามากที่สุด?",
+    choices: [
+      "โปรแกรมจะรันเร็วขึ้นเพราะไม่มีโอเวอร์เฮด",
+      "โปรแกรมจะใช้หน่วยความจำได้มากขึ้นกว่าเดิม",
+      "CPU จะหยุดทำงานทันทีโดยไม่มีสาเหตุ",
+      "หลายโปรแกรมอาจเขียนทับข้อมูลกันในหน่วยความจำจริง"
+    ],
+    correct: 3,
+    explain: [
+      "อาจได้ประสิทธิภาพบางส่วน แต่ไม่ใช่ปัญหาหลักที่ตามมา และไม่ใช่สิ่งที่สไลด์ชี้ให้เห็น",
+      "ตรงข้ามกับความจริง เพราะไม่มีการจัดการพื้นที่ให้ดี อาจใช้ได้น้อยลงหรือชนกันแทน",
+      "ไม่มีข้อมูลสนับสนุนว่า CPU จะหยุดทำงานทันที",
+      "ถูก — ถ้าไม่มีการแยก address space ให้แต่ละโปรแกรม โปรแกรมอาจเข้าถึง/เขียนทับพื้นที่ของกันและกันโดยตรง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Job pool (Job queue) จึงช่วยเพิ่ม CPU utilization ได้?",
+    choices: [
+      "เพราะเก็บงานไว้ให้ OS เลือกงานถัดไปมารันได้ทันทีโดยไม่ต้องรอ operator",
+      "เพราะลดจำนวนคำสั่งในโปรแกรมโดยตรง",
+      "เพราะเพิ่มความเร็วสัญญาณนาฬิกาของ CPU",
+      "เพราะลบงานที่ไม่จำเป็นออกจากคิวอัตโนมัติ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — Job pool ทำให้ OS เลือกงานถัดไปมารันได้ทันทีเมื่อ CPU ว่าง ไม่ต้องรอมนุษย์มาโหลดงานใหม่",
+      "ไม่เกี่ยวกับจำนวนคำสั่งในโปรแกรม",
+      "Job pool ไม่เกี่ยวกับความเร็วสัญญาณนาฬิกาของฮาร์ดแวร์",
+      "สไลด์ไม่ได้ระบุว่ามีการลบงานอัตโนมัติ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดแยกความแตกต่างระหว่าง \"Abstraction\" กับ \"Protection\" ในเป้าหมายออกแบบ OS ได้ถูกต้อง?",
+    choices: [
+      "Abstraction เกี่ยวกับความปลอดภัย ส่วน Protection เกี่ยวกับความง่ายในการใช้งาน",
+      "ทั้งสองข้อเน้นเรื่องความเร็วในการประมวลผลเหมือนกัน",
+      "Abstraction เน้นซ่อนความซับซ้อนให้ใช้งานง่าย ส่วน Protection เน้นแยก/ป้องกันโปรแกรมไม่ให้ทำร้ายกัน",
+      "Abstraction กับ Protection เป็นคำพ้องความหมายที่ใช้แทนกันได้"
+    ],
+    correct: 2,
+    explain: [
+      "สลับความหมายกัน ผิด",
+      "ไม่ตรง เพราะเรื่องความเร็วคือเป้าหมายด้าน Performance",
+      "ถูก — ตรงกับนิยามในสไลด์ทั้งสองข้อ",
+      "สองคำนี้มีความหมายต่างกันชัดเจน ไม่ใช่คำพ้องความหมาย"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ถ้าตัดบทบาท \"APIs\" ออกจาก OS ไปเลย จะส่งผลอย่างไรต่อโปรแกรมที่ต้องการใช้บริการของระบบ?",
+    choices: [
+      "โปรแกรมจะทำงานได้เร็วขึ้นเพราะไม่ต้องผ่าน OS",
+      "โปรแกรมจะต้องสื่อสารกับฮาร์ดแวร์โดยตรง ทำให้พัฒนายากและซับซ้อนขึ้นมาก",
+      "โปรแกรมจะไม่ได้รับผลกระทบใด ๆ เลย",
+      "OS จะทำ virtualization ได้ดีขึ้นแทน"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่สมเหตุสมผล เพราะ APIs มีไว้ช่วยให้เข้าถึงบริการได้ง่ายและปลอดภัย ไม่ใช่ตัวถ่วงความเร็ว",
+      "ถูก — ถ้าไม่มี APIs โปรแกรมต้องจัดการกับรายละเอียดฮาร์ดแวร์เอง ซึ่ง APIs มีไว้ซ่อนความซับซ้อนนี้",
+      "APIs เป็นหนึ่งใน 3 บทบาทหลัก การตัดออกย่อมกระทบแน่นอน",
+      "ไม่เกี่ยวข้องกัน APIs กับ virtualization เป็นบทบาทคนละส่วนกัน"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "เครื่องมี CPU เพียงตัวเดียว แต่ผู้ใช้เห็นโปรแกรม A และ B ทำงาน \"พร้อมกัน\" ได้ ข้อใดอธิบายกลไกเบื้องหลังที่ตรงกับแนวคิดในเลกเชอร์นี้ที่สุด?",
+    choices: [
+      "OS สลับให้ A และ B ได้ใช้ CPU ทีละช่วงเวลาสั้น ๆ สลับกันเร็วมากจนดูเหมือนพร้อมกัน",
+      "เครื่องมี CPU ตัวที่สองซ่อนอยู่ที่ผู้ใช้มองไม่เห็น",
+      "โปรแกรม A และ B ถูกรวมเป็นโปรแกรมเดียวกันโดยอัตโนมัติ",
+      "ฮาร์ดแวร์เร่งความเร็วสัญญาณนาฬิกาขึ้นเป็นสองเท่าเมื่อมีสองโปรแกรม"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — นี่คือหลักการ virtualization ของ CPU ผ่านการสลับโปรแกรม (time-slicing)",
+      "ไม่ตรงกับสมมติฐานของโจทย์ว่ามี CPU ตัวเดียว",
+      "ไม่สมเหตุสมผลและไม่ตรงกับแนวคิดใดในสไลด์",
+      "ไม่มีข้อมูลสนับสนุน และไม่ใช่หลักการ virtualization ที่เรียนมา"
+    ]
+  },
+  {
+    type: "apply",
+    q: "นักศึกษาคนหนึ่งได้คะแนน Quiz 8/10, Homework 9/10 และ Final Exam 25/30 เมื่อคิดตามสัดส่วนที่ระบุ (Quiz 10%, Homework 10%, Final 30%) รวมกันแล้วนักศึกษาได้คะแนนกี่ % จาก 3 รายการนี้?",
+    choices: ["24%", "32%", "50%", "42%"],
+    correct: 3,
+    explain: [
+      "คำนวณต่ำเกินไป ไม่ตรงกับสัดส่วนจริง",
+      "ยังคำนวณคลาดเคลื่อน",
+      "เกินจากที่คำนวณได้จริง",
+      "ถูก — Quiz: 8/10×10%=8%, Homework: 9/10×10%=9%, Final: 25/30×30%=25% รวม 8+9+25 = 42%"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ถ้าต้องออกแบบ OS สำหรับอุปกรณ์ IoT ขนาดเล็กที่ทำงานด้วยแบตเตอรี่และต้องใช้งานได้นานหลายเดือน ควรให้ความสำคัญกับเป้าหมายออกแบบข้อใดเป็นพิเศษ?",
+    choices: [
+      "รองรับผู้ใช้จำนวนมากพร้อมกัน",
+      "Graphic User Interface ที่สวยงาม",
+      "Energy-efficient (ประหยัดพลังงาน)",
+      "ความเร็วสัญญาณนาฬิกาสูงที่สุดเท่าที่เป็นไปได้"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่ตรงกับโจทย์ที่เน้นการประหยัดพลังงาน ไม่ใช่รองรับผู้ใช้จำนวนมาก",
+      "อุปกรณ์ IoT ขนาดเล็กมักไม่เน้น GUI ที่สวยงามเป็นหลัก",
+      "ถูก — สไลด์จัด Energy-efficient ไว้ใน \"Others\" ของเป้าหมายออกแบบ ซึ่งสำคัญมากสำหรับอุปกรณ์ที่ใช้แบตเตอรี่ เช่นเดียวกับที่กล่าวถึงมือถือ",
+      "ยิ่งความเร็วสูงมักยิ่งใช้พลังงานมากขึ้น ขัดกับเป้าหมายประหยัดพลังงาน"
+    ]
+  },
+  {
+    type: "apply",
+    q: "เครื่องพิมพ์ทำงานช้ากว่า CPU มาก ถ้าไม่อยากให้ CPU ต้องหยุดรอเครื่องพิมพ์ทุกครั้งที่มีงานพิมพ์ ควรใช้เทคนิคใดตามแนวคิดในยุค Third Generation?",
+    choices: ["Multitasking", "Spooling", "Batch Processing แบบมนุษย์ควบคุม", "เพิ่มจำนวน CPU"],
+    correct: 1,
+    explain: [
+      "Multitasking เกี่ยวกับการรันหลายโปรแกรม ไม่ได้แก้ปัญหาความเร็ว I/O โดยตรง",
+      "ถูก — Spooling ซ้อนงาน I/O (เช่น พิมพ์งาน) กับการประมวลผลของงานอื่น ทำให้ CPU ไม่ต้องรอเครื่องพิมพ์",
+      "เป็นวิธีของยุคก่อนหน้าที่ไม่มีประสิทธิภาพ ไม่ใช่คำตอบที่ตรงกับยุค Third generation",
+      "ไม่ใช่แนวทางที่สไลด์กล่าวถึง และแก้ปัญหาไม่ตรงจุด (ปัญหาคือ I/O ช้า ไม่ใช่ CPU ไม่พอ)"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรม X พยายามเขียนข้อมูลลงในตำแหน่งหน่วยความจำที่จริง ๆ เป็นของโปรแกรม Y โดยตรง ตามแนวคิด virtualization และ protection ที่เรียนมา OS ควรทำอย่างไร?",
+    choices: [
+      "ปฏิเสธ/บล็อกการเข้าถึงนั้น เพื่อรักษา address space ที่แยกกัน",
+      "อนุญาตให้เขียนได้เสมอเพื่อความรวดเร็ว",
+      "ลบโปรแกรม Y ออกจากระบบทันที",
+      "รวมหน่วยความจำของ X และ Y เข้าด้วยกัน"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — แต่ละโปรแกรมควรเห็นเฉพาะ address space ของตัวเอง การเข้าถึงพื้นที่ของโปรแกรมอื่นต้องถูกป้องกัน",
+      "ขัดกับหลัก Protection และ virtualization ของหน่วยความจำโดยตรง",
+      "รุนแรงเกินไปและไม่ใช่แนวทางที่ถูกต้องตามหลักการ",
+      "ขัดกับหลักการแยก address space ของแต่ละโปรแกรมโดยสิ้นเชิง"
+    ]
+  },
+  {
+    type: "apply",
+    q: "บริษัทหนึ่งต้องการรันหลายโปรแกรมพร้อมกันบนเครื่องเดียว เพื่อลดเวลาที่ CPU ว่างงานให้เหลือน้อยที่สุด แนวคิดจากยุคใดในประวัติ OS ที่ตรงกับความต้องการนี้มากที่สุด?",
+    choices: [
+      "First Generation: Human OS",
+      "Second Generation: Batch System",
+      "Fifth Generation: Mobile Computers",
+      "Third Generation: Multiprogramming"
+    ],
+    correct: 3,
+    explain: [
+      "ยุคนี้เสียเวลาไปกับการที่ operator ต้องเดินไปมาในห้องเครื่อง ไม่ตรงกับเป้าหมายลด idle time",
+      "ยุคนี้ดีขึ้นกว่ายุคแรกแต่ยังต้องรอ operator สลับงานทีละงาน ไม่ใช่คำตอบที่ตรงที่สุด",
+      "ยุคนี้เน้นเรื่องพลังงานและการเชื่อมต่อไร้สายของอุปกรณ์พกพา ไม่ใช่การลด idle time ของ CPU บนเครื่องเดียว",
+      "ถูก — Multiprogramming คือการโหลดหลายงานเข้าหน่วยความจำและสลับกันทำงานเพื่อเพิ่ม CPU utilization โดยตรง"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    let cls = 'current-jump';
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

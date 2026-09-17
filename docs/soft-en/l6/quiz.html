@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L6 — Flow Modeling I (Data Flow Diagram)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L6 — Flow Modeling I (Data Flow Diagram)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  {
+    "type": "recall",
+    "q": "DFD เป็นเครื่องมือของแนวทาง requirements modeling แบบใด?",
+    "choices": [
+      "Object-oriented analysis",
+      "Behavioral modeling",
+      "Structured analysis",
+      "Scenario-based modeling"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — OO analysis ใช้ class diagram",
+      "ผิด — behavioral ใช้ state diagram",
+      "ถูก — structured analysis แยก data กับ process",
+      "ผิด — scenario-based ใช้ use case"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "สัญลักษณ์ DFD ใดคือ “ข้อมูลที่กำลังเคลื่อนที่ (data in motion)”?",
+    "choices": [
+      "Data flow",
+      "Data store",
+      "Process",
+      "External entity"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — วาดเป็นลูกศร",
+      "ผิด — data store คือข้อมูลที่เก็บไว้",
+      "ผิด — process แปลงข้อมูล",
+      "ผิด — entity เป็นผู้ผลิตหรือบริโภคข้อมูล"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ใน notation Yourdon/DeMarco process วาดเป็นรูปใด?",
+    "choices": [
+      "สี่เหลี่ยมมุมมน",
+      "เส้นขนานสองเส้น",
+      "สี่เหลี่ยมเปิดด้านขวา",
+      "วงกลม (bubble)"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ Gane/Sarson",
+      "ผิด — นั่นคือ data store แบบ Yourdon",
+      "ผิด — นั่นคือ data store แบบ Gane/Sarson",
+      "ถูก — Yourdon/DeMarco ใช้ bubble"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Data flow ที่ออกจาก data store หมายถึงอะไร?",
+    "choices": [
+      "การลบข้อมูล",
+      "การดึงข้อมูล (retrieval)",
+      "การเพิ่มข้อมูลใหม่",
+      "การส่งข้อมูลให้ entity โดยตรง"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่ความหมายของ flow ออก",
+      "ถูก — flow เข้า store คือ update หรือ add",
+      "ผิด — นั่นคือ flow เข้า store",
+      "ผิด — store ต่อ entity ตรงไม่ได้"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Context diagram มี process กี่ตัวและใช้เลขอะไร?",
+    "choices": [
+      "1 ตัว เลข 1",
+      "3–7 ตัว เลข 1, 2, 3",
+      "1 ตัว เลข 0",
+      "ไม่มี process"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — เลขต้องเป็น 0",
+      "ผิด — นั่นคือ level 1",
+      "ถูก — ระบบทั้งระบบเป็น process 0",
+      "ผิด — ต้องมี process เดียว"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ตาม Flow Modeling Notes ระบบส่วนใหญ่ต้องใช้ DFD กี่ระดับ?",
+    "choices": [
+      "1–2 ระดับ",
+      "3–7 ระดับ",
+      "10–12 ระดับ",
+      "ระดับเดียวเสมอ"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — น้อยเกินไป",
+      "ถูก — จึงได้ flow model ที่เพียงพอ",
+      "ผิด — มากเกินไป",
+      "ผิด — ต้องแตกหลายระดับ"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Detailed DFD หนึ่งแผ่นควรมี process ไม่เกินกี่ตัว?",
+    "choices": [
+      "3",
+      "5",
+      "10",
+      "7"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ตรงกับสไลด์",
+      "ผิด — ไม่ตรงกับสไลด์",
+      "ผิด — ไม่ตรงกับสไลด์",
+      "ถูก — detailed DFD มี process 1–7 ตัว"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Process ใน Level 2 ที่แตกจาก process 3 ควรมีเลขแบบใด?",
+    "choices": [
+      "3.1, 3.2, 3.3",
+      "31, 32, 33",
+      "3.1.1, 3.1.2",
+      "0.3, 0.4"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — level 2 ใช้ 1 จุด: เลข parent.เลขเฉพาะ",
+      "ผิด — ไม่มีจุดคั่น",
+      "ผิด — นั่นคือ level 3",
+      "ผิด — ไม่ตรงกับรูปแบบ"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "สิ่งใดที่ child diagram เพิ่มได้โดยไม่ผิดหลัก balancing ตามสไลด์?",
+    "choices": [
+      "External entity ใหม่ที่ส่ง input ใหม่เข้าระบบ",
+      "Error lines และ transaction files",
+      "ลบ output ของ parent ออก",
+      "เปลี่ยนชื่อ input ของ parent"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — input ใหม่จากนอกระบบต้องปรากฏใน parent",
+      "ถูก — เพิ่มได้ใน child ที่ละเอียด",
+      "ผิด — output ของ parent ต้องอยู่ครบ",
+      "ผิด — ต้องตรงกับ parent"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Guideline ใดของ DFD ถูกต้อง?",
+    "choices": [
+      "เริ่มวาดจาก level 2 ก่อนเสมอ",
+      "ไม่จำเป็นต้องตั้งชื่อ data flow",
+      "เริ่มจาก context level diagram เสมอและแสดง external entities ที่ level 0",
+      "ห้ามใช้ external entity"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ต้องเริ่มจาก context",
+      "ผิด — ต้องตั้งชื่อ data flow ทุกเส้น",
+      "ถูก — ตาม guidelines ในสไลด์",
+      "ผิด — entity เป็นสัญลักษณ์หลัก"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ชื่อเรียก process ที่มีแต่ input ไม่มี output คืออะไร?",
+    "choices": [
+      "Miracle",
+      "Gray hole",
+      "Primitive process",
+      "Black hole"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — miracle มีแต่ output ไม่มี input",
+      "ผิด — gray hole คือ input ไม่พอสร้าง output",
+      "ผิด — primitive process คือ process ระดับล่างสุด",
+      "ถูก — ข้อมูลเข้าไปแล้วหายไป"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ข้อใดเป็นตัวอย่างของ process ที่ควรใส่ใน DFD?",
+    "choices": [
+      "Calculate grade point average",
+      "Customer",
+      "Invoice",
+      "Student records"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — เป็นการคำนวณ (กริยา + กรรม)",
+      "ผิด — เป็น external entity",
+      "ผิด — เป็น data flow (คำนาม)",
+      "ผิด — เป็น data store"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Structured analysis ต่างจาก Object-oriented analysis อย่างไร?",
+    "choices": [
+      "Structured มองเป็น class ที่ทำงานร่วมกัน",
+      "Structured แยกข้อมูลกับ process ที่แปลงข้อมูล ส่วน OO มองเป็น class ที่ร่วมมือกัน",
+      "ทั้งสองใช้ DFD",
+      "OO ไม่มีการโมเดลข้อมูล"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — นั่นคือ OO",
+      "ถูก — DFD/ERD vs class diagram",
+      "ผิด — OO ใช้ class diagram",
+      "ผิด — ไม่ใช่ความต่างในสไลด์"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม DFD ยังมีประโยชน์แม้ถูกมองว่า “old school”?",
+    "choices": [
+      "เพราะใช้แทนโมเดลอื่นได้ทั้งหมด",
+      "เพราะให้มุมมองการไหลและการแปลงข้อมูลที่โมเดลอื่นไม่มี จึงใช้เสริมกันได้",
+      "เพราะวาดง่ายที่สุด",
+      "เพราะไม่ต้องมีกฎ"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ควรใช้เสริม ไม่ใช่แทน",
+      "ถูก — ตามที่สไลด์ระบุ",
+      "ผิด — ไม่ใช่เหตุผลในสไลด์",
+      "ผิด — DFD มีกฎหลายข้อ"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม context diagram จึงไม่มี data store?",
+    "choices": [
+      "เพราะระบบไม่มีการเก็บข้อมูล",
+      "เพราะ data store เป็น external entity",
+      "เพราะ data store อยู่ภายในระบบ ซึ่งถูกยุบรวมเป็น process 0 แล้ว",
+      "เพราะ data store วาดได้เฉพาะแบบ Gane/Sarson"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ระบบยังเก็บข้อมูล",
+      "ผิด — data store อยู่ในระบบ",
+      "ถูก — context แสดงระบบเป็นกล่องเดียวกับ entity ภายนอก",
+      "ผิด — ไม่เกี่ยวกับ notation"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "หลัก Data Flow Packet Concept หมายความว่าอะไร?",
+    "choices": [
+      "ข้อมูลที่ไปด้วยกันควรวาดเป็น data flow เส้นเดียว แม้มีเอกสารหลายชิ้น",
+      "ทุกเอกสารต้องมีลูกศรของตัวเอง",
+      "ห้ามมีลูกศรเกิน 1 เส้นต่อ process",
+      "Data flow ต้องแตกเป็นหลายเส้นเสมอ"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — เช่น รายการโทรกับใบแจ้งหนี้ในซองเดียว",
+      "ผิด — ตรงข้ามกับหลัก",
+      "ผิด — process มีได้หลายเส้น",
+      "ผิด — ไม่ใช่หลักนี้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมห้ามลาก data flow จาก external entity ไปยัง data store โดยตรง?",
+    "choices": [
+      "เพราะ entity อ่านข้อมูลไม่ได้",
+      "เพราะ data store อยู่นอกระบบ",
+      "เพราะจะทำให้ DFD มีหลายระดับ",
+      "เพราะข้อมูลต้องผ่าน process (ตรวจหรือแปลง) ก่อนเก็บ ทุก flow ต้องแตะ process"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ใช่เหตุผล",
+      "ผิด — data store อยู่ในระบบ",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ถูก — ภายนอกเขียนลงฐานข้อมูลตรงไม่ได้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Balancing ระหว่าง parent กับ child diagram หมายถึงอะไร?",
+    "choices": [
+      "Child ต้องมีจำนวน process เท่ากับ parent",
+      "Parent ต้องมี data store มากกว่า child",
+      "Input และ output ของ process ใน parent ต้องปรากฏใน child ครบ โดย child เพิ่ม process และ flow ภายในได้",
+      "Child ห้ามมี flow ใหม่"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — child แตกเป็นหลาย process ได้",
+      "ผิด — ไม่ใช่หลัก balancing",
+      "ถูก — ไม่ให้ข้อมูลหายหรือโผล่มาเองระหว่างระดับ",
+      "ผิด — child เพิ่ม flow ภายในได้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Internal consistency ต่างจาก Hierarchical consistency อย่างไร?",
+    "choices": [
+      "Internal ตรวจระหว่าง parent และ child",
+      "ทั้งสองตรวจสิ่งเดียวกัน",
+      "Hierarchical ตรวจเฉพาะชื่อ process",
+      "Internal ตรวจความถูกต้องภายในแต่ละแผนภาพ ส่วน Hierarchical ตรวจความสอดคล้องระหว่างระดับ"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ hierarchical",
+      "ผิด — ขอบเขตต่างกัน",
+      "ผิด — ตรวจทั้ง process, flow, store, primitive spec",
+      "ถูก — ถูกในแผ่น vs ถูกข้ามแผ่น"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมชื่อ data flow ใน logical modeling ควรเป็น “Customer Order” ไม่ใช่ “SQL Query”?",
+    "choices": [
+      "เพราะต้องบอกว่าเป็นข้อมูลอะไรโดยไม่บอกวิธี implement",
+      "เพราะ SQL ไม่มีใน DFD",
+      "เพราะชื่อต้องเป็นภาษาไทย",
+      "เพราะชื่อต้องสั้นที่สุด"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — logical model เน้น “อะไร” ไม่ใช่ “ยังไง”",
+      "ผิด — ไม่ใช่เหตุผลหลัก",
+      "ผิด — ไม่ใช่เงื่อนไข",
+      "ผิด — ไม่ใช่เหตุผล"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมต้องแตก DFD ออกเป็นหลายระดับ (decomposition)?",
+    "choices": [
+      "เพื่อให้มีกระดาษมากขึ้น",
+      "เพราะ business process ซับซ้อนเกินจะแสดงในแผ่นเดียว child จึงขยายรายละเอียดของ parent",
+      "เพราะกฎห้ามมี process เกิน 1 ตัวต่อแผ่น",
+      "เพื่อซ่อน external entity"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่เหตุผล",
+      "ถูก — แตกจนแต่ละ process ทำแค่อย่างเดียว",
+      "ผิด — detailed DFD มีได้ถึง 7 process",
+      "ผิด — ไม่ใช่เหตุผล"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ตามกฎ internal consistency data store ต้องมีลักษณะใด?",
+    "choices": [
+      "เชื่อมกับ external entity โดยตรง",
+      "ไม่ต้องมีชื่อ",
+      "ปรากฏเฉพาะใน context diagram",
+      "เป็น interface ระหว่าง 2 process และมีชื่อ"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ต้องผ่าน process",
+      "ผิด — ต้องมีชื่อ",
+      "ผิด — context ไม่มี data store",
+      "ถูก — ตามสไลด์"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ข้อใดอธิบาย expansion ratio ได้ถูกต้อง?",
+    "choices": [
+      "ยิ่งลงลึก process ยิ่งแตกออกมากขึ้น",
+      "อัตราที่ process แตกเป็นหลาย process ลดลงเมื่อจำนวนระดับเพิ่มขึ้น",
+      "จำนวน entity ต่อแผนภาพ",
+      "จำนวน data store ที่เพิ่มขึ้นแต่ละระดับ"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ตรงข้าม",
+      "ถูก — ระดับลึกแตกออกน้อยลง",
+      "ผิด — ไม่ใช่ความหมาย",
+      "ผิด — ไม่ใช่ความหมาย"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ในตัวอย่าง Library Query System Level 1 ที่ process 1 ไม่ได้วาด output มีปัญหาอะไร?",
+    "choices": [
+      "ผิดกฎเรื่องเลข process",
+      "ผิดกฎเพราะ entity เชื่อมกับ entity",
+      "ผิดหลักที่ process ต้องมี output และไม่ balance กับ output ของ level 0",
+      "ไม่มีปัญหา"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — เลขถูกต้อง",
+      "ผิด — ไม่ใช่ปัญหานี้",
+      "ถูก — ควรมีลูกศร output ไปหา Student",
+      "ผิด — เป็นข้อสังเกตในสรุป"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ใน DFD มีลูกศร PAYROLL DEPARTMENT → Paycheck → EMPLOYEE ผิดกฎข้อใด?",
+    "choices": [
+      "Process ไม่มี input",
+      "Data flow แตกเป็นหลายข้อมูล",
+      "ไม่มีเลข process",
+      "Entity → entity ไม่ผ่าน process"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่มี process ในเส้นนี้",
+      "ผิด — เป็นเส้นเดียว",
+      "ผิด — ไม่มี process ให้ใส่เลข",
+      "ถูก — ทุก flow ต้องเริ่มหรือจบที่ process"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "Process “2.1 Calculate Gross Pay” มี Hours Worked และ Pay Rate เข้า แต่ไม่มีลูกศรออก ผิดอย่างไร?",
+    "choices": [
+      "Black hole — ไม่มี output",
+      "Miracle — ไม่มี input",
+      "ใช้เลขผิดระดับ",
+      "ถูกต้องแล้ว"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — process ต้องมี output อย่างน้อย 1",
+      "ผิด — มี input 2 เส้น",
+      "ผิด — เลข 2.1 เป็นรูปแบบ level 2 ที่ถูก",
+      "ผิด — ขาด output"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ข้อใดเป็นการเชื่อมต่อใน DFD ที่ถูกต้อง?",
+    "choices": [
+      "Courses (data store) → Class List → Students (data store)",
+      "CUSTOMER → Payment → Accounts Receivable (data store)",
+      "5.0 Post Payment → Customer Payment → D2 Daily Payments → Daily Payment → 6.0 Prepare Deposit",
+      "CUSTOMER → Order → SUPPLIER"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — store → store ต้องผ่าน process",
+      "ผิด — entity → store ต้องผ่าน process",
+      "ถูก — data store อยู่ระหว่าง 2 process",
+      "ผิด — entity → entity"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "วาด context DFD ระบบขายบัตรสวนสัตว์ ข้อใดไม่ควรปรากฏในแผนภาพ?",
+    "choices": [
+      "External entity: Visitor",
+      "Data store: Tickets",
+      "Process: 0 Zoo Ticketing System",
+      "Data flow: Ticket Request"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — entity ต้องแสดงที่ context",
+      "ถูก — context diagram ไม่มี data store",
+      "ผิด — ต้องมี process เดียวเลข 0",
+      "ผิด — flow ระหว่าง entity กับระบบควรมี"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "จากคำอธิบาย “เจ้าหน้าที่บันทึกคะแนนสอบ แล้วระบบคำนวณเกรดเฉลี่ยเก็บลงแฟ้มนักศึกษา” ใช้ grammatical parse ได้อะไร?",
+    "choices": [
+      "Process: เจ้าหน้าที่, Entity: คำนวณเกรด",
+      "Data store: คะแนนสอบ, Process: แฟ้มนักศึกษา",
+      "Entity: เกรดเฉลี่ย, Data flow: เจ้าหน้าที่",
+      "Entity: เจ้าหน้าที่, Process: คำนวณเกรดเฉลี่ย, Data store: แฟ้มนักศึกษา"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — สลับบทบาท",
+      "ผิด — แฟ้มเป็น store ไม่ใช่ process",
+      "ผิด — สลับบทบาท",
+      "ถูก — คนภายนอก → entity, กริยา → process, ที่เก็บ → store"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "Parent process 2 มี input B, D และ output W, C, E, Z ข้อใดคือ child diagram ที่ balance?",
+    "choices": [
+      "Child มี input B, D และ output W, C, E, Z พร้อม flow ภายใน J, K, L เพิ่ม",
+      "Child มี input B และ output W เท่านั้น",
+      "Child มี input B, D, X และ output W, C",
+      "Child ไม่มี input จาก parent แต่มี output ครบ"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — input/output ครบและเพิ่ม flow ภายในได้",
+      "ผิด — ขาด D และ output หลายเส้น",
+      "ผิด — X ไม่มีใน parent และขาด output",
+      "ผิด — ต้องมี input ครบ"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

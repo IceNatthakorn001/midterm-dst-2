@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 4 – Requirements Analysis with Scenario-based Modeling I (Use Case Modeling) · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+      <ol><li><a href="#1-requirements-analysis-สะพานสู่การออกแบบ">1. Requirements Analysis: สะพานสู่การออกแบบ</a></li><li><a href="#2-requirements-modeling-approaches-pressman">2. Requirements Modeling Approaches (Pressman)</a></li><li><a href="#3-scenario-based-models">3. Scenario-based Models</a></li><li><a href="#4-ขั้นตอน-requirements-analysis-and-modeling-5-ขั้น">4. ขั้นตอน Requirements Analysis and Modeling (5 ขั้น)</a></li><li><a href="#5-จะเขียนอะไรใน-use-case-what-to-write-about">5. จะเขียนอะไรใน Use Case (What to Write About?)</a></li><li><a href="#6-system-concepts-for-use-case-modeling">6. System Concepts for Use Case Modeling</a></li><li><a href="#7-สัญลักษณ์พื้นฐาน-basic-use-case-symbols">7. สัญลักษณ์พื้นฐาน (Basic Use Case Symbols)</a></li><li><a href="#8-use-case-relationships">8. Use Case Relationships</a></li><li><a href="#9-การสร้าง-use-case-developing-a-use-case-6-ขั้น">9. การสร้าง Use Case (Developing a Use Case) – 6 ขั้น</a></li><li><a href="#10-use-case-narrative">10. Use Case Narrative</a></li><li><a href="#11-แนวทางทำแบบฝึกหัด">11. แนวทางทำแบบฝึกหัด</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L4</div>
+    <h1 class="lesson-title">Lecture 4 – Requirements Analysis with Scenario-based Modeling I (Use Case Modeling)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> L3 สอนวิธี &quot;เก็บ&quot; และ &quot;เขียน&quot; requirement บทนี้ต่อด้วย <strong>requirements analysis</strong> คือการเอา requirement มาวิเคราะห์และทำเป็น <strong>โมเดล</strong> โดยเริ่มจาก <strong>scenario-based model</strong> ที่ใช้บ่อยที่สุด คือ <strong>use case</strong></p>
+<p>เนื้อหาหลักมี 3 ส่วน: (1) การวิเคราะห์ requirement และโมเดลแบบต่าง ๆ (2) <strong>use case diagram</strong> ทั้งสัญลักษณ์ ความสัมพันธ์ (association, inheritance, include, extend) และขั้นตอนการวาด (3) <strong>use case narrative</strong> ที่อธิบายแต่ละ use case เป็นตาราง</p>
+<p>ท้ายไฟล์มีแนวทางทำ <strong>แบบฝึกหัด In-class (Zoo Ticketing)</strong> และ <strong>Exercise 2 (คลินิกทันตกรรม / ร้าน POS คริสต์มาส)</strong> ที่ใช้เนื้อหาบทนี้</p>
+</blockquote>
+<h2 id="1-requirements-analysis-สะพานสู่การออกแบบ">1. Requirements Analysis: สะพานสู่การออกแบบ</h2>
+<h3 id="a-bridge">A Bridge</h3>
+<p><img loading="lazy" src="diagrams/L4-01-analysis-bridge.png" alt="Analysis model เป็นสะพาน" /></p>
+<p><strong>Analysis model เป็น &quot;สะพาน&quot;</strong> เชื่อมจาก requirement ที่เป็นข้อความ ไปสู่การออกแบบระบบ ถ้าไม่มีสะพานนี้ นักออกแบบต้องตีความข้อความเอง ซึ่งผิดพลาดง่าย</p>
+<h3 id="requirements-analysis-ทำอะไร">Requirements Analysis ทำอะไร</h3>
+<ul>
+<li><strong>ระบุลักษณะการทำงาน</strong> (operational characteristics) ของซอฟต์แวร์</li>
+<li><strong>ขยายรายละเอียด</strong> requirement พื้นฐานที่ได้จากขั้น elicitation</li>
+<li><strong>ระบุ interface</strong> ของซอฟต์แวร์กับส่วนอื่นของระบบ</li>
+<li><strong>สร้างโมเดล</strong> ที่แสดง user scenarios, functional activities, ความสัมพันธ์ของ class และ data flow</li>
+<li><strong>กำหนดข้อจำกัด</strong> ที่ซอฟต์แวร์ต้องทำตาม</li>
+<li><strong>มักทำโดย Business Analyst (BA)</strong></li>
+</ul>
+<h3 id="objectives-ของ-requirements-analysis-3-ข้อ">Objectives ของ Requirements Analysis (3 ข้อ)</h3>
+<ol>
+<li><strong>อธิบายว่าลูกค้าต้องการอะไร</strong></li>
+<li><strong>วางรากฐาน</strong> สำหรับการออกแบบซอฟต์แวร์</li>
+<li><strong>กำหนดชุด requirement ที่ validate ได้</strong> เมื่อสร้างซอฟต์แวร์เสร็จ</li>
+</ol>
+<hr />
+<h2 id="2-requirements-modeling-approaches-pressman">2. Requirements Modeling Approaches (Pressman)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โมเดล</th>
+<th>แสดงอะไร</th>
+<th>ตัวอย่างแผนภาพ</th>
+<th>เรียนในบท</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scenario-based models</strong></td>
+<td>requirement จาก <strong>มุมมองผู้ใช้ (actors)</strong></td>
+<td>Use case diagram, use case narrative</td>
+<td><strong>L4 (บทนี้)</strong></td>
+</tr>
+<tr>
+<td><strong>Class models</strong></td>
+<td><strong>class, attribute, operation</strong> แบบ object-oriented และความสัมพันธ์</td>
+<td>Class diagram</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Flow models</strong></td>
+<td><strong>การเคลื่อนที่ของข้อมูล</strong> และการแปลงข้อมูลระหว่าง process</td>
+<td>DFD</td>
+<td>L6–L7</td>
+</tr>
+<tr>
+<td><strong>Behavioral models</strong></td>
+<td>ซอฟต์แวร์ <strong>ตอบสนองต่อ event</strong> อย่างไร</td>
+<td>State diagram</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Data models</strong></td>
+<td><strong>information domain</strong> ของปัญหา</td>
+<td>ER diagram</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(คอลัมน์ &quot;ตัวอย่างแผนภาพ&quot; และ &quot;เรียนในบท&quot; เสริมเอง ยกเว้น ER diagram ที่มีในสไลด์)</em></p>
+<blockquote class="callout">
+<p class="c-tip">💡 จำง่าย ๆ: <strong>Scenario = ใครทำอะไร / Class = มีของอะไร / Flow = ข้อมูลไหลไปไหน / Behavior = เกิดเหตุแล้วทำอะไร / Data = ข้อมูลสัมพันธ์กันอย่างไร</strong></p>
+</blockquote>
+<hr />
+<h2 id="3-scenario-based-models">3. Scenario-based Models</h2>
+<ul>
+<li>อธิบายว่า <strong>actor จะมีปฏิสัมพันธ์กับระบบอย่างไรในสถานการณ์เฉพาะ</strong></li>
+<li><strong>เน้น functional requirements จากมุมมองของ actor</strong></li>
+<li><strong>มีประโยชน์ในการ validate requirement กับ stakeholder</strong> เพราะ stakeholder อ่านเข้าใจง่าย</li>
+<li>เทคนิคที่ใช้บ่อย → <strong>Use case modelling</strong></li>
+</ul>
+<blockquote class="callout">
+<p><em>&quot;Use-cases are simply an aid to defining <strong>what exists outside the system (actors)</strong> and <strong>what should be performed by the system (use cases)</strong>.&quot;</em> — <strong>Ivar Jacobson</strong></p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-tip">💡 คำพูดนี้คือหัวใจของ use case: <strong>actor อยู่นอกระบบ ส่วน use case อยู่ในระบบ</strong></p>
+</blockquote>
+<hr />
+<h2 id="4-ขั้นตอน-requirements-analysis-and-modeling-5-ขั้น">4. ขั้นตอน Requirements Analysis and Modeling (5 ขั้น)</h2>
+<ol>
+<li><strong>วิเคราะห์ functional requirements</strong> เพื่อเข้าใจโครงสร้างของ problem domain</li>
+<li><strong>แยกโครงสร้างเป็นส่วน ๆ</strong> เพื่อเข้าใจธรรมชาติ ความสัมพันธ์ และหน้าที่ของแต่ละส่วน</li>
+<li><strong>ระบุพฤติกรรมของระบบและ functional requirements</strong> จากมุมมองของ stakeholder</li>
+<li><strong>เขียน พัฒนา และปรับปรุง</strong> use case diagram และ narrative</li>
+<li><strong>ยืนยันว่าโมเดลตอบความต้องการของ stakeholder ทุกฝ่าย</strong></li>
+</ol>
+<hr />
+<h2 id="5-จะเขียนอะไรใน-use-case-what-to-write-about">5. จะเขียนอะไรใน Use Case (What to Write About?)</h2>
+<p>การประชุมเก็บ requirement และกลไก RE อื่น ๆ ใช้เพื่อ:</p>
+<ul>
+<li><strong>ระบุ stakeholders</strong></li>
+<li><strong>กำหนดขอบเขต</strong> ของปัญหา</li>
+<li><strong>ระบุเป้าหมายการทำงาน</strong> โดยรวม</li>
+<li><strong>จัดลำดับความสำคัญ</strong></li>
+<li><strong>ร่าง functional requirements</strong> ที่รู้ทั้งหมด</li>
+<li><strong>อธิบายสิ่งของ (objects)</strong> ที่ระบบจะจัดการ</li>
+</ul>
+<p>➜ <strong>จุดเริ่มของการเขียน use case:</strong> ลิสต์ <strong>ฟังก์ชันหรือกิจกรรมที่ actor แต่ละคนทำ</strong></p>
+<hr />
+<h2 id="6-system-concepts-for-use-case-modeling">6. System Concepts for Use Case Modeling</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แนวคิด</th>
+<th>นิยาม</th>
+<th>อธิบายเพิ่ม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use case</strong></td>
+<td>ลำดับขั้นตอน (scenario) ที่ <strong>สัมพันธ์กันเชิงพฤติกรรม</strong> ทั้งแบบอัตโนมัติและทำด้วยมือ เพื่อ <strong>ทำงานธุรกิจหนึ่งอย่างให้สำเร็จ</strong></td>
+<td>อธิบายฟังก์ชันจาก <strong>มุมมองผู้ใช้ภายนอก</strong> ด้วย <strong>คำที่ผู้ใช้เข้าใจ</strong></td>
+</tr>
+<tr>
+<td><strong>Use case diagram</strong></td>
+<td>แผนภาพแสดง <strong>ปฏิสัมพันธ์ระหว่างระบบกับระบบภายนอกและผู้ใช้</strong></td>
+<td>บอกเป็นภาพว่า <strong>ใครใช้ระบบ</strong> และ <strong>ใช้ในแบบไหน</strong></td>
+</tr>
+<tr>
+<td><strong>Use case narrative</strong></td>
+<td><strong>คำอธิบายเป็นข้อความ</strong> ของ business event และวิธีที่ผู้ใช้โต้ตอบกับระบบเพื่อทำงานให้สำเร็จ</td>
+<td>หัวข้อ 10</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>1 use case = 1 business task</strong> เช่น &quot;จองตั๋ว&quot; เป็น use case ได้ แต่ &quot;กดปุ่มถัดไป&quot; ไม่ใช่ เพราะเป็นแค่ขั้นตอนย่อย</p>
+</blockquote>
+<hr />
+<h2 id="7-สัญลักษณ์พื้นฐาน-basic-use-case-symbols">7. สัญลักษณ์พื้นฐาน (Basic Use Case Symbols)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัญลักษณ์</th>
+<th>รูป</th>
+<th>กฎการตั้งชื่อ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use case</strong></td>
+<td>⬭ วงรี (ellipse)</td>
+<td><strong>ขึ้นต้นด้วยคำกริยา (verb)</strong></td>
+<td>Book a ticket, View product</td>
+</tr>
+<tr>
+<td><strong>Actor</strong></td>
+<td>🧍 คนก้าง (stickman)</td>
+<td>ใส่ <strong>ชื่อ actor</strong></td>
+<td>Customer, Librarian</td>
+</tr>
+<tr>
+<td><strong>System boundary</strong></td>
+<td>▭ กล่อง</td>
+<td>ใส่ <strong>ชื่อระบบ</strong></td>
+<td>Library Management System</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="three-components-ในแผนภาพ">Three Components ในแผนภาพ</h3>
+<p><img loading="lazy" src="diagrams/L4-02-three-components.png" alt="3 องค์ประกอบของ use case diagram" /></p>
+<ul>
+<li><strong>actor อยู่นอกกล่อง</strong></li>
+<li><strong>use case อยู่ในกล่อง</strong></li>
+<li><strong>เส้นทึบ</strong> เชื่อม actor กับ use case</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ตั้งชื่อ use case แบบ <strong>กริยา + กรรม</strong> เสมอ เช่น &quot;Register patient&quot; ไม่ใช่ &quot;Patient registration&quot; หรือ &quot;Registration page&quot;</p>
+</blockquote>
+<hr />
+<h2 id="8-use-case-relationships">8. Use Case Relationships</h2>
+<h3 id="ภาพรวม-4-ความสัมพันธ์">ภาพรวม 4 ความสัมพันธ์</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความสัมพันธ์</th>
+<th>อยู่ระหว่าง</th>
+<th>ใช้ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>High-level</strong></td>
+<td><strong>Association</strong></td>
+<td>actor ↔ use case</td>
+<td>แสดงว่า actor มีปฏิสัมพันธ์กับ use case</td>
+</tr>
+<tr>
+<td><strong>Detailed</strong></td>
+<td><strong>Inheritance</strong></td>
+<td>actor ↔ actor</td>
+<td>ย้ายพฤติกรรมร่วมของหลาย actor ไปไว้ที่ <strong>abstract actor</strong> เพื่อลดความซ้ำซ้อน</td>
+</tr>
+<tr>
+<td><strong>Detailed</strong></td>
+<td><strong>Includes</strong></td>
+<td>use case ↔ use case</td>
+<td><strong>ทำ use case ใหญ่ให้เรียบง่าย</strong> โดยดึงพฤติกรรมที่ใช้ร่วมกันออกมา</td>
+</tr>
+<tr>
+<td><strong>Detailed</strong></td>
+<td><strong>Extends</strong></td>
+<td>use case ↔ use case</td>
+<td>เพิ่ม <strong>พฤติกรรมเสริม (optional)</strong> ให้ base use case</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<blockquote class="callout">
+<p>🎨 <strong>วิธีอ่านรูปในสรุปนี้:</strong> 🟦 สี่เหลี่ยมสีฟ้า = actor (ในข้อสอบวาดเป็นคนก้าง) · ⬭ วงรีขอบม่วง = use case · กรอบสีเหลือง = system boundary · เส้นทึบ = association · เส้นประมีลูกศร = include / extend</p>
+</blockquote>
+<h3 id="81-association">8.1 Association</h3>
+<p><strong>นิยาม:</strong> แสดง <strong>ปฏิสัมพันธ์ระหว่าง actor กับ use case</strong> วาดเป็น <strong>เส้นทึบ ไม่มีหัวลูกศร</strong></p>
+<p><strong>ตัวอย่าง 1</strong> – actor 1 คน สัมพันธ์กับหลาย use case</p>
+<p><img loading="lazy" src="diagrams/L4-03-association-1.png" alt="Association: actor 1 คน กับหลาย use case" /></p>
+<p>Customer actor สัมพันธ์กับ 2 use cases คือ Browse Items และ Place Order</p>
+<p><strong>ตัวอย่าง 2</strong> – use case 1 อัน สัมพันธ์กับหลาย actor</p>
+<p><img loading="lazy" src="diagrams/L4-04-association-2.png" alt="Association: use case 1 อัน กับหลาย actor" /></p>
+<p>Manage Account สัมพันธ์กับทั้ง Customer และ Bank actors</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Actor ไม่จำเป็นต้องเป็นคน</strong> อาจเป็นระบบภายนอก เช่น Bank หรือ payment gateway</p>
+</blockquote>
+<hr />
+<h3 id="82-inheritance-ระหว่าง-actor">8.2 Inheritance (ระหว่าง actor)</h3>
+<p><strong>นิยาม:</strong> ย้าย <strong>พฤติกรรมที่เหมือนกัน</strong> ของหลาย actor ไปไว้ที่ <strong>abstract actor</strong> ที่ใช้ร่วมกัน <strong>เพื่อลดความซ้ำซ้อน</strong></p>
+<p><strong>Before (จากสไลด์)</strong> – ระบบห้องสมุด</p>
+<p><img loading="lazy" src="diagrams/L4-05-inheritance-before.png" alt="Inheritance – Before" /></p>
+<p>ทั้ง Visitor และ Patron ต่างมีเส้นไปที่ &quot;Search library inventory&quot; เหมือนกัน → <strong>ซ้ำซ้อน</strong></p>
+<p><strong>After</strong> <em>(ช่อง After ในสไลด์ว่างไว้ให้ทำในห้อง ด้านล่างเป็นแนวคำตอบ)</em></p>
+<p><img loading="lazy" src="diagrams/L4-06-inheritance-after.png" alt="Inheritance – After (แนวคำตอบ)" /></p>
+<blockquote class="callout">
+<p>✏️ ในรูปใช้ลูกศรธรรมดาแทน ตอนวาดจริงตาม UML ให้ใช้ <strong>เส้นทึบ หัวลูกศรสามเหลี่ยมโปร่ง</strong> ชี้จาก actor ลูกไปหา actor แม่</p>
+</blockquote>
+<ul>
+<li>สร้าง abstract actor ชื่อ <strong>Library User</strong> ถือ use case ที่ใช้ร่วม คือ <strong>Search library inventory</strong></li>
+<li><strong>Visitor</strong> และ <strong>Patron</strong> สืบทอดจาก Library User จึงค้นหาได้เหมือนเดิม</li>
+<li>แต่ละคนยังมี use case เฉพาะตัว: Visitor → Apply for membership, Patron → Borrow items</li>
+</ul>
+<hr />
+<h3 id="83-includes-ระหว่าง-use-case">8.3 Includes (ระหว่าง use case)</h3>
+<p><strong>นิยาม:</strong> ทำ use case ใหญ่ให้เรียบง่าย โดย <strong>ดึงพฤติกรรมที่ใช้ร่วมกัน (common behaviours) ออกมา</strong> เป็น use case แยก</p>
+<p><strong>วิธีวาด ⭐</strong></p>
+<ul>
+<li><strong>ลูกศรเส้นประ</strong> เริ่มจาก <strong>use case ต้นฉบับ (base)</strong> ชี้ไปที่ <strong>use case ที่ถูกเรียกใช้</strong></li>
+<li>ติดป้าย <strong><code>&lt;&lt;includes&gt;&gt;</code></strong></li>
+</ul>
+<p><strong>ตัวอย่าง 1: Checkout</strong> – แยก use case ใหญ่เป็นส่วน ๆ</p>
+<p><img loading="lazy" src="diagrams/L4-07-include-checkout.png" alt="Includes: Checkout" /></p>
+<p>Checkout <strong>ต้องทำ</strong> Scan Item, Calculate Total and Tax และ Payment <strong>ทุกครั้ง</strong></p>
+<p><strong>ตัวอย่าง 2: ATM</strong> – ดึงส่วนที่ใช้ร่วมกันออกมา</p>
+<p><img loading="lazy" src="diagrams/L4-08-include-atm.png" alt="Includes: ATM" /></p>
+<p>ทั้ง Deposit Funds และ Withdraw Cash <strong>ต้อง</strong> ยืนยันตัวตนลูกค้า จึงแยก Customer Authentication ออกมาใช้ร่วมกัน ไม่ต้องเขียนซ้ำ</p>
+<hr />
+<h3 id="84-extends-ระหว่าง-use-case">8.4 Extends (ระหว่าง use case)</h3>
+<p><strong>นิยาม:</strong> ให้ <strong>พฤติกรรมเสริมแบบ optional</strong> กับ base use case</p>
+<p><strong>วิธีวาด ⭐</strong></p>
+<ul>
+<li><strong>ลูกศรเส้นประ</strong> เริ่มจาก <strong>use case ที่มาเสริม (extending)</strong> ชี้ไปที่ <strong>base use case</strong></li>
+<li>ติดป้าย <strong><code>&lt;&lt;extends&gt;&gt;</code></strong></li>
+</ul>
+<p><strong>ตัวอย่าง: Registration</strong></p>
+<p><img loading="lazy" src="diagrams/L4-09-extend-registration.png" alt="Extends: Registration" /></p>
+<ul>
+<li><strong>Registration สมบูรณ์และมีความหมายได้ด้วยตัวเอง</strong></li>
+<li>อาจเสริมด้วย <strong>Get Help On Registration</strong> ซึ่งเป็น <strong>ทางเลือก</strong> (บางคนกดขอความช่วยเหลือ บางคนไม่กด)</li>
+</ul>
+<hr />
+<h3 id="includes-vs-extends-จุดที่สับสนที่สุดในบทนี้">⚠️ Includes vs Extends — จุดที่สับสนที่สุดในบทนี้</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>&lt;<includes>&gt;</strong></th>
+<th><strong>&lt;<extends>&gt;</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ความหมาย</td>
+<td><strong>ต้องทำเสมอ</strong> เป็นส่วนหนึ่งของ base</td>
+<td><strong>ทำหรือไม่ทำก็ได้</strong> (optional)</td>
+</tr>
+<tr>
+<td>base use case ขาดส่วนนี้ได้ไหม</td>
+<td><strong>ไม่ได้</strong> ไม่สมบูรณ์</td>
+<td><strong>ได้</strong> ยังสมบูรณ์ในตัวเอง</td>
+</tr>
+<tr>
+<td><strong>ทิศลูกศร</strong></td>
+<td><strong>base ──► included</strong></td>
+<td><strong>extending ──► base</strong></td>
+</tr>
+<tr>
+<td>จุดประสงค์</td>
+<td>ลดความซ้ำ / แยก use case ใหญ่</td>
+<td>เพิ่มทางเลือกหรือกรณีพิเศษ</td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td>Withdraw Cash ──► Customer Authentication</td>
+<td>Get Help On Registration ──► Registration</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>เทคนิคจำทิศลูกศร:</strong> อ่านลูกศรเป็นประโยค</p>
+<ul>
+<li><code>Withdraw Cash ──includes──► Authentication</code> = &quot;ถอนเงิน <strong>รวม</strong> การยืนยันตัวตน&quot; ✅</li>
+<li><code>Get Help ──extends──► Registration</code> = &quot;ขอความช่วยเหลือ <strong>ขยาย</strong> การลงทะเบียน&quot; ✅</li>
+</ul>
+<p><strong>ทดสอบง่าย ๆ:</strong> ถามว่า &quot;ทุกครั้งที่ทำ A ต้องทำ B ไหม?&quot; ถ้า <strong>ต้อง</strong> ใช้ include แต่ถ้า <strong>แค่บางครั้ง</strong> ใช้ extend</p>
+</blockquote>
+<hr />
+<h2 id="9-การสร้าง-use-case-developing-a-use-case-6-ขั้น">9. การสร้าง Use Case (Developing a Use Case) – 6 ขั้น</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ทำอะไร</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Identify the system boundary</strong></td>
+<td>กำหนดขอบเขตระบบ</td>
+<td>ตัดสินว่าจะโมเดลระบบอะไร แล้ววาด <strong>กล่อง</strong> แทน scope ของระบบ</td>
+</tr>
+<tr>
+<td><strong>2. Identify the actors</strong></td>
+<td>หา actor</td>
+<td>ใครจะใช้ระบบ แบ่งเป็น <strong>primary</strong> (ใช้ระบบโดยตรงเพื่อบรรลุเป้าหมาย เช่น customer) และ <strong>secondary</strong> (บทบาทสนับสนุน เช่น payment service)</td>
+</tr>
+<tr>
+<td><strong>3. Identify use cases</strong></td>
+<td>หา use case</td>
+<td>ลิสต์ <strong>งานหลักหรือเป้าหมาย</strong> ที่ actor อยากทำกับระบบ ต้องแทน <strong>functional requirements</strong> เช่น &quot;Book Ticket&quot;, &quot;Generate Report&quot;</td>
+</tr>
+<tr>
+<td><strong>4. Establish relationships</strong></td>
+<td>สร้างความสัมพันธ์</td>
+<td>เชื่อม actor กับ use case ที่ <strong>เริ่มหรือมีส่วนร่วม</strong> และพิจารณาชนิดความสัมพันธ์ (include, extend, inheritance)</td>
+</tr>
+<tr>
+<td><strong>5. Draw a use case diagram</strong></td>
+<td>วาดแผนภาพ</td>
+<td><strong>actor อยู่นอกกล่อง</strong>, <strong>use case อยู่ในกล่อง</strong>, แสดง association และ relationship ให้ชัด</td>
+</tr>
+<tr>
+<td><strong>6. Review and refine</strong></td>
+<td>ตรวจและปรับ</td>
+<td>เช็กว่า <strong>ครอบคลุมทุก functional requirement</strong> และ <strong>validate กับ stakeholder</strong> ว่าครบและถูกต้อง</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>วิธีหา actor และ use case จากโจทย์ข้อความ</strong> <em>(เทคนิคเสริม)</em></p>
+<ul>
+<li><strong>คำนามที่เป็นคน ตำแหน่ง หรือระบบภายนอก</strong> → actor เช่น &quot;ผู้เยี่ยมชม&quot;, &quot;เจ้าหน้าที่&quot;, &quot;ธนาคาร&quot;</li>
+<li><strong>คำกริยาที่ actor ทำกับระบบ</strong> → use case เช่น &quot;ซื้อตั๋ว&quot;, &quot;ยกเลิกตั๋ว&quot;, &quot;สร้างรายงาน&quot;</li>
+<li><strong>สิ่งที่ระบบทำเองอัตโนมัติระหว่างทาง</strong> (เช่น &quot;ระบบคำนวณราคา&quot;) มักเป็น <strong>ขั้นตอนใน narrative</strong> หรือ <strong>include</strong> ไม่ใช่ use case ที่มี actor เป็นเจ้าของ</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="10-use-case-narrative">10. Use Case Narrative</h2>
+<h3 id="คืออะไร">คืออะไร</h3>
+<ul>
+<li><strong>คำอธิบายเป็นข้อความอย่างละเอียด</strong> ว่าระบบโต้ตอบกับ actor อย่างไรเพื่อบรรลุเป้าหมายหนึ่ง</li>
+<li>อธิบาย <strong>ทีละขั้นตอน (step-by-step)</strong> ว่าผู้ใช้หรือระบบอื่นโต้ตอบกับซอฟต์แวร์อย่างไร</li>
+<li><strong>มักเขียนเป็นตาราง</strong></li>
+</ul>
+<h3 id="key-components-8-ช่อง">Key Components (8 ช่อง)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use Case Name</strong></td>
+<td>ชื่อที่ชัดเจน <strong>ต้องตรงกับชื่อใน use case diagram</strong></td>
+</tr>
+<tr>
+<td><strong>Primary Actor</strong></td>
+<td>ผู้ใช้หรือระบบที่โต้ตอบกับ use case นี้</td>
+</tr>
+<tr>
+<td><strong>Goal in Context</strong></td>
+<td>เป้าหมายหรือจุดประสงค์ของ use case</td>
+</tr>
+<tr>
+<td><strong>Precondition</strong></td>
+<td>เงื่อนไขที่ต้องเป็นจริง <strong>ก่อน</strong> เริ่ม use case</td>
+</tr>
+<tr>
+<td><strong>Trigger</strong></td>
+<td><strong>เหตุการณ์ที่ทำให้ use case เริ่ม</strong></td>
+</tr>
+<tr>
+<td><strong>Scenario</strong></td>
+<td>ลำดับปฏิสัมพันธ์ปกติระหว่าง actor กับระบบ บางครั้งเรียก <strong>&quot;main flow&quot;</strong> หรือ <strong>&quot;basic flow&quot;</strong></td>
+</tr>
+<tr>
+<td><strong>Exception</strong></td>
+<td>จะเกิดอะไรถ้า <strong>มีบางอย่างผิดพลาด</strong> เช่น error หรือ input ไม่ถูกต้อง</td>
+</tr>
+<tr>
+<td><strong>Postcondition</strong></td>
+<td>สภาพของระบบ <strong>หลัง</strong> use case เสร็จ</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Precondition ≠ Trigger</strong></p>
+<ul>
+<li><strong>Precondition</strong> = <strong>สภาพ</strong> ที่ต้องเป็นจริงอยู่แล้ว เช่น &quot;ผู้ใช้ login แล้ว&quot;</li>
+<li><strong>Trigger</strong> = <strong>เหตุการณ์</strong> ที่เริ่ม use case เช่น &quot;ผู้ใช้กดปุ่มซื้อตั๋ว&quot;</li>
+</ul>
+</blockquote>
+<h3 id="ตัวอย่าง-use-case-narrative-ผมเขียนเอง-จากโจทย์-zoo-ticketing">ตัวอย่าง Use Case Narrative <em>(ผมเขียนเอง จากโจทย์ Zoo Ticketing)</em></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use Case Name</strong></td>
+<td>Purchase Ticket Online</td>
+</tr>
+<tr>
+<td><strong>Primary Actor</strong></td>
+<td>Visitor (ผู้เยี่ยมชม)</td>
+</tr>
+<tr>
+<td><strong>Goal in Context</strong></td>
+<td>ผู้เยี่ยมชมซื้อตั๋วเข้าสวนสัตว์ล่วงหน้า และได้ตั๋วพร้อม Booking ID กับ QR Code</td>
+</tr>
+<tr>
+<td><strong>Precondition</strong></td>
+<td>ผู้ดูแลระบบกำหนดราคาและรอบการเข้าชมไว้แล้ว; ผู้เยี่ยมชมเข้าสู่ระบบแล้ว</td>
+</tr>
+<tr>
+<td><strong>Trigger</strong></td>
+<td>ผู้เยี่ยมชมกดเมนู &quot;ซื้อตั๋ว&quot;</td>
+</tr>
+<tr>
+<td><strong>Scenario</strong></td>
+<td>1. ผู้เยี่ยมชมเลือกวันที่เข้าชม<br>2. ผู้เยี่ยมชมเลือกประเภทบัตร (เด็ก/ผู้ใหญ่/ผู้สูงอายุ) และจำนวน<br>3. ระบบแสดงราคารวมตามที่ผู้ดูแลระบบกำหนด<br>4. ผู้เยี่ยมชมเลือกชำระด้วยบัตรเครดิตหรือ QR Code<br>5. ระบบยืนยันการชำระเงิน<br>6. ระบบออกตั๋วพร้อม Booking ID และ QR Code</td>
+</tr>
+<tr>
+<td><strong>Exception</strong></td>
+<td>1a. วันที่เลือกเต็มหรือปิดทำการ: ระบบแจ้งและให้เลือกวันใหม่<br>5a. ชำระเงินไม่สำเร็จ: ระบบแจ้งและให้ลองใหม่หรือเปลี่ยนช่องทาง</td>
+</tr>
+<tr>
+<td><strong>Postcondition</strong></td>
+<td>บันทึกการจองในระบบ; ผู้เยี่ยมชมได้ตั๋วพร้อม Booking ID และ QR Code</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="11-แนวทางทำแบบฝึกหัด">11. แนวทางทำแบบฝึกหัด</h2>
+<blockquote class="callout">
+<p>ทุกคำตอบในหัวข้อนี้ผมเขียนเป็น <strong>แนวทาง</strong> ไม่ใช่เฉลยของอาจารย์ ควรเช็กกับที่อาจารย์สอนในห้องอีกครั้ง</p>
+</blockquote>
+<h3 id="111-in-class-exercise-zoo-ticketing-system">11.1 In-class Exercise: Zoo Ticketing System</h3>
+<p><strong>โจทย์ (ย่อ):</strong> ระบบขายบัตรเข้าสวนสัตว์ ซื้อล่วงหน้าผ่านระบบ หรือซื้อที่จุดขายหน้าสวนสัตว์ก็ได้</p>
+<ul>
+<li><strong>ผู้เยี่ยมชม:</strong> ซื้อตั๋ว (เลือกประเภทบัตร เด็ก/ผู้ใหญ่/ผู้สูงอายุ และวันที่) → ระบบแสดงราคา → ชำระด้วยบัตรเครดิตหรือ QR Code → ได้ตั๋วพร้อม Booking ID และ QR Code, ตรวจรายละเอียดและสถานะตั๋ว, ขอยกเลิกตั๋วก่อนวันเข้าชม (ระบบตรวจเงื่อนไขและคืนเงินตามนโยบาย)</li>
+<li><strong>เจ้าหน้าที่ขายตั๋ว:</strong> ขายตั๋ว ณ จุดบริการ (เลือกประเภท จำนวน วันที่ รับเงิน ออกตั๋ว), ตรวจสอบ แก้ไข หรือยกเลิกรายการตามคำขอ (คืนเงินตามนโยบาย)</li>
+<li><strong>ผู้ดูแลระบบ:</strong> กำหนดรอบและช่วงเวลาเข้าชม, กำหนดและปรับราคาบัตรตามช่วงเวลา ฤดูกาล หรือกิจกรรมพิเศษ, จัดการบัญชีและสิทธิ์เจ้าหน้าที่, ดูและสร้างรายงานยอดขายและสถิติผู้เข้าชม</li>
+</ul>
+<p><strong>งานที่ต้องทำ:</strong> (1) อ่านระบบ (2) วาด use case diagram (3) เขียน use case narrative 2 อัน</p>
+<p><strong>แนวทาง use case diagram</strong>
+<strong>System boundary:</strong> Zoo Ticketing System</p>
+<p><strong>Actors และ use cases (association)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Use cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧍 <strong>Visitor</strong> (primary)</td>
+<td>Purchase Ticket Online, View Ticket Status, Request Ticket Cancellation</td>
+</tr>
+<tr>
+<td>🧍 <strong>Ticket Staff</strong> (primary)</td>
+<td>Sell Ticket at Counter, Manage Ticket Order (ตรวจสอบ/แก้ไข/ยกเลิก)</td>
+</tr>
+<tr>
+<td>🧍 <strong>Administrator</strong> (primary)</td>
+<td>Manage Visit Rounds, Manage Ticket Prices, Manage Staff Accounts, Generate Sales Report</td>
+</tr>
+<tr>
+<td>🏦 <strong>Payment Gateway</strong> (secondary)</td>
+<td>Make Payment, Process Refund</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ความสัมพันธ์ระหว่าง use case</strong></p>
+<p><img loading="lazy" src="diagrams/L4-10a-zoo-use-case-visitor.png" alt="แนวทาง use case diagram: Zoo Ticketing System (ส่วนผู้เยี่ยมชม)" /></p>
+<p><img loading="lazy" src="diagrams/L4-10b-zoo-use-case-staff.png" alt="แนวทาง use case diagram: Zoo Ticketing System (ส่วนเจ้าหน้าที่ขายตั๋ว)" /></p>
+<p><img loading="lazy" src="diagrams/L4-10c-zoo-use-case-admin.png" alt="แนวทาง use case diagram: Zoo Ticketing System (ส่วนผู้ดูแลระบบ)" /></p>
+<p><strong>เหตุผลของการออกแบบ</strong></p>
+<ul>
+<li><strong>Make Payment</strong> ถูก include จากทั้งการซื้อออนไลน์และการขายหน้าเคาน์เตอร์ เพราะ <strong>ต้องจ่ายเงินทุกครั้ง</strong> และใช้ร่วมกัน</li>
+<li><strong>Process Refund</strong> ถูก include จาก Request Ticket Cancellation เพราะคำขอยกเลิกทุกครั้งต้องผ่านการตรวจเงื่อนไขคืนเงิน <em>(ถ้ามองว่าคืนเงินแค่บางกรณี ใช้ extend ก็ได้ ขึ้นกับการตีความ)</em> แต่กับ <strong>Manage Ticket Order</strong> ใช้ <strong>extend</strong> เพราะเจ้าหน้าที่แค่ตรวจหรือแก้ไขตั๋วโดยไม่คืนเงินก็ได้ จะคืนเงินเฉพาะตอนยกเลิก</li>
+<li><strong>Payment Gateway</strong> เป็น <strong>secondary actor</strong> (ระบบภายนอก)</li>
+<li>&quot;ระบบแสดงราคา&quot; เป็นแค่ <strong>ขั้นตอนใน scenario</strong> ไม่ใช่ use case แยก</li>
+<li><strong>Staff</strong> ตรวจสอบ แก้ไข และยกเลิกตั๋ว รวมเป็น &quot;Manage Ticket Order&quot; หรือจะแยกเป็น 3 use case ก็ได้</li>
+</ul>
+<hr />
+<h3 id="112-exercise-2-requirements-analysis-with-scenario-based-modeling">11.2 Exercise 2: Requirements Analysis with Scenario-based Modeling</h3>
+<p><strong>งานที่ต้องทำ:</strong> จากระบบที่กำหนด ให้</p>
+<ol>
+<li>ระบุ <strong>Functional Requirement</strong></li>
+<li>ระบุ <strong>Non-functional Requirement</strong></li>
+<li>ระบุ <strong>Actor และ Use Case</strong></li>
+<li>วาด <strong>Detailed-level Use Case Diagram</strong> (มี include/extend/inheritance)</li>
+<li>เขียน <strong>Use Case Narrative</strong></li>
+</ol>
+<p>ส่งเป็น PDF ชื่อ <code>Ex2-SecX-idXXXXXXX.pdf</code> บน MyCourses</p>
+<h4>ระบบที่ 1: การจัดการนัดหมายคลินิกทันตกรรม</h4>
+<p><strong>สรุปโจทย์</strong></p>
+<ul>
+<li><strong>ผู้ป่วย:</strong> สร้างบัญชีและเข้าสู่ระบบ, จองนัด (เลือกทันตแพทย์ เลือกวันเวลาจากช่วงว่าง ระบุเหตุผล เช่น ตรวจฟัน ถอนฟัน ขูดหินปูน) → ระบบสร้างรหัสนัดหมาย และส่งยืนยันทาง push notification, ตรวจนัดที่จะมาถึง, เปลี่ยนหรือยกเลิกนัด, ดูประวัตินัด</li>
+<li><strong>ทันตแพทย์:</strong> เข้าสู่ระบบ, ดูตารางงานประจำวันพร้อมรายละเอียดผู้ป่วยและเหตุผล, อัปเดตสถานะนัด (รอดำเนินการ/เสร็จสิ้น/ยกเลิก), เพิ่มบันทึกการมาพบ, เปลี่ยนแปลงนัดหมาย</li>
+<li><strong>เจ้าหน้าที่คลินิก:</strong> จัดการข้อมูลผู้ป่วย, อัปเดตความพร้อมของนัดหมาย, เปลี่ยนหรือยกเลิกนัดแทนผู้ป่วย, สร้างรายงานสถิติ (นัดที่เสร็จสิ้น, ขาดนัด)</li>
+<li><strong>ระบบ:</strong> ส่งแจ้งเตือนอัตโนมัติทาง push notification และ SMS ก่อนถึงนัด</li>
+<li><strong>ผู้ดูแลระบบ:</strong> จัดการบัญชีผู้ใช้, อัปเดตตารางงานคลินิก, ตั้งค่านัดหมาย (จำนวนนัดสูงสุดต่อวันของแต่ละทันตแพทย์, วันหยุด)</li>
+</ul>
+<p><strong>แนวทาง Functional Requirements (ตัวอย่าง)</strong></p>
+<ul>
+<li>FR1: The system shall allow patients to create an account and log in.</li>
+<li>FR2: The system shall allow patients to book an appointment by selecting a dentist, an available date/time, and a visit reason.</li>
+<li>FR3: The system shall generate an appointment ID and send a push notification confirmation.</li>
+<li>FR4: The system shall allow patients to view, reschedule, and cancel appointments and view appointment history.</li>
+<li>FR5: The system shall allow dentists to view their daily schedule, update appointment status, and add visit notes.</li>
+<li>FR6: The system shall allow clinic staff to manage patient information and reschedule/cancel on behalf of patients.</li>
+<li>FR7: The system shall generate appointment statistics reports (completed and no-show).</li>
+<li>FR8: The system shall send automatic reminders via push notification and SMS before the appointment.</li>
+<li>FR9: The system shall allow administrators to manage user accounts, clinic schedules, and appointment settings.</li>
+</ul>
+<p><strong>แนวทาง Non-functional Requirements</strong> <em>(โจทย์ไม่ได้เขียนตรง ๆ ต้องอนุมานเอง และต้องวัดผลได้)</em></p>
+<ul>
+<li>NFR1 (usability): โจทย์บอกว่าแอป &quot;ใช้งานง่าย&quot; จึงควรเขียนให้วัดได้ เช่น a new patient shall complete a booking within 3 minutes</li>
+<li>NFR2 (reliability): reminders shall be sent at least 24 hours before the appointment for 99% of appointments</li>
+<li>NFR3 (security): patient records shall be accessible only to authorized dentists and staff</li>
+<li>NFR4 (performance): available time slots shall load within 2 seconds</li>
+<li>NFR5 (platform): the application shall run on iOS and Android</li>
+</ul>
+<p><strong>แนวทาง Actors</strong></p>
+<ul>
+<li><strong>Primary:</strong> Patient, Dentist, Clinic Staff, Administrator</li>
+<li><strong>Secondary:</strong> Push Notification Service, SMS Gateway</li>
+<li><strong>Inheritance ที่ใช้ได้:</strong> Dentist และ Clinic Staff ต่างเปลี่ยนแปลงนัดหมายได้ อาจสร้าง abstract actor &quot;Clinic Personnel&quot; ถือ use case &quot;Reschedule Appointment&quot; แล้วให้ทั้งคู่สืบทอด</li>
+<li><strong>Include ที่ใช้ได้:</strong> Book Appointment ──&lt;<include>&gt;──► Send Confirmation Notification</li>
+<li><strong>Extend ที่ใช้ได้:</strong> Cancel Appointment ◄──&lt;<extend>&gt;── Record No-show <em>(ตัวอย่างการตีความ)</em></li>
+<li><strong>Login:</strong> ถ้าวาด &quot;Log In&quot; เป็น use case แยก ให้ระวังว่าหลายตำราไม่นิยม include login กับทุก use case แต่ให้เขียนเป็น <strong>precondition</strong> แทน <em>(ขึ้นกับที่อาจารย์สอน)</em></li>
+</ul>
+<h4>ระบบที่ 2: ระบบ POS ร้าน Twinkle Jingle's Christmas Shop</h4>
+<p><strong>สรุปโจทย์</strong></p>
+<ul>
+<li>ร้านขายของคริสต์มาสที่เปิดเฉพาะเดือนธันวาคม (ช็อกโกแลต แก้วธีมสโนว์แมน ของประดับต้นคริสต์มาส เทียน ถุงเท้า หมวกซานตา)</li>
+<li><strong>พนักงานขาย:</strong> ดูรายการสินค้าและจำนวนในสต็อก, ขายสินค้า (เพิ่มหรือลบสินค้าในรายการขาย, ใช้ส่วนลด), ระบบคำนวณยอดรวมส่วนลดและภาษี, รับชำระด้วยเงินสด บัตรเครดิต หรือ e-wallet, ระบบออกใบเสร็จและตัดสต็อกอัตโนมัติ, <strong>ระบบแจ้งเตือนเมื่อสินค้าหมด เพื่อป้องกันการขายของที่ไม่มี</strong></li>
+<li><strong>ผู้จัดการร้าน:</strong> จัดการข้อมูลสินค้า (เพิ่ม แก้ไข นำออก), กำหนดและปรับส่วนลดสำหรับสินค้าหรือช่วงเวลา, ตรวจสินค้าคงคลัง, ดูรายงานการขายบนแดชบอร์ด</li>
+<li><strong>ระบบ:</strong> จบวันทำรายงานยอดขายประจำวันอัตโนมัติ (รายได้รวม จำนวนธุรกรรม จำนวนที่ขายได้ต่อประเภท และสินค้าขายดี)</li>
+</ul>
+<p><strong>แนวทางโครง use case diagram</strong></p>
+<p><img loading="lazy" src="diagrams/L4-11a-pos-use-case-sales.png" alt="แนวทาง use case diagram: Twinkle Jingle's POS (ส่วนพนักงานขาย)" /></p>
+<p><img loading="lazy" src="diagrams/L4-11b-pos-use-case-manager.png" alt="แนวทาง use case diagram: Twinkle Jingle's POS (ส่วนผู้จัดการร้านและรายงานอัตโนมัติ)" /></p>
+<ul>
+<li><strong>Apply Discount เป็น extend</strong> เพราะไม่ได้ใช้ส่วนลดทุกการขาย</li>
+<li><strong>Calculate Total, Receive Payment, Issue Receipt, Update Stock เป็น include</strong> เพราะเกิดทุกการขาย <em>(จะรวมเป็นขั้นตอนใน narrative แทนก็ได้ ถ้าไม่อยากให้แผนภาพละเอียดเกิน)</em></li>
+<li><strong>การแจ้งเตือนสินค้าหมด</strong> อาจเขียนเป็น <strong>exception</strong> ใน narrative ของ Process Sale หรือจะเป็น extend &quot;Alert Out of Stock&quot; ก็ได้</li>
+<li><strong>รายงานประจำวัน</strong> เกิดอัตโนมัติ บางตำรานิยมใช้ <strong>Time</strong> เป็น actor ส่วนบางตำราให้ Store Manager เป็น actor ที่รับรายงาน <em>(ขึ้นกับที่อาจารย์สอน)</em></li>
+<li><strong>Non-functional ที่อนุมานได้:</strong> คำนวณภาษีถูกต้อง 100%, ใช้งานช่วงเทศกาลคนเยอะได้ (เช่น ทำรายการขายเสร็จภายใน 30 วินาที), ข้อมูลบัตรเครดิตปลอดภัย</li>
+</ul>
+<hr />
+<h1>คำศัพท์สำคัญ</h1>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Requirements analysis</strong></td>
+<td>ขยาย requirement และสร้างโมเดลเพื่อวางฐานการออกแบบ มักทำโดย BA</td>
+<td>แปลงข้อความเป็นโมเดล</td>
+</tr>
+<tr>
+<td><strong>Analysis model</strong></td>
+<td>สะพานระหว่าง requirements specification กับ design model</td>
+<td>สะพาน</td>
+</tr>
+<tr>
+<td><strong>Scenario-based model</strong></td>
+<td>โมเดลที่มองจากมุม actor เช่น use case</td>
+<td>ใครทำอะไร</td>
+</tr>
+<tr>
+<td><strong>Class / Flow / Behavioral / Data model</strong></td>
+<td>โมเดล class OO / การไหลของข้อมูล / การตอบสนองต่อ event / information domain (ERD)</td>
+<td>ของ / ไหล / เหตุการณ์ / ข้อมูล</td>
+</tr>
+<tr>
+<td><strong>Use case</strong></td>
+<td>ลำดับขั้นตอนเพื่อทำ business task หนึ่งอย่างให้สำเร็จ จากมุมมองผู้ใช้ภายนอก</td>
+<td>1 งาน 1 วงรี</td>
+</tr>
+<tr>
+<td><strong>Use case diagram</strong></td>
+<td>แผนภาพแสดงว่าใครใช้ระบบ และใช้อย่างไร</td>
+<td>ภาพรวมใคร-ทำอะไร</td>
+</tr>
+<tr>
+<td><strong>Use case narrative</strong></td>
+<td>คำอธิบายละเอียดเป็นตารางของ use case หนึ่งอัน</td>
+<td>คำบรรยาย</td>
+</tr>
+<tr>
+<td><strong>Actor</strong></td>
+<td>คนหรือระบบภายนอกที่ใช้ระบบ อยู่ <strong>นอก</strong> system boundary</td>
+<td>คนก้าง</td>
+</tr>
+<tr>
+<td><strong>Primary actor</strong></td>
+<td>ใช้ระบบโดยตรงเพื่อบรรลุเป้าหมาย</td>
+<td>ผู้ใช้หลัก</td>
+</tr>
+<tr>
+<td><strong>Secondary actor</strong></td>
+<td>บทบาทสนับสนุน เช่น payment service</td>
+<td>ผู้ช่วย</td>
+</tr>
+<tr>
+<td><strong>System boundary</strong></td>
+<td>กล่องแสดงขอบเขตระบบ ใส่ชื่อระบบ</td>
+<td>กรอบระบบ</td>
+</tr>
+<tr>
+<td><strong>Association</strong></td>
+<td>เส้นทึบ actor ↔ use case</td>
+<td>เส้นเชื่อม</td>
+</tr>
+<tr>
+<td><strong>Inheritance</strong></td>
+<td>actor ลูกสืบทอดพฤติกรรมจาก abstract actor เพื่อลดความซ้ำ</td>
+<td>พ่อ-ลูก</td>
+</tr>
+<tr>
+<td><strong>Abstract actor</strong></td>
+<td>actor กลางที่รวมพฤติกรรมร่วมของหลาย actor</td>
+<td>actor แม่</td>
+</tr>
+<tr>
+<td><strong>&lt;<includes>&gt;</strong></td>
+<td>ดึงพฤติกรรมร่วมหรือแยก use case ใหญ่ <strong>ทำเสมอ</strong> ลูกศรจาก base → included</td>
+<td>ต้องทำ</td>
+</tr>
+<tr>
+<td><strong>&lt;<extends>&gt;</strong></td>
+<td>พฤติกรรมเสริม <strong>optional</strong> ลูกศรจาก extending → base</td>
+<td>ทำก็ได้ไม่ทำก็ได้</td>
+</tr>
+<tr>
+<td><strong>Base use case</strong></td>
+<td>use case หลักที่ถูก include/extend</td>
+<td>ตัวหลัก</td>
+</tr>
+<tr>
+<td><strong>Goal in Context</strong></td>
+<td>เป้าหมายของ use case</td>
+<td>ทำเพื่ออะไร</td>
+</tr>
+<tr>
+<td><strong>Precondition</strong></td>
+<td>สภาพที่ต้องเป็นจริงก่อนเริ่ม</td>
+<td>สภาพก่อน</td>
+</tr>
+<tr>
+<td><strong>Trigger</strong></td>
+<td>เหตุการณ์ที่เริ่ม use case</td>
+<td>ปุ่มสตาร์ท</td>
+</tr>
+<tr>
+<td><strong>Scenario (main / basic flow)</strong></td>
+<td>ลำดับปฏิสัมพันธ์ปกติ</td>
+<td>ทางหลัก</td>
+</tr>
+<tr>
+<td><strong>Exception</strong></td>
+<td>สิ่งที่เกิดเมื่อผิดพลาด หรือ input ไม่ถูกต้อง</td>
+<td>ทางเบี่ยง</td>
+</tr>
+<tr>
+<td><strong>Postcondition</strong></td>
+<td>สภาพระบบหลังจบ use case</td>
+<td>สภาพหลัง</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>สรุปท้ายบท / จุดที่มักออกสอบ</h1>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>Analysis model = สะพาน</strong> ระหว่าง requirements specification กับ design model</li>
+<li>Requirements analysis <strong>มักทำโดย BA</strong> มี <strong>3 objectives:</strong> อธิบายว่าลูกค้าต้องการอะไร, วางฐานการออกแบบ, สร้าง requirement ที่ validate ได้</li>
+<li><strong>5 modeling approaches:</strong> scenario-based, class, flow, behavioral, data</li>
+<li><strong>Jacobson:</strong> actors = สิ่งที่อยู่ <strong>นอก</strong> ระบบ, use cases = สิ่งที่ระบบ <strong>ทำ</strong></li>
+<li><strong>สัญลักษณ์:</strong> ellipse (ชื่อขึ้นต้นด้วย <strong>verb</strong>), stickman, box (ชื่อระบบ)</li>
+<li><strong>4 relationships:</strong> association (high-level), inheritance (actor–actor), includes และ extends (use case–use case)</li>
+<li><strong>ทิศลูกศร:</strong> include = <strong>base → included</strong>, extend = <strong>extending → base</strong> (เส้นประทั้งคู่)</li>
+<li><strong>6 ขั้นสร้าง use case:</strong> boundary → actors → use cases → relationships → draw → review &amp; refine</li>
+<li><strong>Narrative 8 ช่อง:</strong> Name, Primary Actor, Goal in Context, Precondition, Trigger, Scenario, Exception, Postcondition</li>
+<li><strong>ชื่อใน narrative ต้องตรงกับชื่อใน diagram</strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Include vs Extend</strong></td>
+<td>ทำเสมอ, base → included vs optional, extending → base</td>
+</tr>
+<tr>
+<td>Association vs Include</td>
+<td>เส้นทึบ actor–use case vs เส้นประ use case–use case</td>
+</tr>
+<tr>
+<td>Inheritance vs Include</td>
+<td>ระหว่าง actor vs ระหว่าง use case</td>
+</tr>
+<tr>
+<td>Primary vs Secondary actor</td>
+<td>ใช้ระบบเพื่อเป้าหมายตัวเอง vs สนับสนุน เช่น payment service</td>
+</tr>
+<tr>
+<td>Precondition vs Trigger</td>
+<td>สภาพที่เป็นจริงอยู่แล้ว vs เหตุการณ์ที่เริ่ม</td>
+</tr>
+<tr>
+<td>Scenario vs Exception</td>
+<td>ทางปกติ vs ทางเมื่อผิดพลาด</td>
+</tr>
+<tr>
+<td>Use case diagram vs Narrative</td>
+<td>ภาพรวมทุก use case vs รายละเอียดทีละ use case</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมต้องมี analysis model ก่อน design</strong> เพราะเป็นสะพานที่ทำให้ requirement ข้อความกลายเป็นโครงสร้างชัดเจน ที่ทั้ง stakeholder validate ได้และนักออกแบบใช้ต่อได้</li>
+<li><strong>ทำไม scenario-based model ดีต่อการ validate กับ stakeholder</strong> เพราะมองจากมุมของผู้ใช้และใช้คำที่ผู้ใช้เข้าใจ</li>
+<li><strong>ทำไมใช้ inheritance</strong> เพื่อลดเส้นซ้ำซ้อนเมื่อหลาย actor ทำ use case เดียวกัน</li>
+<li><strong>ทำไมใช้ include</strong> เพื่อไม่ต้องเขียนพฤติกรรมที่ใช้ร่วมกันซ้ำ (เช่น authentication) และทำ use case ใหญ่ให้อ่านง่าย</li>
+<li><strong>โจทย์วาด diagram:</strong> หา actor จากคำนามที่เป็นคนหรือระบบภายนอก, หา use case จากกริยาที่ actor ทำ, ตัดสิน include/extend ด้วยคำถาม &quot;ต้องทำทุกครั้งไหม?&quot;</li>
+</ul>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../l3/index.html"><small>← บทก่อนหน้า</small><span>Lecture 3 – Requirement Engineering</span></a><a class="pg next" href="../l6/index.html"><small>บทถัดไป →</small><span>Lecture 6 – Requirements Modeling with Flow Modeling I (Data Flow Diagram)</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 03 — Data Representation, ISA &amp; Assembly Language (RISC-V) · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+      <ol><li><a href="#1-ภาพรวม">1. ภาพรวม</a></li><li><a href="#2-number-systems-และ-quantitative-numbers">2. Number Systems และ Quantitative Numbers</a></li><li><a href="#3-signed-integers">3. Signed Integers</a></li><li><a href="#4-complement-method">4. Complement Method ⭐</a></li><li><a href="#5-s-m-1s-2s-เทียบ-8-บิต">5. S &amp;amp; M, 1&#x27;s, &amp;amp; 2&#x27;s (เทียบ 8 บิต)</a></li><li><a href="#6-bias-notation-excess-notation">6. Bias Notation (Excess Notation)</a></li><li><a href="#7-floating-point">7. Floating Point ⭐</a></li><li><a href="#8-character-representation">8. Character Representation</a></li><li><a href="#9-assignment-2-ใบงานที่-2">9. Assignment 2 (ใบงานที่ 2)</a></li><li><a href="#10-instruction-set-overview-และ-risc-v">10. Instruction Set Overview และ RISC-V</a></li><li><a href="#11-arithmetic-operations-และ-registers">11. Arithmetic Operations และ Registers</a></li><li><a href="#12-memory-operands-endianness-immediate">12. Memory Operands, Endianness, Immediate</a></li><li><a href="#13-risc-v-numbers">13. RISC-V: Numbers</a></li><li><a href="#14-representing-instructions">14. Representing Instructions ⭐⭐</a></li><li><a href="#15-stored-program-และ-logical-operations">15. Stored Program และ Logical Operations</a></li><li><a href="#16-conditional-operations">16. Conditional Operations ⭐</a></li><li><a href="#17-procedure-calling">17. Procedure Calling ⭐⭐</a></li><li><a href="#18-memory-layout-local-data-character-data-byte-operations">18. Memory Layout, Local Data, Character Data, Byte Operations</a></li><li><a href="#19-string-copy-example">19. String Copy Example</a></li><li><a href="#20-wide-immediates-และ-addressing">20. Wide Immediates และ Addressing</a></li><li><a href="#21-synchronization">21. Synchronization</a></li><li><a href="#22-translation-and-startup">22. Translation and Startup</a></li><li><a href="#23-c-sort-example">23. C Sort Example</a></li><li><a href="#24-effect-of-compiler-optimization-และ-languagealgorithm">24. Effect of Compiler Optimization และ Language/Algorithm</a></li><li><a href="#25-arrays-vs-pointers">25. Arrays vs Pointers</a></li><li><a href="#26-mips-other-risc-v-instructions-extensions">26. MIPS, Other RISC-V Instructions, Extensions</a></li><li><a href="#27-คำศัพท์สำคัญ">27. คำศัพท์สำคัญ</a></li><li><a href="#28-สรุปท้ายบท-จุดที่มักออกสอบ">28. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter03</div>
+    <h1 class="lesson-title">Chapter 03 — Data Representation, ISA &amp; Assembly Language (RISC-V)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> บทยาวที่สุดของครึ่ง Computer Architecture แบ่งเป็น 2 ส่วนใหญ่
+<strong>ส่วนแรก — Data Representation:</strong> คอมพิวเตอร์เก็บตัวเลขและตัวอักษรเป็นบิตได้อย่างไร (unsigned, sign &amp; magnitude, 1's/2's complement, bias, floating point IEEE 754, ASCII, Unicode) พร้อมใบงานที่ 2
+<strong>ส่วนที่สอง — Instructions: Language of the Computer (RISC-V):</strong> Part I เรียนในห้อง — operands, registers, memory, instruction formats (R/I/S), logical/conditional operations, procedure calls; Part II ให้ศึกษาเอง — string copy, wide immediates, addressing, synchronization, linking/loading, sort example, arrays vs pointers, MIPS และ extensions</p>
+<p>ต่อจาก Chapter 02 ที่ใช้ MARIE (เครื่องสอน) บทนี้ใช้ <strong>RISC-V</strong> ซึ่งเป็น ISA ที่ใช้จริง</p>
+</blockquote>
+<h2 id="สารบัญ">สารบัญ</h2>
+<p><strong>ส่วน A — Data Representation</strong></p>
+<ol>
+<li>ภาพรวมและ register n บิต</li>
+<li>Number Systems และ Quantitative Numbers</li>
+<li>Signed Integers: Sign &amp; Magnitude</li>
+<li>Complement Method (1's, 2's)</li>
+<li>เปรียบเทียบ S&amp;M, 1's, 2's</li>
+<li>Bias Notation</li>
+<li>Floating Point และ IEEE 754</li>
+<li>Character Representation (ASCII, Unicode)</li>
+<li>Assignment 2</li>
+</ol>
+<p><strong>ส่วน B — RISC-V Part I (เรียนในห้อง)</strong>
+10. Instruction Set Overview และ RISC-V
+11. Arithmetic Operations และ Registers
+12. Memory Operands, Endianness, Immediate
+13. Numbers ใน RISC-V (2's complement, sign extension)
+14. Representing Instructions: R, I, S format
+15. Stored Program, Logical Operations
+16. Conditional Operations, If, Loop, Basic Blocks
+17. Procedure Calling (leaf, non-leaf, stack)
+18. Memory Layout, Character Data, Byte/Halfword/Word</p>
+<p><strong>ส่วน C — RISC-V Part II (Self-study)</strong>
+19. String Copy
+20. 32-bit Constants, Branch/Jump Addressing, สรุป Addressing/Encoding
+21. Synchronization
+22. Translation and Startup (object module, linking, loading, dynamic linking, Java)
+23. C Sort Example
+24. Compiler Optimization, Language &amp; Algorithm
+25. Arrays vs Pointers
+26. MIPS, Other RISC-V Instructions, Extensions</p>
+<ol start="27">
+<li>คำศัพท์สำคัญ</li>
+<li>สรุปท้ายบท / จุดที่มักออกสอบ</li>
+</ol>
+<hr />
+<h1>ส่วน A — Data Representation</h1>
+<h2 id="1-ภาพรวม">1. ภาพรวม</h2>
+<h3 id="11-data-representation-outline">1.1 Data Representation Outline</h3>
+<ul>
+<li><strong>Representing numbers:</strong> Unsigned, Signed, Floating point</li>
+<li><strong>Representing characters &amp; Symbols:</strong> ASCII, Unicode</li>
+</ul>
+<h3 id="12-data-representation-in-computers">1.2 Data Representation in Computers</h3>
+<p><img loading="lazy" src="img/c3-p005.jpg" alt="register n บิต: min 0, max 2^n − 1" /></p>
+<ul>
+<li><strong>ข้อมูลถูกเก็บใน registers</strong></li>
+<li><strong>registers มีจำนวนและขนาดจำกัด</strong></li>
+<li>register <strong>n บิต</strong> (บิต n−1 ถึง 0) เก็บ unsigned ได้:
+<ul>
+<li><strong>Min value = 0</strong></li>
+<li><strong>Max value = 2ⁿ − 1</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 8 บิต → 0 ถึง 255 / 16 บิต → 0 ถึง 65,535</p>
+</blockquote>
+<h3 id="13-การแบ่งประเภทข้อมูล">1.3 การแบ่งประเภทข้อมูล</h3>
+<p><img loading="lazy" src="img/c3-p006.jpg" alt="Data → Quantitative (integers, non-integers ทั้ง signed/unsigned) และ Qualitative" /></p>
+<ul>
+<li><strong>Data</strong>
+<ul>
+<li><strong>Quantitative</strong> (เชิงปริมาณ = ตัวเลข)
+<ul>
+<li><strong>Integers:</strong> Signed / Unsigned</li>
+<li><strong>Non-integers:</strong> Signed / Unsigned</li>
+</ul>
+</li>
+<li><strong>Qualitative</strong> (เชิงคุณภาพ = ตัวอักษร สัญลักษณ์)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="2-number-systems-และ-quantitative-numbers">2. Number Systems และ Quantitative Numbers</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบ</th>
+<th>สัญลักษณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Decimal</strong> (ฐาน 10)</td>
+<td>0–9</td>
+</tr>
+<tr>
+<td><strong>Binary</strong> (ฐาน 2)</td>
+<td>0, 1</td>
+</tr>
+<tr>
+<td><strong>Octal</strong> (ฐาน 8)</td>
+<td>0–7</td>
+</tr>
+<tr>
+<td><strong>Hexadecimal</strong> (ฐาน 16)</td>
+<td>0–9, A, B, C, D, E, F</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Quantitative Numbers</strong></p>
+<ul>
+<li><strong>Integers:</strong> Unsigned (เช่น 20), Signed (เช่น +20, −20)</li>
+<li><strong>Non-integers:</strong> Floating point numbers เช่น 10.25, 3.33333…, 1/8 = 0.125</li>
+</ul>
+<hr />
+<h2 id="3-signed-integers">3. Signed Integers</h2>
+<p><strong>ปัญหา:</strong> ต้องมีวิธีแทนค่าลบ มี <strong>3 วิธี</strong>:</p>
+<ol>
+<li><strong>Sign &amp; Magnitude (S&amp;M)</strong></li>
+<li><strong>Complement method</strong></li>
+<li><strong>Bias notation / Excess notation</strong></li>
+</ol>
+<h3 id="31-sign-magnitude-representation">3.1 Sign &amp; Magnitude Representation</h3>
+<p><img loading="lazy" src="img/c3-p010.jpg" alt="sign bit + magnitude n บิต" /></p>
+<ul>
+<li>ใช้ <strong>magnitude n บิตแบบ unsigned + sign bit (S)</strong> 1 บิตหน้าสุด</li>
+<li><strong>S = 0</strong> → จำนวนบวกหรือศูนย์ / <strong>S = 1</strong> → จำนวนลบหรือศูนย์</li>
+<li><strong>Range: −(2ⁿ − 1) ถึง +(2ⁿ − 1)</strong> (n = จำนวนบิต magnitude)</li>
+</ul>
+<h3 id="32-example-sign-magnitude">3.2 Example — Sign &amp; Magnitude</h3>
+<ul>
+<li><strong>register 8 บิต</strong> มี min และ max เท่าไร? → magnitude 7 บิต → <strong>−127 ถึง +127</strong> <em>(คำตอบเสริม)</em></li>
+<li><strong>0000 0000 และ 1000 0000</strong> เป็นเลขอะไร? → <strong>+0 และ −0</strong>
+<ul>
+<li><strong>การแทนศูนย์ไม่ unique</strong> (มีสองแบบ)</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-ข้อดีข้อเสีย-sm">3.3 ข้อดีข้อเสีย S&amp;M</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Advantages</th>
+<th>❌ Disadvantages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>กลับเครื่องหมายง่าย (sign reversal)</strong></td>
+<td><strong>บวกกับค่าลบไม่เหมือนการลบ</strong> — เช่น บวก 2 กับ −3 ต้อง <strong>ใช้ operation ต่างกัน</strong></td>
+</tr>
+<tr>
+<td><strong>หาค่าสัมบูรณ์ |a| ง่าย</strong> — แค่พลิก sign bit</td>
+<td><strong>ศูนย์ไม่ unique</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-complement-method">4. Complement Method ⭐</h2>
+<h3 id="41-แนวคิด">4.1 แนวคิด</h3>
+<ul>
+<li><strong>Base = Radix</strong> — ระบบฐาน r มีสัญลักษณ์ r ตัว (ฐาน 2 มี 0, 1)</li>
+<li><strong>2 ชนิด:</strong> <strong>r's complement</strong> และ <strong>(r − 1)'s complement</strong></li>
+<li><strong>ตัวอย่าง:</strong> Decimal → <strong>9's และ 10's complement</strong> / Binary → <strong>1's และ 2's complement</strong></li>
+</ul>
+<h3 id="42-definition">4.2 Definition</h3>
+<p>ให้เลข <strong>m</strong> ในฐาน <strong>r</strong> มี <strong>n</strong> หลัก:</p>
+<p>$$(r-1)\text{'s complement of } m = (r^n - 1) - m$$</p>
+<p>$$r\text{'s complement of } m = (r^n - 1) - m + 1 = r^n - m$$</p>
+<h3 id="43-example-ฐาน-10">4.3 Example (ฐาน 10)</h3>
+<p><strong>m = 382, n = 3 (3 หลัก)</strong> หา −382:</p>
+<ul>
+<li>9's complement: 999 − 382 = <strong>617</strong></li>
+<li>10's complement: 617 + 1 = <strong>618</strong></li>
+<li><strong>−382 = 617 หรือ 618</strong> ขึ้นกับว่าใช้ complement แบบไหน</li>
+<li>เรียกว่า <strong>complementary pair</strong></li>
+</ul>
+<h3 id="44-1s-complement">4.4 1's Complement</h3>
+<ul>
+<li>คำนวณจาก <strong>(2ⁿ − 1) − m</strong> = <strong>กลับทุกบิต (invert each bit)</strong> ของ m</li>
+<li><strong>ตัวอย่าง:</strong> m = 0101 ในระบบ 4 บิต → 1111 − 0101 = <strong>1010</strong> → แทนค่า <strong>−5</strong> ใน 1's complement</li>
+<li><strong>ตัวอย่าง:</strong> m = 00101011 → 1's complement = <strong>11010100</strong></li>
+<li>m = 00000000 = <strong>0</strong> → 1's complement = 11111111 = <strong>−0</strong> (ศูนย์สองแบบ)</li>
+<li><strong>Range (8 บิต): −127 ถึง +127</strong></li>
+</ul>
+<h3 id="45-addition-with-1s-complement">4.5 Addition with 1's Complement</h3>
+<ul>
+<li><strong>ถ้าผลมี carry (ตัวทด) ให้เอาไปบวกที่ LSB</strong> — เรียกว่า <strong>end-around carry</strong></li>
+<li><strong>ตัวอย่าง:</strong> บวก 6 กับ −3 ในระบบ 3 บิต
+<ul>
+<li>6 = 110</li>
+<li>−3 = 100 (1's complement ของ 011)</li>
+<li>110 + 100 = <strong>1</strong>010 → carry 1 วนมาบวก → 010 + 1 = <strong>011</strong> = <strong>3</strong> ✅</li>
+</ul>
+</li>
+</ul>
+<h3 id="46-2s-complement">4.6 2's Complement</h3>
+<ul>
+<li><strong>ไม่ต้องทำ end-around carry</strong> แบบ 1's complement</li>
+<li><strong>วิธีสร้าง:</strong> หา <strong>1's complement</strong> แล้ว <strong>บวก 1 ที่ LSB</strong></li>
+<li><strong>Range (8 บิต): −128 ถึง +127</strong>
+<ul>
+<li>ได้ <strong>−128</strong> เพิ่มมาเพราะการ +1 ทำให้ฝั่งลบมีเพิ่ม 1 ค่า</li>
+</ul>
+</li>
+</ul>
+<h3 id="47-example-2s-complement">4.7 Example — 2's Complement</h3>
+<p><strong>หา 2's complement ของ 0101011</strong></p>
+<ul>
+<li>m = 0101011</li>
+<li>กลับบิต = 1010100</li>
+<li>+1 = <strong>1010101</strong></li>
+</ul>
+<p><strong>Short-cut:</strong></p>
+<ol>
+<li><strong>หาบิตที่เป็น 1 ตัวแรก</strong> โดยเริ่มจาก LSB (ขวาสุด)</li>
+<li><strong>กลับทุกบิตที่อยู่หลัง (ซ้ายของ) 1 ตัวแรกนั้น</strong></li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 0101011 → 1 ตัวแรกจากขวาคือบิต 0 คงไว้ แล้วกลับบิตที่เหลือด้านซ้าย: 101010<strong>1</strong> ✅</p>
+</blockquote>
+<p><strong>บวก 6 กับ −5 ในระบบ 4 บิต</strong></p>
+<ul>
+<li>5 = 0101 → −5 = <strong>1011</strong></li>
+<li>6 = 0110</li>
+<li>0110 + 1011 = <strong>1</strong>0001 → <strong>ทิ้ง (discard)</strong> carry ด้านซ้าย → <strong>0001 = 1</strong> ✅</li>
+</ul>
+<h3 id="48-1s-vs-2s-complement">4.8 1's vs 2's Complement</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>1's complement</th>
+<th>2's complement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>มีศูนย์สองแบบ (+0, −0)</strong></td>
+<td><strong>มีศูนย์แบบเดียว</strong></td>
+</tr>
+<tr>
+<td><strong>ช่วงค่าน้อยกว่า</strong> 2's complement</td>
+<td><strong>ช่วงค่าไม่สมมาตร</strong> (ลบมากกว่าบวก 1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ข้อดีร่วมของ complement:</strong></p>
+<ul>
+<li><strong>ไม่ต้องมีวงจรลบแยก</strong> — ลบ = บวกกับค่าลบ</li>
+<li>การทำ <strong>NOT</strong> มี <strong>ต้นทุนวงจรถูกกว่ามาก</strong></li>
+<li><strong>แต่ การคูณและหารช้า</strong></li>
+</ul>
+<hr />
+<h2 id="5-s-m-1s-2s-เทียบ-8-บิต">5. S &amp; M, 1's, &amp; 2's (เทียบ 8 บิต)</h2>
+<p><img loading="lazy" src="img/c3-p022.jpg" alt="ตารางเทียบ bit pattern ของ sign-magnitude, 1's, 2's complement" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bit pattern</th>
+<th>Sign-Magnitude</th>
+<th>1's complement</th>
+<th>2's complement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0111 1111</td>
+<td>+127</td>
+<td>+127</td>
+<td>+127</td>
+</tr>
+<tr>
+<td>0111 1110</td>
+<td>+126</td>
+<td>+126</td>
+<td>+126</td>
+</tr>
+<tr>
+<td>0000 0001</td>
+<td>+1</td>
+<td>+1</td>
+<td>+1</td>
+</tr>
+<tr>
+<td>0000 0000</td>
+<td>+0</td>
+<td>+0</td>
+<td>+0</td>
+</tr>
+<tr>
+<td>1000 0000</td>
+<td><strong>−0</strong></td>
+<td><strong>−127</strong></td>
+<td><strong>−128</strong></td>
+</tr>
+<tr>
+<td>1000 0001</td>
+<td>−1</td>
+<td>−126</td>
+<td>−127</td>
+</tr>
+<tr>
+<td>1111 1110</td>
+<td>−126</td>
+<td>−1</td>
+<td><strong>−2</strong></td>
+</tr>
+<tr>
+<td>1111 1111</td>
+<td>−127</td>
+<td><strong>−0</strong></td>
+<td><strong>−1</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ภาพในสไลด์แสดง &quot;increasing binary codes&quot; และ &quot;wrap around&quot;: ใน complement พอเลขบิตวนเกินค่าบวกสูงสุด จะวนไปเป็นค่าลบ</p>
+<p class="c-warn">⚠️ <strong>1111 1111</strong> = −127 (S&amp;M), −0 (1's), <strong>−1 (2's)</strong> — มักออกสอบ</p>
+</blockquote>
+<hr />
+<h2 id="6-bias-notation-excess-notation">6. Bias Notation (Excess Notation)</h2>
+<ul>
+<li>ช่วงเลขที่ต้องการแทน ถูกบวก <strong>bias B (ค่าบวก)</strong> เพื่อให้ค่า unsigned ที่เล็กที่สุดมีค่าเท่ากับ <strong>−B</strong></li>
+<li><strong>ค่า B ในช่วงตัวเลขจะกลายเป็นศูนย์</strong></li>
+<li>ค่าที่แทน:</li>
+</ul>
+<p>$$\sum_{i=0}^{n} b_i 2^i - B$$</p>
+<ul>
+<li><strong>ถ้า bias = 127 กับ 8 บิต:</strong> ช่วงคือ <strong>−127 (0 − 127) ถึง 128 (255 − 127)</strong></li>
+</ul>
+<p><img loading="lazy" src="img/c3-p024.jpg" alt="ตาราง Biased-127" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bit pattern</th>
+<th>Unsigned</th>
+<th>Biased-127</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0000 0000</td>
+<td>+0</td>
+<td>−127</td>
+</tr>
+<tr>
+<td>0000 0001</td>
+<td>+1</td>
+<td>−126</td>
+</tr>
+<tr>
+<td>0000 0010</td>
+<td>+2</td>
+<td>−125</td>
+</tr>
+<tr>
+<td>0111 1110</td>
+<td>+126</td>
+<td>−1</td>
+</tr>
+<tr>
+<td>0111 1111</td>
+<td>+127</td>
+<td><strong>+0</strong></td>
+</tr>
+<tr>
+<td>1000 0000</td>
+<td>+128</td>
+<td>+1</td>
+</tr>
+<tr>
+<td>1111 1111</td>
+<td>+255</td>
+<td>+128</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>อ่านค่า biased = ค่า unsigned − bias</strong> เช่น 1000 0000 = 128 − 127 = +1 — ใช้ใน exponent ของ floating point</p>
+</blockquote>
+<hr />
+<h2 id="7-floating-point">7. Floating Point ⭐</h2>
+<h3 id="71-ทำไมต้องมี">7.1 ทำไมต้องมี</h3>
+<ul>
+<li>ต้องแทน <strong>ค่าทศนิยม</strong> และ <strong>ค่าที่ใหญ่กว่า 2ⁿ − 1</strong></li>
+<li><strong>+3207.23 = 3.20723 × 10³</strong></li>
+<li><strong>−0.000321 = −3.21 × 10⁻⁴</strong> → ประกอบด้วย <strong>Sign</strong>, <strong>Mantissa</strong> (3.21), <strong>Radix/base</strong> (10), <strong>Exponent</strong> (−4)</li>
+</ul>
+<h3 id="72-รูปแบบทั่วไป">7.2 รูปแบบทั่วไป</h3>
+<p>$$N = (-1)^s \times m \times 2^e$$</p>
+<ul>
+<li><strong>s</strong> = sign, <strong>m</strong> = mantissa, <strong>2</strong> = radix, <strong>e</strong> = exponent</li>
+<li>เก็บเป็นบิต: <strong>sign | exponent (e_{n−1}…e₀) | mantissa (m_{n−1}…m₀)</strong></li>
+</ul>
+<h3 id="73-ieee-floating-point-standard">7.3 IEEE Floating Point Standard</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Single precision</strong></th>
+<th><strong>Double precision</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ขนาดรวม</td>
+<td><strong>32 bits</strong></td>
+<td><strong>64 bits</strong></td>
+</tr>
+<tr>
+<td>Sign</td>
+<td><strong>1 bit</strong> (บิต 31)</td>
+<td><strong>1 bit</strong> (บิต 63)</td>
+</tr>
+<tr>
+<td>Exponent</td>
+<td><strong>8 bits</strong> (บิต 30–23)</td>
+<td><strong>11 bits</strong> (บิต 62–52)</td>
+</tr>
+<tr>
+<td>Mantissa</td>
+<td><strong>23 bits</strong> (บิต 22–0)</td>
+<td><strong>52 bits</strong> (บิต 51–0)</td>
+</tr>
+</tbody>
+</table></div>
+<p>$$N = (-1)^s \times [1.m] \times 2^{E-127}$$</p>
+<ul>
+<li><strong>E − 127 = e</strong> และ <strong>E = e + 127</strong> (bias 127)</li>
+<li><strong>สิ่งที่เก็บจริงคือ E</strong> (exponent ที่บวก bias แล้ว)</li>
+<li>mantissa เก็บเฉพาะส่วนหลังจุด เพราะหน้าจุดเป็น <strong>1 เสมอ</strong> (normalized)</li>
+</ul>
+<h3 id="74-single-precision">7.4 Single Precision</h3>
+<ul>
+<li><strong>23-bit mantissa:</strong> m มีค่าตั้งแต่ <strong>1 ถึง (2 − 2⁻²³)</strong></li>
+<li><strong>8-bit exponent:</strong>
+<ul>
+<li><strong>E มีค่า 1 ถึง 254</strong></li>
+<li><strong>0 และ 255 สงวนไว้</strong> แทน <strong>−∞, +∞, NaN</strong></li>
+<li><strong>e มีค่า −126 ถึง +127</strong></li>
+</ul>
+</li>
+<li><strong>ค่าสูงสุดที่แทนได้ ≈ 2 × 2¹²⁷ = 2¹²⁸</strong></li>
+</ul>
+<h3 id="75-review-binary-fractions">7.5 Review — Binary Fractions</h3>
+<p><strong>101.1101₂ เป็นฐานสิบ</strong>
+= 2²×1 + 2¹×0 + 2⁰×1 + 2⁻¹×1 + 2⁻²×1 + 2⁻³×0 + 2⁻⁴×1
+= 4 + 0 + 1 + 0.5 + 0.25 + 0 + 0.0625 = <strong>5.8125</strong></p>
+<p><strong>5.8125₁₀ เป็นฐานสอง</strong></p>
+<ul>
+<li><strong>ส่วนจำนวนเต็ม:</strong> 5 = <strong>101</strong></li>
+<li><strong>ส่วนทศนิยม:</strong> คูณ 2 ไปเรื่อย ๆ จนได้ 1 แล้วเก็บเลขหน้าจุด
+<ul>
+<li>0.8125 × 2 = <strong>1</strong>.625</li>
+<li>0.625 × 2 = <strong>1</strong>.25</li>
+<li>0.25 × 2 = <strong>0</strong>.5</li>
+<li>0.5 × 2 = <strong>1</strong>.0</li>
+<li>→ 0.8125₁₀ = <strong>.1101₂</strong></li>
+</ul>
+</li>
+<li><strong>5.8125₁₀ = 101.1101₂</strong></li>
+</ul>
+<h3 id="76-example-single-precision-ของ-1715₁₀">7.6 Example — Single Precision ของ 17.15₁₀ ⭐</h3>
+<p><img loading="lazy" src="img/c3-p031.jpg" alt="IEEE single precision ของ 17.15" /></p>
+<ol>
+<li><strong>แปลงเป็นฐานสอง:</strong> 17.15₁₀ = <strong>10001.0010011…₂</strong> (17 = 10001, 0.15 = .001001100110… วนซ้ำ)</li>
+<li><strong>Normalize:</strong> = <strong>1.00010010011… × 2⁴</strong> → e = 4</li>
+<li><strong>หา E:</strong> E = e + 127 = 4 + 127 = <strong>131</strong> = <strong>1000 0011</strong></li>
+<li><strong>Mantissa:</strong> ตัด &quot;1.&quot; ออก เหลือ <strong>0001 0010 0110 0000…</strong> <em>(ตามสไลด์)</em></li>
+<li><strong>ผลลัพธ์:</strong></li>
+</ol>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sign</th>
+<th>Exponent</th>
+<th>Mantissa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td><strong>1000 0011</strong></td>
+<td><strong>0001 0010 0110 0000 ……</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ 0.15 ในฐานสองเป็น <strong>ทศนิยมไม่รู้จบ</strong> (.0010011001100…) จึงเก็บได้แค่ค่าประมาณ — นี่คือเหตุผลที่ 0.1 + 0.2 ในคอมพิวเตอร์ไม่เท่ากับ 0.3 พอดี <em>(คำอธิบายเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="8-character-representation">8. Character Representation</h2>
+<h3 id="81-ภาพรวม">8.1 ภาพรวม</h3>
+<ul>
+<li>เป็นข้อมูล <strong>เชิงคุณภาพ (qualitative)</strong> — แทนคุณภาพหรือคุณลักษณะ</li>
+<li>ประกอบด้วย:
+<ul>
+<li><strong>Letters:</strong> a-z, A-Z</li>
+<li><strong>Digits:</strong> 0-9</li>
+<li><strong>Symbols:</strong> !, @, *, /, &amp;, #, $</li>
+<li><strong>Control characters:</strong> <CR>, <BEL>, <ESC>, <LF></li>
+</ul>
+</li>
+<li><strong>1 byte (8 บิต) แทนได้ 256 ตัวอักษร</strong></li>
+<li><strong>มาตรฐาน:</strong>
+<ul>
+<li><strong>ASCII</strong> — American Standard Code for Information Interchange</li>
+<li><strong>EBCDIC</strong> — Extended Binary-Coded Decimal Interchange Code</li>
+<li><strong>Unicode</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="82-ascii">8.2 ASCII</h3>
+<ul>
+<li><strong>มาตรฐานโดยพฤตินัยทั่วโลก</strong></li>
+<li>ใช้แทน: <strong>ตัวอักษรละตินพิมพ์ใหญ่-เล็ก, ตัวเลข, เครื่องหมายวรรคตอน, control characters</strong></li>
+<li><strong>มี 128 รหัสมาตรฐาน</strong>
+<ul>
+<li>แทนด้วย <strong>เลขฐานสอง 7 บิต</strong> (000 0000 ถึง 111 1111)</li>
+<li><strong>บวก parity bit</strong> 1 บิต</li>
+</ul>
+</li>
+</ul>
+<h3 id="83-ascii-table-ส่วนสำคัญ">8.3 ASCII Table (ส่วนสำคัญ)</h3>
+<p><img loading="lazy" src="img/c3-p035.jpg" alt="ASCII 0–63" /></p>
+<p><img loading="lazy" src="img/c3-p036.jpg" alt="ASCII 64–111" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่วง (ฐานสิบ)</th>
+<th>Hex</th>
+<th>ตัวอักษร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–31</td>
+<td>00–1F</td>
+<td>control: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL(7), BS(8), TAB(9), LF(10), VT, FF, CR(13), SO, SI …</td>
+</tr>
+<tr>
+<td>32</td>
+<td>20</td>
+<td>(space)</td>
+</tr>
+<tr>
+<td>33–47</td>
+<td>21–2F</td>
+<td>! &quot; # $ % &amp; ' ( ) * + , - . /</td>
+</tr>
+<tr>
+<td><strong>48–57</strong></td>
+<td><strong>30–39</strong></td>
+<td><strong>0–9</strong></td>
+</tr>
+<tr>
+<td>58–64</td>
+<td>3A–40</td>
+<td>: ; &lt; = &gt; ? @</td>
+</tr>
+<tr>
+<td><strong>65–90</strong></td>
+<td><strong>41–5A</strong></td>
+<td><strong>A–Z</strong></td>
+</tr>
+<tr>
+<td>91–96</td>
+<td>5B–60</td>
+<td>[ \ ] ^ _ `</td>
+</tr>
+<tr>
+<td><strong>97–122</strong></td>
+<td><strong>61–7A</strong></td>
+<td><strong>a–z</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="84-ascii-things-to-note">8.4 ASCII — Things to Note ⭐</h3>
+<ul>
+<li><strong>รหัส ASCII ของตัวเลข ไม่เท่ากับค่าตัวเลขจริง</strong> (เช่น '0' = 48 ไม่ใช่ 0)</li>
+<li><strong>ตัวพิมพ์ใหญ่กับเล็กต่างกัน 0x20</strong>
+<ul>
+<li><strong>Shift key เคลียร์บิตที่ 5</strong></li>
+<li>0x20 = 32 = <strong>0010 0000</strong></li>
+<li><strong>A = 65 = 0100 0001 / a = 97 = 0110 0001</strong></li>
+</ul>
+</li>
+<li><strong>ภาษาส่วนใหญ่ต้องการมากกว่า 128 ตัวอักษร</strong> (จึงมี Unicode)</li>
+</ul>
+<hr />
+<h2 id="9-assignment-2-ใบงานที่-2">9. Assignment 2 (ใบงานที่ 2)</h2>
+<ol>
+<li><strong>งานกลุ่ม กลุ่มละ 2 คน</strong></li>
+<li>ใช้ <strong>เลขฐาน 2 จำนวน 16 บิต</strong> แทนตัวเลข</li>
+<li>ทีม <strong>กำหนดตัวตั้งและตัวกระทำเอง</strong> ได้</li>
+<li>แสดง <strong>ขั้นตอนการคำนวณ &quot;add&quot; และ &quot;sub&quot;</strong> ของ data representation <strong>2 แบบ:</strong> (1) <strong>sign magnitude</strong> และ (2) <strong>two's complement</strong></li>
+</ol>
+<p><strong>ส่ง:</strong> Upload งานทุกคนใน <strong>MyCourse</strong></p>
+<ul>
+<li><strong>Section 1:</strong> DEADLINE <strong>23.59 น. วันอาทิตย์ที่ 23 สิงหาคม 2569</strong></li>
+<li><strong>Section 2:</strong> DEADLINE <strong>23.59 น. วันอังคารที่ 25 สิงหาคม 2569</strong></li>
+</ul>
+<hr />
+<h1>ส่วน B — Instructions: Language of the Computer (RISC-V) — Part I</h1>
+<h2 id="10-instruction-set-overview-และ-risc-v">10. Instruction Set Overview และ RISC-V</h2>
+<h3 id="101-instruction-set-overview">10.1 Instruction Set Overview</h3>
+<ul>
+<li><strong>คอมพิวเตอร์แต่ละเครื่องมี instruction set ต่างกัน</strong></li>
+<li><strong>คอมพิวเตอร์ยุคแรกมีชุดคำสั่งเรียบง่ายมาก</strong> → <strong>implement ง่าย</strong></li>
+<li><strong>คอมพิวเตอร์สมัยใหม่หลายรุ่นก็มีชุดคำสั่งเรียบง่าย</strong></li>
+</ul>
+<h3 id="102-risc-v-instruction-set">10.2 RISC-V Instruction Set</h3>
+<ul>
+<li><strong>พัฒนาที่ UC Berkeley</strong> เป็น <strong>open ISA</strong></li>
+<li>ปัจจุบันดูแลโดย <strong>RISC-V Foundation</strong> (riscv.org)</li>
+<li><strong>เป็นแบบฉบับของ ISA สมัยใหม่หลายตัว</strong> (ดู RISC-V Reference Data tear-out card)</li>
+<li><strong>ISA คล้าย ๆ กันมีส่วนแบ่งตลาด embedded core ขนาดใหญ่</strong>
+<ul>
+<li>ใช้ใน consumer electronics, network/storage equipment, cameras, printers, …</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="11-arithmetic-operations-และ-registers">11. Arithmetic Operations และ Registers</h2>
+<h3 id="111-arithmetic-operations">11.1 Arithmetic Operations</h3>
+<ul>
+<li><strong>Add และ subtract มี 3 operands:</strong> <strong>2 sources + 1 destination</strong>
+<ul>
+<li><code>add a, b, c  // a gets b + c</code></li>
+</ul>
+</li>
+<li><strong>ทุก arithmetic operation มีรูปแบบนี้</strong></li>
+<li><strong>Design Principle 1: Simplicity favours regularity</strong>
+<ul>
+<li><strong>ความสม่ำเสมอทำให้ implement ง่าย</strong></li>
+<li><strong>ความเรียบง่ายทำให้ได้ประสิทธิภาพสูงในต้นทุนต่ำ</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="112-arithmetic-example">11.2 Arithmetic Example</h3>
+<pre><code>C code:  f = (g + h) - (i + j);
+
+add t0, g, h    // temp t0 = g + h
+add t1, i, j    // temp t1 = i + j
+sub f, t0, t1   // f = t0 - t1
+</code></pre>
+<p><em>(สไลด์เขียนบรรทัดสุดท้ายเป็น <code>add f, t0, t1</code> แต่ comment บอก f = t0 − t1 ที่ถูกต้องคือ <code>sub</code>)</em></p>
+<h3 id="113-register-operands">11.3 Register Operands</h3>
+<ul>
+<li><strong>arithmetic instructions ใช้ register เป็น operand</strong></li>
+<li>RISC-V มี <strong>register file ขนาด 32 × 64-bit</strong>
+<ul>
+<li>ใช้กับ <strong>ข้อมูลที่เข้าถึงบ่อย</strong></li>
+<li><strong>ข้อมูล 64 บิต เรียกว่า &quot;doubleword&quot;</strong>
+<ul>
+<li>มี <strong>general purpose registers 32 ตัว: x0 ถึง x31</strong> (สไลด์เขียน &quot;x0 to x30&quot;)</li>
+</ul>
+</li>
+<li><strong>ข้อมูล 32 บิต เรียกว่า &quot;word&quot;</strong></li>
+</ul>
+</li>
+<li><strong>Design Principle 2: Smaller is faster</strong> — เทียบกับ main memory ที่มีหลายล้านตำแหน่ง</li>
+</ul>
+<h3 id="114-risc-v-registers">11.4 RISC-V Registers ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Register</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>x0</strong></td>
+<td><strong>ค่าคงที่ 0</strong> (เปลี่ยนไม่ได้)</td>
+</tr>
+<tr>
+<td><strong>x1</strong></td>
+<td><strong>return address</strong></td>
+</tr>
+<tr>
+<td><strong>x2</strong></td>
+<td><strong>stack pointer</strong></td>
+</tr>
+<tr>
+<td><strong>x3</strong></td>
+<td><strong>global pointer</strong></td>
+</tr>
+<tr>
+<td><strong>x4</strong></td>
+<td><strong>thread pointer</strong></td>
+</tr>
+<tr>
+<td><strong>x5–x7, x28–x31</strong></td>
+<td><strong>temporaries</strong></td>
+</tr>
+<tr>
+<td><strong>x8</strong></td>
+<td><strong>frame pointer</strong></td>
+</tr>
+<tr>
+<td><strong>x9, x18–x27</strong></td>
+<td><strong>saved registers</strong></td>
+</tr>
+<tr>
+<td><strong>x10–x11</strong></td>
+<td><strong>function arguments/results</strong></td>
+</tr>
+<tr>
+<td><strong>x12–x17</strong></td>
+<td><strong>function arguments</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="115-register-operand-example">11.5 Register Operand Example</h3>
+<p>C: <code>f = (g + h) - (i + j);</code> โดย <strong>f, …, j อยู่ใน x19, x20, …, x23</strong></p>
+<pre><code>add x5, x20, x21    // x5 = g + h
+add x6, x22, x23    // x6 = i + j
+sub x19, x5, x6     // f = x5 - x6
+</code></pre>
+<hr />
+<h2 id="12-memory-operands-endianness-immediate">12. Memory Operands, Endianness, Immediate</h2>
+<h3 id="121-endian-support">12.1 Endian Support</h3>
+<p><img loading="lazy" src="img/c3-p048.jpg" alt="big-endian vs little-endian address mapping" /></p>
+<ul>
+<li><strong>Big-endian:</strong> byte ที่มีนัยสำคัญมากที่สุดอยู่ที่ address ต่ำสุด (byte address 00–07 เรียงซ้ายไปขวาตรงกับค่า 11 12 13 14 …)</li>
+<li><strong>Little-endian:</strong> byte ที่มีนัยสำคัญน้อยที่สุดอยู่ที่ address ต่ำสุด (เรียงกลับกัน)</li>
+</ul>
+<h3 id="122-memory-operands">12.2 Memory Operands</h3>
+<ul>
+<li><strong>Main memory ใช้กับข้อมูลประกอบ (composite data):</strong> arrays, structures, dynamic data</li>
+<li><strong>การทำ arithmetic:</strong>
+<ul>
+<li><strong>โหลดค่าจาก memory เข้า register</strong></li>
+<li><strong>เก็บผลจาก register กลับลง memory</strong></li>
+</ul>
+</li>
+<li><strong>Memory เป็น byte addressed</strong> — <strong>แต่ละ address ระบุข้อมูล 8 บิต (1 byte)</strong></li>
+<li><strong>RISC-V เป็น Little Endian</strong>
+<ul>
+<li><strong>byte ที่มีนัยสำคัญน้อยสุดอยู่ที่ address ต่ำสุดของ word</strong></li>
+<li>c.f. <strong>Big Endian:</strong> byte ที่มีนัยสำคัญมากสุดอยู่ที่ address ต่ำสุด</li>
+</ul>
+</li>
+<li><strong>RISC-V ไม่บังคับให้ word ต้อง align</strong> ใน memory (ต่างจาก ISA อื่นบางตัว)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เลข 0x12345678: <strong>little-endian</strong> เก็บ 78 56 34 12 / <strong>big-endian</strong> เก็บ 12 34 56 78 (อ่านจาก address ต่ำไปสูง) <em>(ตัวอย่างเสริม)</em></p>
+</blockquote>
+<h3 id="123-memory-operand-example">12.3 Memory Operand Example ⭐</h3>
+<p>C: <code>A[12] = h + A[8];</code> — <strong>h ใน x21</strong>, <strong>base address ของ A ใน x22</strong></p>
+<ul>
+<li><strong>Index 8 ต้องใช้ offset 64</strong> เพราะ <strong>8 bytes ต่อ doubleword</strong></li>
+</ul>
+<pre><code>ld  x9, 64(x22)     // x9 = A[8]  (8 × 8 = 64)
+add x9, x21, x9     // x9 = h + A[8]
+sd  x9, 96(x22)     // A[12] = x9 (12 × 8 = 96)
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>offset = index × 8</strong> (doubleword 8 bytes) — ลืมคูณ 8 เป็นข้อผิดพลาดที่พบบ่อย</p>
+<p><code>ld</code> = load doubleword, <code>sd</code> = store doubleword</p>
+</blockquote>
+<h3 id="124-registers-vs-memory">12.4 Registers vs Memory</h3>
+<ul>
+<li><strong>register เข้าถึงเร็วกว่า memory</strong></li>
+<li>ทำงานกับข้อมูลใน memory <strong>ต้อง load และ store</strong> → <strong>มีคำสั่งต้องรันมากขึ้น</strong></li>
+<li><strong>compiler ต้องใช้ register เก็บตัวแปรให้มากที่สุด</strong>
+<ul>
+<li><strong>เก็บลง memory เฉพาะตัวแปรที่ใช้ไม่บ่อย</strong></li>
+<li><strong>Register optimization สำคัญมาก!</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="125-immediate-operands">12.5 Immediate Operands</h3>
+<ul>
+<li><strong>ค่าคงที่ระบุในคำสั่งเลย:</strong> <code>addi x22, x22, 4</code></li>
+<li><strong>Make the common case fast</strong> (หนึ่งใน Great Ideas)
+<ul>
+<li><strong>ค่าคงที่ขนาดเล็กพบบ่อย</strong></li>
+<li><strong>immediate operand ไม่ต้องโหลดค่าจาก memory</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="13-risc-v-numbers">13. RISC-V: Numbers</h2>
+<ul>
+<li><strong>Unsigned Binary Integers:</strong> range <strong>0 ถึง +2ⁿ − 1</strong></li>
+<li><strong>2s-Complement Signed Integers:</strong> range <strong>−2ⁿ⁻¹ ถึง +2ⁿ⁻¹ − 1</strong></li>
+<li><strong>Signed Negation:</strong> <strong>Complement and add 1</strong>
+<ul>
+<li>ตัวอย่าง negate +2: +2 = 0000 0000 … 0010₂ → −2 = 1111 1111 … 1101₂ + 1 = <strong>1111 1111 … 1110₂</strong></li>
+</ul>
+</li>
+<li><strong>Sign Extension</strong> (ขยายจำนวนบิตโดยรักษาค่า): ใน RISC-V instruction set
+<ul>
+<li><strong><code>lb</code>:</strong> sign-extend byte ที่โหลดมา (คัดลอก sign bit ไปเติมด้านซ้าย)</li>
+<li><strong><code>lbu</code>:</strong> zero-extend byte ที่โหลดมา (เติม 0)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 sign extension: −2 แบบ 8 บิต = 1111 1110 → แบบ 16 บิต = <strong>1111 1111</strong> 1111 1110 (เติม 1 ตาม sign bit) <em>(ตัวอย่างเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="14-representing-instructions">14. Representing Instructions ⭐⭐</h2>
+<h3 id="141-หลักการ">14.1 หลักการ</h3>
+<ul>
+<li><strong>คำสั่งถูกเข้ารหัสเป็นเลขฐานสอง</strong> เรียกว่า <strong>machine code</strong></li>
+<li><strong>RISC-V instructions:</strong>
+<ul>
+<li>เข้ารหัสเป็น <strong>instruction word ขนาด 32 บิต</strong></li>
+<li>มี <strong>format จำนวนน้อย</strong> เข้ารหัส operation code (opcode), หมายเลข register, …</li>
+<li><strong>Regularity!</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="142-r-format-instructions">14.2 R-format Instructions</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>funct7</th>
+<th>rs2</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>rd</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7 bits</td>
+<td>5 bits</td>
+<td>5 bits</td>
+<td>3 bits</td>
+<td>5 bits</td>
+<td>7 bits</td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>opcode</strong></td>
+<td>operation code</td>
+</tr>
+<tr>
+<td><strong>rd</strong></td>
+<td><strong>destination</strong> register number</td>
+</tr>
+<tr>
+<td><strong>funct3</strong></td>
+<td>3-bit function code (additional opcode)</td>
+</tr>
+<tr>
+<td><strong>rs1</strong></td>
+<td><strong>first source</strong> register number</td>
+</tr>
+<tr>
+<td><strong>rs2</strong></td>
+<td><strong>second source</strong> register number</td>
+</tr>
+<tr>
+<td><strong>funct7</strong></td>
+<td>7-bit function code (additional opcode)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="143-r-format-example">14.3 R-format Example ⭐</h3>
+<p><strong><code>add x9, x20, x21</code></strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>funct7</th>
+<th>rs2</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>rd</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>21</td>
+<td>20</td>
+<td>0</td>
+<td>9</td>
+<td>51</td>
+</tr>
+<tr>
+<td>0000000</td>
+<td>10101</td>
+<td>10100</td>
+<td>000</td>
+<td>01001</td>
+<td>0110011</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>= 0000 0001 0101 1010 0000 0100 1011 0011₂ = 015A04B3₁₆</strong></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สังเกต <strong>ลำดับ field กลับกับลำดับในคำสั่ง</strong>: <code>add rd, rs1, rs2</code> แต่เก็บเป็น rs2 | rs1 | … | rd</p>
+</blockquote>
+<h3 id="144-i-format-instructions">14.4 I-format Instructions</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>immediate</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>rd</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12 bits</td>
+<td>5 bits</td>
+<td>3 bits</td>
+<td>5 bits</td>
+<td>7 bits</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใช้กับ <strong>immediate arithmetic และ load instructions</strong>
+<ul>
+<li><strong>rs1:</strong> source หรือ base address register number</li>
+<li><strong>immediate:</strong> constant operand หรือ <strong>offset ที่บวกกับ base address</strong>
+<ul>
+<li><strong>2s-complement, sign extended</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Design Principle 3: Good design demands good compromises</strong>
+<ul>
+<li><strong>format ต่างกันทำให้ decode ซับซ้อน</strong> แต่ <strong>ทำให้ทุกคำสั่งยาว 32 บิตเท่ากัน</strong></li>
+<li><strong>ทำให้ format คล้ายกันมากที่สุด</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="145-s-format-instructions">14.5 S-format Instructions</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>imm[11:5]</th>
+<th>rs2</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>imm[4:0]</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7 bits</td>
+<td>5 bits</td>
+<td>5 bits</td>
+<td>3 bits</td>
+<td>5 bits</td>
+<td>7 bits</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>immediate format แบบต่างออกไปสำหรับ store instructions</strong>
+<ul>
+<li><strong>rs1:</strong> base address register number</li>
+<li><strong>rs2:</strong> source operand register number</li>
+<li><strong>immediate:</strong> offset ที่บวกกับ base address
+<ul>
+<li><strong>แยก immediate เป็น 2 ส่วน เพื่อให้ rs1 และ rs2 อยู่ตำแหน่งเดิมเสมอ</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไม S-format ต้องแยก immediate?</strong> store ไม่มี rd (ไม่มีผลลัพธ์ลง register) แต่ต้องมี rs2 จึงเอาช่อง rd มาใส่ immediate ส่วนล่างแทน ทำให้ rs1, rs2 อยู่ที่เดิมเหมือน R-format → decode ง่าย</p>
+</blockquote>
+<hr />
+<h2 id="15-stored-program-และ-logical-operations">15. Stored Program และ Logical Operations</h2>
+<h3 id="151-stored-program-computers-the-big-picture">15.1 Stored Program Computers (The BIG Picture)</h3>
+<p><img loading="lazy" src="img/c3-p059.jpg" alt="memory เก็บทั้งโปรแกรมและข้อมูล" /></p>
+<ul>
+<li><strong>คำสั่งถูกแทนเป็นเลขฐานสองเหมือนข้อมูล</strong></li>
+<li><strong>คำสั่งและข้อมูลเก็บใน memory</strong></li>
+<li><strong>โปรแกรมทำงานกับโปรแกรมได้</strong> เช่น compilers, linkers, …</li>
+<li><strong>Binary compatibility</strong> ทำให้โปรแกรมที่คอมไพล์แล้วรันบนคอมพิวเตอร์อื่นได้ → <strong>Standardized ISAs</strong></li>
+<li>ภาพ: Memory เก็บ Accounting program, Editor program, C compiler (machine code), Payroll data, Book text, Source code in C for editor program</li>
+</ul>
+<h3 id="152-logical-operations">15.2 Logical Operations</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>C</th>
+<th>Java</th>
+<th>RISC-V</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shift left</td>
+<td>&lt;&lt;</td>
+<td>&lt;&lt;</td>
+<td><code>slli</code></td>
+</tr>
+<tr>
+<td>Shift right</td>
+<td>&gt;&gt;</td>
+<td>&gt;&gt;&gt;</td>
+<td><code>srli</code></td>
+</tr>
+<tr>
+<td>Bit-by-bit AND</td>
+<td>&amp;</td>
+<td>&amp;</td>
+<td><code>and</code>, <code>andi</code></td>
+</tr>
+<tr>
+<td>Bit-by-bit OR</td>
+<td>|</td>
+<td>|</td>
+<td><code>or</code>, <code>ori</code></td>
+</tr>
+<tr>
+<td>Bit-by-bit XOR</td>
+<td>^</td>
+<td>^</td>
+<td><code>xor</code>, <code>xori</code></td>
+</tr>
+<tr>
+<td>Bit-by-bit NOT</td>
+<td>~</td>
+<td>~</td>
+<td>(ใช้ xor กับ 1 ทั้งหมด)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใช้ <strong>ดึงหรือแทรกกลุ่มบิต</strong> ใน word</li>
+</ul>
+<h3 id="153-shift-operations">15.3 Shift Operations</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>funct6</th>
+<th>immed</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>rd</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 bits</td>
+<td>6 bits</td>
+<td>5 bits</td>
+<td>3 bits</td>
+<td>5 bits</td>
+<td>7 bits</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>immed:</strong> เลื่อนกี่ตำแหน่ง</li>
+<li><strong>Shift left logical:</strong> เลื่อนซ้ายเติม 0 → <strong><code>slli</code> i บิต = คูณ 2ⁱ</strong></li>
+<li><strong>Shift right logical:</strong> เลื่อนขวาเติม 0 → <strong><code>srli</code> i บิต = หาร 2ⁱ (unsigned เท่านั้น)</strong></li>
+</ul>
+<h3 id="154-and-or-xor">15.4 AND / OR / XOR</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>ใช้ทำ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AND</strong> <code>and x9,x10,x11</code></td>
+<td><strong>mask bits</strong> — เลือกบางบิต เคลียร์ที่เหลือเป็น 0</td>
+<td>x10 = …0000<strong>1101 11</strong>000000, x11 = …00<strong>11 11</strong>00 00000000 → x9 = …0000<strong>11 00</strong> 00000000</td>
+</tr>
+<tr>
+<td><strong>OR</strong> <code>or x9,x10,x11</code></td>
+<td><strong>include bits</strong> — ตั้งบางบิตเป็น 1 ที่เหลือไม่เปลี่ยน</td>
+<td>→ x9 = …00<strong>111101</strong> 11000000</td>
+</tr>
+<tr>
+<td><strong>XOR</strong> <code>xor x9,x10,x12</code></td>
+<td><strong>differencing</strong> — x12 เป็น 1 ทั้งหมด → ได้ <strong>NOT</strong></td>
+<td>x9 = …1111<strong>0010</strong> 00111111</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="16-conditional-operations">16. Conditional Operations ⭐</h2>
+<h3 id="161-branch">16.1 Branch</h3>
+<ul>
+<li><strong>กระโดดไปคำสั่งที่มี label ถ้าเงื่อนไขจริง</strong> ไม่งั้นทำต่อตามลำดับ</li>
+<li><strong><code>beq rs1, rs2, L1</code></strong> — ถ้า rs1 == rs2 กระโดดไป L1</li>
+<li><strong><code>bne rs1, rs2, L1</code></strong> — ถ้า rs1 != rs2 กระโดดไป L1</li>
+</ul>
+<h3 id="162-compiling-if-statements">16.2 Compiling If Statements</h3>
+<pre><code class="language-c">if (i==j) f = g+h;
+else f = g-h;
+</code></pre>
+<p>f, g, … อยู่ใน x19, x20, …</p>
+<pre><code>      bne x22, x23, Else     // ถ้า i != j ไป Else
+      add x19, x20, x21      // f = g + h
+      beq x0, x0, Exit       // unconditional (0 == 0 เสมอ)
+Else: sub x19, x20, x21      // f = g - h
+Exit: …                      // Assembler calculates addresses
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 เทคนิค: <strong>ทดสอบเงื่อนไขกลับด้าน</strong> (bne แทน ==) เพื่อข้ามส่วน then / <code>beq x0,x0</code> = กระโดดแน่นอน</p>
+</blockquote>
+<h3 id="163-compiling-loop-statements">16.3 Compiling Loop Statements</h3>
+<pre><code class="language-c">while (save[i] == k) i += 1;
+</code></pre>
+<p>i ใน x22, k ใน x24, address ของ save ใน x25</p>
+<pre><code>Loop: slli x10, x22, 3     // x10 = i * 8
+      add  x10, x10, x25   // x10 = address ของ save[i]
+      ld   x9, 0(x10)      // x9 = save[i]
+      bne  x9, x24, Exit   // ถ้า save[i] != k ออก
+      addi x22, x22, 1     // i += 1
+      beq  x0, x0, Loop    // วนกลับ
+Exit: …
+</code></pre>
+<h3 id="164-basic-blocks">16.4 Basic Blocks</h3>
+<p><img loading="lazy" src="img/c3-p068.jpg" alt="basic block" /></p>
+<ul>
+<li><strong>Basic block</strong> = ลำดับคำสั่งที่
+<ul>
+<li><strong>ไม่มี branch ฝังอยู่ (ยกเว้นตอนท้าย)</strong></li>
+<li><strong>ไม่มี branch target (ยกเว้นตอนต้น)</strong></li>
+</ul>
+</li>
+<li><strong>compiler ใช้หา basic block เพื่อ optimize</strong></li>
+<li><strong>processor ขั้นสูงเร่งการทำงานของ basic block ได้</strong></li>
+</ul>
+<h3 id="165-more-conditional-operations">16.5 More Conditional Operations</h3>
+<ul>
+<li><strong><code>blt rs1, rs2, L1</code></strong> — ถ้า rs1 &lt; rs2 กระโดด</li>
+<li><strong><code>bge rs1, rs2, L1</code></strong> — ถ้า rs1 &gt;= rs2 กระโดด</li>
+<li><strong>ตัวอย่าง:</strong> <code>if (a &gt; b) a += 1;</code> (a ใน x22, b ใน x23)</li>
+</ul>
+<pre><code>      bge  x23, x22, Exit   // branch if b &gt;= a
+      addi x22, x22, 1
+Exit:
+</code></pre>
+<h3 id="166-signed-vs-unsigned">16.6 Signed vs Unsigned</h3>
+<ul>
+<li><strong>Signed comparison:</strong> <code>blt</code>, <code>bge</code></li>
+<li><strong>Unsigned comparison:</strong> <code>bltu</code>, <code>bgeu</code></li>
+<li><strong>ตัวอย่าง:</strong>
+<ul>
+<li>x22 = 1111 1111 1111 1111 1111 1111 1111 1111</li>
+<li>x23 = 0000 0000 0000 0000 0000 0000 0000 0001</li>
+<li><strong>x22 &lt; x23 // signed</strong> → <strong>−1 &lt; +1</strong></li>
+<li><strong>x22 &gt; x23 // unsigned</strong> → <strong>+4,294,967,295 &gt; +1</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>บิตชุดเดียวกัน ผลเปรียบเทียบต่างกัน</strong> ขึ้นกับว่าตีความเป็น signed หรือ unsigned</p>
+</blockquote>
+<hr />
+<h2 id="17-procedure-calling">17. Procedure Calling ⭐⭐</h2>
+<h3 id="171-ขั้นตอนเรียก-procedure-6-ขั้น">17.1 ขั้นตอนเรียก procedure (6 ขั้น)</h3>
+<ol>
+<li><strong>วาง parameters ใน registers x10 ถึง x17</strong></li>
+<li><strong>ส่งการควบคุมไปที่ procedure</strong></li>
+<li><strong>จองพื้นที่เก็บข้อมูล</strong> สำหรับ procedure</li>
+<li><strong>ทำงานของ procedure</strong></li>
+<li><strong>วางผลลัพธ์ใน register</strong> ให้ caller</li>
+<li><strong>กลับไปจุดที่เรียก</strong> (address อยู่ใน <strong>x1</strong>)</li>
+</ol>
+<h3 id="172-procedure-call-instructions">17.2 Procedure Call Instructions</h3>
+<ul>
+<li><strong>Procedure call: jump and link</strong>
+<ul>
+<li><strong><code>jal x1, ProcedureLabel</code></strong></li>
+<li><strong>address ของคำสั่งถัดไปถูกเก็บใน x1</strong></li>
+<li>กระโดดไป target address</li>
+</ul>
+</li>
+<li><strong>Procedure return: jump and link register</strong>
+<ul>
+<li><strong><code>jalr x0, 0(x1)</code></strong></li>
+<li>เหมือน jal แต่ <strong>กระโดดไป 0 + address ใน x1</strong></li>
+<li><strong>ใช้ x0 เป็น rd</strong> (x0 เปลี่ยนค่าไม่ได้ จึงเท่ากับทิ้ง return address)</li>
+<li>ใช้ทำ <strong>computed jumps</strong> ได้ด้วย เช่น <strong>case/switch statements</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="173-leaf-procedure-example">17.3 Leaf Procedure Example</h3>
+<p><strong>Leaf procedure = ฟังก์ชันที่ไม่มีการ call เรียกออกไปหาฟังก์ชันอื่น</strong></p>
+<pre><code class="language-c">long long int leaf_example (long long int g, long long int h,
+                            long long int i, long long int j) {
+    long long int f;
+    f = (g + h) - (i + j);
+    return f;
+}
+</code></pre>
+<ul>
+<li><strong>Arguments g, …, j ใน x10, …, x13</strong></li>
+<li><strong>f ใน x20</strong></li>
+<li><strong>temporaries x5, x6</strong></li>
+<li><strong>ต้องเก็บ x5, x6, x20 ลง stack</strong></li>
+</ul>
+<pre><code>leaf_example:
+    addi sp, sp, -24     // จองที่ stack 3 × 8 bytes
+    sd   x5, 16(sp)      // Save x5, x6, x20 on stack
+    sd   x6, 8(sp)
+    sd   x20, 0(sp)
+    add  x5, x10, x11    // x5 = g + h
+    add  x6, x12, x13    // x6 = i + j
+    sub  x20, x5, x6     // f = x5 - x6
+    addi x10, x20, 0     // copy f to return register
+    ld   x20, 0(sp)      // Restore x5, x6, x20 from stack
+    ld   x6, 8(sp)
+    ld   x5, 16(sp)
+    addi sp, sp, 24      // คืนพื้นที่ stack
+    jalr x0, 0(x1)       // Return to caller
+</code></pre>
+<p><em>(สไลด์พิมพ์บรรทัดที่ 6 เป็น <code>add x6,x12,x1</code> — ที่ถูกคือ x13 = j)</em></p>
+<h3 id="174-local-data-on-the-stack">17.4 Local Data on the Stack</h3>
+<p><img loading="lazy" src="img/c3-p075.jpg" alt="stack ก่อน ระหว่าง และหลังเรียก leaf_example" /></p>
+<ul>
+<li><strong>(a) ก่อนเรียก:</strong> SP ชี้ตำแหน่งเดิม</li>
+<li><strong>(b) ระหว่างรัน:</strong> SP ลดลง 24 มีช่อง Contents of register x5, x6, x20</li>
+<li><strong>(c) หลังคืน:</strong> SP กลับที่เดิม</li>
+<li><strong>stack โตจาก high address ลงไป low address</strong> (จึง <code>addi sp, sp, -24</code>)</li>
+</ul>
+<h3 id="175-register-usage">17.5 Register Usage</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชุด register</th>
+<th>ประเภท</th>
+<th>กติกา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>x5–x7, x28–x31</strong></td>
+<td><strong>temporary registers</strong></td>
+<td><strong>callee ไม่ต้องรักษาค่า</strong></td>
+</tr>
+<tr>
+<td><strong>x8–x9, x18–x27</strong></td>
+<td><strong>saved registers</strong></td>
+<td><strong>ถ้า callee ใช้ ต้อง save และ restore</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ในตัวอย่าง leaf ที่ save x5, x6 ด้วยเป็นแบบระวังไว้ก่อน ตามกติกาจริงไม่จำเป็นต้อง save temporaries</p>
+</blockquote>
+<h3 id="176-non-leaf-procedures">17.6 Non-Leaf Procedures</h3>
+<ul>
+<li><strong>procedure ที่เรียก procedure อื่น</strong></li>
+<li>สำหรับ nested call <strong>caller ต้อง save ลง stack:</strong>
+<ul>
+<li><strong>return address ของตัวเอง</strong></li>
+<li><strong>arguments และ temporaries ที่ยังต้องใช้หลัง call</strong></li>
+</ul>
+</li>
+<li><strong>restore จาก stack หลัง call</strong></li>
+</ul>
+<h3 id="177-non-leaf-procedure-example-factorial">17.7 Non-Leaf Procedure Example: Factorial ⭐</h3>
+<pre><code class="language-c">long long int fact (long long int n) {
+    if (n &lt; 1) return 1;          // สไลด์พิมพ์ return f;
+    else return n * fact(n - 1);
+}
+</code></pre>
+<p><strong>Argument n ใน x10 / Result ใน x10</strong></p>
+<pre><code>fact:
+    addi sp, sp, -16     // Save return address and n on stack
+    sd   x1, 8(sp)
+    sd   x10, 0(sp)
+    addi x5, x10, -1     // x5 = n - 1
+    bge  x5, x0, L1      // if n &gt;= 1, go to L1
+    addi x10, x0, 1      // Else, set return value to 1
+    addi sp, sp, 16      // Pop stack, don't bother restoring values
+    jalr x0, 0(x1)       // Return
+L1: addi x10, x10, -1    // n = n - 1
+    jal  x1, fact        // call fact(n-1)
+    addi x6, x10, 0      // move result of fact(n-1) to x6
+    ld   x10, 0(sp)      // Restore caller's n
+    ld   x1, 8(sp)       // Restore caller's return address
+    addi sp, sp, 16      // Pop stack
+    mul  x10, x10, x6    // return n * fact(n-1)
+    jalr x0, 0(x1)       // return
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไมต้อง save x1?</strong> เพราะ <code>jal x1, fact</code> จะเขียนทับ x1 ด้วย return address ใหม่ ถ้าไม่เก็บไว้ ตัวเองจะกลับไปหาคนเรียกไม่ได้
+<strong>ทำไมต้อง save x10 (n)?</strong> เพราะหลังเรียก fact(n−1) ยังต้องใช้ n มาคูณ แต่ x10 ถูกเปลี่ยนไปแล้ว</p>
+</blockquote>
+<hr />
+<h2 id="18-memory-layout-local-data-character-data-byte-operations">18. Memory Layout, Local Data, Character Data, Byte Operations</h2>
+<h3 id="181-memory-layout">18.1 Memory Layout</h3>
+<p><img loading="lazy" src="img/c3-p080.jpg" alt="memory layout ของ RISC-V: reserved, text, static data, dynamic data, stack" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>เก็บอะไร</th>
+<th>ตำแหน่ง (จากภาพ)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reserved</strong></td>
+<td>สงวน</td>
+<td>ล่างสุด (address 0)</td>
+</tr>
+<tr>
+<td><strong>Text</strong></td>
+<td><strong>program code</strong></td>
+<td>เริ่มที่ PC → 0000 0000 0040 0000₁₆</td>
+</tr>
+<tr>
+<td><strong>Static data</strong></td>
+<td><strong>global variables</strong> เช่น static variables ใน C, constant arrays, strings — <strong>x3 (global pointer)</strong> ตั้งไว้ที่ address ที่ใช้ ±offset เข้าถึง segment นี้</td>
+<td>0000 0000 1000 0000₁₆</td>
+</tr>
+<tr>
+<td><strong>Dynamic data (heap)</strong></td>
+<td>เช่น <strong>malloc ใน C, new ใน Java</strong> — โตขึ้นบน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Stack</strong></td>
+<td><strong>automatic storage</strong> — โตลงล่าง</td>
+<td>SP → 0000 003f ffff fff0₁₆</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="182-local-data-on-the-stack">18.2 Local Data on the Stack</h3>
+<p><img loading="lazy" src="img/c3-p081.jpg" alt="procedure frame: FP, SP, saved registers, return address, local arrays" /></p>
+<ul>
+<li><strong>ข้อมูล local ถูกจองโดย callee</strong> เช่น C automatic variables</li>
+<li><strong>Procedure frame (activation record)</strong> — บาง compiler ใช้จัดการพื้นที่ stack</li>
+<li>frame มี: Saved argument registers (if any), Saved return address, Saved saved registers (if any), Local arrays and structures (if any) — อยู่ระหว่าง <strong>FP (frame pointer)</strong> และ <strong>SP</strong></li>
+</ul>
+<h3 id="183-character-data">18.3 Character Data</h3>
+<ul>
+<li><strong>Byte-encoded character sets:</strong>
+<ul>
+<li><strong>ASCII: 128 ตัว</strong> (95 graphic, 33 control)</li>
+<li><strong>Latin-1: 256 ตัว</strong> (ASCII + 96 graphic เพิ่ม)</li>
+</ul>
+</li>
+<li><strong>Unicode: 32-bit character set</strong>
+<ul>
+<li>ใช้ใน <strong>Java, C++ wide characters, …</strong></li>
+<li>รวม <strong>ตัวอักษรส่วนใหญ่ของโลก</strong> และสัญลักษณ์</li>
+<li><strong>UTF-8, UTF-16:</strong> variable-length encodings</li>
+</ul>
+</li>
+</ul>
+<h3 id="184-bytehalfwordword-operations">18.4 Byte/Halfword/Word Operations</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>คำสั่ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Load (signed)</strong></td>
+<td><code>lb</code>, <code>lh</code>, <code>lw rd, offset(rs1)</code></td>
+<td><strong>Sign extend เป็น 64 บิตใน rd</strong></td>
+</tr>
+<tr>
+<td><strong>Load unsigned</strong></td>
+<td><code>lbu</code>, <code>lhu</code>, <code>lwu rd, offset(rs1)</code></td>
+<td><strong>Zero extend เป็น 64 บิตใน rd</strong></td>
+</tr>
+<tr>
+<td><strong>Store</strong></td>
+<td><code>sb</code>, <code>sh</code>, <code>sw rs2, offset(rs1)</code></td>
+<td><strong>เก็บ 8/16/32 บิตขวาสุด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ตัวอักษรท้าย: <strong>b</strong> = byte (8), <strong>h</strong> = halfword (16), <strong>w</strong> = word (32), <strong>d</strong> = doubleword (64), <strong>u</strong> = unsigned</p>
+</blockquote>
+<hr />
+<h1>ส่วน C — RISC-V in details: Part II (Self-study)</h1>
+<blockquote class="callout">
+<p>สไลด์ระบุว่าส่วนนี้ <strong>&quot;Students can explore by themselves&quot;</strong></p>
+</blockquote>
+<h2 id="19-string-copy-example">19. String Copy Example</h2>
+<pre><code class="language-c">void strcpy (char x[], char y[]) {
+    size_t i;
+    i = 0;
+    while ((x[i]=y[i])!='\0')
+        i += 1;
+}
+</code></pre>
+<ul>
+<li>ใช้ <strong>null-terminated string</strong></li>
+</ul>
+<pre><code>strcpy:
+    addi sp, sp, -8      // adjust stack for 1 doubleword
+    sd   x19, 0(sp)      // push x19
+    add  x19, x0, x0     // i = 0
+L1: add  x5, x19, x11    // x5 = addr of y[i]
+    lbu  x6, 0(x5)       // x6 = y[i]
+    add  x7, x19, x10    // x7 = addr of x[i]
+    sb   x6, 0(x7)       // x[i] = y[i]
+    beq  x6, x0, L2      // if y[i] == 0 then exit
+    addi x19, x19, 1     // i = i + 1
+    jal  x0, L1          // next iteration of loop
+L2: ld   x19, 0(sp)      // restore saved x19
+    addi sp, sp, 8       // pop 1 doubleword from stack
+    jalr x0, 0(x1)       // and return
+</code></pre>
+<p><em>(สไลด์พิมพ์บรรทัด L1 เป็น <code>add x5,x19,x10</code> — y อยู่ใน x11 จึงควรเป็น x11)</em></p>
+<ul>
+<li>ใช้ x19 (saved register) เก็บ i จึงต้อง push/pop</li>
+<li>char มีขนาด 1 byte จึงไม่ต้องคูณ 8 และใช้ <code>lbu</code>/<code>sb</code></li>
+</ul>
+<hr />
+<h2 id="20-wide-immediates-และ-addressing">20. Wide Immediates และ Addressing</h2>
+<h3 id="201-32-bit-constants">20.1 32-bit Constants</h3>
+<ul>
+<li><strong>ค่าคงที่ส่วนใหญ่เล็ก → immediate 12 บิตพอ</strong></li>
+<li>สำหรับค่าคงที่ 32 บิตที่มีบ้าง: <strong><code>lui rd, constant</code></strong>
+<ul>
+<li><strong>คัดลอกค่าคงที่ 20 บิต ไปที่บิต [31:12] ของ rd</strong></li>
+<li><strong>ขยายบิต 31 ไปที่บิต [63:32]</strong></li>
+<li><strong>เคลียร์บิต [11:0] ของ rd เป็น 0</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>ตัวอย่าง:</strong> โหลด 0x003D0500 ลง x19</p>
+<pre><code>lui  x19, 976       // 0x003D0  → x19 = 0000 0000 0011 1101 0000 | 0000 0000 0000
+addi x19, x19, 128  // 0x500    → x19 = 0000 0000 0011 1101 0000 | 0101 0000 0000
+</code></pre>
+<p><em>(สไลด์เขียน addi 128 แต่ค่า 0x500 = 1280; ส่วนล่าง 0101 0000 0000 ตามภาพคือ 0x500)</em></p>
+<h3 id="202-branch-addressing">20.2 Branch Addressing</h3>
+<ul>
+<li>branch ระบุ <strong>opcode, register 2 ตัว, target address</strong></li>
+<li><strong>branch target ส่วนใหญ่อยู่ใกล้</strong> (ไปข้างหน้าหรือถอยหลัง)</li>
+<li><strong>SB format:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>imm[12]</th>
+<th>imm[10:5]</th>
+<th>rs2</th>
+<th>rs1</th>
+<th>funct3</th>
+<th>imm[4:1]</th>
+<th>imm[11]</th>
+<th>opcode</th>
+</tr>
+</thead>
+</table></div>
+<ul>
+<li><strong>PC-relative addressing:</strong> <strong>Target address = PC + immediate × 2</strong></li>
+</ul>
+<h3 id="203-jump-addressing">20.3 Jump Addressing</h3>
+<ul>
+<li><strong><code>jal</code> ใช้ immediate 20 บิต</strong> เพื่อกระโดดได้ไกลกว่า</li>
+<li><strong>UJ format:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>imm[20]</th>
+<th>imm[10:1]</th>
+<th>imm[11]</th>
+<th>imm[19:12]</th>
+<th>rd</th>
+<th>opcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>5 bits</td>
+<td>7 bits</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>กระโดดไกลมาก</strong> เช่น ไป absolute address 32 บิต:
+<ul>
+<li><strong><code>lui</code>:</strong> โหลด address[31:12] ลง temp register</li>
+<li><strong><code>jalr</code>:</strong> บวก address[11:0] แล้วกระโดดไป target</li>
+</ul>
+</li>
+</ul>
+<h3 id="204-risc-v-addressing-summary">20.4 RISC-V Addressing Summary</h3>
+<p><img loading="lazy" src="img/c3-p090.jpg" alt="4 addressing modes ของ RISC-V" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>วิธีหา operand</th>
+<th>ใช้กับ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Immediate addressing</strong></td>
+<td>operand คือ <strong>immediate ในคำสั่งเลย</strong></td>
+<td><code>addi</code></td>
+</tr>
+<tr>
+<td><strong>2. Register addressing</strong></td>
+<td>operand อยู่ใน <strong>register</strong></td>
+<td><code>add</code> (R-format)</td>
+</tr>
+<tr>
+<td><strong>3. Base addressing</strong></td>
+<td><strong>register + immediate</strong> → address ใน memory (byte/halfword/word/doubleword)</td>
+<td><code>ld</code>, <code>sd</code></td>
+</tr>
+<tr>
+<td><strong>4. PC-relative addressing</strong></td>
+<td><strong>PC + immediate</strong> → address</td>
+<td>branch</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="205-risc-v-encoding-summary">20.5 RISC-V Encoding Summary</h3>
+<p><img loading="lazy" src="img/c3-p091.jpg" alt="ตาราง format ทั้ง 6 แบบ" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>7 bits</th>
+<th>5 bits</th>
+<th>5 bits</th>
+<th>3 bits</th>
+<th>5 bits</th>
+<th>7 bits</th>
+<th>Comments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R-type</strong></td>
+<td>funct7</td>
+<td>rs2</td>
+<td>rs1</td>
+<td>funct3</td>
+<td>rd</td>
+<td>opcode</td>
+<td><strong>Arithmetic</strong> instruction format</td>
+</tr>
+<tr>
+<td><strong>I-type</strong></td>
+<td>immediate[11:0] (12)</td>
+<td></td>
+<td>rs1</td>
+<td>funct3</td>
+<td>rd</td>
+<td>opcode</td>
+<td><strong>Loads &amp; immediate arithmetic</strong></td>
+</tr>
+<tr>
+<td><strong>S-type</strong></td>
+<td>immed[11:5]</td>
+<td>rs2</td>
+<td>rs1</td>
+<td>funct3</td>
+<td>immed[4:0]</td>
+<td>opcode</td>
+<td><strong>Stores</strong></td>
+</tr>
+<tr>
+<td><strong>SB-type</strong></td>
+<td>immed[12,10:5]</td>
+<td>rs2</td>
+<td>rs1</td>
+<td>funct3</td>
+<td>immed[4:1,11]</td>
+<td>opcode</td>
+<td><strong>Conditional branch</strong> format</td>
+</tr>
+<tr>
+<td><strong>UJ-type</strong></td>
+<td>immediate[20,10:1,11,19:12] (20)</td>
+<td></td>
+<td></td>
+<td></td>
+<td>rd</td>
+<td>opcode</td>
+<td><strong>Unconditional jump</strong> format</td>
+</tr>
+<tr>
+<td><strong>U-type</strong></td>
+<td>immediate[31:12] (20)</td>
+<td></td>
+<td></td>
+<td></td>
+<td>rd</td>
+<td>opcode</td>
+<td><strong>Upper immediate</strong> format</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="21-synchronization">21. Synchronization</h2>
+<h3 id="211-ปัญหา">21.1 ปัญหา</h3>
+<ul>
+<li><strong>2 processors ใช้ memory ร่วมกัน:</strong> P1 เขียน แล้ว P2 อ่าน</li>
+<li><strong>Data race</strong> ถ้า P1 และ P2 ไม่ synchronize → <strong>ผลลัพธ์ขึ้นกับลำดับการเข้าถึง</strong></li>
+<li><strong>ต้องมี hardware support:</strong>
+<ul>
+<li><strong>Atomic read/write memory operation</strong> — ไม่มีใครเข้าถึงตำแหน่งนั้นได้ระหว่างอ่านกับเขียน</li>
+<li>เป็น <strong>คำสั่งเดียว</strong> ได้ เช่น atomic swap ของ register ↔ memory</li>
+<li>หรือ <strong>คู่คำสั่งแบบ atomic</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="212-synchronization-in-risc-v">21.2 Synchronization in RISC-V</h3>
+<ul>
+<li><strong>Load reserved: <code>lr.d rd, (rs1)</code></strong>
+<ul>
+<li>โหลดจาก address ใน rs1 ลง rd</li>
+<li><strong>จอง (reservation)</strong> address นั้นไว้</li>
+</ul>
+</li>
+<li><strong>Store conditional: <code>sc.d rd, (rs1), rs2</code></strong>
+<ul>
+<li>เก็บค่าจาก rs2 ไปที่ address ใน rs1</li>
+<li><strong>สำเร็จถ้าตำแหน่งนั้นไม่ถูกเปลี่ยนตั้งแต่ <code>lr.d</code></strong> → คืน <strong>0</strong> ใน rd</li>
+<li><strong>ล้มเหลวถ้าถูกเปลี่ยน</strong> → คืน <strong>ค่าไม่ใช่ศูนย์</strong> ใน rd</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example 1: atomic swap (test/set lock variable)</strong></p>
+<pre><code>again: lr.d x10, (x20)
+       sc.d x11, (x20), x23   // x11 = status
+       bne  x11, x0, again    // branch if store failed
+       addi x23, x10, 0       // x23 = loaded value
+</code></pre>
+<p><strong>Example 2: lock</strong></p>
+<pre><code>       addi x12, x0, 1        // copy locked value
+again: lr.d x10, (x20)        // read lock
+       bne  x10, x0, again    // check if it is 0 yet
+       sc.d x11, (x20), x12   // attempt to store
+       bne  x11, x0, again    // branch if fails
+Unlock:
+       sd   x0, 0(x20)        // free lock
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับครึ่ง OS หัวข้อ Synchronization: lock ต้องอาศัยคำสั่งระดับ hardware ที่ atomic แบบนี้</p>
+</blockquote>
+<hr />
+<h2 id="22-translation-and-startup">22. Translation and Startup</h2>
+<h3 id="221-ภาพรวม">22.1 ภาพรวม</h3>
+<p><img loading="lazy" src="img/c3-p095.jpg" alt="C program → compiler → assembly → assembler → object → linker → executable → loader → memory" /></p>
+<p><strong>C program → Compiler → Assembly language program → Assembler → Object (machine language module) + Object (library routine) → Linker → Executable → Loader → Memory</strong></p>
+<ul>
+<li><strong>compiler หลายตัวสร้าง object module ได้โดยตรง</strong></li>
+<li><strong>Static linking:</strong> รวม library เข้า executable ตอน link</li>
+</ul>
+<h3 id="222-producing-an-object-module">22.2 Producing an Object Module</h3>
+<ul>
+<li><strong>Assembler (หรือ compiler)</strong> แปลโปรแกรมเป็นคำสั่งเครื่อง</li>
+<li>ให้ข้อมูลสำหรับประกอบโปรแกรมสมบูรณ์จากชิ้นส่วน:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Header</strong></td>
+<td>อธิบายเนื้อหาของ object module</td>
+</tr>
+<tr>
+<td><strong>Text segment</strong></td>
+<td>คำสั่งที่แปลแล้ว</td>
+</tr>
+<tr>
+<td><strong>Static data segment</strong></td>
+<td>ข้อมูลที่จองตลอดอายุโปรแกรม</td>
+</tr>
+<tr>
+<td><strong>Relocation info</strong></td>
+<td>สำหรับเนื้อหาที่ขึ้นกับตำแหน่ง absolute ของโปรแกรมที่โหลด</td>
+</tr>
+<tr>
+<td><strong>Symbol table</strong></td>
+<td>global definitions และ external references</td>
+</tr>
+<tr>
+<td><strong>Debug info</strong></td>
+<td>เชื่อมกับ source code</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="223-linking-object-modules">22.3 Linking Object Modules</h3>
+<ul>
+<li><strong>สร้าง executable image</strong>
+<ol>
+<li><strong>รวม segments</strong></li>
+<li><strong>Resolve labels</strong> (หา address จริง)</li>
+<li><strong>Patch</strong> การอ้างอิงที่ขึ้นกับตำแหน่งและ external refs</li>
+</ol>
+</li>
+<li>อาจปล่อยการขึ้นกับตำแหน่งไว้ให้ <strong>relocating loader</strong> แก้
+<ul>
+<li><strong>แต่ถ้ามี virtual memory ไม่จำเป็น</strong></li>
+<li>โปรแกรม <strong>โหลดที่ตำแหน่ง absolute ใน virtual memory space</strong> ได้</li>
+</ul>
+</li>
+</ul>
+<h3 id="224-loading-a-program">22.4 Loading a Program</h3>
+<p><strong>โหลดจาก image file บน disk เข้า memory:</strong></p>
+<ol>
+<li><strong>อ่าน header</strong> หาขนาด segment</li>
+<li><strong>สร้าง virtual address space</strong></li>
+<li><strong>คัดลอก text และ initialized data ลง memory</strong> (หรือตั้ง page table entries ให้ fault เข้ามาทีหลัง)</li>
+<li><strong>ตั้ง arguments บน stack</strong></li>
+<li><strong>ตั้งค่า registers</strong> (รวม sp, fp, gp)</li>
+<li><strong>กระโดดไป startup routine</strong>
+<ul>
+<li>คัดลอก arguments ไป x10, … แล้ว <strong>เรียก main</strong></li>
+<li><strong>เมื่อ main return ทำ exit syscall</strong></li>
+</ul>
+</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ Lecture 2 (OS): นี่คือขั้น &quot;process creation&quot; ในมุมของ loader</p>
+</blockquote>
+<h3 id="225-dynamic-linking">22.5 Dynamic Linking</h3>
+<ul>
+<li><strong>link/load library procedure เฉพาะตอนถูกเรียก</strong></li>
+<li><strong>ต้องให้โค้ด procedure relocatable ได้</strong></li>
+<li><strong>หลีกเลี่ยง image บวม</strong> จาก static linking ของ library ทั้งหมดที่ถูกอ้างถึง</li>
+<li><strong>ได้ library เวอร์ชันใหม่อัตโนมัติ</strong></li>
+</ul>
+<h3 id="226-lazy-linkage">22.6 Lazy Linkage</h3>
+<p><img loading="lazy" src="img/c3-p100.jpg" alt="lazy linkage: indirection table, stub, linker/loader code, dynamically mapped code" /></p>
+<ul>
+<li><strong>(a) First call to DLL routine:</strong> โปรแกรมกระโดดผ่าน <strong>Indirection table</strong> → <strong>Stub</strong> (Loads routine ID, Jump to linker/loader) → <strong>Linker/loader code</strong> (Dynamic linker/loader, Remap DLL routine) → <strong>Dynamically mapped code</strong> (DLL routine)</li>
+<li><strong>(b) Subsequent calls:</strong> indirection table ถูกแก้ให้ชี้ไป DLL routine โดยตรงแล้ว ไม่ต้องผ่าน linker อีก</li>
+</ul>
+<h3 id="227-starting-java-applications">22.7 Starting Java Applications</h3>
+<p><img loading="lazy" src="img/c3-p101.jpg" alt="Java: compiler → bytecodes → JVM interpreter / JIT compiler" /></p>
+<ul>
+<li><strong>Java program → Compiler → Class files (Java bytecodes)</strong></li>
+<li><strong>Java bytecodes = ชุดคำสั่งพกพาได้แบบง่ายสำหรับ JVM</strong></li>
+<li><strong>Java Virtual Machine</strong> ใช้ Class files + Java library routines (machine language) → <strong>แปลความ (interprets) bytecodes</strong></li>
+<li><strong>Just In Time (JIT) compiler:</strong> <strong>คอมไพล์ bytecodes ของ method ที่ &quot;hot&quot; (ถูกเรียกบ่อย) เป็น native code</strong> ของเครื่อง → Compiled Java methods (machine language)</li>
+</ul>
+<hr />
+<h2 id="23-c-sort-example">23. C Sort Example</h2>
+<h3 id="231-swap-procedure-leaf">23.1 Swap Procedure (leaf)</h3>
+<pre><code class="language-c">void swap(long long int v[], long long int k) {
+    long long int temp;
+    temp = v[k];
+    v[k] = v[k+1];
+    v[k+1] = temp;
+}
+</code></pre>
+<p><strong>v ใน x10, k ใน x11, temp ใน x5</strong></p>
+<pre><code>swap:
+    slli x6, x11, 3     // reg x6 = k * 8
+    add  x6, x10, x6    // reg x6 = v + (k * 8)
+    ld   x5, 0(x6)      // reg x5 (temp) = v[k]
+    ld   x7, 8(x6)      // reg x7 = v[k + 1]
+    sd   x7, 0(x6)      // v[k] = reg x7
+    sd   x5, 8(x6)      // v[k+1] = reg x5 (temp)
+    jalr x0, 0(x1)      // return to calling routine
+</code></pre>
+<h3 id="232-sort-procedure-in-c-non-leaf-เรียก-swap">23.2 Sort Procedure in C (non-leaf, เรียก swap)</h3>
+<pre><code class="language-c">void sort (long long int v[], size_t n) {
+    size_t i, j;
+    for (i = 0; i &lt; n; i += 1) {
+        for (j = i – 1; j &gt;= 0 &amp;&amp; v[j] &gt; v[j + 1]; j -= 1) {
+            swap(v,j);
+        }
+    }
+}
+</code></pre>
+<p><strong>v ใน x10, n ใน x11, i ใน x19, j ใน x20</strong></p>
+<h3 id="233-outer-loop">23.3 Outer Loop</h3>
+<pre><code>        li   x19, 0            // i = 0
+for1tst:
+        bge  x19, x11, exit1   // go to exit1 if x19 ≥ x11 (i ≥ n)
+        (body of outer for-loop)
+        addi x19, x19, 1       // i += 1
+        j    for1tst           // branch to test of outer loop
+exit1:
+</code></pre>
+<h3 id="234-inner-loop">23.4 Inner Loop</h3>
+<pre><code>        addi x20, x19, -1      // j = i − 1
+for2tst:
+        blt  x20, x0, exit2    // go to exit2 if x20 &lt; 0 (j &lt; 0)
+        slli x5, x20, 3        // reg x5 = j * 8
+        add  x5, x10, x5       // reg x5 = v + (j * 8)
+        ld   x6, 0(x5)         // reg x6 = v[j]
+        ld   x7, 8(x5)         // reg x7 = v[j + 1]
+        ble  x6, x7, exit2     // go to exit2 if x6 ≤ x7
+        mv   x21, x10          // copy parameter x10 into x21
+        mv   x22, x11          // copy parameter x11 into x22
+        mv   x10, x21          // first swap parameter is v
+        mv   x11, x20          // second swap parameter is j
+        jal  x1, swap          // call swap
+        addi x20, x20, -1      // j –= 1
+        j    for2tst           // branch to test of inner loop
+exit2:
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไมต้องย้าย x10, x11 ไปเก็บใน x21, x22?</strong> เพราะต้องส่งค่าใหม่ให้ swap ทาง x10, x11 แต่ sort ยังต้องใช้ v และ n เดิมต่อ จึงเก็บสำเนาไว้ใน saved registers</p>
+</blockquote>
+<h3 id="235-preserving-registers">23.5 Preserving Registers</h3>
+<pre><code>// Preserve saved registers:
+    addi sp, sp, -40   // make room on stack for 5 regs
+    sd   x1, 32(sp)    // save x1 on stack
+    sd   x22, 24(sp)   // save x22 on stack
+    sd   x21, 16(sp)   // save x21 on stack
+    sd   x20, 8(sp)    // save x20 on stack
+    sd   x19, 0(sp)    // save x19 on stack
+
+// Restore saved registers:
+exit1:
+    ld   x19, 0(sp)    // restore x19 from stack
+    ld   x20, 8(sp)    // restore x20 from stack
+    ld   x21, 16(sp)   // restore x21 from stack
+    ld   x22, 24(sp)   // restore x22 from stack
+    ld   x1, 32(sp)    // restore x1 from stack
+    addi sp, sp, 40    // restore stack pointer
+    jalr x0, 0(x1)
+</code></pre>
+<p><em>(สไลด์พิมพ์ส่วน restore เป็น <code>sd</code> — การ restore ที่ถูกต้องต้องใช้ <code>ld</code>)</em></p>
+<hr />
+<h2 id="24-effect-of-compiler-optimization-และ-languagealgorithm">24. Effect of Compiler Optimization และ Language/Algorithm</h2>
+<h3 id="241-effect-of-compiler-optimization">24.1 Effect of Compiler Optimization</h3>
+<p><img loading="lazy" src="img/c3-p108.jpg" alt="กราฟ relative performance, clock cycles, instruction count, CPI ของ none, O1, O2, O3" /></p>
+<p>คอมไพล์ด้วย <strong>gcc สำหรับ Pentium 4 บน Linux</strong> เทียบ optimization <strong>none, O1, O2, O3</strong> ใน 4 กราฟ: <strong>Relative Performance, Clock Cycles, Instruction count, CPI</strong></p>
+<ul>
+<li>optimization ช่วยเพิ่ม performance และลด clock cycles/instruction count ได้ แต่ <strong>CPI ไม่ได้ลดตาม</strong> เสมอ</li>
+</ul>
+<h3 id="242-effect-of-language-and-algorithm">24.2 Effect of Language and Algorithm</h3>
+<p><img loading="lazy" src="img/c3-p109.jpg" alt="Bubblesort vs Quicksort ใน C/none, O1, O2, O3, Java/int, Java/JIT" /></p>
+<p>3 กราฟ: <strong>Bubblesort Relative Performance</strong>, <strong>Quicksort Relative Performance</strong>, <strong>Quicksort vs Bubblesort Speedup</strong> เทียบ C/none, C/O1, C/O2, C/O3, Java/int (interpreted), Java/JIT</p>
+<ul>
+<li><strong>Quicksort เร็วกว่า Bubblesort หลักพันเท่า</strong> (แกนกราฟ speedup ไปถึง ~3000)</li>
+</ul>
+<h3 id="243-lessons-learnt">24.3 Lessons Learnt ⭐</h3>
+<ul>
+<li><strong>Instruction count และ CPI ไม่ใช่ตัวชี้วัด performance ที่ดีถ้าดูแยกกัน</strong></li>
+<li><strong>Compiler optimizations ไวต่อ algorithm</strong></li>
+<li><strong>Java/JIT เร็วกว่า JVM interpreted อย่างมาก</strong>
+<ul>
+<li><strong>เทียบได้กับ optimized C</strong> ในบางกรณี</li>
+</ul>
+</li>
+<li><strong>Nothing can fix a dumb algorithm!</strong> (ไม่มีอะไรช่วย algorithm ที่แย่ได้)</li>
+</ul>
+<hr />
+<h2 id="25-arrays-vs-pointers">25. Arrays vs Pointers</h2>
+<h3 id="251-หลักการ">25.1 หลักการ</h3>
+<ul>
+<li><strong>Array indexing ต้อง:</strong> คูณ index ด้วยขนาด element + บวกกับ base address ของ array</li>
+<li><strong>Pointers ตรงกับ memory address โดยตรง</strong> → <strong>หลีกเลี่ยงความซับซ้อนของ indexing</strong></li>
+</ul>
+<h3 id="252-example-clearing-an-array">25.2 Example: Clearing an Array</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>clear1 — ใช้ array index</strong></th>
+<th><strong>clear2 — ใช้ pointer</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>for (i = 0; i &lt; size; i += 1) array[i] = 0;</code></td>
+<td><code>for (p = &amp;array[0]; p &lt; &amp;array[size]; p = p + 1) *p = 0;</code></td>
+</tr>
+</tbody>
+</table></div>
+<pre><code>// clear1
+        li   x5, 0          // i = 0
+loop1:  slli x6, x5, 3      // x6 = i * 8
+        add  x7, x10, x6    // x7 = address of array[i]
+        sd   x0, 0(x7)      // array[i] = 0
+        addi x5, x5, 1      // i = i + 1
+        blt  x5, x11, loop1 // if (i&lt;size) go to loop1
+
+// clear2
+        mv   x5, x10        // p = address of array[0]
+        slli x6, x11, 3     // x6 = size * 8
+        add  x7, x10, x6    // x7 = address of array[size]
+loop2:  sd   x0, 0(x5)      // Memory[p] = 0
+        addi x5, x5, 8      // p = p + 8
+        bltu x5, x7, loop2  // if (p&lt;&amp;array[size]) go to loop2
+</code></pre>
+<h3 id="253-comparison-of-array-vs-pointer">25.3 Comparison of Array vs Pointer</h3>
+<ul>
+<li><strong>การคูณถูก &quot;strength reduced&quot; เป็น shift</strong></li>
+<li><strong>เวอร์ชัน array ต้องมี shift อยู่ในลูป</strong> (เป็นส่วนของการคำนวณ index ทุกรอบที่ i เพิ่ม) เทียบกับการเพิ่ม pointer ตรง ๆ</li>
+<li><strong>compiler ทำได้ผลเท่ากับการใช้ pointer เอง</strong> ด้วย <strong>induction variable elimination</strong></li>
+<li><strong>ควรเขียนโปรแกรมให้อ่านง่ายและปลอดภัยกว่า</strong> (ปล่อยให้ compiler optimize)</li>
+</ul>
+<hr />
+<h2 id="26-mips-other-risc-v-instructions-extensions">26. MIPS, Other RISC-V Instructions, Extensions</h2>
+<h3 id="261-mips-instructions">26.1 MIPS Instructions</h3>
+<ul>
+<li><strong>MIPS: รุ่นก่อนเชิงพาณิชย์ของ RISC-V</strong></li>
+<li><strong>ชุดคำสั่งพื้นฐานคล้ายกัน:</strong>
+<ul>
+<li><strong>คำสั่ง 32 บิต</strong></li>
+<li><strong>general purpose registers 32 ตัว, register 0 เป็น 0 เสมอ</strong></li>
+<li><strong>floating-point registers 32 ตัว</strong></li>
+<li><strong>เข้าถึง memory ด้วย load/store เท่านั้น</strong></li>
+<li><strong>addressing mode สม่ำเสมอ</strong> สำหรับข้อมูลทุกขนาด</li>
+</ul>
+</li>
+<li><strong>ต่างกันที่ conditional branch</strong> สำหรับ &lt;, &lt;=, &gt;, &gt;=
+<ul>
+<li><strong>RISC-V:</strong> <code>blt</code>, <code>bge</code>, <code>bltu</code>, <code>bgeu</code></li>
+<li><strong>MIPS:</strong> <code>slt</code>, <code>sltu</code> (set less than ได้ผล 0 หรือ 1) แล้วใช้ <code>beq</code>, <code>bne</code> ต่อ</li>
+</ul>
+</li>
+</ul>
+<h3 id="262-instruction-encoding-risc-v-vs-mips">26.2 Instruction Encoding: RISC-V vs MIPS</h3>
+<p><img loading="lazy" src="img/c3-p115.jpg" alt="เทียบ encoding ของ RISC-V และ MIPS" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>RISC-V</th>
+<th>MIPS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Register-register</strong></td>
+<td>funct7(7) rs2(5) rs1(5) funct3(3) rd(5) opcode(7)</td>
+<td>Op(6) Rs1(5) Rs2(5) Rd(5) Const(5) Opx(6)</td>
+</tr>
+<tr>
+<td><strong>Load</strong></td>
+<td>immediate(12) rs1(5) funct3(3) rd(5) opcode(7)</td>
+<td>Op(6) Rs1(5) Rs2(5) Const(16)</td>
+</tr>
+<tr>
+<td><strong>Store</strong></td>
+<td>immediate(7) rs2(5) rs1(5) funct3(3) immediate(5) opcode(7)</td>
+<td>Op(6) Rs1(5) Rs2(5) Const(16)</td>
+</tr>
+<tr>
+<td><strong>Branch</strong></td>
+<td>immediate(7) rs2(5) rs1(5) funct3(3) immediate(5) opcode(7)</td>
+<td>Op(6) Rs1(5) Opx/Rs2(5) Const(16)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 RISC-V วาง <strong>opcode ไว้บิตล่าง</strong> และ <strong>rs1/rs2 อยู่ตำแหน่งเดิมทุก format</strong> ส่วน MIPS วาง opcode บิตบนและ immediate 16 บิต</p>
+</blockquote>
+<h3 id="263-other-risc-v-instructions">26.3 Other RISC-V Instructions</h3>
+<ul>
+<li><strong>Base integer instructions (RV64I):</strong> คำสั่งที่เรียนมา บวก:
+<ul>
+<li><strong><code>auipc rd, immed</code></strong> // rd = (imm&lt;&lt;12) + pc → ตามด้วย <code>jalr</code> (บวก immediate 12 บิต) สำหรับ long jump</li>
+<li><strong><code>slt, sltu, slti, sltui</code>:</strong> set less than (แบบ MIPS)</li>
+<li><strong><code>addw, subw, addiw</code>:</strong> add/sub 32 บิต</li>
+<li><strong><code>sllw, srlw, sraw, slliw, srliw, sraiw</code>:</strong> shift 32 บิต</li>
+</ul>
+</li>
+<li><strong>32-bit variant: RV32I</strong> — registers กว้าง 32 บิต, operations 32 บิต</li>
+</ul>
+<h3 id="264-instruction-set-extensions">26.4 Instruction Set Extensions</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวอักษร</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>M</strong></td>
+<td>integer <strong>multiply, divide, remainder</strong></td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td><strong>atomic</strong> memory operations</td>
+</tr>
+<tr>
+<td><strong>F</strong></td>
+<td><strong>single-precision</strong> floating point</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td><strong>double-precision</strong> floating point</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td><strong>compressed instructions</strong> — encoding 16 บิตสำหรับคำสั่งที่ใช้บ่อย</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="27-คำศัพท์สำคัญ">27. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unsigned</strong></td>
+<td>ไม่มีเครื่องหมาย 0 ถึง 2ⁿ − 1</td>
+<td>บวกล้วน</td>
+</tr>
+<tr>
+<td><strong>Sign &amp; Magnitude</strong></td>
+<td>บิตแรกเป็นเครื่องหมาย ที่เหลือเป็นขนาด</td>
+<td>ศูนย์สองแบบ</td>
+</tr>
+<tr>
+<td><strong>Radix</strong></td>
+<td>ฐานของระบบเลข</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>(r−1)'s / r's complement</strong></td>
+<td>(rⁿ−1) − m / rⁿ − m</td>
+<td>9's/10's, 1's/2's</td>
+</tr>
+<tr>
+<td><strong>1's complement</strong></td>
+<td>กลับทุกบิต</td>
+<td>end-around carry</td>
+</tr>
+<tr>
+<td><strong>2's complement</strong></td>
+<td>กลับทุกบิต + 1</td>
+<td>ศูนย์แบบเดียว, −128 ถึง +127</td>
+</tr>
+<tr>
+<td><strong>End-around carry</strong></td>
+<td>carry วนไปบวก LSB (1's complement)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Bias / Excess notation</strong></td>
+<td>ค่าจริง = unsigned − bias</td>
+<td>biased-127</td>
+</tr>
+<tr>
+<td><strong>Floating point</strong></td>
+<td>(−1)ˢ × m × 2ᵉ</td>
+<td>ทศนิยม</td>
+</tr>
+<tr>
+<td><strong>Mantissa / Exponent</strong></td>
+<td>ส่วนเลขนัยสำคัญ / เลขยกกำลัง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>IEEE 754 single / double</strong></td>
+<td>1+8+23 / 1+11+52 บิต</td>
+<td>32 / 64</td>
+</tr>
+<tr>
+<td><strong>Normalized</strong></td>
+<td>รูปแบบ 1.xxx</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NaN</strong></td>
+<td>Not a Number (E = 255)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>ASCII</strong></td>
+<td>7 บิต 128 ตัว + parity</td>
+<td>A=65, a=97</td>
+</tr>
+<tr>
+<td><strong>EBCDIC / Latin-1 / Unicode</strong></td>
+<td>มาตรฐานตัวอักษรอื่น / 256 ตัว / 32 บิต</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>UTF-8, UTF-16</strong></td>
+<td>variable-length encoding ของ Unicode</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>RISC-V</strong></td>
+<td>open ISA จาก UC Berkeley</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Doubleword / Word</strong></td>
+<td>64 บิต / 32 บิต</td>
+<td>d / w</td>
+</tr>
+<tr>
+<td><strong>x0, x1, x2</strong></td>
+<td>0 / return address / stack pointer</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Temporary vs Saved registers</strong></td>
+<td>x5–7, x28–31 ไม่ต้องรักษา / x8–9, x18–27 ต้อง save</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Byte addressed</strong></td>
+<td>1 address = 1 byte</td>
+<td>offset × 8</td>
+</tr>
+<tr>
+<td><strong>Little / Big endian</strong></td>
+<td>LSB / MSB อยู่ address ต่ำสุด</td>
+<td>RISC-V = little</td>
+</tr>
+<tr>
+<td><strong>Immediate operand</strong></td>
+<td>ค่าคงที่ในคำสั่ง (addi)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Sign / Zero extension</strong></td>
+<td>ขยายบิตด้วย sign bit / 0</td>
+<td>lb / lbu</td>
+</tr>
+<tr>
+<td><strong>Machine code</strong></td>
+<td>คำสั่งในรูปเลขฐานสอง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>opcode, rd, rs1, rs2, funct3, funct7</strong></td>
+<td>field ของคำสั่ง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>R / I / S / SB / UJ / U format</strong></td>
+<td>arithmetic / load, immediate / store / branch / jump / upper immediate</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Design Principles 1–3</strong></td>
+<td>simplicity favours regularity / smaller is faster / good design demands good compromises</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Stored program / Binary compatibility</strong></td>
+<td>คำสั่งเก็บใน memory เหมือนข้อมูล / รันข้ามเครื่องได้</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>slli / srli</strong></td>
+<td>คูณ / หาร 2ⁱ</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Mask / Include bits</strong></td>
+<td>AND / OR</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>beq, bne, blt, bge, bltu, bgeu</strong></td>
+<td>conditional branch</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Basic block</strong></td>
+<td>ลำดับคำสั่งไม่มี branch ข้างใน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>jal / jalr</strong></td>
+<td>call (เก็บ return address ใน x1) / return</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Leaf / Non-leaf procedure</strong></td>
+<td>ไม่เรียก / เรียกฟังก์ชันอื่น</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Stack / Procedure frame</strong></td>
+<td>automatic storage / activation record</td>
+<td>โตลงล่าง</td>
+</tr>
+<tr>
+<td><strong>Text / Static data / Heap / Stack</strong></td>
+<td>โค้ด / global / malloc / local</td>
+<td>memory layout</td>
+</tr>
+<tr>
+<td><strong>lui</strong></td>
+<td>โหลด 20 บิตบน</td>
+<td>ค่าคงที่ 32 บิต</td>
+</tr>
+<tr>
+<td><strong>PC-relative addressing</strong></td>
+<td>target = PC + imm × 2</td>
+<td>branch</td>
+</tr>
+<tr>
+<td><strong>Immediate / Register / Base / PC-relative</strong></td>
+<td>4 addressing modes</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Data race</strong></td>
+<td>ผลขึ้นกับลำดับการเข้าถึง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>lr.d / sc.d</strong></td>
+<td>load reserved / store conditional</td>
+<td>atomic</td>
+</tr>
+<tr>
+<td><strong>Object module</strong></td>
+<td>header, text, static data, relocation, symbol table, debug</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Linker / Loader</strong></td>
+<td>รวมโมดูลเป็น executable / โหลดเข้า memory</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Static / Dynamic linking</strong></td>
+<td>รวมตอน link / link ตอนเรียก</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Lazy linkage</strong></td>
+<td>ผ่าน stub ครั้งแรก แล้วเรียกตรง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>JVM / JIT</strong></td>
+<td>interpret bytecodes / คอมไพล์ method ที่ hot</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Strength reduction</strong></td>
+<td>เปลี่ยนคูณเป็น shift</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Induction variable elimination</strong></td>
+<td>compiler optimize loop แบบ pointer</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>MIPS</strong></td>
+<td>รุ่นก่อนเชิงพาณิชย์ของ RISC-V (slt + beq/bne)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>RV64I / RV32I</strong></td>
+<td>base integer 64 / 32 บิต</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>M, A, F, D, C</strong></td>
+<td>extensions</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="28-สรุปท้ายบท-จุดที่มักออกสอบ">28. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>Data Representation</strong></p>
+<ul>
+<li><strong>n-bit unsigned:</strong> 0 ถึง 2ⁿ − 1</li>
+<li><strong>3 วิธีแทนค่าลบ:</strong> S&amp;M, complement, bias</li>
+<li><strong>S&amp;M:</strong> −(2ⁿ−1) ถึง +(2ⁿ−1), ศูนย์ 2 แบบ, บวกลบต้องใช้ operation ต่างกัน</li>
+<li><strong>(r−1)'s = (rⁿ−1) − m, r's = rⁿ − m</strong> (382 → 617, 618)</li>
+<li><strong>1's complement:</strong> กลับบิต, −127 ถึง +127, ศูนย์ 2 แบบ, end-around carry (6 + (−3) บน 3 บิต = 011)</li>
+<li><strong>2's complement:</strong> กลับบิต + 1 (short-cut: คงบิตจนถึง 1 ตัวแรกจากขวา แล้วกลับที่เหลือ), −128 ถึง +127, ศูนย์เดียว, ทิ้ง carry (6 + (−5) = 0001)</li>
+<li><strong>ตาราง 8 บิต:</strong> 1000 0000 = −0 / −127 / −128; 1111 1111 = −127 / −0 / −1</li>
+<li><strong>Bias-127:</strong> ค่า = unsigned − 127, ช่วง −127 ถึง +128</li>
+<li><strong>IEEE single:</strong> 1 + 8 + 23, N = (−1)ˢ × 1.m × 2^(E−127), E = 1–254, 0/255 สงวน, e = −126 ถึง +127</li>
+<li><strong>IEEE double:</strong> 1 + 11 + 52</li>
+<li><strong>17.15 → sign 0, E = 131 = 1000 0011, mantissa 0001 0010 0110…</strong></li>
+<li><strong>Fraction → binary:</strong> คูณ 2 เก็บเลขหน้าจุด (0.8125 = .1101)</li>
+<li><strong>ASCII:</strong> 7 บิต 128 ตัว + parity; '0' ≠ 0; ตัวใหญ่-เล็กต่าง 0x20 (A = 65, a = 97)</li>
+</ul>
+<p><strong>RISC-V</strong></p>
+<ul>
+<li><strong>Design principles 3 ข้อ</strong> และ Great Idea &quot;make the common case fast&quot; (immediate)</li>
+<li><strong>ตาราง register</strong> x0–x31 (x0=0, x1=ra, x2=sp, x10–x17 args, temporaries/saved)</li>
+<li><strong>Memory:</strong> byte addressed, little endian, <strong>offset = index × 8</strong> (A[8] → 64(x22))</li>
+<li><strong>Signed range:</strong> −2ⁿ⁻¹ ถึง 2ⁿ⁻¹ − 1; negation = complement + 1; lb sign-extend, lbu zero-extend</li>
+<li><strong>R-format:</strong> funct7|rs2|rs1|funct3|rd|opcode (7,5,5,3,5,7); <strong>add x9,x20,x21 = 015A04B3₁₆</strong></li>
+<li><strong>I-format:</strong> imm(12)|rs1|funct3|rd|opcode; <strong>S-format:</strong> imm[11:5]|rs2|rs1|funct3|imm[4:0]|opcode</li>
+<li><strong>Logical:</strong> slli (×2ⁱ), srli (÷2ⁱ unsigned), and (mask), or (include), xor (NOT กับ 1 ทั้งหมด)</li>
+<li><strong>If/while</strong> แปลงด้วย bne/beq; beq x0,x0 = unconditional</li>
+<li><strong>Signed vs unsigned compare:</strong> 111…1 เป็น −1 (signed) แต่เป็น 4,294,967,295 (unsigned)</li>
+<li><strong>Procedure 6 ขั้น</strong>, jal x1 / jalr x0,0(x1), leaf vs non-leaf (save x1 และ argument), stack โตลงล่าง</li>
+<li><strong>Memory layout:</strong> reserved, text, static data (x3 gp), heap, stack</li>
+<li><strong>Formats 6 แบบ</strong> และ <strong>addressing 4 แบบ</strong>; branch target = PC + imm × 2</li>
+<li><strong>lr.d / sc.d</strong> สำหรับ atomic operations</li>
+<li><strong>Translation:</strong> compiler → assembler → linker → loader; object module 6 ส่วน; linking 3 ขั้น; loading 6 ขั้น; dynamic linking และ lazy linkage; Java JIT</li>
+<li><strong>Lessons:</strong> IC และ CPI ดูแยกไม่ได้, optimization ขึ้นกับ algorithm, JIT เร็วกว่า interpreter มาก, <strong>nothing can fix a dumb algorithm</strong></li>
+<li><strong>Array vs pointer:</strong> strength reduction, induction variable elimination → เขียนให้อ่านง่ายดีกว่า</li>
+<li><strong>MIPS vs RISC-V:</strong> slt+beq vs blt/bge; <strong>Extensions M, A, F, D, C</strong></li>
+</ul>
+<p><strong>จุดที่สไลด์พิมพ์ผิด (ควรระวังตอนอ่าน)</strong></p>
+<ul>
+<li>Arithmetic example บรรทัดสุดท้ายควรเป็น <code>sub</code></li>
+<li>leaf_example: <code>add x6,x12,x1</code> ควรเป็น <code>x13</code></li>
+<li>fact: <code>return f</code> ควรเป็น <code>return 1</code></li>
+<li>sort restore ใช้ <code>sd</code> ควรเป็น <code>ld</code></li>
+<li>strcpy: address ของ y[i] ควรใช้ x11</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1's vs 2's complement</td>
+<td>ศูนย์ 2 แบบ, end-around carry vs ศูนย์เดียว, ทิ้ง carry</td>
+</tr>
+<tr>
+<td>Signed vs Unsigned compare</td>
+<td>blt/bge vs bltu/bgeu</td>
+</tr>
+<tr>
+<td>Sign vs Zero extension</td>
+<td>เติมด้วย sign bit vs เติม 0 (lb vs lbu)</td>
+</tr>
+<tr>
+<td>Little vs Big endian</td>
+<td>LSB vs MSB ที่ address ต่ำ</td>
+</tr>
+<tr>
+<td>Temporary vs Saved registers</td>
+<td>ไม่ต้องรักษา vs callee ต้อง save/restore</td>
+</tr>
+<tr>
+<td>Leaf vs Non-leaf</td>
+<td>ไม่เรียกต่อ vs ต้อง save return address</td>
+</tr>
+<tr>
+<td>Static vs Dynamic linking</td>
+<td>รวมทั้งหมดตอน link vs link ตอนเรียกใช้</td>
+</tr>
+<tr>
+<td>E vs e (IEEE)</td>
+<td>ค่าที่เก็บ (มี bias) vs เลขยกกำลังจริง</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../chapter02/index.html"><small>← บทก่อนหน้า</small><span>Chapter 02 — Computer Systems, Computer Functions, Processor Structure and Function</span></a><a class="pg next" href="../chapter04/index.html"><small>บทถัดไป →</small><span>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 01 — Basic Computer Components &amp; Introduction to Computer Architecture · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+      <ol><li><a href="#1-course-outline">1. Course Outline</a></li><li><a href="#2-architecture-vs-organization">2. Architecture vs Organization ⭐</a></li><li><a href="#3-defining-computer-architecture">3. Defining Computer Architecture</a></li><li><a href="#4-classes-of-computers-และ-cloud-computing">4. Classes of Computers และ Cloud Computing</a></li><li><a href="#5-understanding-performance">5. Understanding Performance</a></li><li><a href="#6-eight-great-ideas-in-computer-architecture">6. Eight Great Ideas in Computer Architecture ⭐</a></li><li><a href="#7-below-your-program-และ-levels-of-program-code">7. Below Your Program และ Levels of Program Code</a></li><li><a href="#8-components-of-computers-และ-inside-the-cpu">8. Components of Computers และ Inside the CPU</a></li><li><a href="#9-machine-cycle-และ-registers">9. Machine Cycle และ Registers</a></li><li><a href="#10-cache-memory">10. Cache Memory ⭐</a></li><li><a href="#11-multi-core-vs-multi-thread">11. Multi-core vs Multi-thread ⭐</a></li><li><a href="#12-ตัวอย่างฮาร์ดแวร์จริงและการผลิต-ic">12. ตัวอย่างฮาร์ดแวร์จริงและการผลิต IC</a></li><li><a href="#13-single-processor-performance">13. Single Processor Performance</a></li><li><a href="#14-risc-vs-cisc-architecture">14. RISC vs CISC Architecture ⭐</a></li><li><a href="#15-embedded-systems-และ-arm">15. Embedded Systems และ ARM</a></li><li><a href="#16-parallelism-และ-flynns-taxonomy">16. Parallelism และ Flynn&#x27;s Taxonomy ⭐</a></li><li><a href="#17-system-level-architecture-patterns">17. System Level Architecture Patterns</a></li><li><a href="#18-performance">18. Performance ⭐⭐</a></li><li><a href="#19-คำศัพท์สำคัญ">19. คำศัพท์สำคัญ</a></li><li><a href="#20-สรุปท้ายบท-จุดที่มักออกสอบ">20. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter01</div>
+    <h1 class="lesson-title">Chapter 01 — Basic Computer Components &amp; Introduction to Computer Architecture</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> บทแรกของครึ่ง Computer Architecture (W. Suntiamorntut, Ph.D.) ปูพื้นว่า <strong>สถาปัตยกรรมคอมพิวเตอร์คืออะไร</strong> ต่างจาก organization อย่างไร คอมพิวเตอร์มีกี่ประเภท มีส่วนประกอบอะไร ข้างใน CPU มีอะไร</p>
+<p>ต่อด้วยแนวคิดสำคัญที่จะเจอทั้งเทอม: cache, multi-core vs multi-thread, การผลิตชิป, RISC vs CISC, embedded/ARM, parallelism และ Flynn's taxonomy</p>
+<p>ปิดท้ายด้วย <strong>การวัดประสิทธิภาพ (performance)</strong> ซึ่งมีสูตรคำนวณที่ออกสอบบ่อย: CPU time, clock rate, CPI</p>
+</blockquote>
+<h2 id="1-course-outline">1. Course Outline</h2>
+<p>หัวข้อที่เรียนในครึ่งนี้ (บทนี้คือ 2 ข้อแรกที่เน้นสีแดงในสไลด์):</p>
+<ul>
+<li><strong>The structure and architecture of the computer systems</strong> ← บทนี้</li>
+<li><strong>Basic components of computers</strong> ← บทนี้</li>
+<li>data representations</li>
+<li>the Assembly Language</li>
+<li>memory system organization</li>
+<li>the memory hierarchy; the cache memory</li>
+<li>input and output systems</li>
+<li>storage systems</li>
+<li>computing units</li>
+<li>the multiprocessor architecture</li>
+</ul>
+<hr />
+<h2 id="2-architecture-vs-organization">2. Architecture vs Organization ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Architecture</strong> (สถาปัตยกรรมคอมพิวเตอร์)</th>
+<th><strong>Organization</strong> (โครงสร้างการจัดระบบคอมพิวเตอร์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>คำถาม</td>
+<td><strong>WHAT</strong> — ทำอะไรได้</td>
+<td><strong>HOW</strong> — ทำให้เกิดขึ้นจริงอย่างไร</td>
+</tr>
+<tr>
+<td>นิยาม</td>
+<td>คุณลักษณะของระบบที่ <strong>โปรแกรมเมอร์มองเห็น</strong> และมีผลโดยตรงต่อการทำงานเชิงตรรกะของโปรแกรม</td>
+<td><strong>หน่วยปฏิบัติการและการเชื่อมต่อ</strong> ที่ทำให้ข้อกำหนดของ architecture เกิดขึ้นจริง</td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td><strong>Instruction set, addressing modes, data types</strong></td>
+<td>คำสั่งถูกทำให้เกิดขึ้นจริงในระดับวงจรอย่างไร, <strong>cache, pipeline, design, bus width, clock speed</strong></td>
+</tr>
+<tr>
+<td>เกี่ยวข้องกับ</td>
+<td><strong>ผู้ใช้ / โปรแกรมเมอร์</strong> เป็นหลัก</td>
+<td><strong>วิศวกรฮาร์ดแวร์</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบกับรถยนต์: <strong>architecture</strong> = คนขับรู้ว่ามีพวงมาลัย คันเร่ง เบรก (สิ่งที่ใช้งานได้) / <strong>organization</strong> = เครื่องยนต์ข้างในเป็นแบบไหน กี่สูบ (วิธีทำให้มันวิ่ง) รถสองรุ่นขับเหมือนกันได้แต่เครื่องต่างกัน</p>
+<p class="c-warn">⚠️ ตัวอย่างจริง: Intel และ AMD ใช้ <strong>architecture เดียวกัน (x86)</strong> โปรแกรมเดียวกันรันได้ทั้งคู่ แต่ <strong>organization ต่างกัน</strong> (ออกแบบวงจรภายในคนละแบบ) <em>(ตัวอย่างเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="3-defining-computer-architecture">3. Defining Computer Architecture</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>&quot;Old&quot; view</strong></th>
+<th><strong>&quot;Real&quot; computer architecture</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instruction Set Architecture (ISA) design</strong> อย่างเดียว</td>
+<td>ต้องตอบ <strong>ความต้องการเฉพาะของเครื่องเป้าหมาย</strong></td>
+</tr>
+<tr>
+<td>ตัดสินใจเรื่อง: <strong>registers, memory addressing, addressing modes, instruction operands, available operations, control flow instructions, instruction encoding</strong></td>
+<td>ออกแบบให้ <strong>ประสิทธิภาพสูงสุดภายใต้ข้อจำกัด: cost, power, availability</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>รวม ISA, microarchitecture และ hardware</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 มุมมองเก่ามองแค่ &quot;ชุดคำสั่ง&quot; มุมมองจริงมองทั้งระบบ รวมถึงเรื่องต้นทุน พลังงาน และความพร้อมใช้งาน</p>
+</blockquote>
+<hr />
+<h2 id="4-classes-of-computers-และ-cloud-computing">4. Classes of Computers และ Cloud Computing</h2>
+<h3 id="41-classes-of-computers">4.1 Classes of Computers</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Supercomputers</strong></td>
+<td>ใช้คำนวณ <strong>วิทยาศาสตร์และวิศวกรรมระดับสูง</strong> / <strong>ความสามารถสูงสุด</strong> แต่เป็น <strong>ส่วนน้อยของตลาดคอมพิวเตอร์</strong></td>
+</tr>
+<tr>
+<td><strong>Embedded Computers</strong></td>
+<td><strong>ซ่อนอยู่เป็นส่วนประกอบของระบบอื่น</strong> / มี <strong>ข้อจำกัดเข้มงวด</strong> ด้าน power, performance, cost</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="42-cloud-computing">4.2 Cloud Computing</h3>
+<ul>
+<li><strong>Cloud Computing:</strong> โมเดลที่ให้ <strong>เข้าถึงผ่านเครือข่ายได้ทุกที่ สะดวก ตามต้องการ (on demand)</strong> ไปยัง <strong>กลุ่มทรัพยากรคอมพิวเตอร์ที่ใช้ร่วมกันและปรับแต่งได้</strong></li>
+<li><strong>Cloud networking:</strong> เครือข่ายและฟังก์ชันจัดการเครือข่ายที่ <strong>ต้องมี</strong> เพื่อให้ cloud computing ทำงานได้</li>
+<li><strong>Cloud Storage:</strong> <strong>ฐานข้อมูลและแอปฐานข้อมูล</strong> ที่โฮสต์ไว้บน <strong>cloud server ระยะไกล</strong></li>
+</ul>
+<h3 id="43-cloud-service-models">4.3 Cloud Service Models</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>ให้บริการอะไร</th>
+<th>ตัวอย่าง <em>(เสริม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SaaS</strong> (Software as a Service)</td>
+<td><strong>ซอฟต์แวร์/แอปพลิเคชัน</strong> ที่รันและเข้าถึงได้บน cloud</td>
+<td>Gmail, Google Docs</td>
+</tr>
+<tr>
+<td><strong>PaaS</strong> (Platform as a Service)</td>
+<td><strong>แพลตฟอร์ม</strong> ให้ลูกค้าเอาแอปของตัวเองไปรัน</td>
+<td>Heroku, Google App Engine</td>
+</tr>
+<tr>
+<td><strong>IaaS</strong> (Infrastructure as a Service)</td>
+<td><strong>virtual machines</strong> และ hardware/OS แบบ abstract ควบคุมผ่าน <strong>API</strong></td>
+<td>AWS EC2</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="44-cloud-computing-benefits">4.4 Cloud Computing Benefits</h3>
+<p><img loading="lazy" src="img/c1-p008.jpg" alt="เปรียบเทียบ Traditional IT, IaaS, PaaS, SaaS: ใครจัดการชั้นไหน" /></p>
+<p>ภาพแสดง stack 10 ชั้น (Applications, Application Framework, Compilers, Run-time environment, Databases, Operating system, Virtual machine, Server hardware, Storage, Networking) ว่าชั้นไหน <strong>managed by client</strong> (สีขาว) และชั้นไหน <strong>managed by CSP</strong> (Cloud Service Provider, สีเขียว)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>ลูกค้าจัดการเอง</th>
+<th>CSP จัดการให้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Traditional IT</strong></td>
+<td>ทั้งหมด</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>IaaS</strong></td>
+<td>Applications → Databases, OS</td>
+<td>Virtual machine, Server hardware, Storage, Networking</td>
+</tr>
+<tr>
+<td><strong>PaaS</strong></td>
+<td>Applications, Application Framework</td>
+<td>ที่เหลือทั้งหมด</td>
+</tr>
+<tr>
+<td><strong>SaaS</strong></td>
+<td>–</td>
+<td>ทั้งหมด</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ลูกศรสองทาง:</strong> ฝั่ง <strong>Traditional IT</strong> = more complex, more upfront cost, less scalable, <strong>more customizable</strong> ↔ ฝั่ง <strong>SaaS</strong> = less complex, lower upfront cost, more scalable, <strong>less customizable</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบกับพิซซ่า: Traditional = ทำเองทุกอย่าง, IaaS = เช่าครัว, PaaS = สั่งแป้งกับเตามาแล้วแต่งหน้าเอง, SaaS = สั่งเดลิเวอรี่ <em>(อุปมาเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="5-understanding-performance">5. Understanding Performance</h2>
+<p>ประสิทธิภาพของโปรแกรมขึ้นกับ 4 ส่วน:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>กำหนดอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Algorithm</strong></td>
+<td><strong>จำนวน operation</strong> ที่ต้องทำ</td>
+</tr>
+<tr>
+<td><strong>Programming language, compiler, architecture</strong></td>
+<td><strong>จำนวน machine instruction</strong> ต่อ operation</td>
+</tr>
+<tr>
+<td><strong>Processor and memory system</strong></td>
+<td><strong>คำสั่งถูกรันเร็วแค่ไหน</strong></td>
+</tr>
+<tr>
+<td><strong>I/O system (รวม OS)</strong></td>
+<td><strong>I/O operation เร็วแค่ไหน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-eight-great-ideas-in-computer-architecture">6. Eight Great Ideas in Computer Architecture ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Great Idea</th>
+<th>ความหมาย <em>(คำอธิบายเสริม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Design for Moore's Law</strong></td>
+<td>ออกแบบโดยคิดว่าจำนวนทรานซิสเตอร์จะเพิ่มขึ้นเรื่อย ๆ (เดิมคือเพิ่มเท่าตัวทุก ~2 ปี)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Use abstraction to simplify design</strong></td>
+<td>ซ่อนรายละเอียดระดับล่างเพื่อให้ออกแบบง่าย</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Make the common case fast</strong></td>
+<td>เร่งส่วนที่เกิดบ่อยที่สุดให้เร็ว คุ้มกว่าเร่งกรณีหายาก</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Performance via parallelism</strong></td>
+<td>ทำหลายอย่างพร้อมกัน</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Performance via pipelining</strong></td>
+<td>แบ่งงานเป็นขั้นแล้วทำต่อกันแบบสายพาน</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Performance via prediction</strong></td>
+<td>เดาไว้ก่อนแล้วทำไปเลย ถ้าเดาถูกบ่อยจะเร็วขึ้น</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Hierarchy of memories</strong></td>
+<td>memory เร็ว เล็ก แพงไว้ใกล้ CPU / ช้า ใหญ่ ถูกไว้ไกล</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Dependability via redundancy</strong></td>
+<td>มีสำรองไว้ เพื่อให้ระบบยังทำงานได้เมื่อบางส่วนเสีย</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สไลด์ใช้ไอคอนประกอบ: กราฟ (Moore's Law), ภาพวาดซ้อนชั้น (abstraction), รถสปอร์ต (common case fast), เครื่องบินหลายลำ (parallelism), ท่อ (pipelining), ลูกแก้ว (prediction), พีระมิด (hierarchy), รถพ่วงยางสำรอง (redundancy)</p>
+</blockquote>
+<hr />
+<h2 id="7-below-your-program-และ-levels-of-program-code">7. Below Your Program และ Levels of Program Code</h2>
+<h3 id="71-below-your-program-ชั้นซ้อนเป็นวงกลม">7.1 Below Your Program (ชั้นซ้อนเป็นวงกลม)</h3>
+<p><img loading="lazy" src="img/c1-p011.jpg" alt="ชั้นของซอฟต์แวร์: applications → systems software → hardware" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ประกอบด้วย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application software</strong></td>
+<td>เขียนด้วย <strong>ภาษาระดับสูง (high-level language)</strong></td>
+</tr>
+<tr>
+<td><strong>System software</strong></td>
+<td><strong>Compiler:</strong> แปลโค้ดภาษาระดับสูงเป็น machine code / <strong>Operating System:</strong> service code — จัดการ input/output, จัดการ memory และ storage, schedule งานและแบ่งทรัพยากร</td>
+</tr>
+<tr>
+<td><strong>Hardware</strong></td>
+<td>Processor, memory, I/O controllers</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72-levels-of-program-code">7.2 Levels of Program Code</h3>
+<p><img loading="lazy" src="img/c1-p012.jpg" alt="ระดับของโค้ด: C → assembly (RISC-V) → binary" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ลักษณะ</th>
+<th>ตัวอย่างในภาพ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>High-level language</strong></td>
+<td><strong>ใกล้กับ problem domain</strong>, ให้ <strong>productivity และ portability</strong></td>
+<td>ฟังก์ชัน <code>swap(int v[], int k)</code> ในภาษา C</td>
+</tr>
+<tr>
+<td>↓ <strong>Compiler</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Assembly language</strong></td>
+<td><strong>ข้อความแทนคำสั่ง</strong> (textual representation)</td>
+<td><code>slli x6, x11, 3</code>, <code>add x6, x10, x6</code>, <code>ld x5, 0(x6)</code> … <code>jalr x0, 0(x1)</code> (RISC-V)</td>
+</tr>
+<tr>
+<td>↓ <strong>Assembler</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Hardware representation</strong></td>
+<td><strong>เลขฐานสอง (bits)</strong>, คำสั่งและข้อมูลที่ถูกเข้ารหัส</td>
+<td><code>00000000001101011001001100010011</code> …</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-components-of-computers-และ-inside-the-cpu">8. Components of Computers และ Inside the CPU</h2>
+<h3 id="81-components-of-computers">8.1 Components of Computers</h3>
+<p><img loading="lazy" src="img/c1-p013.jpg" alt="ส่วนประกอบคอมพิวเตอร์: compiler, processor (control, datapath), memory, input, output" /></p>
+<ul>
+<li><strong>Input Devices</strong> — อุปกรณ์รับข้อมูล (keyboard, mouse)</li>
+<li><strong>Central Processing Unit (CPU)</strong> — สมองของเครื่อง ประมวลผลคำสั่ง</li>
+<li><strong>Memory (RAM)</strong> — เก็บโปรแกรมและข้อมูลที่กำลังใช้</li>
+<li><strong>Storage Devices</strong> — เก็บข้อมูลถาวร (HDD, SSD)</li>
+<li><strong>Motherboard</strong> — แผงวงจรหลักที่เชื่อมทุกส่วน</li>
+<li><strong>Output Devices</strong> — อุปกรณ์แสดงผล (จอ, ลำโพง)</li>
+<li><strong>Power Supply Unit</strong> — จ่ายไฟ</li>
+<li><strong>Graphics Processing Unit (GPU)</strong> — ประมวลผลกราฟิกและงานขนาน</li>
+</ul>
+<p>ภาพประกอบแสดง <strong>Processor = Control + Datapath</strong>, <strong>Memory</strong>, <strong>Input</strong>, <strong>Output</strong> และ <strong>Compiler/Interface</strong></p>
+<h3 id="82-inside-the-processor-cpu">8.2 Inside the Processor (CPU)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Control Unit</strong></td>
+<td><strong>ควบคุมการทำงาน</strong> ของ CPU</td>
+</tr>
+<tr>
+<td><strong>Arithmetic and Logic Unit (ALU)</strong></td>
+<td>ทำหน้าที่ <strong>ประมวลผลข้อมูล</strong> (คำนวณ เปรียบเทียบ)</td>
+</tr>
+<tr>
+<td><strong>Registers</strong></td>
+<td><strong>ที่เก็บข้อมูลภายใน CPU</strong> (เร็วที่สุด)</td>
+</tr>
+<tr>
+<td><strong>CPU interconnection</strong></td>
+<td><strong>การสื่อสาร</strong> ระหว่าง control unit, ALU และ registers</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-machine-cycle-และ-registers">9. Machine Cycle และ Registers</h2>
+<h3 id="91-machine-cycle-fetch-decode-execute-store">9.1 Machine Cycle: Fetch-decode-execute-store</h3>
+<p><img loading="lazy" src="img/c1-p015.jpg" alt="Machine cycle 4 ขั้น" /></p>
+<ol>
+<li><strong>Fetch</strong> — ดึงคำสั่งจาก memory</li>
+<li><strong>Decode</strong> — <strong>Control Unit</strong> แปลคำสั่งเป็นคำสั่งงาน</li>
+<li><strong>Execute</strong> — <strong>ALU</strong> ทำตามคำสั่ง</li>
+<li><strong>Store</strong> — เก็บผลลัพธ์กลับลง memory</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ Lecture 1 (OS) พูดถึง 3 ขั้น (fetch-decode-execute) บทนี้เพิ่มขั้น <strong>store</strong> เป็น 4 ขั้น</p>
+</blockquote>
+<h3 id="92-registers-in-cpu">9.2 Registers in CPU</h3>
+<p><img loading="lazy" src="img/c1-p016.jpg" alt="Registers ใน CPU: accumulator, program counter, instruction register" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Register</th>
+<th>หน้าที่ <em>(คำอธิบายเสริม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Program Counter (PC)</strong></td>
+<td>เก็บ <strong>address ของคำสั่งถัดไป</strong></td>
+</tr>
+<tr>
+<td><strong>Instruction Register (IR)</strong></td>
+<td>เก็บ <strong>คำสั่งที่กำลังรันอยู่</strong></td>
+</tr>
+<tr>
+<td><strong>Status register</strong></td>
+<td>เก็บ <strong>สถานะและ flags</strong> เช่น ผลเป็นศูนย์ ติดลบ มีตัวทด</td>
+</tr>
+</tbody>
+</table></div>
+<p>ภาพ: CPU มี <strong>Arithmetic Logical Unit (Accumulator)</strong> และ <strong>Control Unit (Program Counter, Instruction Register)</strong> เชื่อมกับ <strong>Central Memory (ROM, RAM)</strong>, Input Unit, Output Unit และ Backing Storage ผ่าน <strong>Control Bus</strong> (เส้นประ) และ <strong>Data Bus</strong> (เส้นทึบ)</p>
+<hr />
+<h2 id="10-cache-memory">10. Cache Memory ⭐</h2>
+<p><img loading="lazy" src="img/c1-p017.jpg" alt="ระดับ cache: L1 ใน CPU, L2 ใน processor package, และ smart-shared L2 ระหว่าง 2 core" /></p>
+<h3 id="101-cache-level">10.1 Cache Level</h3>
+<ul>
+<li><strong>L1 cache:</strong> <strong>เร็วที่สุดและเล็กที่สุด</strong> (อยู่ใน CPU core)</li>
+<li><strong>L2 cache:</strong> <strong>เร็วและเล็กรองลงมา</strong></li>
+</ul>
+<p>ภาพขวา: <strong>CORE1</strong> และ <strong>CORE2</strong> ต่างมี <strong>L1 Data Cache</strong> ของตัวเอง และใช้ <strong>Smart-Shared L2 Cache</strong> ร่วมกัน ต่อกับ <strong>System Bus</strong></p>
+<ul>
+<li><strong>WHEN:</strong> Ensure data can be used as <strong>early</strong> as possible</li>
+<li><strong>WHERE:</strong> Ensure user of data has it as <strong>close</strong> as possible</li>
+</ul>
+<h3 id="102-หลักการของ-cache">10.2 หลักการของ Cache</h3>
+<ul>
+<li><strong>หลายชั้นของ memory</strong> อยู่ <strong>ระหว่าง processor กับ main memory</strong></li>
+<li><strong>เล็กกว่าและเร็วกว่า main memory</strong></li>
+<li><strong>เร่งการเข้าถึง memory</strong> โดยเอาข้อมูลจาก main memory ที่ <strong>น่าจะถูกใช้ในอนาคตอันใกล้</strong> มาวางใน cache</li>
+<li>ใช้ <strong>หลายระดับ</strong> ได้ประสิทธิภาพดีขึ้น โดย <strong>L1 ใกล้ core ที่สุด</strong> แล้ว <strong>L2, L3, …</strong> ไกลออกไปเรื่อย ๆ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนโต๊ะทำงาน: <strong>L1</strong> = ของบนโต๊ะ (หยิบเร็วสุดแต่วางได้น้อย), <strong>L2/L3</strong> = ลิ้นชัก, <strong>main memory</strong> = ตู้เอกสาร, <strong>disk</strong> = โกดัง เอาของที่ใช้บ่อยมาไว้ใกล้มือ</p>
+</blockquote>
+<hr />
+<h2 id="11-multi-core-vs-multi-thread">11. Multi-core vs Multi-thread ⭐</h2>
+<p><img loading="lazy" src="img/c1-p019.jpg" alt="Multi-core processor (hardware จริง) vs Multi-threaded CPU (virtual)" /></p>
+<ul>
+<li><strong>Multi-core Processor:</strong> Core 1–4 แต่ละ core มี <strong>Individual Memory</strong> ของตัวเอง ใช้ <strong>Shared Memory</strong> และ <strong>Bus Interface</strong> ร่วมกัน ต่อ Off-Chip Components → <strong>มี hardware จริงทำงาน</strong></li>
+<li><strong>Multi-Threaded CPU:</strong> แต่ละ core (มี Thread, ALU, L2, Control Unit) แบ่งเป็นหลาย thread มี <strong>Scheduler</strong> ด้านบนและ <strong>L3 Cache</strong> ด้านล่าง → <strong>Virtual แบ่งการทำงาน</strong></li>
+<li>เทคโนโลยีจริง: <strong>Hyper-Threading ของ Intel</strong> หรือ <strong>SMT ของ AMD</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Multi-core</strong></th>
+<th><strong>Multi-thread</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hardware ทางกายภาพมีอยู่จริง</strong></td>
+<td><strong>เสมือนจริง</strong> (เทคนิคแบ่งการทำงาน)</td>
+</tr>
+<tr>
+<td><strong>รับงานชิ้นใหญ่มาประมวลผลแยกกันแบบคู่ขนาน (parallel)</strong></td>
+<td><strong>จัดการงานเบื้องหลังและแบ่งงานย่อยป้อนให้ core</strong></td>
+</tr>
+<tr>
+<td><strong>Core = จำนวนเชฟทำอาหารในครัว</strong></td>
+<td><strong>Thread = จำนวนแขนของเชฟแต่ละคน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 CPU &quot;4 cores 8 threads&quot; = เชฟ 4 คน แต่ละคนมี 2 แขน ทำงานได้ 8 อย่างพร้อมกัน (แต่ 2 แขนของคนเดียวยังไม่เร็วเท่าเชฟ 2 คนจริง)</p>
+</blockquote>
+<h3 id="simplified-view-of-major-elements-of-a-multicore-computer">Simplified view of major elements of a multicore computer</h3>
+<p><img loading="lazy" src="img/c1-p021.jpg" alt="มุมมองจาก motherboard → processor chip → core" /></p>
+<p>ซูมเป็น 3 ระดับ:</p>
+<ol>
+<li><strong>MOTHERBOARD:</strong> Main memory chips, I/O chips, Processor chip</li>
+<li><strong>PROCESSOR CHIP:</strong> หลาย <strong>Core</strong> และ <strong>L3 cache</strong></li>
+<li><strong>CORE:</strong> Instruction logic, Arithmetic and logic unit (ALU), Load/store logic, <strong>L1 I-cache</strong> (instruction), <strong>L1 data cache</strong>, <strong>L2 instruction cache</strong>, <strong>L2 data cache</strong></li>
+</ol>
+<hr />
+<h2 id="12-ตัวอย่างฮาร์ดแวร์จริงและการผลิต-ic">12. ตัวอย่างฮาร์ดแวร์จริงและการผลิต IC</h2>
+<h3 id="121-motherboard-with-two-intel-quad-core-xeon-processors">12.1 Motherboard with Two Intel Quad-Core Xeon Processors</h3>
+<p><img loading="lazy" src="img/c1-p022.jpg" alt="เมนบอร์ดที่มี Intel Quad-Core Xeon 2 ตัว" /></p>
+<p>ส่วนที่ชี้ในภาพ: 2x Quad-Core Intel Xeon Processors with Integrated Memory Controllers, Six Channel DDR3-1333 Memory Interfaces (Up to 48GB), Intel 3420 Chipset, Serial ATA/300 (SATA) Interfaces, 2x USB 2.0 Internal, 2x USB 2.0 External, VGA Video Output, BIOS, 2x Ethernet Ports 10/100/1000Base-T, Ethernet Controller, Power &amp; Backplane I/O Connector C, PCI Express Connector B, PCI Express Connector A, Clock</p>
+<h3 id="122-inside-the-processor-apple-a5">12.2 Inside the Processor: Apple A5</h3>
+<p><img loading="lazy" src="img/c1-p023.jpg" alt="ภาพชิป Apple A5" /></p>
+<p>ภาพชิปจริง (chipworks) แบ่งพื้นที่เป็น Processor Data Path 1–2, ARM Cores, CPU/GPU blocks, Digital Logic Blocks, DDR SDRAM Interface, GPIO, I/O — แสดงว่า <strong>ชิปเดียวรวมหลายส่วน</strong> (System on Chip)</p>
+<h3 id="123-manufacturing-ics">12.3 Manufacturing ICs</h3>
+<p><img loading="lazy" src="img/c1-p024.jpg" alt="ขั้นตอนการผลิต IC" /></p>
+<ol>
+<li><strong>Silicon ingot</strong> (แท่งซิลิคอน) → <strong>Slicer</strong> → <strong>Blank wafers</strong></li>
+<li><strong>20 to 40 processing steps</strong> → <strong>Patterned wafers</strong></li>
+<li><strong>Wafer tester</strong> → <strong>Tested wafer</strong></li>
+<li><strong>Dicer</strong> (ตัดเป็นชิ้น) → <strong>Tested dies</strong></li>
+<li><strong>Bond die to package</strong> → <strong>Packaged dies</strong></li>
+<li><strong>Part tester</strong> → <strong>Tested packaged dies</strong></li>
+<li><strong>Ship to customers</strong></li>
+</ol>
+<ul>
+<li><strong>Yield:</strong> <strong>สัดส่วนของ die ที่ใช้งานได้ต่อ wafer</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ในภาพ die ที่มีกากบาท = die เสีย ถูกคัดทิ้ง ยิ่ง yield สูง ต้นทุนต่อชิปยิ่งต่ำ</p>
+</blockquote>
+<h3 id="124-intel-core-i7-wafer">12.4 Intel Core i7 Wafer</h3>
+<p><img loading="lazy" src="img/c1-p025.jpg" alt="wafer ของ Intel Core i7" /></p>
+<ul>
+<li><strong>wafer 300mm, 280 chips, เทคโนโลยี 32nm</strong></li>
+<li><strong>แต่ละชิปขนาด 20.7 x 10.5 mm</strong></li>
+</ul>
+<hr />
+<h2 id="13-single-processor-performance">13. Single Processor Performance</h2>
+<p><img loading="lazy" src="img/c1-p026.jpg" alt="กราฟประสิทธิภาพ processor ตัวเดียว 1978–2018" /></p>
+<p>กราฟ log scale แสดงประสิทธิภาพ processor ตัวเดียว (จาก VAX-11/780 ปี 1978 ถึง Intel Core i7 ปี 2018) อัตราเติบโตแบ่งเป็นช่วง:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่วง</th>
+<th>อัตราเพิ่มต่อปี</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>~1978–1986</td>
+<td><strong>25%/year</strong></td>
+</tr>
+<tr>
+<td>~1986–2003</td>
+<td><strong>52%/year</strong></td>
+</tr>
+<tr>
+<td>~2003–2011</td>
+<td><strong>23%/year</strong></td>
+</tr>
+<tr>
+<td>~2011–2015</td>
+<td><strong>12%/year</strong></td>
+</tr>
+<tr>
+<td>~2015–2018</td>
+<td><strong>3.5%/year</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไมโตช้าลง?</strong> หลังปี 2003 เพิ่มความเร็ว clock ต่อไม่ได้เพราะความร้อนและพลังงาน อุตสาหกรรมจึงหันไปใช้ <strong>multi-core / parallelism</strong> แทน <em>(คำอธิบายเสริมตามตำรา Hennessy &amp; Patterson)</em></p>
+</blockquote>
+<hr />
+<h2 id="14-risc-vs-cisc-architecture">14. RISC vs CISC Architecture ⭐</h2>
+<p><img loading="lazy" src="img/c1-p027.jpg" alt="เปรียบเทียบโครงสร้าง RISC และ CISC" /></p>
+<ul>
+<li><strong>RISC = Reduced Instruction Set Computing</strong></li>
+<li><strong>CISC = Complex Instruction Set Computing</strong></li>
+</ul>
+<p><strong>ภาพเปรียบเทียบ</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>RISC (ซ้าย)</th>
+<th>CISC (ขวา)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PC → Program Memory → <strong>IR</strong> → <strong>Decoder</strong> → CW → Data path</td>
+<td>PC → Program Memory → <strong>mPC</strong> → <strong>mPM</strong> → CW → Data path</td>
+</tr>
+<tr>
+<td>คำสั่งถูก decode ตรง ๆ ด้วยวงจร</td>
+<td>คำสั่งถูกแปลผ่าน <strong>microprogram</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>(หมายเหตุในสไลด์: <strong>mPC = microprogram counter</strong>, <strong>mPM = Microprocessor Mode</strong>; CW = control word)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>RISC</strong></th>
+<th><strong>CISC</strong> <em>(ตารางเสริมจากความรู้ทั่วไป)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ชุดคำสั่ง</td>
+<td>น้อย เรียบง่าย ขนาดคงที่</td>
+<td>มาก ซับซ้อน ขนาดไม่คงที่</td>
+</tr>
+<tr>
+<td>การถอดรหัส</td>
+<td>hardwired decoder</td>
+<td>microprogram</td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td>ARM, RISC-V</td>
+<td>Intel x86</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="15-embedded-systems-และ-arm">15. Embedded Systems และ ARM</h2>
+<h3 id="151-embedded-systems">15.1 Embedded Systems</h3>
+<ul>
+<li><strong>การใช้อิเล็กทรอนิกส์และซอฟต์แวร์ภายในผลิตภัณฑ์</strong></li>
+<li><strong>มีคอมพิวเตอร์หลายพันล้านเครื่องผลิตทุกปี</strong> ฝังอยู่ในอุปกรณ์ที่ใหญ่กว่า</li>
+<li><strong>อุปกรณ์ส่วนใหญ่ที่ใช้ไฟฟ้า</strong> มีระบบ embedded computing อยู่</li>
+<li>มักมี <strong>ความผูกพันแน่นกับสภาพแวดล้อม</strong>:
+<ul>
+<li><strong>Real-time constraints</strong> — ต้องตอบสนองทันเวลา</li>
+<li><strong>ต้องจัดการหลายกิจกรรมพร้อมกัน</strong> ทำให้ข้อจำกัด real-time ซับซ้อนขึ้น</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เช่น ไมโครเวฟ เครื่องซักผ้า ระบบเบรก ABS ในรถยนต์ <em>(ตัวอย่างเสริม)</em></p>
+</blockquote>
+<h3 id="152-example-of-embedded-system-processor-arm">15.2 Example of Embedded System Processor: ARM</h3>
+<p><img loading="lazy" src="img/c1-p029.jpg" alt="ARM คืออะไร" /></p>
+<ul>
+<li><strong>หมายถึงสถาปัตยกรรม processor ที่พัฒนามาจากหลักการออกแบบ RISC</strong> และใช้ในระบบ embedded</li>
+<li><strong>ตระกูล microprocessor และ microcontroller แบบ RISC</strong> ออกแบบโดย <strong>ARM Holdings, Cambridge, England</strong></li>
+<li>ชิปเป็น <strong>processor ความเร็วสูง</strong> ที่ขึ้นชื่อเรื่อง <strong>die ขนาดเล็กและใช้พลังงานต่ำ</strong></li>
+<li><strong>น่าจะเป็นสถาปัตยกรรม embedded processor ที่ใช้มากที่สุด</strong> และเป็น processor ที่ใช้มากที่สุดในโลก</li>
+<li>ชื่อย่อจาก <strong>Acorn RISC Machine / Advanced RISC Machine</strong></li>
+</ul>
+<h3 id="153-arm-products">15.3 ARM Products</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตระกูล</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cortex-A / Cortex-A50</strong></td>
+<td>สำหรับงานประยุกต์ทั่วไป (เช่น สมาร์ทโฟน) <em>(เสริม)</em></td>
+</tr>
+<tr>
+<td><strong>Cortex-R</strong></td>
+<td>สำหรับงาน real-time <em>(เสริม)</em></td>
+</tr>
+<tr>
+<td><strong>Cortex-M</strong></td>
+<td>Cortex-M0, Cortex-M0+, Cortex-M3, Cortex-M4 (microcontroller)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="154-microcontroller-chip-based-on-cortex-m3">15.4 Microcontroller chip based on Cortex-M3</h3>
+<p><img loading="lazy" src="img/c1-p031.jpg" alt="บล็อกไดอะแกรม microcontroller ที่ใช้ Cortex-M3" /></p>
+<ul>
+<li><strong>ARM Cortex-M series:</strong> <strong>fast</strong>, <strong>interrupt management ที่คาดการณ์ได้แน่นอน (highly deterministic)</strong>, <strong>ใช้พลังงานต่ำ</strong></li>
+<li><strong>Cortex-M3:</strong> สำหรับงาน <strong>16, 32-bit</strong>, มี <strong>debug และ trace features</strong> ช่วยให้นักพัฒนาทำแอปได้เร็ว</li>
+<li>ภาพแสดงบล็อกภายในชิป: Security (AES), Analog Interfaces (A/D, D/A converters), Timers &amp; Triggers, Parallel I/O Ports, Serial Interfaces (USART, USB), Peripheral bus, 32-bit bus, Voltage regulator, Flash memory 64 kB, SRAM memory 64 kB, Clock management, Energy management, Cortex-M3 processor (NVIC, ETM, 32-bit ALU, Hardware divider, Thumb decode, Memory protection unit, Debug logic)</li>
+</ul>
+<hr />
+<h2 id="16-parallelism-และ-flynns-taxonomy">16. Parallelism และ Flynn's Taxonomy ⭐</h2>
+<h3 id="161-parallelism">16.1 Parallelism</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>ประเภท</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Classes of parallelism in applications</strong> (ในตัวแอป)</td>
+<td><strong>Data-Level Parallelism (DLP)</strong> — ทำกับข้อมูลหลายชิ้นพร้อมกัน / <strong>Task-Level Parallelism (TLP)</strong> — แยกงานที่เป็นอิสระทำพร้อมกัน</td>
+</tr>
+<tr>
+<td><strong>Classes of architectural parallelism</strong> (ในฮาร์ดแวร์)</td>
+<td><strong>Instruction-Level Parallelism (ILP)</strong> (เช่น pipelining) / <strong>Vector architectures / GPUs</strong> / <strong>Thread-Level Parallelism</strong> / <strong>Request-Level Parallelism</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="162-flynns-taxonomy">16.2 Flynn's Taxonomy</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ชื่อเต็ม</th>
+<th>ตัวอย่าง / หมายเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SISD</strong></td>
+<td>Single instruction stream, single data stream</td>
+<td>processor ตัวเดียวแบบดั้งเดิม</td>
+</tr>
+<tr>
+<td><strong>SIMD</strong></td>
+<td>Single instruction stream, multiple data streams</td>
+<td><strong>Vector architectures</strong>, <strong>Multimedia extensions</strong>, <strong>Graphics processor units</strong></td>
+</tr>
+<tr>
+<td><strong>MISD</strong></td>
+<td>Multiple instruction streams, single data stream</td>
+<td><strong>ไม่มีเครื่องเชิงพาณิชย์ (No commercial implementation)</strong></td>
+</tr>
+<tr>
+<td><strong>MIMD</strong></td>
+<td>Multiple instruction streams, multiple data streams</td>
+<td><strong>Tightly-coupled MIMD</strong> (เช่น multicore แชร์ memory), <strong>Loosely-coupled MIMD</strong> (เช่น cluster)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>SIMD</strong> = คำสั่งเดียวทำกับข้อมูลหลายชุดพร้อมกัน เช่น ปรับความสว่างทุก pixel ของภาพในคราวเดียว จึงเหมาะกับ GPU <em>(ตัวอย่างเสริม)</em></p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ: ตัวที่ 1 = instruction, ตัวที่ 3 = data / S = single, M = multiple / <strong>MISD ไม่มีใช้เชิงพาณิชย์</strong></p>
+</blockquote>
+<hr />
+<h2 id="17-system-level-architecture-patterns">17. System Level Architecture Patterns</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Monolithic</strong></td>
+<td><strong>ระบบเดียวรวมทุกอย่าง</strong></td>
+</tr>
+<tr>
+<td><strong>Client-server</strong></td>
+<td><strong>แยกเป็นเครื่องที่ขอ (client) และเครื่องที่ให้บริการ (server)</strong></td>
+</tr>
+<tr>
+<td><strong>Distributed systems</strong></td>
+<td><strong>กระจายการคำนวณ</strong> ไปหลายเครื่องที่เชื่อมเครือข่ายกัน</td>
+</tr>
+<tr>
+<td><strong>Micro services</strong></td>
+<td><strong>บริการย่อยแบบโมดูล</strong> deploy แยกกันได้อิสระ (เป็น software architecture pattern มากกว่า)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="18-performance">18. Performance ⭐⭐</h2>
+<h3 id="181-relative-performance">18.1 Relative Performance</h3>
+<ul>
+<li><strong>Performance = 1 / Execution Time</strong> (เวลายิ่งน้อย ประสิทธิภาพยิ่งสูง)</li>
+<li><strong>&quot;X เร็วกว่า Y n เท่า&quot;</strong></li>
+</ul>
+<p>$$\frac{\text{Performance}_X}{\text{Performance}_Y} = \frac{\text{Execution time}_Y}{\text{Execution time}_X} = n$$</p>
+<p><strong>ตัวอย่าง:</strong> รันโปรแกรมบน A ใช้ <strong>10s</strong> บน B ใช้ <strong>15s</strong></p>
+<ul>
+<li>Execution Time_B / Execution Time_A = 15s / 10s = <strong>1.5</strong></li>
+<li><strong>A เร็วกว่า B 1.5 เท่า</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สังเกตว่า <strong>เวลาของตัวที่ช้ากว่าอยู่บนเศษ</strong> (กลับข้างกับ performance)</p>
+</blockquote>
+<h3 id="182-measuring-execution-time">18.2 Measuring Execution Time</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Elapsed time</strong></th>
+<th><strong>CPU time</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>คืออะไร</td>
+<td><strong>เวลาตอบสนองรวม</strong> ทุกด้าน</td>
+<td><strong>เวลาที่ CPU ใช้ประมวลผลงานนั้นจริง</strong></td>
+</tr>
+<tr>
+<td>รวมอะไร</td>
+<td>Processing, I/O, OS overhead, idle time</td>
+<td><strong>ไม่นับ</strong> เวลา I/O และเวลาที่แบ่งให้งานอื่น</td>
+</tr>
+<tr>
+<td>ใช้บอก</td>
+<td><strong>ประสิทธิภาพของทั้งระบบ</strong></td>
+<td>ประกอบด้วย <strong>user CPU time + system CPU time</strong></td>
+</tr>
+<tr>
+<td>หมายเหตุ</td>
+<td></td>
+<td>โปรแกรมต่างกันได้รับผลจาก CPU และ system performance ต่างกัน</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="183-clock">18.3 Clock</h3>
+<p><img loading="lazy" src="img/c1-p038.jpg" alt="สัญญาณ clock: clock period, data transfer and computation, update state" /></p>
+<ul>
+<li>การทำงานของฮาร์ดแวร์ดิจิทัลถูกควบคุมด้วย <strong>clock ที่มีจังหวะคงที่</strong></li>
+<li><strong>Clock period:</strong> ระยะเวลาของ 1 clock cycle — เช่น <strong>250ps = 0.25ns = 250×10⁻¹²s</strong></li>
+<li><strong>Clock frequency (rate):</strong> จำนวน cycle ต่อวินาที — เช่น <strong>4.0GHz = 4000MHz = 4.0×10⁹Hz</strong></li>
+<li><strong>Clock rate = 1 / Clock period</strong> <em>(ความสัมพันธ์เสริม: 1/250ps = 4GHz)</em></li>
+</ul>
+<h3 id="184-cpu-time">18.4 CPU Time</h3>
+<p>$$\text{CPU Time} = \text{CPU Clock Cycles} \times \text{Clock Cycle Time} = \frac{\text{CPU Clock Cycles}}{\text{Clock Rate}}$$</p>
+<p><strong>ปรับปรุงประสิทธิภาพได้โดย:</strong></p>
+<ul>
+<li><strong>ลดจำนวน clock cycles</strong></li>
+<li><strong>เพิ่ม clock rate</strong></li>
+<li>⚠️ <strong>วิศวกรฮาร์ดแวร์มักต้องแลก (trade off) ระหว่าง clock rate กับจำนวน cycle</strong> — ทำ clock เร็วขึ้นมักทำให้ต้องใช้ cycle มากขึ้น</li>
+</ul>
+<h3 id="185-cpu-time-example">18.5 CPU Time Example ⭐</h3>
+<p><strong>โจทย์:</strong></p>
+<ul>
+<li><strong>Computer A:</strong> clock <strong>2GHz</strong>, CPU time <strong>10s</strong></li>
+<li><strong>ออกแบบ Computer B:</strong> ต้องการ CPU time <strong>6s</strong>; ทำ clock เร็วขึ้นได้ แต่ทำให้ <strong>clock cycles เพิ่มเป็น 1.2 เท่า</strong></li>
+<li><strong>Computer B ต้องมี clock rate เท่าใด?</strong></li>
+</ul>
+<p><strong>วิธีทำ:</strong></p>
+<p>$$\text{Clock Rate}_B = \frac{\text{Clock Cycles}_B}{\text{CPU Time}_B} = \frac{1.2 \times \text{Clock Cycles}_A}{6s}$$</p>
+<p>$$\text{Clock Cycles}_A = \text{CPU Time}_A \times \text{Clock Rate}_A = 10s \times 2GHz = 20 \times 10^9$$</p>
+<p>$$\text{Clock Rate}_B = \frac{1.2 \times 20 \times 10^9}{6s} = \frac{24 \times 10^9}{6s} = \mathbf{4GHz}$$</p>
+<blockquote class="callout">
+<p class="c-tip">💡 ลำดับคิด: (1) หาจำนวน cycle ของ A จากเวลา × rate (2) คูณ 1.2 ได้ cycle ของ B (3) หารด้วยเวลาที่ต้องการของ B</p>
+</blockquote>
+<h3 id="186-instruction-count-and-cpi">18.6 Instruction Count and CPI</h3>
+<p>$$\text{Clock Cycles} = \text{Instruction Count} \times \text{Cycles per Instruction}$$</p>
+<p>$$\text{CPU Time} = \text{Instruction Count} \times \text{CPI} \times \text{Clock Cycle Time} = \frac{\text{Instruction Count} \times \text{CPI}}{\text{Clock Rate}}$$</p>
+<ul>
+<li><strong>Instruction Count</strong> ของโปรแกรม: ถูกกำหนดโดย <strong>program, ISA และ compiler</strong></li>
+<li><strong>CPI (average cycles per instruction):</strong>
+<ul>
+<li>ถูกกำหนดโดย <strong>CPU hardware</strong></li>
+<li>ถ้าคำสั่งแต่ละแบบมี CPI ต่างกัน <strong>CPI เฉลี่ยขึ้นกับ instruction mix</strong> (สัดส่วนของคำสั่งแต่ละประเภทในโปรแกรม)</li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปัจจัย</th>
+<th>ถูกกำหนดโดย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instruction Count</td>
+<td>program, ISA, compiler</td>
+</tr>
+<tr>
+<td>CPI</td>
+<td>CPU hardware (และ instruction mix)</td>
+</tr>
+<tr>
+<td>Clock Cycle Time</td>
+<td>hardware / เทคโนโลยี</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="187-cpi-example">18.7 CPI Example ⭐</h3>
+<p><strong>โจทย์:</strong></p>
+<ul>
+<li><strong>Computer A:</strong> Cycle Time = <strong>250ps</strong>, CPI = <strong>2.0</strong></li>
+<li><strong>Computer B:</strong> Cycle Time = <strong>500ps</strong>, CPI = <strong>1.2</strong></li>
+<li><strong>ISA เดียวกัน</strong> (instruction count เท่ากัน = I)</li>
+<li><strong>ตัวไหนเร็วกว่า และเร็วกว่ากี่เท่า?</strong></li>
+</ul>
+<p><strong>วิธีทำ:</strong></p>
+<p>$$\text{CPU Time}_A = I \times 2.0 \times 250ps = I \times 500ps$$</p>
+<p>$$\text{CPU Time}_B = I \times 1.2 \times 500ps = I \times 600ps$$</p>
+<p>$$\frac{\text{CPU Time}_B}{\text{CPU Time}_A} = \frac{I \times 600ps}{I \times 500ps} = \mathbf{1.2}$$</p>
+<p><strong>A เร็วกว่า B 1.2 เท่า</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 แม้ A มี CPI สูงกว่า (2.0 &gt; 1.2) แต่ clock เร็วกว่า 2 เท่า จึงชนะ แสดงว่า <strong>ต้องดูทั้ง 3 ปัจจัยรวมกัน</strong> ดูตัวใดตัวหนึ่งอย่างเดียวไม่ได้</p>
+<p class="c-warn">⚠️ <strong>ISA เดียวกัน</strong> ทำให้ instruction count ตัดกันได้ ถ้าคนละ ISA ต้องรู้ instruction count ด้วย</p>
+</blockquote>
+<hr />
+<h2 id="19-คำศัพท์สำคัญ">19. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Architecture</strong></td>
+<td>คุณลักษณะที่โปรแกรมเมอร์เห็น (instruction set, addressing modes, data types)</td>
+<td>WHAT</td>
+</tr>
+<tr>
+<td><strong>Organization</strong></td>
+<td>หน่วยปฏิบัติการและการเชื่อมต่อที่ทำให้ architecture เกิดขึ้นจริง (cache, pipeline, bus width, clock)</td>
+<td>HOW</td>
+</tr>
+<tr>
+<td><strong>ISA</strong></td>
+<td>Instruction Set Architecture</td>
+<td>ชุดคำสั่ง</td>
+</tr>
+<tr>
+<td><strong>Microarchitecture</strong></td>
+<td>การออกแบบภายใน processor ที่ implement ISA</td>
+<td>ไส้ใน CPU</td>
+</tr>
+<tr>
+<td><strong>Supercomputer / Embedded computer</strong></td>
+<td>ความสามารถสูงสุด / ซ่อนในระบบอื่น ข้อจำกัดเข้ม</td>
+<td>ยักษ์ / ฝังตัว</td>
+</tr>
+<tr>
+<td><strong>SaaS / PaaS / IaaS</strong></td>
+<td>ซอฟต์แวร์ / แพลตฟอร์ม / โครงสร้างพื้นฐาน เป็นบริการ</td>
+<td>ใช้แอป / รันแอปเรา / เช่า VM</td>
+</tr>
+<tr>
+<td><strong>CSP</strong></td>
+<td>Cloud Service Provider</td>
+<td>ผู้ให้บริการ cloud</td>
+</tr>
+<tr>
+<td><strong>Eight Great Ideas</strong></td>
+<td>Moore's law, abstraction, common case fast, parallelism, pipelining, prediction, hierarchy, redundancy</td>
+<td>8 หลักคิด</td>
+</tr>
+<tr>
+<td><strong>Compiler / Assembler</strong></td>
+<td>แปล HLL → assembly / assembly → binary</td>
+<td>ล่าม 2 ชั้น</td>
+</tr>
+<tr>
+<td><strong>Control Unit / ALU / Registers</strong></td>
+<td>ควบคุม / คำนวณ / เก็บข้อมูลใน CPU</td>
+<td>สั่ง / คิด / จด</td>
+</tr>
+<tr>
+<td><strong>Machine cycle</strong></td>
+<td>fetch-decode-execute-store</td>
+<td>4 จังหวะ</td>
+</tr>
+<tr>
+<td><strong>PC / IR / Status register</strong></td>
+<td>address คำสั่งถัดไป / คำสั่งปัจจุบัน / flags</td>
+<td>ที่คั่น / บรรทัดที่อ่าน / ผลตรวจ</td>
+</tr>
+<tr>
+<td><strong>Cache (L1, L2, L3)</strong></td>
+<td>memory เล็กเร็วระหว่าง CPU กับ main memory</td>
+<td>ของบนโต๊ะ</td>
+</tr>
+<tr>
+<td><strong>Multi-core</strong></td>
+<td>หลาย core ทางกายภาพ</td>
+<td>เชฟหลายคน</td>
+</tr>
+<tr>
+<td><strong>Multi-thread (Hyper-Threading, SMT)</strong></td>
+<td>แบ่งการทำงานเสมือนใน core</td>
+<td>แขนของเชฟ</td>
+</tr>
+<tr>
+<td><strong>Wafer / Die / Yield</strong></td>
+<td>แผ่นซิลิคอน / ชิปแต่ละชิ้น / สัดส่วน die ที่ใช้ได้</td>
+<td>แผ่นแป้ง / คุกกี้ / คุกกี้ที่ไม่ไหม้</td>
+</tr>
+<tr>
+<td><strong>RISC / CISC</strong></td>
+<td>ชุดคำสั่งลดลง / ซับซ้อน</td>
+<td>ARM / x86</td>
+</tr>
+<tr>
+<td><strong>ARM, Cortex-M3</strong></td>
+<td>สถาปัตยกรรม RISC สำหรับ embedded, ใช้พลังงานต่ำ</td>
+<td>ชิปมือถือ</td>
+</tr>
+<tr>
+<td><strong>DLP / TLP</strong></td>
+<td>parallelism ระดับข้อมูล / งาน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>ILP</strong></td>
+<td>Instruction-Level Parallelism</td>
+<td>pipelining</td>
+</tr>
+<tr>
+<td><strong>SISD / SIMD / MISD / MIMD</strong></td>
+<td>Flynn's taxonomy</td>
+<td>MISD ไม่มีใช้</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>1 / Execution Time</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Elapsed time vs CPU time</strong></td>
+<td>เวลารวมทุกอย่าง vs เวลาที่ CPU ทำงานนั้นจริง</td>
+<td>นาฬิกาจับเวลา vs เวลาที่ลงมือ</td>
+</tr>
+<tr>
+<td><strong>Clock period / Clock rate</strong></td>
+<td>เวลาต่อ cycle / cycle ต่อวินาที</td>
+<td>กลับกัน</td>
+</tr>
+<tr>
+<td><strong>CPI</strong></td>
+<td>Clock cycles Per Instruction (เฉลี่ย)</td>
+<td>กี่จังหวะต่อคำสั่ง</td>
+</tr>
+<tr>
+<td><strong>Instruction mix</strong></td>
+<td>สัดส่วนของคำสั่งแต่ละชนิด</td>
+<td>ส่วนผสม</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="20-สรุปท้ายบท-จุดที่มักออกสอบ">20. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>Architecture (WHAT, โปรแกรมเมอร์เห็น) vs Organization (HOW, วิศวกรฮาร์ดแวร์)</strong></li>
+<li><strong>Real computer architecture</strong> = ISA + microarchitecture + hardware ภายใต้ cost, power, availability</li>
+<li><strong>Cloud:</strong> SaaS / PaaS / IaaS; ยิ่งไปทาง SaaS ยิ่งง่าย ถูก scale ง่าย แต่ปรับแต่งได้น้อย</li>
+<li><strong>Performance ขึ้นกับ:</strong> algorithm (จำนวน operation), language/compiler/architecture (จำนวน instruction), processor/memory (ความเร็วคำสั่ง), I/O + OS (ความเร็ว I/O)</li>
+<li><strong>Eight Great Ideas</strong> ทั้ง 8 ข้อ</li>
+<li><strong>Levels of code:</strong> HLL → (compiler) → assembly → (assembler) → binary</li>
+<li><strong>CPU = Control Unit + ALU + Registers + interconnection</strong>; <strong>machine cycle 4 ขั้น</strong></li>
+<li><strong>Cache:</strong> L1 เร็วสุดเล็กสุดใกล้ core, L2, L3 ไกลออกไป</li>
+<li><strong>Multi-core = hardware จริง (เชฟ), Multi-thread = virtual (แขน)</strong></li>
+<li><strong>Yield = working dies / wafer</strong>; Core i7 wafer: 300mm, 280 chips, 32nm, 20.7 × 10.5 mm</li>
+<li><strong>Single processor performance:</strong> 25% → 52% → 23% → 12% → 3.5% ต่อปี</li>
+<li><strong>ARM:</strong> RISC, low power, small die, ใช้มากที่สุด; Cortex-A/R/M</li>
+<li><strong>Flynn:</strong> SISD, SIMD (vector, multimedia ext, GPU), MISD (ไม่มีเชิงพาณิชย์), MIMD (tightly/loosely coupled)</li>
+<li><strong>สูตร:</strong> Performance = 1/time; CPU time = cycles × cycle time = cycles / rate = IC × CPI × cycle time</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architecture vs Organization</td>
+<td>สิ่งที่มองเห็น (what) vs วิธี implement (how)</td>
+</tr>
+<tr>
+<td>Multi-core vs Multi-thread</td>
+<td>core จริง vs แบ่งงานเสมือน</td>
+</tr>
+<tr>
+<td>Elapsed time vs CPU time</td>
+<td>รวม I/O, OS, idle vs เฉพาะเวลาประมวลผลงานนั้น</td>
+</tr>
+<tr>
+<td>Clock period vs Clock rate</td>
+<td>วินาทีต่อ cycle vs cycle ต่อวินาที</td>
+</tr>
+<tr>
+<td>RISC vs CISC</td>
+<td>คำสั่งน้อยง่าย decode ตรง vs คำสั่งซับซ้อนผ่าน microprogram</td>
+</tr>
+<tr>
+<td>DLP vs TLP</td>
+<td>แบ่งข้อมูล vs แบ่งงาน</td>
+</tr>
+<tr>
+<td>Tightly vs Loosely coupled MIMD</td>
+<td>แชร์ memory ใกล้ชิด vs เครื่องแยกเชื่อมเครือข่าย</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>โจทย์คำนวณที่ต้องทำได้</strong></p>
+<ul>
+<li><strong>&quot;X เร็วกว่า Y กี่เท่า&quot;</strong> = time_Y / time_X (10s vs 15s → 1.5)</li>
+<li><strong>หา clock rate ใหม่:</strong> cycles_A = time × rate → × ตัวคูณ → หารเวลาเป้าหมาย (2GHz, 10s, ×1.2, 6s → <strong>4GHz</strong>)</li>
+<li><strong>เทียบ CPI:</strong> time = I × CPI × cycle time แล้วหารกัน (250ps/2.0 vs 500ps/1.2 → <strong>A เร็วกว่า 1.2 เท่า</strong>)</li>
+</ul>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../chapter00/index.html"><small>← บทก่อนหน้า</small><span>Chapter 00 — Course Information (ครึ่ง Computer Architecture)</span></a><a class="pg next" href="../chapter02/index.html"><small>บทถัดไป →</small><span>Chapter 02 — Computer Systems, Computer Functions, Processor Structure and Function</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>โครงข่ายพิมพ์เขียว — สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต (Internet Architecture) · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+      <ol><li><a href="#1-end-systems-และ-protocols">1. End Systems และ Protocols</a></li><li><a href="#2-เทคโนโลยีการเข้าถึงเครือข่าย-access-networks-matrix">2. เทคโนโลยีการเข้าถึงเครือข่าย (Access Networks Matrix) ⭐</a></li><li><a href="#3-แกนกลางเครือข่าย-circuit-vs-packet-switching">3. แกนกลางเครือข่าย: Circuit vs Packet Switching ⭐</a></li><li><a href="#4-โครงสร้างพื้นฐานอินเทอร์เน็ต-internet-backbone">4. โครงสร้างพื้นฐานอินเทอร์เน็ต (Internet Backbone)</a></li><li><a href="#5-ฟิสิกส์ของเครือข่าย-ความหน่วง-4-ประเภท">5. ฟิสิกส์ของเครือข่าย: ความหน่วง 4 ประเภท ⭐</a></li><li><a href="#6-transmission-vs-propagation">6. Transmission vs Propagation ⭐</a></li><li><a href="#7-ปริมาณข้อมูลและคอขวด-throughput-the-bottleneck">7. ปริมาณข้อมูลและคอขวด (Throughput &amp;amp; The Bottleneck) ⭐</a></li><li><a href="#8-คิวและการสูญหายของข้อมูล-queuing-packet-loss">8. คิวและการสูญหายของข้อมูล (Queuing &amp;amp; Packet Loss) ⭐</a></li><li><a href="#9-โจทย์คำนวณ-delay-พร้อมวิธีทำ">9. โจทย์คำนวณ Delay (พร้อมวิธีทำ) ⭐⭐</a></li><li><a href="#10-สถาปัตยกรรม-5-เลเยอร์-the-protocol-stack">10. สถาปัตยกรรม 5 เลเยอร์ (The Protocol Stack) ⭐</a></li><li><a href="#11-การห่อหุ้มข้อมูล-encapsulation">11. การห่อหุ้มข้อมูล (Encapsulation)</a></li><li><a href="#12-พลังของการแบ่งแพ็กเก็ต-why-segmentation-matters">12. พลังของการแบ่งแพ็กเก็ต (Why Segmentation Matters) ⭐</a></li><li><a href="#13-ภัยคุกคามเครือข่าย-network-security-threats">13. ภัยคุกคามเครือข่าย (Network Security Threats) ⭐</a></li><li><a href="#14-บทสรุปภาพรวม-the-internet-blueprint">14. บทสรุปภาพรวม (The Internet Blueprint)</a></li><li><a href="#15-คำศัพท์และสูตรสำคัญ">15. คำศัพท์และสูตรสำคัญ</a></li><li><a href="#16-สรุปท้ายบท-จุดที่มักออกสอบ">16. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Internet-Architecture</div>
+    <h1 class="lesson-title">โครงข่ายพิมพ์เขียว — สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต (Internet Architecture)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p>สไลด์ชุดนี้ (20 หน้า) เป็น <strong>บทสรุปแนวคิดหลักของ Chapter 1</strong> (Computer Networking: A Top-Down Approach) ในรูปแบบ &quot;พิมพ์เขียว&quot; ภาษาไทย</p>
+<p>ครอบคลุม end systems, protocols, access networks, circuit vs packet switching, โครงสร้าง backbone, <strong>delay 4 ประเภท</strong>, throughput, queueing/loss, 5 layers, encapsulation, การแบ่งแพ็กเก็ต และภัยคุกคาม</p>
+<p>จุดเด่นคือมี <strong>โจทย์คำนวณ delay พร้อมวิธีทำ 3 ข้อ</strong> — ควรฝึกทำให้คล่อง เพราะเป็นแนวข้อสอบ</p>
+<p>ถ้าต้องการรายละเอียดเต็ม ดู <a href="../Ch1-Intro/%E0%B8%AA%E0%B8%A3%E0%B8%B8%E0%B8%9B-Chapter1-Introduction.md">สรุป Chapter 1</a></p>
+</blockquote>
+<p><img loading="lazy" src="img/arch-p001.jpg" alt="โครงข่ายพิมพ์เขียว: สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต" /></p>
+<p>ภาพหน้าแรกรวมทุกส่วนไว้ในพิมพ์เขียวเดียว: <strong>Internet core</strong> ตรงกลาง, <strong>data center / content provider network</strong>, <strong>enterprise router + firewall</strong>, <strong>cellular tower 5G + IoT sensors + end systems</strong>, <strong>satellite links (10 Gbps)</strong>, พร้อมป้ายเตือน <strong>security threat (DDoS attack, packet loss)</strong> และ <strong>delay warning (queuing delay &amp; propagation delay)</strong></p>
+<h2 id="1-end-systems-และ-protocols">1. End Systems และ Protocols</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปลายทางของเครือข่าย (End Systems / Hosts)</th>
+<th>กฎเกณฑ์ทางการทูตดิจิทัล (Protocols &amp; Standards)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>อุปกรณ์ทุกชนิดที่เชื่อมต่อกับอินเทอร์เน็ต</strong> ตั้งแต่เซิร์ฟเวอร์ขนาดใหญ่ไปจนถึงอุปกรณ์ IoT ถือเป็น Host หรือ End System ทั้งสิ้น</td>
+<td>การสื่อสารต้องการ <strong>Protocol</strong> (เช่น HTTP, TCP) ซึ่งเปรียบเสมือน <strong>ธรรมเนียมปฏิบัติทางการทูต</strong> หากปราศจากมาตรฐาน (Standards) ที่กำหนดลำดับและรูปแบบ อุปกรณ์จากผู้ผลิตต่างค่ายจะไม่สามารถสื่อสารกันได้ (<strong>Interoperability</strong>)</td>
+</tr>
+<tr>
+<td>ตัวอย่างในภาพ: Desktop PC, Smartphone, IoT sensor, Rack server ต่อผ่าน network backbone</td>
+<td>ภาพแสดง 2 เครื่องที่มี TCP/IP stack ทำ alignment sequence, handshake (SYN/ACK), data exchange, security checkpoint, synchronization</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p002.jpg" alt="End Systems และ Protocols" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Interoperability</strong> = การทำงานร่วมกันได้ข้ามยี่ห้อ เช่น iPhone ส่งไลน์หาเครื่อง Android ได้ เพราะทั้งคู่ทำตามโปรโตคอลเดียวกัน</p>
+</blockquote>
+<hr />
+<h2 id="2-เทคโนโลยีการเข้าถึงเครือข่าย-access-networks-matrix">2. เทคโนโลยีการเข้าถึงเครือข่าย (Access Networks Matrix) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เทคโนโลยี</th>
+<th>ประเภท</th>
+<th>สื่อกลาง</th>
+<th>การจัดสรรแบนด์วิดท์</th>
+<th>ความเร็วโดยประมาณ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FTTH</strong></td>
+<td>Home Access</td>
+<td>Fiber Optic</td>
+<td><strong>Dedicated</strong></td>
+<td>100 Mbps – 1 Gbps+</td>
+</tr>
+<tr>
+<td><strong>HFC (Cable)</strong></td>
+<td>Home Access</td>
+<td>Coaxial</td>
+<td><strong>Shared</strong></td>
+<td>10s – 100s Mbps</td>
+</tr>
+<tr>
+<td><strong>DSL</strong></td>
+<td>Home Access</td>
+<td>Copper Wire</td>
+<td><strong>Dedicated</strong></td>
+<td>&lt;10 Mbps – 10s Mbps</td>
+</tr>
+<tr>
+<td><strong>Ethernet</strong></td>
+<td>Enterprise</td>
+<td>Copper / Fiber</td>
+<td><strong>Dedicated</strong></td>
+<td>10 Mbps – 100 Gbps</td>
+</tr>
+<tr>
+<td><strong>Wi-Fi</strong></td>
+<td>Home / Enterprise</td>
+<td>Wireless (<strong>Unlicensed</strong>)</td>
+<td><strong>Shared</strong></td>
+<td>High speed, short range</td>
+</tr>
+<tr>
+<td><strong>4G / 5G</strong></td>
+<td>Wide-Area</td>
+<td>Wireless (<strong>Licensed</strong>)</td>
+<td><strong>Shared</strong></td>
+<td>Moderate speed, high mobility</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p003.jpg" alt="Access Networks Matrix" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Shared</strong> = HFC, Wi-Fi, 4G/5G / <strong>Dedicated</strong> = FTTH, DSL, Ethernet</p>
+<p class="c-tip">💡 Wi-Fi ใช้คลื่น <strong>unlicensed</strong> (ใครก็ใช้ได้ไม่ต้องขอใบอนุญาต) ส่วน 4G/5G ใช้คลื่น <strong>licensed</strong> (ค่ายมือถือประมูลมา)</p>
+</blockquote>
+<hr />
+<h2 id="3-แกนกลางเครือข่าย-circuit-vs-packet-switching">3. แกนกลางเครือข่าย: Circuit vs Packet Switching ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Circuit Switching</strong></th>
+<th><strong>Packet Switching</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>รับประกันทรัพยากร (bandwidth) คงที่ตลอดการเชื่อมต่อ</strong> (dedicated path, แบ่งด้วย TDM slots)</td>
+<td><strong>แชร์ทรัพยากรร่วมกัน</strong> (store-and-forward, shared link) <strong>เหมาะกับข้อมูลที่มาเป็นระลอก (bursty)</strong></td>
+</tr>
+<tr>
+<td>ประสิทธิภาพ <strong>คาดการณ์ได้แน่นอน</strong> แต่ <strong>สูญเปล่าหากไม่มีการส่งข้อมูล</strong></td>
+<td>อนุญาตให้ผู้ใช้เข้าถึงเครือข่ายได้ <strong>มากกว่า</strong> แต่มี <strong>ความเสี่ยงเกิดคิวสะสม (queuing delay)</strong></td>
+</tr>
+<tr>
+<td><strong>ตัวอย่าง:</strong> ลิงก์ 2 Mbps หากผู้ใช้ใช้คนละ 1 Mbps จะรองรับได้ <strong>สูงสุดเพียง 2 คนถ้วน</strong></td>
+<td><strong>ตัวอย่าง:</strong> ลิงก์ 2 Mbps รองรับผู้ใช้ได้ <strong>มากกว่า 3 คน</strong> หากไม่ได้ส่งข้อมูลพร้อมกันตลอดเวลา</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p004.jpg" alt="Circuit vs Packet Switching" /></p>
+<hr />
+<h2 id="4-โครงสร้างพื้นฐานอินเทอร์เน็ต-internet-backbone">4. โครงสร้างพื้นฐานอินเทอร์เน็ต (Internet Backbone)</h2>
+<p>โครงสร้างเป็น <strong>พีระมิด</strong>: <strong>Tier-1 ISP</strong> (บนสุด) → <strong>Regional ISP</strong> → <strong>Access ISP</strong> (ล่างสุด)</p>
+<ul>
+<li><strong>Peering เพื่อลดต้นทุน:</strong> ISP ระดับเดียวกันมักเชื่อมต่อกันเอง (peer) หรือผ่าน <strong>IXP</strong> เพื่อ <strong>หลีกเลี่ยงการจ่ายค่าผ่านทาง (transit fee)</strong> ให้ ISP ระดับบน</li>
+<li><strong>Google's Private Network (Content Provider Network):</strong> ผู้ให้บริการเนื้อหารายใหญ่สร้างโครงข่ายส่วนตัวเชื่อมโยง data center ทั่วโลก เพื่อ <strong>ลดต้นทุนค่า transit</strong> และ <strong>นำข้อมูลเข้าใกล้ผู้ใช้ปลายทางมากที่สุด</strong> (ในภาพเป็นลูกศรที่พุ่งลงจากบนตรงถึงชั้นล่าง ข้ามลำดับชั้น)</li>
+</ul>
+<p><img loading="lazy" src="img/arch-p005.jpg" alt="Internet Backbone" /></p>
+<hr />
+<h2 id="5-ฟิสิกส์ของเครือข่าย-ความหน่วง-4-ประเภท">5. ฟิสิกส์ของเครือข่าย: ความหน่วง 4 ประเภท ⭐</h2>
+<p>$$d_{end\text{-}to\text{-}end} = d_{proc} + d_{queue} + d_{trans} + d_{prop}$$</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>คงที่/แปรผัน</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Processing delay (d_proc)</strong></td>
+<td><strong>คงที่</strong></td>
+<td>เวลาตรวจสอบ header และตัดสินใจหาเส้นทาง</td>
+</tr>
+<tr>
+<td><strong>Queuing delay (d_queue)</strong></td>
+<td><strong>แปรผัน</strong></td>
+<td>เวลารอในคิวหากทราฟฟิกหนาแน่น</td>
+</tr>
+<tr>
+<td><strong>Transmission delay (d_trans)</strong></td>
+<td><strong>คงที่</strong></td>
+<td>เวลาที่ใช้ดันบิตทั้งหมดของแพ็กเก็ตลงสู่สาย</td>
+</tr>
+<tr>
+<td><strong>Propagation delay (d_prop)</strong></td>
+<td><strong>คงที่</strong></td>
+<td>เวลาเดินทางของสัญญาณตามฟิสิกส์ของสื่อกลาง (ความเร็วแสง)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p006.jpg" alt="ความหน่วง 4 ประเภท" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ใน 4 ตัวนี้ <strong>queuing delay เป็นตัวเดียวที่แปรผัน</strong> ตามสภาพทราฟฟิก</p>
+</blockquote>
+<hr />
+<h2 id="6-transmission-vs-propagation">6. Transmission vs Propagation ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Transmission Delay = L / R</strong></th>
+<th><strong>Propagation Delay = d / s</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L = ความยาวแพ็กเก็ต (bits), R = อัตราการส่ง/แบนด์วิดท์ (bps)</td>
+<td>d = ระยะทาง (meters), s = ความเร็วสัญญาณ (~2.5×10⁸ m/s ในสไลด์นี้; Ch1 และโจทย์ใช้ 2×10⁸ m/s)</td>
+</tr>
+<tr>
+<td><strong>เปรียบเทียบ:</strong> เวลาที่ด่านเก็บเงินใช้ปล่อยรถทีละคันจนครบทั้งขบวน (สายพานส่งบิตออกจากด่าน)</td>
+<td><strong>เปรียบเทียบ:</strong> รถแข่งวิ่งจากจุด A ไป B</td>
+</tr>
+<tr>
+<td>ขึ้นกับ <strong>ขนาดแพ็กเก็ต</strong> และ <strong>แบนด์วิดท์</strong></td>
+<td><strong>กฎเหล็ก:</strong> d_prop <strong>ไม่ขึ้นกับขนาดแพ็กเก็ต (L) หรือความเร็วอินเทอร์เน็ต (R)</strong> แต่ขึ้นกับ <strong>ระยะทางฟิสิกส์ล้วน ๆ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p007.jpg" alt="Transmission vs Propagation" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 ซื้อเน็ตแรงขึ้น (R สูงขึ้น) ลด d_trans ได้ แต่ <strong>ลด d_prop ไม่ได้</strong> — ส่งข้อมูลไปอเมริกายังไงก็ต้องใช้เวลาเดินทางข้ามมหาสมุทรเท่าเดิม</p>
+</blockquote>
+<hr />
+<h2 id="7-ปริมาณข้อมูลและคอขวด-throughput-the-bottleneck">7. ปริมาณข้อมูลและคอขวด (Throughput &amp; The Bottleneck) ⭐</h2>
+<ul>
+<li><strong>Throughput แบบ end-to-end</strong> = อัตราที่ข้อมูลส่งถึงปลายทางได้สำเร็จ</li>
+<li><strong>สูตร:</strong> Throughput = <strong>min(R1, R2, R3)</strong></li>
+<li><strong>ตัวอย่าง:</strong> Server → R1 = 2 Mbps → R2 = <strong>100 kbps</strong> → R3 = 1 Mbps → Client
+<strong>ผลลัพธ์:</strong> แม้คุณจะมีอินเทอร์เน็ตแรง 2 Mbps แต่ถ้าลิงก์ระหว่างทางมีคอขวดที่ 100 kbps <strong>ความเร็วรวมจะถูกจำกัดที่ 100 kbps เท่านั้น</strong></li>
+</ul>
+<p><img loading="lazy" src="img/arch-p008.jpg" alt="Throughput &amp; Bottleneck" /></p>
+<hr />
+<h2 id="8-คิวและการสูญหายของข้อมูล-queuing-packet-loss">8. คิวและการสูญหายของข้อมูล (Queuing &amp; Packet Loss) ⭐</h2>
+<p><strong>Traffic Intensity:</strong>
+$$I = \frac{La}{R}$$
+(L = ขนาดแพ็กเก็ต, a = อัตราแพ็กเก็ตที่เข้ามา, R = แบนด์วิดท์)</p>
+<ul>
+<li>กราฟ: queuing delay ต่ำเมื่อ I ≈ 0, เพิ่มขึ้นช้า ๆ ถึง 0.5 แล้ว <strong>พุ่งขึ้นชันเมื่อ I เข้าใกล้ 1</strong> — บริเวณ I ≥ 1 เรียกว่า <strong>Unstable Region</strong></li>
+<li><strong>เมื่อ I &gt; 1</strong> ข้อมูลไหลเข้าเร็วกว่าที่ router จะระบายออกได้</li>
+<li><strong>ผลที่ตามมา:</strong> คิวยาวขึ้นเรื่อย ๆ จนกระทั่ง <strong>router buffer เต็ม</strong> ทำให้แพ็กเก็ตใหม่ <strong>ถูกทิ้ง (dropped)</strong> เกิดเป็น <strong>Packet Loss</strong></li>
+</ul>
+<p><img loading="lazy" src="img/arch-p009.jpg" alt="Queuing &amp; Packet Loss" /></p>
+<hr />
+<h2 id="9-โจทย์คำนวณ-delay-พร้อมวิธีทำ">9. โจทย์คำนวณ Delay (พร้อมวิธีทำ) ⭐⭐</h2>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ขั้นตอนสำคัญที่คนพลาดบ่อย:</strong> แปลงหน่วยก่อนเสมอ</p>
+<ul>
+<li><strong>Bytes → bits: × 8</strong></li>
+<li><strong>Mbps → bps: × 10⁶</strong> (1 Mbps = 1,000,000 bps)</li>
+<li><strong>MB (ในโจทย์นี้) → bytes: × 10⁶</strong></li>
+<li><strong>km → m: × 1,000</strong></li>
+<li>วินาที → ms: × 1,000</li>
+</ul>
+</blockquote>
+<h3 id="โจทย์ข้อ-1">โจทย์ข้อ 1</h3>
+<p><strong>เครื่องคอมพิวเตอร์ต้องการส่ง Packet ขนาด 4,000 บิต ผ่านสายสัญญาณที่มีความเร็ว 2 Mbps จงหาค่า Transmission Delay</strong></p>
+<p><strong>วิธีคิด:</strong></p>
+<ol>
+<li>แปลงหน่วยความเร็ว: R = 2 Mbps = 2 × 10⁶ bps = 2,000,000 bps</li>
+<li>แทนค่าในสูตร:
+$$D_{trans} = \frac{4{,}000 \text{ bits}}{2{,}000{,}000 \text{ bps}} = 0.002 \text{ s}$$</li>
+<li><strong>คำตอบ: 2 ms</strong></li>
+</ol>
+<p><img loading="lazy" src="img/arch-p011.jpg" alt="โจทย์ข้อ 1 วิธีทำ" /></p>
+<h3 id="โจทย์ข้อ-2">โจทย์ข้อ 2</h3>
+<p><strong>โฮสต์ต้นทางต้องการส่งไฟล์รูปภาพขนาด 5 MegaBytes (MB) ผ่านสายเคเบิลแบบ Cable-based access (HFC) ที่มีความเร็วขาขึ้น (Upstream Rate) 10 Mbps จะใช้เวลาในการผลักข้อมูลลงสายสัญญาณเท่าใด</strong></p>
+<p>(คำว่า &quot;ผลักข้อมูลลงสาย&quot; = Transmission delay)</p>
+<p><strong>วิธีคิด:</strong></p>
+<ol>
+<li>แปลงขนาดไฟล์ L จาก Bytes เป็น bits: L = 5 × 10⁶ × 8 = <strong>40,000,000 bits</strong></li>
+<li>แปลงหน่วยความเร็ว: R = 10 Mbps = <strong>10,000,000 bps</strong></li>
+<li>แทนค่าในสูตร:
+$$D_{trans} = \frac{40{,}000{,}000 \text{ bits}}{10{,}000{,}000 \text{ bps}} = 4$$</li>
+<li><strong>คำตอบ: 4 วินาที</strong></li>
+</ol>
+<p><img loading="lazy" src="img/arch-p013.jpg" alt="โจทย์ข้อ 2 วิธีทำ" /></p>
+<h3 id="โจทย์ข้อ-3">โจทย์ข้อ 3</h3>
+<p><strong>คอมพิวเตอร์ A ส่งข้อมูลขนาด 1,000 Bytes ไปยัง Router ผ่านสายสัญญาณยาว 2,000 กิโลเมตร มีแบนด์วิดท์ 10 Mbps และสัญญาณเดินทางด้วยความเร็ว 2 × 10⁸ m/s จงหาค่า Transmission Delay และ Propagation Delay ว่าต่างกันอย่างไร</strong></p>
+<p><strong>Transmission Delay (D_trans = L/R):</strong></p>
+<ol>
+<li>แปลง L = 1,000 Bytes × 8 = <strong>8,000 bits</strong></li>
+<li>แปลง R = 10 Mbps = <strong>10,000,000 bps</strong></li>
+<li>คำนวณ:
+$$D_{trans} = \frac{8{,}000}{10{,}000{,}000} = 0.0008 \text{ s} = \mathbf{0.8 \text{ ms}}$$</li>
+</ol>
+<p><strong>Propagation Delay (D_prop = Distance/Speed):</strong></p>
+<ol>
+<li>แปลงระยะทาง = 2,000 km = <strong>2,000,000 m</strong></li>
+<li>คำนวณ:
+$$D_{prop} = \frac{2{,}000{,}000 \text{ m}}{2 \times 10^8 \text{ m/s}} = 0.01 \text{ s} = \mathbf{10 \text{ ms}}$$</li>
+</ol>
+<p><strong>ต่างกันอย่างไร:</strong> ในโจทย์นี้ <strong>d_prop (10 ms) มากกว่า d_trans (0.8 ms) ถึง 12.5 เท่า</strong> เพราะสายยาวมาก (2,000 km) ขณะที่แพ็กเก็ตเล็กและแบนด์วิดท์สูง — d_trans ขึ้นกับขนาดแพ็กเก็ตและแบนด์วิดท์ ส่วน d_prop ขึ้นกับระยะทางเท่านั้น</p>
+<p><img loading="lazy" src="img/arch-p015.jpg" alt="โจทย์ข้อ 3 วิธีทำ" /></p>
+<p><strong>ตารางสรุปโจทย์:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อ</th>
+<th>L</th>
+<th>R / d</th>
+<th>สูตร</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>4,000 bits</td>
+<td>2 Mbps</td>
+<td>L/R</td>
+<td><strong>2 ms</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>5 MB = 40,000,000 bits</td>
+<td>10 Mbps</td>
+<td>L/R</td>
+<td><strong>4 s</strong></td>
+</tr>
+<tr>
+<td>3 (trans)</td>
+<td>1,000 B = 8,000 bits</td>
+<td>10 Mbps</td>
+<td>L/R</td>
+<td><strong>0.8 ms</strong></td>
+</tr>
+<tr>
+<td>3 (prop)</td>
+<td>—</td>
+<td>2,000 km, 2×10⁸ m/s</td>
+<td>d/s</td>
+<td><strong>10 ms</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-สถาปัตยกรรม-5-เลเยอร์-the-protocol-stack">10. สถาปัตยกรรม 5 เลเยอร์ (The Protocol Stack) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>หน้าที่</th>
+<th>หน่วยข้อมูล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5. Application</strong></td>
+<td>รองรับแอปพลิเคชันเครือข่าย (HTTP, SMTP, DNS)</td>
+<td><strong>Message</strong></td>
+</tr>
+<tr>
+<td><strong>4. Transport</strong></td>
+<td>ส่งข้อมูล <strong>โพรเซส-ต่อ-โพรเซส</strong> (TCP, UDP)</td>
+<td><strong>Segment</strong></td>
+</tr>
+<tr>
+<td><strong>3. Network</strong></td>
+<td>กำหนดเส้นทางจากต้นทางถึงปลายทาง (IP)</td>
+<td><strong>Datagram</strong></td>
+</tr>
+<tr>
+<td><strong>2. Link</strong></td>
+<td>เคลื่อนย้ายข้อมูลระหว่าง <strong>โหนดที่ติดกัน</strong></td>
+<td><strong>Frame</strong></td>
+</tr>
+<tr>
+<td><strong>1. Physical</strong></td>
+<td>ส่งผ่านสัญญาณฟิสิกส์แต่ละบิตลงสื่อกลาง</td>
+<td><strong>Bits</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p016.jpg" alt="สถาปัตยกรรม 5 เลเยอร์" /></p>
+<hr />
+<h2 id="11-การห่อหุ้มข้อมูล-encapsulation">11. การห่อหุ้มข้อมูล (Encapsulation)</h2>
+<ul>
+<li><strong>Host A</strong> ห่อ payload ด้วย header ทีละชั้น (H4 = transport, H3 = network, H2 = link) แล้วส่งออก</li>
+<li><strong>Link-layer Switch:</strong> <strong>แกะซองถึงแค่ชั้น Link (L2)</strong> (ดูแค่ H2)</li>
+<li><strong>Router:</strong> <strong>แกะซองถึงชั้น Network (L3)</strong> เพื่อหา IP ปลายทาง (ดู H3) แล้วห่อ H2 ใหม่ส่งต่อ</li>
+<li><strong>Host B</strong> แกะครบทุกชั้นจนได้ payload</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>เปรียบเสมือนการเดินทางด้วยเครื่องบิน:</strong> การเช็คอินติดป้ายกระเป๋า (Header 1), ประตูขึ้นเครื่องตรวจ Boarding Pass (Header 2) — <strong>อุปกรณ์แกนกลางไม่ได้อ่านข้อมูลทั้งหมด</strong> แต่ละจุดดูเฉพาะป้ายที่ตัวเองรับผิดชอบ</p>
+</blockquote>
+<p><img loading="lazy" src="img/arch-p017.jpg" alt="Encapsulation" /></p>
+<hr />
+<h2 id="12-พลังของการแบ่งแพ็กเก็ต-why-segmentation-matters">12. พลังของการแบ่งแพ็กเก็ต (Why Segmentation Matters) ⭐</h2>
+<p><strong>การทดลอง:</strong> ส่งข้อความ <strong>10⁶ บิต</strong> ผ่าน <strong>3 ลิงก์</strong> (แต่ละลิงก์ <strong>5 Mbps</strong>)</p>
+<h3 id="กรณี-a-ไม่แบ่งแพ็กเก็ต-store-and-forward-ทั้งก้อน">กรณี A: ไม่แบ่งแพ็กเก็ต (store-and-forward ทั้งก้อน)</h3>
+<ul>
+<li>ส่งผ่าน 1 ลิงก์ใช้ 10⁶ / (5 × 10⁶) = <strong>0.2 วินาที</strong></li>
+<li>ต้องรอรับครบทั้งก้อนก่อนส่งต่อ → Link 1 (0.2s) → Link 2 (0.2s) → Link 3 (0.2s)</li>
+<li><strong>รวม 0.6 วินาที</strong></li>
+</ul>
+<h3 id="กรณี-b-แบ่งเป็น-100-แพ็กเก็ต-แพ็กเก็ตละ-10⁴-บิต-pipelining">กรณี B: แบ่งเป็น 100 แพ็กเก็ต แพ็กเก็ตละ 10⁴ บิต (pipelining)</h3>
+<ul>
+<li>แต่ละแพ็กเก็ตใช้ 10⁴ / (5 × 10⁶) = 0.002 วินาทีต่อลิงก์</li>
+<li>แพ็กเก็ตแรกถึงปลายทางหลัง 3 × 0.002 = 0.006 s และแพ็กเก็ตถัด ๆ ไปตามมาทีละ 0.002 s (ไหลต่อกันเป็นท่อ ทุกลิงก์ทำงานพร้อมกัน)</li>
+<li>รวม = 0.006 + 99 × 0.002 = <strong>0.204 วินาที</strong></li>
+</ul>
+<p><strong>สรุป:</strong> สถาปัตยกรรม packet switching อาศัยการหั่นข้อมูลเป็นชิ้นเล็ก ๆ <strong>เพื่อทะลวงขีดจำกัดด้านความเร็วของเครือข่าย</strong> (เร็วขึ้นเกือบ 3 เท่า)</p>
+<p><img loading="lazy" src="img/arch-p018.jpg" alt="Why Segmentation Matters" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนย้ายหนังสือ 100 เล่มผ่านคน 3 คนที่ยืนต่อแถว: ถ้ายกทีละลังใหญ่ คนที่ 2 กับ 3 ต้องยืนรอว่าง ๆ แต่ถ้าส่งทีละเล่ม ทุกคนได้ส่งต่อพร้อมกันตลอด</p>
+</blockquote>
+<hr />
+<h2 id="13-ภัยคุกคามเครือข่าย-network-security-threats">13. ภัยคุกคามเครือข่าย (Network Security Threats) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ภัยคุกคาม</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Self-Replicating Malware</strong></td>
+<td>มัลแวร์ (เช่น <strong>Worms</strong>) ที่ <strong>แพร่กระจายและคัดลอกตัวเองไปยัง Host อื่น ๆ ที่มีช่องโหว่โดยอัตโนมัติ</strong> ไม่ต้องพึ่งพาการกระทำของผู้ใช้</td>
+</tr>
+<tr>
+<td><strong>2. Botnets &amp; DDoS Attack</strong></td>
+<td>มัลแวร์ยึดครอง Host จำนวนมากให้กลายเป็น <strong>Bot</strong> รอคำสั่งจากศูนย์กลาง เพื่อส่ง <strong>ทราฟฟิกขยะปริมาณมหาศาล</strong> ไปถล่มเป้าหมายเดียวพร้อมกันจนระบบล่ม</td>
+</tr>
+<tr>
+<td><strong>3. Man-in-the-Middle (MITM)</strong></td>
+<td>ผู้ไม่หวังดี (<strong>Trudy</strong>) <strong>แทรกตัวระหว่างการสื่อสาร</strong> (Alice ↔ Bob) เพื่อ <strong>ดักอ่าน ปลอมแปลง หรือแก้ไขข้อมูล</strong> ที่กำลังเดินทางผ่านลิงก์</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/arch-p019.jpg" alt="Network Security Threats" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 ชื่อในตำรา security: <strong>Alice</strong> กับ <strong>Bob</strong> = คู่สื่อสารที่ดี, <strong>Trudy</strong> (intruder) = ผู้บุกรุก</p>
+</blockquote>
+<hr />
+<h2 id="14-บทสรุปภาพรวม-the-internet-blueprint">14. บทสรุปภาพรวม (The Internet Blueprint)</h2>
+<p>เครือข่ายอินเทอร์เน็ตคือ <strong>สถาปัตยกรรมวิศวกรรมที่ซับซ้อนแต่น่าทึ่ง</strong>:</p>
+<ol>
+<li><strong>ขับเคลื่อนโดย HOSTS ที่ขอบข่าย</strong> (edge)</li>
+<li><strong>เชื่อมต่อด้วย PROTOCOLS ที่เป็นมาตรฐานสากล</strong></li>
+<li><strong>ข้อมูลถูกหั่นและห่อหุ้มผ่าน 5 LAYERS</strong></li>
+<li><strong>เดินทางแบบ PACKET SWITCHING</strong> ผ่านเราเตอร์ที่ต้องต่อสู้กับ <strong>4 DELAYS</strong> (processing, queuing, transmission, propagation)</li>
+<li><strong>เพื่อนำส่งข้อมูลจากมุมหนึ่งของโลกไปยังอีกมุมหนึ่งในเสี้ยววินาที</strong></li>
+</ol>
+<p><img loading="lazy" src="img/arch-p020.jpg" alt="The Internet Blueprint" /></p>
+<hr />
+<h2 id="15-คำศัพท์และสูตรสำคัญ">15. คำศัพท์และสูตรสำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์ / สูตร</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>End system / Host</td>
+<td>อุปกรณ์ทุกชนิดที่ต่ออินเทอร์เน็ต (รวม IoT)</td>
+<td></td>
+</tr>
+<tr>
+<td>Interoperability</td>
+<td>อุปกรณ์ต่างค่ายทำงานร่วมกันได้เพราะใช้มาตรฐานเดียวกัน</td>
+<td>ภาษากลาง</td>
+</tr>
+<tr>
+<td>Dedicated / Shared</td>
+<td>แบนด์วิดท์เป็นของเราคนเดียว / แบ่งกับคนอื่น</td>
+<td></td>
+</tr>
+<tr>
+<td>Licensed / Unlicensed spectrum</td>
+<td>คลื่นที่ต้องได้รับอนุญาต (4G/5G) / ใช้ได้เสรี (Wi-Fi)</td>
+<td></td>
+</tr>
+<tr>
+<td>Circuit switching</td>
+<td>จองทรัพยากรคงที่ คาดการณ์ได้ แต่อาจสูญเปล่า</td>
+<td></td>
+</tr>
+<tr>
+<td>Packet switching</td>
+<td>แชร์ทรัพยากร รองรับคนมากกว่า แต่มี queuing delay</td>
+<td></td>
+</tr>
+<tr>
+<td>Bursty</td>
+<td>ข้อมูลมาเป็นระลอก</td>
+<td></td>
+</tr>
+<tr>
+<td>Tier-1 / Regional / Access ISP</td>
+<td>ลำดับชั้น ISP</td>
+<td></td>
+</tr>
+<tr>
+<td>Peering / IXP</td>
+<td>เชื่อมกันเองเพื่อไม่ต้องจ่าย transit fee</td>
+<td></td>
+</tr>
+<tr>
+<td>Transit fee</td>
+<td>ค่าผ่านทางที่จ่ายให้ ISP ระดับบน</td>
+<td></td>
+</tr>
+<tr>
+<td>d_end-to-end = d_proc + d_queue + d_trans + d_prop</td>
+<td>ความหน่วงรวม</td>
+<td>queue แปรผันตัวเดียว</td>
+</tr>
+<tr>
+<td><strong>d_trans = L/R</strong></td>
+<td>ขนาดแพ็กเก็ต / แบนด์วิดท์</td>
+<td>ด่านเก็บเงิน</td>
+</tr>
+<tr>
+<td><strong>d_prop = d/s</strong></td>
+<td>ระยะทาง / ความเร็วสัญญาณ</td>
+<td>รถแข่ง</td>
+</tr>
+<tr>
+<td><strong>Throughput = min(R1, R2, …)</strong></td>
+<td>ลิงก์ที่ช้าที่สุดกำหนดความเร็ว</td>
+<td>คอขวด</td>
+</tr>
+<tr>
+<td><strong>I = La/R</strong></td>
+<td>Traffic intensity</td>
+<td>&gt; 1 = unstable, loss</td>
+</tr>
+<tr>
+<td>Message / Segment / Datagram / Frame / Bits</td>
+<td>หน่วยข้อมูลของ L5 / L4 / L3 / L2 / L1</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch แกะถึง L2 / Router แกะถึง L3</td>
+<td>encapsulation กลางทาง</td>
+<td></td>
+</tr>
+<tr>
+<td>Pipelining</td>
+<td>แบ่งแพ็กเก็ตเล็กให้ทุกลิงก์ทำงานพร้อมกัน</td>
+<td>0.6 s → 0.204 s</td>
+</tr>
+<tr>
+<td>Worm</td>
+<td>มัลแวร์แพร่ตัวเองอัตโนมัติ</td>
+<td></td>
+</tr>
+<tr>
+<td>Botnet / DDoS</td>
+<td>เครือข่ายเครื่องที่ถูกยึด / ถล่มพร้อมกัน</td>
+<td></td>
+</tr>
+<tr>
+<td>MITM</td>
+<td>ดักกลางทาง อ่าน/แก้ข้อมูล (Trudy)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="16-สรุปท้ายบท-จุดที่มักออกสอบ">16. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Access networks matrix:</strong> FTTH/DSL/Ethernet = dedicated; HFC/Wi-Fi/4G-5G = shared; Wi-Fi unlicensed, 4G/5G licensed</li>
+<li><strong>Circuit vs Packet:</strong> ลิงก์ 2 Mbps, คนละ 1 Mbps → circuit รับได้ 2 คน, packet รับได้มากกว่า 3 คน (ถ้าไม่ส่งพร้อมกันตลอด)</li>
+<li><strong>Backbone:</strong> Tier-1 → Regional → Access; peering/IXP เลี่ยง transit fee; Google private network ข้ามลำดับชั้น</li>
+<li><strong>4 delays</strong> — queuing แปรผัน, อีก 3 ตัวคงที่</li>
+<li><strong>d_trans = L/R</strong> vs <strong>d_prop = d/s</strong> — d_prop ไม่ขึ้นกับ L หรือ R</li>
+<li><strong>Throughput = min</strong> (ตัวอย่าง 2 Mbps, 100 kbps, 1 Mbps → 100 kbps)</li>
+<li><strong>I = La/R &gt; 1</strong> → คิวยาว buffer เต็ม packet loss</li>
+<li><strong>ฝึกโจทย์ 3 ข้อ</strong> — จำการแปลงหน่วย (×8 สำหรับ bytes, ×10⁶ สำหรับ M) → 2 ms, 4 s, 0.8 ms vs 10 ms</li>
+<li><strong>5 layers + หน่วยข้อมูล</strong> (Message, Segment, Datagram, Frame, Bits)</li>
+<li><strong>Encapsulation:</strong> switch ดูถึง L2, router ดูถึง L3</li>
+<li><strong>Segmentation:</strong> 10⁶ bits, 3 ลิงก์ 5 Mbps → ไม่แบ่ง 0.6 s, แบ่ง 100 ชิ้น 0.204 s</li>
+<li><strong>Threats:</strong> worm (แพร่เองอัตโนมัติ), botnet/DDoS, MITM</li>
+</ol>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../network-topography/index.html"><small>← บทก่อนหน้า</small><span>สถาปัตยกรรมแห่งการเชื่อมต่อ (Network Topography)</span></a><a class="pg next" href="../lecture5.0-dlp-foundation/index.html"><small>บทถัดไป →</small><span>Lecture 5.0 — Introduction to the Data Link Layer</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

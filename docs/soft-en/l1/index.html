@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 1 – Software Engineering Foundation &amp; Software Project Management · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+      <ol><li><a href="#1-จาก-business-need-สู่การพัฒนาซอฟต์แวร์">1. จาก Business Need สู่การพัฒนาซอฟต์แวร์</a></li><li><a href="#2-software-คืออะไร">2. Software คืออะไร</a></li><li><a href="#3-software-engineering-se-คืออะไร">3. Software Engineering (SE) คืออะไร</a></li><li><a href="#4-ทำไมต้องมี-software-engineering">4. ทำไมต้องมี Software Engineering</a></li><li><a href="#5-ปัจจัยของโครงการซอฟต์แวร์">5. ปัจจัยของโครงการซอฟต์แวร์</a></li><li><a href="#6-ประเด็นในการพัฒนาซอฟต์แวร์">6. ประเด็นในการพัฒนาซอฟต์แวร์</a></li><li><a href="#7-developing-and-supporting-a-system">7. Developing and Supporting a System</a></li><li><a href="#8-implementation-testing-supporting">8. Implementation, Testing, Supporting</a></li><li><a href="#9-software-quality">9. Software Quality</a></li><li><a href="#10-สรุปคำศัพท์หลักของส่วน-a-สไลด์-44">10. สรุปคำศัพท์หลักของส่วน A (สไลด์ 44)</a></li><li><a href="#11-software-project-management-คืออะไร">11. Software Project Management คืออะไร</a></li><li><a href="#12-project-คืออะไร">12. Project คืออะไร</a></li><li><a href="#13-project-management-คืออะไร">13. Project Management คืออะไร</a></li><li><a href="#14-บทบาทของ-pm-และ-stakeholders">14. บทบาทของ PM และ Stakeholders</a></li><li><a href="#15-software-project-management-process-poma">15. Software Project Management Process – POMA</a></li><li><a href="#16-project-management-tools-and-techniques">16. Project Management Tools and Techniques</a></li><li><a href="#17-ความสำเร็จ-ข้อดี-และเป้าหมาย">17. ความสำเร็จ ข้อดี และเป้าหมาย</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L1</div>
+    <h1 class="lesson-title">Lecture 1 – Software Engineering Foundation &amp; Software Project Management</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> บทแรกของวิชา ITDS261 แบ่งเป็น 2 ครึ่ง
+<strong>ครึ่งแรก</strong> ตอบคำถามว่า software คืออะไร ทำไมต้องมี &quot;วิศวกรรม&quot; ซอฟต์แวร์ และการทำซอฟต์แวร์ใหญ่ยากกว่าเขียนโปรแกรมเล็ก ๆ อย่างไร
+<strong>ครึ่งหลัง</strong> เป็นเรื่องการบริหารโครงการซอฟต์แวร์ (Software Project Management) ว่า project คืออะไร มีข้อจำกัดอะไร ผู้จัดการโครงการทำงานอย่างไร (POMA) และใช้เครื่องมืออะไร เช่น WBS, PERT, Gantt chart</p>
+<p>บทนี้เป็นพื้นฐานของทุกบทต่อไป โดยเฉพาะ <strong>process model (L2)</strong> และ <strong>requirement (L3)</strong></p>
+</blockquote>
+<h2 id="สารบัญ">สารบัญ</h2>
+<p><strong>ส่วน A – Software Engineering Foundation</strong></p>
+<ol>
+<li>จาก business need สู่การพัฒนาซอฟต์แวร์</li>
+<li>Software คืออะไร และมีองค์ประกอบอะไร</li>
+<li>Software Engineering คืออะไร</li>
+<li>ทำไมต้องมี Software Engineering</li>
+<li>ปัจจัยของโครงการซอฟต์แวร์ (estimation, requirements, roles)</li>
+<li>ประเด็นทางเทคนิคและไม่ใช่เทคนิค</li>
+<li>ขนาดและความซับซ้อนของระบบ</li>
+<li>Implementation, Testing, Support</li>
+<li>Software Quality</li>
+<li>สรุปคำศัพท์หลักของส่วน A</li>
+</ol>
+<p><strong>ส่วน B – Software Project Management</strong></p>
+<ol start="11">
+<li>Project Management คืออะไร และ 4P's</li>
+<li>Project, คุณลักษณะ และข้อจำกัด (Triple Constraint)</li>
+<li>Project Management Framework (10 Knowledge Areas)</li>
+<li>บทบาท PM และ Stakeholders</li>
+<li>กระบวนการ POMA</li>
+<li>เครื่องมือและเทคนิค (WBS, PERT, Gantt)</li>
+<li>ความสำเร็จ ข้อดี และเป้าหมายของ Project Management</li>
+</ol>
+<hr />
+<h1>ส่วน A – Software Engineering Foundation</h1>
+<h2 id="1-จาก-business-need-สู่การพัฒนาซอฟต์แวร์">1. จาก Business Need สู่การพัฒนาซอฟต์แวร์</h2>
+<p><strong>ซอฟต์แวร์เกิดขึ้นมาเพราะอะไร?</strong>
+ซอฟต์แวร์ไม่ได้เกิดขึ้นลอย ๆ แต่เกิดจาก &quot;ความต้องการทางธุรกิจ&quot; เสมอ ลำดับเป็นแบบนี้</p>
+<p><img loading="lazy" src="diagrams/L1-01-need-process-software.png" alt="Business need → Business process → Software development" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Business needs</strong></td>
+<td>แรงผลักดัน (driving force) คือสิ่งที่ธุรกิจอยากได้ อยากแก้</td>
+</tr>
+<tr>
+<td><strong>Business processes</strong></td>
+<td>การลงมือทำเพื่อตอบความต้องการนั้น (execution of needs)</td>
+</tr>
+<tr>
+<td><strong>Software development</strong></td>
+<td>ช่วยให้ business process ทำงานได้ (enabling) และดีขึ้น (improving)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="business-process">Business Process</h3>
+<ul>
+<li><strong>เน้นที่คำถาม:</strong> งานนี้ทำให้เสร็จได้อย่างไร (How to get work done?)</li>
+<li><strong>องค์ประกอบ 4 อย่าง</strong>
+<ul>
+<li><strong>Actors</strong> – คนหรือฝ่ายที่ทำงาน</li>
+<li><strong>Tasks / activities</strong> – งานแต่ละขั้น</li>
+<li><strong>Rules</strong> – กฎหรือเงื่อนไข</li>
+<li><strong>Inputs and outputs</strong> – ข้อมูลที่เข้าและออก</li>
+</ul>
+</li>
+<li><strong>ลักษณะ</strong>
+<ul>
+<li>วาดเป็นแผนภาพได้ด้วย <strong>BPMN</strong> (Business Process Model and Notation)</li>
+<li><strong>อาจมีหรือไม่มีระบบมาช่วยก็ได้</strong> เช่น การจองโต๊ะทางโทรศัพท์ก็เป็น business process แม้ไม่มีซอฟต์แวร์เลย</li>
+</ul>
+</li>
+</ul>
+<h3 id="software-development-ช่วยอะไร">Software Development ช่วยอะไร</h3>
+<ul>
+<li>ทำให้ business process <strong>มีประสิทธิภาพขึ้น (efficient)</strong>, <strong>แม่นยำขึ้น (accurate)</strong> และ <strong>ขยายได้ (scalable)</strong></li>
+<li>ทำให้ process ถูก <strong>digitised</strong> (เปลี่ยนเป็นดิจิทัล), <strong>automated</strong> (ทำอัตโนมัติ) และ <strong>improved</strong> ตามความต้องการธุรกิจ</li>
+</ul>
+<h3 id="ตัวอย่างจากสไลด์-ร้านอาหาร">ตัวอย่างจากสไลด์: ร้านอาหาร</h3>
+<p>ร้านอาหารรับจองโต๊ะทางโทรศัพท์ แล้วพนักงานจดเอง ร้านอยากลดความผิดพลาดของคนและทำงานเร็วขึ้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Business need</th>
+<th>Business process</th>
+<th>Software development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>อยากมีระบบจองออนไลน์ เพื่อลดการจองทางโทรศัพท์</td>
+<td>ลูกค้าเลือกเวลา → ระบบจัดโต๊ะให้ → ส่งคำยืนยัน</td>
+<td>สร้างแอปจองโต๊ะ ลูกค้าจองออนไลน์ได้ และระบบเช็กว่าโต๊ะว่างไหมให้เอง</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำง่าย ๆ: <strong>Need = อยากได้อะไร, Process = ทำอย่างไร, Software = ช่วยทำให้ดีขึ้น</strong> ถ้าไม่เข้าใจ need กับ process ก่อน ซอฟต์แวร์ที่ทำออกมาก็จะไม่ตอบโจทย์</p>
+</blockquote>
+<hr />
+<h2 id="2-software-คืออะไร">2. Software คืออะไร</h2>
+<h3 id="องค์ประกอบของ-software-pressman">องค์ประกอบของ Software (Pressman)</h3>
+<p>Software ไม่ใช่แค่ &quot;โค้ด&quot; แต่มี 3 ส่วน:</p>
+<ol>
+<li><strong>Instructions (โปรแกรม)</strong> – ชุดคำสั่งที่ให้ features, function และ performance</li>
+<li><strong>Data structures</strong> – โครงสร้างข้อมูลที่ทำให้โปรแกรมจัดการข้อมูลได้</li>
+<li><strong>Documents</strong> – เอกสารที่อธิบายการทำงานและวิธีใช้โปรแกรม</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ มักออกสอบ: <strong>เอกสารก็นับเป็นส่วนหนึ่งของ software</strong> ถ้าไม่มีเอกสาร คนที่มาดูแลต่อจะเข้าใจระบบได้ยากมาก</p>
+</blockquote>
+<h3 id="interaction-hierarchy-ลำดับชั้นการทำงาน">Interaction Hierarchy (ลำดับชั้นการทำงาน)</h3>
+<p><img loading="lazy" src="diagrams/L1-02-interaction-hierarchy.png" alt="Interaction Hierarchy" /></p>
+<p>ผู้ใช้คุยกับแอป แอปคุยกับ OS แล้ว OS ถึงจะสั่ง hardware อีกที</p>
+<h3 id="characteristics-of-software-ลักษณะของซอฟต์แวร์">Characteristics of Software (ลักษณะของซอฟต์แวร์)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ลักษณะ</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Developed / engineered, not manufactured</strong></td>
+<td>สร้างด้วยการออกแบบและพัฒนา ไม่ได้ผลิตในโรงงาน ต้นทุนหลักอยู่ที่การพัฒนา การ copy เพิ่มแทบไม่มีต้นทุน</td>
+</tr>
+<tr>
+<td><strong>Intangible</strong></td>
+<td>จับต้องไม่ได้ เลยวัดความคืบหน้าและคุณภาพได้ยากกว่าของจริง</td>
+</tr>
+<tr>
+<td><strong>Labour intensive</strong></td>
+<td>ใช้แรงงานคนมาก ต้นทุนหลักคือคน</td>
+</tr>
+<tr>
+<td><strong>Difficult to make changes</strong></td>
+<td>แก้ยาก แก้จุดหนึ่งอาจกระทบอีกหลายจุด</td>
+</tr>
+<tr>
+<td><strong>Does not wear out</strong></td>
+<td>ไม่สึกหรอเหมือนเครื่องจักร ใช้ไปนาน ๆ โค้ดก็ไม่พัง</td>
+</tr>
+<tr>
+<td><strong>Can be obsolete</strong></td>
+<td>แต่ <strong>ล้าสมัยได้</strong> เมื่อไม่มีการสนับสนุนหรือสภาพแวดล้อมเปลี่ยน</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่างซอฟต์แวร์ที่ล้าสมัย (obsolete):</strong> Windows XP (หมดอายุปี 2014), Windows 7 (หมดอายุปี 2023)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ อย่าสับสน: <strong>ไม่ wear out ≠ ใช้ได้ตลอดไป</strong> Windows XP ไม่ได้พังเอง แต่ไม่มี security update และแอปใหม่ ๆ ไม่รองรับ จึงเลิกใช้</p>
+</blockquote>
+<h3 id="types-of-software-applications-ตัวอย่างในสไลด์">Types of Software Applications (ตัวอย่างในสไลด์)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Productivity</td>
+<td>Microsoft Word / Excel / PowerPoint, Canva, Notion</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>Zoom, Slack, Microsoft Teams, Webex</td>
+</tr>
+<tr>
+<td>Media players / editors</td>
+<td>VLC Media Player, Adobe Photoshop / Premiere Pro, Audacity</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Duolingo, Coursera, EdX, Quizlet, Lightbot</td>
+</tr>
+<tr>
+<td>Business</td>
+<td>QuickBooks (accounting), Salesforce (CRM), SAP (ERP)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="ซอฟต์แวร์ในโลกปัจจุบัน">ซอฟต์แวร์ในโลกปัจจุบัน</h3>
+<ul>
+<li><strong>Evolution of Programming</strong> – สไลด์มีวิดีโอเรื่องวิวัฒนาการของการเขียนโปรแกรม (youtu.be/LCEmiRjPEtQ)</li>
+<li><strong>&quot;Software is eating the world&quot;</strong> – Marc Andreessen หมายความว่าธุรกิจทุกประเภทกำลังถูกขับเคลื่อนด้วยซอฟต์แวร์ เช่น ร้านหนังสือแพ้ Amazon และการเรียกแท็กซี่ถูกแทนด้วย Grab</li>
+<li><strong>7 Software Development Trends 2026</strong> (solzit.com)
+<ol>
+<li>AI in Software Development</li>
+<li>Low-Code Development – สร้างแอปได้เร็วขึ้น</li>
+<li>Secured Development with DevSecOps</li>
+<li>Cloud and Azure Development – ระบบที่ขยายได้</li>
+<li>.NET Core Development – แอปที่ยืดหยุ่นและเร็ว</li>
+<li>DevOps Development – ทำ workflow อัตโนมัติ</li>
+<li>Offshore Software Development – จ้างทีมต่างประเทศ</li>
+</ol>
+</li>
+</ul>
+<hr />
+<h2 id="3-software-engineering-se-คืออะไร">3. Software Engineering (SE) คืออะไร</h2>
+<h3 id="นิยาม-timothy-c-lethbridge">นิยาม (Timothy C. Lethbridge)</h3>
+<blockquote class="callout">
+<p><em>&quot;A process of solving customers' problems by the systematic development and evolution of large, high-quality software systems within cost, time and other constraints.&quot;</em></p>
+</blockquote>
+<p>แปลง่าย ๆ: SE คือ <strong>กระบวนการแก้ปัญหาให้ลูกค้า</strong> ด้วยการพัฒนาและปรับปรุงระบบซอฟต์แวร์ขนาดใหญ่ที่มีคุณภาพสูงอย่างเป็นระบบ <strong>ภายใต้ข้อจำกัด</strong> ด้านงบ เวลา และอื่น ๆ</p>
+<h3 id="แยกคำสำคัญในนิยาม">แยกคำสำคัญในนิยาม</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วลีในนิยาม</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Solving customers' problems</td>
+<td><strong>เป้าหมาย</strong> – ไม่ใช่แค่เขียนโค้ดให้รัน แต่ต้องแก้ปัญหาลูกค้าได้จริง</td>
+</tr>
+<tr>
+<td>Systematic development and evolution</td>
+<td><strong>ความเป็นวิศวกรรม</strong> – ทำเป็นขั้นตอน มีวิธีการ และดูแลต่อเนื่อง (evolution)</td>
+</tr>
+<tr>
+<td>Large, high-quality software systems</td>
+<td><strong>ความซับซ้อนสูงมาก</strong></td>
+</tr>
+<tr>
+<td>Cost, time and other constraints</td>
+<td><strong>ข้อจำกัด</strong> ที่ต้องทำงานภายใต้มัน</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="5-ด้านที่ต้องคำนึงใน-se-tsui-karam">5 ด้านที่ต้องคำนึงใน SE (Tsui &amp; Karam)</h3>
+<p>การพัฒนาและดูแลระบบซอฟต์แวร์ต้องคิดถึง:</p>
+<ol>
+<li><strong>Technical and business processes</strong> – กระบวนการทั้งด้านเทคนิคและธุรกิจ</li>
+<li><strong>Specific methodologies and techniques</strong> – วิธีการและเทคนิคเฉพาะ</li>
+<li><strong>Product characterization and metrics</strong> – ลักษณะของผลิตภัณฑ์และตัวชี้วัด</li>
+<li><strong>People skills and teamwork</strong> – ทักษะคนและการทำงานเป็นทีม</li>
+<li><strong>Project coordination and management</strong> – การประสานงานและบริหารโครงการ</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตว่ามีแค่ข้อ 2 ที่เกี่ยวกับเทคนิคจริง ๆ ส่วนที่เหลือเป็นเรื่องคน กระบวนการ และการบริหาร <strong>SE จึงไม่ได้มีแค่การเขียนโค้ด</strong></p>
+</blockquote>
+<hr />
+<h2 id="4-ทำไมต้องมี-software-engineering">4. ทำไมต้องมี Software Engineering</h2>
+<h3 id="การ์ตูน-tree-swing-สไลด์-23">การ์ตูน &quot;Tree Swing&quot; (สไลด์ 23)</h3>
+<p>ภาพชิงช้าบนต้นไม้ที่แต่ละฝ่ายเข้าใจไม่ตรงกัน</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ใคร</th>
+<th>ผลลัพธ์ในภาพ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ลูกค้าอธิบาย</td>
+<td>ชิงช้า 3 ชั้นหรูหรา</td>
+</tr>
+<tr>
+<td>Project Leader เข้าใจ</td>
+<td>ชิงช้าที่ตัดกลางต้นไม้</td>
+</tr>
+<tr>
+<td>System Analyst ออกแบบ</td>
+<td>ชิงช้าที่ใช้งานไม่ได้</td>
+</tr>
+<tr>
+<td>Programmer เขียน</td>
+<td>ชิงช้าที่ไม่ติดต้นไม้</td>
+</tr>
+<tr>
+<td>Business Consultant บรรยาย</td>
+<td>เก้าอี้โซฟาหรู</td>
+</tr>
+<tr>
+<td>เอกสารโครงการ</td>
+<td>ว่างเปล่า ไม่มีอะไรเลย</td>
+</tr>
+<tr>
+<td>ที่ติดตั้งจริง</td>
+<td>มีแค่เชือก</td>
+</tr>
+<tr>
+<td>ที่เรียกเก็บเงินลูกค้า</td>
+<td>รถไฟเหาะ</td>
+</tr>
+<tr>
+<td>การดูแลหลังส่งมอบ</td>
+<td>เหลือแค่ตอไม้</td>
+</tr>
+<tr>
+<td><strong>ที่ลูกค้าต้องการจริง ๆ</strong></td>
+<td><strong>ยางรถยนต์ผูกเชือกธรรมดา</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>บทเรียน:</strong> ปัญหาส่วนใหญ่ของโครงการมาจาก <strong>การสื่อสารและ requirement ที่ไม่ชัด</strong> ไม่ใช่เพราะเขียนโค้ดไม่เป็น SE จึงต้องมีกระบวนการที่ทำให้ทุกฝ่ายเข้าใจตรงกัน</p>
+<hr />
+<h2 id="5-ปัจจัยของโครงการซอฟต์แวร์">5. ปัจจัยของโครงการซอฟต์แวร์</h2>
+<h3 id="software-projects-ต้องบาลานซ์-4-อย่าง">Software Projects ต้องบาลานซ์ 4 อย่าง</h3>
+<p><strong>Scope – Time – Cost – Quality</strong></p>
+<p>และโครงการที่ดีต้องมี:</p>
+<ul>
+<li>วัตถุประสงค์และเป้าหมายชัดเจน (clear objectives and goals)</li>
+<li>Requirement ชัดเจน</li>
+<li>Stakeholder มีส่วนร่วม</li>
+<li>ผู้บริหารสนับสนุน (executive management support)</li>
+<li>วางแผนอย่างสมจริง (realistic planning)</li>
+<li>บริหารจัดการดี</li>
+</ul>
+<h3 id="ปัจจัยสู่ความสำเร็จและความล้มเหลว-chaos-capers-jones-report">ปัจจัยสู่ความสำเร็จและความล้มเหลว (Chaos &amp; Capers Jones Report)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Key success factors</th>
+<th>❌ Top failure reasons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User involvement – ผู้ใช้มีส่วนร่วม</td>
+<td>Lack of user input – ไม่มี input จากผู้ใช้</td>
+</tr>
+<tr>
+<td>Executive management support</td>
+<td>Incomplete requirements – requirement ไม่ครบ</td>
+</tr>
+<tr>
+<td>Clear requirement statements</td>
+<td>Changing requirements – requirement เปลี่ยนไปเรื่อย ๆ</td>
+</tr>
+<tr>
+<td>Proper planning</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>สัดส่วนชนิดของข้อผิดพลาด (defects)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด error</th>
+<th>สัดส่วน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code errors</td>
+<td>38.33%</td>
+</tr>
+<tr>
+<td>Design errors</td>
+<td>24.17%</td>
+</tr>
+<tr>
+<td>Documentation errors</td>
+<td>13.33%</td>
+</tr>
+<tr>
+<td>Requirements errors</td>
+<td>12.50%</td>
+</tr>
+<tr>
+<td>Bad-fix errors (แก้บั๊กแล้วเกิดบั๊กใหม่)</td>
+<td>11.67%</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตคู่กัน: <strong>สาเหตุที่โครงการล้มเหลวอันดับต้น ๆ เป็นเรื่อง requirement ทั้งหมด</strong> แม้ requirement error จะมีแค่ 12.5% ของบั๊ก แต่ผลกระทบใหญ่ถึงขั้นทำให้ทั้งโครงการล้มได้</p>
+</blockquote>
+<h3 id="estimation-การประมาณการ">Estimation (การประมาณการ)</h3>
+<p>ต้องประมาณก่อนเริ่มว่า:</p>
+<ul>
+<li>ต้องใช้ <strong>effort</strong> เท่าไร</li>
+<li><strong>Cost</strong> เท่าไร</li>
+<li><strong>Time / Scheduling</strong> นานแค่ไหน</li>
+</ul>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Requirement ใช้ <strong>กำหนด (define)</strong> และ <strong>ระบุคุณสมบัติ (qualify)</strong> ของระบบ</li>
+<li><strong>ลูกค้าเป็นคนกำหนด</strong> โดยมีวิศวกรช่วย</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ความหมาย</th>
+<th>ตัวอย่าง (แอปจองโต๊ะ)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functional</strong></td>
+<td>ระบบต้องทำ <strong>อะไร</strong></td>
+<td>ลูกค้าเลือกวันเวลาและจำนวนคนได้</td>
+</tr>
+<tr>
+<td><strong>Non-functional</strong></td>
+<td>ระบุ <strong>คุณภาพ</strong> ของ functional</td>
+<td>หน้าจองต้องโหลดภายใน 2 วินาที</td>
+</tr>
+<tr>
+<td><strong>Design constraints</strong></td>
+<td>ข้อจำกัดของการออกแบบหรือการ implement เช่น ภาษา แพลตฟอร์ม</td>
+<td>ต้องทำบน Android และ iOS ด้วย Flutter</td>
+</tr>
+</tbody>
+</table></div>
+<p>(ตัวอย่างในคอลัมน์ขวาเป็นตัวอย่างประกอบ ไม่ได้อยู่ในสไลด์ เรื่องนี้เรียนละเอียดใน L3)</p>
+<h3 id="roles-in-a-software-project">Roles in a Software Project</h3>
+<p><strong>ฝั่งลูกค้า (Client side)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บทบาท</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Customers</strong></td>
+<td>กำหนด business needs, <strong>ออกเงิน (fund)</strong>, อนุมัติผลงานสุดท้าย</td>
+</tr>
+<tr>
+<td><strong>End users</strong></td>
+<td>ใช้ซอฟต์แวร์จริง, ให้ feedback เรื่อง usability และ functionality</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Customer ≠ End user</strong> เช่น มหาวิทยาลัยจ่ายเงินซื้อระบบลงทะเบียนเรียน (customer) แต่คนใช้จริงคือนักศึกษา (end user)</p>
+</blockquote>
+<p><strong>ฝั่งพัฒนา (Development side)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บทบาท</th>
+<th>หน้าที่หลัก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project Manager (PM)</strong></td>
+<td>วางแผนและบริหารโครงการ, กำหนด scope, จัดตาราง task, จัดสรรทรัพยากร, ติดตามความคืบหน้า, บริหารความเสี่ยง, ประสาน stakeholder, ทำให้เสร็จทันเวลาและในงบ</td>
+</tr>
+<tr>
+<td><strong>Business Analyst (BA)</strong></td>
+<td>เก็บ (elicit), วิเคราะห์ และตรวจสอบ requirement ทั้ง business, functional และ non-functional, ทำเอกสาร requirement specification, <strong>เป็นสะพานระหว่างลูกค้า/ผู้ใช้กับทีมพัฒนา</strong></td>
+</tr>
+<tr>
+<td><strong>System Analyst (SA)</strong></td>
+<td><strong>แปลง requirement เป็น technical specification</strong>, ออกแบบสถาปัตยกรรมรวม, เลือกเทคโนโลยีและ framework, กำหนด coding standard และ architectural pattern</td>
+</tr>
+<tr>
+<td><strong>Software Developer</strong></td>
+<td>เขียนและดูแลโค้ด, ทำ unit test, แก้ defect, review โค้ด, integrate component</td>
+</tr>
+<tr>
+<td><strong>UX/UI Designer</strong></td>
+<td>ทำ user research, สร้าง persona, wireframe, mockup, prototype, ออกแบบ UI และปรับ usability / UX</td>
+</tr>
+<tr>
+<td><strong>QA Engineer / Tester</strong></td>
+<td>ทำ test plan และ test case, ทดสอบทั้ง functional และ non-functional, รายงาน defect, ตรวจว่าแก้บั๊กแล้วจริง, ดูแลคุณภาพ</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 แยก <strong>BA vs SA</strong>: BA อยู่ฝั่ง &quot;ธุรกิจ&quot; ถามว่า <strong>ต้องการอะไร</strong> ส่วน SA อยู่ฝั่ง &quot;เทคนิค&quot; ตอบว่า <strong>จะสร้างด้วยอะไร อย่างไร</strong></p>
+</blockquote>
+<hr />
+<h2 id="6-ประเด็นในการพัฒนาซอฟต์แวร์">6. ประเด็นในการพัฒนาซอฟต์แวร์</h2>
+<h3 id="technical-issues-ด้านเทคนิค">Technical Issues (ด้านเทคนิค)</h3>
+<p><strong>1) Process and Methodology</strong></p>
+<ul>
+<li>เลือก process (เช่น waterfall หรือ agile ซึ่งจะเรียนใน L2)</li>
+<li>เลือก methodology</li>
+<li>เลือกเครื่องมือที่รองรับ process</li>
+</ul>
+<p><strong>2) Technology and tools choices</strong></p>
+<ul>
+<li>Development platform</li>
+<li>Development language</li>
+<li>Database</li>
+<li>Network</li>
+<li>Configuration management (จัดการเวอร์ชันและการตั้งค่า)</li>
+</ul>
+<h3 id="non-technical-issues-ด้านที่ไม่ใช่เทคนิค">Non-technical Issues (ด้านที่ไม่ใช่เทคนิค)</h3>
+<p><strong>1) Effort Estimation and Scheduling</strong> เมื่อระบบใหญ่ขึ้น</p>
+<ul>
+<li>ต้องประมาณหลายอย่างมากขึ้น</li>
+<li>ต้องประสานว่างานไหนต้องเสร็จก่อน (pre-requisite) งานไหนต้องทำไปพร้อมกัน (co-requisite)</li>
+<li>มีความเสี่ยงและความไม่แน่นอนมากขึ้น</li>
+</ul>
+<p><strong>2) Assignments and Communications</strong></p>
+<ul>
+<li>คนมากขึ้น ทักษะหลากหลายขึ้น</li>
+<li>ต้องสื่อสารกันมากขึ้น</li>
+<li>ผิดพลาดและต้องแก้ไขมากขึ้น</li>
+</ul>
+<h3 id="เพิ่มคนแล้วงานจะเสร็จเร็วขึ้นไหม">เพิ่มคนแล้วงานจะเสร็จเร็วขึ้นไหม?</h3>
+<p><strong>ไม่เสมอไป</strong> เพราะเส้นทางการสื่อสารเพิ่มเร็วกว่าจำนวนคน และโอกาสผิดพลาดก็เพิ่มตาม</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จำนวนคน</th>
+<th>เส้นทางการสื่อสาร (สูงสุด)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>6</td>
+<td>15</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สูตรที่ได้ตัวเลขตามสไลด์คือ <strong>n(n−1)/2</strong> (สไลด์ไม่ได้เขียนสูตรไว้) เช่น 10 คนจะมีถึง 45 เส้นทาง</p>
+<p>เหมือนทำงานกลุ่มในวิชา ถ้ากลุ่ม 3 คน นัดกันง่าย แต่ถ้ากลุ่ม 10 คน แค่ตกลงเวลาประชุมก็ยากแล้ว</p>
+</blockquote>
+<hr />
+<h2 id="7-developing-and-supporting-a-system">7. Developing and Supporting a System</h2>
+<h3 id="คำถามชวนคิดจากสไลด์">คำถามชวนคิดจากสไลด์</h3>
+<ul>
+<li>โปรแกรมเดียวนับเป็น &quot;ระบบ&quot; ได้ไหม</li>
+<li>ต้องมีกี่โปรแกรมถึงจะเป็นระบบ</li>
+<li>ระบบต้องรวม hardware, โปรแกรม, business process และอื่น ๆ ด้วยไหม</li>
+<li>การพัฒนาและดูแล <strong>โปรแกรมเดียว</strong> ต่างจากการพัฒนาและดูแล <strong>ระบบ</strong> อย่างไร</li>
+</ul>
+<p><strong>แนวคิด:</strong> ระบบมีหลายส่วนที่เชื่อมกัน ทั้งโปรแกรม ข้อมูล คน กระบวนการ และระบบภายนอก ยิ่งใหญ่ยิ่งซับซ้อน จึงต้องใช้ SE</p>
+<h3 id="size-and-complexity">Size and Complexity</h3>
+<p><strong>Breadth issue – ความกว้าง (จำนวนที่มากขึ้น)</strong></p>
+<ul>
+<li>จำนวน major functions</li>
+<li>จำนวน features ในแต่ละ function</li>
+<li>Interfaces ระหว่าง features และ functions</li>
+<li>Interfaces ไปยังระบบภายนอก</li>
+<li>จำนวนผู้ใช้พร้อมกัน และผู้ใช้ทั้งหมด</li>
+</ul>
+<p><strong>Depth issue – ความลึก (การเชื่อมโยง)</strong></p>
+<ul>
+<li>ระดับการซ้อนกัน (nesting)</li>
+<li>จำนวนความสัมพันธ์ที่ต่อกันเป็นทอด ๆ (chained relationships)</li>
+</ul>
+<p><strong>ตัวอย่างในสไลด์ 38:</strong> เทียบ flow 2 แบบ</p>
+<p><img loading="lazy" src="diagrams/L1-03-size-complexity.png" alt="เทียบ flow แบบเรียงตรง กับแบบมีเงื่อนไข" /></p>
+<p>แค่เพิ่มการรอสัญญาณและแตกเงื่อนไข จำนวนเส้นทางที่ต้องออกแบบและทดสอบก็เพิ่มขึ้นทันที <strong>ยิ่งกว้างและลึก ความซับซ้อนยิ่งพุ่งขึ้น</strong></p>
+<hr />
+<h2 id="8-implementation-testing-supporting">8. Implementation, Testing, Supporting</h2>
+<h3 id="implementation-coding-conventions">Implementation – Coding Conventions</h3>
+<p>Coding convention ครอบคลุม: การจัดไฟล์, การย่อหน้า, comment, การประกาศตัวแปร, statement, white space, การตั้งชื่อ, programming practices, principles, rules of thumb และ architectural best practices</p>
+<p>หลักที่ควรทำ:</p>
+<ul>
+<li><strong>Be consistent</strong> – เขียนแบบเดียวกันทั้งโปรเจกต์</li>
+<li><strong>Choose names carefully</strong> – ตั้งชื่อให้สื่อความหมาย</li>
+<li><strong>Test before using</strong> – ทดสอบก่อนนำไปใช้</li>
+<li><strong>Know the libraries</strong> – รู้จัก library ที่มี จะได้ไม่เขียนซ้ำ</li>
+<li><strong>Do code reviews</strong> – ให้คนอื่นช่วยตรวจโค้ด</li>
+</ul>
+<h3 id="testing">Testing</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ใครทำ / ทำอย่างไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Acceptance testing</strong></td>
+<td>ถ้าไม่ผ่าน <strong>ลูกค้าปฏิเสธโปรแกรม</strong></td>
+</tr>
+<tr>
+<td><strong>Unit testing</strong></td>
+<td>โปรแกรมเมอร์ทดสอบแต่ละชิ้นย่อย</td>
+</tr>
+<tr>
+<td><strong>Black-box</strong></td>
+<td>ทดสอบโดย <strong>ไม่รู้โค้ดข้างใน</strong> ดูว่าตรวจสอบข้อมูล (data validation) ถูกไหม</td>
+</tr>
+<tr>
+<td><strong>White-box</strong></td>
+<td>ทดสอบ <strong>ตามเส้นทางในโค้ด</strong> ที่เขียนไว้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Black-box</strong> = ทดสอบเครื่องกดน้ำโดยหยอดเหรียญแล้วดูว่าน้ำออกไหม
+<strong>White-box</strong> = เปิดฝาเครื่องดูว่าวงจรทุกเส้นทำงานถูกไหม</p>
+</blockquote>
+<h3 id="supporting-a-system">Supporting a System</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ก่อนปล่อย (Pre-release education &amp; preparation)</th>
+<th>หลังปล่อย (Post-release support)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จำนวนผู้ใช้ที่คาดไว้</td>
+<td>Call center และการแก้ปัญหา</td>
+</tr>
+<tr>
+<td>จำนวนปัญหาที่รู้อยู่ และคุณภาพที่คาดหวัง</td>
+<td>แก้ปัญหาใหญ่และแก้โค้ด</td>
+</tr>
+<tr>
+<td>ปริมาณการอบรมผู้ใช้และทีม support</td>
+<td>ปรับปรุงฟังก์ชันและเพิ่มความสามารถ</td>
+</tr>
+<tr>
+<td>จำนวนรอบการแก้ไขและบำรุงรักษา</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-software-quality">9. Software Quality</h2>
+<p><strong>ตัวชี้วัดคุณภาพ (quality indicators) ตัวอย่าง</strong></p>
+<ul>
+<li><strong>Usability</strong> – ใช้ง่าย</li>
+<li><strong>Efficiency</strong> – ใช้ทรัพยากรคุ้มค่า ทำงานเร็ว</li>
+<li><strong>Testability</strong> – ทดสอบง่าย</li>
+<li><strong>Maintainability</strong> – ดูแลและแก้ไขง่าย</li>
+<li><strong>Reusability</strong> – นำไปใช้ซ้ำได้</li>
+</ul>
+<p>คำถามจากสไลด์: <strong>เราจะวัดสิ่งเหล่านี้อย่างไร?</strong> (ยากเพราะ software จับต้องไม่ได้)</p>
+<h3 id="คุณภาพในมุมของแต่ละคนไม่เหมือนกัน">คุณภาพในมุมของแต่ละคนไม่เหมือนกัน</h3>
+<p>สไลด์ถามว่า &quot;quality software&quot; มีความหมายอย่างไรต่อ User, Customer, Project Manager และ Developer (ตัวอย่างคำตอบด้านล่างเป็นแนวคิดประกอบ)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Stakeholder</th>
+<th>มักมองว่า &quot;คุณภาพดี&quot; คือ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User</td>
+<td>ใช้ง่าย ไม่ล่ม เร็ว</td>
+</tr>
+<tr>
+<td>Customer</td>
+<td>คุ้มเงิน ตอบโจทย์ธุรกิจ</td>
+</tr>
+<tr>
+<td>Project Manager</td>
+<td>เสร็จทันเวลา อยู่ในงบ บั๊กน้อย</td>
+</tr>
+<tr>
+<td>Developer</td>
+<td>โค้ดอ่านง่าย แก้ง่าย ทดสอบง่าย</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-สรุปคำศัพท์หลักของส่วน-a-สไลด์-44">10. สรุปคำศัพท์หลักของส่วน A (สไลด์ 44)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+<th>ภาษาง่าย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Software</strong></td>
+<td>Programs, data, and documentation that together form a usable system</td>
+<td>โปรแกรม + ข้อมูล + เอกสาร รวมกันเป็นระบบที่ใช้ได้</td>
+</tr>
+<tr>
+<td><strong>Software Engineering</strong></td>
+<td>The disciplined application of engineering principles to software development</td>
+<td>ใช้หลักวิศวกรรมอย่างมีวินัยในการทำซอฟต์แวร์</td>
+</tr>
+<tr>
+<td><strong>Software Process</strong></td>
+<td>The structured set of activities required to develop a software system</td>
+<td>ชุดกิจกรรมเป็นขั้นตอนที่ใช้สร้างซอฟต์แวร์</td>
+</tr>
+<tr>
+<td><strong>Software Product</strong></td>
+<td>The artefact produced by the software process — the deployed system and its documentation</td>
+<td>ผลงานที่ได้ คือระบบที่ใช้งานจริงพร้อมเอกสาร</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>ส่วน B – Software Project Management</h1>
+<h2 id="11-software-project-management-คืออะไร">11. Software Project Management คืออะไร</h2>
+<ul>
+<li>เป็น <strong>umbrella activity</strong> (กิจกรรมร่ม) ที่ครอบทุกอย่างใน SE</li>
+<li><strong>เริ่มก่อนงานเทคนิคใด ๆ</strong> (ต้องวางแผนก่อนเริ่มเขียนโค้ด)</li>
+<li><strong>ดำเนินต่อเนื่องตลอด</strong> กระบวนการพัฒนา</li>
+</ul>
+<h3 id="the-management-spectrum-4ps">The Management Spectrum – 4P's</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>P</th>
+<th>สิ่งที่ต้องจัดการ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>People</strong></td>
+<td>Roles – ใครทำหน้าที่อะไร</td>
+</tr>
+<tr>
+<td><strong>Problem</strong></td>
+<td>Objectives, Scope, Alternatives (ทางเลือก), Technical and management constraints</td>
+</tr>
+<tr>
+<td><strong>Process</strong></td>
+<td>Tasks, Milestones, Deliverables, QA</td>
+</tr>
+<tr>
+<td><strong>Project</strong></td>
+<td>ตัวโครงการที่รวมทั้ง 3 P ข้างต้นเข้าด้วยกัน</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="12-project-คืออะไร">12. Project คืออะไร</h2>
+<h3 id="นิยาม-pmbok-guide-6th-ed-2017">นิยาม (PMBOK® Guide, 6th Ed., 2017)</h3>
+<blockquote class="callout">
+<p><em>&quot;A temporary endeavour undertaken to create a unique product, service, or result&quot;</em></p>
+<p>ความพยายามที่ <strong>มีช่วงเวลาจำกัด</strong> เพื่อสร้าง <strong>ผลิตภัณฑ์ บริการ หรือผลลัพธ์ที่ไม่ซ้ำใคร</strong></p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ชั่วคราว มีจุดเริ่มและจุดจบ</td>
+<td>งานประจำเพื่อให้ธุรกิจดำเนินต่อ (sustain the business)</td>
+</tr>
+<tr>
+<td><strong>จบเมื่อบรรลุเป้าหมาย หรือถูกยกเลิก</strong></td>
+<td>ทำซ้ำไปเรื่อย ๆ</td>
+</tr>
+<tr>
+<td>เช่น สร้างแอปจองโต๊ะ</td>
+<td>เช่น พนักงานรับจองโต๊ะทุกวัน</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="project-attributes-คุณลักษณะของโครงการ-7-ข้อ">Project Attributes (คุณลักษณะของโครงการ) 7 ข้อ</h3>
+<ol>
+<li><strong>Has a unique purpose</strong> – มีจุดประสงค์เฉพาะ</li>
+<li><strong>Temporary</strong> – ชั่วคราว</li>
+<li><strong>Drive change</strong> – ทำให้เกิดการเปลี่ยนแปลง</li>
+<li><strong>Enable value creation</strong> – สร้างคุณค่า</li>
+<li><strong>Require resources</strong> – ต้องใช้ทรัพยากร</li>
+<li><strong>Has customer or sponsor</strong> – มีลูกค้าหรือผู้สนับสนุน</li>
+<li><strong>Involves uncertainty</strong> – มีความไม่แน่นอน</li>
+</ol>
+<p>สไลด์ถามต่อว่า <strong>&quot;ใครดูแลโครงการ?&quot;</strong> คำตอบคือ Project Manager</p>
+<h3 id="project-constraints-triple-constraint">Project Constraints – Triple Constraint</h3>
+<p><img loading="lazy" src="diagrams/L1-04-triple-constraint.png" alt="Triple Constraint" /></p>
+<ul>
+<li><strong>Scope</strong> – ขอบเขตงาน ทำอะไรบ้าง</li>
+<li><strong>Cost</strong> – งบประมาณ</li>
+<li><strong>Time</strong> – ระยะเวลา</li>
+</ul>
+<p><strong>Balancing Project Constraints:</strong> ภาพตาชั่งมี Scope อยู่ข้างหนึ่ง และ Cost กับ Time อยู่อีกข้าง ถ้าเปลี่ยนด้านหนึ่ง อีกด้านต้องปรับตาม เช่น</p>
+<ul>
+<li>เพิ่ม scope → ต้องเพิ่มเวลาหรือเงิน</li>
+<li>ลดเวลา → ต้องเพิ่มเงิน (เพิ่มคน) หรือลด scope</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนทำโปรเจกต์ส่งอาจารย์ ถ้าอาจารย์เลื่อนกำหนดส่งให้เร็วขึ้น (time ลด) ก็ต้องตัดฟีเจอร์ (scope ลด) หรือหาเพื่อนมาช่วย (cost เพิ่ม)</p>
+</blockquote>
+<hr />
+<h2 id="13-project-management-คืออะไร">13. Project Management คืออะไร</h2>
+<h3 id="นิยาม">นิยาม</h3>
+<ul>
+<li><strong>การประยุกต์ใช้ความรู้ ทักษะ เครื่องมือ และเทคนิค</strong> กับกิจกรรมของโครงการ เพื่อให้ได้ตาม requirement ของโครงการ</li>
+<li>PM พยายามทำให้ได้ตาม <strong>triple constraint</strong> (scope, time, cost) และช่วยให้ทั้งกระบวนการตอบความต้องการและความคาดหวังของ stakeholder</li>
+</ul>
+<h3 id="ทำไมต้องบริหารโครงการ-ใช้แค่-development-process-ไม่พอหรือ">ทำไมต้องบริหารโครงการ? ใช้แค่ development process ไม่พอหรือ?</h3>
+<p><strong>ทุกโครงการ ไม่ว่าเล็กหรือใหญ่ ต้องการ project management</strong> เพราะทุกโครงการต้องมี</p>
+<ul>
+<li><strong>planning</strong> – การวางแผน</li>
+<li><strong>organizing</strong> – การจัดองค์กร</li>
+<li><strong>status monitoring</strong> – การติดตามสถานะ</li>
+<li><strong>adjustment</strong> – การปรับแก้</li>
+</ul>
+<p>(4 คำนี้คือที่มาของ <strong>POMA</strong> ในหัวข้อ 15)</p>
+<h3 id="project-management-framework-pmbok-2019">Project Management Framework (PMBOK, 2019)</h3>
+<p><img loading="lazy" src="diagrams/L1-05-pmbok-framework.png" alt="Project Management Framework (PMBOK)" /></p>
+<p>อ่านจากซ้ายไปขวา: รับความต้องการของ stakeholder → จัดการด้วย 10 knowledge areas → ใช้เครื่องมือและเทคนิค → โครงการสำเร็จ → หลายโครงการรวมเป็น portfolio → องค์กรสำเร็จ</p>
+<h3 id="10-project-management-knowledge-areas">10 Project Management Knowledge Areas</h3>
+<p>เป็นความรู้และทักษะหลักที่ PM ต้องมี</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Knowledge area</th>
+<th>ดูแลเรื่อง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Scope</strong></td>
+<td>ขอบเขตงาน</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Schedule</strong></td>
+<td>ตารางเวลา</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Cost</strong></td>
+<td>งบประมาณ</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Quality</strong></td>
+<td>คุณภาพ</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Resource</strong></td>
+<td>ทรัพยากร คน และอุปกรณ์</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Communications</strong></td>
+<td>การสื่อสาร</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Risk</strong></td>
+<td>ความเสี่ยง</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Procurement</strong></td>
+<td>การจัดซื้อจัดจ้าง</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Stakeholder</strong></td>
+<td>ผู้มีส่วนได้ส่วนเสีย</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Project integration management</strong></td>
+<td><strong>ประสานทั้ง 9 ด้านให้ไปด้วยกัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ช่วยจำ: 4 ตัวแรก <strong>Scope-Schedule-Cost-Quality</strong> คือ triple constraint บวกคุณภาพ ส่วน integration เป็นตัวที่ร้อยทุกด้านเข้าด้วยกัน</p>
+</blockquote>
+<hr />
+<h2 id="14-บทบาทของ-pm-และ-stakeholders">14. บทบาทของ PM และ Stakeholders</h2>
+<h3 id="the-role-of-project-managers">The Role of Project Managers</h3>
+<ul>
+<li>ทำงานใกล้ชิดกับ stakeholder อื่น <strong>โดยเฉพาะ sponsor และทีมโครงการ</strong></li>
+<li>ต้องรู้จักทั้ง <strong>10 knowledge areas</strong></li>
+<li>ใช้เครื่องมือและเทคนิคการบริหารโครงการได้หลากหลาย</li>
+</ul>
+<h3 id="project-stakeholders">Project Stakeholders</h3>
+<p><strong>Stakeholders</strong> คือคนที่ <strong>มีส่วนร่วมหรือได้รับผลกระทบ</strong> จากกิจกรรมของโครงการ ได้แก่</p>
+<ul>
+<li>Project sponsor หรือ customer</li>
+<li>ธนาคารและสถาบันการเงิน</li>
+<li>Project manager</li>
+<li>Project team (ทั้งสายเทคนิคและไม่ใช่เทคนิค)</li>
+<li>Support staff</li>
+<li>Suppliers</li>
+</ul>
+<hr />
+<h2 id="15-software-project-management-process-poma">15. Software Project Management Process – POMA</h2>
+<p><img loading="lazy" src="diagrams/L1-06-poma.png" alt="POMA" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ภาพใหญ่ (macro) ดูเป็นลำดับขั้น แต่ในระดับย่อย (micro) วนซ้ำได้มาก</strong></p>
+</blockquote>
+<h3 id="p-planning">P – Planning</h3>
+<p>ลำดับงานในการวางแผน:</p>
+<ol>
+<li>เข้าใจ requirement ของโครงการ</li>
+<li>กำหนดเป้าหมายที่ <strong>วัดผลได้</strong> (measurable goals)</li>
+<li>ประมาณ <strong>work effort</strong></li>
+<li>ประมาณ <strong>schedule</strong></li>
+<li>ประมาณ <strong>ทรัพยากรที่ต้องใช้</strong></li>
+<li>กำหนดการจัดสรรทรัพยากร</li>
+<li>ระบุและวิเคราะห์ <strong>ความเสี่ยง</strong> ด้าน people, process, tools และ facilities</li>
+</ol>
+<p>➜ <strong>ผลลัพธ์: Project Plan</strong></p>
+<h3 id="o-organizing">O – Organizing</h3>
+<p>รับ Project Plan มาแล้วลงมือจัดองค์กร:</p>
+<ol>
+<li>ออกแบบ <strong>โครงสร้างองค์กร</strong> ของทีม</li>
+<li><strong>จ้างคน</strong> (hire human resources)</li>
+<li>จัด <strong>การศึกษาและการอบรม</strong> ที่จำเป็น</li>
+<li>ตั้ง <strong>กลไกติดตาม</strong> (tracking mechanisms)
+<ul>
+<li>ติดตามความเสี่ยงและวิธีลดความเสี่ยง (risk tracking and mitigation)</li>
+<li>ติดตามเป้าหมายของโครงการ</li>
+</ul>
+</li>
+</ol>
+<h3 id="m-monitoring">M – Monitoring</h3>
+<p>เมื่อโครงการเริ่มเดินแล้ว ต้องติดตามสม่ำเสมอว่ายังไปถูกทาง มี 3 ส่วนหลัก:</p>
+<ol>
+<li><strong>เก็บข้อมูล</strong> สถานะโครงการ</li>
+<li><strong>วิเคราะห์และประเมิน</strong> ข้อมูลที่เก็บมา</li>
+<li><strong>นำเสนอและสื่อสาร</strong> สถานะโครงการ</li>
+</ol>
+<h3 id="a-adjusting">A – Adjusting</h3>
+<ul>
+<li>แทบเป็นไปไม่ได้ที่โครงการจะไม่มีปัญหาเลย</li>
+<li>เมื่อสถานะบอกว่าอาจมีปัญหา <strong>ต้องกล้าเปลี่ยน อย่ากลัว</strong></li>
+<li>ปรับได้ 3 ด้าน (หรือผสมกัน):
+<ul>
+<li><strong>Resources</strong> – ทรัพยากร</li>
+<li><strong>Schedule</strong> – ตารางเวลา</li>
+<li><strong>Project content</strong> – เนื้องาน หรือ scope</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ด้านที่ปรับได้ <strong>Resources / Schedule / Content</strong> ตรงกับ <strong>Cost / Time / Scope</strong> ของ triple constraint</p>
+</blockquote>
+<h3 id="จุดที่มักสับสน">⚠️ จุดที่มักสับสน</h3>
+<blockquote class="callout">
+<p><strong>Software Project Management Process ≠ Software Development Process (Software Life Cycle)</strong></p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Project Management Process (POMA)</th>
+<th>Development Process / Life Cycle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>บริหาร</strong> โครงการ: วางแผน จัดคน ติดตาม ปรับ</td>
+<td><strong>สร้าง</strong> ซอฟต์แวร์: requirement, design, code, test, deploy</td>
+</tr>
+<tr>
+<td>ครอบทั้งโครงการ (umbrella)</td>
+<td>เป็นงานเทคนิคที่อยู่ใต้การบริหาร</td>
+</tr>
+<tr>
+<td>เรียนในบทนี้</td>
+<td>เรียนละเอียดใน L2 (process models)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="16-project-management-tools-and-techniques">16. Project Management Tools and Techniques</h2>
+<p>เครื่องมือช่วย PM และทีมในด้านต่าง ๆ ตัวอย่าง:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ด้าน</th>
+<th>เครื่องมือ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scope</strong></td>
+<td>Project charter, Scope statement, <strong>WBS</strong></td>
+</tr>
+<tr>
+<td><strong>Time</strong></td>
+<td><strong>Gantt charts</strong>, Network diagrams, Critical path analysis</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Cost estimates, Earned value management</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>&quot;Let's Guess!&quot;</strong> สไลด์ให้ทายโลโก้เครื่องมือบริหารโครงการและทำงานร่วมกัน 10 ตัว (อ้างอิงบทความ &quot;10 best project management tools&quot; บน medium.com):
+Asana, Trello, Zoho Projects, Monday.com, ClickUp, Basecamp, Wrike, Microsoft Teams, Jira, Slack</p>
+<h3 id="เริ่มวางแผนโครงการ">เริ่มวางแผนโครงการ</h3>
+<ul>
+<li>ต้องรู้ <strong>goal, scope และ deliverables</strong> ของโครงการก่อน</li>
+<li>เทคนิคที่ใช้ได้: <strong>Work Breakdown Structure (WBS)</strong></li>
+</ul>
+<h3 id="ขั้นตอนสร้าง-wbs">ขั้นตอนสร้าง WBS</h3>
+<p><strong>ขั้น 1 – กำหนด project scope</strong></p>
+<ul>
+<li>จะมี function อะไรบ้าง</li>
+</ul>
+<p><strong>ขั้น 2 – ระบุ major deliverables</strong>
+แตก scope เป็นส่วนใหญ่ ๆ (มักแบ่งตามช่วงการพัฒนาหรือฟีเจอร์ใหญ่) เช่น</p>
+<ul>
+<li>Project Management</li>
+<li>Requirements Analysis</li>
+<li>UI/UX Design</li>
+<li>Development</li>
+<li>Testing</li>
+<li>Deployment</li>
+<li>Training &amp; Documentation</li>
+</ul>
+<p><strong>ขั้น 3 – แตก deliverable เป็น sub-deliverables</strong>
+ตัวอย่างระบบห้องสมุด ส่วน Development แตกเป็น:</p>
+<ul>
+<li>Login &amp; registration</li>
+<li>Book borrow (ยืมหนังสือ)</li>
+<li>Book return (คืนหนังสือ)</li>
+<li>Fine calculation (คำนวณค่าปรับ)</li>
+</ul>
+<p><strong>ขั้น 4 – เรียงลำดับ task</strong></p>
+<ul>
+<li><strong>Sequential</strong> – ต้องทำต่อกัน</li>
+<li><strong>Parallel</strong> – ทำพร้อมกันได้</li>
+</ul>
+<p><strong>ขั้น 5 – ประมาณเวลาของแต่ละ task</strong></p>
+<p><strong>ขั้น 6 – มอบหมายผู้รับผิดชอบแต่ละ task</strong></p>
+<p><strong>ขั้น 7 – วาง timeline ของโครงการ</strong></p>
+<h3 id="โครงสร้างลำดับชั้นของ-wbs">โครงสร้างลำดับชั้นของ WBS</h3>
+<p><img loading="lazy" src="diagrams/L1-07-wbs-levels.png" alt="ลำดับชั้นของ WBS" /></p>
+<p>เช่น ระบบห้องสมุด → Module การยืมคืน → Function ยืมหนังสือ → Task ออกแบบหน้าจอยืม</p>
+<h3 id="pert-program-evaluation-and-review-technique">PERT (Program Evaluation and Review Technique)</h3>
+<p>แผนภาพแสดง <strong>ลำดับและความสัมพันธ์ของ task</strong> พร้อมเวลาของแต่ละงาน ตัวอย่างในสไลด์:</p>
+<p><img loading="lazy" src="diagrams/L1-08-pert.png" alt="PERT ของตัวอย่างในสไลด์" /></p>
+<ul>
+<li>Task 1 และ 2 ต้องทำก่อนตามลำดับ</li>
+<li>กลุ่ม 3, 4, 5 แต่ละกลุ่มมีงานย่อย a, b, c ที่ <strong>ทำขนานกันได้</strong></li>
+</ul>
+<h3 id="end-result-of-wbs-initial-schedule-estimate">End Result of WBS = Initial Schedule Estimate</h3>
+<p>ผลลัพธ์ของ WBS คือ <strong>ตารางเวลาประมาณการเบื้องต้น</strong> ที่บอกว่าใครทำ task ไหน นานเท่าไร</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Person</th>
+<th>Time (units)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>X, Y, Z</td>
+<td>12</td>
+</tr>
+<tr>
+<td>2</td>
+<td>X, Y, Z</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3a</td>
+<td>X</td>
+<td>8</td>
+</tr>
+<tr>
+<td>3b</td>
+<td>Y</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3c</td>
+<td>Z</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4a</td>
+<td>Z</td>
+<td>20</td>
+</tr>
+<tr>
+<td>4b</td>
+<td>X</td>
+<td>2</td>
+</tr>
+<tr>
+<td>4c</td>
+<td>Y</td>
+<td>2</td>
+</tr>
+<tr>
+<td>5a</td>
+<td>X</td>
+<td>5</td>
+</tr>
+<tr>
+<td>5b</td>
+<td>Y</td>
+<td>1</td>
+</tr>
+<tr>
+<td>5c</td>
+<td>Z</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ข้อสังเกต (คำนวณเพิ่ม ไม่ได้อยู่ในสไลด์):</strong></p>
+<ul>
+<li>งานที่ทำขนานกัน กลุ่มจะเสร็จเมื่อ <strong>งานที่นานที่สุด</strong> ในกลุ่มเสร็จ</li>
+<li>เวลารวมโดยประมาณ = 12 + 2 + 8 + 20 + 5 = <strong>47 units</strong> ถ้าแต่ละกลุ่มรอให้งานย่อยทั้งหมดเสร็จก่อนเริ่มกลุ่มถัดไป</li>
+<li>ถ้าทำทุกงานต่อกันทีละงาน จะใช้ 62 units การทำขนานจึงช่วยย่นเวลาได้</li>
+<li>งานที่นานที่สุดในแต่ละช่วง (1 → 2 → 3a → 4a → 5a) คือเส้นทางที่กำหนดว่าโครงการจะเสร็จเมื่อไร เป็นแนวคิดของ <strong>critical path</strong> ถ้างานบนเส้นทางนี้ช้า โครงการทั้งหมดจะช้าตาม</li>
+<li><strong>คนเดียวกันต้องไม่ถูกจ่ายงานซ้อนกันในช่วงเวลาเดียวกัน</strong> ในตารางนี้ X, Y, Z ได้งานคนละชิ้นในแต่ละกลุ่ม</li>
+</ul>
+<h3 id="gantt-chart">Gantt Chart</h3>
+<ul>
+<li>เป็น <strong>แผนภูมิแท่งแนวนอน</strong> แกนตั้งคือ task แกนนอนคือเวลา</li>
+<li>เห็นทันทีว่างานไหนเริ่มและจบเมื่อไร งานไหนซ้อนกัน และตอนนี้ช้ากว่าแผนไหม</li>
+<li>ตารางในหัวข้อก่อนหน้าก็วาดออกมาเป็น Gantt chart แบบง่าย (อ้างอิง projectmanager.com)</li>
+</ul>
+<h3 id="working-exercise">Working Exercise</h3>
+<p>สไลด์ 74 เป็นแบบฝึกในห้องเรียน ใช้ภาพ <strong>ต้มยำกุ้ง / มาม่าต้มยำ</strong> เป็นโจทย์ สไลด์ไม่มีข้อความโจทย์ แต่ดูจากลำดับหัวข้อน่าจะให้ลองทำ <strong>WBS, ลำดับ task และ schedule ของการทำอาหาร</strong> แบบนี้</p>
+<p><img loading="lazy" src="diagrams/L1-09-tomyum-wbs.png" alt="ตัวอย่าง WBS ทำต้มยำกุ้ง" /></p>
+<p><em>(ตัวอย่างคำตอบนี้เป็นแนวทางประกอบเท่านั้น)</em></p>
+<hr />
+<h2 id="17-ความสำเร็จ-ข้อดี-และเป้าหมาย">17. ความสำเร็จ ข้อดี และเป้าหมาย</h2>
+<h3 id="project-success-วัดได้หลายแบบ">Project Success – วัดได้หลายแบบ</h3>
+<ol>
+<li>โครงการได้ตาม <strong>scope, time และ cost</strong></li>
+<li><strong>ลูกค้า / sponsor พอใจ</strong></li>
+<li>ผลลัพธ์ได้ตามเป้าหมายหลัก เช่น ทำเงินหรือประหยัดเงินได้ตามที่ตั้งไว้, ROI ดี หรือแค่ทำให้ sponsor พอใจ</li>
+</ol>
+<p><strong>Top 3 success factors</strong></p>
+<ol>
+<li><strong>Adequate funding</strong> – งบเพียงพอ</li>
+<li><strong>Staff expertise</strong> – ทีมมีความเชี่ยวชาญ</li>
+<li><strong>Engagement from all stakeholders</strong> – stakeholder ทุกฝ่ายมีส่วนร่วม</li>
+</ol>
+<h3 id="advantages-of-project-management-9-ข้อ">Advantages of Project Management (9 ข้อ)</h3>
+<ol>
+<li>ควบคุมทรัพยากรด้านการเงิน กายภาพ และคนได้ดีขึ้น</li>
+<li>ความสัมพันธ์กับลูกค้าดีขึ้น</li>
+<li>ใช้เวลาพัฒนาสั้นลง</li>
+<li>ต้นทุนต่ำลง productivity สูงขึ้น</li>
+<li>คุณภาพและความน่าเชื่อถือสูงขึ้น</li>
+<li>กำไรมากขึ้น (higher profit margins)</li>
+<li>ประสานงานภายในดีขึ้น</li>
+<li>ช่วยให้บรรลุเป้าหมายเชิงกลยุทธ์</li>
+<li>ขวัญกำลังใจของทีมดีขึ้น (higher worker morale)</li>
+</ol>
+<h3 id="goals-of-software-project-management-5-ข้อ">Goals of Software Project Management (5 ข้อ)</h3>
+<ol>
+<li><strong>Satisfy customers' needs</strong> – ตอบความต้องการลูกค้า</li>
+<li><strong>Project attributes are met</strong> – ได้ตามคุณลักษณะของโครงการ</li>
+<li><strong>Target &amp; milestones are met</strong> – ได้ตามเป้าหมายและ milestone</li>
+<li><strong>Team members work effectively</strong> – ทีมทำงานได้มีประสิทธิภาพ</li>
+<li><strong>Tools &amp; resources are made available and effectively utilized</strong> – มีเครื่องมือและทรัพยากรพร้อม และใช้อย่างคุ้มค่า</li>
+</ol>
+<hr />
+<h1>คำศัพท์สำคัญ</h1>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Business need</strong></td>
+<td>ความต้องการทางธุรกิจ เป็นแรงผลักให้เกิดซอฟต์แวร์</td>
+<td>&quot;อยากได้อะไร&quot;</td>
+</tr>
+<tr>
+<td><strong>Business process</strong></td>
+<td>ขั้นตอนการทำงานเพื่อตอบ need มี actors, tasks, rules, I/O</td>
+<td>&quot;ทำอย่างไร&quot;</td>
+</tr>
+<tr>
+<td><strong>BPMN</strong></td>
+<td>สัญลักษณ์มาตรฐานสำหรับวาด business process</td>
+<td>ผังงานของธุรกิจ</td>
+</tr>
+<tr>
+<td><strong>Software</strong></td>
+<td>Programs + data (structures) + documentation</td>
+<td>ไม่ใช่แค่โค้ด</td>
+</tr>
+<tr>
+<td><strong>Obsolete</strong></td>
+<td>ล้าสมัย ไม่มีการสนับสนุนแล้ว</td>
+<td>Windows XP</td>
+</tr>
+<tr>
+<td><strong>Software Engineering</strong></td>
+<td>แก้ปัญหาลูกค้าด้วยการพัฒนาซอฟต์แวร์ใหญ่ คุณภาพสูง อย่างเป็นระบบ ภายใต้ข้อจำกัด</td>
+<td>วิศวกรรม + ข้อจำกัด</td>
+</tr>
+<tr>
+<td><strong>Software Process</strong></td>
+<td>ชุดกิจกรรมที่มีโครงสร้างสำหรับพัฒนาซอฟต์แวร์</td>
+<td>วิธีสร้าง</td>
+</tr>
+<tr>
+<td><strong>Software Product</strong></td>
+<td>ระบบที่ deploy แล้วพร้อมเอกสาร</td>
+<td>ของที่ได้</td>
+</tr>
+<tr>
+<td><strong>Functional requirement</strong></td>
+<td>ระบบต้องทำอะไร</td>
+<td>&quot;ทำอะไร&quot;</td>
+</tr>
+<tr>
+<td><strong>Non-functional requirement</strong></td>
+<td>คุณภาพของสิ่งที่ระบบทำ เช่น เร็ว ปลอดภัย</td>
+<td>&quot;ทำได้ดีแค่ไหน&quot;</td>
+</tr>
+<tr>
+<td><strong>Design constraint</strong></td>
+<td>ข้อจำกัดด้านการออกแบบหรือการ implement เช่น ภาษา แพลตฟอร์ม</td>
+<td>&quot;ต้องใช้อะไร&quot;</td>
+</tr>
+<tr>
+<td><strong>Customer vs End user</strong></td>
+<td>คนจ่ายเงินและอนุมัติ vs คนใช้งานจริง</td>
+<td>จ่าย vs ใช้</td>
+</tr>
+<tr>
+<td><strong>BA (Business Analyst)</strong></td>
+<td>เก็บและวิเคราะห์ requirement เป็นสะพานเชื่อมลูกค้ากับทีม</td>
+<td>ล่ามฝั่งธุรกิจ</td>
+</tr>
+<tr>
+<td><strong>SA (System Analyst)</strong></td>
+<td>แปลง requirement เป็น technical spec และออกแบบสถาปัตยกรรม</td>
+<td>ล่ามฝั่งเทคนิค</td>
+</tr>
+<tr>
+<td><strong>QA Engineer / Tester</strong></td>
+<td>วางแผนและทำการทดสอบ รายงาน defect</td>
+<td>คนจับบั๊ก</td>
+</tr>
+<tr>
+<td><strong>Acceptance testing</strong></td>
+<td>การทดสอบที่ถ้าไม่ผ่าน ลูกค้าจะปฏิเสธ</td>
+<td>ด่านสุดท้าย</td>
+</tr>
+<tr>
+<td><strong>Unit testing</strong></td>
+<td>โปรแกรมเมอร์ทดสอบชิ้นส่วนย่อย</td>
+<td>ทดสอบทีละชิ้น</td>
+</tr>
+<tr>
+<td><strong>Black-box testing</strong></td>
+<td>ทดสอบโดยไม่ดูโค้ด ดู input/output</td>
+<td>กล่องทึบ</td>
+</tr>
+<tr>
+<td><strong>White-box testing</strong></td>
+<td>ทดสอบตามเส้นทางในโค้ด</td>
+<td>กล่องใส</td>
+</tr>
+<tr>
+<td><strong>Bad-fix error</strong></td>
+<td>บั๊กที่เกิดจากการแก้บั๊กเดิม</td>
+<td>แก้แล้วพังเพิ่ม</td>
+</tr>
+<tr>
+<td><strong>Umbrella activity</strong></td>
+<td>กิจกรรมที่ครอบคลุมตลอดทั้งกระบวนการ</td>
+<td>ร่มที่กางตลอด</td>
+</tr>
+<tr>
+<td><strong>4P's</strong></td>
+<td>People, Problem, Process, Project</td>
+<td>สเปกตรัมการบริหาร</td>
+</tr>
+<tr>
+<td><strong>Project</strong></td>
+<td>งานชั่วคราวเพื่อสร้างผลลัพธ์ที่ไม่ซ้ำใคร (PMBOK)</td>
+<td>มีวันจบ</td>
+</tr>
+<tr>
+<td><strong>Operations</strong></td>
+<td>งานประจำเพื่อให้ธุรกิจดำเนินต่อ</td>
+<td>ทำทุกวัน</td>
+</tr>
+<tr>
+<td><strong>Triple constraint</strong></td>
+<td>Scope, Time, Cost ที่ต้องสมดุลกัน</td>
+<td>ขยับหนึ่ง อีกสองขยับตาม</td>
+</tr>
+<tr>
+<td><strong>PMBOK</strong></td>
+<td>Project Management Body of Knowledge คู่มือมาตรฐานการบริหารโครงการ</td>
+<td>ตำรา PM</td>
+</tr>
+<tr>
+<td><strong>Knowledge areas (10)</strong></td>
+<td>Scope, Schedule, Cost, Quality, Resource, Communications, Risk, Procurement, Stakeholder, Integration</td>
+<td>10 ความรู้ของ PM</td>
+</tr>
+<tr>
+<td><strong>Stakeholder</strong></td>
+<td>คนที่มีส่วนร่วมหรือได้รับผลกระทบจากโครงการ</td>
+<td>ผู้มีส่วนได้ส่วนเสีย</td>
+</tr>
+<tr>
+<td><strong>POMA</strong></td>
+<td>Planning, Organizing, Monitoring, Adjusting</td>
+<td>4 ขั้นบริหารโครงการ</td>
+</tr>
+<tr>
+<td><strong>Milestone</strong></td>
+<td>จุดสำคัญในโครงการที่ใช้วัดความคืบหน้า</td>
+<td>หมุดหมาย</td>
+</tr>
+<tr>
+<td><strong>Deliverable</strong></td>
+<td>ผลงานที่ต้องส่งมอบ</td>
+<td>ของที่ต้องส่ง</td>
+</tr>
+<tr>
+<td><strong>WBS</strong></td>
+<td>Work Breakdown Structure แตกงานใหญ่เป็นงานย่อยเป็นลำดับชั้น</td>
+<td>ต้นไม้ของงาน</td>
+</tr>
+<tr>
+<td><strong>PERT</strong></td>
+<td>แผนภาพลำดับงานและเวลา</td>
+<td>ผังว่างานไหนต่อจากงานไหน</td>
+</tr>
+<tr>
+<td><strong>Gantt chart</strong></td>
+<td>แผนภูมิแท่งแนวนอนของ task ตามเวลา</td>
+<td>ปฏิทินของงาน</td>
+</tr>
+<tr>
+<td><strong>Critical path</strong></td>
+<td>เส้นทางงานที่ยาวที่สุด ถ้าช้า ทั้งโครงการช้าตาม</td>
+<td>เส้นทางห้ามช้า</td>
+</tr>
+<tr>
+<td><strong>Earned value management</strong></td>
+<td>เทคนิควัดความคืบหน้าเทียบกับต้นทุน</td>
+<td>ใช้เงินไปคุ้มงานไหม</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>สรุปท้ายบท / จุดที่มักออกสอบ</h1>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>ลำดับ <strong>Business need → Business process → Software development</strong></li>
+<li>Software มี 3 ส่วน: <strong>programs, data structures, documentation</strong></li>
+<li>ลักษณะ software: engineered not manufactured, intangible, labour intensive, แก้ยาก, <strong>ไม่สึกหรอแต่ล้าสมัยได้</strong></li>
+<li>นิยาม SE แยกเป็น 4 ส่วน: <strong>เป้าหมาย / ความเป็นวิศวกรรม / ความซับซ้อน / ข้อจำกัด</strong></li>
+<li>สาเหตุล้มเหลวอันดับต้น: <strong>ไม่มี input จากผู้ใช้, requirement ไม่ครบ, requirement เปลี่ยน</strong></li>
+<li>บั๊กที่พบมากสุดคือ <strong>Code errors 38.33%</strong> รองลงมาคือ <strong>Design errors 24.17%</strong></li>
+<li>4P's: <strong>People, Problem, Process, Project</strong></li>
+<li>10 Knowledge Areas และ <strong>Integration</strong> ที่ร้อยทุกด้านเข้าด้วยกัน</li>
+<li>POMA: <strong>Planning → Organizing → Monitoring → Adjusting</strong> ภาพใหญ่เป็นลำดับ แต่ระดับย่อยวนซ้ำได้</li>
+<li>ขั้นตอน WBS: scope → deliverables → sub-deliverables → sequence → estimate → assign → timeline</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer vs End user</td>
+<td>จ่ายเงินและอนุมัติ vs ใช้งานจริง</td>
+</tr>
+<tr>
+<td>BA vs SA</td>
+<td>requirement ฝั่งธุรกิจ vs technical spec และสถาปัตยกรรม</td>
+</tr>
+<tr>
+<td>Functional vs Non-functional</td>
+<td>ทำอะไร vs ทำได้ดีแค่ไหน</td>
+</tr>
+<tr>
+<td>Black-box vs White-box</td>
+<td>ไม่ดูโค้ด vs ดูเส้นทางในโค้ด</td>
+</tr>
+<tr>
+<td>Project vs Operations</td>
+<td>ชั่วคราว มีวันจบ vs งานประจำต่อเนื่อง</td>
+</tr>
+<tr>
+<td>Wear out vs Obsolete</td>
+<td>software ไม่สึก แต่ล้าสมัยได้</td>
+</tr>
+<tr>
+<td><strong>Project Management Process vs Software Development Process</strong></td>
+<td>บริหารโครงการ (POMA) vs สร้างซอฟต์แวร์ (life cycle)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้ (ข้อสอบแบบให้เหตุผล)</strong></p>
+<ul>
+<li><strong>ทำไมเพิ่มคนแล้วงานอาจไม่เร็วขึ้น</strong> เพราะเส้นทางการสื่อสารเพิ่มแบบ n(n−1)/2 และโอกาสผิดพลาดก็เพิ่มตาม</li>
+<li><strong>ทำไมระบบใหญ่ถึงยาก</strong> เพราะมีทั้งความกว้าง (จำนวน function, interface, user) และความลึก (nesting, chained relationships)</li>
+<li><strong>ทำไมทุกโครงการต้องมี project management</strong> เพราะทุกโครงการต้องวางแผน จัดองค์กร ติดตาม และปรับแก้</li>
+<li><strong>ถ้า triple constraint ด้านหนึ่งเปลี่ยน</strong> เช่น scope เพิ่ม ต้องเพิ่มเวลาหรือเงิน หรือไม่ก็ต้องลดคุณภาพ</li>
+<li><strong>ในขั้น Adjusting ปรับได้ 3 ด้าน:</strong> resources, schedule, project content</li>
+</ul>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><span></span><a class="pg next" href="../l2/index.html"><small>บทถัดไป →</small><span>Lecture 2 – Software Process Models</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

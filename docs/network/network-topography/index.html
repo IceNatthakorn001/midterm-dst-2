@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถาปัตยกรรมแห่งการเชื่อมต่อ (Network Topography) · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+      <ol><li><a href="#1-เครือข่ายของเครือข่าย-the-internetwork">1. เครือข่ายของเครือข่าย (The Internetwork)</a></li><li><a href="#2-มาตรวัดขนาดของเครือข่าย">2. มาตรวัดขนาดของเครือข่าย ⭐</a></li><li><a href="#3-ตัวอย่างที่-1-เครือข่ายส่วนบุคคล-pan">3. ตัวอย่างที่ 1: เครือข่ายส่วนบุคคล (PAN)</a></li><li><a href="#4-ตัวอย่างที่-2-เครือข่ายในที่พักอาศัย-home-access-networks">4. ตัวอย่างที่ 2: เครือข่ายในที่พักอาศัย (Home Access Networks)</a></li><li><a href="#5-ตัวอย่างที่-3-เครือข่ายองค์กร-enterprise-lan">5. ตัวอย่างที่ 3: เครือข่ายองค์กร (Enterprise LAN)</a></li><li><a href="#6-ตัวอย่างที่-4-เครือข่ายไร้สาย-wifi-80211">6. ตัวอย่างที่ 4: เครือข่ายไร้สาย (WiFi / 802.11)</a></li><li><a href="#7-ตัวอย่างที่-5-เครือข่ายมือถือ-cellular-4g5g">7. ตัวอย่างที่ 5: เครือข่ายมือถือ (Cellular 4G/5G)</a></li><li><a href="#8-ตัวอย่างที่-6-เครือข่ายศูนย์ข้อมูล-data-center-the-cloud">8. ตัวอย่างที่ 6: เครือข่ายศูนย์ข้อมูล (Data Center / The Cloud)</a></li><li><a href="#9-สรุปเปรียบเทียบ-wired-vs-wireless-architecture">9. สรุปเปรียบเทียบ: Wired vs Wireless Architecture ⭐</a></li><li><a href="#10-วิถีแห่งข้อมูล-a-day-in-the-life-of-a-packet">10. วิถีแห่งข้อมูล: A Day in the Life of a Packet</a></li><li><a href="#11-the-network-of-networks-สรุปปิดท้าย">11. The Network of Networks (สรุปปิดท้าย)</a></li><li><a href="#12-คำศัพท์สำคัญ">12. คำศัพท์สำคัญ</a></li><li><a href="#13-สรุปท้ายบท-จุดที่มักออกสอบ">13. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Network-Topography</div>
+    <h1 class="lesson-title">สถาปัตยกรรมแห่งการเชื่อมต่อ (Network Topography)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p>สไลด์ชุดนี้ (15 หน้า เป็นภาพ infographic ทั้งหมด) พาสำรวจ &quot;ภูมิทัศน์&quot; ของเครือข่ายคอมพิวเตอร์ ตั้งแต่อุปกรณ์ส่วนตัวรอบตัวเรา ไปจนถึงโครงสร้างพื้นฐานระดับโลก</p>
+<p>ใช้ <strong>ขนาดของเครือข่าย (PAN → LAN → MAN → WAN → Internet)</strong> เป็นแกน แล้วยกตัวอย่างเครือข่ายจริง 6 แบบ พร้อมกลไกเบื้องหลัง (NAT, VLAN, Handover)</p>
+<p>เป็นส่วนเสริมของ Chapter 1 (หัวข้อ Network model &amp; topology ในสัปดาห์ที่ 1) — ช่วยให้เห็นว่า &quot;network of networks&quot; หน้าตาเป็นอย่างไรในชีวิตจริง</p>
+</blockquote>
+<p><img loading="lazy" src="img/topo-p001.jpg" alt="สถาปัตยกรรมแห่งการเชื่อมต่อ" /></p>
+<h2 id="1-เครือข่ายของเครือข่าย-the-internetwork">1. เครือข่ายของเครือข่าย (The Internetwork)</h2>
+<p><strong>อินเทอร์เน็ตไม่ใช่เครือข่ายเดียว แต่คือ &quot;เครือข่ายที่เชื่อมต่อเครือข่ายเข้าด้วยกัน&quot;</strong></p>
+<p>ภาพแสดงเครือข่ายหลายแบบที่ต่อเข้าหา <strong>โครงข่ายหลัก (Global ISP / backbone)</strong> ตรงกลาง:</p>
+<ul>
+<li><strong>เครือข่ายระดับภูมิภาค</strong> — บ้าน คอมพิวเตอร์ อุปกรณ์ในพื้นที่</li>
+<li><strong>เครือข่ายองค์กร</strong> — กลุ่มเซิร์ฟเวอร์และเครื่องลูกข่ายจำนวนมาก</li>
+<li><strong>เครือข่ายมือถือ</strong> — เสาสัญญาณและสมาร์ทโฟน</li>
+</ul>
+<p><img loading="lazy" src="img/topo-p002.jpg" alt="The Internetwork" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนระบบถนน: ซอยในหมู่บ้าน ถนนในนิคมอุตสาหกรรม และถนนในเมือง ต่างมีเจ้าของและรูปแบบของตัวเอง แต่ทุกสายไปเชื่อมกับทางหลวงสายหลัก จึงขับจากที่ไหนไปที่ไหนก็ได้</p>
+</blockquote>
+<hr />
+<h2 id="2-มาตรวัดขนาดของเครือข่าย">2. มาตรวัดขนาดของเครือข่าย ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระยะห่าง</th>
+<th>พื้นที่ครอบคลุม</th>
+<th>ประเภทเครือข่าย</th>
+<th>เทคโนโลยีตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 เมตร</strong></td>
+<td>พื้นที่ส่วนบุคคล</td>
+<td><strong>PAN</strong> (Personal Area Network)</td>
+<td>Bluetooth</td>
+</tr>
+<tr>
+<td><strong>10 ม. – 1 กม.</strong></td>
+<td>ห้อง / อาคาร / วิทยาเขต</td>
+<td><strong>LAN</strong> (Local Area Network)</td>
+<td>Ethernet, WiFi</td>
+</tr>
+<tr>
+<td><strong>10 กม.</strong></td>
+<td>เมือง</td>
+<td><strong>MAN</strong> (Metropolitan Area Network)</td>
+<td>Cable, 802.16</td>
+</tr>
+<tr>
+<td><strong>100 กม.+</strong></td>
+<td>ประเทศ / ทวีป</td>
+<td><strong>WAN</strong> (Wide Area Network)</td>
+<td>Optical Backbone, 5G</td>
+</tr>
+<tr>
+<td><strong>10,000 กม.</strong></td>
+<td>โลก</td>
+<td><strong>The Internet</strong></td>
+<td>TCP/IP</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p003.jpg" alt="มาตรวัดขนาดของเครือข่าย" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 จำจากเล็กไปใหญ่: <strong>P</strong>ersonal → <strong>L</strong>ocal → <strong>M</strong>etropolitan → <strong>W</strong>ide → Internet = ตัวเรา → ตึก → เมือง → ประเทศ → โลก</p>
+<p class="c-warn">⚠️ 802.16 = WiMAX (มาตรฐานไร้สายระดับเมือง) อย่าสับสนกับ 802.11 (WiFi, ระดับ LAN)</p>
+</blockquote>
+<hr />
+<h2 id="3-ตัวอย่างที่-1-เครือข่ายส่วนบุคคล-pan">3. ตัวอย่างที่ 1: เครือข่ายส่วนบุคคล (PAN)</h2>
+<p><strong>นิยาม:</strong> เครือข่ายไร้สาย <strong>ระยะสั้นรอบตัวบุคคล</strong></p>
+<p><strong>โครงสร้าง (แบบ master-slave):</strong></p>
+<ul>
+<li><strong>Master device</strong> (เช่น สมาร์ทโฟน) — <strong>ควบคุมการเชื่อมต่อและจัดสรรความถี่</strong></li>
+<li><strong>Slave devices</strong> (เช่น หูฟังไร้สาย, นาฬิกาอัจฉริยะ, เครื่องเสียงในรถ) — อุปกรณ์ต่อพ่วงที่เชื่อมต่อแบบ <strong>Piconet</strong></li>
+<li><strong>Technology:</strong> <strong>Bluetooth</strong> — ตัดปัญหาสายสัญญาณทับซ้อน (ใช้แทนสาย)</li>
+</ul>
+<p><img loading="lazy" src="img/topo-p004.jpg" alt="PAN" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Piconet</strong> = เครือข่ายเล็ก ๆ ที่มี master 1 ตัวคุม slave หลายตัว เหมือนหัวหน้าห้องที่เรียกชื่อให้เพื่อนพูดทีละคน จึงไม่พูดชนกัน</p>
+</blockquote>
+<hr />
+<h2 id="4-ตัวอย่างที่-2-เครือข่ายในที่พักอาศัย-home-access-networks">4. ตัวอย่างที่ 2: เครือข่ายในที่พักอาศัย (Home Access Networks)</h2>
+<p><strong>การหลอมรวมของอุปกรณ์หลากหลายประเภทในพื้นที่อยู่อาศัย</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DSL/Cable modem</strong></td>
+<td>เชื่อมโยงบ้านเข้ากับ ISP</td>
+</tr>
+<tr>
+<td><strong>Gateway</strong></td>
+<td>เราเตอร์หลักที่เชื่อมโยงบ้านเข้ากับ ISP</td>
+</tr>
+<tr>
+<td><strong>Convergence</strong></td>
+<td>รองรับทั้งข้อมูลแบบ <strong>Elastic</strong> (เว็บเพจ — รอได้ ปรับความเร็วได้) และ <strong>Time-Sensitive</strong> (สตรีมมิ่งวิดีโอ — ต้องทันเวลา)</td>
+</tr>
+<tr>
+<td><strong>IoT Integration</strong></td>
+<td>เซ็นเซอร์และเครื่องใช้ไฟฟ้าที่ต้องการความเสถียร</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p005.jpg" alt="Home Access Networks" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Elastic vs Time-sensitive:</strong> เว็บโหลดช้าไป 1 วินาทีไม่เป็นไร (elastic) แต่วิดีโอคอลกระตุก 1 วินาทีใช้ไม่ได้ (time-sensitive)</p>
+</blockquote>
+<h3 id="กลไกเบื้องหลัง-network-address-translation-nat">กลไกเบื้องหลัง: Network Address Translation (NAT) ⭐</h3>
+<p><strong>ปัญหา:</strong> อุปกรณ์ในบ้านมีหลายเครื่อง แต่ ISP ให้ IP สาธารณะมาแค่ 1 ตัว</p>
+<p><strong>การทำงาน:</strong></p>
+<ol>
+<li><strong>เครือข่ายส่วนตัว</strong> — อุปกรณ์ในบ้านใช้ IP ภายใน เช่น laptop <code>10.0.0.1</code>, มือถือ <code>10.0.0.2</code>, แท็บเล็ต <code>10.0.0.3</code> → <strong>IP ภายในมีความหมายแค่ในบ้าน</strong></li>
+<li><strong>NAT Router</strong> — ทำหน้าที่ <strong>แปลงที่อยู่</strong> (เหมือนกรวยรวมทุกเครื่องเข้าทางเดียว)</li>
+<li><strong>อินเทอร์เน็ตสาธารณะ</strong> — ออกไปด้วย IP สาธารณะเดียว <code>138.76.29.7</code> → <strong>ใช้ IP เดียวเป็นตัวแทนของทั้งบ้าน</strong></li>
+</ol>
+<p><img loading="lazy" src="img/topo-p006.jpg" alt="NAT" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนคอนโดที่มีที่อยู่ไปรษณีย์เดียว จดหมายขาออกจากทุกห้องใช้ที่อยู่คอนโด แล้วนิติบุคคล (NAT router) จำไว้ว่าจดหมายตอบกลับต้องส่งเข้าห้องไหน</p>
+</blockquote>
+<hr />
+<h2 id="5-ตัวอย่างที่-3-เครือข่ายองค์กร-enterprise-lan">5. ตัวอย่างที่ 3: เครือข่ายองค์กร (Enterprise LAN)</h2>
+<p><strong>โครงสร้างพื้นฐานแบบมีสายความเร็วสูงสำหรับองค์กร</strong> — เป็นลำดับชั้น (hierarchical):</p>
+<ul>
+<li><strong>Institutional Router</strong> (บนสุด) — ต่อองค์กรออกอินเทอร์เน็ต</li>
+<li><strong>Core/Edge Switches</strong> (ชั้นกลาง) — กระจายไปแต่ละส่วน</li>
+<li><strong>End Systems</strong> (ล่างสุด) — Workstations และ Servers</li>
+</ul>
+<p><strong>จุดเด่น:</strong></p>
+<ul>
+<li><strong>Link-Layer Switches:</strong> ขจัดปัญหาการชนกันของข้อมูล โดยส่งเฟรมข้อมูลแยกตามพอร์ตอย่างอิสระ</li>
+<li><strong>High Throughput:</strong> รองรับความเร็วระดับ <strong>1 Gbps ถึง 10 Gbps</strong></li>
+<li><strong>Resource Sharing:</strong> แชร์ข้อมูลและเซิร์ฟเวอร์ส่วนกลางอย่างมีประสิทธิภาพ</li>
+</ul>
+<p><img loading="lazy" src="img/topo-p007.jpg" alt="Enterprise LAN" /></p>
+<h3 id="วิวัฒนาการของ-lan-virtual-lans-vlan">วิวัฒนาการของ LAN: Virtual LANs (VLAN) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Physical</strong> (แบบเดิม)</th>
+<th><strong>Logical</strong> (VLAN)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ข้อจำกัดทางภูมิศาสตร์:</strong> การจัดกลุ่มถูกกำหนดโดย <strong>สายเคเบิล</strong> (เครื่องที่ต่อ switch เดียวกันก็อยู่กลุ่มเดียวกัน)</td>
+<td><strong>นิยามใหม่ด้วยซอฟต์แวร์:</strong> จัดกลุ่มเครือข่าย <strong>ตามแผนกหรือความปลอดภัย</strong> ไม่ใช่ตามชั้นของอาคาร</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p008.jpg" alt="VLAN" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 ตัวอย่าง: ฝ่ายบัญชีอยู่ชั้น 2 และชั้น 5 — แบบ physical ต้องเดินสายใหม่ แต่ VLAN ตั้งค่าใน switch ให้เป็นกลุ่มเดียวกันได้เลย (รายละเอียดอยู่ใน Lecture 7 VLAN)</p>
+</blockquote>
+<hr />
+<h2 id="6-ตัวอย่างที่-4-เครือข่ายไร้สาย-wifi-80211">6. ตัวอย่างที่ 4: เครือข่ายไร้สาย (WiFi / 802.11)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Infrastructure Mode</strong></th>
+<th><strong>Ad-hoc Mode</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>อุปกรณ์ไร้สายสื่อสาร <strong>ผ่าน Access Point</strong> (Base Station) ที่เชื่อมต่อกับอินเทอร์เน็ตแบบมีสาย (wired network)</td>
+<td>อุปกรณ์สื่อสารกัน <strong>เองโดยตรง</strong> ไม่ต้องใช้โครงสร้างพื้นฐาน</td>
+</tr>
+<tr>
+<td>เช่น WiFi บ้าน/ออฟฟิศ</td>
+<td>เช่น แชร์ไฟล์ระหว่างเครื่องโดยตรง</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Bandwidth:</strong> <strong>แชร์ช่องสัญญาณวิทยุร่วมกัน</strong> ภายในรัศมี (ยิ่งคนใช้เยอะ ยิ่งแบ่งกันเยอะ)</li>
+</ul>
+<p><img loading="lazy" src="img/topo-p009.jpg" alt="WiFi 802.11" /></p>
+<hr />
+<h2 id="7-ตัวอย่างที่-5-เครือข่ายมือถือ-cellular-4g5g">7. ตัวอย่างที่ 5: เครือข่ายมือถือ (Cellular 4G/5G)</h2>
+<p><strong>เครือข่ายไร้สายระยะไกลที่ครอบคลุมระดับประเทศ</strong> — พื้นที่ถูกแบ่งเป็น <strong>เซลล์รูปหกเหลี่ยม (cells)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mobile Device (UE — User Equipment)</strong></td>
+<td>อุปกรณ์เคลื่อนที่ ซึ่ง <strong>มีรหัสยืนยันตัวตนผ่านซิมการ์ด</strong></td>
+</tr>
+<tr>
+<td><strong>Base Station (eNode-B)</strong></td>
+<td>เสาสัญญาณที่ <strong>บริหารจัดการทรัพยากรคลื่นวิทยุในพื้นที่เซลล์</strong></td>
+</tr>
+<tr>
+<td><strong>Core Network</strong></td>
+<td><strong>ศูนย์กลางการจัดการข้อมูลและการเคลื่อนที่</strong> ของผู้ใช้งาน</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p010.jpg" alt="Cellular 4G/5G" /></p>
+<h3 id="กลไกเบื้องหลัง-mobility-handover">กลไกเบื้องหลัง: Mobility &amp; Handover ⭐</h3>
+<p>เมื่อผู้ใช้ (เช่น รถที่กำลังวิ่ง) เคลื่อนจากเซลล์หนึ่งไปอีกเซลล์:</p>
+<ol>
+<li><strong>Step 1: Association</strong> — อุปกรณ์เชื่อมต่อกับเสาสัญญาณปัจจุบัน (Tower A ใน Hexagon A)</li>
+<li><strong>Step 2: Coordination</strong> — ระบบ <strong>ประเมินความแรงสัญญาณ</strong> และเตรียมโอนย้าย (รถอยู่รอยต่อ A กับ B)</li>
+<li><strong>Step 3: Handover</strong> — <strong>ส่งมอบการเชื่อมต่อไปยังเสาสัญญาณใหม่</strong> (Tower B) <strong>โดยไม่ทำให้การดาวน์โหลดสะดุด</strong></li>
+</ol>
+<p><img loading="lazy" src="img/topo-p011.jpg" alt="Mobility &amp; Handover" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนวิ่งผลัด: ไม้ถูกส่งต่อจากคนหนึ่งไปอีกคนขณะวิ่ง โดยไม่ต้องหยุดการแข่งขัน</p>
+</blockquote>
+<hr />
+<h2 id="8-ตัวอย่างที่-6-เครือข่ายศูนย์ข้อมูล-data-center-the-cloud">8. ตัวอย่างที่ 6: เครือข่ายศูนย์ข้อมูล (Data Center / The Cloud)</h2>
+<p><strong>โครงสร้างพื้นฐานขนาดใหญ่เบื้องหลังบริการคลาวด์และสตรีมมิ่ง</strong></p>
+<p>โครงสร้างเป็นชั้น:</p>
+<ul>
+<li><strong>Internet</strong> (บนสุด)</li>
+<li><strong>Core Routers</strong></li>
+<li><strong>Edge Switches</strong> (เชื่อมกับ core routers แบบไขว้กันหนาแน่น)</li>
+<li><strong>Server Racks</strong> (ล่างสุด)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คุณสมบัติ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Massive Scale</strong></td>
+<td>เชื่อมต่อโฮสต์ <strong>หลายหมื่นเครื่อง</strong> ภายในศูนย์ข้อมูลเดียว</td>
+</tr>
+<tr>
+<td><strong>Load Balancing</strong></td>
+<td><strong>กระจายภาระงาน</strong> อย่างชาญฉลาด เพื่อไม่ให้เซิร์ฟเวอร์ใดทำงานหนักเกินไป</td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>ประมวลผลแบบขนานและให้บริการเนื้อหา (เช่น Netflix, Google)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p012.jpg" alt="Data Center" /></p>
+<hr />
+<h2 id="9-สรุปเปรียบเทียบ-wired-vs-wireless-architecture">9. สรุปเปรียบเทียบ: Wired vs Wireless Architecture ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>สถาปัตยกรรมแบบมีสาย (Wired)</th>
+<th>สถาปัตยกรรมแบบไร้สาย (Wireless)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ตัวกลาง (Medium)</strong></td>
+<td>สายทองแดง / เคเบิลใยแก้วนำแสง</td>
+<td>คลื่นวิทยุ (Radio Spectrum)</td>
+</tr>
+<tr>
+<td><strong>การจัดการข้อมูล (Collision Mgt.)</strong></td>
+<td>ใช้ <strong>สวิตช์แยกช่องสัญญาณ</strong> ป้องกันการชนกันของข้อมูล</td>
+<td><strong>ใช้สื่อกลางร่วมกัน</strong> ต้องมีกลไก <strong>หลีกเลี่ยง</strong> การชน</td>
+</tr>
+<tr>
+<td><strong>ความคล่องตัว (Mobility)</strong></td>
+<td>อุปกรณ์อยู่กับที่ (stationary devices)</td>
+<td>รองรับอุปกรณ์เคลื่อนที่และการโอนย้าย</td>
+</tr>
+<tr>
+<td><strong>เทคโนโลยีตัวอย่าง</strong></td>
+<td>Ethernet, Fiber Backbone</td>
+<td>WiFi (802.11), 4G/5G, Bluetooth</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/topo-p013.jpg" alt="Wired vs Wireless" /></p>
+<hr />
+<h2 id="10-วิถีแห่งข้อมูล-a-day-in-the-life-of-a-packet">10. วิถีแห่งข้อมูล: A Day in the Life of a Packet</h2>
+<p><strong>เมื่อคุณกดสตรีมภาพยนตร์ 1 เรื่อง ข้อมูลเดินทางผ่านเครือข่ายอะไรบ้าง?</strong></p>
+<ol>
+<li><strong>Step 1 (PAN/Mobile):</strong> สมาร์ทโฟนส่งคำขอผ่านสัญญาณ <strong>5G</strong></li>
+<li><strong>Step 2 (Cellular Edge):</strong> <strong>Base Station</strong> รับสัญญาณและส่งเข้าโครงข่ายหลัก</li>
+<li><strong>Step 3 (Global WAN):</strong> ข้อมูลเดินทางข้ามประเทศผ่าน <strong>Optical Backbone</strong> (ผ่าน router)</li>
+<li><strong>Step 4 (Data Center):</strong> <strong>Load Balancer</strong> ส่งคำขอไปยังเซิร์ฟเวอร์ที่เก็บภาพยนตร์</li>
+</ol>
+<p><img loading="lazy" src="img/topo-p014.jpg" alt="A Day in the Life of a Packet" /></p>
+<hr />
+<h2 id="11-the-network-of-networks-สรุปปิดท้าย">11. The Network of Networks (สรุปปิดท้าย)</h2>
+<p>วงกลมซ้อนกันจากในสุดออกนอก: <strong>PAN (1m) → LAN/Home (10m–1km) → MAN/Cellular (10km) → WAN/Internet (Global)</strong></p>
+<ul>
+<li>เครือข่ายมีหลากหลายขนาดและบริบท <strong>แต่ละประเภทถูกออกแบบมาเพื่อแก้ปัญหาเฉพาะทาง</strong></li>
+<li>จาก <strong>1 เมตรถึง 10,000 กิโลเมตร</strong> ทุกเครือข่ายสื่อสารกันได้ผ่าน <strong>โปรโตคอลมาตรฐาน</strong></li>
+<li>การหลอมรวมของเทคโนโลยีเหล่านี้คือสถาปัตยกรรมที่ขับเคลื่อนโลกดิจิทัลในปัจจุบัน</li>
+</ul>
+<p><img loading="lazy" src="img/topo-p015.jpg" alt="The Network of Networks" /></p>
+<hr />
+<h2 id="12-คำศัพท์สำคัญ">12. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internetwork</td>
+<td>เครือข่ายที่เชื่อมเครือข่ายหลายแบบเข้าด้วยกัน</td>
+<td>ถนนหลายสายต่อทางหลวง</td>
+</tr>
+<tr>
+<td>PAN</td>
+<td>เครือข่ายส่วนบุคคล ~1 m (Bluetooth)</td>
+<td>รอบตัว</td>
+</tr>
+<tr>
+<td>LAN</td>
+<td>เครือข่ายท้องถิ่น 10 m–1 km (Ethernet, WiFi)</td>
+<td>ในตึก</td>
+</tr>
+<tr>
+<td>MAN</td>
+<td>เครือข่ายระดับเมือง ~10 km (Cable, 802.16)</td>
+<td>ในเมือง</td>
+</tr>
+<tr>
+<td>WAN</td>
+<td>เครือข่ายระยะไกล 100 km+ (Optical backbone, 5G)</td>
+<td>ข้ามประเทศ</td>
+</tr>
+<tr>
+<td>Master / Slave device</td>
+<td>ตัวคุมการเชื่อมต่อ / อุปกรณ์ต่อพ่วง ใน Bluetooth</td>
+<td></td>
+</tr>
+<tr>
+<td>Piconet</td>
+<td>เครือข่าย Bluetooth ขนาดเล็ก 1 master หลาย slave</td>
+<td></td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>เราเตอร์หลักที่ต่อบ้านเข้ากับ ISP</td>
+<td>ประตูบ้าน</td>
+</tr>
+<tr>
+<td>Convergence</td>
+<td>รวมข้อมูล elastic และ time-sensitive บนเครือข่ายเดียว</td>
+<td></td>
+</tr>
+<tr>
+<td>Elastic / Time-sensitive</td>
+<td>รอได้ (เว็บ) / ต้องทันเวลา (สตรีม)</td>
+<td></td>
+</tr>
+<tr>
+<td>NAT</td>
+<td>แปลง IP ภายในหลายตัวเป็น IP สาธารณะตัวเดียว</td>
+<td>ที่อยู่คอนโด</td>
+</tr>
+<tr>
+<td>Enterprise LAN</td>
+<td>เครือข่ายองค์กรแบบมีสาย ลำดับชั้น router → switch → end systems</td>
+<td></td>
+</tr>
+<tr>
+<td>VLAN</td>
+<td>จัดกลุ่ม LAN ด้วยซอฟต์แวร์ตามแผนก ไม่ใช่ตามสาย</td>
+<td></td>
+</tr>
+<tr>
+<td>Infrastructure mode</td>
+<td>WiFi ผ่าน Access Point</td>
+<td></td>
+</tr>
+<tr>
+<td>Ad-hoc mode</td>
+<td>WiFi คุยกันตรงไม่ผ่าน AP</td>
+<td></td>
+</tr>
+<tr>
+<td>UE</td>
+<td>User Equipment อุปกรณ์มือถือ ยืนยันตัวด้วย SIM</td>
+<td></td>
+</tr>
+<tr>
+<td>eNode-B</td>
+<td>Base station ของ 4G จัดการคลื่นในเซลล์</td>
+<td>เสา</td>
+</tr>
+<tr>
+<td>Core Network</td>
+<td>ศูนย์กลางจัดการข้อมูลและการเคลื่อนที่</td>
+<td></td>
+</tr>
+<tr>
+<td>Handover</td>
+<td>ส่งต่อการเชื่อมต่อไปเสาใหม่โดยไม่สะดุด</td>
+<td>วิ่งผลัด</td>
+</tr>
+<tr>
+<td>Load Balancing</td>
+<td>กระจายภาระงานไปหลายเซิร์ฟเวอร์</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-สรุปท้ายบท-จุดที่มักออกสอบ">13. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>อินเทอร์เน็ต = เครือข่ายที่เชื่อมเครือข่ายเข้าด้วยกัน</strong> (ภูมิภาค, องค์กร, มือถือ ต่อเข้าโครงข่ายหลัก)</li>
+<li><strong>ตารางขนาดเครือข่าย:</strong> PAN 1 m Bluetooth / LAN 10 m–1 km Ethernet, WiFi / MAN 10 km Cable, 802.16 / WAN 100 km+ Optical backbone, 5G / Internet 10,000 km TCP/IP</li>
+<li><strong>PAN:</strong> master คุมการเชื่อมต่อและความถี่, slave ต่อแบบ Piconet, ใช้ Bluetooth</li>
+<li><strong>Home network:</strong> modem + gateway, convergence ของ elastic และ time-sensitive, IoT</li>
+<li><strong>NAT:</strong> IP ภายใน (เช่น 10.0.0.x) มีความหมายแค่ในบ้าน → NAT router แปลงเป็น IP สาธารณะเดียว (เช่น 138.76.29.7)</li>
+<li><strong>Enterprise LAN:</strong> link-layer switches ขจัด collision, 1–10 Gbps, resource sharing</li>
+<li><strong>VLAN:</strong> physical = กลุ่มตามสาย / logical = กลุ่มตามแผนกหรือความปลอดภัยด้วยซอฟต์แวร์</li>
+<li><strong>WiFi:</strong> infrastructure mode (ผ่าน AP) vs ad-hoc mode (คุยตรง); แชร์ bandwidth ในรัศมี</li>
+<li><strong>Cellular:</strong> UE (SIM), eNode-B (จัดการคลื่นในเซลล์), core network (จัดการข้อมูลและ mobility)</li>
+<li><strong>Handover 3 ขั้น:</strong> Association → Coordination → Handover (ไม่สะดุด)</li>
+<li><strong>Data center:</strong> core routers → edge switches → server racks; massive scale, load balancing</li>
+<li><strong>Wired vs Wireless:</strong> สื่อกลาง, collision (switch แยกช่อง vs หลีกเลี่ยงการชน), mobility, ตัวอย่างเทคโนโลยี</li>
+<li><strong>Packet journey 4 ขั้น:</strong> 5G → base station → optical backbone WAN → load balancer ใน data center</li>
+</ol>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../ch2-application-layer/index.html"><small>← บทก่อนหน้า</small><span>Chapter 2 — Application Layer (Lecture 3 &amp; 4)</span></a><a class="pg next" href="../internet-architecture/index.html"><small>บทถัดไป →</small><span>โครงข่ายพิมพ์เขียว — สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต (Internet Architecture)</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

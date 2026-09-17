@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Chapter 6 - External Memory</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Chapter 6 - External Memory</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "Access time ของดิสก์ คำนวณจากอะไร?",
+    choices: [
+      "Seek time + Transfer time",
+      "Seek time + Rotational delay",
+      "Rotational delay + Transfer time",
+      "Seek time เพียงอย่างเดียว"
+    ],
+    correct: 1,
+    explain: [
+      "Transfer time เป็นเวลาที่แยกต่างหากหลังจากเข้าตำแหน่งได้แล้ว ไม่ได้รวมอยู่ใน access time",
+      "ถูก — สไลด์นิยาม Access time = seek time + rotational delay คือเวลาเตรียมตำแหน่งก่อนอ่าน/เขียนจริง",
+      "ขาด seek time ไป",
+      "ขาด rotational delay ไป ไม่ครบตามนิยาม"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RAID ย่อมาจากอะไร?",
+    choices: [
+      "Random Access Interface Device",
+      "Reliable Automatic Input Device",
+      "Redundant Array of Independent Disks",
+      "Rapid Array of Integrated Disks"
+    ],
+    correct: 2,
+    explain: [
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — ตรงตามที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RAID มีทั้งหมดกี่ level ตามที่สไลด์กล่าวถึง?",
+    choices: ["7 levels", "5 levels", "8 levels", "6 levels"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ RAID มี 7 levels คือ 0 ถึง 6",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RAID level ใดที่ใช้เทคนิค \"Mirroring\" (ทำสำเนาข้อมูลซ้ำทั้งหมด)?",
+    choices: ["RAID 0", "RAID 4", "RAID 5", "RAID 1"],
+    correct: 3,
+    explain: [
+      "RAID 0 คือ striping แบบไม่มี redundancy เลย",
+      "RAID 4 ใช้ parity ไม่ใช่ mirroring",
+      "RAID 5 ใช้ parity แบบกระจาย ไม่ใช่ mirroring",
+      "ถูก — สไลด์ระบุว่า RAID 1 คือ Mirroring ทำสำเนาข้อมูลทั้งหมด"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RAID level ใดกระจาย parity strip ไปทั่วทุกดิสก์แบบ round-robin แทนที่จะรวมไว้ในดิสก์เดียว?",
+    choices: ["RAID 3", "RAID 5", "RAID 4", "RAID 2"],
+    correct: 1,
+    explain: [
+      "RAID 3 ใช้ parity disk เดียวแบบ byte-level striping",
+      "ถูก — สไลด์ระบุว่า RAID 5 กระจายพาริตีแบบ round-robin ไปทุกดิสก์",
+      "RAID 4 รวม parity ไว้ในดิสก์เดียว (นี่คือปัญหาที่ RAID 5 แก้)",
+      "RAID 2 ใช้ Hamming code แบบ bit-level ไม่ใช่การกระจายแบบ round-robin"
+    ]
+  },
+  {
+    type: "recall",
+    q: "SSD มีข้อได้เปรียบเหนือ HDD ในด้านใดตามสไลด์?",
+    choices: [
+      "IOPS สูง ทนทานกว่า และประหยัดพลังงานกว่า",
+      "ราคาต่อ GB ถูกกว่าเสมอ",
+      "ไม่ต้องมีการจัดการ wear-leveling เลย",
+      "เก็บข้อมูลได้มากกว่าเสมอในทุกกรณี"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุข้อได้เปรียบของ SSD ได้แก่ IOPS สูง, ทนทาน, อายุการใช้งานยาวขึ้น, ใช้พลังงานต่ำกว่า",
+      "ตามตารางเปรียบเทียบในสไลด์ SSD มักมีราคาต่อ GB แพงกว่า HDD ไม่ใช่ถูกกว่า",
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า SSD ต้องมี wear-leveling เพื่อยืดอายุการใช้งาน",
+      "ตามตารางเปรียบเทียบ ความจุสูงสุดของ HDD มักมากกว่า SSD"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ปัญหาเฉพาะของ SSD ที่ HDD ไม่เจอคืออะไร?",
+    choices: [
+      "ต้องหมุนจานแม่เหล็กตลอดเวลา",
+      "ต้องมี read-write head คอยเคลื่อนที่",
+      "flash เขียนซ้ำได้จำกัดครั้ง ประสิทธิภาพลดลงเมื่อใช้นาน",
+      "ใช้พลังงานสูงกว่า HDD เสมอ"
+    ],
+    correct: 2,
+    explain: [
+      "การหมุนจานแม่เหล็กเป็นลักษณะของ HDD ไม่ใช่ปัญหาของ SSD",
+      "read-write head ที่เคลื่อนที่เป็นลักษณะของ HDD ไม่ใช่ SSD",
+      "ถูก — สไลด์ระบุว่า SSD มีปัญหาเฉพาะคือ flash เขียนซ้ำได้จำกัดครั้ง และประสิทธิภาพลดลงเมื่อใช้งานไปนาน",
+      "ตรงข้ามกับสไลด์ที่ระบุว่า SSD ใช้พลังงานต่ำกว่า HDD"
+    ]
+  },
+  {
+    type: "recall",
+    q: "CD มาตรฐานใช้แผ่นขนาดกี่ cm และบันทึกเสียงได้กี่นาที?",
+    choices: [
+      "8 cm, 30 นาที",
+      "15 cm, 90 นาที",
+      "12 cm, 20 นาที",
+      "12 cm, มากกว่า 60 นาที"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับขนาดและเวลาที่สไลด์ระบุ",
+      "ไม่มีมาตรฐาน CD ขนาด 15 cm ตามที่สไลด์กล่าวถึง",
+      "ขนาด 12 cm ถูกแต่ระยะเวลาไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ CD มาตรฐานใช้แผ่น 12 cm และบันทึกได้มากกว่า 60 นาที"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ข้อใดคือความแตกต่างหลักระหว่าง CD-R กับ CD-RW?",
+    choices: [
+      "CD-R เขียนซ้ำได้ ส่วน CD-RW เขียนได้ครั้งเดียว",
+      "CD-R เขียนได้ครั้งเดียว ส่วน CD-RW เขียนซ้ำและลบได้หลายครั้ง",
+      "ทั้งสองอ่านได้อย่างเดียว เขียนไม่ได้เลย",
+      "ไม่มีความแตกต่างกัน ใช้แทนกันได้ทุกกรณี"
+    ],
+    correct: 1,
+    explain: [
+      "สลับความหมายกัน ผิด",
+      "ถูก — สไลด์ระบุ CD-R เป็น write-once ส่วน CD-RW ใช้วัสดุ phase-change ที่เขียนซ้ำได้หลายครั้ง",
+      "ทั้งสองแบบเขียนได้ ต่างกันที่จำนวนครั้ง ไม่ใช่ read-only",
+      "สไลด์ระบุความแตกต่างชัดเจนระหว่างสองแบบนี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Blu-ray ใช้เลเซอร์ความยาวคลื่นเท่าไหร่ตามสไลด์?",
+    choices: ["405 nm", "780 nm", "650 nm", "1200 nm"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ Blu-ray ใช้เลเซอร์ 405 nm (blue-violet)",
+      "780 nm คือความยาวคลื่นที่ CD ใช้",
+      "650 nm คือความยาวคลื่นที่ DVD ใช้",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "เทปแม่เหล็ก (Magnetic Tape) มีการบันทึกข้อมูลแบบใด?",
+    choices: [
+      "Random access เหมือนดิสก์",
+      "เขียนได้เฉพาะ 1 ครั้งเท่านั้น",
+      "Serial recording ตามลำดับไปตาม track",
+      "ไม่สามารถลบข้อมูลได้เลย"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่าเทปเข้าถึงข้อมูลแบบเรียงลำดับ ไม่ใช่ random access เหมือนดิสก์",
+      "เทปสามารถเขียนและเขียนทับข้อมูลได้หลายครั้ง ไม่ใช่ write-once",
+      "ถูก — สไลด์ระบุว่าข้อมูลบนเทปถูกจัดเรียงเป็น serial recording ไปตามความยาวของ track",
+      "เทปสามารถลบและเขียนข้อมูลใหม่ทับได้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Winchester head ถูกออกแบบมาให้ทำงานอย่างไร?",
+    choices: [
+      "สัมผัสกับผิวดิสก์ตลอดเวลาขณะทำงาน",
+      "ใช้แม่เหล็กถาวรที่ไม่เคลื่อนที่เลย",
+      "ทำงานเฉพาะกับแผ่น optical เท่านั้น",
+      "ลอยตัวด้วยแรงลมจากการหมุนของดิสก์ ให้อยู่ใกล้ผิวดิสก์มากขึ้น"
+    ],
+    correct: 3,
+    explain: [
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า Winchester head ไม่สัมผัสผิวดิสก์ขณะดิสก์หมุน (ต่างจาก contact head แบบฟลอปปี้)",
+      "Winchester head เป็นหัวอ่านแม่เหล็กที่เคลื่อนที่ได้ ไม่ใช่แม่เหล็กถาวรที่อยู่นิ่ง",
+      "Winchester head เป็นเทคโนโลยีของฮาร์ดดิสก์แม่เหล็ก ไม่เกี่ยวกับแผ่น optical",
+      "ถูก — สไลด์ระบุว่า Winchester head เป็น aerodynamic foil ที่ลอยด้วยแรงลมจากการหมุนของดิสก์ ทำให้อยู่ใกล้ผิวดิสก์ได้มากขึ้น"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม seek time และ rotational delay จึงถูกรวมเป็น \"access time\"?",
+    choices: [
+      "เพราะทั้งสองคือเวลาที่ใช้ในการส่งข้อมูลจริง",
+      "เพราะเป็นเวลาที่ดิสก์หยุดหมุนสนิท",
+      "เพราะทั้งสองคือเวลาที่ต้องใช้ \"เตรียมตำแหน่ง\" ก่อนจะเริ่มอ่าน/เขียนข้อมูลจริง",
+      "เพราะเป็นเวลาที่ไม่เกี่ยวกับการทำงานของดิสก์เลย"
+    ],
+    correct: 2,
+    explain: [
+      "การส่งข้อมูลจริงคือ transfer time ซึ่งแยกต่างหากจาก access time",
+      "ดิสก์ยังคงหมุนอยู่ตลอดระหว่าง rotational delay ไม่ได้หยุดสนิท",
+      "ถูก — ทั้งสองเป็นขั้นตอนก่อนเข้าถึงข้อมูลจริง จึงถูกนับรวมเป็นเวลาที่ต้องเสียไปก่อนเริ่มอ่าน/เขียน",
+      "ทั้งสองเป็นส่วนสำคัญของการทำงานของดิสก์โดยตรง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด RAID 0 จึงไม่ถือว่ามี \"ความทนทานต่อความเสียหาย (fault tolerance)\" เลย?",
+    choices: [
+      "เพราะไม่มีการเก็บ redundancy/parity ใด ๆ ถ้าดิสก์ตัวใดตัวหนึ่งเสีย ข้อมูลทั้งหมดจะเสียหาย",
+      "เพราะ RAID 0 ใช้ดิสก์แค่ตัวเดียว",
+      "เพราะ RAID 0 เก็บข้อมูลซ้ำสองชุดเสมอ",
+      "เพราะ RAID 0 ใช้ Hamming code"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — RAID 0 กระจายข้อมูล (striping) เพื่อความเร็วเท่านั้น ไม่มีข้อมูลสำรองเลย จึงไม่ทนต่อดิสก์เสีย",
+      "RAID 0 ใช้ดิสก์หลายตัวเพื่อกระจายข้อมูล ไม่ใช่ตัวเดียว",
+      "การเก็บข้อมูลซ้ำสองชุดคือ RAID 1 (Mirroring) ไม่ใช่ RAID 0",
+      "Hamming code เป็นเทคนิคของ RAID 2 ไม่ใช่ RAID 0"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด RAID 1 (Mirroring) จึงมี \"ต้นทุนสูง\" เป็นข้อเสียหลัก?",
+    choices: [
+      "เพราะต้องใช้ CPU แรงมากเป็นพิเศษ",
+      "เพราะอ่านข้อมูลได้ช้ากว่าดิสก์เดี่ยวมาก",
+      "เพราะไม่รองรับการกู้คืนข้อมูลเลย",
+      "เพราะต้องใช้พื้นที่ดิสก์เพิ่มเป็นสองเท่าเพื่อเก็บข้อมูลชุดเดียวกันซ้ำ"
+    ],
+    correct: 3,
+    explain: [
+      "RAID 1 ไม่ได้ต้องการ CPU พิเศษมากไปกว่าการทำสำเนาข้อมูล",
+      "สไลด์ระบุว่า RAID 1 อ่านได้เร็ว เพราะเลือกอ่านจากดิสก์ตัวใดตัวหนึ่งในสองตัวก็ได้",
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า RAID 1 กู้คืนข้อมูลง่ายมากเมื่อดิสก์ตัวหนึ่งเสีย",
+      "ถูก — สไลด์ระบุว่าข้อเสียหลักของ RAID 1 คือต้นทุน เพราะต้องมีดิสก์สำรองเก็บข้อมูลชุดเดียวกันซ้ำทุกชุด"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม RAID 4 จึงมี \"write penalty\" (ต้องอ่าน-เขียนหลายครั้งต่อการเขียนหนึ่งครั้ง)?",
+    choices: [
+      "เพราะ RAID 4 ไม่มี parity เลย",
+      "เพราะต้องอ่าน strip และ parity เดิมมาคำนวณใหม่ แล้วเขียนกลับไปที่ parity disk ตัวเดียว",
+      "เพราะข้อมูลถูกเก็บซ้ำสองชุดเสมอเหมือน RAID 1",
+      "เพราะ RAID 4 ใช้ดิสก์เพียงตัวเดียวทั้งระบบ"
+    ],
+    correct: 1,
+    explain: [
+      "RAID 4 มี parity disk หนึ่งตัวเสมอ ซึ่งเป็นต้นเหตุของ write penalty นี้เอง",
+      "ถูก — สไลด์ระบุว่าการเขียนแต่ละครั้งต้องอ่าน user strip เดิมและ parity strip เดิมก่อน แล้วเขียนทั้งสองกลับไป รวมเป็น 2 อ่าน + 2 เขียน ต่อการเขียนหนึ่งครั้ง",
+      "RAID 4 ใช้ parity ไม่ใช่การเก็บซ้ำทั้งชุดแบบ mirroring",
+      "RAID 4 ใช้ดิสก์หลายตัว (data disks + parity disk) ไม่ใช่ตัวเดียว"
+    ]
+  },
+  {
+    type: "understand",
+    q: "RAID 5 แก้ปัญหาคอขวด (bottleneck) ของ RAID 4 ได้อย่างไร?",
+    choices: [
+      "ลบ parity ออกไปทั้งหมด",
+      "เพิ่ม parity disk เป็นสองตัวแยกกัน",
+      "ใช้ดิสก์ตัวเดียวในการเก็บข้อมูลทั้งหมด",
+      "กระจาย parity strip ไปทั่วทุกดิสก์ ไม่ให้ดิสก์ใดต้องรับภาระตลอดเวลา"
+    ],
+    correct: 3,
+    explain: [
+      "RAID 5 ยังมี parity อยู่ เพียงแต่กระจายตำแหน่งที่เก็บ",
+      "การมี parity สองชุดแยกกันคือ RAID 6 ไม่ใช่ RAID 5",
+      "RAID 5 ยังใช้ดิสก์หลายตัวทำงานร่วมกันเหมือนเดิม",
+      "ถูก — การกระจาย parity แบบ round-robin ทำให้ภาระการอ่าน-เขียน parity กระจายไปทุกดิสก์แทนที่จะกระจุกที่ดิสก์เดียวเหมือน RAID 4"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด RAID 6 จึงทนทานต่อความเสียหายมากกว่า RAID 5?",
+    choices: [
+      "เพราะ RAID 6 ไม่มี parity เลย",
+      "เพราะ RAID 6 ใช้ดิสก์น้อยกว่า RAID 5",
+      "เพราะ RAID 6 เก็บ parity สองชุดแยกกัน ทนต่อดิสก์เสียพร้อมกันสูงสุด 2 ตัวได้",
+      "เพราะ RAID 6 ไม่ต้องเขียนข้อมูลซ้ำเลย"
+    ],
+    correct: 2,
+    explain: [
+      "RAID 6 มี parity มากกว่า RAID 5 ไม่ใช่ไม่มีเลย",
+      "RAID 6 ต้องการดิสก์อย่างน้อยเท่ากับหรือมากกว่า RAID 5 เพื่อเก็บ parity สองชุด",
+      "ถูก — สไลด์ระบุว่า RAID 6 คำนวณ parity สองชุดเก็บแยกดิสก์กัน ต้องมีดิสก์เสียพร้อมกันถึง 3 ตัวถึงจะข้อมูลหาย จึงทนทานกว่า RAID 5 ที่ทนได้แค่ 1 ตัว",
+      "RAID 6 ยังต้องเขียน parity ทั้งสองชุดทุกครั้งที่มีการเขียนข้อมูล (write penalty สูงกว่า RAID 5 ด้วยซ้ำ)"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด SSD จึงมีประสิทธิภาพลดลงเมื่อใช้งานไปนาน ๆ ต่างจาก HDD?",
+    choices: [
+      "เพราะก่อนเขียนข้อมูลใหม่ทับ flash memory ต้องลบทั้ง block ก่อนเสมอ ทำให้ยิ่งใช้นานยิ่งมีขั้นตอนแทรกมากขึ้น",
+      "เพราะ SSD มีชิ้นส่วนที่เคลื่อนที่และสึกหรอเหมือน HDD",
+      "เพราะ SSD ร้อนขึ้นเรื่อย ๆ จนช้าลงเสมอ",
+      "เพราะ SSD ต้องหมุนจานแม่เหล็กเร็วขึ้นเรื่อย ๆ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่าก่อนเขียนทับต้องอ่าน block เดิมมาใส่ buffer แล้วลบทั้ง block ก่อนเขียนกลับ ขั้นตอนนี้ทำให้ช้าลงเมื่อใช้งานไปนาน",
+      "SSD ไม่มีชิ้นส่วนเคลื่อนที่ นี่คือจุดเด่นที่ต่างจาก HDD ไม่ใช่สาเหตุของปัญหา",
+      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่เหตุผลหลักที่กล่าวถึง",
+      "SSD ไม่มีจานแม่เหล็กหรือการหมุนใด ๆ เลย เป็นลักษณะของ HDD"
+    ]
+  },
+  {
+    type: "understand",
+    q: "Wear-leveling ในการจัดการ SSD มีจุดประสงค์อะไร?",
+    choices: [
+      "เพิ่มความจุของ SSD ให้มากขึ้น",
+      "กระจายการเขียนข้อมูลให้ทั่วทุก block เพื่อไม่ให้ block ใดเสียก่อนเวลา",
+      "ทำให้ SSD อ่านข้อมูลเร็วขึ้นเท่านั้น",
+      "ลบข้อมูลเก่าทิ้งอัตโนมัติทุกวัน"
+    ],
+    correct: 1,
+    explain: [
+      "wear-leveling ไม่ได้เพิ่มความจุ แต่จัดการอายุการใช้งานของพื้นที่ที่มีอยู่",
+      "ถูก — สไลด์ระบุ wear-leveling algorithm ใช้กระจายการเขียนให้ทั่วทุก block เพื่อยืดอายุการใช้งานโดยรวม",
+      "wear-leveling ไม่ได้เกี่ยวกับความเร็วในการอ่านโดยตรง",
+      "ไม่มีข้อมูลนี้ในสไลด์ wear-leveling ไม่ใช่การลบข้อมูลอัตโนมัติ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด CD-ROM จึงเหมาะกับการแจกจ่ายข้อมูลจำนวนมากให้ผู้ใช้จำนวนมาก แต่ไม่เหมาะกับงานเฉพาะบุคคล?",
+    choices: [
+      "เพราะ CD-ROM เขียนซ้ำได้ไม่จำกัดครั้ง",
+      "เพราะทำ master ครั้งแรกต้นทุนสูง แต่ปั๊มสำเนาจำนวนมากทำได้ถูกมาก",
+      "เพราะ CD-ROM มีความจุมากกว่า Blu-ray",
+      "เพราะ CD-ROM ไม่ต้องใช้เลเซอร์ในการอ่าน"
+    ],
+    correct: 1,
+    explain: [
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า CD-ROM เป็น read-only แก้ไข/เขียนซ้ำไม่ได้",
+      "ถูก — สไลด์ระบุว่าค่าใช้จ่ายในการเขียนครั้งแรก (สร้าง master) สูง จึงไม่เหมาะกับงานเฉพาะบุคคล แต่ปั๊มสำเนาจำนวนมากได้ถูกมาก",
+      "ตรงข้ามกับความจริง Blu-ray มีความจุมากกว่า CD-ROM มาก",
+      "CD-ROM ยังต้องใช้เลเซอร์อ่านค่า pit/land บนแผ่นเหมือนแผ่นออปติคัลอื่น ๆ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Blu-ray จึงเก็บข้อมูลได้ความหนาแน่นสูงกว่า DVD และ CD มาก?",
+    choices: [
+      "เพราะ Blu-ray ใช้แผ่นที่มีขนาดใหญ่กว่า CD และ DVD",
+      "เพราะ Blu-ray หมุนเร็วกว่ามาก",
+      "เพราะ Blu-ray ไม่ได้ใช้เลเซอร์ในการอ่านเลย",
+      "เพราะใช้เลเซอร์ความยาวคลื่นสั้นกว่า (405 nm) โฟกัสจุดอ่าน/เขียนได้ละเอียดกว่า"
+    ],
+    correct: 3,
+    explain: [
+      "ขนาดแผ่น Blu-ray, DVD, CD ส่วนใหญ่ใกล้เคียงกัน (12 cm) ไม่ใช่ปัจจัยที่ทำให้ความจุต่างกันมาก",
+      "ไม่มีข้อมูลนี้ในสไลด์ ความเร็วการหมุนไม่ใช่ปัจจัยหลักที่กล่าวถึง",
+      "Blu-ray ยังคงใช้เลเซอร์อ่าน/เขียนเหมือนแผ่นออปติคัลอื่น เพียงแต่ความยาวคลื่นสั้นกว่า",
+      "ถูก — เลเซอร์ความยาวคลื่นสั้นกว่า (405 nm เทียบกับ 650 nm ของ DVD และ 780 nm ของ CD) โฟกัสจุดได้เล็กและแม่นยำกว่า จึงเก็บ pit ได้ถี่กว่า"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Fixed-head disk จึงมีความเร็วในการเข้าถึงข้อมูลสูงกว่า Movable-head disk โดยทั่วไป?",
+    choices: [
+      "เพราะมี read-write head ประจำอยู่ทุก track อยู่แล้ว จึงไม่ต้องเสียเวลาเคลื่อนหัวอ่านไปหา track (ไม่มี seek time)",
+      "เพราะ Fixed-head disk หมุนเร็วกว่าเสมอ",
+      "เพราะ Fixed-head disk มีความจุมากกว่าเสมอ",
+      "เพราะ Fixed-head disk ไม่ต้องมี rotational delay เลย"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า Fixed-head มีหัวอ่านหนึ่งหัวต่อหนึ่ง track ทำให้เลือก track ได้ด้วยวิธีอิเล็กทรอนิกส์ ไม่ต้องเคลื่อนหัวอ่านจริง จึงไม่มี seek time",
+      "ไม่มีข้อมูลนี้ในสไลด์ ความเร็วรอบไม่ใช่ปัจจัยที่ต่างกันระหว่างสองแบบนี้โดยตรง",
+      "การมีหัวอ่านทุก track มักทำให้ต้นทุนสูงและความจุต่อพื้นที่ไม่ได้มากกว่าเสมอไป",
+      "Fixed-head disk ยังคงต้องมี rotational delay เหมือนเดิม เพียงแต่ไม่มี seek time เท่านั้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Magnetic Tape จึงยังถูกใช้เก็บข้อมูล backup/archive อยู่ แม้จะเข้าถึงข้อมูลได้ช้ากว่าดิสก์มาก?",
+    choices: [
+      "เพราะเทปเร็วกว่า SSD เสมอ",
+      "เพราะเทปเข้าถึงข้อมูลแบบสุ่ม (random access) ได้ดีกว่าดิสก์",
+      "เพราะเทปมีต้นทุนต่อความจุถูก เก็บข้อมูลได้มากในราคาประหยัด ไม่ต้องเรียกใช้บ่อย",
+      "เพราะเทปไม่สามารถเก็บข้อมูลได้นาน"
+    ],
+    correct: 2,
+    explain: [
+      "ตรงข้ามกับความจริง เทปช้ากว่า SSD มาก",
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่าเทปเป็น serial recording ไม่ใช่ random access",
+      "ถูก — จุดเด่นของเทปคือต้นทุนต่อความจุถูกมาก (ดูตาราง LTO ที่ความจุขึ้นถึงหลาย TB) เหมาะกับงาน backup ที่เน้นความจุมากกว่าความเร็ว",
+      "เทปสามารถเก็บข้อมูลได้นานและเป็นสื่อยอดนิยมสำหรับ archive ระยะยาว"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "บริษัทหนึ่งต้องการระบบจัดเก็บข้อมูลที่ทนต่อการที่ดิสก์เสียพร้อมกันได้สูงสุดถึง 2 ตัว และยอมรับต้นทุนจากการมี parity เพิ่มได้ ควรเลือก RAID level ใด?",
+    choices: ["RAID 0", "RAID 6", "RAID 1", "RAID 5"],
+    correct: 1,
+    explain: [
+      "RAID 0 ไม่มี redundancy เลย ดิสก์เสียแม้ตัวเดียวข้อมูลก็หายหมด",
+      "ถูก — RAID 6 เก็บ parity สองชุดแยกกัน ทนต่อดิสก์เสียพร้อมกันได้สูงสุด 2 ตัวตามที่โจทย์ต้องการ",
+      "RAID 1 ทนได้แค่ดิสก์เสีย 1 ตัวในคู่ mirror เดียวกัน ไม่ถึง 2 ตัวพร้อมกันในทุกกรณี",
+      "RAID 5 ทนต่อดิสก์เสียได้สูงสุด 1 ตัวเท่านั้น"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ระบบงานที่ต้องเขียนข้อมูลขนาดเล็กบ่อยมาก (small I/O write) และต้องการเลี่ยง write penalty ที่กระจุกอยู่ในดิสก์เดียว ควรเลือก RAID level ใดระหว่าง RAID 4 กับ RAID 5?",
+    choices: [
+      "RAID 4 เพราะรวม parity ไว้ดิสก์เดียว",
+      "ทั้งสองแบบไม่มีความแตกต่างกันเลยในแง่นี้",
+      "ควรใช้ RAID 0 แทนเพราะเร็วที่สุดและไม่มีปัญหาใด ๆ",
+      "RAID 5 เพราะกระจาย parity ไปทุกดิสก์ ลดคอขวดจากการเขียนซ้ำที่ดิสก์เดียว"
+    ],
+    correct: 3,
+    explain: [
+      "การรวม parity ไว้ดิสก์เดียวคือจุดอ่อนของ RAID 4 ที่ทำให้เกิดคอขวดเวลาต้องเขียนบ่อย ๆ",
+      "ทั้งสองต่างกันชัดเจนในเรื่องตำแหน่งเก็บ parity ซึ่งกระทบ write performance โดยตรง",
+      "RAID 0 ไม่มี parity เลย จึงไม่ทนต่อดิสก์เสีย ไม่เหมาะกับงานที่ต้องการความปลอดภัยของข้อมูลด้วย",
+      "ถูก — RAID 5 กระจาย parity ไปทุกดิสก์แบบ round-robin ทำให้ภาระการเขียน parity ไม่กระจุกที่ดิสก์เดียวเหมือน RAID 4"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการผลิตแผ่นเพลงจำนวน 100,000 แผ่นเพื่อแจกจ่ายแบบอ่านอย่างเดียว ควรเลือกใช้เทคโนโลยีใด?",
+    choices: [
+      "CD-ROM เพราะปั๊มสำเนาจำนวนมากได้ในราคาถูกและเหมาะกับการแจกจ่ายจำนวนมาก",
+      "CD-RW เพราะเขียนซ้ำได้หลายครั้ง",
+      "CD-R เพราะเขียนได้ครั้งเดียว",
+      "Magnetic tape เพราะเข้าถึงข้อมูลได้เร็วที่สุด"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า CD-ROM เหมาะกับการแจกจ่ายข้อมูลจำนวนมากให้ผู้ใช้จำนวนมาก เพราะปั๊มสำเนาได้ถูกมากหลังจากทำ master แล้ว",
+      "CD-RW เหมาะกับงานที่ต้องแก้ไขซ้ำ ๆ ไม่ใช่การผลิตจำนวนมากเพื่อแจกจ่าย",
+      "CD-R เหมาะกับการเขียนสำเนาจำนวนน้อย ๆ ไม่ใช่การผลิตจำนวนมากระดับแสนแผ่น",
+      "เทปเข้าถึงข้อมูลได้ช้ากว่าดิสก์ออปติคัลมาก และไม่ได้ออกแบบมาสำหรับแจกจ่ายเพลง"
+    ]
+  },
+  {
+    type: "apply",
+    q: "มือถือเครื่องหนึ่งต้องการพื้นที่เก็บข้อมูลที่ประหยัดพลังงาน ทนต่อการกระแทก และให้ IOPS สูง ควรเลือกใช้อุปกรณ์เก็บข้อมูลชนิดใดระหว่าง HDD กับ SSD?",
+    choices: [
+      "HDD เพราะราคาต่อ GB ถูกกว่า",
+      "ทั้งสองแบบให้ผลลัพธ์เหมือนกันทุกประการ",
+      "SSD เพราะไม่มีชิ้นส่วนเคลื่อนที่ ทนกระแทก ประหยัดพลังงาน และ IOPS สูงกว่า",
+      "Magnetic tape เพราะพกพาง่ายที่สุด"
+    ],
+    correct: 2,
+    explain: [
+      "แม้ HDD ถูกกว่าต่อ GB แต่ไม่ตอบโจทย์เรื่องทนกระแทกและประหยัดพลังงานตามที่โจทย์ต้องการ",
+      "สไลด์เปรียบเทียบไว้ชัดเจนว่า SSD กับ HDD ต่างกันหลายด้าน",
+      "ถูก — คุณสมบัติที่โจทย์ต้องการ (ประหยัดพลังงาน, ทนกระแทก, IOPS สูง) ตรงกับข้อได้เปรียบของ SSD ตามสไลด์ทั้งหมด",
+      "เทปไม่เหมาะกับอุปกรณ์พกพาขนาดเล็กที่ต้องเข้าถึงข้อมูลบ่อยและเร็วแบบมือถือ"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ระบบไฟล์หนึ่งต้องอ่านข้อมูลจากตำแหน่งเดิมซ้ำ ๆ บ่อยมาก การใช้ Fixed-head disk แทน Movable-head disk จะช่วยอย่างไร?",
+    choices: [
+      "เพิ่มความจุของดิสก์โดยตรง",
+      "ลด seek time ลงได้มาก เพราะไม่ต้องเคลื่อนหัวอ่านไปมาระหว่าง track",
+      "ทำให้ดิสก์ราคาถูกลง",
+      "ไม่มีผลใด ๆ เพราะทั้งสองแบบเหมือนกันทุกประการ"
+    ],
+    correct: 1,
+    explain: [
+      "การเลือกชนิดหัวอ่านไม่ได้เพิ่มความจุของดิสก์โดยตรง",
+      "ถูก — Fixed-head มีหัวอ่านประจำทุก track จึงไม่ต้องเสีย seek time ในการเคลื่อนหัวอ่านไปมา เหมาะกับการอ่านตำแหน่งเดิมซ้ำ ๆ",
+      "โดยทั่วไป Fixed-head disk มีต้นทุนสูงกว่า ไม่ใช่ถูกกว่า เพราะต้องมีหัวอ่านจำนวนมาก",
+      "สไลด์ระบุความแตกต่างชัดเจนระหว่างสองแบบนี้ในเรื่อง seek time"
+    ]
+  },
+  {
+    type: "apply",
+    q: "บริษัทต้องการเก็บข้อมูล backup ปริมาณมหาศาลที่ไม่ค่อยถูกเรียกใช้ โดยเน้นต้นทุนต่อ GB ให้ต่ำที่สุด ควรเลือกสื่อบันทึกข้อมูลชนิดใดจากที่เรียนมา?",
+    choices: [
+      "Magnetic Tape (เช่น LTO) เพราะต้นทุนต่อความจุถูกมากและเหมาะกับข้อมูลที่เรียกใช้ไม่บ่อย",
+      "SSD เพราะเร็วที่สุด",
+      "Blu-ray เพราะความจุมากที่สุดในบรรดา optical",
+      "RAID 0 เพราะเร็วที่สุดและไม่มีความเสี่ยงใด ๆ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — เทปมีต้นทุนต่อความจุถูกที่สุดในบรรดาสื่อที่เรียนมา เหมาะกับข้อมูลปริมาณมากที่ไม่ต้องเรียกใช้บ่อย",
+      "SSD เร็วแต่ราคาต่อ GB แพงกว่ามาก ไม่เหมาะกับ backup ปริมาณมหาศาลที่เน้นต้นทุนต่ำ",
+      "Blu-ray ความจุยังน้อยกว่าเทปรุ่นใหม่มาก และไม่เหมาะกับการเก็บข้อมูลปริมาณมหาศาลระดับองค์กร",
+      "RAID 0 ไม่มี redundancy เลย เสี่ยงข้อมูลหายทั้งหมดถ้าดิสก์เสีย จึงไม่เหมาะกับงาน backup"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

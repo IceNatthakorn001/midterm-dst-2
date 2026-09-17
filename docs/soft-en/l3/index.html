@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 3 – Requirement Engineering · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+      <ol><li><a href="#1-software-requirements-คืออะไร">1. Software Requirements คืออะไร</a></li><li><a href="#2-แหล่งที่มาของ-requirements-sources">2. แหล่งที่มาของ Requirements (Sources)</a></li><li><a href="#3-ประเภทของ-requirements">3. ประเภทของ Requirements</a></li><li><a href="#4-requirements-engineering-re">4. Requirements Engineering (RE)</a></li><li><a href="#5-requirements-elicitation-การเก็บ-requirement">5. Requirements Elicitation (การเก็บ requirement)</a></li><li><a href="#6-requirements-specification-การเขียน-requirement">6. Requirements Specification (การเขียน requirement)</a></li><li><a href="#7-software-requirements-document-srs">7. Software Requirements Document (SRS)</a></li><li><a href="#8-requirements-validation-การตรวจ-requirement">8. Requirements Validation (การตรวจ requirement)</a></li><li><a href="#9-requirements-change-และ-requirements-management">9. Requirements Change และ Requirements Management</a></li><li><a href="#10-exercise-สไลด์-67">10. Exercise (สไลด์ 67)</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L3</div>
+    <h1 class="lesson-title">Lecture 3 – Requirement Engineering</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> ใน L1 เราเห็นว่าสาเหตุอันดับต้นของโครงการล้มเหลวคือ <strong>requirement ไม่ครบ ไม่ชัด และเปลี่ยนไปเรื่อย ๆ</strong> บทนี้จึงเรียนวิธี &quot;จัดการ requirement อย่างเป็นวิศวกรรม&quot; เรียกว่า <strong>Requirements Engineering (RE)</strong></p>
+<p>เนื้อหาเริ่มจากว่า requirement คืออะไร มีกี่ประเภท แล้วไล่ตาม 4 กระบวนการของ RE คือ <strong>elicitation</strong> (หา), <strong>specification</strong> (เขียน), <strong>validation</strong> (ตรวจ) และ <strong>change</strong> (จัดการการเปลี่ยนแปลง)</p>
+<p>เนื้อหาดัดแปลงจากหนังสือ Sommerville, <em>Software Engineering</em> (2015) ต่อยอดไปบท <strong>L4 Use case modeling</strong> และ <strong>L6–L7 DFD</strong> โดยตรง</p>
+</blockquote>
+<h2 id="1-software-requirements-คืออะไร">1. Software Requirements คืออะไร</h2>
+<ul>
+<li><strong>คำอธิบาย &quot;บริการ&quot; ที่ระบบควรให้</strong> และ <strong>ข้อจำกัด</strong> ในการทำงานของระบบ</li>
+<li>สะท้อน <strong>ความต้องการของลูกค้า</strong> ต่อระบบที่มีจุดประสงค์บางอย่าง</li>
+<li>มักมี <strong>นิยามฟังก์ชันของระบบที่ละเอียดและเป็นทางการ</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 พูดง่าย ๆ requirement ตอบ 2 คำถาม: <strong>ระบบต้องทำอะไร</strong> และ <strong>ต้องทำภายใต้เงื่อนไขอะไร</strong></p>
+</blockquote>
+<hr />
+<h2 id="2-แหล่งที่มาของ-requirements-sources">2. แหล่งที่มาของ Requirements (Sources)</h2>
+<p>ภาพในสไลด์มี <strong>Business Analyst (BA)</strong> อยู่ตรงกลาง และแลกเปลี่ยนข้อมูลกับทุกฝ่าย:</p>
+<p><img loading="lazy" src="diagrams/L3-01-sources-of-requirements.png" alt="Sources of software requirements" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝ่าย</th>
+<th>ข้อมูลที่แลกเปลี่ยนกับ BA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project Sponsor</strong></td>
+<td>Business requirements (ความต้องการทางธุรกิจ)</td>
+</tr>
+<tr>
+<td><strong>Project Manager</strong></td>
+<td>Scope and status (ขอบเขตและสถานะโครงการ)</td>
+</tr>
+<tr>
+<td><strong>Business User</strong></td>
+<td>User requirements (ความต้องการของผู้ใช้)</td>
+</tr>
+<tr>
+<td><strong>Other Stakeholders</strong></td>
+<td>Expectations and constraints (ความคาดหวังและข้อจำกัด)</td>
+</tr>
+<tr>
+<td><strong>Software Developer</strong></td>
+<td>Functional and non-functional requirements</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Functional and non-functional requirements</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ย้อนไป L1: BA คือ <strong>&quot;สะพาน&quot;</strong> ระหว่างลูกค้า/ผู้ใช้กับทีมพัฒนา ภาพนี้แสดงบทบาทนั้นชัดที่สุด</p>
+</blockquote>
+<hr />
+<h2 id="3-ประเภทของ-requirements">3. ประเภทของ Requirements</h2>
+<p><img loading="lazy" src="diagrams/L3-02-types-of-requirements.png" alt="ประเภทของ requirements" /></p>
+<h3 id="31-user-requirements-vs-system-requirements">3.1 User requirements vs System requirements</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>User requirements</strong></th>
+<th><strong>System requirements</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บอกอะไร</td>
+<td>บริการที่ระบบต้องให้ผู้ใช้ และข้อจำกัดในการทำงาน</td>
+<td>คำอธิบาย <strong>ละเอียดกว่า</strong> ของฟังก์ชัน บริการ และข้อจำกัดของระบบ</td>
+</tr>
+<tr>
+<td>ระดับ</td>
+<td>มีได้ตั้งแต่ประโยคกว้าง ๆ ถึงคำอธิบายที่ละเอียด</td>
+<td><strong>กำหนดชัดเจนว่าต้อง implement อะไร</strong></td>
+</tr>
+<tr>
+<td>ภาษา</td>
+<td>ภาษาที่ลูกค้าเข้าใจ</td>
+<td>ละเอียด เป็นเทคนิคมากขึ้น</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="ตัวอย่าง-mentcare-mental-health-care-patient-information-system">ตัวอย่าง: Mentcare (Mental health care patient information system)</h3>
+<p><strong>User requirement definition</strong></p>
+<blockquote class="callout">
+<ol>
+<li>The Mentcare system shall generate monthly management reports showing the cost of drugs prescribed by each clinic during that month.</li>
+</ol>
+</blockquote>
+<p>(ระบบต้องออกรายงานรายเดือน แสดงค่ายาที่แต่ละคลินิกสั่งในเดือนนั้น)</p>
+<p><strong>System requirements specification</strong> (แตกจากข้อ 1 ให้ละเอียด)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อ</th>
+<th>ข้อความ</th>
+<th>สรุปไทย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1</td>
+<td>On the last working day of each month, a summary of the drugs prescribed, their cost and the prescribing clinics shall be generated.</td>
+<td>วันทำการสุดท้ายของเดือน ต้องสร้างสรุปยาที่สั่ง ราคา และคลินิกที่สั่ง</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>The system shall generate the report for printing after 17.30 on the last working day of the month.</td>
+<td>สร้างรายงานสำหรับพิมพ์ <strong>หลัง 17.30 น.</strong> ของวันทำการสุดท้าย</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>A report shall be created for each clinic and shall list the individual drug names, the total number of prescriptions, the number of doses prescribed and the total cost of the prescribed drugs.</td>
+<td>รายงานแยกต่อคลินิก มีชื่อยา จำนวนใบสั่ง จำนวน dose และราคารวม</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td>If drugs are available in different dose units (e.g. 10mg, 20mg, etc.) separate reports shall be created for each dose unit.</td>
+<td>ยาที่มีหลายขนาด (10mg, 20mg) ต้องแยกรายงานตามขนาด</td>
+</tr>
+<tr>
+<td>1.5</td>
+<td>Access to drug cost reports shall be restricted to authorized users as listed on a management access control list.</td>
+<td>เฉพาะผู้มีสิทธิ์ใน access control list เท่านั้นที่ดูรายงานค่ายาได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต: user requirement <strong>ประโยคเดียว</strong> แตกเป็น system requirements <strong>5 ข้อ</strong> ที่ programmer เอาไปเขียนโค้ดได้เลย</p>
+</blockquote>
+<h3 id="ใครอ่าน-requirement-แต่ละระดับ-readers-stakeholders">ใครอ่าน requirement แต่ละระดับ (Readers / Stakeholders)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>User requirements</th>
+<th>System requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client managers</td>
+<td>System end-users</td>
+</tr>
+<tr>
+<td>System end-users</td>
+<td>Client engineers</td>
+</tr>
+<tr>
+<td>Client engineers</td>
+<td>System architects</td>
+</tr>
+<tr>
+<td>Contractor managers</td>
+<td><strong>Software developers</strong></td>
+</tr>
+<tr>
+<td>System architects</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Managers</strong> (client managers, contractor managers) อ่านแค่ <strong>user requirements</strong> ส่วน <strong>software developers</strong> อ่าน <strong>system requirements</strong> เพราะต้องรู้รายละเอียดเพื่อ implement</p>
+</blockquote>
+<h3 id="stakeholders-ของ-mentcare">Stakeholders ของ Mentcare</h3>
+<p>Patients, Doctors, Nurses, Medical receptionists, IT staff, Medical ethics manager, Health care managers, Medical records staff</p>
+<blockquote class="callout">
+<p class="c-tip">💡 ระบบเดียวมี stakeholder ถึง 8 กลุ่ม และแต่ละกลุ่มต้องการต่างกัน จึงเก็บ requirement ยาก (ดูหัวข้อ 5)</p>
+</blockquote>
+<h3 id="32-functional-vs-non-functional-requirements">3.2 Functional vs Non-functional requirements</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Functional requirements</strong></th>
+<th><strong>Non-functional requirements</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บอกอะไร</td>
+<td><strong>บริการ</strong> ที่ระบบต้องให้</td>
+<td><strong>ข้อจำกัด</strong> ของบริการหรือฟังก์ชัน เช่น response time, compatibility, memory use</td>
+</tr>
+<tr>
+<td>รายละเอียด</td>
+<td>ระบบต้อง <strong>ทำอะไร</strong>, ตอบสนอง input แต่ละแบบอย่างไร, ทำงานอย่างไรในสถานการณ์เฉพาะ</td>
+<td>มักใช้กับ <strong>ระบบทั้งระบบ</strong> ไม่ใช่ฟีเจอร์เดียว</td>
+</tr>
+<tr>
+<td>คำถาม</td>
+<td>&quot;ทำอะไร&quot;</td>
+<td>&quot;ทำได้ดีแค่ไหน ภายใต้เงื่อนไขอะไร&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง functional requirements (Mentcare)</strong></p>
+<ul>
+<li>A user shall be able to <strong>search the appointments lists</strong> for all clinics.</li>
+<li>The system shall <strong>generate each day, for each clinic, a list of patients</strong> who are expected to attend appointments that day.</li>
+<li>Each staff member using the system shall be <strong>uniquely identified by his or her eight-digit employee number</strong>.</li>
+</ul>
+<h3 id="types-of-non-functional-requirements-sommerville">Types of Non-functional Requirements (Sommerville)</h3>
+<p><img loading="lazy" src="diagrams/L3-03-types-of-nfr.png" alt="Types of non-functional requirements" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่มใหญ่</th>
+<th>ความหมาย</th>
+<th>ประเภทย่อย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product requirements</strong></td>
+<td>ข้อกำหนดเรื่องพฤติกรรมของ <strong>ตัวผลิตภัณฑ์</strong></td>
+<td>Usability, Efficiency (Performance, Space), Dependability, Security</td>
+</tr>
+<tr>
+<td><strong>Organizational requirements</strong></td>
+<td>มาจาก <strong>นโยบายและขั้นตอนขององค์กร</strong></td>
+<td>Environmental, Operational, Development</td>
+</tr>
+<tr>
+<td><strong>External requirements</strong></td>
+<td>มาจาก <strong>ปัจจัยภายนอก</strong> ระบบและองค์กร</td>
+<td>Regulatory, Ethical, Legislative (Accounting, Safety/security)</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(คำอธิบายคอลัมน์ &quot;ความหมาย&quot; เสริมจากหนังสือ Sommerville สไลด์มีแค่แผนภาพ)</em></p>
+<h3 id="example-metrics-สำหรับ-non-functional-requirements">Example: Metrics สำหรับ Non-functional requirements</h3>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Non-functional requirements ต้องวัดผลได้และทดสอบได้ (Must be measurable and testable!!!)</strong></p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Measure (วัดด้วย)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Speed</strong></td>
+<td>Processed transactions/second, User/event response time, Screen refresh time</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>Megabytes / Number of ROM chips</td>
+</tr>
+<tr>
+<td><strong>Ease of use</strong></td>
+<td>Training time, Number of help frames</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>Mean time to failure, Probability of unavailability, Rate of failure occurrence, Availability</td>
+</tr>
+<tr>
+<td><strong>Robustness</strong></td>
+<td>Time to restart after failure, Percentage of events causing failure, Probability of data corruption on failure</td>
+</tr>
+<tr>
+<td><strong>Portability</strong></td>
+<td>Percentage of target dependent statements, Number of target systems</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="แบบฝึก-functional-หรือ-non-functional-สไลด์-16">แบบฝึก: Functional หรือ Non-functional? (สไลด์ 16)</h3>
+<p><em>(สไลด์มีแค่คำถาม เฉลยด้านล่างผมใส่เอง)</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประโยค</th>
+<th>ประเภท</th>
+<th>เหตุผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The application should be easy-to-use.</td>
+<td><strong>Non-functional</strong></td>
+<td>เป็นคุณภาพ (usability) ⚠️ แต่ <strong>เขียนไม่ดี เพราะวัดไม่ได้</strong> ควรเขียนเป็น เช่น &quot;ผู้ใช้ใหม่สั่งซื้อสำเร็จภายใน 3 นาทีโดยไม่ต้องอบรม&quot;</td>
+</tr>
+<tr>
+<td>The system shall allow users to create accounts.</td>
+<td><strong>Functional</strong></td>
+<td>บริการที่ระบบต้องทำ</td>
+</tr>
+<tr>
+<td>The system shall allow users to add products to a shopping cart.</td>
+<td><strong>Functional</strong></td>
+<td>บริการที่ระบบต้องทำ</td>
+</tr>
+<tr>
+<td>The system should be able to handle up to 10,000 concurrent users without significant performance degradation.</td>
+<td><strong>Non-functional</strong></td>
+<td>performance / scalability (คำว่า &quot;significant&quot; ยังกำกวมอยู่)</td>
+</tr>
+<tr>
+<td>Users shall be able to search for products by keywords.</td>
+<td><strong>Functional</strong></td>
+<td>บริการค้นหา</td>
+</tr>
+<tr>
+<td>The website should load within 2 seconds for 95% of user requests.</td>
+<td><strong>Non-functional</strong></td>
+<td>performance ที่ <strong>วัดได้ชัดเจน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-requirements-engineering-re">4. Requirements Engineering (RE)</h2>
+<h3 id="นิยาม">นิยาม</h3>
+<blockquote class="callout">
+<p>กระบวนการ <strong>ค้นหา (finding out), วิเคราะห์ (analysing), จัดทำเอกสาร (documenting) และตรวจสอบ (checking)</strong> software requirements เรียกว่า <strong>Requirements Engineering (RE)</strong></p>
+</blockquote>
+<p>และก่อนเริ่ม RE มักมี <strong>Feasibility study</strong></p>
+<h3 id="feasibility-study-การศึกษาความเป็นไปได้">Feasibility Study (การศึกษาความเป็นไปได้)</h3>
+<ul>
+<li>เป็นการศึกษา <strong>สั้น ๆ และเจาะจง</strong> ทำ <strong>ตั้งแต่ช่วงต้น</strong> ของ RE</li>
+<li>ตอบ 3 คำถาม:
+<ol>
+<li>ระบบนี้ <strong>ช่วยให้องค์กรบรรลุเป้าหมายโดยรวม</strong> ไหม</li>
+<li><strong>สร้างได้ภายในเวลาและงบ</strong> ด้วยเทคโนโลยีปัจจุบันไหม</li>
+<li><strong>รวมเข้ากับระบบอื่นที่ใช้อยู่</strong> ได้ไหม</li>
+</ol>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ถ้าคำตอบข้อใดข้อหนึ่งเป็น &quot;ไม่&quot; ก็ไม่ควรเดินหน้าโครงการ</strong></p>
+</blockquote>
+<h3 id="re-processes">RE Processes</h3>
+<ul>
+<li><strong>RE เป็นกระบวนการแบบวนซ้ำ (iterative)</strong></li>
+<li><strong>Output:</strong> System requirements document</li>
+<li>ประกอบด้วย <strong>4 กระบวนการ</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L3-04-re-processes.png" alt="Requirements Engineering processes" /></p>
+<hr />
+<h2 id="5-requirements-elicitation-การเก็บ-requirement">5. Requirements Elicitation (การเก็บ requirement)</h2>
+<h3 id="เป้าหมายและสิ่งที่ต้องทำ">เป้าหมายและสิ่งที่ต้องทำ</h3>
+<ul>
+<li><strong>Aim:</strong> เข้าใจงานที่ stakeholder ทำ และเข้าใจว่าระบบใหม่จะช่วยงานนั้นได้อย่างไร</li>
+<li><strong>What needs to be done:</strong> วิศวกรซอฟต์แวร์ทำงานร่วมกับ stakeholder เพื่อหาข้อมูลเรื่อง
+<ul>
+<li>application domain (ขอบเขตธุรกิจของงาน)</li>
+<li>กิจกรรมการทำงาน (work activities)</li>
+<li>บริการและฟีเจอร์ที่ stakeholder ต้องการ</li>
+<li>performance ที่ระบบต้องได้</li>
+<li>ข้อจำกัดด้าน hardware</li>
+<li>และอื่น ๆ</li>
+</ul>
+</li>
+</ul>
+<h3 id="challenges-ทำไมเก็บ-requirement-ยาก">Challenges – ทำไมเก็บ requirement ยาก</h3>
+<ol>
+<li><strong>Stakeholder มักไม่รู้ว่าตัวเองต้องการอะไร</strong></li>
+<li>Stakeholder <strong>อธิบายสิ่งที่อยากให้ระบบทำได้ยาก</strong></li>
+<li>Stakeholder อาจ <strong>ขอสิ่งที่เป็นไปไม่ได้</strong> เพราะไม่รู้ว่าอะไรทำได้หรือไม่ได้</li>
+<li><strong>Stakeholder ต่างกลุ่ม</strong> มี requirement ต่างกัน และ <strong>พูดคนละแบบ</strong></li>
+</ol>
+<h3 id="who-should-be-the-key-man-สไลด์-24">Who should be the key man? (สไลด์ 24)</h3>
+<p>ใช้การ์ตูน tree swing (แบบเดียวกับ L1) แล้วถามว่า <strong>ใครควรเป็นคนหลักในการเก็บ requirement</strong>
+➜ ตามบทบาทใน L1 และภาพหัวข้อ 2 คำตอบคือ <strong>Business Analyst (BA)</strong> ที่เป็นสะพานระหว่างทุกฝ่าย <em>(สไลด์ไม่ได้เฉลย)</em></p>
+<h3 id="requirements-elicitation-and-analysis-process-วนเป็นวงกลม">Requirements Elicitation and Analysis Process (วนเป็นวงกลม)</h3>
+<p><img loading="lazy" src="diagrams/L3-05-elicitation-analysis-process.png" alt="Requirements elicitation and analysis process" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Discovery and understanding</strong></td>
+<td>คุยกับ stakeholder เพื่อค้นหาและทำความเข้าใจ requirement</td>
+</tr>
+<tr>
+<td><strong>2. Classification and organization</strong></td>
+<td>จัดกลุ่ม requirement ที่เกี่ยวข้องกัน</td>
+</tr>
+<tr>
+<td><strong>3. Prioritization and negotiation</strong></td>
+<td>จัดลำดับความสำคัญ และเจรจาเมื่อ requirement ขัดกัน</td>
+</tr>
+<tr>
+<td><strong>4. Documentation</strong></td>
+<td>บันทึก requirement แล้ววนกลับไปข้อ 1</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(คำอธิบายแต่ละขั้นเสริมจาก Sommerville สไลด์มีแค่ชื่อขั้น และมีภาพเกลียวเล็ก ๆ มุมขวาแสดงว่า RE เป็นกระบวนการที่วนซ้ำ)</em></p>
+<h3 id="6-dimensions-of-detailed-requirements-elicitation">6 Dimensions of Detailed Requirements Elicitation</h3>
+<p>เวลาเก็บ requirement ให้ครบ ต้องถามให้ครอบคลุม 6 มิติ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>มิติ</th>
+<th>คำถามตัวอย่าง (เสริม)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Individual Functionality</strong></td>
+<td>แต่ละฟังก์ชันต้องทำอะไร</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Business Workflow</strong></td>
+<td>ขั้นตอนงานทางธุรกิจไหลอย่างไร</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Data and Data formats</strong></td>
+<td>มีข้อมูลอะไร รูปแบบไหน</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>User Interfaces</strong></td>
+<td>หน้าจอหน้าตาอย่างไร</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Existing Systems &amp; Interfaces</strong></td>
+<td>ต้องเชื่อมกับระบบเดิมอะไรบ้าง</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Other Constraints</strong></td>
+<td>Performance, Reliability ฯลฯ</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="elicitation-techniques">Elicitation Techniques</h3>
+<ul>
+<li>เป็นกระบวนการ <strong>พบ stakeholder หลายกลุ่ม</strong> เพื่อค้นหาข้อมูลของระบบที่จะทำ</li>
+<li>เพื่อเข้าใจว่า <strong>คนทำงานอย่างไร ผลิตอะไร ใช้ระบบอื่นอย่างไร</strong> และ <strong>ต้องเปลี่ยนวิธีทำงานอย่างไร</strong> เมื่อมีระบบใหม่</li>
+<li><strong>2 แนวทางพื้นฐาน</strong>
+<ol>
+<li><strong>Interviewing</strong> – คุยกับคนเรื่องงานที่เขาทำ</li>
+<li><strong>Observation / Ethnography</strong> – ดูคนทำงานจริง ว่าใช้ artifact อะไรและใช้อย่างไร</li>
+</ol>
+</li>
+</ul>
+<h3 id="interviewing-การสัมภาษณ์">Interviewing (การสัมภาษณ์)</h3>
+<ul>
+<li>การสัมภาษณ์ stakeholder ทั้งแบบ <strong>formal และ informal</strong> เป็นส่วนหนึ่งของ RE เกือบทุกโครงการ</li>
+<li>ทีม RE ถามเรื่อง <strong>ระบบที่ใช้อยู่ปัจจุบัน</strong> และ <strong>ระบบที่จะพัฒนา</strong></li>
+<li><strong>2 แบบ</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Closed interview</th>
+<th>Open interview</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ถามตาม <strong>ชุดคำถามที่เตรียมไว้</strong></td>
+<td><strong>ไม่มีสคริปต์ตายตัว</strong> คุยเปิดกว้างเพื่อสำรวจประเด็น</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(คำอธิบาย closed/open เสริมจาก Sommerville สไลด์มีแค่ชื่อ)</em></p>
+<p><strong>Challenges / Limitations ของการสัมภาษณ์</strong></p>
+<ul>
+<li>Stakeholder อาจใช้ <strong>ศัพท์เฉพาะ (jargon)</strong> ของสายงานตัวเอง</li>
+<li>Stakeholder คุ้นเคยกับงานมากจน <strong>อธิบายยาก</strong> หรือ <strong>คิดว่าเรื่องพื้นฐานไม่ต้องพูดถึง</strong></li>
+<li><strong>ไม่ค่อยได้ผลกับ requirement และข้อจำกัดระดับองค์กร</strong> เพราะมี <strong>ความสัมพันธ์เชิงอำนาจ</strong> ที่ละเอียดอ่อนระหว่างคนในองค์กร (เช่น พนักงานไม่กล้าพูดต่อหน้าหัวหน้า)</li>
+</ul>
+<p><strong>Tips for being an effective interviewer</strong></p>
+<ul>
+<li><strong>Be open-minded</strong> – เปิดใจ</li>
+<li><strong>Avoid preconceived ideas</strong> – อย่าคิดคำตอบไว้ก่อน</li>
+<li><strong>Willing to listen</strong> – ตั้งใจฟัง</li>
+<li><strong>Prompt the interviewee</strong> to get discussion going – ชวนคุยให้บทสนทนาเดินต่อ</li>
+<li><strong>Do not say &quot;tell me what you want&quot;</strong> – อย่าถามว่า &quot;บอกมาเลยว่าต้องการอะไร&quot; (เพราะ stakeholder มักไม่รู้ว่าตัวเองต้องการอะไร)</li>
+</ul>
+<h3 id="ethnography-การสังเกตการณ์">Ethnography (การสังเกตการณ์)</h3>
+<ul>
+<li>เทคนิค <strong>การสังเกต</strong> เพื่อเข้าใจกระบวนการทำงานจริง แล้วหา requirement ของซอฟต์แวร์ที่จะมาช่วย</li>
+<li>นักวิเคราะห์ <strong>เข้าไปอยู่ในสภาพแวดล้อมการทำงานจริง</strong> ดูงานประจำวัน แล้วจดงานที่ผู้ใช้ทำจริง</li>
+<li>ช่วยค้นพบ <strong>implicit requirements</strong> (requirement แฝง) ที่สะท้อน <strong>วิธีทำงานจริง</strong> ไม่ใช่กระบวนการทางการที่องค์กรเขียนไว้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ตัวอย่าง: คู่มือร้านกาแฟบอกให้พนักงานจดออเดอร์ลงระบบก่อนชง แต่พอไปดูจริง พนักงานเขียนชื่อลงแก้วแล้วชงเลยเพราะคนเยอะ ถ้าแค่สัมภาษณ์จะไม่มีทางรู้เรื่องนี้ (ตัวอย่างเสริม)</p>
+</blockquote>
+<h3 id="other-elicitation-techniques">Other Elicitation Techniques</h3>
+<ul>
+<li><strong>Sampling of existing documentation, forms, and databases</strong> – สุ่มดูเอกสาร แบบฟอร์ม ฐานข้อมูลเดิม</li>
+<li><strong>Research and site visits</strong> – ค้นคว้าและไปดูสถานที่จริง</li>
+<li><strong>Questionnaires</strong> – แบบสอบถาม</li>
+<li><strong>Joint Requirements Planning (JRP)</strong> – ประชุมร่วมกันระหว่าง stakeholder สำคัญ เพื่อกำหนด requirement</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>แต่ละเทคนิคมีจุดแข็งและเหมาะกับสถานการณ์ต่างกัน</strong> ไม่มีเทคนิคเดียวที่ดีที่สุด</p>
+</blockquote>
+<hr />
+<h2 id="6-requirements-specification-การเขียน-requirement">6. Requirements Specification (การเขียน requirement)</h2>
+<h3 id="ภาพรวม">ภาพรวม</h3>
+<ul>
+<li>กระบวนการ <strong>เขียน user และ system requirements ลงในเอกสาร requirement</strong></li>
+<li>Requirement ที่ดีต้อง <strong>clear, unambiguous, easy to understand, complete, consistent</strong></li>
+<li>ควรเขียนเป็น <strong>ประโยคภาษาธรรมชาติที่มีหมายเลข</strong> อาจมีตารางง่าย ๆ และแผนภาพที่เข้าใจง่ายประกอบ</li>
+</ul>
+<p><strong>ประเภทของ requirements specification</strong></p>
+<ol>
+<li>Natural language specification</li>
+<li>Structured specifications (รวม <strong>user story</strong>)</li>
+<li>Use case specification</li>
+<li>Prototyping</li>
+<li>แบบอื่น: DFD, ERD</li>
+</ol>
+<hr />
+<h3 id="61-natural-language-specification">6.1 Natural Language Specification</h3>
+<p><strong>Guidelines 5 ข้อ</strong></p>
+<ol>
+<li><strong>คิดรูปแบบมาตรฐาน</strong> และเขียนทุก requirement ตามรูปแบบนั้น</li>
+<li><strong>ใช้ภาษาให้สม่ำเสมอ</strong> เพื่อแยก requirement ที่จำเป็นกับที่ควรมี
+<ul>
+<li><strong>&quot;Shall&quot;</strong> = <strong>mandatory</strong> (must have, ต้องมี)</li>
+<li><strong>&quot;Should&quot;</strong> = <strong>desirable</strong> (nice to have, ควรมี)</li>
+</ul>
+</li>
+<li><strong>ใช้การเน้นข้อความ</strong> (ตัวหนา ตัวเอียง สี) กับส่วนสำคัญของ requirement</li>
+<li><strong>หลีกเลี่ยง jargon, คำย่อ และอักษรย่อ</strong></li>
+<li>ถ้าเป็นไปได้ ให้ใส่ <strong>rationale</strong> (เหตุผล) กับทุก requirement ว่า <strong>ทำไมต้องมี</strong> และ <strong>ใครเสนอ</strong></li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ มักออกสอบ: <strong>Shall = ต้องมี / Should = ควรมี</strong></p>
+</blockquote>
+<p><strong>ตัวอย่าง (แอปธนาคาร)</strong></p>
+<ul>
+<li>The application <strong>shall</strong> allow users to view their account balance.</li>
+<li>The application <strong>shall</strong> send a real-time notification to users via emails.</li>
+<li>The application <strong>shall</strong> require users to securely log in using multi-factor authentication (MFA).</li>
+</ul>
+<hr />
+<h3 id="62-structured-specifications">6.2 Structured Specifications</h3>
+<p>เขียน requirement ในรูปแบบ <strong>ฟอร์มที่มีช่องกำหนดไว้</strong> มี 10 fields:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>No.</th>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Requirement ID</strong></td>
+<td>รหัสไม่ซ้ำของแต่ละ requirement ไว้อ้างอิงและติดตาม</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Requirement type</strong></td>
+<td>ประเภท เช่น functional, non-functional</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Description</strong></td>
+<td>คำอธิบายละเอียดว่า requirement คืออะไร</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Rationale</strong></td>
+<td>เหตุผลว่าทำไมจำเป็น และช่วยเป้าหมายโดยรวมอย่างไร</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Source</strong></td>
+<td>ที่มา คือ <strong>ใครให้ requirement นี้</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Input(s)</strong></td>
+<td>ข้อมูลหรือเงื่อนไขที่ต้องใช้ในการทำงาน</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Output(s)</strong></td>
+<td>ผลลัพธ์ที่คาดว่าจะได้</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Action</strong></td>
+<td>ขั้นตอนการทำงานของ requirement นี้</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Precondition</strong></td>
+<td>สภาพที่ต้องเป็นจริง <strong>ก่อน</strong> ทำงาน</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Postcondition</strong></td>
+<td>สภาพของระบบ <strong>หลัง</strong> ทำงาน สะท้อนการเปลี่ยนแปลงที่คาดไว้</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่างการกรอก</strong> <em>(สไลด์ 39 เป็นฟอร์มว่าง ตัวอย่างนี้ผมเติมเอง)</em></p>
+<pre><code>Requirement ID:    FR-03
+Requirement Type:  Functional
+Description:       ผู้ใช้เพิ่มสินค้าลงตะกร้าได้
+Rationale:         ให้ผู้ใช้เลือกสินค้าหลายชิ้นก่อนชำระเงินครั้งเดียว
+Source:            ผู้จัดการฝ่ายขายออนไลน์
+Input(s):          รหัสสินค้า, จำนวน
+Output(s):         ตะกร้าที่อัปเดตแล้ว และยอดรวม
+Action:            1) ผู้ใช้กด &quot;เพิ่มลงตะกร้า&quot; 2) ระบบตรวจสต็อก 3) ระบบเพิ่มสินค้าและคำนวณยอดใหม่
+Precondition:      ผู้ใช้ login แล้ว และสินค้ามีในสต็อก
+Postcondition:     สินค้าอยู่ในตะกร้า และยอดรวมถูกต้อง
+</code></pre>
+<hr />
+<h3 id="63-user-story">6.3 User Story</h3>
+<ul>
+<li>ใช้ <strong>บันทึก requirement</strong> และ <strong>กำหนดขอบเขตของฟังก์ชัน</strong> (นิยมใน Agile)</li>
+<li><strong>Template</strong></li>
+</ul>
+<pre><code>ในฐานะ (As a)     … บุคคล ตำแหน่ง หรือบทบาทในระบบ
+ฉันต้องการ (I want) … พฤติกรรมหรือความสามารถในระบบ
+เพื่อที่ (So that)   … สร้างแล้วได้ประโยชน์อะไร มีคุณค่าอะไรกับธุรกิจ
+</code></pre>
+<ul>
+<li>User story <strong>วัดผลด้วย &quot;เงื่อนไขการยอมรับ&quot; (Acceptance Criteria)</strong> หรือ <strong>Definition of Done (DoD)</strong></li>
+</ul>
+<h3 id="ลำดับชั้น-user-need-epic-user-story-tasks-acceptance-criteria-สไลด์-41">ลำดับชั้น: User Need → Epic → User Story → Tasks / Acceptance Criteria (สไลด์ 41)</h3>
+<p><img loading="lazy" src="diagrams/L3-06-user-need-epic-story.png" alt="User Need → Epic → User Story → Tasks / Acceptance Criteria" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User Need</strong></td>
+<td>ความต้องการใหญ่สุดของผู้ใช้</td>
+</tr>
+<tr>
+<td><strong>Epic</strong></td>
+<td>user story ขนาดใหญ่ที่ต้องแตกย่อยอีก</td>
+</tr>
+<tr>
+<td><strong>User Story</strong></td>
+<td>ชิ้นความต้องการที่ทำเสร็จได้ในรอบเดียว</td>
+</tr>
+<tr>
+<td><strong>Tasks</strong></td>
+<td>งานเทคนิคที่ทีมต้องทำ</td>
+</tr>
+<tr>
+<td><strong>Acceptance criteria</strong></td>
+<td>เกณฑ์ว่าเมื่อไรถือว่าเสร็จ</td>
+</tr>
+</tbody>
+</table></div>
+<p>(อ้างอิงภาพ: salmapatel.co.uk)</p>
+<h3 id="acceptance-criteria-เงื่อนไขการยอมรับ">Acceptance Criteria (เงื่อนไขการยอมรับ)</h3>
+<ul>
+<li><strong>เงื่อนไขหรือเกณฑ์ที่ต้องทำให้สำเร็จ</strong> เพื่อให้ user story เสร็จสมบูรณ์และ stakeholder ยอมรับ</li>
+<li><strong>คุณลักษณะ</strong>
+<ul>
+<li>เขียนเป็นข้อ ๆ ชัดเจน <strong>ไม่กำกวม</strong></li>
+<li><strong>ต้องวัดผลได้ (measurable)</strong></li>
+<li>มักเขียนในรูป <strong>Given – When – Then</strong> (<strong>Gherkin syntax</strong>) หรือเป็น bullet point</li>
+</ul>
+</li>
+</ul>
+<pre><code>กำหนดให้ (Given) … ผู้ใช้อยู่ในสถานการณ์อะไร
+เมื่อ     (When)  … ผู้ใช้ทำอะไร
+จึง      (Then)  … ผลลัพธ์ของระบบ
+</code></pre>
+<h3 id="ตัวอย่าง-ระบบขายตั๋วสวนสัตว์">ตัวอย่าง: ระบบขายตั๋วสวนสัตว์</h3>
+<p><strong>User story</strong></p>
+<blockquote class="callout">
+<p><strong>ในฐานะ</strong> ผู้เข้าชมสวนสัตว์
+<strong>ฉันต้องการ</strong> ซื้อตั๋วออนไลน์ผ่านเว็บไซต์
+<strong>เพื่อที่</strong> ฉันจะได้ไม่ต้องต่อคิวยาวที่หน้าทางเข้า</p>
+</blockquote>
+<p><strong>Acceptance criteria</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ผู้เข้าชมเข้าสู่หน้าเว็บขายตั๋ว</td>
+<td>ผู้เข้าชมเลือกจำนวนตั๋ว (ผู้ใหญ่/เด็ก)</td>
+<td>ระบบแสดงราคารวมทั้งหมดให้เห็นทันที</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ผู้เข้าชมเลือกจำนวนตั๋วเรียบร้อยแล้ว</td>
+<td>ผู้เข้าชมชำระเงินผ่านช่องทางที่รองรับ (บัตรเครดิต หรือ QR Payment)</td>
+<td>ระบบยืนยันการชำระเงินสำเร็จ</td>
+</tr>
+<tr>
+<td>3</td>
+<td>การชำระเงินสำเร็จ</td>
+<td>ระบบออกตั๋ว</td>
+<td>ผู้เข้าชมได้รับอีเมลยืนยันการซื้อตั๋ว พร้อม QR Code</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ผู้เข้าชมมี QR Code ตั๋วจากอีเมล</td>
+<td>ผู้เข้าชมไปที่ทางเข้าสวนสัตว์และสแกน QR Code</td>
+<td>ระบบตรวจสอบและอนุญาตให้เข้าสวนสัตว์ได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตว่า <strong>Then ของข้อก่อน กลายเป็น Given ของข้อถัดไป</strong> criteria จึงร้อยต่อกันเป็นเส้นทางการใช้งานตั้งแต่ต้นจนจบ</p>
+</blockquote>
+<hr />
+<h3 id="64-use-case-specification">6.4 Use Case Specification</h3>
+<p><em>(เรียนละเอียดใน L4)</em></p>
+<ul>
+<li>Use case คือการอธิบาย <strong>ปฏิสัมพันธ์ระหว่างผู้ใช้กับระบบ</strong> ด้วย <strong>โมเดลกราฟิก + ข้อความที่มีโครงสร้าง</strong></li>
+<li>ชุดของ use case แทน <strong>ปฏิสัมพันธ์ที่เป็นไปได้ทั้งหมด</strong> ใน system requirements</li>
+<li>ระบุ <strong>ปฏิสัมพันธ์แต่ละอัน</strong> ระหว่างระบบกับผู้ใช้ หรือกับระบบอื่น</li>
+<li>บันทึกด้วย <strong>high-level use case diagram</strong></li>
+<li><strong>แต่ละ use case ควรมีคำอธิบายเป็นข้อความ</strong> (textual description)</li>
+</ul>
+<p><strong>ส่วนประกอบของ use case diagram</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัญลักษณ์</th>
+<th>แทน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧍 <strong>Stick figure</strong></td>
+<td><strong>Actor</strong> ซึ่งเป็นคนหรือระบบอื่นก็ได้</td>
+</tr>
+<tr>
+<td>⬭ <strong>Named ellipse</strong></td>
+<td><strong>Use case</strong> (ปฏิสัมพันธ์แต่ละประเภท)</td>
+</tr>
+<tr>
+<td>── <strong>Line</strong></td>
+<td>เชื่อม actor กับ use case</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง: Mentcare use case diagram</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Use cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Medical receptionist</strong></td>
+<td>Register patient, View personal info.</td>
+</tr>
+<tr>
+<td><strong>Manager</strong></td>
+<td>View personal info., Export statistics, Generate report</td>
+</tr>
+<tr>
+<td><strong>Nurse</strong></td>
+<td>View record, Edit record</td>
+</tr>
+<tr>
+<td><strong>Doctor</strong></td>
+<td>View record, Edit record, Setup consultation, Generate report</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 use case เดียวใช้ร่วมกันหลาย actor ได้ เช่น &quot;View record&quot; ใช้ทั้ง Nurse และ Doctor</p>
+</blockquote>
+<hr />
+<h3 id="65-prototyping">6.5 Prototyping</h3>
+<ul>
+<li>Prototype ของ requirement ส่วนใหญ่เน้นส่วน <strong>User Interface (UI)</strong> ใน 2 ด้าน:
+<ul>
+<li><strong>Visual looks</strong> – ขนาด รูปทรง ตำแหน่ง สี</li>
+<li><strong>Flow</strong> – control flow และ logical flow (กดแล้วไปหน้าไหน)</li>
+</ul>
+</li>
+<li>ทำได้ <strong>2 โหมด</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Low fidelity</th>
+<th>High fidelity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ใช้ <strong>กระดาษหรือกระดาษแข็ง</strong> แทนหน้าจอ แล้วให้ <strong>คนเลื่อนแผ่น</strong></td>
+<td>ใช้ <strong>เครื่องมืออัตโนมัติ</strong> เช่น Visual Basic เขียนหน้าจอและกำหนด logical flow</td>
+</tr>
+<tr>
+<td>ถูก เร็ว แก้ง่าย</td>
+<td>สมจริง แต่ใช้เวลาและแรงมากกว่า</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(แถวล่างเสริมเอง ปัจจุบันเครื่องมือ high-fidelity ที่นิยมคือ Figma)</em></p>
+<p><strong>ตัวอย่างในสไลด์ 49:</strong> ภาพสเก็ตช์ด้วยมือของแอปมือถือ 8 หน้าจอ (หน้า home → sign in ด้วย Facebook/Twitter/LinkedIn → Balance → Search / Spend / Save / Find บนแผนที่) มี <strong>ลูกศรสีแดงแสดง flow</strong> ว่ากดปุ่มไหนแล้วไปหน้าไหน เป็นตัวอย่างของ <strong>low-fidelity prototype</strong></p>
+<hr />
+<h3 id="66-other-types-of-specification">6.6 Other Types of Specification</h3>
+<p><strong>Data Flow Diagram (DFD)</strong> – แสดงการไหลของข้อมูล <em>(เรียนละเอียดใน L6–L7)</em></p>
+<p><img loading="lazy" src="diagrams/L3-07-dfd-example.png" alt="ตัวอย่าง Data Flow Diagram (DFD)" /></p>
+<p><strong>Entity Relationship Diagram (ERD)</strong> – แสดงความสัมพันธ์ของข้อมูล</p>
+<p><img loading="lazy" src="diagrams/L3-08-erd-cardinality.png" alt="ERD – Cardinality" /></p>
+<ul>
+<li><strong>Cardinality:</strong> ระบุ <strong>จำนวน</strong> ของ entity ที่สัมพันธ์กัน (ผู้แต่ง 1 คน เขียนหนังสือได้หลายเล่ม)</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L3-09-erd-modality.png" alt="ERD – Modality" /></p>
+<ul>
+<li><strong>Modality:</strong> ระบุว่า <strong>ความสัมพันธ์จำเป็นต้องมีหรือไม่</strong>
+<ul>
+<li><code>|</code> = ต้องมี (mandatory)</li>
+<li><code>○</code> = ไม่จำเป็นต้องมี (optional)</li>
+<li><em>(ความหมายสัญลักษณ์เสริมเอง)</em></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="7-software-requirements-document-srs">7. Software Requirements Document (SRS)</h2>
+<h3 id="คืออะไร">คืออะไร</h3>
+<ul>
+<li>เรียกอีกชื่อว่า <strong>Software Requirements Specification (SRS)</strong></li>
+<li>เป็น <strong>ข้อความทางการ</strong> ว่านักพัฒนาต้อง implement อะไร</li>
+<li>มีทั้ง <strong>user และ system requirements</strong> โดย <strong>user requirements อยู่ในบทนำ</strong> ของ SRS</li>
+<li>ผู้ใช้เอกสารหลากหลาย <strong>ตั้งแต่ผู้บริหารระดับสูงถึงวิศวกร</strong> ที่พัฒนาซอฟต์แวร์</li>
+</ul>
+<h3 id="ทำไมต้องทำเอกสาร-requirement">ทำไมต้องทำเอกสาร requirement</h3>
+<ol>
+<li>requirement ที่ชัดเจนจำเป็นต่อ <strong>design และ implementation</strong></li>
+<li>ใช้ <strong>สร้าง test case และ test scenario</strong> โดยเฉพาะในระบบใหญ่ที่ทีม test แยกจากทีม dev</li>
+<li>ใช้ <strong>ควบคุม scope creep</strong> (scope บานปลาย)</li>
+<li>ใช้สร้าง <strong>เอกสารอบรมผู้ใช้, เอกสารการตลาด</strong> และเอกสารสำหรับ support และ maintenance</li>
+<li>ช่วย <strong>แบ่งโครงการใหญ่เป็นส่วน, จัดลำดับ release</strong> และทำให้บริหารโครงการง่ายขึ้น</li>
+</ol>
+<h3 id="users-of-the-srs">Users of the SRS</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ผู้ใช้</th>
+<th>ใช้ SRS ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System customers</strong></td>
+<td>ระบุ requirement และอ่านเพื่อเช็กว่าตรงความต้องการไหม <strong>ลูกค้าเป็นคนระบุการเปลี่ยนแปลง requirement</strong></td>
+</tr>
+<tr>
+<td><strong>Managers</strong></td>
+<td>ใช้ <strong>วางแผนเสนอราคา (bid)</strong> และวางแผนกระบวนการพัฒนา</td>
+</tr>
+<tr>
+<td><strong>System engineers</strong></td>
+<td>ใช้ทำความเข้าใจว่า <strong>ต้องพัฒนาระบบอะไร</strong></td>
+</tr>
+<tr>
+<td><strong>System test engineers</strong></td>
+<td>ใช้ <strong>สร้าง validation tests</strong></td>
+</tr>
+<tr>
+<td><strong>System maintenance engineers</strong></td>
+<td>ใช้ทำความเข้าใจระบบและ <strong>ความสัมพันธ์ระหว่างส่วนต่าง ๆ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="structure-of-the-srs-10-บท">Structure of the SRS (10 บท)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Chapter</th>
+<th>เนื้อหา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Preface</strong></td>
+<td>กลุ่มผู้อ่านที่คาดไว้, <strong>ประวัติเวอร์ชัน</strong> พร้อมเหตุผลที่ออกเวอร์ชันใหม่และสรุปการเปลี่ยนแปลง</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Introduction</strong></td>
+<td><strong>ความจำเป็น</strong> ของระบบ, อธิบายฟังก์ชันสั้น ๆ, ทำงานร่วมกับระบบอื่นอย่างไร, สอดคล้องกับเป้าหมายธุรกิจหรือกลยุทธ์ขององค์กรอย่างไร</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Glossary</strong></td>
+<td>นิยาม <strong>ศัพท์เทคนิค</strong> ในเอกสาร ไม่ควรสมมติว่าผู้อ่านมีความรู้</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>User requirements definition</strong></td>
+<td>บริการที่ให้ผู้ใช้ รวม <strong>non-functional requirements</strong> ใช้ภาษาธรรมชาติ แผนภาพ หรือสัญลักษณ์ที่ลูกค้าเข้าใจ ระบุมาตรฐานผลิตภัณฑ์และกระบวนการที่ต้องทำตาม</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>System architecture</strong></td>
+<td>ภาพรวม <strong>สถาปัตยกรรม</strong> ระดับสูง แสดงการกระจายฟังก์ชันไปยัง module และเน้นส่วนที่ <strong>นำกลับมาใช้ซ้ำ</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>System requirements specification</strong></td>
+<td>functional และ non-functional requirements <strong>แบบละเอียด</strong> รวมถึง interface ไปยังระบบอื่น</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>System models</strong></td>
+<td><strong>โมเดลกราฟิก</strong> แสดงความสัมพันธ์ระหว่างส่วนประกอบของระบบ และระหว่างระบบกับสภาพแวดล้อม เช่น object model, data-flow model, semantic data model</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>System evolution</strong></td>
+<td><strong>สมมติฐานพื้นฐาน</strong> ของระบบ และ <strong>การเปลี่ยนแปลงที่คาดว่าจะเกิด</strong> (hardware เปลี่ยน, ความต้องการผู้ใช้เปลี่ยน) ช่วยให้นักออกแบบไม่ตัดสินใจอะไรที่ขวางการเปลี่ยนแปลงในอนาคต</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Appendices</strong></td>
+<td>ข้อมูลเฉพาะ เช่น <strong>hardware requirements</strong> (config ขั้นต่ำและที่เหมาะสม) และ <strong>database requirements</strong> (โครงสร้างข้อมูลเชิงตรรกะและความสัมพันธ์)</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Index</strong></td>
+<td>ดัชนีตัวอักษร ดัชนีแผนภาพ ดัชนีฟังก์ชัน ฯลฯ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-requirements-validation-การตรวจ-requirement">8. Requirements Validation (การตรวจ requirement)</h2>
+<h3 id="คืออะไร-และทำไมสำคัญ">คืออะไร และทำไมสำคัญ</h3>
+<ul>
+<li>กระบวนการ <strong>ตรวจว่า requirement กำหนดระบบที่ลูกค้าต้องการจริง ๆ</strong></li>
+<li><strong>สำคัญมาก</strong> เพราะความผิดพลาดในเอกสาร requirement ทำให้ <strong>ต้นทุนแก้งานสูงมาก</strong> ถ้าเจอตอนพัฒนาหรือหลังใช้งานแล้ว</li>
+<li>เปลี่ยน requirement หนึ่งข้อ มักต้อง <strong>เปลี่ยน design และ implementation</strong> แล้ว <strong>ทดสอบใหม่</strong> ด้วย</li>
+</ul>
+<h3 id="validation-criteria-7-ข้อ">Validation Criteria (7 ข้อ)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Check</th>
+<th>ตรวจอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Validity</strong></td>
+<td>requirement สะท้อน <strong>ความต้องการจริง</strong> ของผู้ใช้</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Consistency</strong></td>
+<td><strong>ไม่ขัดแย้งกันเอง</strong> ไม่มีข้อจำกัดที่ขัดกัน หรือคำอธิบายฟังก์ชันเดียวกันที่ไม่ตรงกัน</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Completeness</strong></td>
+<td>กำหนด <strong>ทุกฟังก์ชันและข้อจำกัด</strong> ครบ</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Realism</strong></td>
+<td><strong>ทำได้จริง</strong> และส่งมอบได้</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Clarity</strong></td>
+<td><strong>ไม่กำกวม</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Verifiability</strong></td>
+<td>เมื่อสร้างระบบเสร็จ <strong>ออกแบบ test ที่ทำซ้ำได้</strong> เพื่อพิสูจน์ว่าระบบทำตาม requirement</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Traceability</strong></td>
+<td>functional requirement <strong>สืบย้อนไปยังฟังก์ชันของระบบ</strong> ที่กำหนดไว้ได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ 7 ข้อ: <strong>V-C-C-R-C-V-T</strong> → &quot;<strong>V</strong>ery <strong>C</strong>lear <strong>C</strong>ats <strong>R</strong>un, <strong>C</strong>ats <strong>V</strong>isit <strong>T</strong>rees&quot; (ประโยคช่วยจำ ไม่ได้อยู่ในสไลด์)</p>
+</blockquote>
+<p><strong>ตัวอย่างที่ไม่ผ่าน</strong> <em>(เสริม)</em></p>
+<ul>
+<li><strong>Consistency ไม่ผ่าน:</strong> ข้อ 3 บอก &quot;รหัสผ่านอย่างน้อย 8 ตัว&quot; แต่ข้อ 12 บอก &quot;อย่างน้อย 6 ตัว&quot;</li>
+<li><strong>Verifiability ไม่ผ่าน:</strong> &quot;ระบบต้องเร็ว&quot; (เร็วแค่ไหน ทดสอบไม่ได้)</li>
+<li><strong>Realism ไม่ผ่าน:</strong> &quot;ระบบต้องไม่ล่มเลย 100% ตลอดไป&quot;</li>
+</ul>
+<hr />
+<h2 id="9-requirements-change-และ-requirements-management">9. Requirements Change และ Requirements Management</h2>
+<h3 id="ทำไม-requirement-ถึงเปลี่ยน">ทำไม requirement ถึงเปลี่ยน</h3>
+<p><img loading="lazy" src="diagrams/L3-10-why-requirements-change.png" alt="ทำไม requirement ถึงเปลี่ยน" /></p>
+<ul>
+<li><strong>Wicked problem</strong> คือปัญหาซับซ้อนที่ <strong>นิยามให้ครบตั้งแต่แรกไม่ได้</strong> requirement ที่ผูกกับปัญหาแบบนี้จึงไม่ครบและต้องเปลี่ยน</li>
+<li><strong>ความเข้าใจของ stakeholder เปลี่ยน</strong> เมื่อเห็นระบบหรือเข้าใจปัญหามากขึ้น requirement ก็เปลี่ยนตาม</li>
+</ul>
+<h3 id="requirements-management">Requirements Management</h3>
+<blockquote class="callout">
+<p>เมื่อ requirement เปลี่ยนตลอด ต้อง <strong>ติดตาม requirement แต่ละข้อ</strong> และ <strong>รักษาลิงก์ระหว่าง requirement ที่พึ่งพากัน</strong> เพื่อ <strong>ประเมินผลกระทบ</strong> ของการเปลี่ยนแปลงได้ กระบวนการนี้เรียกว่า <strong>Requirements Management</strong></p>
+</blockquote>
+<ul>
+<li>เป็น <strong>กระบวนการทางการ</strong> สำหรับยื่นข้อเสนอการเปลี่ยนแปลง และเชื่อมการเปลี่ยนแปลงกับ system requirements</li>
+<li>ประกอบด้วย <strong>2 กระบวนการ</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Requirements management planning</strong></th>
+<th><strong>Requirements change management</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ทำเมื่อ</td>
+<td>ช่วงวางแผน</td>
+<td><strong>หลังเอกสาร requirement ได้รับอนุมัติแล้ว</strong></td>
+</tr>
+<tr>
+<td>ทำอะไร</td>
+<td>กำหนดว่าจะจัดการ requirement ที่เปลี่ยนตลอดอย่างไร</td>
+<td>จัดการการเปลี่ยนแปลงทั้งหมดที่ถูกเสนอ</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="requirements-management-planning-ต้องพิจารณา-4-เรื่อง">Requirements Management Planning – ต้องพิจารณา 4 เรื่อง</h3>
+<ol>
+<li><strong>Requirements identification</strong> – ทุก requirement ต้องมี <strong>ID ไม่ซ้ำ</strong> เพื่ออ้างอิงข้ามกันและใช้ประเมิน traceability</li>
+<li><strong>Change management process</strong> – ชุดกิจกรรมสำหรับ <strong>ประเมินผลกระทบและต้นทุน</strong> ของการเปลี่ยนแปลง</li>
+<li><strong>Traceability policies</strong> – กำหนด <strong>ความสัมพันธ์</strong> ระหว่าง requirement ด้วยกัน และระหว่าง requirement กับ design</li>
+<li><strong>Tool support</strong> – เครื่องมืออัตโนมัติช่วยดูแล requirement</li>
+</ol>
+<h3 id="requirements-change-management-3-ขั้น">Requirements Change Management – 3 ขั้น</h3>
+<p><img loading="lazy" src="diagrams/L3-11-change-management.png" alt="Requirements change management" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Problem analysis and change specification</strong></td>
+<td>ระบุปัญหาหรือข้อเสนอเปลี่ยนแปลง, <strong>ตรวจว่าสมเหตุสมผลไหม</strong>, ตัดสินว่า <strong>รับหรือถอน</strong></td>
+</tr>
+<tr>
+<td><strong>2. Change analysis and costing</strong></td>
+<td>ประเมินการเปลี่ยนแปลงโดยใช้ <strong>ข้อมูล traceability</strong> และความรู้เรื่อง requirement แล้ว <strong>ประมาณต้นทุน</strong></td>
+</tr>
+<tr>
+<td><strong>3. Change implementation</strong></td>
+<td><strong>แก้ไข design และ implementation</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เห็นความเชื่อมโยงไหม: <strong>Requirement ID</strong> (planning) → ทำให้ <strong>traceability</strong> ได้ → ทำให้ <strong>change analysis and costing</strong> ประเมินผลกระทบได้ ถ้าไม่มี ID ก็ไม่รู้ว่าแก้ข้อหนึ่งแล้วจะกระทบอะไรบ้าง</p>
+</blockquote>
+<hr />
+<h2 id="10-exercise-สไลด์-67">10. Exercise (สไลด์ 67)</h2>
+<p><strong>โจทย์:</strong> เว็บไซต์ขายของออนไลน์</p>
+<ul>
+<li>เขียน functional requirements 5 ข้อ</li>
+<li>เขียน non-functional requirements 5 ข้อ</li>
+</ul>
+<p><strong>ตัวอย่างคำตอบ</strong> <em>(ผมเขียนเอง ใช้ &quot;shall&quot; และวัดผลได้)</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Functional</th>
+<th>Non-functional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>The system shall allow users to register an account with email and password.</td>
+<td>The website shall load each page within 2 seconds for 95% of requests. <em>(performance)</em></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Users shall be able to search products by keyword and category.</td>
+<td>The system shall support 10,000 concurrent users. <em>(scalability)</em></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Users shall be able to add and remove products in a shopping cart.</td>
+<td>The system shall be available 99.9% of the time per month. <em>(reliability)</em></td>
+</tr>
+<tr>
+<td>4</td>
+<td>The system shall allow users to pay by credit card or QR payment.</td>
+<td>Payment data shall be encrypted using TLS 1.2 or higher. <em>(security)</em></td>
+</tr>
+<tr>
+<td>5</td>
+<td>The system shall send an order confirmation email after successful payment.</td>
+<td>A new user shall complete a first purchase within 5 minutes without help. <em>(usability)</em></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>คำศัพท์สำคัญ</h1>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Software requirement</strong></td>
+<td>คำอธิบายบริการที่ระบบต้องให้ และข้อจำกัดของระบบ</td>
+<td>ทำอะไร + เงื่อนไข</td>
+</tr>
+<tr>
+<td><strong>User requirement</strong></td>
+<td>ระดับกว้าง ภาษาที่ลูกค้าเข้าใจ</td>
+<td>ฉบับลูกค้า</td>
+</tr>
+<tr>
+<td><strong>System requirement</strong></td>
+<td>ระดับละเอียด บอกชัดว่าต้อง implement อะไร</td>
+<td>ฉบับ developer</td>
+</tr>
+<tr>
+<td><strong>Functional requirement</strong></td>
+<td>บริการ พฤติกรรม และการตอบสนองต่อ input</td>
+<td>&quot;ทำอะไร&quot;</td>
+</tr>
+<tr>
+<td><strong>Non-functional requirement</strong></td>
+<td>ข้อจำกัดของบริการ ใช้กับทั้งระบบ ต้องวัดได้และทดสอบได้</td>
+<td>&quot;ทำได้ดีแค่ไหน&quot;</td>
+</tr>
+<tr>
+<td><strong>Product / Organizational / External requirements</strong></td>
+<td>3 กลุ่มของ non-functional</td>
+<td>ตัวผลิตภัณฑ์ / องค์กร / ภายนอก</td>
+</tr>
+<tr>
+<td><strong>Stakeholder</strong></td>
+<td>ผู้มีส่วนได้ส่วนเสียกับระบบ</td>
+<td>ทุกคนที่เกี่ยวข้อง</td>
+</tr>
+<tr>
+<td><strong>Requirements Engineering (RE)</strong></td>
+<td>หา วิเคราะห์ เขียน และตรวจ requirement</td>
+<td>วิศวกรรม requirement</td>
+</tr>
+<tr>
+<td><strong>Feasibility study</strong></td>
+<td>ศึกษาสั้น ๆ ช่วงต้นว่าควรทำโครงการไหม (3 คำถาม)</td>
+<td>ทำได้/คุ้มไหม</td>
+</tr>
+<tr>
+<td><strong>Elicitation</strong></td>
+<td>การเก็บหรือค้นหา requirement จาก stakeholder</td>
+<td>ขุดหา</td>
+</tr>
+<tr>
+<td><strong>Specification</strong></td>
+<td>การเขียน requirement ลงเอกสาร</td>
+<td>จดให้ชัด</td>
+</tr>
+<tr>
+<td><strong>Validation</strong></td>
+<td>ตรวจว่า requirement ตรงกับที่ลูกค้าต้องการจริง</td>
+<td>ตรวจทาน</td>
+</tr>
+<tr>
+<td><strong>Requirements management</strong></td>
+<td>ติดตามและจัดการการเปลี่ยนแปลงของ requirement</td>
+<td>คุมการเปลี่ยน</td>
+</tr>
+<tr>
+<td><strong>Closed / Open interview</strong></td>
+<td>สัมภาษณ์ตามชุดคำถาม / คุยแบบเปิด</td>
+<td>มีสคริปต์ / ไม่มี</td>
+</tr>
+<tr>
+<td><strong>Jargon</strong></td>
+<td>ศัพท์เฉพาะของสายงาน</td>
+<td>ภาษาวงใน</td>
+</tr>
+<tr>
+<td><strong>Ethnography</strong></td>
+<td>สังเกตการทำงานจริงในสถานที่จริง</td>
+<td>ไปนั่งดู</td>
+</tr>
+<tr>
+<td><strong>Implicit requirement</strong></td>
+<td>requirement แฝงที่ไม่มีใครพูด แต่มีจริงในการทำงาน</td>
+<td>ของที่ไม่ได้บอก</td>
+</tr>
+<tr>
+<td><strong>JRP (Joint Requirements Planning)</strong></td>
+<td>ประชุมร่วมกันเพื่อกำหนด requirement</td>
+<td>ประชุมรวม</td>
+</tr>
+<tr>
+<td><strong>Shall / Should</strong></td>
+<td>mandatory (ต้องมี) / desirable (ควรมี)</td>
+<td>ต้อง / ควร</td>
+</tr>
+<tr>
+<td><strong>Rationale</strong></td>
+<td>เหตุผลว่าทำไมต้องมี requirement นี้ และใครเสนอ</td>
+<td>ทำไม</td>
+</tr>
+<tr>
+<td><strong>Structured specification</strong></td>
+<td>ฟอร์ม 10 ช่อง (ID, type, description, rationale, source, input, output, action, pre, post)</td>
+<td>ฟอร์มกรอก</td>
+</tr>
+<tr>
+<td><strong>Precondition / Postcondition</strong></td>
+<td>สภาพที่ต้องเป็นจริงก่อน / หลังทำงาน</td>
+<td>ก่อน / หลัง</td>
+</tr>
+<tr>
+<td><strong>User story</strong></td>
+<td>As a … I want … So that …</td>
+<td>ใคร-อยากได้อะไร-เพื่ออะไร</td>
+</tr>
+<tr>
+<td><strong>Epic</strong></td>
+<td>user story ขนาดใหญ่ที่ต้องแตกย่อย</td>
+<td>story ก้อนใหญ่</td>
+</tr>
+<tr>
+<td><strong>Acceptance criteria / DoD</strong></td>
+<td>เกณฑ์ที่ต้องผ่านจึงถือว่า story เสร็จ</td>
+<td>เสร็จจริงเมื่อ…</td>
+</tr>
+<tr>
+<td><strong>Given–When–Then (Gherkin)</strong></td>
+<td>รูปแบบเขียน acceptance criteria</td>
+<td>สถานการณ์–การกระทำ–ผลลัพธ์</td>
+</tr>
+<tr>
+<td><strong>Use case</strong></td>
+<td>ปฏิสัมพันธ์ระหว่าง actor กับระบบ (กราฟิก + ข้อความ)</td>
+<td>วงรี + คนก้าง</td>
+</tr>
+<tr>
+<td><strong>Actor</strong></td>
+<td>คนหรือระบบอื่นที่ใช้ระบบ</td>
+<td>stick figure</td>
+</tr>
+<tr>
+<td><strong>Prototyping (low / high fidelity)</strong></td>
+<td>ต้นแบบ UI จากกระดาษ / จากเครื่องมืออัตโนมัติ</td>
+<td>กระดาษ / โปรแกรม</td>
+</tr>
+<tr>
+<td><strong>DFD</strong></td>
+<td>Data Flow Diagram แผนภาพการไหลของข้อมูล</td>
+<td>ข้อมูลไหลไปไหน</td>
+</tr>
+<tr>
+<td><strong>ERD</strong></td>
+<td>Entity Relationship Diagram</td>
+<td>ข้อมูลสัมพันธ์กันอย่างไร</td>
+</tr>
+<tr>
+<td><strong>Cardinality / Modality</strong></td>
+<td>จำนวนที่สัมพันธ์ (1:m) / ความจำเป็นของความสัมพันธ์</td>
+<td>กี่อัน / ต้องมีไหม</td>
+</tr>
+<tr>
+<td><strong>SRS</strong></td>
+<td>Software Requirements Specification เอกสาร requirement ทางการ</td>
+<td>คัมภีร์ requirement</td>
+</tr>
+<tr>
+<td><strong>Scope creep</strong></td>
+<td>ขอบเขตงานบานปลายเรื่อย ๆ</td>
+<td>งานงอก</td>
+</tr>
+<tr>
+<td><strong>Traceability</strong></td>
+<td>สืบย้อนความสัมพันธ์ระหว่าง requirement กับ design ได้</td>
+<td>ตามรอยได้</td>
+</tr>
+<tr>
+<td><strong>Verifiability</strong></td>
+<td>สร้าง test ที่ทำซ้ำได้เพื่อพิสูจน์ requirement</td>
+<td>ทดสอบได้</td>
+</tr>
+<tr>
+<td><strong>Wicked problem</strong></td>
+<td>ปัญหาที่นิยามให้ครบไม่ได้ตั้งแต่แรก</td>
+<td>ปัญหาดื้อ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>สรุปท้ายบท / จุดที่มักออกสอบ</h1>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>Requirement มี 2 มิติ: <strong>User vs System</strong> (ระดับความละเอียด) และ <strong>Functional vs Non-functional</strong> (สิ่งที่อธิบาย)</li>
+<li><strong>Non-functional ต้อง measurable และ testable</strong> พร้อมตาราง metrics (speed, size, ease of use, reliability, robustness, portability)</li>
+<li>Non-functional แบ่ง 3 กลุ่ม: <strong>Product / Organizational / External</strong></li>
+<li><strong>Feasibility study 3 คำถาม:</strong> ตอบเป้าหมายองค์กรไหม, ทำได้ในเวลา งบ และเทคโนโลยีไหม, รวมกับระบบเดิมได้ไหม ถ้าตอบ &quot;ไม่&quot; ข้อใดข้อหนึ่ง ไม่ควรทำต่อ</li>
+<li><strong>RE มี 4 กระบวนการ:</strong> elicitation → specification → validation → change (iterative) ผลลัพธ์คือ system requirements document</li>
+<li><strong>Elicitation challenges 4 ข้อ</strong></li>
+<li><strong>Elicitation process 4 ขั้น:</strong> discovery → classification → prioritization &amp; negotiation → documentation</li>
+<li><strong>6 dimensions:</strong> individual functionality, business workflow, data, UI, existing systems, other constraints</li>
+<li><strong>2 แนวทางหลัก:</strong> interviewing และ ethnography พร้อมเทคนิคอื่น (documents, site visits, questionnaires, JRP)</li>
+<li><strong>Natural language guidelines 5 ข้อ</strong> โดยเฉพาะ <strong>shall = mandatory, should = desirable</strong></li>
+<li><strong>Structured specification 10 fields</strong></li>
+<li><strong>User story template</strong> + <strong>acceptance criteria (Given-When-Then)</strong></li>
+<li><strong>Use case diagram:</strong> stick figure = actor, ellipse = use case, line = การเชื่อม</li>
+<li><strong>Prototyping:</strong> low fidelity (กระดาษ) vs high fidelity (เครื่องมือ)</li>
+<li><strong>ทำไมต้องมีเอกสาร requirement 5 ข้อ</strong> และ <strong>ผู้ใช้ SRS 5 กลุ่ม</strong></li>
+<li><strong>โครงสร้าง SRS 10 บท</strong></li>
+<li><strong>Validation 7 criteria:</strong> validity, consistency, completeness, realism, clarity, verifiability, traceability</li>
+<li><strong>Requirements management = planning (4 เรื่อง) + change management (3 ขั้น)</strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User vs System requirements</td>
+<td>กว้าง ลูกค้าอ่าน vs ละเอียด developer อ่าน</td>
+</tr>
+<tr>
+<td>Functional vs Non-functional</td>
+<td>ทำอะไร vs ข้อจำกัดหรือคุณภาพ ใช้กับทั้งระบบ</td>
+</tr>
+<tr>
+<td>Shall vs Should</td>
+<td>ต้องมี vs ควรมี</td>
+</tr>
+<tr>
+<td>Interview vs Ethnography</td>
+<td>ฟังจากที่เขาเล่า vs ดูจากที่เขาทำจริง (ได้ implicit requirement)</td>
+</tr>
+<tr>
+<td>Closed vs Open interview</td>
+<td>มีชุดคำถาม vs คุยเปิด</td>
+</tr>
+<tr>
+<td>Low vs High fidelity prototype</td>
+<td>กระดาษ คนเลื่อน vs เครื่องมือ ทำ flow อัตโนมัติ</td>
+</tr>
+<tr>
+<td>Cardinality vs Modality</td>
+<td>กี่อัน vs จำเป็นต้องมีไหม</td>
+</tr>
+<tr>
+<td>Consistency vs Completeness</td>
+<td>ไม่ขัดกันเอง vs ครบทุกฟังก์ชัน</td>
+</tr>
+<tr>
+<td>Verifiability vs Traceability</td>
+<td>ทดสอบพิสูจน์ได้ vs สืบย้อนไปยังฟังก์ชันหรือ design ได้</td>
+</tr>
+<tr>
+<td>Requirements management planning vs Change management</td>
+<td>วางแผนก่อน vs จัดการการเปลี่ยนหลังเอกสารอนุมัติแล้ว</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมห้ามถาม &quot;tell me what you want&quot;</strong> เพราะ stakeholder มักไม่รู้ว่าต้องการอะไร และอธิบายยาก ต้องชวนคุยจากงานที่เขาทำจริง</li>
+<li><strong>ทำไม ethnography เจอสิ่งที่สัมภาษณ์ไม่เจอ</strong> เพราะคนทำงานจนคุ้นจนไม่คิดจะพูด และการทำงานจริงมักต่างจากกระบวนการทางการ</li>
+<li><strong>ทำไม &quot;easy-to-use&quot; เป็น requirement ที่แย่</strong> เพราะวัดไม่ได้และทดสอบไม่ได้ ไม่ผ่าน verifiability</li>
+<li><strong>ทำไม validation สำคัญ</strong> เพราะแก้ requirement หลังพัฒนาแล้ว ต้องแก้ design และ implementation แล้ว retest ทำให้ต้นทุนสูงมาก</li>
+<li><strong>ทำไม requirement ต้องมี ID ไม่ซ้ำ</strong> เพื่อทำ traceability และประเมินผลกระทบเมื่อมีการเปลี่ยนแปลง</li>
+<li><strong>ทำไม requirement เปลี่ยนแน่นอน</strong> เพราะเป็น wicked problem และความเข้าใจของ stakeholder เปลี่ยนไปตามเวลา</li>
+</ul>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../l2/index.html"><small>← บทก่อนหน้า</small><span>Lecture 2 – Software Process Models</span></a><a class="pg next" href="../l4/index.html"><small>บทถัดไป →</small><span>Lecture 4 – Requirements Analysis with Scenario-based Modeling I (Use Case Modeling)</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

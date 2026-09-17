@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter VIII — Parallel Processors from Client to Cloud · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+      <ol><li><a href="#1-course-outline-และ-taxonomy">1. Course Outline และ Taxonomy</a></li><li><a href="#2-chapter-overview">2. Chapter Overview</a></li><li><a href="#3-introduction">3. Introduction</a></li><li><a href="#4-hardware-and-software">4. Hardware and Software</a></li><li><a href="#5-what-weve-already-covered">5. What We&#x27;ve Already Covered</a></li><li><a href="#6-parallel-programming">6. Parallel Programming ⭐</a></li><li><a href="#7-instruction-and-data-streams">7. Instruction and Data Streams ⭐⭐</a></li><li><a href="#8-vector-processors-และ-daxpy">8. Vector Processors และ DAXPY</a></li><li><a href="#9-vector-vs-scalar-simd-vector-vs-multimedia-extensions">9. Vector vs Scalar, SIMD, Vector vs Multimedia Extensions</a></li><li><a href="#10-hardware-multithreading">10. Hardware Multithreading ⭐⭐</a></li><li><a href="#11-shared-memory-multiprocessors">11. Shared Memory Multiprocessors</a></li><li><a href="#12-gpus">12. GPUs</a></li><li><a href="#13-message-passing-clusters-grid-computing">13. Message Passing, Clusters, Grid Computing</a></li><li><a href="#14-interconnection-networks">14. Interconnection Networks ⭐⭐</a></li><li><a href="#15-parallel-benchmarks-และ-modeling-performance">15. Parallel Benchmarks และ Modeling Performance</a></li><li><a href="#16-concluding-remarks">16. Concluding Remarks ⭐</a></li><li><a href="#17-คำศัพท์สำคัญ">17. คำศัพท์สำคัญ</a></li><li><a href="#18-สรุปท้ายบท-จุดที่มักออกสอบ">18. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter08</div>
+    <h1 class="lesson-title">Chapter VIII — Parallel Processors from Client to Cloud</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> การทำให้ CPU ตัวเดียวเร็วขึ้นเรื่อย ๆ ทำได้ยากแล้ว (ติดเรื่องพลังงานและความร้อน) ทางออกคือ <strong>ใช้ processor หลายตัวช่วยกันทำงาน</strong></p>
+<p>บทนี้ครอบคลุม:</p>
+<ul>
+<li>ทำไมเขียนโปรแกรมขนานถึงยาก</li>
+<li>การจัดกลุ่มเครื่องตาม <strong>Flynn (SISD, SIMD, MISD, MIMD)</strong> และ SPMD</li>
+<li><strong>vector processor</strong></li>
+<li><strong>hardware multithreading</strong></li>
+<li><strong>shared memory (SMP, UMA/NUMA)</strong></li>
+<li><strong>GPU</strong></li>
+<li><strong>message passing, clusters, grid</strong></li>
+<li><strong>network topologies</strong></li>
+<li>benchmark และ performance model</li>
+</ul>
+<p>บทนี้ต่อจาก Chapter 01 (parallelism, SIMD), Chapter 04 (cache coherence) และ Chapter 07 (pipelining = parallelism ระดับคำสั่ง)</p>
+</blockquote>
+<h2 id="1-course-outline-และ-taxonomy">1. Course Outline และ Taxonomy</h2>
+<ul>
+<li>บทนี้คือหัวข้อสุดท้ายของวิชา: <strong>the multiprocessor architecture</strong></li>
+</ul>
+<h3 id="figure-171-a-taxonomy-of-parallel-processor-architectures">Figure 17.1 — A Taxonomy of Parallel Processor Architectures ⭐</h3>
+<p><img loading="lazy" src="img/c8-p003.jpg" alt="แผนผังการจัดกลุ่ม processor organizations" /></p>
+<p><strong>Processor Organizations</strong> แบ่งเป็น 4 กลุ่มตาม Flynn:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>ชื่อเต็ม</th>
+<th>แยกย่อยเป็น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SISD</strong></td>
+<td>Single Instruction, Single Data Stream</td>
+<td><strong>Uniprocessor</strong></td>
+</tr>
+<tr>
+<td><strong>SIMD</strong></td>
+<td>Single Instruction, Multiple Data Stream</td>
+<td><strong>Vector Processor</strong>, <strong>Array Processor</strong></td>
+</tr>
+<tr>
+<td><strong>MISD</strong></td>
+<td>Multiple Instruction, Single Data Stream</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>MIMD</strong></td>
+<td>Multiple Instruction, Multiple Data Stream</td>
+<td><strong>Shared Memory (tightly coupled)</strong> และ <strong>Distributed Memory (loosely coupled)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใต้ <strong>Shared Memory:</strong>
+<ul>
+<li><strong>Symmetric Multiprocessor (SMP)</strong></li>
+<li><strong>Nonuniform Memory Access (NUMA)</strong></li>
+</ul>
+</li>
+<li>ใต้ <strong>Distributed Memory:</strong>
+<ul>
+<li><strong>Clusters</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="2-chapter-overview">2. Chapter Overview</h2>
+<ul>
+<li>Introduction</li>
+<li>Difficulty of creating parallel processing programs</li>
+<li>SISD, MIMD, SIMD, SPMD, Vector</li>
+<li>Hardware multithreading</li>
+<li>Multicore and other shared memory multiprocessors</li>
+<li>Introduction to GPUs</li>
+<li>Clusters &amp; Message Passing</li>
+<li>Introduction to multiprocessors network topologies</li>
+</ul>
+<hr />
+<h2 id="3-introduction">3. Introduction</h2>
+<ul>
+<li><strong>เป้าหมาย: ต่อคอมพิวเตอร์หลายเครื่องเข้าด้วยกันเพื่อให้ได้ประสิทธิภาพสูงขึ้น</strong>
+<ul>
+<li><strong>Multiprocessors</strong></li>
+<li>ได้ <strong>scalability, availability, power efficiency</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Task-level (process-level) parallelism</strong></td>
+<td><strong>throughput สูงสำหรับงานที่ไม่ขึ้นต่อกัน</strong> (หลายงานแยกกันรัน)</td>
+</tr>
+<tr>
+<td><strong>Parallel processing program</strong></td>
+<td><strong>โปรแกรมเดียวที่รันบนหลาย processor</strong></td>
+</tr>
+<tr>
+<td><strong>Multicore microprocessors</strong></td>
+<td><strong>ชิปที่มีหลาย processor (core) อยู่ในตัว</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Task-level</strong> = ร้านอาหารมีพ่อครัวหลายคน แต่ละคนทำคนละเมนู
+<strong>Parallel processing program</strong> = พ่อครัวหลายคนช่วยกันทำเมนูเดียว (ยากกว่าเพราะต้องประสานกัน)</p>
+</blockquote>
+<hr />
+<h2 id="4-hardware-and-software">4. Hardware and Software</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>แบบ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hardware</strong></td>
+<td><strong>Serial</strong></td>
+<td><strong>Pentium 4</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Parallel</strong></td>
+<td><strong>quad-core Xeon e5345</strong></td>
+</tr>
+<tr>
+<td><strong>Software</strong></td>
+<td><strong>Sequential</strong></td>
+<td><strong>matrix multiplication</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Concurrent</strong></td>
+<td><strong>operating system</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>software แบบ sequential หรือ concurrent รันบน hardware แบบ serial หรือ parallel ก็ได้</strong></li>
+<li><strong>ความท้าทาย: ใช้ parallel hardware ให้คุ้ม</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Concurrent ≠ Parallel</strong></p>
+<ul>
+<li><strong>concurrent</strong> คือ software ที่มีหลายงานดำเนินไปพร้อมกัน (เช่น OS) ซึ่งรันบน CPU ตัวเดียวได้</li>
+<li><strong>parallel</strong> หมายถึง hardware ที่ทำงานพร้อมกันได้จริง</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="5-what-weve-already-covered">5. What We've Already Covered</h2>
+<p>หัวข้อ parallelism ที่ตำราพูดถึงในบทก่อน ๆ แล้ว:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อตำรา</th>
+<th>เรื่อง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>§2.11</strong> Parallelism and Instructions</td>
+<td><strong>Synchronization</strong></td>
+</tr>
+<tr>
+<td><strong>§3.6</strong> Parallelism and Computer Arithmetic</td>
+<td><strong>Subword Parallelism</strong></td>
+</tr>
+<tr>
+<td><strong>§4.10</strong> Parallelism and Advanced Instruction-Level Parallelism</td>
+<td>(pipelining ขั้นสูง)</td>
+</tr>
+<tr>
+<td><strong>§5.10</strong> Parallelism and Memory Hierarchies</td>
+<td><strong>Cache Coherence</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-parallel-programming">6. Parallel Programming ⭐</h2>
+<ul>
+<li><strong>ปัญหาอยู่ที่ parallel software</strong></li>
+<li><strong>ต้องได้ประสิทธิภาพเพิ่มขึ้นอย่างมีนัยสำคัญ</strong>
+<ul>
+<li><strong>ไม่อย่างนั้นใช้ uniprocessor ที่เร็วกว่าเลยดีกว่า เพราะง่ายกว่า!</strong></li>
+</ul>
+</li>
+<li><strong>ความยาก 3 ข้อ:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ความยาก</th>
+<th>ความหมาย (อธิบายเสริม)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Partitioning</strong></td>
+<td><strong>แบ่งงาน</strong> ให้แต่ละ processor ทำได้เท่า ๆ กัน</td>
+</tr>
+<tr>
+<td><strong>Coordination</strong></td>
+<td><strong>จัดลำดับและประสานงาน</strong> ระหว่าง processor</td>
+</tr>
+<tr>
+<td><strong>Communications overhead</strong></td>
+<td><strong>เวลาที่เสียไปกับการสื่อสาร</strong> ระหว่าง processor</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ทาสีบ้านคนเดียวใช้ 8 ชั่วโมง ถ้าจ้าง 8 คนก็ไม่ได้เสร็จใน 1 ชั่วโมงเสมอไป เพราะต้อง <strong>แบ่งห้อง</strong> (partitioning), <strong>คุยว่าใครทำอะไร</strong> (coordination) และ <strong>เดินไปถามกัน</strong> (communication)</p>
+</blockquote>
+<hr />
+<h2 id="7-instruction-and-data-streams">7. Instruction and Data Streams ⭐⭐</h2>
+<p><strong>An alternate classification</strong> (Flynn's taxonomy)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Data Streams: Single</strong></th>
+<th><strong>Data Streams: Multiple</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instruction Streams: Single</strong></td>
+<td><strong>SISD:</strong> Intel Pentium 4</td>
+<td><strong>SIMD:</strong> SSE instructions of x86</td>
+</tr>
+<tr>
+<td><strong>Instruction Streams: Multiple</strong></td>
+<td><strong>MISD:</strong> No examples today</td>
+<td><strong>MIMD:</strong> Intel Xeon e5345</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>SPMD: Single Program Multiple Data</strong>
+<ul>
+<li><strong>โปรแกรมขนานที่รันบนเครื่อง MIMD</strong></li>
+<li>ใช้ <strong>conditional code สำหรับ processor แต่ละตัว</strong> (เช่น <code>if (Pn == 0) ...</code>)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>SPMD ไม่ใช่ประเภท hardware</strong> แต่เป็น <strong>วิธีเขียนโปรแกรม</strong> คือเขียนโปรแกรมเดียว ให้ทุก processor รัน แต่แต่ละตัวทำงานกับข้อมูลคนละส่วน</p>
+</blockquote>
+<hr />
+<h2 id="8-vector-processors-และ-daxpy">8. Vector Processors และ DAXPY</h2>
+<h3 id="81-vector-processors">8.1 Vector Processors</h3>
+<ul>
+<li><strong>function units แบบ pipeline สูง</strong></li>
+<li><strong>ส่งข้อมูลเป็นสายระหว่าง vector registers กับ units</strong>
+<ul>
+<li><strong>ดึงข้อมูลจาก memory เข้า register</strong></li>
+<li><strong>เก็บผลจาก register กลับ memory</strong></li>
+</ul>
+</li>
+<li><strong>ตัวอย่าง: Vector extension ของ RISC-V</strong>
+<ul>
+<li><strong>v0 ถึง v31:</strong> register <strong>32 ตัว × 64 elements</strong> (element ละ 64 บิต)</li>
+<li><strong>Vector instructions:</strong>
+<ul>
+<li><strong><code>fld.v</code>, <code>fsd.v</code>:</strong> load/store vector</li>
+<li><strong><code>fadd.d.v</code>:</strong> บวก vector ของ double</li>
+<li><strong><code>fadd.d.vs</code>:</strong> บวก scalar เข้ากับทุก element ของ vector ของ double</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ลด bandwidth ที่ใช้ fetch คำสั่งได้มาก</strong> (คำสั่งเดียวทำงานกับข้อมูลหลายตัว)</li>
+</ul>
+<h3 id="82-example-daxpy-y-a-x-y">8.2 Example: DAXPY (Y = a × X + Y) ⭐</h3>
+<p><strong>DAXPY</strong> คือ <strong>คำสั่งทางพีชคณิตเชิงเส้น (linear algebra)</strong> ใน library <strong>BLAS</strong></p>
+<ul>
+<li>ชื่อมาจาก <strong>Double-precision A*X Plus Y</strong></li>
+<li>ทำหน้าที่ <strong>นำ vector X คูณ scalar a แล้วบวกกับ vector Y</strong></li>
+</ul>
+<pre><code class="language-c">void daxpy(size_t n, double a, const double x[], double y[]) {
+    for (size_t i = 0; i &lt; n; i++) {
+        y[i] = a * x[i] + y[i];   // Y = a*X + Y
+    }
+}
+</code></pre>
+<p><strong>Conventional RISC-V code</strong></p>
+<pre><code>      fld    f0, a(x3)      // load scalar a
+      addi   x5, x19, 512   // end of array X
+loop: fld    f1, 0(x19)     // load x[i]
+      fmul.d f1, f1, f0     // a * x[i]
+      fld    f2, 0(x20)     // load y[i]
+      fadd.d f2, f2, f1     // a * x[i] + y[i]
+      fsd    f2, 0(x20)     // store y[i]
+      addi   x19, x19, 8    // increment index to x
+      addi   x20, x20, 8    // increment index to y
+      bltu   x19, x5, loop  // repeat if not done
+</code></pre>
+<p><strong>Vector RISC-V code</strong></p>
+<pre><code>      fld       f0, a(x3)     // load scalar a
+      fld.v     v0, 0(x19)    // load vector x
+      fmul.d.vs v0, v0, f0    // vector-scalar multiply
+      fld.v     v1, 0(x20)    // load vector y
+      fadd.d.v  v1, v1, v0    // vector-vector add
+      fsd.v     v1, 0(x20)    // store vector y
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Conventional</th>
+<th>Vector</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จำนวนคำสั่ง</td>
+<td>10 บรรทัด แต่ <strong>วนลูป</strong> (512/8 = <strong>64 รอบ</strong>)</td>
+<td><strong>6 คำสั่ง ไม่มีลูป</strong></td>
+</tr>
+<tr>
+<td>branch</td>
+<td>มี <code>bltu</code> ทุกรอบ</td>
+<td><strong>ไม่มี</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 array 512 bytes ÷ 8 bytes ต่อ double = <strong>64 elements</strong> พอดีกับ vector register ที่มี 64 elements <em>(คำนวณเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="9-vector-vs-scalar-simd-vector-vs-multimedia-extensions">9. Vector vs Scalar, SIMD, Vector vs Multimedia Extensions</h2>
+<h3 id="91-vector-vs-scalar">9.1 Vector vs. Scalar</h3>
+<p><strong>Vector architectures และ compilers:</strong></p>
+<ul>
+<li><strong>ทำให้เขียนโปรแกรม data-parallel ง่ายขึ้น</strong></li>
+<li><strong>บอกชัดเจนว่าไม่มี loop-carried dependences</strong> (แต่ละรอบไม่ขึ้นกับรอบก่อน)
+<ul>
+<li><strong>hardware จึงตรวจสอบน้อยลง</strong></li>
+</ul>
+</li>
+<li><strong>รูปแบบการเข้าถึงสม่ำเสมอ</strong> → ได้ประโยชน์จาก <strong>interleaved และ burst memory</strong></li>
+<li><strong>เลี่ยง control hazards</strong> เพราะไม่มีลูป</li>
+<li><strong>ใช้ได้กว้างกว่า media extensions แบบเฉพาะกิจ</strong> (เช่น <strong>MMX, SSE</strong>)</li>
+<li><strong>เข้ากับเทคโนโลยี compiler ได้ดีกว่า</strong></li>
+</ul>
+<h3 id="92-simd">9.2 SIMD ⭐</h3>
+<ul>
+<li><strong>ทำงานกับ vector ของข้อมูลทีละ element พร้อมกัน</strong>
+<ul>
+<li>เช่น <strong>คำสั่ง MMX และ SSE ใน x86</strong></li>
+<li><strong>ข้อมูลหลายตัวอยู่ใน register กว้าง 128 บิต</strong></li>
+</ul>
+</li>
+<li><strong>ทุก processor ทำคำสั่งเดียวกันในเวลาเดียวกัน</strong>
+<ul>
+<li><strong>แต่ละตัวใช้ data address ต่างกัน</strong></li>
+</ul>
+</li>
+<li><strong>ข้อดี:</strong>
+<ul>
+<li><strong>synchronization ง่าย</strong></li>
+<li><strong>ใช้ hardware ควบคุมคำสั่งน้อยลง</strong></li>
+</ul>
+</li>
+<li><strong>เหมาะที่สุดกับงานที่ data-parallel สูง</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนครูสั่งทั้งห้องว่า &quot;บวก 5&quot; พร้อมกัน แต่ละคนถือตัวเลขของตัวเอง</p>
+</blockquote>
+<h3 id="93-vector-vs-multimedia-extensions">9.3 Vector vs. Multimedia Extensions</h3>
+<p><img loading="lazy" src="img/c8-p014.jpg" alt="vector units แบบ pipelined + arrayed functional units" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Vector instructions</strong></th>
+<th><strong>Multimedia extensions</strong> (MMX, SSE)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ความกว้าง vector</strong></td>
+<td><strong>ปรับได้ (variable)</strong></td>
+<td><strong>คงที่ (fixed)</strong></td>
+</tr>
+<tr>
+<td><strong>Strided access</strong> (เข้าถึงข้ามทีละหลายตัว)</td>
+<td><strong>รองรับ</strong></td>
+<td><strong>ไม่รองรับ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>vector units เป็นการผสม pipelined และ arrayed functional units ได้</strong>
+<ul>
+<li>ในภาพมี <strong>4 lanes</strong> แต่ละ lane มี <strong>FP add pipe</strong> และ <strong>FP mul pipe</strong></li>
+<li>มี <strong>vector registers</strong> ของ element และ <strong>Vector load/store unit</strong> อยู่ด้านล่าง</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="10-hardware-multithreading">10. Hardware Multithreading ⭐⭐</h2>
+<h3 id="101-multithreading">10.1 Multithreading</h3>
+<ul>
+<li><strong>ทำ thread หลาย thread พร้อมกัน</strong>
+<ul>
+<li><strong>ทำสำเนา registers, PC ฯลฯ</strong> ต่อ thread</li>
+<li><strong>สลับระหว่าง thread ได้เร็ว</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>วิธีสลับ</th>
+<th>ข้อดี / ข้อเสีย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fine-grain multithreading</strong></td>
+<td><strong>สลับ thread ทุก cycle</strong> — <strong>สลับการทำคำสั่งของแต่ละ thread</strong></td>
+<td><strong>ถ้า thread หนึ่ง stall thread อื่นยังทำงานต่อได้</strong></td>
+</tr>
+<tr>
+<td><strong>Coarse-grain multithreading</strong></td>
+<td><strong>สลับเฉพาะตอน stall นาน</strong> (เช่น <strong>L2-cache miss</strong>)</td>
+<td><strong>hardware ง่ายกว่า</strong> แต่ <strong>ซ่อน stall สั้น ๆ (เช่น data hazards) ไม่ได้</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-simultaneous-multithreading-smt">10.2 Simultaneous Multithreading (SMT)</h3>
+<ul>
+<li>ใช้ใน <strong>multiple-issue dynamically scheduled processor</strong>
+<ul>
+<li><strong>จัดคิวคำสั่งจากหลาย thread</strong></li>
+<li><strong>คำสั่งจาก thread ที่เป็นอิสระต่อกัน ทำได้เมื่อ function unit ว่าง</strong></li>
+<li><strong>ภายใน thread เดียวกัน dependency จัดการด้วย scheduling และ register renaming</strong></li>
+</ul>
+</li>
+<li><strong>ตัวอย่าง: Intel Pentium-4 HT</strong> (Hyper-Threading)
+<ul>
+<li><strong>2 threads:</strong>
+<ul>
+<li><strong>registers ถูกทำสำเนา</strong></li>
+<li><strong>function units และ caches ใช้ร่วมกัน</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="103-multithreading-example">10.3 Multithreading Example</h3>
+<p><img loading="lazy" src="img/c8-p017.jpg" alt="ตัวอย่าง thread A–D บน coarse MT, fine MT, SMT" /></p>
+<ul>
+<li><strong>ภาพบน:</strong> thread A, B, C, D แต่ละ thread รันแยกกัน
+<ul>
+<li>แกนนอน = <strong>issue slots</strong> (ช่องที่ทำคำสั่งพร้อมกันได้)</li>
+<li>แกนตั้ง = <strong>เวลา</strong></li>
+<li>ช่องว่างในแต่ละ thread = <strong>stall</strong></li>
+</ul>
+</li>
+<li><strong>ภาพล่าง:</strong> นำ thread A และ B มารวมกันบน processor เดียว
+<ul>
+<li><strong>Coarse MT:</strong> รัน A ยาว ๆ แล้วค่อยสลับไป B ตอน stall นาน</li>
+<li><strong>Fine MT:</strong> สลับ A/B ทุก cycle แต่ละ cycle ทำได้ทีละ thread</li>
+<li><strong>SMT:</strong> ใน cycle เดียวกัน <strong>ใช้ issue slots ร่วมกันทั้งสอง thread</strong> → <strong>เต็มช่องที่สุด ใช้เวลาน้อยที่สุด</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="104-future-of-multithreading">10.4 Future of Multithreading</h3>
+<ul>
+<li><strong>จะอยู่รอดไหม? ในรูปแบบไหน?</strong></li>
+<li><strong>เรื่องพลังงานทำให้ microarchitecture ต้องเรียบง่ายขึ้น</strong>
+<ul>
+<li><strong>multithreading แบบที่ง่ายขึ้น</strong></li>
+</ul>
+</li>
+<li><strong>ทนต่อ latency จาก cache miss</strong>
+<ul>
+<li><strong>การสลับ thread อาจได้ผลดีที่สุด</strong></li>
+</ul>
+</li>
+<li><strong>core ง่าย ๆ หลายตัว อาจแชร์ทรัพยากรได้มีประสิทธิภาพกว่า</strong></li>
+</ul>
+<hr />
+<h2 id="11-shared-memory-multiprocessors">11. Shared Memory Multiprocessors</h2>
+<h3 id="111-shared-memory">11.1 Shared Memory ⭐</h3>
+<ul>
+<li><strong>SMP: shared memory multiprocessor</strong>
+<ul>
+<li><strong>hardware ให้ physical address space เดียวสำหรับทุก processor</strong></li>
+<li><strong>ใช้ lock ในการ synchronize ตัวแปรที่แชร์กัน</strong></li>
+</ul>
+</li>
+<li><strong>Memory access time:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>UMA (uniform)</strong></th>
+<th><strong>NUMA (nonuniform)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เวลาเข้าถึง memory</td>
+<td><strong>เท่ากัน</strong> ไม่ว่า processor ไหนจะเข้าถึง address ไหน</td>
+<td><strong>ไม่เท่ากัน</strong> — memory ใกล้ processor ตัวไหน ตัวนั้นเข้าถึงเร็วกว่า <em>(อธิบายเสริม)</em></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="112-example-sum-reduction">11.2 Example: Sum Reduction ⭐</h3>
+<p><strong>บวกเลข 64,000 ตัว บน UMA ที่มี 64 processor</strong></p>
+<ul>
+<li><strong>แต่ละ processor มี ID: 0 ≤ Pn ≤ 63</strong></li>
+<li><strong>แบ่งให้ processor ละ 1000 ตัว</strong></li>
+<li><strong>ขั้นแรก: แต่ละ processor รวมผลของตัวเอง</strong></li>
+</ul>
+<pre><code class="language-c">sum[Pn] = 0;
+for (i = 1000*Pn; i &lt; 1000*(Pn+1); i += 1)
+    sum[Pn] += A[i];
+</code></pre>
+<ul>
+<li><strong>จากนั้นต้องรวมผลย่อยเหล่านี้</strong>
+<ul>
+<li><strong>Reduction: divide and conquer</strong></li>
+<li><strong>processor ครึ่งหนึ่งบวกเป็นคู่ แล้วเหลือหนึ่งในสี่ …</strong></li>
+<li><strong>ต้อง synchronize ระหว่างแต่ละขั้นของ reduction</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>ขั้น reduction:</strong></p>
+<pre><code class="language-c">half = 64;
+do
+    synch();
+    if (half%2 != 0 &amp;&amp; Pn == 0)
+        sum[0] += sum[half-1];
+        /* Conditional sum needed when half is odd;
+           Processor0 gets missing element */
+    half = half/2;   /* dividing line on who sums */
+    if (Pn &lt; half) sum[Pn] += sum[Pn+half];
+while (half &gt; 1);
+</code></pre>
+<p><strong>ไล่ตัวอย่าง</strong> <em>(เสริม)</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รอบ</th>
+<th>half หลังหาร 2</th>
+<th>ใครทำงาน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>32</td>
+<td>P0–P31 บวก sum ของ P32–P63 เข้าตัวเอง</td>
+</tr>
+<tr>
+<td>2</td>
+<td>16</td>
+<td>P0–P15 บวก sum ของ P16–P31</td>
+</tr>
+<tr>
+<td>3</td>
+<td>8</td>
+<td>P0–P7</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>P0–P3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2</td>
+<td>P0–P1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1</td>
+<td>P0 บวก sum[1] → <strong>sum[0] คือผลรวมทั้งหมด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใช้ <strong>log₂64 = 6 ขั้น</strong></li>
+<li><strong>กรณี half เป็นเลขคี่:</strong> ตัวสุดท้ายไม่มีคู่ จึงให้ <strong>P0 รับไปบวกเอง</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 นี่คือตัวอย่างของ <strong>SPMD</strong> — ทุก processor รันโค้ดเดียวกัน แต่ใช้ <code>Pn</code> ตัดสินว่าตัวเองต้องทำอะไร</p>
+</blockquote>
+<hr />
+<h2 id="12-gpus">12. GPUs</h2>
+<h3 id="121-history-of-gpus">12.1 History of GPUs</h3>
+<ul>
+<li><strong>Early video cards</strong>
+<ul>
+<li><strong>frame buffer memory</strong> พร้อมการสร้าง address สำหรับ video output</li>
+</ul>
+</li>
+<li><strong>3D graphics processing</strong>
+<ul>
+<li><strong>เดิมอยู่ในคอมพิวเตอร์ระดับสูง</strong> (เช่น <strong>SGI</strong>)</li>
+<li><strong>Moore's Law → ราคาถูกลง ความหนาแน่นสูงขึ้น</strong></li>
+<li><strong>มีการ์ด 3D graphics สำหรับ PC และเครื่องเล่นเกม</strong></li>
+</ul>
+</li>
+<li><strong>Graphics Processing Units</strong>
+<ul>
+<li><strong>processor ที่เน้นงาน 3D graphics:</strong>
+<ul>
+<li><strong>vertex/pixel processing</strong></li>
+<li><strong>shading</strong></li>
+<li><strong>texture mapping</strong></li>
+<li><strong>rasterization</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="122-graphics-in-the-system">12.2 Graphics in the System</h3>
+<p><img loading="lazy" src="img/c8-p023.jpg" alt="ตำแหน่งของ GPU ในระบบคอมพิวเตอร์" /></p>
+<p>ภาพแสดงวิวัฒนาการของตำแหน่ง graphics ในระบบ 3 แบบ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>โครงสร้าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ยุคเก่า (ซ้ายล่าง)</strong></td>
+<td>CPU —Front Side Bus— North Bridge (+ Memory) —<strong>PCI Bus</strong>— <strong>VGA Controller</strong> + <strong>Framebuffer Memory</strong> → VGA Display; South Bridge ต่อ LAN, UART</td>
+</tr>
+<tr>
+<td><strong>Intel (กลางบน)</strong></td>
+<td>Intel CPU —Front Side Bus— North Bridge (+ DDR2 Memory 128-bit 667 MT/s) —<strong>x16 PCI-Express Link</strong>— <strong>GPU</strong> + <strong>GPU Memory</strong> → display; North Bridge —x4 PCI-Express derivative— South Bridge</td>
+</tr>
+<tr>
+<td><strong>AMD (ขวา)</strong></td>
+<td><strong>North Bridge อยู่ในตัว AMD CPU</strong> (ต่อ CPU core ด้วย internal bus, ต่อ DDR2 Memory ตรง) —HyperTransport 1.03— Chipset —<strong>x16 PCI-Express Link</strong>— <strong>GPU</strong> + <strong>GPU Memory</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จุดร่วมคือ GPU สมัยใหม่ <strong>มี memory ของตัวเอง</strong> และต่อผ่าน <strong>PCI-Express x16</strong> ที่เร็วกว่า PCI bus เดิมมาก</p>
+</blockquote>
+<h3 id="123-gpu-architectures">12.3 GPU Architectures ⭐</h3>
+<ul>
+<li><strong>งานประมวลผลเป็นแบบ data-parallel สูง</strong>
+<ul>
+<li><strong>GPU เป็น highly multithreaded</strong></li>
+<li><strong>ใช้การสลับ thread ซ่อน latency ของ memory</strong>
+<ul>
+<li><strong>จึงพึ่ง multi-level caches น้อยกว่า</strong></li>
+</ul>
+</li>
+<li><strong>graphics memory กว้างและมี bandwidth สูง</strong></li>
+</ul>
+</li>
+<li><strong>แนวโน้มไปสู่ general purpose GPU (GPGPU)</strong>
+<ul>
+<li><strong>ระบบ CPU/GPU แบบ heterogeneous</strong></li>
+<li><strong>CPU รันโค้ดแบบ sequential, GPU รันโค้ดแบบ parallel</strong></li>
+</ul>
+</li>
+<li><strong>Programming languages/APIs:</strong>
+<ul>
+<li><strong>DirectX, OpenGL</strong></li>
+<li><strong>C for Graphics (Cg), High Level Shader Language (HLSL)</strong></li>
+<li><strong>Compute Unified Device Architecture (CUDA)</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="124-example-nvidia-fermi">12.4 Example: NVIDIA Fermi</h3>
+<p><img loading="lazy" src="img/c8-p025.jpg" alt="SIMD processor ของ Fermi: 16 lanes, register 1K×32, load store unit" /></p>
+<ul>
+<li><strong>Multiple SIMD processors</strong> แต่ละตัวมีโครงสร้างตามภาพ:
+<ul>
+<li><strong>Instruction register</strong> ร่วมกัน</li>
+<li><strong>SIMD Lanes (Thread Processors) 16 lanes</strong> แต่ละ lane มี <strong>Reg (1K × 32)</strong> และ <strong>Load store unit</strong></li>
+<li><strong>Address coalescing unit</strong>, <strong>Interconnection network</strong></li>
+<li><strong>Local Memory 64 KiB</strong> และต่อไป <strong>Global Memory</strong></li>
+</ul>
+</li>
+<li><strong>SIMD Processor: 16 SIMD lanes</strong></li>
+<li><strong>SIMD instruction:</strong>
+<ul>
+<li><strong>ทำงานกับ thread กว้าง 32 elements</strong></li>
+<li><strong>ถูก schedule แบบ dynamic บน processor กว้าง 16 lanes ภายใน 2 cycles</strong></li>
+</ul>
+</li>
+<li><strong>register 32K × 32-bit กระจายอยู่ใน lanes</strong>
+<ul>
+<li><strong>64 registers ต่อ thread context</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="125-gpu-memory-structures">12.5 GPU Memory Structures</h3>
+<p><img loading="lazy" src="img/c8-p027.jpg" alt="CUDA thread, thread block, grid และ GPU memory" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>memory ที่ใช้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CUDA Thread</strong></td>
+<td><strong>Per-CUDA Thread Private Memory</strong></td>
+</tr>
+<tr>
+<td><strong>Thread block</strong></td>
+<td><strong>Per-Block Local Memory</strong></td>
+</tr>
+<tr>
+<td><strong>Grid 0, Grid 1, …</strong> (รันเป็น <strong>Sequence</strong>)</td>
+<td><strong>GPU Memory</strong> (ใช้ร่วมกัน)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ระหว่าง grid มี <strong>Inter-Grid Synchronization</strong></li>
+</ul>
+<h3 id="126-classifying-gpus">12.6 Classifying GPUs ⭐</h3>
+<ul>
+<li><strong>GPU ไม่เข้ากับโมเดล SIMD/MIMD ได้พอดี</strong>
+<ul>
+<li><strong>conditional execution ใน thread ทำให้ดูเหมือน MIMD</strong>
+<ul>
+<li><strong>แต่ประสิทธิภาพลดลง</strong></li>
+<li><strong>ต้องเขียนโค้ดทั่วไปอย่างระมัดระวัง</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Static: Discovered at Compile Time</strong></th>
+<th><strong>Dynamic: Discovered at Runtime</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instruction-Level Parallelism</strong></td>
+<td><strong>VLIW</strong></td>
+<td><strong>Superscalar</strong></td>
+</tr>
+<tr>
+<td><strong>Data-Level Parallelism</strong></td>
+<td><strong>SIMD or Vector</strong></td>
+<td><strong>Tesla Multiprocessor</strong> (GPU)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="127-putting-gpus-into-perspective">12.7 Putting GPUs into Perspective ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th><strong>Multicore with SIMD</strong></th>
+<th><strong>GPU</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SIMD processors</td>
+<td>4 to 8</td>
+<td><strong>8 to 16</strong></td>
+</tr>
+<tr>
+<td>SIMD lanes/processor</td>
+<td>2 to 4</td>
+<td><strong>8 to 16</strong></td>
+</tr>
+<tr>
+<td>Multithreading hardware support for SIMD threads</td>
+<td>2 to 4</td>
+<td><strong>16 to 32</strong></td>
+</tr>
+<tr>
+<td>Typical ratio of single precision to double-precision performance</td>
+<td>2:1</td>
+<td>2:1</td>
+</tr>
+<tr>
+<td>Largest cache size</td>
+<td><strong>8 MB</strong></td>
+<td>0.75 MB</td>
+</tr>
+<tr>
+<td>Size of memory address</td>
+<td>64-bit</td>
+<td>64-bit</td>
+</tr>
+<tr>
+<td>Size of main memory</td>
+<td><strong>8 GB to 256 GB</strong></td>
+<td>4 GB to 6 GB</td>
+</tr>
+<tr>
+<td>Memory protection at level of page</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Demand paging</strong></td>
+<td>Yes</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td><strong>Integrated scalar processor/SIMD processor</strong></td>
+<td>Yes</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td><strong>Cache coherent</strong></td>
+<td>Yes</td>
+<td><strong>No</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>สรุปตาราง:</strong> GPU มี <strong>SIMD มากกว่า และ thread มากกว่า</strong> แต่มี <strong>cache เล็ก, memory น้อย, ไม่มี demand paging, ไม่มี scalar processor ในตัว และไม่ cache coherent</strong></p>
+</blockquote>
+<h3 id="128-guide-to-gpu-terms">12.8 Guide to GPU Terms</h3>
+<p><img loading="lazy" src="img/c8-p030.jpg" alt="ตารางเทียบคำศัพท์ GPU/CUDA กับคำศัพท์ทั่วไป" /></p>
+<ul>
+<li>ตารางแบ่งคำศัพท์เป็น 4 กลุ่ม:
+<ul>
+<li><strong>Program abstractions</strong></li>
+<li><strong>Machine object</strong></li>
+<li><strong>Processing hardware</strong></li>
+<li><strong>Memory hardware</strong></li>
+</ul>
+</li>
+<li>แต่ละกลุ่มเทียบคำอธิบายทั่วไป, ชื่อที่ใช้นอก GPU, และชื่อทางการของ CUDA</li>
+<li><strong>ตัวอย่างคู่คำที่สำคัญ</strong> (ตามตำรา):</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชื่อทั่วไป</th>
+<th>ชื่อใน CUDA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vectorizable Loop</strong></td>
+<td><strong>Grid</strong></td>
+</tr>
+<tr>
+<td><strong>Body of Vectorized Loop</strong></td>
+<td><strong>Thread Block</strong></td>
+</tr>
+<tr>
+<td><strong>Sequence of SIMD Lane Operations</strong></td>
+<td><strong>CUDA Thread</strong></td>
+</tr>
+<tr>
+<td><strong>A Thread of SIMD Instructions</strong></td>
+<td><strong>Instruction</strong></td>
+</tr>
+<tr>
+<td><strong>SIMD Instruction</strong></td>
+<td><strong>Thread</strong></td>
+</tr>
+<tr>
+<td><strong>Multithreaded SIMD Processor</strong></td>
+<td><strong>Streaming Multiprocessor</strong></td>
+</tr>
+<tr>
+<td><strong>SIMD Lane</strong></td>
+<td><strong>Thread Processor</strong></td>
+</tr>
+<tr>
+<td><strong>GPU Memory</strong></td>
+<td><strong>Global Memory</strong></td>
+</tr>
+<tr>
+<td><strong>Local Memory</strong></td>
+<td><strong>Shared Memory</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-message-passing-clusters-grid-computing">13. Message Passing, Clusters, Grid Computing</h2>
+<h3 id="131-message-passing">13.1 Message Passing ⭐</h3>
+<p><img loading="lazy" src="img/c8-p031.jpg" alt="processor แต่ละตัวมี cache และ memory ของตัวเอง เชื่อมด้วย interconnection network" /></p>
+<ul>
+<li><strong>แต่ละ processor มี physical address space ของตัวเอง</strong></li>
+<li><strong>hardware ส่งและรับ message ระหว่าง processor</strong></li>
+<li>ในภาพ:
+<ul>
+<li>แต่ละชุดมี <strong>Processor → Cache → Memory</strong></li>
+<li>ทุกชุดต่อกันด้วย <strong>Interconnection Network</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Shared memory (SMP)</strong></th>
+<th><strong>Message passing</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>address space</td>
+<td><strong>เดียวกันทุก processor</strong></td>
+<td><strong>ของใครของมัน</strong></td>
+</tr>
+<tr>
+<td>การสื่อสาร</td>
+<td>อ่านเขียนตัวแปรร่วม + <strong>lock</strong></td>
+<td><strong>ส่ง/รับ message</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="132-loosely-coupled-clusters">13.2 Loosely Coupled Clusters</h3>
+<ul>
+<li><strong>เครือข่ายของคอมพิวเตอร์ที่เป็นอิสระต่อกัน</strong>
+<ul>
+<li><strong>แต่ละเครื่องมี memory และ OS ของตัวเอง</strong></li>
+<li><strong>เชื่อมกันด้วย I/O system</strong> เช่น <strong>Ethernet/switch, Internet</strong></li>
+</ul>
+</li>
+<li><strong>เหมาะกับงานที่แยกเป็นงานอิสระได้:</strong>
+<ul>
+<li><strong>web servers, databases, simulations, …</strong></li>
+</ul>
+</li>
+<li><strong>ข้อดี: high availability, scalable, affordable</strong></li>
+<li><strong>ปัญหา:</strong>
+<ul>
+<li><strong>ค่าบริหารจัดการสูง</strong> (จึงนิยมใช้ <strong>virtual machines</strong>)</li>
+<li><strong>bandwidth ของการเชื่อมต่อต่ำ</strong>
+<ul>
+<li><strong>เทียบกับ bandwidth ระหว่าง processor กับ memory ใน SMP</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="133-grid-computing">13.3 Grid Computing</h3>
+<ul>
+<li><strong>คอมพิวเตอร์แยกกัน เชื่อมด้วยเครือข่ายระยะไกล</strong>
+<ul>
+<li>เช่น <strong>การเชื่อมต่อ Internet</strong></li>
+<li><strong>แจกหน่วยงานออกไป แล้วส่งผลกลับมา</strong></li>
+</ul>
+</li>
+<li><strong>ใช้เวลาว่างของ PC ได้</strong>
+<ul>
+<li>เช่น <strong>SETI@home, World Community Grid</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Cluster</strong></th>
+<th><strong>Grid</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>การเชื่อมต่อ</td>
+<td>Ethernet/switch ในที่เดียวกัน</td>
+<td><strong>long-haul network (Internet)</strong></td>
+</tr>
+<tr>
+<td>เครื่อง</td>
+<td>เครื่องที่จัดไว้สำหรับงานนี้</td>
+<td><strong>PC ทั่วไปที่ว่างอยู่</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="14-interconnection-networks">14. Interconnection Networks ⭐⭐</h2>
+<h3 id="141-network-topologies">14.1 Network Topologies</h3>
+<p><strong>การจัดวาง processor, switch และ link</strong></p>
+<p><img loading="lazy" src="img/c8-p034.jpg" alt="Bus, Ring, 2D Mesh, N-cube (N=3), Fully connected" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>ลักษณะ (อธิบายเสริม)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bus</strong></td>
+<td>ทุก node ต่อสายร่วมเส้นเดียว — ถูกแต่ <strong>แย่งกันใช้</strong></td>
+</tr>
+<tr>
+<td><strong>Ring</strong></td>
+<td>node ต่อเป็นวง แต่ละตัวมีเพื่อนบ้าน 2 ตัว</td>
+</tr>
+<tr>
+<td><strong>2D Mesh</strong></td>
+<td>ตาราง 2 มิติ ต่อกับ node รอบข้าง</td>
+</tr>
+<tr>
+<td><strong>N-cube (N = 3)</strong></td>
+<td>ลูกบาศก์ 3 มิติ = <strong>8 node</strong> แต่ละ node ต่อ <strong>3 link</strong></td>
+</tr>
+<tr>
+<td><strong>Fully connected</strong></td>
+<td><strong>ทุก node ต่อตรงกับทุก node</strong> — เร็วที่สุด <strong>แพงที่สุด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="142-multistage-networks">14.2 Multistage Networks</h3>
+<p><img loading="lazy" src="img/c8-p035.jpg" alt="Crossbar, Omega network และ Omega network switch box" /></p>
+<ul>
+<li><strong>a. Crossbar:</strong> switch แบบตาราง
+<ul>
+<li>P ทุกตัวต่อถึงกันผ่านจุดตัด</li>
+<li>เชื่อมได้ครบทุกคู่ แต่ใช้ switch เยอะ <em>(อธิบายเสริม)</em></li>
+</ul>
+</li>
+<li><strong>b. Omega network:</strong> ใช้ <strong>switch หลายชั้น (multistage)</strong>
+<ul>
+<li>ใช้ switch น้อยกว่า crossbar</li>
+<li>แต่บางคู่เชื่อมพร้อมกันไม่ได้ <em>(อธิบายเสริม)</em></li>
+</ul>
+</li>
+<li><strong>c. Omega network switch box:</strong> กล่อง switch 2 × 2
+<ul>
+<li>input A, B → output C, D</li>
+<li>ต่อตรงหรือสลับไขว้ได้</li>
+</ul>
+</li>
+</ul>
+<h3 id="143-network-characteristics">14.3 Network Characteristics ⭐</h3>
+<ul>
+<li><strong>Performance</strong>
+<ul>
+<li><strong>Latency per message</strong> (บน network ที่ไม่มีโหลด)</li>
+<li><strong>Throughput</strong>
+<ul>
+<li><strong>Link bandwidth</strong></li>
+<li><strong>Total network bandwidth</strong></li>
+<li><strong>Bisection bandwidth</strong> — bandwidth ที่ผ่าน <strong>เส้นแบ่ง network ออกเป็นสองซีกเท่ากัน</strong> ในกรณีแย่ที่สุด <em>(นิยามเสริมจากตำรา)</em></li>
+</ul>
+</li>
+<li><strong>Congestion delays</strong> (ขึ้นกับปริมาณ traffic)</li>
+</ul>
+</li>
+<li><strong>Cost</strong></li>
+<li><strong>Power</strong></li>
+<li><strong>Routability in silicon</strong> (วางเส้นทางบนชิปได้ง่ายแค่ไหน)</li>
+</ul>
+<hr />
+<h2 id="15-parallel-benchmarks-และ-modeling-performance">15. Parallel Benchmarks และ Modeling Performance</h2>
+<h3 id="151-parallel-benchmarks">15.1 Parallel Benchmarks</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>ใช้วัดอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Linpack</strong></td>
+<td><strong>matrix linear algebra</strong></td>
+</tr>
+<tr>
+<td><strong>SPECrate</strong></td>
+<td><strong>รัน SPEC CPU programs แบบขนาน</strong> — <strong>job-level parallelism</strong></td>
+</tr>
+<tr>
+<td><strong>SPLASH</strong> (Stanford Parallel Applications for Shared Memory)</td>
+<td><strong>ผสม kernels และ applications</strong>, <strong>strong scaling</strong></td>
+</tr>
+<tr>
+<td><strong>NAS</strong> (NASA Advanced Supercomputing) suite</td>
+<td><strong>kernels ของ computational fluid dynamics</strong></td>
+</tr>
+<tr>
+<td><strong>PARSEC</strong> (Princeton Application Repository for Shared Memory Computers) suite</td>
+<td><strong>multithreaded applications</strong> ที่ใช้ <strong>Pthreads และ OpenMP</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="152-code-or-applications">15.2 Code or Applications?</h3>
+<ul>
+<li><strong>Traditional benchmarks</strong>
+<ul>
+<li><strong>ใช้ code และ data sets ตายตัว</strong></li>
+</ul>
+</li>
+<li><strong>แต่การเขียนโปรแกรมขนานยังพัฒนาอยู่</strong>
+<ul>
+<li><strong>algorithms, programming languages และ tools ควรเป็นส่วนหนึ่งของระบบที่วัดด้วยไหม?</strong></li>
+<li><strong>เปรียบเทียบระบบได้ ถ้าระบบเหล่านั้นทำ application ที่กำหนดได้</strong>
+<ul>
+<li>เช่น <strong>Linpack, Berkeley Design Patterns</strong></li>
+</ul>
+</li>
+<li><strong>จะส่งเสริมนวัตกรรมในแนวทางทำ parallelism</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="153-modeling-performance">15.3 Modeling Performance</h3>
+<ul>
+<li><strong>สมมติว่าตัวชี้วัดที่สนใจคือ GFLOPs/sec ที่ทำได้</strong>
+<ul>
+<li><strong>วัดด้วย computational kernels จาก Berkeley Design Patterns</strong></li>
+</ul>
+</li>
+<li><strong>Arithmetic intensity ของ kernel:</strong>
+<ul>
+<li><strong>FLOPs ต่อ byte ของ memory ที่เข้าถึง</strong></li>
+</ul>
+</li>
+<li><strong>สำหรับคอมพิวเตอร์เครื่องหนึ่ง ต้องหา:</strong>
+<ul>
+<li><strong>Peak GFLOPS</strong> (จาก data sheet)</li>
+<li><strong>Peak memory bytes/sec</strong> (ใช้ <strong>Stream benchmark</strong>)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ข้อมูลสองค่านี้ใช้สร้าง <strong>Roofline model</strong> ในตำรา <em>(เสริม)</em></p>
+<ul>
+<li>kernel ที่ arithmetic intensity ต่ำ ถูกจำกัดด้วย <strong>memory bandwidth</strong></li>
+<li>kernel ที่ arithmetic intensity สูง ถูกจำกัดด้วย <strong>peak GFLOPS</strong></li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="16-concluding-remarks">16. Concluding Remarks ⭐</h2>
+<ul>
+<li><strong>เป้าหมาย: ประสิทธิภาพสูงขึ้นด้วยการใช้หลาย processor</strong></li>
+<li><strong>ความยาก:</strong>
+<ul>
+<li><strong>การพัฒนา parallel software</strong></li>
+<li><strong>การออกแบบสถาปัตยกรรมที่เหมาะสม</strong></li>
+</ul>
+</li>
+<li><strong>SaaS มีความสำคัญมากขึ้น และ clusters เข้ากันได้ดีกับ SaaS</strong></li>
+<li><strong>performance per dollar และ performance per Joule</strong> เป็นตัวขับเคลื่อนทั้ง <strong>mobile</strong> และ <strong>WSC</strong> (warehouse-scale computers)</li>
+</ul>
+<blockquote class="callout">
+<p>Q &amp; A (สไลด์สุดท้าย)</p>
+</blockquote>
+<hr />
+<h2 id="17-คำศัพท์สำคัญ">17. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Multiprocessor</strong></td>
+<td>ระบบที่มีหลาย processor</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Task-level parallelism</strong></td>
+<td>หลายงานอิสระรันพร้อมกัน</td>
+<td>พ่อครัวคนละเมนู</td>
+</tr>
+<tr>
+<td><strong>Parallel processing program</strong></td>
+<td>โปรแกรมเดียวรันหลาย processor</td>
+<td>พ่อครัวช่วยกันทำเมนูเดียว</td>
+</tr>
+<tr>
+<td><strong>Multicore</strong></td>
+<td>ชิปที่มีหลาย core</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Serial / Parallel hardware</strong></td>
+<td>Pentium 4 / Xeon e5345</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Sequential / Concurrent software</strong></td>
+<td>matrix multiplication / OS</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Partitioning, Coordination, Communications overhead</strong></td>
+<td>3 ความยากของ parallel programming</td>
+<td>ทาสีบ้าน</td>
+</tr>
+<tr>
+<td><strong>SISD / SIMD / MISD / MIMD</strong></td>
+<td>Flynn's taxonomy</td>
+<td>Pentium 4 / SSE / ไม่มี / Xeon</td>
+</tr>
+<tr>
+<td><strong>SPMD</strong></td>
+<td>Single Program Multiple Data บน MIMD</td>
+<td>โค้ดเดียว เช็ก Pn</td>
+</tr>
+<tr>
+<td><strong>Vector processor</strong></td>
+<td>ทำงานกับ vector register</td>
+<td>v0–v31</td>
+</tr>
+<tr>
+<td><strong>DAXPY</strong></td>
+<td>Y = aX + Y (BLAS)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Loop-carried dependence</strong></td>
+<td>รอบถัดไปขึ้นกับรอบก่อน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>MMX / SSE</strong></td>
+<td>multimedia extensions ของ x86 (ความกว้างคงที่)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Strided access</strong></td>
+<td>เข้าถึงข้ามทีละหลายตำแหน่ง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Fine-grain / Coarse-grain MT</strong></td>
+<td>สลับทุก cycle / สลับตอน stall นาน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SMT</strong></td>
+<td>หลาย thread ใช้ issue slots ร่วมใน cycle เดียว</td>
+<td>Pentium-4 HT</td>
+</tr>
+<tr>
+<td><strong>SMP</strong></td>
+<td>shared memory multiprocessor</td>
+<td>address space เดียว</td>
+</tr>
+<tr>
+<td><strong>UMA / NUMA</strong></td>
+<td>เข้าถึง memory เวลาเท่ากัน / ไม่เท่ากัน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Lock</strong></td>
+<td>ใช้ synchronize ตัวแปรร่วม</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Reduction</strong></td>
+<td>รวมผลแบบ divide and conquer</td>
+<td>64 → 32 → … → 1</td>
+</tr>
+<tr>
+<td><strong>GPU / GPGPU</strong></td>
+<td>processor กราฟิก / ใช้ GPU ทำงานทั่วไป</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CUDA, DirectX, OpenGL, Cg, HLSL</strong></td>
+<td>APIs/ภาษาของ GPU</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SIMD lane</strong></td>
+<td>ช่องประมวลผลขนานใน GPU</td>
+<td>Fermi 16 lanes</td>
+</tr>
+<tr>
+<td><strong>VLIW / Superscalar</strong></td>
+<td>instruction-level parallelism แบบ static / dynamic</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Message passing</strong></td>
+<td>address space แยก สื่อสารด้วย message</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Cluster</strong></td>
+<td>คอมพิวเตอร์อิสระต่อด้วย I/O network</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Grid computing</strong></td>
+<td>เครื่องห่างกัน ต่อผ่าน Internet ใช้เวลาว่าง</td>
+<td>SETI@home</td>
+</tr>
+<tr>
+<td><strong>Bus / Ring / 2D Mesh / N-cube / Fully connected</strong></td>
+<td>network topologies</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Crossbar / Omega network</strong></td>
+<td>multistage networks</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Bisection bandwidth</strong></td>
+<td>bandwidth ข้ามเส้นแบ่งครึ่ง network</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Linpack, SPECrate, SPLASH, NAS, PARSEC</strong></td>
+<td>parallel benchmarks</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Arithmetic intensity</strong></td>
+<td>FLOPs ต่อ byte ที่เข้าถึง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>WSC / SaaS</strong></td>
+<td>Warehouse-scale computer / Software as a Service</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="18-สรุปท้ายบท-จุดที่มักออกสอบ">18. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>Taxonomy:</strong>
+<ul>
+<li>SISD → uniprocessor</li>
+<li>SIMD → vector/array processor</li>
+<li>MISD</li>
+<li>MIMD → shared memory (SMP, NUMA) / distributed memory (clusters)</li>
+</ul>
+</li>
+<li><strong>เป้าหมาย multiprocessor:</strong> scalability, availability, power efficiency</li>
+<li><strong>task-level parallelism vs parallel processing program</strong>; multicore</li>
+<li><strong>Hardware serial/parallel vs software sequential/concurrent</strong> (ผสมกันได้ทุกแบบ)
+<ul>
+<li>ความท้าทายคือใช้ parallel hardware ให้คุ้ม</li>
+</ul>
+</li>
+<li><strong>ความยากของ parallel programming:</strong> partitioning, coordination, communications overhead
+<ul>
+<li>ถ้าไม่เร็วขึ้นมาก ใช้ uniprocessor ที่เร็วกว่าเลยดีกว่า</li>
+</ul>
+</li>
+<li><strong>ตาราง Flynn พร้อมตัวอย่าง:</strong>
+<ul>
+<li>SISD = Pentium 4</li>
+<li>SIMD = SSE</li>
+<li>MISD = ไม่มี</li>
+<li>MIMD = Xeon e5345</li>
+</ul>
+</li>
+<li><strong>SPMD</strong> = โปรแกรมขนานบน MIMD ที่ใช้ conditional code</li>
+<li><strong>Vector RISC-V:</strong>
+<ul>
+<li>v0–v31 (32 × 64 elements)</li>
+<li>fld.v / fsd.v / fadd.d.v / fadd.d.vs</li>
+<li>DAXPY แบบ vector ไม่มีลูป</li>
+</ul>
+</li>
+<li><strong>ข้อดีของ vector</strong> เช่น ไม่มี loop-carried dependence, เลี่ยง control hazard</li>
+<li><strong>SIMD:</strong> register 128 บิต (MMX/SSE), synchronize ง่าย, เหมาะกับงาน data-parallel</li>
+<li><strong>Vector vs multimedia extensions:</strong> ความกว้าง variable vs fixed; strided access รองรับ vs ไม่รองรับ</li>
+<li><strong>Fine-grain vs coarse-grain MT</strong>; <strong>SMT</strong> (Pentium-4 HT: registers ทำสำเนา, function units และ caches ใช้ร่วม)</li>
+<li><strong>SMP:</strong> address space เดียว + lock; <strong>UMA vs NUMA</strong></li>
+<li><strong>Sum reduction:</strong>
+<ul>
+<li>64,000 ตัว / 64 processor / processor ละ 1000</li>
+<li>reduction ครึ่งทีละรอบ ต้อง synch</li>
+<li>half เป็นเลขคี่ให้ P0 รับตัวที่เหลือ</li>
+</ul>
+</li>
+<li><strong>GPU:</strong>
+<ul>
+<li>highly multithreaded, พึ่ง cache น้อย, memory กว้าง</li>
+<li>heterogeneous (CPU sequential / GPU parallel)</li>
+<li>APIs: DirectX, OpenGL, Cg, HLSL, CUDA</li>
+</ul>
+</li>
+<li><strong>NVIDIA Fermi:</strong> 16 SIMD lanes, thread กว้าง 32 elements, schedule ใน 2 cycles, 32K × 32-bit registers, 64 registers ต่อ thread context</li>
+<li><strong>GPU ไม่เข้ากับ SIMD/MIMD พอดี</strong> และตาราง static/dynamic:
+<ul>
+<li>VLIW / Superscalar</li>
+<li>SIMD-Vector / Tesla</li>
+</ul>
+</li>
+<li><strong>ตาราง Multicore with SIMD vs GPU:</strong> GPU ไม่มี demand paging, ไม่มี integrated scalar processor, ไม่ cache coherent</li>
+<li><strong>Message passing:</strong> address space แยก</li>
+<li><strong>Clusters:</strong>
+<ul>
+<li>ข้อดี: high availability, scalable, affordable</li>
+<li>ปัญหา: ค่าบริหารจัดการ, interconnect bandwidth ต่ำ</li>
+</ul>
+</li>
+<li><strong>Grid:</strong> long-haul network, ใช้เวลาว่างของ PC (SETI@home)</li>
+<li><strong>Topologies:</strong> bus, ring, 2D mesh, N-cube, fully connected; <strong>multistage:</strong> crossbar, omega</li>
+<li><strong>Network characteristics:</strong>
+<ul>
+<li>performance (latency, throughput: link / total / bisection bandwidth, congestion)</li>
+<li>cost, power, routability</li>
+</ul>
+</li>
+<li><strong>Benchmarks:</strong> Linpack, SPECrate, SPLASH, NAS, PARSEC</li>
+<li><strong>Modeling:</strong> GFLOPs/sec, arithmetic intensity, peak GFLOPS, peak memory bytes/sec (Stream)</li>
+<li><strong>Concluding:</strong> SaaS + clusters; performance per dollar / per Joule</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task-level vs Parallel processing program</td>
+<td>หลายงานอิสระ vs งานเดียวแบ่งหลาย processor</td>
+</tr>
+<tr>
+<td>Concurrent vs Parallel</td>
+<td>software หลายงาน vs hardware ทำพร้อมกันจริง</td>
+</tr>
+<tr>
+<td>SIMD vs MIMD</td>
+<td>คำสั่งเดียวหลายข้อมูล vs หลายคำสั่งหลายข้อมูล</td>
+</tr>
+<tr>
+<td>SPMD vs SIMD</td>
+<td>วิธีเขียนโปรแกรมบน MIMD vs ประเภท hardware</td>
+</tr>
+<tr>
+<td>Vector vs Multimedia extension</td>
+<td>ความกว้าง variable + strided vs fixed</td>
+</tr>
+<tr>
+<td>Fine-grain vs Coarse-grain vs SMT</td>
+<td>สลับทุก cycle vs สลับตอน stall นาน vs ใช้ slot ร่วมใน cycle เดียว</td>
+</tr>
+<tr>
+<td>UMA vs NUMA</td>
+<td>เวลาเข้าถึง memory เท่ากัน vs ไม่เท่ากัน</td>
+</tr>
+<tr>
+<td>Shared memory vs Message passing</td>
+<td>address space เดียว + lock vs แยก + ส่ง message</td>
+</tr>
+<tr>
+<td>Cluster vs Grid</td>
+<td>เครื่องเฉพาะในที่เดียวกัน vs PC ว่างผ่าน Internet</td>
+</tr>
+<tr>
+<td>Link bandwidth vs Bisection bandwidth</td>
+<td>ต่อ link vs ข้ามเส้นแบ่งครึ่ง network</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../chapter07/index.html"><small>← บทก่อนหน้า</small><span>Chapter VII — Computing Unit (Pipelining)</span></a><a class="pg next" href="../lecture1/index.html"><small>บทถัดไป →</small><span>Lecture 1 — Introduction to Operating Systems</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

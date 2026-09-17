@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+      <ol><li><a href="#1-chapter-overview-และ-principle-of-locality">1. Chapter Overview และ Principle of Locality</a></li><li><a href="#2-memory-hierarchy">2. Memory Hierarchy</a></li><li><a href="#3-memory-technology">3. Memory Technology</a></li><li><a href="#4-cache-memory-basics">4. Cache Memory Basics</a></li><li><a href="#5-direct-mapped-cache">5. Direct Mapped Cache ⭐⭐</a></li><li><a href="#6-address-subdivision-และ-block-size">6. Address Subdivision และ Block Size</a></li><li><a href="#7-cache-misses-และ-write-policy">7. Cache Misses และ Write Policy</a></li><li><a href="#8-intrinsity-fastmath-และ-main-memory-supporting-caches">8. Intrinsity FastMATH และ Main Memory Supporting Caches</a></li><li><a href="#9-measuring-cache-performance">9. Measuring Cache Performance ⭐⭐</a></li><li><a href="#10-associative-caches">10. Associative Caches ⭐⭐</a></li><li><a href="#11-replacement-policy-และ-multilevel-caches">11. Replacement Policy และ Multilevel Caches</a></li><li><a href="#12-interactions-with-advanced-cpus-และ-software">12. Interactions with Advanced CPUs และ Software</a></li><li><a href="#13-dependability">13. Dependability</a></li><li><a href="#14-virtual-machines">14. Virtual Machines</a></li><li><a href="#15-virtual-memory">15. Virtual Memory ⭐⭐</a></li><li><a href="#16-memory-protection">16. Memory Protection</a></li><li><a href="#17-the-memory-hierarchy-common-framework-the-big-picture">17. The Memory Hierarchy — Common Framework (The BIG Picture)</a></li><li><a href="#18-cache-control-ด้วย-finite-state-machine">18. Cache Control ด้วย Finite State Machine</a></li><li><a href="#19-cache-coherence-ใน-multiprocessor">19. Cache Coherence ใน Multiprocessor</a></li><li><a href="#20-real-stuff-arm-cortex-a53-intel-core-i7-risc-v-system-instructions">20. Real Stuff: ARM Cortex-A53, Intel Core i7, RISC-V System Instructions</a></li><li><a href="#21-fallacies-pitfalls-และ-concluding-remarks">21. Fallacies &amp;amp; Pitfalls และ Concluding Remarks</a></li><li><a href="#22-คำศัพท์สำคัญ">22. คำศัพท์สำคัญ</a></li><li><a href="#23-สรุปท้ายบท-จุดที่มักออกสอบ">23. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter04</div>
+    <h1 class="lesson-title">Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> memory ที่เร็วมักเล็กและแพง memory ที่ใหญ่มักช้าและถูก บทนี้ตอบว่า <strong>ทำอย่างไรให้ได้ memory ที่ &quot;ดูเหมือน&quot; ทั้งเร็วและใหญ่</strong> คำตอบคือ <strong>memory hierarchy + caching</strong> ซึ่งอาศัย <strong>principle of locality</strong></p>
+<p>เนื้อหาไล่ตั้งแต่เทคโนโลยี memory (SRAM, DRAM, flash, disk), <strong>cache</strong> (direct mapped, associative, การคำนวณ tag/index/offset, miss, write policy), <strong>การวัดประสิทธิภาพ cache</strong> (AMAT, CPI, multilevel), dependability (MTTF, Hamming code), <strong>virtual machine</strong>, <strong>virtual memory</strong> (page table, TLB, page fault), common framework, cache FSM, cache coherence ใน multiprocessor และตัวอย่างจริง (ARM Cortex-A53, Intel Core i7)</p>
+<p>เชื่อมกับ Chapter 01 (cache L1/L2/L3) และครึ่ง OS (Lecture 1–2 virtual memory, address space)</p>
+</blockquote>
+<h2 id="1-chapter-overview-และ-principle-of-locality">1. Chapter Overview และ Principle of Locality</h2>
+<h3 id="11-chapter-overview">1.1 Chapter Overview</h3>
+<ul>
+<li>Introduction</li>
+<li>Memory Technology</li>
+<li>The Basic of Caches</li>
+<li>Direct mapped cache</li>
+<li>Associative cache: fully associative และ n-way set associative</li>
+<li>Measuring and Improving Cache Performance</li>
+<li>Dependable Memory Hierarchy</li>
+<li>Virtual Machine</li>
+<li>A common framework for memory hierarchy</li>
+<li>Using a finite state machine to control a simple cache</li>
+</ul>
+<h3 id="12-principle-of-locality">1.2 Principle of Locality ⭐</h3>
+<p><strong>โปรแกรมเข้าถึงพื้นที่ address space ส่วนเล็ก ๆ ในแต่ละช่วงเวลา</strong> มี 2 แบบ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>ความหมาย</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Temporal locality</strong> (ตามเวลา)</td>
+<td>ของที่ <strong>เพิ่งถูกใช้</strong> มีแนวโน้ม <strong>ถูกใช้อีกเร็ว ๆ นี้</strong></td>
+<td>คำสั่งในลูป, induction variables (ตัวนับลูป)</td>
+</tr>
+<tr>
+<td><strong>Spatial locality</strong> (ตามพื้นที่)</td>
+<td>ของที่ <strong>อยู่ใกล้</strong> ของที่เพิ่งใช้ มีแนวโน้มถูกใช้เร็ว ๆ นี้</td>
+<td>การรันคำสั่งเรียงกัน, ข้อมูลใน array</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Temporal</strong> = อ่านหนังสือเล่มไหนเมื่อกี้ เดี๋ยวก็หยิบอีก / <strong>Spatial</strong> = อ่านหน้า 10 แล้ว เดี๋ยวก็อ่านหน้า 11</p>
+</blockquote>
+<h3 id="13-taking-advantage-of-locality">1.3 Taking Advantage of Locality</h3>
+<p><strong>Memory hierarchy:</strong></p>
+<ul>
+<li><strong>เก็บทุกอย่างบน disk</strong></li>
+<li><strong>คัดลอกของที่เพิ่งใช้ (และของใกล้เคียง) จาก disk ไป DRAM ที่เล็กกว่า</strong> → <strong>Main memory</strong></li>
+<li><strong>คัดลอกของที่ใช้ล่าสุดยิ่งกว่า จาก DRAM ไป SRAM ที่เล็กกว่า</strong> → <strong>Cache memory ที่ติดกับ CPU</strong></li>
+</ul>
+<hr />
+<h2 id="2-memory-hierarchy">2. Memory Hierarchy</h2>
+<p><img loading="lazy" src="img/c4-p006.jpg" alt="พีระมิด memory hierarchy: inboard memory, outboard storage, off-line storage" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>ประกอบด้วย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inboard memory</strong> (บนสุด เร็ว แพง เล็ก)</td>
+<td>Registers, Cache, Main memory</td>
+</tr>
+<tr>
+<td><strong>Outboard storage</strong></td>
+<td>Magnetic disk, CD-ROM, CD-RW, DVD-RW, DVD-RAM, Blu-Ray</td>
+</tr>
+<tr>
+<td><strong>Off-line storage</strong> (ล่างสุด ช้า ถูก ใหญ่)</td>
+<td>Magnetic tape</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ลงล่าง:</strong> ราคาต่อบิตลดลง, ความจุเพิ่มขึ้น, เวลาเข้าถึงนานขึ้น, CPU เข้าถึงน้อยลง <em>(ลักษณะเสริมตามตำรา Stallings)</em></p>
+<h3 id="cache-and-main-memory">Cache and Main Memory</h3>
+<p><img loading="lazy" src="img/c4-p007.jpg" alt="(a) single cache (b) three-level cache" /></p>
+<ul>
+<li><strong>(a) Single cache:</strong> CPU ⇄ Cache (<strong>Word Transfer, Fast</strong>) ⇄ Main Memory (<strong>Block Transfer, Slow</strong>)</li>
+<li><strong>(b) Three-level cache organization:</strong> CPU ⇄ <strong>L1 (Fastest)</strong> ⇄ <strong>L2 (Fast)</strong> ⇄ <strong>L3 (Less fast)</strong> ⇄ Main Memory (<strong>Slow</strong>)</li>
+</ul>
+<h3 id="memory-hierarchy-levels">Memory Hierarchy Levels ⭐</h3>
+<ul>
+<li><strong>Block (aka line):</strong> <strong>หน่วยของการคัดลอก</strong> (อาจมีหลาย word)</li>
+<li>ถ้าข้อมูลที่ต้องการ <strong>อยู่ในระดับบน</strong>:
+<ul>
+<li><strong>Hit:</strong> ระดับบนตอบได้</li>
+<li><strong>Hit ratio = hits / accesses</strong></li>
+</ul>
+</li>
+<li>ถ้า <strong>ไม่อยู่</strong>:
+<ul>
+<li><strong>Miss:</strong> คัดลอก block จากระดับล่างขึ้นมา</li>
+<li><strong>Miss penalty:</strong> เวลาที่ใช้</li>
+<li><strong>Miss ratio = misses / accesses = 1 − hit ratio</strong></li>
+<li>แล้วจึงส่งข้อมูลจากระดับบน</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="3-memory-technology">3. Memory Technology</h2>
+<h3 id="31-เปรียบเทียบเทคโนโลยี">3.1 เปรียบเทียบเทคโนโลยี ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เทคโนโลยี</th>
+<th>Access time</th>
+<th>ราคา $/GB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Static RAM (SRAM)</strong></td>
+<td><strong>0.5ns – 2.5ns</strong></td>
+<td><strong>$2000 – $5000</strong></td>
+</tr>
+<tr>
+<td><strong>Dynamic RAM (DRAM)</strong></td>
+<td><strong>50ns – 70ns</strong></td>
+<td><strong>$20 – $75</strong></td>
+</tr>
+<tr>
+<td><strong>Magnetic disk</strong></td>
+<td><strong>5ms – 20ms</strong></td>
+<td><strong>$0.20 – $2</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ideal memory</strong> = <strong>access time ของ SRAM</strong> + <strong>ความจุและ $/GB ของ disk</strong> (ทำไม่ได้จริง จึงใช้ hierarchy)</p>
+<h3 id="32-dram-technology">3.2 DRAM Technology</h3>
+<ul>
+<li><strong>เก็บข้อมูลเป็นประจุใน capacitor</strong></li>
+<li>ใช้ <strong>transistor ตัวเดียว</strong> เข้าถึงประจุ</li>
+<li><strong>ต้อง refresh เป็นระยะ</strong> (ประจุรั่ว)
+<ul>
+<li><strong>อ่านค่าแล้วเขียนกลับ</strong></li>
+<li>ทำทีละ <strong>&quot;row&quot;</strong> ของ DRAM</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>SRAM ไม่ต้อง refresh</strong> (ใช้ flip-flop หลาย transistor) จึงเร็วแต่แพงและเล็ก ใช้ทำ cache / DRAM ถูกและจุเยอะ ใช้ทำ main memory <em>(คำอธิบายเสริม)</em></p>
+</blockquote>
+<h3 id="33-advanced-dram-organization">3.3 Advanced DRAM Organization</h3>
+<ul>
+<li>บิตใน DRAM จัดเป็น <strong>array สี่เหลี่ยม</strong>
+<ul>
+<li>DRAM <strong>เข้าถึงทั้ง row</strong></li>
+<li><strong>Burst mode:</strong> ส่ง word ถัด ๆ ไปใน row เดียวกันโดย latency ลดลง</li>
+</ul>
+</li>
+<li><strong>DDR (Double data rate) DRAM:</strong> ส่งข้อมูลทั้ง <strong>ขอบขาขึ้นและขาลงของ clock</strong></li>
+<li><strong>QDR (Quad data rate) DRAM:</strong> <strong>แยก input และ output</strong> ของ DDR</li>
+</ul>
+<h3 id="34-dram-generations">3.4 DRAM Generations</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Year</th>
+<th>Capacity</th>
+<th>$/GB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1980</td>
+<td>64Kbit</td>
+<td>$1,500,000</td>
+</tr>
+<tr>
+<td>1983</td>
+<td>256Kbit</td>
+<td>$500,000</td>
+</tr>
+<tr>
+<td>1985</td>
+<td>1Mbit</td>
+<td>$200,000</td>
+</tr>
+<tr>
+<td>1989</td>
+<td>4Mbit</td>
+<td>$50,000</td>
+</tr>
+<tr>
+<td>1992</td>
+<td>16Mbit</td>
+<td>$15,000</td>
+</tr>
+<tr>
+<td>1996</td>
+<td>64Mbit</td>
+<td>$10,000</td>
+</tr>
+<tr>
+<td>1998</td>
+<td>128Mbit</td>
+<td>$4,000</td>
+</tr>
+<tr>
+<td>2000</td>
+<td>256Mbit</td>
+<td>$1,000</td>
+</tr>
+<tr>
+<td>2004</td>
+<td>512Mbit</td>
+<td>$250</td>
+</tr>
+<tr>
+<td>2007</td>
+<td>1Gbit</td>
+<td>$50</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>กราฟแสดง <strong>Trac</strong> (row access time) และ <strong>Tcac</strong> (column access time) ลดลงตามปีแต่ช้ากว่าความจุที่เพิ่ม</li>
+</ul>
+<h3 id="35-dram-performance-factors">3.5 DRAM Performance Factors</h3>
+<ul>
+<li><strong>Row buffer:</strong> อ่านและ refresh หลาย word <strong>พร้อมกัน</strong></li>
+<li><strong>Synchronous DRAM:</strong> เข้าถึงต่อเนื่องแบบ <strong>burst</strong> โดย <strong>ไม่ต้องส่ง address ทุกครั้ง</strong> → <strong>เพิ่ม bandwidth</strong></li>
+<li><strong>DRAM banking:</strong> เข้าถึง <strong>หลาย DRAM พร้อมกัน</strong> → <strong>เพิ่ม bandwidth</strong></li>
+</ul>
+<h3 id="36-increasing-memory-bandwidth">3.6 Increasing Memory Bandwidth</h3>
+<p><img loading="lazy" src="img/c4-p014.jpg" alt="4-word wide memory และ 4-bank interleaved memory" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>Miss penalty</th>
+<th>Bandwidth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>4-word wide memory</strong></td>
+<td>1 + 15 + 1 = <strong>17 bus cycles</strong></td>
+<td>16 bytes / 17 cycles = <strong>0.94 B/cycle</strong></td>
+</tr>
+<tr>
+<td><strong>4-bank interleaved memory</strong></td>
+<td>1 + 15 + 4×1 = <strong>20 bus cycles</strong></td>
+<td>16 bytes / 20 cycles = <strong>0.8 B/cycle</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>(เทียบกับแบบ 1-word-wide ในหัวข้อ 8.2 ที่ได้ 0.25 B/cycle)</p>
+<h3 id="37-flash-storage">3.7 Flash Storage</h3>
+<ul>
+<li><strong>Nonvolatile semiconductor storage</strong> (ไฟดับข้อมูลไม่หาย)</li>
+<li><strong>เร็วกว่า disk 100× – 1000×</strong></li>
+<li><strong>เล็กกว่า ใช้ไฟน้อยกว่า ทนกว่า</strong></li>
+<li>แต่ <strong>$/GB แพงกว่า disk</strong> (อยู่ระหว่าง disk กับ DRAM)</li>
+</ul>
+<h3 id="38-flash-types">3.8 Flash Types</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>NOR flash</strong></th>
+<th><strong>NAND flash</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bit cell</td>
+<td>คล้าย <strong>NOR gate</strong></td>
+<td>คล้าย <strong>NAND gate</strong></td>
+</tr>
+<tr>
+<td>การเข้าถึง</td>
+<td><strong>Random read/write</strong></td>
+<td><strong>ทีละ block</strong> แต่ <strong>หนาแน่นกว่า (bits/area)</strong></td>
+</tr>
+<tr>
+<td>ราคา</td>
+<td></td>
+<td><strong>ถูกกว่าต่อ GB</strong></td>
+</tr>
+<tr>
+<td>ใช้ทำ</td>
+<td><strong>instruction memory ใน embedded systems</strong></td>
+<td><strong>USB keys, media storage, …</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⚠️ <strong>Flash bits สึกหลังเขียนหลายพันครั้ง</strong>
+<ul>
+<li><strong>ไม่เหมาะใช้แทน RAM หรือ disk ตรง ๆ</strong></li>
+<li><strong>Wear leveling:</strong> ย้ายข้อมูลไปยัง block ที่ใช้น้อย</li>
+</ul>
+</li>
+</ul>
+<h3 id="39-disk-storage">3.9 Disk Storage</h3>
+<p><img loading="lazy" src="img/c4-p017.jpg" alt="hard disk: track, sector, cylinder" /></p>
+<ul>
+<li><strong>Nonvolatile, rotating magnetic storage</strong></li>
+<li>โครงสร้าง: <strong>track</strong> (วงรอบบนแผ่น), <strong>sector</strong> (ส่วนย่อยของ track), <strong>cylinder</strong> (track ตำแหน่งเดียวกันทุกแผ่น)</li>
+</ul>
+<h3 id="310-disk-sectors-and-access">3.10 Disk Sectors and Access</h3>
+<p><strong>แต่ละ sector บันทึก:</strong></p>
+<ul>
+<li><strong>Sector ID</strong></li>
+<li><strong>Data</strong> (512 bytes, เสนอ 4096 bytes)</li>
+<li><strong>Error correcting code (ECC)</strong> — ซ่อน defect และ recording errors</li>
+<li><strong>Synchronization fields and gaps</strong></li>
+</ul>
+<p><strong>การเข้าถึง sector ประกอบด้วย:</strong></p>
+<ol>
+<li><strong>Queuing delay</strong> ถ้ามีคำขออื่นรอ</li>
+<li><strong>Seek:</strong> เลื่อนหัวอ่าน</li>
+<li><strong>Rotational latency:</strong> รอแผ่นหมุนมาถึง</li>
+<li><strong>Data transfer</strong></li>
+<li><strong>Controller overhead</strong></li>
+</ol>
+<h3 id="311-disk-access-example">3.11 Disk Access Example ⭐</h3>
+<p><strong>Given:</strong> 512B sector, <strong>15,000rpm</strong>, <strong>4ms average seek time</strong>, <strong>100MB/s transfer rate</strong>, <strong>0.2ms controller overhead</strong>, idle disk</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>คำนวณ</th>
+<th>เวลา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seek</td>
+<td></td>
+<td><strong>4ms</strong></td>
+</tr>
+<tr>
+<td>Rotational latency</td>
+<td>½ / (15,000/60) = ½ รอบ ÷ 250 รอบ/วินาที</td>
+<td><strong>2ms</strong></td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>512 / 100MB/s</td>
+<td><strong>0.005ms</strong></td>
+</tr>
+<tr>
+<td>Controller</td>
+<td></td>
+<td><strong>0.2ms</strong></td>
+</tr>
+<tr>
+<td><strong>Average read time</strong></td>
+<td></td>
+<td><strong>6.2ms</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ถ้า <strong>actual average seek time = 1ms</strong> → <strong>average read time = 3.2ms</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>rotational latency เฉลี่ย = ครึ่งรอบ</strong> เพราะเฉลี่ยแล้วต้องรอหมุนครึ่งทาง</p>
+</blockquote>
+<h3 id="312-disk-performance-issues">3.12 Disk Performance Issues</h3>
+<ul>
+<li>ผู้ผลิตบอก <strong>average seek time</strong> จาก <strong>seek ทุกแบบที่เป็นไปได้</strong>
+<ul>
+<li><strong>Locality และ OS scheduling ทำให้ seek จริงน้อยกว่า</strong></li>
+</ul>
+</li>
+<li><strong>Smart disk controller</strong> จัดวาง physical sectors บน disk
+<ul>
+<li>แสดง <strong>logical sector interface</strong> ให้ host (<strong>SCSI, ATA, SATA</strong>)</li>
+</ul>
+</li>
+<li><strong>Disk drive มี cache</strong>
+<ul>
+<li><strong>Prefetch sectors</strong> ล่วงหน้า</li>
+<li><strong>หลีกเลี่ยง seek และ rotational delay</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="4-cache-memory-basics">4. Cache Memory Basics</h2>
+<h3 id="41-cache-memory">4.1 Cache Memory</h3>
+<ul>
+<li><strong>ระดับของ memory hierarchy ที่ใกล้ CPU ที่สุด</strong></li>
+<li>ให้ลำดับการเข้าถึง X₁, …, Xₙ₋₁, Xₙ (ก่อนอ้าง Xₙ มันยังไม่อยู่ใน cache)</li>
+<li><strong>คำถามหลัก:</strong>
+<ul>
+<li><strong>รู้ได้อย่างไรว่าข้อมูลอยู่ใน cache?</strong></li>
+<li><strong>ต้องหาที่ไหน?</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="42-elements-of-cache-design">4.2 Elements of Cache Design</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>ตัวเลือก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache Addresses</strong></td>
+<td>Logical, Physical</td>
+</tr>
+<tr>
+<td><strong>Cache Size</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Mapping Function</strong></td>
+<td>Direct, Associative, Set Associative</td>
+</tr>
+<tr>
+<td><strong>Replacement Algorithm</strong></td>
+<td>Least recently used (LRU), First in first out (FIFO), Least frequently used (LFU), Random</td>
+</tr>
+<tr>
+<td><strong>Write Policy</strong></td>
+<td>Write through, Write back</td>
+</tr>
+<tr>
+<td><strong>Line Size</strong></td>
+<td>(ขนาด block)</td>
+</tr>
+<tr>
+<td><strong>Number of caches</strong></td>
+<td>Single or two level, Unified or split</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-direct-mapped-cache">5. Direct Mapped Cache ⭐⭐</h2>
+<h3 id="51-หลักการ">5.1 หลักการ</h3>
+<ul>
+<li><strong>ตำแหน่งกำหนดโดย address</strong></li>
+<li><strong>Direct mapped: มีที่เดียวให้วาง</strong>
+<ul>
+<li><strong>(Block address) modulo (#Blocks in cache)</strong></li>
+</ul>
+</li>
+<li><strong>#Blocks เป็นกำลังของ 2</strong> → <strong>ใช้บิตล่างของ address</strong> เป็น index ได้เลย</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนตู้ล็อกเกอร์ 8 ช่องที่กำหนดตามเลข 3 ตัวท้ายของรหัสนักศึกษา แต่ละคนมีช่องได้ช่องเดียว</p>
+</blockquote>
+<h3 id="52-tags-and-valid-bits">5.2 Tags and Valid Bits</h3>
+<ul>
+<li><strong>รู้ได้อย่างไรว่า block ไหนอยู่ในช่องนั้น?</strong>
+<ul>
+<li><strong>เก็บ block address ไว้ด้วย</strong> (จริง ๆ เก็บแค่ <strong>บิตบน</strong>) เรียกว่า <strong>tag</strong></li>
+</ul>
+</li>
+<li><strong>ถ้าช่องนั้นยังไม่มีข้อมูล?</strong>
+<ul>
+<li><strong>Valid bit:</strong> 1 = มี, 0 = ไม่มี (<strong>เริ่มต้นเป็น 0</strong>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="53-cache-example">5.3 Cache Example ⭐</h3>
+<p><strong>8 blocks, 1 word/block, direct mapped</strong> → address 5 บิต = <strong>tag 2 บิต + index 3 บิต</strong></p>
+<p><strong>ลำดับการเข้าถึง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Word addr</th>
+<th>Binary (tag index)</th>
+<th>Hit/miss</th>
+<th>Cache block</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>10 110</td>
+<td><strong>Miss</strong></td>
+<td>110</td>
+</tr>
+<tr>
+<td>26</td>
+<td>11 010</td>
+<td><strong>Miss</strong></td>
+<td>010</td>
+</tr>
+<tr>
+<td>22</td>
+<td>10 110</td>
+<td><strong>Hit</strong></td>
+<td>110</td>
+</tr>
+<tr>
+<td>26</td>
+<td>11 010</td>
+<td><strong>Hit</strong></td>
+<td>010</td>
+</tr>
+<tr>
+<td>16</td>
+<td>10 000</td>
+<td><strong>Miss</strong></td>
+<td>000</td>
+</tr>
+<tr>
+<td>3</td>
+<td>00 011</td>
+<td><strong>Miss</strong></td>
+<td>011</td>
+</tr>
+<tr>
+<td>16</td>
+<td>10 000</td>
+<td><strong>Hit</strong></td>
+<td>000</td>
+</tr>
+<tr>
+<td>18</td>
+<td>10 010</td>
+<td><strong>Miss</strong></td>
+<td>010</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>สถานะ cache สุดท้าย:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Index</th>
+<th>V</th>
+<th>Tag</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>000</td>
+<td>Y</td>
+<td>10</td>
+<td>Mem[10000]</td>
+</tr>
+<tr>
+<td>001</td>
+<td>N</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>010</td>
+<td>Y</td>
+<td><strong>10</strong></td>
+<td><strong>Mem[10010]</strong> ← ถูกแทนที่ (เดิม tag 11 = Mem[11010])</td>
+</tr>
+<tr>
+<td>011</td>
+<td>Y</td>
+<td>00</td>
+<td>Mem[00011]</td>
+</tr>
+<tr>
+<td>100</td>
+<td>N</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>101</td>
+<td>N</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>110</td>
+<td>Y</td>
+<td>10</td>
+<td>Mem[10110]</td>
+</tr>
+<tr>
+<td>111</td>
+<td>N</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ขั้นสุดท้าย: 18 (10 010) ตก index 010 เดียวกับ 26 (11 010) แต่ <strong>tag ไม่ตรง</strong> → miss และ <strong>แทนที่</strong> ของเดิม นี่คือจุดอ่อนของ direct mapped (conflict)</p>
+</blockquote>
+<hr />
+<h2 id="6-address-subdivision-และ-block-size">6. Address Subdivision และ Block Size</h2>
+<h3 id="61-address-subdivision">6.1 Address Subdivision</h3>
+<p><img loading="lazy" src="img/c4-p031.jpg" alt="แบ่ง address เป็น tag, index, byte offset และวงจรตรวจ hit" /></p>
+<ul>
+<li>address 64 บิต แบ่งเป็น <strong>Tag (52 บิต) | Index (10 บิต) | Byte offset (2 บิต)</strong></li>
+<li>cache มี <strong>1024 entries</strong> (index 0–1023) แต่ละ entry: <strong>Valid, Tag, Data (32 บิต)</strong></li>
+<li><strong>Hit = Valid AND (Tag ใน cache == Tag ของ address)</strong></li>
+</ul>
+<h3 id="62-example-larger-block-size">6.2 Example: Larger Block Size ⭐</h3>
+<p><strong>64 blocks, 16 bytes/block</strong> — address <strong>1200</strong> อยู่ block ไหน?</p>
+<p>$$\text{Block address} = \left\lfloor \frac{\text{address}}{\text{bytes/block}} \right\rfloor = \lfloor 1200/16 \rfloor = 75$$</p>
+<p>$$\text{Block number} = \text{Block address} \bmod #\text{blocks} = 75 \bmod 64 = 11$$</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Index</th>
+<th>Offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บิต 31–10 (<strong>22 บิต</strong>, address 32 บิต)</td>
+<td>บิต 9–4 (<strong>6 บิต</strong>, 64 blocks)</td>
+<td>บิต 3–0 (<strong>4 บิต</strong>, 16 bytes)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>สูตรหาจำนวนบิต:</strong> offset = log₂(bytes/block), index = log₂(#blocks), tag = บิตที่เหลือ</p>
+</blockquote>
+<h3 id="63-block-size-considerations">6.3 Block Size Considerations</h3>
+<ul>
+<li><strong>Block ใหญ่ควรลด miss rate</strong> เพราะ <strong>spatial locality</strong></li>
+<li>แต่ใน cache ขนาดคงที่:
+<ul>
+<li><strong>Block ใหญ่ → จำนวน block น้อยลง</strong> → <strong>แย่งกันมากขึ้น → miss rate เพิ่ม</strong></li>
+<li><strong>Block ใหญ่ → pollution</strong> (ดึงข้อมูลที่ไม่ได้ใช้มาเต็มที่)</li>
+</ul>
+</li>
+<li><strong>Miss penalty สูงขึ้น</strong> → อาจกลบประโยชน์จาก miss rate ที่ลดลง
+<ul>
+<li><strong>Early restart</strong> และ <strong>critical-word-first</strong> ช่วยได้</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="7-cache-misses-และ-write-policy">7. Cache Misses และ Write Policy</h2>
+<h3 id="71-cache-misses">7.1 Cache Misses</h3>
+<ul>
+<li><strong>Hit:</strong> CPU ทำงานต่อปกติ</li>
+<li><strong>Miss:</strong>
+<ul>
+<li><strong>หยุด (stall) CPU pipeline</strong></li>
+<li><strong>ดึง block จากระดับถัดไป</strong> ของ hierarchy</li>
+<li><strong>Instruction cache miss:</strong> เริ่ม fetch คำสั่งใหม่</li>
+<li><strong>Data cache miss:</strong> ทำ data access ให้เสร็จ</li>
+</ul>
+</li>
+</ul>
+<h3 id="72-write-through">7.2 Write-Through ⭐</h3>
+<ul>
+<li>ตอน <strong>data-write hit</strong> ถ้าแก้แค่ block ใน cache → <strong>cache กับ memory ไม่ตรงกัน (inconsistent)</strong></li>
+<li><strong>Write through:</strong> <strong>แก้ memory ด้วย</strong>
+<ul>
+<li>แต่ <strong>เขียนช้าลง</strong></li>
+<li><strong>ตัวอย่าง:</strong> base CPI = 1, <strong>10% ของคำสั่งเป็น store</strong>, เขียน memory ใช้ <strong>100 cycles</strong>
+<ul>
+<li><strong>Effective CPI = 1 + 0.1 × 100 = 11</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ทางแก้: write buffer</strong>
+<ul>
+<li>เก็บข้อมูลที่ <strong>รอเขียนลง memory</strong></li>
+<li><strong>CPU ทำงานต่อได้ทันที</strong></li>
+<li><strong>stall เฉพาะเมื่อ write buffer เต็ม</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="73-write-back">7.3 Write-Back</h3>
+<ul>
+<li>ทางเลือก: ตอน data-write hit <strong>แก้แค่ block ใน cache</strong></li>
+<li><strong>ติดตามว่า block ไหน &quot;dirty&quot;</strong> (ถูกแก้แล้ว)</li>
+<li><strong>เมื่อ dirty block ถูกแทนที่</strong> → <strong>เขียนกลับลง memory</strong></li>
+<li>ใช้ <strong>write buffer</strong> ให้อ่าน block ใหม่ก่อนได้</li>
+</ul>
+<h3 id="74-write-allocation">7.4 Write Allocation</h3>
+<p><strong>ถ้า write miss จะทำอย่างไร?</strong></p>
+<ul>
+<li>สำหรับ <strong>write-through:</strong>
+<ul>
+<li><strong>Allocate on miss:</strong> ดึง block มา</li>
+<li><strong>Write around:</strong> ไม่ดึง block (เพราะโปรแกรมมักเขียนทั้ง block ก่อนอ่าน เช่น initialization)</li>
+</ul>
+</li>
+<li>สำหรับ <strong>write-back:</strong> <strong>มักดึง block มา</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Write-through</th>
+<th>Write-back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แก้อะไร</td>
+<td>cache <strong>และ</strong> memory</td>
+<td><strong>cache อย่างเดียว</strong> แล้วเขียนตอนแทนที่</td>
+</tr>
+<tr>
+<td>ข้อดี</td>
+<td>ข้อมูลตรงกันเสมอ, replacement ง่าย</td>
+<td>เขียนเร็ว</td>
+</tr>
+<tr>
+<td>ข้อเสีย</td>
+<td>เขียนช้า (ต้อง write buffer)</td>
+<td>ต้องเก็บ state เพิ่ม (dirty bit)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-intrinsity-fastmath-และ-main-memory-supporting-caches">8. Intrinsity FastMATH และ Main Memory Supporting Caches</h2>
+<h3 id="81-example-intrinsity-fastmath">8.1 Example: Intrinsity FastMATH</h3>
+<ul>
+<li><strong>Embedded MIPS processor</strong>
+<ul>
+<li><strong>12-stage pipeline</strong></li>
+<li>เข้าถึง instruction และ data <strong>ทุก cycle</strong></li>
+</ul>
+</li>
+<li><strong>Split cache:</strong> แยก <strong>I-cache และ D-cache</strong>
+<ul>
+<li><strong>แต่ละตัว 16KB: 256 blocks × 16 words/block</strong></li>
+<li><strong>D-cache:</strong> write-through หรือ write-back</li>
+</ul>
+</li>
+<li><strong>SPEC2000 miss rates:</strong>
+<ul>
+<li><strong>I-cache: 0.4%</strong></li>
+<li><strong>D-cache: 11.4%</strong></li>
+<li><strong>Weighted average: 3.2%</strong></li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="img/c4-p039.jpg" alt="FastMATH: tag 18, index 8, block offset 4 บิต, 256 entries, 16 words ต่อ block + mux" /></p>
+<ul>
+<li>address 32 บิต: <strong>Tag 18 | Index 8 | Block offset 4 | Byte offset 2</strong></li>
+<li>cache 256 entries, data 512 บิต (16 words × 32) → <strong>Mux</strong> เลือก word ด้วย block offset</li>
+</ul>
+<h3 id="82-main-memory-supporting-caches">8.2 Main Memory Supporting Caches ⭐</h3>
+<ul>
+<li>ใช้ <strong>DRAMs</strong> เป็น main memory
+<ul>
+<li>ความกว้างคงที่ (เช่น 1 word)</li>
+<li>เชื่อมด้วย <strong>bus แบบ clocked ความกว้างคงที่</strong>
+<ul>
+<li><strong>bus clock มักช้ากว่า CPU clock</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ตัวอย่างอ่าน cache block:</strong>
+<ul>
+<li><strong>1 bus cycle</strong> สำหรับส่ง address</li>
+<li><strong>15 bus cycles</strong> ต่อการเข้าถึง DRAM</li>
+<li><strong>1 bus cycle</strong> ต่อการส่งข้อมูล</li>
+</ul>
+</li>
+<li><strong>4-word block, 1-word-wide DRAM:</strong>
+<ul>
+<li><strong>Miss penalty = 1 + 4×15 + 4×1 = 65 bus cycles</strong></li>
+<li><strong>Bandwidth = 16 bytes / 65 cycles = 0.25 B/cycle</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="9-measuring-cache-performance">9. Measuring Cache Performance ⭐⭐</h2>
+<h3 id="91-components-of-cpu-time">9.1 Components of CPU Time</h3>
+<ul>
+<li><strong>Program execution cycles</strong> (รวม cache hit time)</li>
+<li><strong>Memory stall cycles</strong> (ส่วนใหญ่จาก cache misses)</li>
+</ul>
+<p><strong>สูตร (แบบง่าย):</strong></p>
+<p>$$\text{Memory stall cycles} = \frac{\text{Memory accesses}}{\text{Program}} \times \text{Miss rate} \times \text{Miss penalty}$$</p>
+<p>$$= \frac{\text{Instructions}}{\text{Program}} \times \frac{\text{Misses}}{\text{Instruction}} \times \text{Miss penalty}$$</p>
+<h3 id="92-cache-performance-example">9.2 Cache Performance Example ⭐</h3>
+<p><strong>Given:</strong></p>
+<ul>
+<li><strong>I-cache miss rate = 2%</strong></li>
+<li><strong>D-cache miss rate = 4%</strong></li>
+<li><strong>Miss penalty = 100 cycles</strong></li>
+<li><strong>Base CPI (ideal cache) = 2</strong></li>
+<li><strong>Load &amp; stores = 36%</strong> ของคำสั่ง</li>
+</ul>
+<p><strong>Miss cycles per instruction:</strong></p>
+<ul>
+<li><strong>I-cache:</strong> 0.02 × 100 = <strong>2</strong> (ทุกคำสั่งต้อง fetch)</li>
+<li><strong>D-cache:</strong> 0.36 × 0.04 × 100 = <strong>1.44</strong> (เฉพาะ load/store)</li>
+</ul>
+<p><strong>Actual CPI = 2 + 2 + 1.44 = 5.44</strong>
+<strong>Ideal CPU เร็วกว่า 5.44 / 2 = 2.72 เท่า</strong></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>D-cache ต้องคูณ 0.36</strong> เพราะเฉพาะ load/store ที่เข้าถึงข้อมูล แต่ I-cache ใช้ทุกคำสั่ง</p>
+</blockquote>
+<h3 id="93-average-memory-access-time-amat">9.3 Average Memory Access Time (AMAT) ⭐</h3>
+<ul>
+<li><strong>Hit time ก็สำคัญต่อประสิทธิภาพ</strong></li>
+</ul>
+<p>$$\text{AMAT} = \text{Hit time} + \text{Miss rate} \times \text{Miss penalty}$$</p>
+<p><strong>ตัวอย่าง:</strong> CPU clock 1ns, hit time = 1 cycle, miss penalty = 20 cycles, I-cache miss rate = 5%</p>
+<ul>
+<li><strong>AMAT = 1 + 0.05 × 20 = 2ns</strong> → <strong>2 cycles ต่อคำสั่ง</strong></li>
+</ul>
+<h3 id="94-performance-summary">9.4 Performance Summary</h3>
+<ul>
+<li><strong>เมื่อ CPU เร็วขึ้น miss penalty ยิ่งสำคัญ</strong>
+<ul>
+<li><strong>ลด base CPI</strong> → <strong>สัดส่วนเวลาที่เสียกับ memory stall สูงขึ้น</strong></li>
+<li><strong>เพิ่ม clock rate</strong> → <strong>memory stall กิน CPU cycles มากขึ้น</strong></li>
+</ul>
+</li>
+<li><strong>ละเลยพฤติกรรม cache ไม่ได้</strong> ตอนประเมินประสิทธิภาพระบบ</li>
+</ul>
+<hr />
+<h2 id="10-associative-caches">10. Associative Caches ⭐⭐</h2>
+<h3 id="101-ชนิด">10.1 ชนิด</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Fully associative</strong></th>
+<th><strong>n-way set associative</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>วางได้ที่ไหน</td>
+<td>block ไป <strong>entry ไหนก็ได้</strong></td>
+<td>แต่ละ <strong>set มี n entries</strong>; block number กำหนด set</td>
+</tr>
+<tr>
+<td>หา set</td>
+<td>–</td>
+<td><strong>(Block number) modulo (#Sets in cache)</strong></td>
+</tr>
+<tr>
+<td>ค้นหา</td>
+<td><strong>ค้นทุก entry พร้อมกัน</strong></td>
+<td><strong>ค้นทุก entry ใน set นั้นพร้อมกัน</strong></td>
+</tr>
+<tr>
+<td>comparator</td>
+<td><strong>ต่อ entry (แพง)</strong></td>
+<td><strong>n ตัว (ถูกกว่า)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-associative-cache-example">10.2 Associative Cache Example</h3>
+<p><img loading="lazy" src="img/c4-p046.jpg" alt="direct mapped vs set associative vs fully associative ค้นหา block 12" /></p>
+<p>ค้นหา block address <strong>12</strong> ใน cache 8 ช่อง:</p>
+<ul>
+<li><strong>Direct mapped:</strong> 12 mod 8 = <strong>block 4</strong> → ค้น <strong>1 ที่</strong></li>
+<li><strong>Set associative (2-way, 4 sets):</strong> 12 mod 4 = <strong>set 0</strong> → ค้น <strong>2 ที่</strong></li>
+<li><strong>Fully associative:</strong> ค้น <strong>ทั้ง 8 ที่</strong></li>
+</ul>
+<h3 id="103-spectrum-of-associativity-cache-8-entries">10.3 Spectrum of Associativity (cache 8 entries)</h3>
+<p><img loading="lazy" src="img/c4-p047.jpg" alt="1-way, 2-way, 4-way, 8-way set associative" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>จำนวน set × entries ต่อ set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>One-way set associative (direct mapped)</strong></td>
+<td>8 sets × 1</td>
+</tr>
+<tr>
+<td><strong>Two-way set associative</strong></td>
+<td>4 sets × 2</td>
+</tr>
+<tr>
+<td><strong>Four-way set associative</strong></td>
+<td>2 sets × 4</td>
+</tr>
+<tr>
+<td><strong>Eight-way set associative (fully associative)</strong></td>
+<td>1 set × 8</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="104-associativity-example">10.4 Associativity Example ⭐</h3>
+<p><strong>เทียบ cache 4 blocks:</strong> direct mapped, 2-way set associative, fully associative
+<strong>ลำดับ block address: 0, 8, 0, 6, 8</strong></p>
+<p><strong>Direct mapped</strong> (index = address mod 4)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Block addr</th>
+<th>Index</th>
+<th>Hit/miss</th>
+<th>Cache content after access (0, 1, 2, 3)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0], –, –, –</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[8], –, –, –</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0], –, –, –</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2</td>
+<td>miss</td>
+<td>Mem[0], –, Mem[6], –</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[8], –, Mem[6], –</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ <strong>5 misses</strong></p>
+<p><strong>2-way set associative</strong> (set = address mod 2)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Block addr</th>
+<th>Set</th>
+<th>Hit/miss</th>
+<th>Set 0</th>
+<th>Set 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0]</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0], Mem[8]</td>
+<td></td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td><strong>hit</strong></td>
+<td>Mem[0], Mem[8]</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0], Mem[6] (แทน 8 เพราะ LRU)</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>miss</td>
+<td>Mem[8], Mem[6] (แทน 0)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>→ <strong>4 misses</strong></p>
+<p><strong>Fully associative</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Block addr</th>
+<th>Hit/miss</th>
+<th>Cache content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>miss</td>
+<td>Mem[0]</td>
+</tr>
+<tr>
+<td>8</td>
+<td>miss</td>
+<td>Mem[0], Mem[8]</td>
+</tr>
+<tr>
+<td>0</td>
+<td><strong>hit</strong></td>
+<td>Mem[0], Mem[8]</td>
+</tr>
+<tr>
+<td>6</td>
+<td>miss</td>
+<td>Mem[0], Mem[8], Mem[6]</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>hit</strong></td>
+<td>Mem[0], Mem[8], Mem[6]</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ <strong>3 misses</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>associativity สูงขึ้น → miss น้อยลง</strong> (5 → 4 → 3)</p>
+</blockquote>
+<h3 id="105-how-much-associativity">10.5 How Much Associativity</h3>
+<ul>
+<li><strong>Associativity สูงขึ้นลด miss rate</strong> แต่ <strong>ได้ผลน้อยลงเรื่อย ๆ (diminishing returns)</strong></li>
+<li><strong>Simulation:</strong> 64KB D-cache, 16-word blocks, SPEC2000</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Associativity</th>
+<th>Miss rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-way</td>
+<td><strong>10.3%</strong></td>
+</tr>
+<tr>
+<td>2-way</td>
+<td><strong>8.6%</strong></td>
+</tr>
+<tr>
+<td>4-way</td>
+<td><strong>8.3%</strong></td>
+</tr>
+<tr>
+<td>8-way</td>
+<td><strong>8.1%</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="106-set-associative-cache-organization">10.6 Set Associative Cache Organization</h3>
+<p><img loading="lazy" src="img/c4-p051.jpg" alt="4-way set associative: 4 comparators + 4-to-1 multiplexor" /></p>
+<ul>
+<li>address 32 บิต: <strong>Tag 22 | Index 8</strong> (256 sets)</li>
+<li><strong>4 ways</strong> แต่ละ way มี V, Tag, Data</li>
+<li><strong>เปรียบเทียบ tag 4 ตัวพร้อมกัน</strong> → OR เป็น <strong>Hit</strong> → <strong>4-to-1 multiplexor</strong> เลือก <strong>Data</strong></li>
+</ul>
+<hr />
+<h2 id="11-replacement-policy-และ-multilevel-caches">11. Replacement Policy และ Multilevel Caches</h2>
+<h3 id="111-replacement-policy">11.1 Replacement Policy</h3>
+<ul>
+<li><strong>Direct mapped: ไม่มีทางเลือก</strong></li>
+<li><strong>Set associative:</strong>
+<ul>
+<li><strong>เลือก entry ที่ไม่ valid ก่อน</strong> (ถ้ามี)</li>
+<li>ไม่งั้นเลือกใน set:
+<ul>
+<li><strong>Least-recently used (LRU):</strong> เลือกตัวที่ <strong>ไม่ได้ใช้นานที่สุด</strong> — ง่ายกับ 2-way, พอจัดการได้กับ 4-way, <strong>ยากเกินไปถ้ามากกว่านั้น</strong></li>
+<li><strong>Random:</strong> ให้ประสิทธิภาพ <strong>ใกล้เคียง LRU</strong> เมื่อ associativity สูง</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="112-multilevel-caches">11.2 Multilevel Caches</h3>
+<ul>
+<li><strong>Primary cache (L1)</strong> ติด CPU: <strong>เล็กแต่เร็ว</strong></li>
+<li><strong>Level-2 cache</strong> รับ miss จาก primary: <strong>ใหญ่กว่า ช้ากว่า แต่ยังเร็วกว่า main memory</strong></li>
+<li><strong>Main memory</strong> รับ miss จาก L-2</li>
+<li>ระบบระดับสูงบางตัวมี <strong>L-3 cache</strong></li>
+</ul>
+<h3 id="113-multilevel-cache-example">11.3 Multilevel Cache Example ⭐⭐</h3>
+<p><strong>Given:</strong></p>
+<ul>
+<li>CPU base CPI = <strong>1</strong>, clock rate = <strong>4GHz</strong> (cycle = 0.25ns)</li>
+<li>Miss rate/instruction = <strong>2%</strong></li>
+<li>Main memory access time = <strong>100ns</strong></li>
+</ul>
+<p><strong>มีแค่ primary cache:</strong></p>
+<ul>
+<li>Miss penalty = 100ns / 0.25ns = <strong>400 cycles</strong></li>
+<li><strong>Effective CPI = 1 + 0.02 × 400 = 9</strong></li>
+</ul>
+<p><strong>เพิ่ม L-2 cache:</strong></p>
+<ul>
+<li>Access time = <strong>5ns</strong></li>
+<li><strong>Global miss rate to main memory = 0.5%</strong></li>
+<li><strong>Primary miss แต่ L-2 hit:</strong> penalty = 5ns / 0.25ns = <strong>20 cycles</strong></li>
+<li><strong>Primary miss และ L-2 miss:</strong> extra penalty = <strong>500 cycles</strong> (ตามสไลด์)
+<ul>
+<li>⚠️ แต่สูตรในสไลด์ใช้ <strong>400</strong> (เวลาไป main memory) ถ้าคิดแบบ 500 จะได้ CPI = 3.9 — ตอบตามที่อาจารย์ใช้คือ <strong>3.4</strong></li>
+</ul>
+</li>
+<li><strong>CPI = 1 + 0.02 × 20 + 0.005 × 400 = 3.4</strong></li>
+<li><strong>Performance ratio = 9 / 3.4 = 2.6</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 การเพิ่ม L2 เล็ก ๆ ทำให้เร็วขึ้น 2.6 เท่า เพราะ miss ส่วนใหญ่ไม่ต้องไปถึง main memory ที่ช้ามาก</p>
+</blockquote>
+<h3 id="114-multilevel-cache-considerations">11.4 Multilevel Cache Considerations</h3>
+<ul>
+<li><strong>Primary cache:</strong> เน้น <strong>hit time น้อยที่สุด</strong></li>
+<li><strong>L-2 cache:</strong> เน้น <strong>miss rate ต่ำ</strong> เพื่อเลี่ยงการเข้าถึง main memory; <strong>hit time มีผลโดยรวมน้อยกว่า</strong></li>
+<li><strong>ผลลัพธ์:</strong>
+<ul>
+<li><strong>L-1 มักเล็กกว่า cache แบบชั้นเดียว</strong></li>
+<li><strong>L-1 block size เล็กกว่า L-2 block size</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="12-interactions-with-advanced-cpus-และ-software">12. Interactions with Advanced CPUs และ Software</h2>
+<h3 id="121-interactions-with-advanced-cpus">12.1 Interactions with Advanced CPUs</h3>
+<ul>
+<li><strong>Out-of-order CPUs รันคำสั่งอื่นได้ระหว่าง cache miss</strong>
+<ul>
+<li><strong>store ที่ค้างอยู่</strong> อยู่ใน load/store unit</li>
+<li><strong>คำสั่งที่พึ่งพา</strong> รอใน reservation stations</li>
+<li><strong>คำสั่งอิสระ</strong> ทำต่อได้</li>
+</ul>
+</li>
+<li><strong>ผลของ miss ขึ้นกับ data flow ของโปรแกรม</strong>
+<ul>
+<li><strong>วิเคราะห์ยากมาก</strong> → ใช้ <strong>system simulation</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="122-interactions-with-software">12.2 Interactions with Software</h3>
+<ul>
+<li><strong>Miss ขึ้นกับรูปแบบการเข้าถึง memory:</strong>
+<ul>
+<li><strong>พฤติกรรมของ algorithm</strong></li>
+<li><strong>Compiler optimization</strong> สำหรับ memory access</li>
+</ul>
+</li>
+</ul>
+<h3 id="123-software-optimization-via-blocking">12.3 Software Optimization via Blocking ⭐</h3>
+<ul>
+<li><strong>เป้าหมาย: ใช้ข้อมูลให้ได้มากที่สุดก่อนมันถูกแทนที่ออกจาก cache</strong></li>
+<li><strong>Inner loops ของ DGEMM</strong> (double-precision general matrix multiply):</li>
+</ul>
+<pre><code class="language-c">for (int j = 0; j &lt; n; ++j) {
+    double cij = C[i+j*n];
+    for( int k = 0; k &lt; n; k++ )
+        cij += A[i+k*n] * B[k+j*n];
+    C[i+j*n] = cij;
+}
+</code></pre>
+<p><img loading="lazy" src="img/c4-p060.jpg" alt="DGEMM access pattern: เข้าถึง B ทั้ง column ทำให้ cache miss" /></p>
+<ul>
+<li><strong>ภาพ:</strong> แสดงการเข้าถึง C, A, B — <strong>สีเข้ม = new accesses, สีอ่อน = older accesses</strong> — B ถูกเข้าถึงไล่ทั้ง column ยาว ๆ ทำให้ข้อมูลเก่าหลุดจาก cache</li>
+</ul>
+<h3 id="124-cache-blocked-dgemm">12.4 Cache Blocked DGEMM</h3>
+<pre><code class="language-c">#define BLOCKSIZE 32
+void do_block (int n, int si, int sj, int sk, double *A, double *B, double *C) {
+    for (int i = si; i &lt; si+BLOCKSIZE; ++i)
+        for (int j = sj; j &lt; sj+BLOCKSIZE; ++j) {
+            double cij = C[i+j*n];                 /* cij = C[i][j] */
+            for( int k = sk; k &lt; sk+BLOCKSIZE; k++ )
+                cij += A[i+k*n] * B[k+j*n];        /* cij+=A[i][k]*B[k][j] */
+            C[i+j*n] = cij;                        /* C[i][j] = cij */
+        }
+}
+void dgemm (int n, double* A, double* B, double* C) {
+    for ( int sj = 0; sj &lt; n; sj += BLOCKSIZE )
+        for ( int si = 0; si &lt; n; si += BLOCKSIZE )
+            for ( int sk = 0; sk &lt; n; sk += BLOCKSIZE )
+                do_block(n, si, sj, sk, A, B, C);
+}
+</code></pre>
+<ul>
+<li>แบ่ง matrix เป็น <strong>ก้อนย่อย 32×32</strong> ที่ใส่ใน cache ได้พอดี แล้วคูณทีละก้อน</li>
+</ul>
+<p><img loading="lazy" src="img/c4-p062.jpg" alt="Blocked DGEMM access pattern และกราฟ GFLOPS" /></p>
+<p><strong>ผลในกราฟ (GFLOPS = ยิ่งสูงยิ่งเร็ว)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขนาด matrix</th>
+<th>Unoptimized</th>
+<th>Blocked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>32×32</td>
+<td>1.7</td>
+<td>1.7</td>
+</tr>
+<tr>
+<td>160×160</td>
+<td>1.5</td>
+<td>1.6</td>
+</tr>
+<tr>
+<td>480×480</td>
+<td>1.3</td>
+<td>1.6</td>
+</tr>
+<tr>
+<td>960×960</td>
+<td><strong>0.8</strong></td>
+<td><strong>1.5</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 matrix ใหญ่ขึ้น แบบ unoptimized ช้าลงมาก (cache miss เยอะ) แต่แบบ blocked แทบคงที่</p>
+</blockquote>
+<hr />
+<h2 id="13-dependability">13. Dependability</h2>
+<h3 id="131-dependability">13.1 Dependability</h3>
+<p><img loading="lazy" src="img/c4-p063.jpg" alt="service accomplishment ⇄ service interruption ด้วย failure และ restoration" /></p>
+<ul>
+<li><strong>Service accomplishment:</strong> ให้บริการตามที่ระบุ</li>
+<li><strong>Service interruption:</strong> เบี่ยงเบนจากบริการที่ระบุ</li>
+<li><strong>Failure</strong> ทำให้ accomplishment → interruption / <strong>Restoration</strong> ทำให้กลับมา</li>
+<li><strong>Fault:</strong> ความเสียหายของส่วนประกอบ — <strong>อาจหรือไม่อาจทำให้ระบบ failure</strong></li>
+</ul>
+<h3 id="132-dependability-measures">13.2 Dependability Measures ⭐</h3>
+<ul>
+<li><strong>Reliability:</strong> <strong>mean time to failure (MTTF)</strong></li>
+<li><strong>Service interruption:</strong> <strong>mean time to repair (MTTR)</strong></li>
+<li><strong>Mean time between failures: MTBF = MTTF + MTTR</strong></li>
+<li><strong>Availability = MTTF / (MTTF + MTTR)</strong></li>
+<li><strong>ปรับปรุง availability:</strong>
+<ul>
+<li><strong>เพิ่ม MTTF:</strong> fault avoidance, fault tolerance, fault forecasting</li>
+<li><strong>ลด MTTR:</strong> เครื่องมือและกระบวนการวินิจฉัยและซ่อมที่ดีขึ้น</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ตัวอย่าง: MTTF = 999 ชม., MTTR = 1 ชม. → availability = 999/1000 = 99.9% <em>(เสริม)</em></p>
+</blockquote>
+<h3 id="133-the-hamming-sec-code">13.3 The Hamming SEC Code</h3>
+<ul>
+<li><strong>Hamming distance:</strong> <strong>จำนวนบิตที่ต่างกัน</strong> ระหว่างบิตสองชุด</li>
+<li><strong>Minimum distance = 2</strong> → <strong>ตรวจจับ single bit error</strong> (เช่น parity code)</li>
+<li><strong>Minimum distance = 3</strong> → <strong>แก้ single error ได้, ตรวจจับ 2 bit error</strong></li>
+</ul>
+<h3 id="134-encoding-sec">13.4 Encoding SEC ⭐</h3>
+<p><img loading="lazy" src="img/c4-p066.jpg" alt="ตาราง parity bit coverage ของ Hamming code 12 บิต" /></p>
+<ul>
+<li><strong>นับตำแหน่งบิตเริ่มที่ 1 จากซ้าย</strong></li>
+<li><strong>ตำแหน่งที่เป็นกำลังของ 2 เป็น parity bits</strong> (1, 2, 4, 8)</li>
+<li><strong>แต่ละ parity bit ตรวจ data bits บางตัว:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bit position</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Encoded data bits</td>
+<td><strong>p1</strong></td>
+<td><strong>p2</strong></td>
+<td>d1</td>
+<td><strong>p4</strong></td>
+<td>d2</td>
+<td>d3</td>
+<td>d4</td>
+<td><strong>p8</strong></td>
+<td>d5</td>
+<td>d6</td>
+<td>d7</td>
+<td>d8</td>
+</tr>
+<tr>
+<td>p1</td>
+<td>X</td>
+<td></td>
+<td>X</td>
+<td></td>
+<td>X</td>
+<td></td>
+<td>X</td>
+<td></td>
+<td>X</td>
+<td></td>
+<td>X</td>
+<td></td>
+</tr>
+<tr>
+<td>p2</td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td></td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td></td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td></td>
+</tr>
+<tr>
+<td>p4</td>
+<td></td>
+<td></td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>X</td>
+</tr>
+<tr>
+<td>p8</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>p_k ตรวจตำแหน่งที่มีบิต k เป็น 1 ในเลขฐานสอง</strong> เช่น p1 ตรวจตำแหน่งเลขคี่, p2 ตรวจ 2,3,6,7,10,11</p>
+</blockquote>
+<h3 id="135-decoding-sec">13.5 Decoding SEC</h3>
+<ul>
+<li><strong>ค่า parity bits บอกว่าบิตไหนผิด</strong> (ใช้เลขตำแหน่งจากตอน encode)</li>
+<li><strong>Parity bits = 0000</strong> → <strong>ไม่มี error</strong></li>
+<li><strong>Parity bits = 1010</strong> → <strong>บิต 10 ถูกพลิก</strong></li>
+</ul>
+<h3 id="136-secded-code">13.6 SEC/DED Code</h3>
+<ul>
+<li><strong>เพิ่ม parity bit อีก 1 บิตสำหรับทั้ง word (pₙ)</strong></li>
+<li>ทำให้ <strong>Hamming distance = 4</strong></li>
+<li><strong>Decoding</strong> (H = SEC parity bits):</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>H</th>
+<th>pₙ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>even</td>
+<td>even</td>
+<td><strong>ไม่มี error</strong></td>
+</tr>
+<tr>
+<td>odd</td>
+<td>odd</td>
+<td><strong>single bit error ที่แก้ได้</strong></td>
+</tr>
+<tr>
+<td>even</td>
+<td>odd</td>
+<td><strong>error ที่บิต pₙ</strong></td>
+</tr>
+<tr>
+<td>odd</td>
+<td>even</td>
+<td><strong>double error</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>ECC DRAM</strong> ใช้ <strong>SEC/DED กับ 8 บิต ป้องกันทุก 64 บิต</strong></li>
+</ul>
+<hr />
+<h2 id="14-virtual-machines">14. Virtual Machines</h2>
+<h3 id="141-virtual-machines">14.1 Virtual Machines</h3>
+<ul>
+<li><strong>Host computer จำลอง guest OS และทรัพยากรเครื่อง</strong>
+<ul>
+<li><strong>แยก guest หลายตัวออกจากกันได้ดีขึ้น</strong></li>
+<li><strong>หลีกเลี่ยงปัญหาความปลอดภัยและความน่าเชื่อถือ</strong></li>
+<li><strong>ช่วยแบ่งปันทรัพยากร</strong></li>
+</ul>
+</li>
+<li><strong>Virtualization มีผลต่อประสิทธิภาพบ้าง</strong> แต่ทำได้บนคอมพิวเตอร์สมรรถนะสูงปัจจุบัน</li>
+<li><strong>ตัวอย่าง:</strong> <strong>IBM VM/370 (เทคโนโลยียุค 1970!)</strong>, <strong>VMWare</strong>, <strong>Microsoft Virtual PC</strong></li>
+</ul>
+<h3 id="142-virtual-machine-monitor-vmm">14.2 Virtual Machine Monitor (VMM)</h3>
+<ul>
+<li><strong>Map ทรัพยากรเสมือน → ทรัพยากรจริง:</strong> memory, I/O devices, CPUs</li>
+<li><strong>โค้ดของ guest รันบนเครื่องจริงใน user mode</strong>
+<ul>
+<li><strong>trap ไป VMM</strong> เมื่อเจอ <strong>privileged instructions</strong> และการเข้าถึง <strong>protected resources</strong></li>
+</ul>
+</li>
+<li><strong>Guest OS อาจต่างจาก host OS</strong></li>
+<li><strong>VMM จัดการ I/O จริง</strong> และ <strong>จำลอง virtual I/O ทั่วไป</strong> ให้ guest</li>
+</ul>
+<h3 id="143-example-timer-virtualization">14.3 Example: Timer Virtualization</h3>
+<ul>
+<li><strong>เครื่องปกติ:</strong> เมื่อ timer interrupt → <strong>OS หยุด process ปัจจุบัน, จัดการ interrupt, เลือกและรัน process ถัดไป</strong></li>
+<li><strong>มี VMM:</strong> → <strong>VMM หยุด VM ปัจจุบัน, จัดการ interrupt, เลือกและรัน VM ถัดไป</strong></li>
+<li><strong>ถ้า VM ต้องการ timer interrupt:</strong>
+<ul>
+<li><strong>VMM จำลอง virtual timer</strong></li>
+<li><strong>จำลอง interrupt ให้ VM</strong> เมื่อ physical timer interrupt เกิด</li>
+</ul>
+</li>
+</ul>
+<h3 id="144-instruction-set-support">14.4 Instruction Set Support</h3>
+<ul>
+<li><strong>User และ System modes</strong></li>
+<li><strong>Privileged instructions ใช้ได้เฉพาะใน system mode</strong>
+<ul>
+<li><strong>trap ไป system</strong> ถ้ารันใน user mode</li>
+</ul>
+</li>
+<li><strong>ทรัพยากรจริงทั้งหมดเข้าถึงได้ด้วย privileged instructions เท่านั้น</strong> (รวม page tables, interrupt controls, I/O registers)</li>
+<li><strong>การฟื้นฟูการรองรับ virtualization:</strong> ISA ปัจจุบัน (เช่น x86) กำลังปรับตัว</li>
+</ul>
+<hr />
+<h2 id="15-virtual-memory">15. Virtual Memory ⭐⭐</h2>
+<h3 id="151-virtual-memory-คืออะไร">15.1 Virtual Memory คืออะไร</h3>
+<ul>
+<li><strong>ใช้ main memory เป็น &quot;cache&quot; ของ secondary storage (disk)</strong>
+<ul>
+<li><strong>จัดการร่วมกันโดย CPU hardware และ OS</strong></li>
+</ul>
+</li>
+<li><strong>โปรแกรมแชร์ main memory</strong>
+<ul>
+<li>แต่ละโปรแกรมมี <strong>virtual address space ส่วนตัว</strong> เก็บโค้ดและข้อมูลที่ใช้บ่อย</li>
+<li><strong>ป้องกันจากโปรแกรมอื่น</strong></li>
+</ul>
+</li>
+<li><strong>CPU และ OS แปล virtual address เป็น physical address</strong>
+<ul>
+<li><strong>&quot;block&quot; ของ VM เรียกว่า page</strong></li>
+<li><strong>&quot;miss&quot; ของการแปลเรียกว่า page fault</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cache</th>
+<th>Virtual Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>block</td>
+<td><strong>page</strong></td>
+</tr>
+<tr>
+<td>miss</td>
+<td><strong>page fault</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="152-address-translation">15.2 Address Translation</h3>
+<p><img loading="lazy" src="img/c4-p074.jpg" alt="virtual address → translation → physical address / disk" /></p>
+<ul>
+<li><strong>Page ขนาดคงที่</strong> (เช่น <strong>4K</strong>)</li>
+<li><strong>Virtual address (48 บิต) = Virtual page number | Page offset (12 บิต)</strong></li>
+<li><strong>Translation</strong> แปลง virtual page number → <strong>physical page number</strong></li>
+<li><strong>Physical address (40 บิต) = Physical page number | Page offset</strong> (offset คงเดิม)</li>
+<li>page บางส่วนไม่อยู่ใน memory แต่อยู่บน <strong>disk addresses</strong></li>
+</ul>
+<h3 id="153-page-fault-penalty">15.3 Page Fault Penalty</h3>
+<ul>
+<li>เมื่อ page fault ต้อง <strong>ดึง page จาก disk</strong>
+<ul>
+<li>ใช้ <strong>หลายล้าน clock cycles</strong></li>
+<li><strong>จัดการโดย OS code</strong></li>
+</ul>
+</li>
+<li><strong>พยายามลด page fault rate:</strong>
+<ul>
+<li><strong>Fully associative placement</strong></li>
+<li><strong>Smart replacement algorithms</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="154-page-tables">15.4 Page Tables</h3>
+<ul>
+<li><strong>เก็บข้อมูลการวาง (placement)</strong>
+<ul>
+<li><strong>array ของ page table entries (PTE)</strong> โดยใช้ <strong>virtual page number เป็น index</strong></li>
+<li><strong>Page table register ใน CPU</strong> ชี้ไปที่ page table ใน physical memory</li>
+</ul>
+</li>
+<li><strong>ถ้า page อยู่ใน memory:</strong>
+<ul>
+<li>PTE เก็บ <strong>physical page number</strong></li>
+<li>บวก <strong>status bits</strong> อื่น (referenced, dirty, …)</li>
+</ul>
+</li>
+<li><strong>ถ้าไม่อยู่:</strong> PTE ชี้ไป <strong>ตำแหน่งใน swap space บน disk</strong></li>
+</ul>
+<h3 id="155-translation-using-a-page-table">15.5 Translation Using a Page Table</h3>
+<p><img loading="lazy" src="img/c4-p077.jpg" alt="แปล address ด้วย page table: VPN 36 บิต → PPN 28 บิต, offset 12 บิต" /></p>
+<ul>
+<li><strong>Page table register</strong> ชี้ page table</li>
+<li><strong>Virtual page number (36 บิต)</strong> เป็น index → ได้ <strong>Valid bit</strong> + <strong>Physical page number (28 บิต)</strong></li>
+<li><strong>If Valid = 0 → page ไม่อยู่ใน memory</strong></li>
+<li><strong>Physical address = Physical page number + Page offset (12 บิต)</strong></li>
+</ul>
+<h3 id="156-mapping-pages-to-storage">15.6 Mapping Pages to Storage</h3>
+<p><img loading="lazy" src="img/c4-p078.jpg" alt="page table ชี้ไป physical memory (valid=1) หรือ disk storage (valid=0)" /></p>
+<ul>
+<li><strong>Valid = 1</strong> → ชี้ไปที่ <strong>physical memory</strong></li>
+<li><strong>Valid = 0</strong> → ชี้ไปที่ <strong>disk storage</strong></li>
+</ul>
+<h3 id="157-replacement-and-writes">15.7 Replacement and Writes</h3>
+<ul>
+<li><strong>ลด page fault rate ด้วย LRU replacement</strong>
+<ul>
+<li><strong>Reference bit (use bit)</strong> ใน PTE ตั้งเป็น 1 เมื่อเข้าถึง page</li>
+<li><strong>OS เคลียร์เป็น 0 เป็นระยะ</strong></li>
+<li>page ที่ reference bit = 0 <strong>ไม่ได้ใช้เมื่อเร็ว ๆ นี้</strong></li>
+</ul>
+</li>
+<li><strong>Disk write ใช้หลายล้าน cycles</strong>
+<ul>
+<li>เขียน <strong>ทั้ง block</strong> ไม่ใช่ทีละตำแหน่ง</li>
+<li><strong>Write through ทำไม่ได้จริง</strong> → <strong>ใช้ write-back</strong></li>
+<li><strong>Dirty bit</strong> ใน PTE ตั้งเมื่อ page ถูกเขียน</li>
+</ul>
+</li>
+</ul>
+<h3 id="158-fast-translation-using-a-tlb">15.8 Fast Translation Using a TLB ⭐</h3>
+<ul>
+<li><strong>การแปล address ดูเหมือนต้องเข้าถึง memory เพิ่ม:</strong>
+<ul>
+<li>ครั้งหนึ่งอ่าน <strong>PTE</strong></li>
+<li>อีกครั้งเข้าถึง <strong>ข้อมูลจริง</strong></li>
+</ul>
+</li>
+<li>แต่ <strong>การเข้าถึง page table มี locality ดี</strong>
+<ul>
+<li>ใช้ <strong>cache ของ PTE ใน CPU</strong> เรียกว่า <strong>Translation Look-aside Buffer (TLB)</strong></li>
+<li><strong>Typical: 16–512 PTEs, 0.5–1 cycle ตอน hit, 10–100 cycles ตอน miss, miss rate 0.01%–1%</strong></li>
+<li><strong>miss จัดการได้ทั้ง hardware หรือ software</strong></li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="img/c4-p081.jpg" alt="TLB (valid, dirty, ref, tag, physical page) + page table + physical memory + disk" /></p>
+<ul>
+<li>TLB มีคอลัมน์ <strong>Valid, Dirty, Ref, Tag, Physical page address</strong></li>
+<li>ถ้า TLB miss → ดู <strong>Page table</strong> (Valid, Dirty, Ref, Physical page or disk address)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 TLB เหมือนโพยเบอร์โทรที่แปะข้างโต๊ะ (เบอร์ที่โทรบ่อย) ไม่ต้องเปิดสมุดโทรศัพท์เล่มใหญ่ (page table) ทุกครั้ง</p>
+</blockquote>
+<h3 id="159-tlb-misses">15.9 TLB Misses</h3>
+<ul>
+<li><strong>ถ้า page อยู่ใน memory:</strong>
+<ul>
+<li><strong>โหลด PTE จาก memory แล้วลองใหม่</strong></li>
+<li>จัดการด้วย <strong>hardware</strong> ได้ (แต่ซับซ้อนกับโครงสร้าง page table ที่ซับซ้อน)</li>
+<li>หรือ <strong>software:</strong> raise special exception พร้อม handler ที่ optimize แล้ว</li>
+</ul>
+</li>
+<li><strong>ถ้า page ไม่อยู่ใน memory (page fault):</strong>
+<ul>
+<li><strong>OS ดึง page และอัปเดต page table</strong></li>
+<li><strong>แล้วเริ่มคำสั่งที่ fault ใหม่</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="1510-tlb-miss-handler">15.10 TLB Miss Handler</h3>
+<ul>
+<li>TLB miss บอกว่า:
+<ul>
+<li><strong>page อยู่ แต่ PTE ไม่อยู่ใน TLB</strong> หรือ</li>
+<li><strong>page ไม่อยู่</strong></li>
+</ul>
+</li>
+<li><strong>ต้องรู้ว่า TLB miss ก่อนที่ destination register จะถูกเขียนทับ</strong>
+<ul>
+<li><strong>Raise exception</strong></li>
+</ul>
+</li>
+<li><strong>Handler คัดลอก PTE จาก memory ไป TLB</strong> → <strong>restart คำสั่ง</strong>
+<ul>
+<li>ถ้า page ไม่อยู่ <strong>page fault จะเกิด</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="1511-page-fault-handler">15.11 Page Fault Handler</h3>
+<ol>
+<li><strong>ใช้ virtual address ที่ fault หา PTE</strong></li>
+<li><strong>หาตำแหน่ง page บน disk</strong></li>
+<li><strong>เลือก page ที่จะแทนที่</strong>
+<ul>
+<li><strong>ถ้า dirty ให้เขียนลง disk ก่อน</strong></li>
+</ul>
+</li>
+<li><strong>อ่าน page เข้า memory และอัปเดต page table</strong></li>
+<li><strong>ทำให้ process runnable อีกครั้ง</strong>
+<ul>
+<li><strong>เริ่มใหม่จากคำสั่งที่ fault</strong></li>
+</ul>
+</li>
+</ol>
+<h3 id="1512-tlb-and-cache-interaction">15.12 TLB and Cache Interaction</h3>
+<p><img loading="lazy" src="img/c4-p085.jpg" alt="virtual address → TLB → physical address → cache" /></p>
+<ul>
+<li><strong>ถ้า cache tag ใช้ physical address:</strong> ต้อง <strong>แปล address ก่อน</strong> ค้น cache</li>
+<li><strong>ทางเลือก: ใช้ virtual address tag</strong>
+<ul>
+<li><strong>ซับซ้อนเพราะ aliasing:</strong> virtual address ต่างกันชี้ physical address เดียวกัน (shared)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="16-memory-protection">16. Memory Protection</h2>
+<ul>
+<li><strong>task ต่าง ๆ แชร์ส่วนของ virtual address space ได้</strong>
+<ul>
+<li>แต่ต้อง <strong>ป้องกันการเข้าถึงผิด</strong></li>
+<li><strong>ต้องมี OS ช่วย</strong></li>
+</ul>
+</li>
+<li><strong>Hardware support สำหรับ OS protection:</strong>
+<ul>
+<li><strong>Privileged supervisor mode (kernel mode)</strong></li>
+<li><strong>Privileged instructions</strong></li>
+<li><strong>Page tables และ state อื่นเข้าถึงได้เฉพาะใน supervisor mode</strong></li>
+<li><strong>System call exception</strong> (เช่น <strong><code>ecall</code></strong> ใน RISC-V)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ Lecture 2 (OS): dual mode, system call, trap</p>
+</blockquote>
+<hr />
+<h2 id="17-the-memory-hierarchy-common-framework-the-big-picture">17. The Memory Hierarchy — Common Framework (The BIG Picture)</h2>
+<p><strong>หลักการเดียวกันใช้ได้ทุกระดับ</strong> (อิงแนวคิด caching) — ในแต่ละระดับต้องตัดสินใจ 4 เรื่อง:</p>
+<ol>
+<li><strong>Block placement</strong></li>
+<li><strong>Finding a block</strong></li>
+<li><strong>Replacement on a miss</strong></li>
+<li><strong>Write policy</strong></li>
+</ol>
+<h3 id="171-block-placement">17.1 Block Placement</h3>
+<ul>
+<li><strong>กำหนดโดย associativity:</strong>
+<ul>
+<li><strong>Direct mapped (1-way associative):</strong> 1 ที่</li>
+<li><strong>n-way set associative:</strong> n ที่ใน set</li>
+<li><strong>Fully associative:</strong> ที่ไหนก็ได้</li>
+</ul>
+</li>
+<li><strong>Associativity สูง → miss rate ลด</strong> แต่ <strong>ความซับซ้อน ต้นทุน และ access time เพิ่ม</strong></li>
+</ul>
+<h3 id="172-finding-a-block">17.2 Finding a Block</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Associativity</th>
+<th>Location method</th>
+<th>Tag comparisons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Direct mapped</strong></td>
+<td>Index</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>n-way set associative</strong></td>
+<td>Set index แล้วค้นใน set</td>
+<td><strong>n</strong></td>
+</tr>
+<tr>
+<td><strong>Fully associative</strong></td>
+<td>ค้นทุก entry</td>
+<td><strong>#entries</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Full lookup table</td>
+<td><strong>0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Hardware caches:</strong> ลดจำนวนการเปรียบเทียบเพื่อลดต้นทุน</li>
+<li><strong>Virtual memory:</strong> <strong>full table lookup ทำให้ fully associative ทำได้จริง</strong> → ได้ miss rate ต่ำ</li>
+</ul>
+<h3 id="173-replacement">17.3 Replacement</h3>
+<ul>
+<li><strong>LRU:</strong> hardware ซับซ้อนและแพงเมื่อ associativity สูง</li>
+<li><strong>Random:</strong> ใกล้เคียง LRU, ทำง่ายกว่า</li>
+<li><strong>Virtual memory:</strong> <strong>LRU approximation</strong> พร้อม hardware support (reference bit)</li>
+</ul>
+<h3 id="174-write-policy">17.4 Write Policy</h3>
+<ul>
+<li><strong>Write-through:</strong> อัปเดตทั้งระดับบนและล่าง — replacement ง่าย แต่อาจต้องมี write buffer</li>
+<li><strong>Write-back:</strong> อัปเดตแค่ระดับบน อัปเดตระดับล่างเมื่อ block ถูกแทนที่ — ต้องเก็บ state เพิ่ม</li>
+<li><strong>Virtual memory:</strong> <strong>ทำได้เฉพาะ write-back</strong> เพราะ disk write ช้ามาก</li>
+</ul>
+<h3 id="175-sources-of-misses-3-cs">17.5 Sources of Misses (3 Cs) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>สาเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compulsory misses</strong> (aka <strong>cold start misses</strong>)</td>
+<td><strong>เข้าถึง block ครั้งแรก</strong></td>
+</tr>
+<tr>
+<td><strong>Capacity misses</strong></td>
+<td><strong>cache ขนาดจำกัด</strong> block ที่ถูกแทนที่ไปแล้วถูกเรียกอีก</td>
+</tr>
+<tr>
+<td><strong>Conflict misses</strong> (aka <strong>collision misses</strong>)</td>
+<td>ใน cache ที่ <strong>ไม่ใช่ fully associative</strong> แย่งกันใน set — <strong>จะไม่เกิดใน fully associative ขนาดเท่ากัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="176-cache-design-trade-offs">17.6 Cache Design Trade-offs ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Design change</th>
+<th>Effect on miss rate</th>
+<th>Negative performance effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Increase cache size</strong></td>
+<td><strong>ลด capacity misses</strong></td>
+<td>อาจเพิ่ม access time</td>
+</tr>
+<tr>
+<td><strong>Increase associativity</strong></td>
+<td><strong>ลด conflict misses</strong></td>
+<td>อาจเพิ่ม access time</td>
+</tr>
+<tr>
+<td><strong>Increase block size</strong></td>
+<td><strong>ลด compulsory misses</strong></td>
+<td><strong>เพิ่ม miss penalty</strong>; block ใหญ่มากอาจเพิ่ม miss rate เพราะ pollution</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="18-cache-control-ด้วย-finite-state-machine">18. Cache Control ด้วย Finite State Machine</h2>
+<h3 id="181-example-cache-characteristics">18.1 Example Cache Characteristics</h3>
+<ul>
+<li><strong>Direct-mapped, write-back, write allocate</strong></li>
+<li><strong>Block size: 4 words (16 bytes)</strong></li>
+<li><strong>Cache size: 16 KB (1024 blocks)</strong></li>
+<li><strong>32-bit byte addresses</strong></li>
+<li><strong>Valid bit และ dirty bit ต่อ block</strong></li>
+<li><strong>Blocking cache:</strong> CPU รอจนการเข้าถึงเสร็จ</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Index</th>
+<th>Offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บิต 31–14 (<strong>18 bits</strong>)</td>
+<td>บิต 13–4 (<strong>10 bits</strong>)</td>
+<td>บิต 3–0 (<strong>4 bits</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="182-interface-signals">18.2 Interface Signals</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>CPU ⇄ Cache</th>
+<th>Cache ⇄ Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read/Write, Valid, Address (32), Write Data (32), Read Data (32), Ready</td>
+<td>Read/Write, Valid, Address (32), Write Data (128), Read Data (128), Ready</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Multiple cycles per access</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>(ข้อมูลกับ memory เป็น 128 บิต = 4 words × 32 เพราะอ่านทั้ง block)</p>
+<h3 id="183-finite-state-machines">18.3 Finite State Machines</h3>
+<ul>
+<li><strong>ใช้ FSM เรียงลำดับขั้นควบคุม</strong></li>
+<li><strong>ชุด states เปลี่ยนสถานะทุกขอบ clock</strong>
+<ul>
+<li>state เข้ารหัสเป็นเลขฐานสอง</li>
+<li><strong>state ปัจจุบันเก็บใน register</strong></li>
+<li><strong>Next state = fn(current state, current inputs)</strong></li>
+</ul>
+</li>
+<li><strong>Control output signals = fo(current state)</strong></li>
+</ul>
+<h3 id="184-cache-controller-fsm">18.4 Cache Controller FSM ⭐</h3>
+<p><img loading="lazy" src="img/c4-p097.jpg" alt="FSM 4 สถานะ: Idle, Compare Tag, Write-Back, Allocate" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>ทำอะไร</th>
+<th>ไปต่อเมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Idle</strong></td>
+<td>รอ</td>
+<td><strong>Valid CPU request</strong> → Compare Tag</td>
+</tr>
+<tr>
+<td><strong>Compare Tag</strong></td>
+<td>ถ้า <strong>Valid &amp;&amp; Hit</strong>: Set Valid, Set Tag, ถ้าเขียนให้ Set Dirty</td>
+<td><strong>Cache Hit</strong> (Mark Cache Ready) → Idle / <strong>Cache Miss และ Old Block is Clean</strong> → Allocate / <strong>Cache Miss และ Old Block is Dirty</strong> → Write-Back</td>
+</tr>
+<tr>
+<td><strong>Write-Back</strong></td>
+<td><strong>เขียน block เก่ากลับลง memory</strong></td>
+<td><strong>Memory Ready</strong> → Allocate / Memory not Ready → วนอยู่</td>
+</tr>
+<tr>
+<td><strong>Allocate</strong></td>
+<td><strong>อ่าน block ใหม่จาก memory</strong></td>
+<td><strong>Memory Ready</strong> → Compare Tag / Memory not Ready → วนอยู่</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>หมายเหตุในภาพ: <strong>&quot;Could partition into separate states to reduce clock cycle time&quot;</strong></li>
+</ul>
+<hr />
+<h2 id="19-cache-coherence-ใน-multiprocessor">19. Cache Coherence ใน Multiprocessor</h2>
+<h3 id="191-cache-coherence-problem">19.1 Cache Coherence Problem</h3>
+<p>สมมติ <strong>CPU 2 cores แชร์ physical address space</strong> และใช้ <strong>write-through caches</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Time step</th>
+<th>Event</th>
+<th>CPU A's cache</th>
+<th>CPU B's cache</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>CPU A reads X</td>
+<td>0</td>
+<td></td>
+<td>0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>CPU B reads X</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CPU A writes 1 to X</td>
+<td>1</td>
+<td><strong>0</strong></td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ <strong>CPU B's cache ยังเป็นค่าเก่า (0)</strong> = ไม่ coherent</p>
+<h3 id="192-coherence-defined">19.2 Coherence Defined</h3>
+<ul>
+<li><strong>แบบไม่เป็นทางการ:</strong> การอ่าน <strong>คืนค่าที่เขียนล่าสุด</strong></li>
+<li><strong>แบบเป็นทางการ:</strong>
+<ul>
+<li><strong>P writes X; P reads X</strong> (ไม่มีการเขียนแทรก) → read คืนค่าที่เขียน</li>
+<li><strong>P1 writes X; P2 reads X</strong> (นานพอหลังจากนั้น) → read คืนค่าที่เขียน (เทียบกับ CPU B อ่าน X หลัง step 3 ในตัวอย่าง)</li>
+<li><strong>P1 writes X, P2 writes X</strong> → <strong>ทุก processor เห็นการเขียนในลำดับเดียวกัน</strong> ได้ค่าสุดท้ายเท่ากัน</li>
+</ul>
+</li>
+</ul>
+<h3 id="193-cache-coherence-protocols">19.3 Cache Coherence Protocols</h3>
+<p><strong>Operations ที่ cache ใน multiprocessor ทำเพื่อให้ coherent:</strong></p>
+<ul>
+<li><strong>Migration of data to local caches</strong> → ลด bandwidth ของ shared memory</li>
+<li><strong>Replication of read-shared data</strong> → ลดการแย่งเข้าถึง</li>
+<li><strong>Snooping protocols</strong> → แต่ละ cache <strong>เฝ้าดูการอ่านเขียนบน bus</strong></li>
+<li><strong>Directory-based protocols</strong> → caches และ memory <strong>บันทึกสถานะการแชร์ของ block ใน directory</strong></li>
+</ul>
+<h3 id="194-invalidating-snooping-protocols">19.4 Invalidating Snooping Protocols</h3>
+<ul>
+<li><strong>cache ได้สิทธิ์ใช้ block แบบ exclusive เมื่อจะเขียน</strong>
+<ul>
+<li><strong>Broadcast invalidate message บน bus</strong></li>
+</ul>
+</li>
+<li><strong>การอ่านครั้งต่อไปใน cache อื่นจะ miss</strong>
+<ul>
+<li><strong>cache ที่เป็นเจ้าของส่งค่าที่อัปเดตให้</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>CPU activity</th>
+<th>Bus activity</th>
+<th>CPU A's cache</th>
+<th>CPU B's cache</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>0</td>
+</tr>
+<tr>
+<td>CPU A reads X</td>
+<td>Cache miss for X</td>
+<td>0</td>
+<td></td>
+<td>0</td>
+</tr>
+<tr>
+<td>CPU B reads X</td>
+<td>Cache miss for X</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>CPU A writes 1 to X</td>
+<td><strong>Invalidate for X</strong></td>
+<td>1</td>
+<td>(invalid)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>CPU B reads X</td>
+<td>Cache miss for X</td>
+<td>1</td>
+<td><strong>1</strong></td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="195-memory-consistency">19.5 Memory Consistency</h3>
+<ul>
+<li><strong>เมื่อไหร่การเขียนถูก processor อื่นเห็น?</strong> (&quot;เห็น&quot; = อ่านแล้วได้ค่าที่เขียน) — <strong>ไม่สามารถเกิดทันที</strong></li>
+<li><strong>สมมติฐาน:</strong>
+<ul>
+<li><strong>การเขียนเสร็จเมื่อทุก processor เห็นแล้ว</strong></li>
+<li><strong>processor ไม่สลับลำดับการเขียนกับการเข้าถึงอื่น</strong></li>
+</ul>
+</li>
+<li><strong>ผลที่ตามมา:</strong>
+<ul>
+<li><strong>P writes X then writes Y</strong> → <strong>ทุก processor ที่เห็น Y ใหม่ ก็เห็น X ใหม่ด้วย</strong></li>
+<li><strong>processor สลับลำดับการอ่านได้ แต่สลับการเขียนไม่ได้</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="20-real-stuff-arm-cortex-a53-intel-core-i7-risc-v-system-instructions">20. Real Stuff: ARM Cortex-A53, Intel Core i7, RISC-V System Instructions</h2>
+<h3 id="201-multilevel-on-chip-caches">20.1 Multilevel On-Chip Caches</h3>
+<p><img loading="lazy" src="img/c4-p103.jpg" alt="ตารางเทียบ cache ของ ARM Cortex-A53 และ Intel Core i7" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Characteristic</th>
+<th>ARM Cortex-A53</th>
+<th>Intel Core i7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 cache organization</td>
+<td>Split instruction and data caches</td>
+<td>Split instruction and data caches</td>
+</tr>
+<tr>
+<td>L1 cache size</td>
+<td>Configurable 16 to 64 KiB each</td>
+<td>32 KiB each per core</td>
+</tr>
+<tr>
+<td>L1 associativity</td>
+<td>Two-way (I), four-way (D)</td>
+<td>Four-way (I), eight-way (D)</td>
+</tr>
+<tr>
+<td>L1 replacement</td>
+<td>Random</td>
+<td>Approximated LRU</td>
+</tr>
+<tr>
+<td>L1 block size</td>
+<td>64 bytes</td>
+<td>64 bytes</td>
+</tr>
+<tr>
+<td>L1 write policy</td>
+<td>Write-back, variable allocation (default write-allocate)</td>
+<td>Write-back, No-write-allocate</td>
+</tr>
+<tr>
+<td>L1 hit time (load-use)</td>
+<td>Two clock cycles</td>
+<td>Four clock cycles, pipelined</td>
+</tr>
+<tr>
+<td>L2 cache organization</td>
+<td>Unified (instruction and data)</td>
+<td>Unified per core</td>
+</tr>
+<tr>
+<td>L2 cache size</td>
+<td>128 KiB to 2 MiB</td>
+<td>256 KiB (0.25 MiB)</td>
+</tr>
+<tr>
+<td>L2 associativity</td>
+<td>16-way set associative</td>
+<td>8-way set associative</td>
+</tr>
+<tr>
+<td>L2 replacement</td>
+<td>Approximated LRU</td>
+<td>Approximated LRU</td>
+</tr>
+<tr>
+<td>L2 block size</td>
+<td>64 bytes</td>
+<td>64 bytes</td>
+</tr>
+<tr>
+<td>L2 write policy</td>
+<td>Write-back, Write-allocate</td>
+<td>Write-back, Write-allocate</td>
+</tr>
+<tr>
+<td>L2 hit time</td>
+<td>12 clock cycles</td>
+<td>10 clock cycles</td>
+</tr>
+<tr>
+<td>L3 cache</td>
+<td>–</td>
+<td>Unified, <strong>8 MiB shared</strong>, 16-way, approximated LRU, 64 bytes, write-back/write-allocate, <strong>35 clock cycles</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="202-2-level-tlb-organization">20.2 2-Level TLB Organization</h3>
+<p><img loading="lazy" src="img/c4-p104.jpg" alt="ตาราง TLB ของ ARM Cortex-A53 และ Intel Core i7" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Characteristic</th>
+<th>ARM Cortex-A53</th>
+<th>Intel Core i7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Virtual address</td>
+<td>48 bits</td>
+<td>48 bits</td>
+</tr>
+<tr>
+<td>Physical address</td>
+<td>40 bits</td>
+<td>44 bits</td>
+</tr>
+<tr>
+<td>Page size</td>
+<td>Variable: 4, 16, 64 KiB, 1, 2 MiB, 1 GiB</td>
+<td>Variable: 4 KiB, 2/4 MiB</td>
+</tr>
+<tr>
+<td>TLB organization</td>
+<td>1 TLB for instructions and 1 TLB for data per core; micro TLBs fully associative 10 entries, round robin; 64-entry four-way set-associative TLBs; TLB misses handled in hardware</td>
+<td>1 TLB for instructions and 1 for data per core; L1 TLBs four-way, LRU; L1 I-TLB 128 entries (small pages), 7 per thread (large pages); L1 D-TLB 64 entries (small), 32 (large); L2 TLB four-way LRU, 512 entries; TLB misses handled in hardware</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="203-supporting-multiple-issue">20.3 Supporting Multiple Issue</h3>
+<ul>
+<li><strong>ทั้งคู่มี multi-banked caches</strong> เข้าถึงหลายครั้งต่อ cycle ได้ (ถ้าไม่มี bank conflicts)</li>
+<li><strong>Optimization อื่น:</strong>
+<ul>
+<li><strong>Return requested word first</strong></li>
+<li><strong>Non-blocking cache:</strong> Hit under miss, Miss under miss</li>
+<li><strong>Data prefetching</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="204-risc-v-system-instructions">20.4 RISC-V System Instructions</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Mnemonic</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mem ordering</strong></td>
+<td><code>fence.i</code></td>
+<td>Instruction fence</td>
+</tr>
+<tr>
+<td></td>
+<td><code>sfence.vm</code></td>
+<td>Address translation fence</td>
+</tr>
+<tr>
+<td><strong>CSR access</strong></td>
+<td><code>csrrwi</code></td>
+<td>CSR read/write immediate</td>
+</tr>
+<tr>
+<td></td>
+<td><code>csrrsi</code></td>
+<td>CSR read/set immediate</td>
+</tr>
+<tr>
+<td></td>
+<td><code>csrrci</code></td>
+<td>CSR read/clear immediate</td>
+</tr>
+<tr>
+<td></td>
+<td><code>csrrw</code></td>
+<td>CSR read/write</td>
+</tr>
+<tr>
+<td></td>
+<td><code>csrrs</code></td>
+<td>CSR read/set</td>
+</tr>
+<tr>
+<td></td>
+<td><code>csrrc</code></td>
+<td>CSR read/clear</td>
+</tr>
+<tr>
+<td><strong>System</strong></td>
+<td><code>ecall</code></td>
+<td>Environment call</td>
+</tr>
+<tr>
+<td></td>
+<td><code>ebreak</code></td>
+<td>Environment breakpoint</td>
+</tr>
+<tr>
+<td></td>
+<td><code>sret</code></td>
+<td>Supervisor exception return</td>
+</tr>
+<tr>
+<td></td>
+<td><code>wfi</code></td>
+<td>Wait for interrupt</td>
+</tr>
+</tbody>
+</table></div>
+<p>(CSR = Control and Status Register <em>(เสริม)</em>)</p>
+<h3 id="205-dgemm-going-faster">20.5 DGEMM: Going Faster</h3>
+<p><img loading="lazy" src="img/c4-p107.jpg" alt="GFLOPS ของ unoptimized, AVX, AVX+unroll, AVX+unroll+blocked" /></p>
+<p><strong>Combine cache blocking and subword parallelism</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Version</th>
+<th>32×32</th>
+<th>160×160</th>
+<th>480×480</th>
+<th>960×960</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unoptimized</td>
+<td>1.7</td>
+<td>1.5</td>
+<td>1.3</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>AVX</td>
+<td>6.4</td>
+<td>3.5</td>
+<td>2.3</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td>AVX + unroll</td>
+<td>14.6</td>
+<td>6.6</td>
+<td>4.7</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>AVX + unroll + blocked</strong></td>
+<td>13.6</td>
+<td>12.7</td>
+<td>11.7</td>
+<td><strong>12.0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 blocking ทำให้ matrix ใหญ่ (960×960) เร็วขึ้นจาก 5.1 เป็น 12.0 GFLOPS</p>
+</blockquote>
+<hr />
+<h2 id="21-fallacies-pitfalls-และ-concluding-remarks">21. Fallacies &amp; Pitfalls และ Concluding Remarks</h2>
+<h3 id="211-pitfalls">21.1 Pitfalls</h3>
+<ul>
+<li><strong>Byte vs word addressing</strong>
+<ul>
+<li>ตัวอย่าง: cache direct-mapped 32 bytes, block 4 bytes
+<ul>
+<li><strong>Byte 36 ไป block 1</strong> (36/4 = 9, 9 mod 8 = 1)</li>
+<li><strong>Word 36 ไป block 4</strong> (36 mod 8 = 4)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ละเลยผลของ memory system ตอนเขียนหรือสร้างโค้ด</strong>
+<ul>
+<li>ตัวอย่าง: <strong>วนตาม row vs column ของ array</strong></li>
+<li><strong>Stride ใหญ่ → locality แย่</strong></li>
+</ul>
+</li>
+<li><strong>Multiprocessor ที่แชร์ L2 หรือ L3 cache</strong>
+<ul>
+<li><strong>associativity น้อยกว่าจำนวน core → conflict misses</strong></li>
+<li><strong>core มากขึ้น → ต้องเพิ่ม associativity</strong></li>
+</ul>
+</li>
+<li><strong>ใช้ AMAT ประเมิน out-of-order processors</strong>
+<ul>
+<li><strong>ไม่นับผลของ non-blocked accesses</strong> → ใช้ <strong>simulation</strong> แทน</li>
+</ul>
+</li>
+<li><strong>ขยาย address range ด้วย segments</strong> (เช่น <strong>Intel 80286</strong>)
+<ul>
+<li>segment <strong>ไม่ใหญ่พอเสมอไป</strong></li>
+<li><strong>คำนวณ address ซับซ้อน</strong></li>
+</ul>
+</li>
+<li><strong>ทำ VMM บน ISA ที่ไม่ได้ออกแบบมาเพื่อ virtualization</strong>
+<ul>
+<li>เช่น <strong>non-privileged instructions ที่เข้าถึง hardware resources</strong></li>
+<li>ต้อง <strong>ขยาย ISA</strong> หรือ <strong>ห้าม guest OS ใช้คำสั่งที่มีปัญหา</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="212-concluding-remarks">21.2 Concluding Remarks ⭐</h3>
+<ul>
+<li><strong>Fast memories are small, large memories are slow</strong>
+<ul>
+<li><strong>เราอยากได้ memory ที่ทั้งเร็วและใหญ่ ☹</strong></li>
+<li><strong>Caching ให้ภาพลวงนั้น ☺</strong></li>
+</ul>
+</li>
+<li><strong>Principle of locality:</strong> โปรแกรมใช้ memory space ส่วนเล็ก ๆ บ่อย</li>
+<li><strong>Memory hierarchy:</strong> <strong>L1 cache ↔ L2 cache ↔ … ↔ DRAM memory ↔ disk</strong></li>
+<li><strong>การออกแบบ memory system สำคัญมากสำหรับ multiprocessors</strong></li>
+</ul>
+<hr />
+<h2 id="22-คำศัพท์สำคัญ">22. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Temporal / Spatial locality</strong></td>
+<td>ใช้ซ้ำเร็ว ๆ นี้ / ใช้ของใกล้ ๆ</td>
+<td>ลูป / array</td>
+</tr>
+<tr>
+<td><strong>Memory hierarchy</strong></td>
+<td>ลำดับชั้น memory เร็ว-เล็ก ถึง ช้า-ใหญ่</td>
+<td>พีระมิด</td>
+</tr>
+<tr>
+<td><strong>Block (line)</strong></td>
+<td>หน่วยคัดลอกระหว่างระดับ</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Hit / Miss ratio</strong></td>
+<td>hits/accesses, 1 − hit ratio</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Miss penalty</strong></td>
+<td>เวลาที่ใช้เมื่อ miss</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SRAM / DRAM</strong></td>
+<td>เร็ว แพง ไม่ refresh / ถูก ต้อง refresh (capacitor)</td>
+<td>cache / main memory</td>
+</tr>
+<tr>
+<td><strong>DDR / QDR</strong></td>
+<td>ส่งทั้งขอบขึ้นลง / แยก in-out</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Burst mode, SDRAM, Banking</strong></td>
+<td>เพิ่ม bandwidth ของ DRAM</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Flash (NOR / NAND)</strong></td>
+<td>nonvolatile; random access / block access ถูกกว่า</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Wear leveling</strong></td>
+<td>กระจายการเขียน flash</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Seek / Rotational latency</strong></td>
+<td>เลื่อนหัว / รอหมุน (ครึ่งรอบ)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Direct mapped</strong></td>
+<td>block mod #blocks ที่เดียว</td>
+<td>ล็อกเกอร์ตามเลขท้าย</td>
+</tr>
+<tr>
+<td><strong>Tag / Valid bit / Index / Offset</strong></td>
+<td>บิตบน / มีข้อมูลไหม / ตำแหน่ง / ตำแหน่งใน block</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Fully associative</strong></td>
+<td>วางที่ไหนก็ได้ ค้นทั้งหมด</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>n-way set associative</strong></td>
+<td>block mod #sets, n ที่ต่อ set</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LRU / FIFO / LFU / Random</strong></td>
+<td>replacement algorithms</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Write-through / Write-back</strong></td>
+<td>เขียนทั้งสองระดับ / เขียนแค่ cache แล้วเขียนกลับตอนแทนที่</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Dirty bit</strong></td>
+<td>block ถูกแก้แล้ว</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Write buffer</strong></td>
+<td>พักข้อมูลรอเขียน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Allocate on miss / Write around</strong></td>
+<td>ดึง block / ไม่ดึง ตอน write miss</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Split / Unified cache</strong></td>
+<td>แยก I/D / รวม</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Memory stall cycles</strong></td>
+<td>cycles ที่เสียจาก miss</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>AMAT</strong></td>
+<td>Hit time + Miss rate × Miss penalty</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Multilevel cache</strong></td>
+<td>L1 เน้น hit time, L2 เน้น miss rate</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Global miss rate</strong></td>
+<td>miss ที่ไปถึง main memory</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Blocking (DGEMM)</strong></td>
+<td>แบ่ง matrix ให้พอดี cache</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>MTTF / MTTR / MTBF / Availability</strong></td>
+<td>เวลาถึงเสีย / เวลาซ่อม / MTTF+MTTR / MTTF÷(MTTF+MTTR)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Hamming distance</strong></td>
+<td>จำนวนบิตต่างกัน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SEC / SEC-DED</strong></td>
+<td>แก้ 1 บิต / แก้ 1 ตรวจ 2</td>
+<td>ECC DRAM</td>
+</tr>
+<tr>
+<td><strong>VMM</strong></td>
+<td>Virtual Machine Monitor</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Virtual memory</strong></td>
+<td>main memory เป็น cache ของ disk</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Page / Page fault</strong></td>
+<td>block / miss ของ VM</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Page table / PTE</strong></td>
+<td>ตาราง VPN → PPN</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Reference (use) bit</strong></td>
+<td>ใช้ประมาณ LRU</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TLB</strong></td>
+<td>cache ของ PTE ใน CPU</td>
+<td>โพยเบอร์</td>
+</tr>
+<tr>
+<td><strong>Aliasing</strong></td>
+<td>virtual address ต่างกันชี้ physical เดียว</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Supervisor (kernel) mode, ecall</strong></td>
+<td>protection</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Compulsory / Capacity / Conflict misses</strong></td>
+<td>3 Cs</td>
+<td>ครั้งแรก / cache เล็ก / แย่ง set</td>
+</tr>
+<tr>
+<td><strong>FSM</strong></td>
+<td>Idle, Compare Tag, Write-Back, Allocate</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Cache coherence</strong></td>
+<td>อ่านได้ค่าที่เขียนล่าสุด</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Snooping / Directory-based protocols</strong></td>
+<td>เฝ้าดู bus / บันทึกสถานะใน directory</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CSR</strong></td>
+<td>Control and Status Register</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="23-สรุปท้ายบท-จุดที่มักออกสอบ">23. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>Temporal vs spatial locality</strong> และการใช้ประโยชน์ผ่าน hierarchy (disk → DRAM → SRAM)</li>
+<li><strong>Hit ratio, miss ratio = 1 − hit ratio, miss penalty</strong></li>
+<li><strong>ตัวเลขเทคโนโลยี:</strong> SRAM 0.5–2.5ns $2000–5000/GB, DRAM 50–70ns $20–75/GB, disk 5–20ms $0.20–2/GB</li>
+<li><strong>DRAM = capacitor + refresh</strong>; DDR/QDR; flash NOR vs NAND, wear leveling</li>
+<li><strong>Disk access example:</strong> 4 + 2 + 0.005 + 0.2 = <strong>6.2ms</strong> (seek 1ms → 3.2ms)</li>
+<li><strong>Elements of cache design</strong> 7 หัวข้อ</li>
+<li><strong>Direct mapped:</strong> block mod #blocks, tag, valid bit; <strong>ตัวอย่าง 22,26,22,26,16,3,16,18</strong></li>
+<li><strong>Address 1200, 16 bytes/block, 64 blocks → block 11</strong>; offset 4, index 6 บิต</li>
+<li><strong>Block size:</strong> ใหญ่ลด miss (spatial) แต่แย่งกัน/pollution/miss penalty สูง</li>
+<li><strong>Write-through (CPI = 1 + 0.1 × 100 = 11) → write buffer; write-back ใช้ dirty bit</strong></li>
+<li><strong>FastMATH:</strong> I 0.4%, D 11.4%, avg 3.2%</li>
+<li><strong>1-word DRAM:</strong> miss penalty 65 cycles, 0.25 B/cycle; 4-word wide 17 cycles 0.94; 4-bank 20 cycles 0.8</li>
+<li><strong>CPI example:</strong> 2 + 2 + 1.44 = <strong>5.44</strong> (2.72 เท่า)</li>
+<li><strong>AMAT = hit + miss rate × penalty</strong> (1 + 0.05×20 = 2ns)</li>
+<li><strong>Associativity example 0,8,0,6,8:</strong> direct 5 miss, 2-way 4 miss, fully 3 miss</li>
+<li><strong>Miss rate:</strong> 1-way 10.3%, 2-way 8.6%, 4-way 8.3%, 8-way 8.1% (diminishing returns)</li>
+<li><strong>Multilevel example:</strong> CPI 9 → 3.4 (2.6 เท่า)</li>
+<li><strong>L1 เน้น hit time, L2 เน้น miss rate</strong></li>
+<li><strong>MTBF = MTTF + MTTR; Availability = MTTF/(MTTF+MTTR)</strong></li>
+<li><strong>Hamming:</strong> distance 2 ตรวจ 1 บิต, 3 แก้ 1 ตรวจ 2; parity ที่ตำแหน่ง 2^k; SEC/DED ตาราง H กับ pₙ; ECC DRAM 8 บิตต่อ 64 บิต</li>
+<li><strong>VMM:</strong> trap privileged instructions, timer virtualization</li>
+<li><strong>Virtual memory:</strong> page, page fault, page table (VPN index → PPN, valid, reference, dirty), write-back เท่านั้น, LRU approx</li>
+<li><strong>TLB:</strong> 16–512 PTEs, hit 0.5–1 cycle, miss 10–100 cycles, miss rate 0.01%–1%</li>
+<li><strong>Page fault handler 5 ขั้น</strong></li>
+<li><strong>4 คำถามของ hierarchy:</strong> placement, finding, replacement, write policy</li>
+<li><strong>3 Cs</strong> และ <strong>design trade-offs</strong></li>
+<li><strong>Cache FSM:</strong> Idle → Compare Tag → (hit) Idle / (miss clean) Allocate / (miss dirty) Write-Back → Allocate → Compare Tag</li>
+<li><strong>Cache coherence</strong> และ invalidating snooping protocol</li>
+<li><strong>Pitfall byte vs word:</strong> byte 36 → block 1, word 36 → block 4</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temporal vs Spatial locality</td>
+<td>ใช้ซ้ำ vs ใช้ของใกล้</td>
+</tr>
+<tr>
+<td>SRAM vs DRAM</td>
+<td>เร็ว แพง ไม่ refresh vs ถูก จุ ต้อง refresh</td>
+</tr>
+<tr>
+<td>NOR vs NAND flash</td>
+<td>random access vs block access, ถูกกว่า</td>
+</tr>
+<tr>
+<td>Direct vs Set vs Fully associative</td>
+<td>1 ที่ vs n ที่ vs ทุกที่</td>
+</tr>
+<tr>
+<td>Write-through vs Write-back</td>
+<td>เขียนสองระดับ vs เขียนตอนแทนที่ (dirty)</td>
+</tr>
+<tr>
+<td>Capacity vs Conflict miss</td>
+<td>cache เล็ก vs แย่ง set</td>
+</tr>
+<tr>
+<td>Cache miss vs Page fault</td>
+<td>ดึงจาก memory vs ดึงจาก disk (ล้าน cycles)</td>
+</tr>
+<tr>
+<td>TLB miss vs Page fault</td>
+<td>PTE ไม่อยู่ใน TLB vs page ไม่อยู่ใน memory</td>
+</tr>
+<tr>
+<td>MTTF vs MTBF</td>
+<td>ถึงเสีย vs รวมเวลาซ่อม</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../chapter03/index.html"><small>← บทก่อนหน้า</small><span>Chapter 03 — Data Representation, ISA &amp; Assembly Language (RISC-V)</span></a><a class="pg next" href="../chapter05/index.html"><small>บทถัดไป →</small><span>Chapter V — I/O Systems</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

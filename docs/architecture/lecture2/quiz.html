@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 2 - Process</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 2 - Process</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "Process API มีกี่หมวดหลักตามที่กล่าวในเลกเชอร์นี้?",
+    choices: [
+      "3 อย่าง (Create, Destroy, Wait)",
+      "5 อย่าง (Create, Destroy, Wait, Control, Status)",
+      "4 อย่าง (Create, Destroy, Wait, Status)",
+      "6 อย่าง (รวม Schedule เข้าไปด้วย)"
+    ],
+    correct: 1,
+    explain: [
+      "ขาด Miscellaneous Control และ Status ไป",
+      "ถูก — สไลด์ระบุ 5 หมวด: Create, Destroy, Wait, Miscellaneous Control, Status",
+      "ขาด Miscellaneous Control ไป",
+      "Schedule ไม่ได้ถูกจัดเป็นหนึ่งในหมวดของ Process API ในสไลด์นี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Address space ของ process แบ่งออกเป็นกี่ส่วนหลักตามสไลด์?",
+    choices: [
+      "3 ส่วน (code, heap, stack)",
+      "2 ส่วน (code, data)",
+      "5 ส่วน (รวม registers เข้าไปด้วย)",
+      "4 ส่วน (code, global variables, heap, stack)"
+    ],
+    correct: 3,
+    explain: [
+      "ขาด global variables ไปหนึ่งส่วน",
+      "แบ่งหยาบเกินไป ไม่ตรงกับที่สไลด์แจกแจง",
+      "registers ไม่ได้อยู่ใน address space แต่เป็นส่วนหนึ่งของ machine state",
+      "ถูก — สไลด์แบ่งเป็น code, global variables, heap, stack"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ในขั้นตอน Process Creation ขั้นที่ 2 ตามสไลด์ OS ทำอะไร?",
+    choices: [
+      "ตั้งค่า default I/O (stdin, stdout, stderr)",
+      "โหลดโค้ดและข้อมูลจากดิสก์เข้า memory",
+      "กำหนดคำสั่งแรกเป็น main()",
+      "โอน control ของ CPU ให้ process"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ขั้นที่ 2 คือการตั้งค่า default I/O ได้แก่ standard input/output/error",
+      "เป็นขั้นที่ 1 ไม่ใช่ขั้นที่ 2",
+      "เป็นขั้นที่ 3 ไม่ใช่ขั้นที่ 2",
+      "เป็นขั้นที่ 4 ไม่ใช่ขั้นที่ 2"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Process มีกี่สถานะหลักตามที่กล่าวในเลกเชอร์นี้?",
+    choices: [
+      "2 สถานะ (Running, Ready)",
+      "4 สถานะ (รวม Terminated)",
+      "3 สถานะ (Running, Ready, Blocked)",
+      "5 สถานะ (รวมสถานะอื่นเพิ่มเติม)"
+    ],
+    correct: 2,
+    explain: [
+      "ขาด Blocked ไป",
+      "สไลด์นี้ไม่ได้แจกแจง Terminated เป็นสถานะหลักเพิ่มเติม",
+      "ถูก — สไลด์ระบุ 3 สถานะหลักคือ Running, Ready, Blocked",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "PCB ย่อมาจากอะไร?",
+    choices: [
+      "Program Counter Block",
+      "Process Control Block",
+      "Process Creation Block",
+      "Processor Control Buffer"
+    ],
+    correct: 1,
+    explain: [
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — ตรงตามที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "fork() คืนค่าอะไรให้กับ process แม่ (parent)?",
+    choices: ["PID ของ process ลูก", "ค่า 0 (ไม่ใช่ PID ของใคร)", "PID ของตัวเอง", "-1 เสมอ"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า fork() คืน PID ของ child ให้กับ parent",
+      "0 คือค่าที่คืนให้ child ไม่ใช่ parent",
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "-1 มักหมายถึง error ไม่ใช่ค่าปกติที่ parent ได้รับ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "fork() คืนค่าอะไรให้กับ process ลูก (child)?",
+    choices: ["PID ของ parent", "PID ของตัวเอง", "ค่า errno", "ค่า 0 (ไม่ใช่ PID ของใคร)"],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ไม่ตรงกับที่สไลด์ระบุ ค่าที่ child ได้รับคือ 0",
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุว่า fork() คืนค่า 0 ให้กับ child"
+    ]
+  },
+  {
+    type: "recall",
+    q: "exec() system call ทำอะไรกับ process ที่เรียกมัน?",
+    choices: [
+      "สร้าง process ใหม่",
+      "หยุด process ไว้ชั่วคราว",
+      "เปลี่ยนเป็นโปรแกรมอื่นทั้งหมด",
+      "ลบ process ทิ้งโดยไม่ทำอะไรต่อ"
+    ],
+    correct: 2,
+    explain: [
+      "สไลด์ระบุชัดว่า exec() ไม่สร้าง process ใหม่",
+      "ไม่ตรงกับนิยามของ exec()",
+      "ถูก — exec() แปลง process ปัจจุบันให้กลายเป็นโปรแกรมอื่นทั้งหมด",
+      "ไม่ตรงกับนิยามของ exec() ซึ่งเปลี่ยนเป็นโปรแกรมใหม่ ไม่ใช่ลบทิ้งเฉย ๆ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "มี exec() กี่รูปแบบตามที่สไลด์ระบุ?",
+    choices: ["4 รูปแบบ", "6 รูปแบบ", "5 รูปแบบ", "8 รูปแบบ"],
+    correct: 1,
+    explain: [
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ 6 รูปแบบ: execl, execv, execlp, execvp, execle, execvpe",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
+      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "OS ทำงานในโหมดใดได้บ้างตาม Dual mode Approach?",
+    choices: [
+      "User mode และ Kernel mode",
+      "Safe mode และ Recovery mode",
+      "Sleep mode และ Wake mode",
+      "Boot mode และ Run mode"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ User mode (สิทธิ์จำกัด) และ Kernel mode (สิทธิ์เต็ม)",
+      "ไม่ใช่คำที่สไลด์ใช้",
+      "ไม่ใช่คำที่สไลด์ใช้",
+      "ไม่ใช่คำที่สไลด์ใช้ในบริบทนี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "อะไรคือ \"Trap\" ตามนิยามในสไลด์?",
+    choices: [
+      "ข้อผิดพลาดของฮาร์ดแวร์ที่แก้ไขไม่ได้เลย",
+      "ไวรัสคอมพิวเตอร์ที่แฝงตัวอยู่ในโปรแกรม",
+      "คำสั่งพิเศษที่ใช้ลบ process ทิ้งทันที",
+      "สัญญาณซอฟต์แวร์ที่สลับ CPU จาก user mode ไป kernel mode"
+    ],
+    correct: 3,
+    explain: [
+      "Trap ไม่ใช่ข้อผิดพลาดของฮาร์ดแวร์ แต่เป็นสัญญาณที่ตั้งใจส่ง",
+      "ไม่เกี่ยวกับไวรัส",
+      "ไม่เกี่ยวกับการลบ process",
+      "ถูก — สไลด์นิยาม trap ว่าเป็นสัญญาณซอฟต์แวร์ที่ user program ตั้งใจส่งเพื่อสลับโหมด"
+    ]
+  },
+  {
+    type: "recall",
+    q: "อะไรคือกลไกที่ทำให้ OS \"ได้ CPU คืน\" อย่างปลอดภัย แม้ process จะรันลูปไม่รู้จบ?",
+    choices: ["fork() system call", "wait() system call", "Timer interrupt (การขัดจังหวะเวลา)", "exec() system call"],
+    correct: 2,
+    explain: [
+      "fork() ใช้สร้าง process ลูก ไม่เกี่ยวกับการคืน CPU",
+      "wait() ใช้ให้ parent รอ child ไม่เกี่ยวกับกรณีลูปไม่รู้จบ",
+      "ถูก — timer interrupt ทำให้ฮาร์ดแวร์ขัดจังหวะเป็นระยะ OS จึงได้ CPU คืนเสมอ",
+      "exec() ใช้เปลี่ยนโปรแกรม ไม่เกี่ยวกับการคืน CPU"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม Process จึงถูกเรียกว่าเป็น abstraction ที่สำคัญที่สุดของ OS?",
+    choices: [
+      "เพราะทำให้รันหลายโปรแกรมได้โดยไม่ต้องกังวลเรื่อง CPU",
+      "เพราะทำให้โปรแกรมรันเร็วขึ้นกว่าเดิมเสมอ",
+      "เพราะช่วยลดขนาดไฟล์ของโปรแกรมลง",
+      "เพราะทำให้ไม่ต้องใช้หน่วยความจำเลย"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่า process ทำให้ผู้ใช้รันโปรแกรมได้โดยไม่ต้องสนใจว่า CPU กำลังว่างหรือไม่",
+      "ไม่เกี่ยวกับความเร็วโดยตรง",
+      "ไม่เกี่ยวกับขนาดไฟล์",
+      "process ยังต้องใช้หน่วยความจำผ่าน address space อยู่ดี"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ความแตกต่างระหว่าง Program กับ Process คือข้อใด?",
+    choices: [
+      "Program กับ Process เหมือนกันทุกประการ ใช้แทนกันได้เสมอ",
+      "Program คือไฟล์นิ่งบนดิสก์ ส่วน Process คือตอนที่มันถูกรันจริง",
+      "Program ต้องมี process แต่ process ไม่จำเป็นต้องมี program",
+      "Program ทำงานได้เฉพาะใน kernel mode เท่านั้น"
+    ],
+    correct: 1,
+    explain: [
+      "สองคำนี้มีความหมายต่างกันชัดเจนตามสไลด์",
+      "ถูก — ตรงกับนิยามในสไลด์ (เปรียบเหมือนสูตรอาหารกับตอนอบขนมจริง)",
+      "ไม่สมเหตุสมผล เพราะ process คือโปรแกรมที่กำลังถูกรัน จึงต้องมี program อยู่เบื้องหลังเสมอ",
+      "ไม่เกี่ยวข้องกับโหมดการทำงานเลย"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Stack จึงถูกใช้เก็บข้อมูลอย่าง return address และตัวแปร local?",
+    choices: [
+      "เพราะ stack มีขนาดใหญ่ที่สุดใน address space เสมอ",
+      "เพราะข้อมูลเหล่านี้ต้องอยู่ถาวรตลอดการทำงานของโปรแกรม",
+      "เพราะ heap เต็มแล้วจึงต้องย้ายมาไว้ที่ stack",
+      "เพราะข้อมูลเหล่านี้ชั่วคราว เกิดและหายไปตามการเรียกฟังก์ชัน"
+    ],
+    correct: 3,
+    explain: [
+      "ขนาดของ stack ไม่ได้เป็นเหตุผลที่สไลด์กล่าวถึง",
+      "ข้อมูลใน stack เป็นข้อมูลชั่วคราว ไม่ใช่ข้อมูลถาวร (ข้อมูลถาวรกว่าจะอยู่ที่ global variables)",
+      "ไม่เกี่ยวข้องกับพื้นที่ของ heap เต็มหรือไม่",
+      "ถูก — return address และตัวแปร local มีอายุแค่ช่วงที่ฟังก์ชันนั้นทำงานอยู่ ตรงกับลักษณะของ stack"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม process ลูกหลัง fork() จึงต้องมี address space และ PCB เป็นของตัวเอง แยกจาก parent?",
+    choices: [
+      "เพื่อประหยัดหน่วยความจำของระบบ",
+      "เพราะ parent กับ child ต้องใช้ address space เดียวกันเสมอ",
+      "เพื่อให้ child เป็นอิสระ ทำงานแยกจาก parent ไม่ชนกัน",
+      "เพราะ fork() ไม่อนุญาตให้มี PCB"
+    ],
+    correct: 2,
+    explain: [
+      "การแยก address space ไม่ได้ช่วยประหยัดหน่วยความจำ แต่เพื่อความเป็นอิสระและความปลอดภัย",
+      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า child มี address space แยกต่างหาก",
+      "ถูก — สไลด์ระบุว่า child มี address space และ PCB ของตัวเอง เพื่อให้ทำงานเป็นอิสระจาก parent",
+      "ทุก process รวมถึง child ต้องมี PCB เพื่อให้ OS ติดตามสถานะได้"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เพราะเหตุใด wait() จึงมีประโยชน์เมื่อ parent process ต้องการให้ child ทำงานเสร็จก่อน?",
+    choices: [
+      "เพราะ wait() บังคับให้ parent รอจน child จบงานก่อน",
+      "เพราะ wait() ทำให้ child ทำงานเร็วขึ้นกว่าเดิม",
+      "เพราะ wait() ลบ child ทิ้งทันทีที่ถูกเรียก",
+      "เพราะ wait() เปลี่ยน child ให้กลายเป็น parent แทน"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — wait() ทำให้ parent หยุดรอจน child เสร็จ จึงจัดลำดับการทำงานให้แน่นอนได้ เช่น ให้ child พิมพ์ก่อนเสมอ",
+      "wait() ไม่มีผลต่อความเร็วของ child",
+      "wait() ไม่ได้ลบ child แต่รอให้ child จบตามธรรมชาติ",
+      "ไม่มีการสลับบทบาท parent/child จากการเรียก wait()"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด exec() จึง \"ไม่ return กลับมา\" เมื่อเรียกสำเร็จ?",
+    choices: [
+      "เพราะการเรียก exec() เกิด error เสมอ",
+      "เพราะ exec() รันในอีก process หนึ่งแยกต่างหากจาก process เดิม",
+      "เพราะ OS ลบ process ทิ้งทันทีหลังเรียก exec()",
+      "เพราะโค้ดเดิมถูกแทนที่ด้วยโปรแกรมใหม่ทั้งหมดแล้ว"
+    ],
+    correct: 3,
+    explain: [
+      "การไม่ return ไม่ได้แปลว่า error สไลด์ระบุว่านี่คือพฤติกรรมปกติเมื่อสำเร็จ",
+      "exec() ทำงานบน process เดิม ไม่ได้สร้างหรือย้ายไปอีก process หนึ่ง",
+      "process ยังอยู่ (PID เดิม) เพียงแต่เนื้อโปรแกรมข้างในถูกแทนที่",
+      "ถูก — เมื่อ exec() สำเร็จ โค้ดเดิมของ process ถูกแทนที่ด้วยโปรแกรมใหม่ทั้งหมด จึงไม่มีทางกลับไปทำงานต่อจากจุดเดิม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด OS จึงต้องมี Dual mode (user mode / kernel mode) แทนที่จะให้ทุกโปรแกรมมีสิทธิ์เท่ากันหมด?",
+    choices: [
+      "เพื่อให้โปรแกรมทำงานได้เร็วขึ้นกว่าเดิมเสมอ",
+      "เพื่อป้องกันโปรแกรมทั่วไปไม่ให้เข้าถึงทรัพยากรระบบโดยตรง",
+      "เพื่อลดจำนวน system call ที่ต้องมีในระบบ",
+      "เพราะฮาร์ดแวร์รุ่นใหม่ไม่รองรับการทำงานแบบโหมดเดียวอีกต่อไป"
+    ],
+    correct: 1,
+    explain: [
+      "ไม่เกี่ยวกับความเร็วโดยตรง เป็นเรื่องของความปลอดภัยมากกว่า",
+      "ถูก — Dual mode มีไว้เพื่อความปลอดภัย จำกัดไม่ให้โปรแกรมทั่วไปทำ privileged operation ได้เอง",
+      "Dual mode ไม่ได้ลดจำนวน system call แต่เป็นกลไกที่ทำให้ system call ทำงานได้อย่างปลอดภัย",
+      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่เหตุผลหลักของ Dual mode"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ถ้าไม่มี Timer interrupt เกิดขึ้นเลยในระบบ จะเกิดปัญหาอะไรตามมา?",
+    choices: [
+      "ระบบจะทำงานเร็วขึ้นเพราะไม่มีการขัดจังหวะเลย",
+      "ไม่มีผลกระทบใด ๆ เพราะ OS มีวิธีอื่นที่ใช้แทนกันได้เสมอ",
+      "OS จะไม่มีทางได้ CPU คืน ถ้า process หนึ่งรันลูปไม่รู้จบ",
+      "process ทุกตัวจะถูกลบทิ้งโดยอัตโนมัติ"
+    ],
+    correct: 2,
+    explain: [
+      "การไม่มี interrupt เลยกลับเป็นความเสี่ยง ไม่ใช่ข้อดี เพราะ OS อาจไม่ได้ CPU คืนเลย",
+      "timer interrupt เป็นกลไกสำคัญที่สไลด์เน้นว่าจำเป็น ไม่ใช่สิ่งที่ทดแทนได้ง่าย ๆ",
+      "ถูก — สไลด์ระบุว่า timer interrupt คือทางที่ปลอดภัยที่ OS ใช้ได้ CPU คืน แม้ process จะรันลูปไม่รู้จบ",
+      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่ผลลัพธ์ที่สมเหตุสมผล"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Context Switching จึงต้อง \"save\" register ของ process เดิมก่อนจะ \"restore\" register ของ process ใหม่?",
+    choices: [
+      "เพื่อให้ process เดิมถูกลบทิ้งไปเลยหลังสลับ",
+      "เพราะ register มีจำนวนจำกัดจึงต้องสุ่มแจกจ่ายใหม่ทุกครั้ง",
+      "เพื่อเพิ่มความเร็วของ CPU โดยตรง",
+      "เพื่อให้ process เดิมสามารถกลับมาทำงานต่อจากจุดเดิมได้ในภายหลัง"
+    ],
+    correct: 3,
+    explain: [
+      "process เดิมไม่ได้ถูกลบ เพียงแค่ถูกสลับออกจาก CPU ชั่วคราว",
+      "การ save/restore ไม่ใช่การสุ่ม แต่เป็นการเก็บค่าที่แน่นอนของแต่ละ process",
+      "ไม่เกี่ยวกับความเร็ว CPU โดยตรง เป็นเรื่องความถูกต้องของการสลับงาน",
+      "ถูก — การ save context ไว้ทำให้เมื่อ OS สลับกลับมาที่ process เดิม มันจะทำงานต่อได้ราวกับไม่เคยถูกขัดจังหวะ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่างสถานะ \"Ready\" กับ \"Blocked\" ของ process ได้ถูกต้อง?",
+    choices: [
+      "Ready คือพร้อมแต่ยังไม่ถูกเลือก ส่วน Blocked คือกำลังรอเหตุการณ์อยู่",
+      "ทั้งสองสถานะมีความหมายเหมือนกันทุกประการ",
+      "Ready คือกำลังใช้ CPU อยู่ ส่วน Blocked คือพร้อมใช้ CPU",
+      "Blocked หมายถึง process ถูกลบออกจากระบบไปแล้ว"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงกับนิยามในสไลด์ทั้งสองสถานะ",
+      "สองสถานะนี้ต่างกันชัดเจนตามที่สไลด์อธิบาย",
+      "สลับความหมายกับ Running และ Ready ผิด",
+      "Blocked ไม่ใช่การถูกลบ เพียงแค่ยังทำงานต่อไม่ได้จนกว่าเหตุการณ์ที่รอจะเกิดขึ้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใดโปรแกรมทั่วไป (user mode) จึงไม่สามารถเข้าถึงทรัพยากรระบบ (เช่น เขียนดิสก์) ได้โดยตรง ต้องผ่าน system call เท่านั้น?",
+    choices: [
+      "เพราะโปรแกรมทั่วไปไม่รู้วิธีเขียนโค้ดสำหรับเข้าถึงฮาร์ดแวร์",
+      "เพราะ system call ทำงานเร็วกว่าการเข้าถึงโดยตรงเสมอ",
+      "เพื่อความปลอดภัย ป้องกันโปรแกรมทำอันตรายต่อระบบ",
+      "เพราะฮาร์ดแวร์ไม่รองรับการเข้าถึงโดยตรงในทุกกรณี"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่เกี่ยวกับความสามารถในการเขียนโค้ด แต่เป็นเรื่องของสิทธิ์การเข้าถึง",
+      "ความเร็วไม่ใช่เหตุผลหลักที่สไลด์กล่าวถึง เป็นเรื่องความปลอดภัยมากกว่า",
+      "ถูก — Dual mode และ system call มีไว้เพื่อความปลอดภัยของระบบและโปรแกรมอื่น ไม่ใช่เพราะข้อจำกัดทางเทคนิคอย่างเดียว",
+      "ไม่ตรงกับเหตุผลที่สไลด์อธิบาย ซึ่งเน้นเรื่องการป้องกันมากกว่าข้อจำกัดฮาร์ดแวร์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด PCB จึงจำเป็นสำหรับ OS ในการทำ scheduling?",
+    choices: [
+      "เพราะ PCB ทำให้โปรแกรมรันเร็วขึ้นโดยตรง",
+      "เพราะ PCB เก็บสถานะแต่ละ process ทำให้ OS รู้ว่าจะเลือกตัวไหนมารันต่อ",
+      "เพราะ PCB คือ address space ของ process",
+      "เพราะ PCB ใช้แทน system call ได้ทั้งหมด"
+    ],
+    correct: 1,
+    explain: [
+      "PCB ไม่ได้ทำให้โปรแกรมรันเร็วขึ้น เป็นแค่โครงสร้างเก็บข้อมูล",
+      "ถูก — สไลด์ระบุว่า OS ต้องรู้สถานะของแต่ละ process (ผ่าน PCB) เพื่อ schedule ได้อย่างถูกต้อง",
+      "PCB กับ address space เป็นคนละส่วนกัน PCB เก็บข้อมูลเกี่ยวกับ process ไม่ใช่หน่วยความจำที่ process ใช้รัน",
+      "PCB กับ system call เป็นแนวคิดคนละเรื่องกัน ใช้แทนกันไม่ได้"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "โปรแกรมหนึ่งเรียก fork() แล้วเช็คค่า return value ได้เป็น 0 โค้ดส่วนที่ทำงานภายใต้เงื่อนไขนี้ควรถือว่าเป็นฝั่งใด?",
+    choices: [
+      "Child process (ฝั่งลูก)",
+      "Parent process (ฝั่งแม่)",
+      "ทั้ง parent และ child พร้อมกัน",
+      "ไม่มี process ใดเลย (0 ไม่ใช่ error)"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — fork() คืนค่า 0 ให้กับ child เท่านั้น",
+      "parent จะได้ค่า PID ของ child ไม่ใช่ 0",
+      "ค่าที่ fork() คืนกลับมาต่างกันระหว่าง parent กับ child จึงใช้แยกเงื่อนไขได้ชัดเจน",
+      "0 ในที่นี้ไม่ใช่ error แต่เป็นค่าปกติที่บอกว่ากำลังอยู่ในฝั่ง child"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการเขียนโปรแกรมที่ให้ process ลูกรันโปรแกรมอื่น (เช่น ls) แทนที่ตัวเองหลัง fork() สำเร็จ ควรใช้ system call ใดต่อในฝั่ง child?",
+    choices: ["wait() system call", "fork() ซ้ำอีกครั้ง", "kill() system call", "exec() system call"],
+    correct: 3,
+    explain: [
+      "wait() ใช้ให้ parent รอ child ไม่ใช่ใช้เปลี่ยนโปรแกรมของ child",
+      "การ fork() ซ้ำจะสร้าง process หลานเพิ่ม ไม่ใช่การเปลี่ยนโปรแกรมของ child เอง",
+      "kill() ใช้หยุด/ฆ่า process ไม่ใช่เปลี่ยนโปรแกรม",
+      "ถูก — exec() ใช้เปลี่ยน process ปัจจุบัน (child) ให้กลายเป็นโปรแกรมใหม่ทั้งหมด"
+    ]
+  },
+  {
+    type: "apply",
+    q: "parent process ต้องการรอให้ child process พิมพ์ผลลัพธ์เสร็จก่อน แล้วค่อยพิมพ์ผลลัพธ์ของตัวเอง ควรใช้ system call ใดในฝั่ง parent?",
+    choices: ["exec() system call", "fork() system call", "wait() system call", "getpid() system call"],
+    correct: 2,
+    explain: [
+      "exec() ใช้เปลี่ยนโปรแกรม ไม่ได้ทำให้ parent รอ child",
+      "fork() ใช้สร้าง child ไม่ใช่ใช้รอให้ child ทำงานเสร็จ",
+      "ถูก — wait() ทำให้ parent หยุดรอจนกว่า child จะทำงานเสร็จก่อน",
+      "getpid() แค่คืนค่า PID ของตัวเอง ไม่เกี่ยวกับการรอ"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรม user ต้องการอ่านไฟล์จากดิสก์ ซึ่งเป็นการทำงานที่ต้องมีสิทธิ์ระดับ kernel เหตุการณ์ใดเกิดขึ้นเพื่อสลับจาก user mode ไป kernel mode?",
+    choices: [
+      "ผู้ใช้กด Ctrl+C",
+      "เกิด Trap ผ่านการเรียก system call เช่น read()",
+      "เครื่องรีสตาร์ทใหม่",
+      "โปรแกรมเปลี่ยนภาษาที่ใช้เขียน"
+    ],
+    correct: 1,
+    explain: [
+      "Ctrl+C เป็นสัญญาณยกเลิกโปรแกรม ไม่ใช่กลไกสลับโหมดเพื่อทำ system call",
+      "ถูก — การเรียก system call เช่น read() จะก่อให้เกิด trap ที่สลับ CPU จาก user mode ไป kernel mode",
+      "ไม่เกี่ยวข้องกับการอ่านไฟล์ในสถานการณ์นี้เลย",
+      "ภาษาที่ใช้เขียนโปรแกรมไม่เกี่ยวกับกลไกการสลับโหมดของ CPU"
+    ]
+  },
+  {
+    type: "apply",
+    q: "process A กำลังรันอยู่ (Running) แล้วต้องรอผลลัพธ์จากการอ่านไฟล์ (I/O) จะเปลี่ยนไปอยู่สถานะใด?",
+    choices: ["Blocked (กำลังรอเหตุการณ์)", "Ready (พร้อมแต่ยังไม่ได้ใช้ CPU)", "Running ต่อไปเหมือนเดิม", "Terminated (จบการทำงานแล้ว)"],
+    correct: 0,
+    explain: [
+      "ถูก — เมื่อ process ต้องรอเหตุการณ์ เช่น I/O จะเปลี่ยนเป็นสถานะ Blocked ตามนิยามในสไลด์",
+      "Ready หมายถึงพร้อมทำงานแต่ยังไม่ถูกเลือก ไม่ตรงกับกรณีที่กำลังรอ I/O",
+      "process ไม่สามารถ Running ต่อได้ในขณะที่กำลังรอ I/O ที่ยังไม่เสร็จ",
+      "การรอ I/O ไม่ใช่การจบการทำงานของ process"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ถ้าต้องออกแบบระบบที่ไม่ให้ process หนึ่งครอบครอง CPU ตลอดไปแม้จะเขียนโค้ดเป็นลูปไม่รู้จบ ควรอาศัยกลไกใดจากที่เรียนมา?",
+    choices: [
+      "fork() system call อย่างเดียว",
+      "exec() system call อย่างเดียว",
+      "PCB (Process Control Block) อย่างเดียว",
+      "Timer interrupt ร่วมกับ Context switching"
+    ],
+    correct: 3,
+    explain: [
+      "fork() ใช้สร้าง process ใหม่ ไม่เกี่ยวกับการควบคุมเวลาการใช้ CPU ของ process ที่มีอยู่",
+      "exec() ใช้เปลี่ยนโปรแกรมของ process เดิม ไม่เกี่ยวกับการแย่งคืน CPU",
+      "PCB เก็บข้อมูลของ process แต่ไม่ใช่กลไกที่ทำให้ OS ได้ CPU คืนมาเอง",
+      "ถูก — timer interrupt ทำให้ OS ได้ CPU คืนเป็นระยะ แล้ว context switching จะสลับไปรัน process อื่นได้อย่างปลอดภัย"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

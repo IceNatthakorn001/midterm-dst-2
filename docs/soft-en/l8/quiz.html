@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L8 — User Interface Design</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L8 — User Interface Design</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  {
+    "type": "recall",
+    "q": "ประเด็นหลัก 2 เรื่องของ UI ตามสไลด์คืออะไร?",
+    "choices": [
+      "Speed และ Security",
+      "Flow of interactions และ Look and feel",
+      "Database และ Network",
+      "Code และ Test"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่ประเด็นหลักที่สไลด์ระบุ",
+      "ถูก — ลำดับการโต้ตอบ และหน้าตาความรู้สึก",
+      "ผิด — ไม่เกี่ยวกับ UI",
+      "ผิด — ไม่ใช่ประเด็นของ UI"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "UI ประเภทใดที่โต้ตอบด้วยเสียงพูด เช่น Siri และ Alexa?",
+    "choices": [
+      "CLI",
+      "GUI",
+      "Voice User Interface (VUI)",
+      "Text Menu Interface"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — CLI พิมพ์คำสั่ง",
+      "ผิด — GUI ใช้กราฟิก",
+      "ถูก — ทั้งสั่งและตอบด้วยเสียง",
+      "ผิด — เลือกเมนูด้วยตัวเลข/ลูกศร"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ข้อใดไม่อยู่ใน Basic Rules 5 ข้อของ UI?",
+    "choices": [
+      "Attractive",
+      "Consistent on all interface screens",
+      "Responsive in short time",
+      "Uses as many colors as possible"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — เป็น basic rule",
+      "ผิด — เป็น basic rule",
+      "ผิด — เป็น basic rule",
+      "ถูก — ไม่อยู่ในรายการ (ที่เหลือคือ simple to use, clear to understand)"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Phase แรกของ UI Design Process คืออะไร?",
+    "choices": [
+      "User, task, environmental analysis and modeling",
+      "Interface design",
+      "Interface construction and implementation",
+      "Interface validation"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — วิเคราะห์ผู้ใช้ งาน และสภาพแวดล้อม",
+      "ผิด — phase 2",
+      "ผิด — phase 3",
+      "ผิด — phase 4"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Design issues ใน Phase 2 Interface Design ประกอบด้วยอะไร?",
+    "choices": [
+      "Budget, schedule, scope",
+      "Response time, command and action structure, error handling",
+      "Paper, pencil, post-it",
+      "Sensor, interrupt, switch"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — เป็นเรื่องโครงการ",
+      "ถูก — ตามสไลด์",
+      "ผิด — เป็นอุปกรณ์ทำ low-fi prototype",
+      "ผิด — เป็นแหล่งหา event (L7)"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Golden Rules 3 ข้อของ Theo Mandel คืออะไร?",
+    "choices": [
+      "Fast, Cheap, Good",
+      "Plan, Build, Test",
+      "Place the user in control, Reduce memory load, Make the interface consistent",
+      "Attractive, Simple, Clear"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่ใช่ golden rules",
+      "ผิด — ไม่ใช่ golden rules",
+      "ถูก — 3 กฎทองของ Mandel",
+      "ผิด — เป็นส่วนของ basic rules"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "การลากไฟล์ไปที่ไอคอนถังขยะเพื่อลบ เป็นตัวอย่างของหลักใด?",
+    "choices": [
+      "Establish meaningful defaults",
+      "Disclose information in layers",
+      "Maintain consistency across the system",
+      "Design for direct interaction with objects on the screen"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — เรื่องค่าเริ่มต้น",
+      "ผิด — เรื่องแสดงข้อมูลเป็นชั้น",
+      "ผิด — เรื่องความสม่ำเสมอ",
+      "ถูก — direct manipulation ภายใต้ Rule 1"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "การใช้รูปบ้านแทนคำสั่ง “Back to home screen” เป็นหลักใด?",
+    "choices": [
+      "Visual layout based on a real-world metaphor",
+      "Provide for flexible interaction",
+      "Hide technical interfaces",
+      "Allow undo"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — Rule 2 ลดภาระการจำ",
+      "ผิด — เรื่องหลายวิธีโต้ตอบ",
+      "ผิด — เรื่องซ่อนส่วนเทคนิค",
+      "ผิด — เรื่องย้อนกลับได้"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ตัวอย่างใดเป็น low fidelity prototype ตามสไลด์?",
+    "choices": [
+      "Coded prototype",
+      "Digital code-free prototype ละเอียดระดับ pixel",
+      "Paper prototype และ click-through prototype",
+      "แอปจริงที่ปล่อยใน store"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — เป็น high fidelity",
+      "ผิด — เป็น high fidelity",
+      "ถูก — เน้นโครงสร้างและฟังก์ชัน",
+      "ผิด — ไม่ใช่ prototype"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ใน Phase 1 การวิเคราะห์ด้าน “User” พิจารณาอะไร?",
+    "choices": [
+      "สภาพแสงและเสียง",
+      "งานที่ผู้ใช้ต้องทำ",
+      "รหัสสีของปุ่ม",
+      "ทักษะ ความรู้ และประเภทของผู้ใช้"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ environment",
+      "ผิด — นั่นคือ task",
+      "ผิด — อยู่ใน look and feel",
+      "ถูก — ตามสไลด์"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "UI Design Process มีลักษณะการดำเนินงานแบบใด?",
+    "choices": [
+      "เส้นตรงทำครั้งเดียวจบ",
+      "เกลียว (spiral) วน 4 phase ซ้ำ",
+      "ทำ phase 4 ก่อน phase 1",
+      "ทำทุก phase พร้อมกันครั้งเดียว"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่ linear",
+      "ถูก — วนซ้ำคล้าย spiral model",
+      "ผิด — ลำดับผิด",
+      "ผิด — ไม่ใช่ลักษณะในสไลด์"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Gesture-based interface ที่ซ้อนองค์ประกอบเสมือนบนสภาพแวดล้อมจริงคืออะไร?",
+    "choices": [
+      "Virtual Reality (VR) UI",
+      "Command-Line Interface",
+      "Augmented Reality (AR) UI",
+      "Text Menu Interface"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — VR สร้างโลกเสมือนทั้งหมด",
+      "ผิด — CLI พิมพ์คำสั่ง",
+      "ถูก — เช่น แอป AR นำทาง",
+      "ผิด — เมนูข้อความ"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมต้องวิเคราะห์สภาพแวดล้อมใน Phase 1?",
+    "choices": [
+      "เพราะผู้ใช้ในอู่ซ่อมรถ ออฟฟิศ หรือตู้ kiosk ต้องการ UI ต่างกันมาก",
+      "เพื่อเลือกภาษาโปรแกรม",
+      "เพื่อกำหนดราคาซอฟต์แวร์",
+      "เพราะสภาพแวดล้อมไม่มีผลต่อ UI"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ซอฟต์แวร์เดียวกันอาจต้องใช้ UI คนละแบบ",
+      "ผิด — ไม่ใช่จุดประสงค์",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — ตรงข้ามกับสไลด์"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม UI design จึงเป็นกระบวนการวนซ้ำ?",
+    "choices": [
+      "เพราะต้องเขียนโค้ดใหม่ทุกวัน",
+      "เพราะผู้ใช้ไม่เคยพอใจ",
+      "เพราะไม่มีการทดสอบ",
+      "เพราะต้องสร้าง prototype ไปทดสอบกับผู้ใช้ แล้วนำ feedback กลับมาปรับการออกแบบ"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ใช่เหตุผล",
+      "ผิด — ไม่ใช่เหตุผลในสไลด์",
+      "ผิด — phase 4 คือ validation",
+      "ถูก — prototype → iterative design"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "หลัก “Reduce demand on short-term memory” ช่วยผู้ใช้อย่างไร?",
+    "choices": [
+      "บังคับให้ผู้ใช้จำคำสั่ง",
+      "ให้ visual clues ช่วยให้ผู้ใช้รู้ว่าทำอะไรไปแล้ว โดยไม่ต้องจำเอง",
+      "ลบประวัติการใช้งานทั้งหมด",
+      "ซ่อนเมนูทั้งหมด"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ตรงข้าม",
+      "ถูก — เช่น แถบขั้นตอน 1-2-3 ตอนชำระเงิน",
+      "ผิด — ไม่ช่วยลดภาระจำ",
+      "ผิด — ทำให้ต้องจำมากขึ้น"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Ctrl + S ถูกใช้เป็นตัวอย่างใน Rule 2 และ Rule 3 ต่างกันอย่างไร?",
+    "choices": [
+      "Rule 2 เน้นเลือกคีย์ลัดที่เดาง่าย ส่วน Rule 3 เน้นอย่าเปลี่ยนคีย์ลัดที่ผู้ใช้คุ้นเคยไปทำอย่างอื่น",
+      "ทั้งสองข้อเน้นเรื่องเดียวกัน",
+      "Rule 2 ห้ามใช้คีย์ลัด",
+      "Rule 3 ให้เปลี่ยนคีย์ลัดทุกเวอร์ชัน"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — Save = Ctrl + S (เดาง่าย) และห้ามเอาไปเป็นคำสั่งอื่น (consistent)",
+      "ผิด — มุมต่างกัน",
+      "ผิด — Rule 2 ส่งเสริมคีย์ลัดที่ intuitive",
+      "ผิด — ตรงข้ามกับ Rule 3"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "หลัก “Disclose information in layers” หมายความว่าอย่างไร?",
+    "choices": [
+      "แสดงข้อมูลทั้งหมดในหน้าเดียว",
+      "ซ่อนข้อมูลสำคัญไว้",
+      "แสดงข้อมูลทั่วไปก่อน แล้วค่อยแสดงรายละเอียดเมื่อผู้ใช้ต้องการ",
+      "แสดงข้อมูลเป็นภาษาเทคนิค"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — เพิ่มภาระการจำ",
+      "ผิด — ไม่ใช่ความหมาย",
+      "ถูก — เช่น รายการสินค้าแสดงชื่อ ราคา แล้วกดดูสเปกเต็ม",
+      "ผิด — ขัดกับ hide technical interfaces"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมควรเริ่มจาก low fidelity prototype ในช่วงแรก?",
+    "choices": [
+      "เพราะใช้ทดสอบระดับ pixel ได้แม่นยำ",
+      "เพราะส่งให้ developer สร้างได้ทันที",
+      "เพราะไม่ต้องใช้ feedback",
+      "เพราะถูกและเร็ว ได้ feedback เรื่องโครงสร้างและ flow ก่อนเสียเวลากับรายละเอียดที่อาจต้องทิ้ง"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ high fidelity",
+      "ผิด — นั่นคือ high fidelity",
+      "ผิด — จุดประสงค์คือเก็บ feedback",
+      "ถูก — เหมาะกับ brainstorming และ feedback ช่วงแรก"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Low fidelity prototype จำเป็นต้องทำบนกระดาษเสมอหรือไม่?",
+    "choices": [
+      "ใช่ ต้องเป็นกระดาษเท่านั้น",
+      "ไม่ใช่ ทำในโปรแกรมก็ได้ถ้ายังเป็นโครงสีเทาที่เน้น flow",
+      "ต้องเป็น coded prototype",
+      "ต้องมี animation"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — สไลด์มีตัวอย่าง Adobe XD",
+      "ถูก — ความหยาบของรายละเอียดคือตัวกำหนด",
+      "ผิด — coded เป็น high fidelity",
+      "ผิด — animation เป็นลักษณะของ high fidelity"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Phase 2 (Interface design) ต่างจาก Phase 3 (Construction) อย่างไร?",
+    "choices": [
+      "Phase 2 ทดสอบกับผู้ใช้",
+      "Phase 3 วิเคราะห์สภาพแวดล้อม",
+      "Phase 2 กำหนด interface objects และ actions ส่วน Phase 3 เริ่ม implement สร้าง prototype และปรับวนซ้ำ",
+      "ทั้งสองคือสิ่งเดียวกัน"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — การทดสอบคือ phase 4",
+      "ผิด — การวิเคราะห์คือ phase 1",
+      "ถูก — ออกแบบ vs สร้างและปรับ",
+      "ผิด — ต่างกัน"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "หลัก “Hide technical interfaces from casual users” มีเหตุผลอย่างไร?",
+    "choices": [
+      "เพราะผู้ใช้ทั่วไปไม่จำเป็นต้องเห็นส่วนเทคนิค เช่น error code หรือ stack trace ที่ทำให้สับสน",
+      "เพราะต้องการปกปิดบั๊ก",
+      "เพื่อให้ผู้ใช้ขั้นสูงใช้งานไม่ได้",
+      "เพราะส่วนเทคนิคไม่มีประโยชน์"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ช่วยให้ผู้ใช้ทั่วไปรู้สึกควบคุมได้ (Rule 1)",
+      "ผิด — ไม่ใช่จุดประสงค์",
+      "ผิด — ผู้ใช้ขั้นสูงปรับแต่งได้",
+      "ผิด — มีประโยชน์กับบางกลุ่ม"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "CLI ต่างจาก Text Menu Interface อย่างไร?",
+    "choices": [
+      "CLI เลือกจากเมนูที่แสดง",
+      "ทั้งสองใช้ไอคอน",
+      "Text Menu ต้องใช้เสียง",
+      "CLI ผู้ใช้พิมพ์คำสั่งเอง ส่วน Text Menu เลือกจากเมนูข้อความที่แสดงด้วยตัวเลข ตัวอักษร หรือลูกศร"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — สลับกัน",
+      "ผิด — ทั้งสองเป็นข้อความ",
+      "ผิด — ไม่ใช่ VUI",
+      "ถูก — พิมพ์เอง vs เลือกจากที่เห็น"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Phase 4 Interface Validation ประเมินอะไรบ้าง?",
+    "choices": [
+      "ต้นทุนการพัฒนาและกำไร",
+      "UI ทำทุก task ได้ รองรับ task variations ใช้ง่าย เรียนรู้ง่าย และผู้ใช้ยอมรับ",
+      "จำนวนบรรทัดของโค้ด",
+      "ความเร็วเครือข่าย"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่ใช่การประเมิน UI",
+      "ถูก — ตามสไลด์",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม high fidelity prototype จึงเหมาะกับช่วงท้ายของการออกแบบ?",
+    "choices": [
+      "เพราะถูกและทิ้งง่ายที่สุด",
+      "เพราะใช้ brainstorming ได้ดีที่สุด",
+      "เพราะเลียนแบบผลิตภัณฑ์จริงใกล้ที่สุด ใช้ทดสอบกับผู้ใช้อย่างแม่นยำและ validate ก่อนพัฒนา",
+      "เพราะไม่ต้องมี flow"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — นั่นคือ low fidelity",
+      "ผิด — นั่นคือ low fidelity",
+      "ถูก — เมื่อ flow นิ่งแล้ว",
+      "ผิด — ยังต้องมี flow และการโต้ตอบ"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "แอปแก้ไขรูปไม่มีปุ่ม undo และเมื่อเข้าโหมดครอปแล้วออกไม่ได้ ละเมิด golden rule ข้อใด?",
+    "choices": [
+      "Rule 2 Reduce memory load",
+      "Rule 3 Make interface consistent",
+      "Basic rule: Attractive",
+      "Rule 1 Place the user in control"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ได้เป็นเรื่องการจำ",
+      "ผิด — ไม่ได้เป็นเรื่องความสม่ำเสมอ",
+      "ผิด — ไม่เกี่ยวกับความสวย",
+      "ถูก — ต้อง interruptible, undoable และออกจากโหมดได้ง่าย"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ระบบให้ผู้ใช้จำรหัสสินค้าจากหน้าก่อน แล้วพิมพ์เองในหน้าชำระเงิน ละเมิด golden rule ข้อใด?",
+    "choices": [
+      "Rule 2 Reduce the user's memory load",
+      "Rule 1 Place the user in control",
+      "Rule 3 Make the interface consistent",
+      "ไม่ละเมิดข้อใด"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ควรแสดงข้อมูลให้เห็นแทนการให้จำ",
+      "ผิด — ไม่ได้เกี่ยวกับการควบคุม",
+      "ผิด — ไม่ได้เกี่ยวกับความสม่ำเสมอ",
+      "ผิด — เพิ่มภาระ short-term memory"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ปุ่ม “ยืนยัน” อยู่มุมขวาสีเขียวในหน้าหนึ่ง แต่อยู่มุมซ้ายสีแดงในอีกหน้า ละเมิดหลักใด?",
+    "choices": [
+      "Establish meaningful defaults",
+      "Maintain consistency across the system (Rule 3)",
+      "Provide for flexible interaction",
+      "Disclose information in layers"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — เรื่องค่าเริ่มต้น",
+      "ถูก — ต้องสม่ำเสมอทั้งระบบ",
+      "ผิด — เรื่องหลายวิธีโต้ตอบ",
+      "ผิด — เรื่องแสดงข้อมูลเป็นชั้น"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ออกแบบ UI ตู้ kiosk ซื้อตั๋วหนังในห้างสำหรับคนทั่วไปที่ใช้ครั้งแรก ควรออกแบบอย่างไร?",
+    "choices": [
+      "CLI ให้พิมพ์คำสั่ง",
+      "แสดงข้อมูลเทคนิคละเอียดทุกหน้า",
+      "Touchscreen เมนูน้อย ปุ่มใหญ่ ใช้ได้ทันทีโดยไม่ต้องเรียนรู้",
+      "ต้องใช้คีย์ลัดจากคีย์บอร์ด"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — คนทั่วไปใช้ไม่เป็น",
+      "ผิด — ขัดกับ hide technical interfaces",
+      "ถูก — ตรงกับผู้ใช้ งาน และสภาพแวดล้อมที่ยืนและมีคนต่อคิว",
+      "ผิด — ตู้ kiosk ไม่มีคีย์บอร์ด"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ทีมเพิ่งเริ่มโปรเจกต์ ยังไม่แน่ใจเรื่อง flow ของแอป และอยาก brainstorm กับลูกค้าเร็ว ๆ ควรใช้อะไร?",
+    "choices": [
+      "Coded prototype",
+      "High fidelity digital prototype พร้อม animation",
+      "ปล่อยแอปจริงให้ลอง",
+      "Paper prototype (low fidelity)"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — ใช้เวลามากเกินไปสำหรับช่วงแรก",
+      "ผิด — ละเอียดเกินไปสำหรับช่วงที่ flow ยังไม่นิ่ง",
+      "ผิด — ยังไม่ถึงขั้นนั้น",
+      "ถูก — ถูก เร็ว เหมาะกับ feedback ช่วงแรก"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "แบบฟอร์มสมัครในเว็บไทยตั้งช่องประเทศเป็น “Thailand” ไว้ล่วงหน้า เป็นการใช้หลักใด?",
+    "choices": [
+      "Establish meaningful defaults",
+      "Hide technical interfaces",
+      "Allow advanced users to customize",
+      "Do not make changes to existing interactive models"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ค่าเริ่มต้นเหมาะกับผู้ใช้ทั่วไป ลดภาระ (Rule 2)",
+      "ผิด — ไม่ได้ซ่อนส่วนเทคนิค",
+      "ผิด — ไม่ได้เป็นการปรับแต่งโดยผู้ใช้",
+      "ผิด — ไม่เกี่ยวกับการเปลี่ยนรูปแบบที่คุ้นเคย"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

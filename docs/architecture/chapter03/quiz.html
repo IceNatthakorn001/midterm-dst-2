@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Data Representation, ISA & Assembly Language (RISC-V)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Data Representation, ISA & Assembly Language (RISC-V)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "2's Complement คำนวณได้จากวิธีใด?",
+    choices: [
+      "เปลี่ยนบิตซ้ายสุดให้เป็น 1 เท่านั้น",
+      "กลับบิตทั้งหมดเฉยๆ โดยไม่บวกอะไรเพิ่ม",
+      "กลับบิตทั้งหมด (invert) แล้วบวก 1",
+      "บวกด้วยค่าคงที่ (bias) เข้าไปก่อนเก็บ"
+    ],
+    correct: 2,
+    explain: [
+      "การเปลี่ยนบิตซ้ายสุดเป็น 1 คือแนวคิดของ Sign & Magnitude ไม่ใช่ 2's complement",
+      "การกลับบิตอย่างเดียวโดยไม่บวก 1 คือ 1's complement ไม่ใช่ 2's complement",
+      "ถูก — สไลด์ระบุ 2's complement คือกลับบิตทั้งหมด (1's complement) แล้วบวก 1 เพิ่มเข้าไปอีก",
+      "การบวก bias คือวิธีของ Bias notation ไม่ใช่ 2's complement"
+    ]
+  },
+  {
+    type: "recall",
+    q: "IEEE Floating Point Standard แบ่งบิตออกเป็นกี่ส่วนหลัก อะไรบ้าง?",
+    choices: [
+      "2 ส่วน: sign และ mantissa",
+      "3 ส่วน: sign, exponent, mantissa",
+      "4 ส่วน: sign, exponent, mantissa, checksum",
+      "1 ส่วน: เก็บเป็นเลขฐานสองปกติทั้งหมด"
+    ],
+    correct: 1,
+    explain: [
+      "ขาด exponent ไปหนึ่งส่วน",
+      "ถูก — สไลด์แบ่งเป็น sign (เครื่องหมาย), exponent (เลขชี้กำลัง), mantissa (เลขนัยสำคัญ)",
+      "ไม่มี checksum เป็นส่วนหนึ่งของ IEEE FPS",
+      "floating point ต้องแยกส่วนต่างหาก ไม่ใช่เก็บเป็นเลขฐานสองปกติแบบ integer"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ASCII ใช้กี่บิตแทนตัวอักษร และมีกี่ค่าตามที่สไลด์ระบุ?",
+    choices: [
+      "16 บิต 256 ค่า",
+      "4 บิต 16 ค่า",
+      "32 บิต ไม่จำกัดจำนวนค่า",
+      "8 บิต 128 ค่า"
+    ],
+    correct: 3,
+    explain: [
+      "256 ค่าคือ Latin-1 ไม่ใช่ ASCII พื้นฐาน",
+      "ไม่ตรงกับจำนวนบิตและค่าที่สไลด์ระบุ",
+      "Unicode ต่างหากที่ใช้ 32 บิตและรองรับตัวอักษรจำนวนมาก ไม่ใช่ ASCII",
+      "ถูก — สไลด์ระบุ ASCII มี 128 ตัวอักษร แบ่งเป็น 95 ตัวที่พิมพ์ได้ (graphic) และ 33 ตัวควบคุม (control)"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RISC-V มี register ทั้งหมดกี่ตัว และ register ตัวไหนมีค่าเป็น 0 เสมอ?",
+    choices: [
+      "32 ตัว, x0 เป็น 0 เสมอ",
+      "16 ตัว, x15 เป็น 0 เสมอ",
+      "32 ตัว, x31 เป็น 0 เสมอ",
+      "64 ตัว, x63 เป็น 0 เสมอ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — RISC-V มี 32 general purpose registers (x0-x31) โดย x0 ถูกกำหนดให้เป็น 0 เสมอ แก้ไขไม่ได้",
+      "ไม่ตรงกับจำนวน register ของ RISC-V",
+      "register ที่ค่าคงที่เป็น 0 คือ x0 ไม่ใช่ x31",
+      "ไม่ตรงกับจำนวน register ของ RISC-V ซึ่งมี 32 ตัว ไม่ใช่ 64"
+    ]
+  },
+  {
+    type: "recall",
+    q: "คำสั่ง jal (jump and link) เก็บที่อยู่ของคำสั่งถัดไปไว้ใน register ใด (ตามธรรมเนียมที่สไลด์ใช้)?",
+    choices: ["x0", "x10", "x1", "x20"],
+    correct: 2,
+    explain: [
+      "x0 มีค่าคงที่เป็น 0 เสมอ ไม่สามารถใช้เก็บที่อยู่กลับได้",
+      "x10 เป็นหนึ่งใน register ที่ใช้ส่งพารามิเตอร์ (x10-x17) ไม่ใช่ที่เก็บที่อยู่กลับ",
+      "ถูก — ตัวอย่างในสไลด์ใช้ jal x1, ProcedureLabel เพื่อเก็บที่อยู่คำสั่งถัดไปไว้ใน x1",
+      "x20 เป็นตัวอย่าง saved register ที่ใช้เก็บตัวแปรของโปรแกรม ไม่ใช่ที่เก็บที่อยู่กลับ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "คำสั่ง jalr x0,0(x1) ตามตัวอย่างในสไลด์ ใช้ทำอะไร?",
+    choices: [
+      "ใช้เรียกฟังก์ชันใหม่",
+      "ใช้บวกเลขสองค่าเข้าด้วยกัน",
+      "ใช้โหลดค่าคงที่ 32 บิตเข้า register",
+      "กระโดดกลับไปยังที่อยู่ใน x1 (procedure return)"
+    ],
+    correct: 3,
+    explain: [
+      "การเรียกฟังก์ชันใหม่ใช้ jal ไม่ใช่ jalr แบบนี้",
+      "ไม่เกี่ยวกับการบวกเลข",
+      "การโหลดค่าคงที่ 32 บิตใช้ lui ไม่ใช่ jalr",
+      "ถูก — สไลด์ระบุว่า jalr x0,0(x1) ใช้เป็น procedure return คือกระโดดไปที่ 0+address ใน x1"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Register กลุ่มใดที่สไลด์ระบุว่าเป็น \"temporary registers\" ที่ callee ไม่ต้องรักษาค่าให้?",
+    choices: [
+      "x5-x7, x28-x31",
+      "x8-x9, x18-x27",
+      "x10-x17",
+      "x1 เท่านั้น"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ x5-x7 และ x28-x31 เป็น temporary registers ที่ไม่ถูก preserve โดย callee",
+      "กลุ่มนี้คือ saved registers ที่ต้อง save/restore ถ้าถูกใช้ ไม่ใช่ temporary",
+      "x10-x17 คือ register ที่ใช้ส่งพารามิเตอร์ ไม่ใช่กลุ่มที่สไลด์เรียกว่า temporary ในหัวข้อนี้",
+      "x1 ใช้เก็บ return address ไม่ใช่กลุ่ม temporary register"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Register กลุ่มใดที่สไลด์ระบุว่าเป็น \"saved registers\" ที่ถ้าใช้ต้อง save/restore?",
+    choices: [
+      "x5-x7, x28-x31",
+      "x8-x9, x18-x27",
+      "x0 เท่านั้น",
+      "x1-x4"
+    ],
+    correct: 1,
+    explain: [
+      "กลุ่มนี้คือ temporary registers ไม่ใช่ saved",
+      "ถูก — สไลด์ระบุ x8-x9 และ x18-x27 เป็น saved registers ที่ callee ต้อง save แล้ว restore ถ้าใช้",
+      "x0 มีค่าคงที่เป็น 0 ไม่ได้อยู่ในกลุ่ม saved registers",
+      "ไม่ตรงกับกลุ่ม register ที่สไลด์ระบุว่าเป็น saved"
+    ]
+  },
+  {
+    type: "recall",
+    q: "หน่วยความจำของโปรแกรมแบ่งเป็นกี่โซนหลักตามสไลด์ (Memory Layout) อะไรบ้าง?",
+    choices: [
+      "2 โซน: Code กับ Data",
+      "5 โซน รวม Register file ด้วย",
+      "4 โซน: Text, Static, Heap, Stack",
+      "3 โซน: Text, Heap, Stack"
+    ],
+    correct: 2,
+    explain: [
+      "แบ่งหยาบเกินไป ไม่ตรงกับที่สไลด์แจกแจง 4 โซน",
+      "Register file ไม่ได้อยู่ใน Memory Layout เพราะเป็นส่วนหนึ่งของ CPU ไม่ใช่หน่วยความจำ",
+      "ถูก — สไลด์แบ่ง Memory Layout เป็น Text (โค้ด), Static data (global), Dynamic data/Heap, และ Stack",
+      "ขาด Static data ไปหนึ่งโซน"
+    ]
+  },
+  {
+    type: "recall",
+    q: "คำสั่ง lui rd, constant ในสไลด์ ใช้ทำอะไร?",
+    choices: [
+      "คัดลอกค่าคงที่ 20 บิตไปยังบิต [31:12] ของ rd แล้วเคลียร์บิต [11:0] เป็น 0",
+      "บวกค่าคงที่ 12 บิตเข้ากับ register",
+      "โหลดค่าจาก memory เข้า register",
+      "เก็บค่าจาก register ลง memory"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ lui คัดลอก 20-bit constant ไปยังบิต [31:12] ของ rd และเคลียร์บิต [11:0] เป็น 0",
+      "การบวกค่าคงที่ 12 บิตคือหน้าที่ของ addi ไม่ใช่ lui",
+      "lui ไม่ได้อ่านจาก memory เป็นการใส่ค่าคงที่ตรงเข้า register",
+      "lui ไม่ใช่คำสั่ง store"
+    ]
+  },
+  {
+    type: "recall",
+    q: "คำสั่งคู่ใดของ RISC-V ที่ใช้ทำ atomic memory operation สำหรับ synchronization ตามสไลด์?",
+    choices: [
+      "lb และ sb",
+      "jal และ jalr",
+      "beq และ bne",
+      "lr.d และ sc.d"
+    ],
+    correct: 3,
+    explain: [
+      "lb/sb เป็นคำสั่ง load/store byte ธรรมดา ไม่ใช่คำสั่ง atomic",
+      "jal/jalr ใช้สำหรับเรียกและกลับจากฟังก์ชัน ไม่เกี่ยวกับ synchronization",
+      "beq/bne เป็นคำสั่ง branch แบบมีเงื่อนไข ไม่ใช่คำสั่ง atomic",
+      "ถูก — สไลด์ระบุ lr.d (load reserved) และ sc.d (store conditional) เป็นคู่คำสั่งสำหรับ synchronization"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ส่วนขยาย (extension) ใดของ RISC-V ที่เพิ่มความสามารถคูณ/หาร/หารเอาเศษ ตามที่สไลด์ระบุ?",
+    choices: ["A", "M", "F", "C"],
+    correct: 1,
+    explain: [
+      "A คือ atomic memory operations ไม่ใช่การคูณ/หาร",
+      "ถูก — สไลด์ระบุส่วนขยาย M คือ integer multiply, divide, remainder",
+      "F คือ single-precision floating point ไม่ใช่การคูณ/หารจำนวนเต็ม",
+      "C คือ compressed instructions (เข้ารหัส 16 บิต) ไม่เกี่ยวกับการคูณ/หาร"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม 2's Complement จึงเป็นที่นิยมใช้จริงในฮาร์ดแวร์มากกว่า Sign & Magnitude?",
+    choices: [
+      "เพราะ 2's complement เก็บข้อมูลได้มากกว่าจำนวนบิตเท่ากัน",
+      "เพราะใช้วงจรบวกเดียวกันได้ทั้งบวก/ลบ และไม่มีปัญหาศูนย์สองแบบ",
+      "เพราะ 2's complement คำนวณโดยไม่ต้องมีวงจรใดๆ เลย",
+      "เพราะ S&M ใช้ได้เฉพาะกับเลขจำนวนเต็มบวกเท่านั้น"
+    ],
+    correct: 1,
+    explain: [
+      "ทั้งสองวิธีใช้จำนวนบิตเท่ากันเก็บค่าได้ในช่วงใกล้เคียงกัน ไม่ใช่เหตุผลหลักที่ทำให้ 2's complement ถูกเลือกใช้",
+      "ถูก — 2's complement ทำให้ฮาร์ดแวร์บวกเลขบวกกับเลขลบด้วยวงจรบวกเดียวกันได้ และไม่มี +0/-0 แยกกันแบบ S&M",
+      "การคำนวณ 2's complement (กลับบิต+บวก1) ก็ยังต้องใช้วงจรอยู่ เพียงแต่ใช้ร่วมกับวงจรบวกปกติได้",
+      "S&M ก็ใช้แทนเลขลบได้เหมือนกัน เพียงแต่มีปัญหาเรื่องศูนย์สองแบบและวงจรคำนวณที่ซับซ้อนกว่า"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม floating point ต้องแยกเก็บ exponent กับ mantissa แทนที่จะเก็บเป็นจำนวนเต็มตรงๆ?",
+    choices: [
+      "เพราะจำนวนเต็มไม่สามารถเก็บเลขติดลบได้",
+      "เพื่อให้ตัวเลขทุกค่ามีขนาดเท่ากันพอดีเสมอ",
+      "เพราะมาตรฐานอุตสาหกรรมกำหนดให้ต้องแยกเก็บเท่านั้น",
+      "เพื่อเก็บเลขเล็กและใหญ่มากด้วยจำนวนบิตเท่ากัน (แบบเลขวิทยาศาสตร์)"
+    ],
+    correct: 3,
+    explain: [
+      "จำนวนเต็มก็เก็บเลขติดลบได้ด้วย 2's complement อยู่แล้ว ไม่ใช่เหตุผลของการแยก exponent/mantissa",
+      "การแยกส่วนแบบนี้ไม่ได้ทำให้ทุกค่ามีขนาดเท่ากัน แต่ทำให้แต่ละค่ามีช่วงและความละเอียดต่างกันได้ตามต้องการ",
+      "เป็นการออกแบบทางวิศวกรรมเพื่อรองรับช่วงค่ากว้าง ไม่ใช่ข้อบังคับทางกฎหมาย",
+      "ถูก — การแยก exponent (บอกอันดับขนาด) กับ mantissa (บอกความละเอียด) ทำให้เก็บช่วงค่าได้กว้างมากโดยใช้บิตจำกัด เหมือนเลขแบบ 1.23×10^5"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด Unicode (UTF-8/UTF-16) จึงต้องใช้การเข้ารหัสความยาวไม่คงที่ แทนที่จะใช้ความยาวคงที่แบบ ASCII?",
+    choices: [
+      "เพื่อประหยัดพื้นที่ ตัวอักษรที่ใช้บ่อยใช้ byte น้อย ที่หายากใช้มากกว่า",
+      "เพราะ Unicode ไม่รองรับตัวอักษรภาษาอังกฤษ",
+      "เพราะกฎหมายบังคับให้ใช้ความยาวไม่คงที่เท่านั้น",
+      "เพื่อให้ตัวอักษรทุกตัวในโลกใช้พื้นที่เท่ากันหมด"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ถ้าใช้ 32 บิตคงที่ทุกตัวอักษรแบบ Unicode ดิบ ๆ ไฟล์ข้อความภาษาอังกฤษจะใหญ่ขึ้นมาก UTF-8/UTF-16 จึงยืดหยุ่นความยาวเพื่อประหยัดพื้นที่",
+      "Unicode รองรับ ASCII อยู่แล้วเป็นส่วนหนึ่งของช่วงตัวอักษรที่รองรับ",
+      "ไม่มีข้อมูลนี้ในสไลด์ เป็นการออกแบบทางเทคนิคเพื่อประสิทธิภาพ ไม่ใช่ข้อบังคับ",
+      "ตรงข้ามกับจุดประสงค์ของความยาวไม่คงที่ ซึ่งทำให้แต่ละตัวอักษรใช้พื้นที่ต่างกันได้ตามความจำเป็น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด RISC-V จึงต้องแยกฟิลด์คำสั่งเป็นหลายรูปแบบ (R, I, S, SB, UJ) แทนที่จะใช้รูปแบบเดียวกันหมด?",
+    choices: [
+      "เพราะ RISC-V ต้องการให้คำสั่งมีความยาวไม่เท่ากัน",
+      "เพราะฮาร์ดแวร์รุ่นเก่าไม่รองรับฟิลด์แบบเดียวกันทั้งหมด",
+      "เพราะคำสั่งแต่ละชนิดต้องการข้อมูลไม่เท่ากัน ช่วยให้ decode ได้เร็วขึ้น",
+      "เพราะจะได้ใช้ชื่อฟิลด์ให้แตกต่างกันเฉยๆ ไม่มีผลด้านเทคนิค"
+    ],
+    correct: 2,
+    explain: [
+      "ทุกคำสั่งใน RISC-V พื้นฐานยังคงยาว 32 บิตเท่ากัน เพียงแต่แบ่งฟิลด์ภายในต่างกัน",
+      "ไม่เกี่ยวกับความเข้ากันได้ของฮาร์ดแวร์รุ่นเก่า เป็นการออกแบบเพื่อความเหมาะสมกับแต่ละชนิดคำสั่ง",
+      "ถูก — คำสั่งบวก register (R-format) ต้องการ register 2 ตัว ส่วนคำสั่ง jump (UJ-format) ต้องการ target address ที่ใหญ่กว่ามาก การแยกฟิลด์ตามชนิดคำสั่งทำให้ decode ได้ตรงไปตรงมา",
+      "การแยกฟิลด์มีผลจริงต่อการ decode ของฮาร์ดแวร์ ไม่ใช่แค่ตั้งชื่อต่างกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม RISC-V จึงต้องเป็นสถาปัตยกรรมแบบ load/store (แยก register operand กับ memory operand ชัดเจน)?",
+    choices: [
+      "เพราะ memory ไม่สามารถเก็บข้อมูลตัวเลขได้",
+      "เพราะ register มีจำนวนไม่จำกัด จึงไม่จำเป็นต้องใช้ memory เลย",
+      "เพราะกฎหมายลิขสิทธิ์ของ RISC-V บังคับให้ทำแบบนี้",
+      "เพราะ register เข้าถึงเร็วกว่า memory มาก การบังคับ load ก่อนช่วยให้ฮาร์ดแวร์ง่ายขึ้น"
+    ],
+    correct: 3,
+    explain: [
+      "memory เก็บข้อมูลตัวเลขได้ปกติ เพียงแต่เข้าถึงช้ากว่า register เท่านั้น",
+      "register มีจำนวนจำกัดมาก (32 ตัวใน RISC-V) ไม่ใช่ไม่จำกัด จึงยังต้องพึ่ง memory สำหรับข้อมูลส่วนใหญ่",
+      "ไม่มีข้อมูลนี้ในสไลด์ เป็นการออกแบบทางสถาปัตยกรรมคอมพิวเตอร์ ไม่ใช่เรื่องกฎหมาย",
+      "ถูก — register อยู่ใกล้ ALU จึงเข้าถึงเร็วกว่า memory มาก การบังคับให้คำนวณจาก register เสมอ (แล้ว load/store แยกต่างหาก) ทำให้ชุดคำสั่งเรียบง่ายและฮาร์ดแวร์ทำงานได้เร็ว"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใด non-leaf procedure (ฟังก์ชันที่เรียกฟังก์ชันอื่นต่อ) จึงต้องเซฟ return address (x1) ไว้บน stack ก่อนเรียกฟังก์ชันถัดไป?",
+    choices: [
+      "เพราะ x1 มีค่าคงที่เป็น 0 เสมอจึงต้องเซฟไว้",
+      "เพราะเรียกซ้อนกันจะทำให้ x1 ถูกเขียนทับ ถ้าไม่เซฟไว้ก่อนจะกลับที่เดิมไม่ได้",
+      "เพราะ stack มีพื้นที่จำกัดต้องรีบใช้ก่อนที่จะเต็ม",
+      "เพราะ leaf procedure ก็ต้องทำแบบเดียวกันทุกครั้งเช่นกัน"
+    ],
+    correct: 1,
+    explain: [
+      "x1 ใช้เก็บ return address ไม่ใช่ register ที่มีค่าคงที่เป็น 0 (นั่นคือ x0)",
+      "ถูก — ตัวอย่าง fact() ในสไลด์แสดงว่าเมื่อเรียก fact(n-1) ซ้อนเข้าไป ค่า x1 เดิมจะถูกเขียนทับ จึงต้องเซฟไว้บน stack ก่อนแล้วค่อย restore",
+      "เหตุผลไม่ใช่เรื่องพื้นที่ stack แต่เป็นเรื่องความถูกต้องของค่าที่จะใช้อ้างอิงกลับ",
+      "leaf procedure (เช่น swap) ไม่ได้เรียกฟังก์ชันอื่นต่อ จึงไม่จำเป็นต้องเซฟ x1 เสมอไปตามตัวอย่างในสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมต้องมี Stack แยกจาก Heap ในหน่วยความจำของโปรแกรม?",
+    choices: [
+      "เพราะ Heap ใช้เก็บได้เฉพาะตัวเลขจำนวนเต็มเท่านั้น",
+      "เพราะไม่มีเหตุผลพิเศษ เพียงแค่ตั้งชื่อให้ต่างกัน",
+      "เพราะ Stack เก็บข้อมูลอายุสั้น (LIFO) ส่วน Heap เก็บข้อมูลที่ต้องจัดการอายุเอง",
+      "เพราะ Stack กับ Heap ต้องมีขนาดเท่ากันเป๊ะเสมอ"
+    ],
+    correct: 2,
+    explain: [
+      "Heap เก็บข้อมูลได้หลายชนิด ไม่ได้จำกัดเฉพาะจำนวนเต็ม",
+      "การแยกสองโซนนี้มีเหตุผลด้านการจัดการอายุข้อมูลที่ต่างกันจริง ไม่ใช่แค่ตั้งชื่อ",
+      "ถูก — Stack ใช้กับตัวแปร local/return address ที่มีอายุตามรอบฟังก์ชัน (LIFO) ส่วน Heap ใช้กับข้อมูลที่จองแบบไดนามิก (เช่น malloc) ที่อายุขึ้นกับโปรแกรมกำหนดเอง",
+      "ทั้งสองโซนมีขนาดที่ปรับเปลี่ยนได้ระหว่างการทำงาน ไม่จำเป็นต้องเท่ากัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมคำสั่ง load ของ RISC-V จึงต้องแยก signed (เช่น lb) กับ unsigned (เช่น lbu)?",
+    choices: [
+      "เพราะการขยายบิตให้เต็ม register ต่างกัน sign extend เติมด้วยบิตเครื่องหมายเดิม ส่วน zero extend เติมด้วย 0 เสมอ ถ้าใช้ผิดค่าที่ได้จะผิดพลาด",
+      "เพราะ lb ทำงานเร็วกว่า lbu เสมอ",
+      "เพราะ lbu ใช้ได้กับ memory เท่านั้น ส่วน lb ใช้ได้กับ register เท่านั้น",
+      "เพราะเป็นชื่อคำสั่งที่ตั้งขึ้นให้ต่างกันโดยไม่มีผลต่อการทำงาน"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ถ้าค่าที่ load มาเป็นค่าติดลบ (บิตซ้ายสุดเป็น 1) แล้วใช้ zero extend (lbu) ผิดชนิด ค่าที่ได้ใน register จะกลายเป็นเลขบวกผิดพลาดทันที",
+      "ความเร็วไม่ใช่เหตุผลของการแยกคำสั่ง เป็นเรื่องความถูกต้องของค่าที่ขยายบิต",
+      "ทั้ง lb และ lbu ต่างก็ทำงานระหว่าง memory กับ register เหมือนกัน ต่างกันแค่วิธีขยายบิต",
+      "การแยกคำสั่งมีผลต่อค่าจริงที่ได้ใน register ไม่ใช่แค่ชื่อเรียก"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมค่าคงที่ 32 บิตเต็มจึงต้องใช้ 2 คำสั่ง (lui ตามด้วย addi) แทนที่จะใส่ไว้ในคำสั่งเดียว?",
+    choices: [
+      "เพราะ lui กับ addi ต้องใช้ CPU คนละตัวกัน",
+      "เพราะ RISC-V ไม่มีฟิลด์ immediate เลยในทุกคำสั่ง",
+      "เพราะโปรแกรมเมอร์ต้องการให้โค้ดยาวขึ้นโดยไม่มีเหตุผลทางเทคนิค",
+      "เพราะคำสั่งยาวคงที่ 32 บิต ฟิลด์ immediate มีแค่ 12 บิต ไม่พอเก็บค่าเดียว"
+    ],
+    correct: 3,
+    explain: [
+      "lui และ addi รันบน CPU ตัวเดียวกันตามลำดับปกติ ไม่ได้แยกกันคนละตัว",
+      "RISC-V มีฟิลด์ immediate อยู่ใน I-format และรูปแบบอื่น ๆ เพียงแต่มีขนาดจำกัด",
+      "เป็นข้อจำกัดทางเทคนิคของการเข้ารหัสคำสั่งแบบความยาวคงที่ ไม่ใช่ความตั้งใจให้โค้ดยาวขึ้นเฉยๆ",
+      "ถูก — คำสั่งยาว 32 บิตคงที่ ฟิลด์สำหรับ immediate (ค่าคงที่) จึงมีพื้นที่จำกัดแค่ 12 บิต การจะได้ค่า 32 บิตเต็มต้องแบ่งใส่ 2 คำสั่งจึงจะครบ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "เหตุใดการเข้าถึงหน่วยความจำเดียวกันโดยไม่ synchronize ระหว่างสอง processor จึงเกิด data race?",
+    choices: [
+      "เพราะผลลัพธ์ขึ้นอยู่กับลำดับอ่าน/เขียนที่ไม่แน่นอนระหว่างสอง processor",
+      "เพราะ memory จะเสียหายถาวรทันทีที่มีสอง processor เข้าถึง",
+      "เพราะ processor แต่ละตัวจะได้ค่าคนละชนิดข้อมูลเสมอ",
+      "เพราะ RISC-V ไม่อนุญาตให้มีสอง processor ทำงานพร้อมกันเลย"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่าถ้า P1 เขียนแล้ว P2 อ่านโดยไม่ synchronize ผลลัพธ์จะขึ้นกับลำดับการเข้าถึงจริง ซึ่งไม่แน่นอน (data race)",
+      "ไม่มีข้อมูลว่า memory จะเสียหายถาวร ปัญหาคือผลลัพธ์ทางตรรกะไม่แน่นอน",
+      "ชนิดข้อมูลไม่เปลี่ยนไปเอง ปัญหาคือค่าที่อ่านได้อาจไม่ตรงกับที่ตั้งใจ ขึ้นกับจังหวะ",
+      "RISC-V รองรับ multiprocessor และมีคำสั่ง synchronization (lr.d/sc.d) ไว้จัดการเรื่องนี้โดยเฉพาะ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม sc.d (store conditional) จึงอาจ \"ล้มเหลว\" ได้ ทั้งที่สั่งให้ store ค่าไปแล้ว?",
+    choices: [
+      "เพราะ sc.d ทำงานผิดพลาดแบบสุ่มโดยไม่มีเหตุผล",
+      "เพราะถ้ามีใครเปลี่ยนค่าตำแหน่งนั้นก่อน sc.d การจองจะถือว่าไม่ถูกต้องแล้ว fail",
+      "เพราะ sc.d ใช้ไม่ได้กับหน่วยความจำที่มีอยู่จริง",
+      "เพราะ lr.d ต้องรันหลัง sc.d เสมอ"
+    ],
+    correct: 1,
+    explain: [
+      "การ fail ของ sc.d เป็นกลไกที่ตั้งใจออกแบบไว้ ไม่ใช่ความผิดพลาดสุ่ม",
+      "ถูก — sc.d จะสำเร็จก็ต่อเมื่อไม่มีใครมาเปลี่ยนตำแหน่งที่ lr.d จองไว้ก่อนหน้า ถ้ามีคนแทรกมาเปลี่ยนค่าก่อน sc.d จะ fail และคืนค่า non-zero",
+      "sc.d ทำงานกับหน่วยความจำจริงตามปกติ เพียงแต่มีเงื่อนไขความสำเร็จที่ชัดเจน",
+      "ลำดับที่ถูกต้องคือ lr.d รันก่อน แล้วตามด้วย sc.d เสมอ ไม่ใช่กลับกัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมโปรแกรมต้องผ่านทั้ง assembler, linker, และ loader แทนที่จะรันจากซอร์สโค้ดได้เลยทันที?",
+    choices: [
+      "เพราะกฎหมายบังคับให้มีขั้นตอนเหล่านี้",
+      "เพราะ loader มีหน้าที่แค่ลบไฟล์ที่ไม่ได้ใช้",
+      "เพราะแต่ละขั้นตอนทำหน้าที่ต่างกัน ขาดขั้นตอนใดก็รันไม่ได้",
+      "เพราะ assembler กับ linker ทำงานเหมือนกันทุกประการ ใช้แทนกันได้"
+    ],
+    correct: 2,
+    explain: [
+      "ไม่มีข้อมูลนี้ในสไลด์ เป็นความจำเป็นทางเทคนิคของกระบวนการแปลงโค้ดเป็นโปรแกรมที่รันได้",
+      "loader มีหน้าที่โหลดโปรแกรมเข้าหน่วยความจำและตั้งค่าต่าง ๆ ก่อนเริ่มรัน ไม่ใช่การลบไฟล์",
+      "ถูก — assembler แปลงโค้ดเป็นคำสั่งเครื่องและสร้าง object module, linker รวมหลายไฟล์และแก้ reference ให้เป็น executable, loader โหลดเข้าหน่วยความจำจริงและเริ่มรัน — แต่ละขั้นจำเป็นและทำหน้าที่ต่างกัน",
+      "assembler แปลงโค้ดเป็นคำสั่งเครื่อง ส่วน linker รวมและแก้ reference ระหว่างไฟล์ ทำหน้าที่ต่างกันชัดเจน"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "ต้องการเขียนค่าคงที่ 32 บิตเต็มลงใน register x19 ควรใช้คำสั่งชุดใดตามรูปแบบในสไลด์?",
+    choices: [
+      "add x19,x0,x0 เพียงคำสั่งเดียว",
+      "jal x19, target เพียงคำสั่งเดียว",
+      "lui x19, <20 บิตบน> ตามด้วย addi x19,x19,<12 บิตล่าง>",
+      "lb x19, 0(x0) เพียงคำสั่งเดียว"
+    ],
+    correct: 2,
+    explain: [
+      "add x19,x0,x0 ได้แค่ค่า 0 ไม่สามารถสร้างค่าคงที่ 32 บิตตามต้องการได้",
+      "jal ใช้เรียกฟังก์ชันและเก็บที่อยู่กลับ ไม่ใช่การสร้างค่าคงที่",
+      "ถูก — ตรงกับตัวอย่างในสไลด์ที่ใช้ lui x19,976 ตามด้วย addi x19,x19,128 เพื่อประกอบค่า 32 บิตเต็ม",
+      "lb เป็นคำสั่งโหลดค่าจาก memory ไม่ใช่การสร้างค่าคงที่ 32 บิต"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการเรียกใช้ฟังก์ชันแล้วให้กลับมาทำงานต่อจากจุดเดิมได้หลังฟังก์ชันจบ ควรใช้คำสั่งคู่ใดตามแบบแผนในสไลด์?",
+    choices: [
+      "jal (เก็บ x1) ตามด้วย jalr (กลับไป x1)",
+      "add ตามด้วย sub",
+      "lb ตามด้วย sb",
+      "lui ตามด้วย lui อีกครั้ง"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — jal x1,ProcedureLabel เก็บที่อยู่คำสั่งถัดไปไว้ใน x1 แล้ว jalr x0,0(x1) ที่ท้ายฟังก์ชันจะกระโดดกลับมาที่จุดเดิม",
+      "add/sub เป็นคำสั่งคำนวณเลขคณิต ไม่เกี่ยวกับการเรียกและกลับจากฟังก์ชัน",
+      "lb/sb เป็นคำสั่ง load/store byte ไม่เกี่ยวกับการควบคุมการไหลของโปรแกรม",
+      "การเรียก lui ซ้ำสองครั้งไม่ทำให้เกิดการเรียกฟังก์ชันและกลับมาได้"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ฟังก์ชันหนึ่งต้องใช้ register x19 (saved register) ระหว่างทำงาน ควรทำอย่างไรก่อน-หลังใช้งานตามธรรมเนียมของ RISC-V?",
+    choices: [
+      "ใช้งาน x19 ได้เลยโดยไม่ต้องเซฟหรือคืนค่าใด ๆ",
+      "ลบค่า x19 ทิ้งแล้วไม่ต้องคืนค่า",
+      "เปลี่ยน x19 ให้กลายเป็น temporary register ชั่วคราว",
+      "เซฟค่า x19 ไว้บน stack ก่อนใช้ แล้วคืนค่าก่อนกลับไปหา caller"
+    ],
+    correct: 3,
+    explain: [
+      "ถ้าไม่เซฟ/คืนค่า x19 ค่าตัวแปรของ caller ที่เก็บอยู่ใน x19 เดิมจะถูกเขียนทับและสูญหาย",
+      "การลบค่าโดยไม่คืนจะทำให้ caller ได้ค่าที่ผิดพลาดเมื่อฟังก์ชันจบ",
+      "หมวดหมู่ของ register (temporary/saved) เป็นข้อตกลงคงที่ตามสไลด์ ไม่สามารถเปลี่ยนชนิดชั่วคราวได้",
+      "ถูก — ตัวอย่าง strcpy และ sort ในสไลด์แสดงว่าต้อง sd (save) x19 ลง stack ก่อนใช้ แล้ว ld (restore) กลับก่อนคืนการควบคุมให้ caller"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการอ่านค่า byte ที่เป็นเลขติดลบ (signed) จากหน่วยความจำเข้ามาที่ register 64 บิต ควรใช้คำสั่งใด?",
+    choices: [
+      "lbu (zero-extend ให้ครบ 64 บิต)",
+      "lb (sign-extend ให้ครบ 64 บิต)",
+      "sb (เก็บค่าลง memory)",
+      "lui (ใส่ค่าคงที่ 20 บิตบน)"
+    ],
+    correct: 1,
+    explain: [
+      "lbu ใช้ zero extend ซึ่งจะทำให้เลขที่ควรติดลบกลายเป็นเลขบวกขนาดใหญ่แทน ผิดความหมาย",
+      "ถูก — lb ใช้ sign extend ซึ่งรักษาความหมายของเลขติดลบไว้ถูกต้องเมื่อขยายเป็น 64 บิต",
+      "sb เป็นคำสั่งเก็บค่าลง memory ไม่ใช่การอ่านค่าเข้า register",
+      "lui ใช้สร้างค่าคงที่ ไม่ใช่การอ่านค่าจากหน่วยความจำ"
+    ]
+  },
+  {
+    type: "apply",
+    q: "สอง thread เข้าถึงตัวแปร lock ร่วมกัน ต้องการเขียนโค้ดแบบ atomic เพื่อทดสอบและตั้งค่า lock ควรใช้คำสั่งคู่ใดของ RISC-V ตามตัวอย่างในสไลด์?",
+    choices: [
+      "lr.d ตามด้วย sc.d",
+      "add ตามด้วย sub",
+      "beq ตามด้วย bne เท่านั้น",
+      "jal ตามด้วย exec"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตัวอย่าง atomic swap และ lock ในสไลด์ใช้ lr.d เพื่อโหลดและจองตำแหน่ง แล้ว sc.d เพื่อพยายามเขียนค่าใหม่แบบ atomic",
+      "add/sub เป็นคำสั่งคำนวณเลขคณิตธรรมดา ไม่มีคุณสมบัติ atomic ต่อการเข้าถึงหน่วยความจำร่วมกัน",
+      "beq/bne เป็นคำสั่ง branch ใช้ตรวจผลลัพธ์หลัง sc.d ได้ แต่ไม่ได้ทำหน้าที่ atomic memory access เอง",
+      "exec ไม่ใช่คำสั่งของ RISC-V ที่กล่าวถึงในสไลด์นี้เลย"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรม C ที่ compile เสร็จแล้ว ต้องการให้ library ถูกโหลดเฉพาะตอนถูกเรียกใช้งานจริง (ไม่ผูกไว้ตายตัวตั้งแต่ตอน compile/link) ควรใช้เทคนิคการ linking แบบใด?",
+    choices: [
+      "Static linking",
+      "ไม่ต้องทำการ linking เลย",
+      "Dynamic linking",
+      "ใช้ assembler แทน linker ทั้งหมด"
+    ],
+    correct: 2,
+    explain: [
+      "static linking รวม library เข้ากับโปรแกรมตั้งแต่ตอน link ไม่ตรงกับความต้องการที่จะโหลดตอนเรียกใช้จริงเท่านั้น",
+      "โปรแกรมที่เรียกใช้ library ภายนอกยังต้องผ่านการ linking บางรูปแบบเพื่อเชื่อมโยง reference ให้ถูกต้อง",
+      "ถูก — สไลด์ระบุว่า dynamic linking จะ link/load library ก็ต่อเมื่อถูกเรียกใช้จริง ทำให้ไฟล์เล็กลงและอัปเดต library ได้โดยไม่ต้อง compile ใหม่",
+      "assembler มีหน้าที่แปลงโค้ดเป็นคำสั่งเครื่อง ไม่ได้ทำหน้าที่เชื่อมโยง library แทน linker"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

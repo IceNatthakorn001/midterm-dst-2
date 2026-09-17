@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 7 — VLAN</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 7 — VLAN</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  {
+    "type": "recall",
+    "q": "VLAN 1 บน Cisco switch มีสถานะใดบ้าง?",
+    "choices": [
+      "Voice VLAN เท่านั้น",
+      "Default VLAN, default native VLAN และ default management VLAN",
+      "Extended range VLAN",
+      "VLAN ที่ลบได้ทันที"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — voice VLAN ต้องตั้งเอง",
+      "ถูก — และลบหรือเปลี่ยนชื่อไม่ได้",
+      "ผิด — VLAN 1 อยู่ใน normal range",
+      "ผิด — VLAN 1 ลบไม่ได้"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "บน 802.1Q trunk frame ของ VLAN ใดที่ไม่ถูกติด tag?",
+    "choices": [
+      "Management VLAN",
+      "Voice VLAN",
+      "Native VLAN",
+      "Data VLAN"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ถูกติด tag ตามปกติ",
+      "ผิด — voice traffic ติด tag พร้อม CoS",
+      "ถูก — ทุก frame ติด tag ยกเว้น native VLAN",
+      "ผิด — ถูกติด tag ตามปกติ"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "802.1Q tag มีขนาดเท่าใดและแทรกไว้ตรงไหน?",
+    "choices": [
+      "4 bytes ระหว่าง Source MAC กับ Type/Length",
+      "2 bytes หน้า Destination MAC",
+      "4 bytes ท้าย FCS",
+      "8 bytes แทน preamble"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — tag แทรกหลัง Source MAC",
+      "ผิด — ขนาดและตำแหน่งไม่ถูก",
+      "ผิด — FCS อยู่ท้ายสุดเสมอ",
+      "ผิด — ไม่ได้แทน preamble"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ค่า TPID ใน 802.1Q tag คือเท่าใด?",
+    "choices": [
+      "0x0800",
+      "0x7E",
+      "0xFFFF",
+      "0x8100"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — 0x0800 เป็น EtherType ของ IPv4",
+      "ผิด — 0x7E คือ flag ของ HDLC",
+      "ผิด — ไม่ใช่ค่า TPID",
+      "ถูก — Tag Protocol ID = 0x8100"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ฟิลด์ VLAN ID ใน 802.1Q มีกี่บิต?",
+    "choices": [
+      "8 บิต",
+      "12 บิต",
+      "16 บิต",
+      "3 บิต"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — จะได้แค่ 256 VLANs",
+      "ถูก — 12 บิต รองรับได้ 4096 VLANs",
+      "ผิด — 16 บิตคือ TPID",
+      "ผิด — 3 บิตคือ user priority"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Normal range VLAN อยู่ในช่วงใด?",
+    "choices": [
+      "1 – 4095",
+      "1006 – 4095",
+      "0 – 255",
+      "1 – 1005"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นรวมทั้งสองช่วง",
+      "ผิด — นั่นคือ extended range",
+      "ผิด — ไม่ตรงกับสไลด์",
+      "ถูก — normal range 1–1005 เก็บใน vlan.dat"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "ข้อมูล normal-range VLAN ถูกเก็บไว้ที่ใด?",
+    "choices": [
+      "ไฟล์ vlan.dat ใน flash",
+      "startup-config เท่านั้น",
+      "NVRAM ของ router",
+      "DHCP server"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — normal range อยู่ใน vlan.dat",
+      "ผิด — ไม่ใช่ที่เก็บ normal range",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "คำสั่งใดกำหนดให้พอร์ตอยู่ใน VLAN 20?",
+    "choices": [
+      "vlan 20",
+      "switchport mode trunk",
+      "switchport access vlan 20",
+      "switchport trunk native vlan 20"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ใช้สร้าง VLAN ใน global config",
+      "ผิด — ตั้งพอร์ตเป็น trunk",
+      "ถูก — ใช้หลัง switchport mode access",
+      "ผิด — ตั้ง native VLAN ของ trunk"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Switch ใช้โปรโตคอลใดแจ้งโทรศัพท์ VoIP ว่า Voice VLAN คือหมายเลขใด?",
+    "choices": [
+      "VTP",
+      "CDP",
+      "DHCP",
+      "STP"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — VTP ซิงก์ VLAN ระหว่าง switch",
+      "ถูก — Cisco Discovery Protocol",
+      "ผิด — DHCP แจก IP",
+      "ผิด — ไม่ได้อยู่ในเนื้อหาส่วนนี้"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Management VLAN ใช้สำหรับ traffic ประเภทใด?",
+    "choices": [
+      "อีเมลและเว็บของผู้ใช้",
+      "เสียง VoIP",
+      "SSH/Telnet VTY สำหรับจัดการอุปกรณ์",
+      "Legacy FDDI"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — นั่นคือ data VLAN",
+      "ผิด — นั่นคือ voice VLAN",
+      "ถูก — และไม่ควรปนกับ traffic ของผู้ใช้",
+      "ผิด — FDDI เป็น legacy VLAN 1002–1005"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "คำสั่งใดลบทุก VLAN ออกจาก switch (แล้วต้อง reload)?",
+    "choices": [
+      "no vlan all",
+      "erase startup-config",
+      "delete flash:vlan.dat",
+      "switchport mode access"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — ไม่ใช่คำสั่งที่ถูกต้อง",
+      "ผิด — ลบ config แต่ไม่ได้ลบ vlan.dat",
+      "ถูก — หรือ delete vlan.dat แล้ว reload",
+      "ผิด — ใช้เปลี่ยนโหมดพอร์ต"
+    ]
+  },
+  {
+    "type": "recall",
+    "q": "Access port หนึ่งพอร์ตกำหนดได้กี่ data VLAN และ voice VLAN?",
+    "choices": [
+      "1 data VLAN + 1 voice VLAN",
+      "หลาย data VLAN ไม่จำกัด",
+      "2 data VLAN + 2 voice VLAN",
+      "ไม่มี voice VLAN"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — กรณีโทรศัพท์และ PC ต่อผ่านพอร์ตเดียวกัน",
+      "ผิด — หลาย VLAN ต้องใช้ trunk",
+      "ผิด — ไม่ตรงกับสไลด์",
+      "ผิด — กำหนด voice VLAN ได้ 1"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "VLAN ช่วยให้ broadcast domain เล็กลงอย่างไร?",
+    "choices": [
+      "เพิ่มจำนวน switch ในเครือข่าย",
+      "Broadcast ถูกจำกัดอยู่ภายใน VLAN เดียว ไม่ไปถึงอุปกรณ์ใน VLAN อื่น",
+      "เข้ารหัส broadcast frame",
+      "เปลี่ยน broadcast เป็น unicast"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — VLAN ลดต้นทุนเพราะใช้ switch น้อยลง",
+      "ถูก — ลด traffic ที่ไม่จำเป็นและเพิ่ม performance",
+      "ผิด — VLAN ไม่ได้เข้ารหัส",
+      "ผิด — ยังเป็น broadcast แต่ขอบเขตแคบลง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ถ้าไม่มี VLAN แล้ว PC1 ส่ง layer 2 broadcast จะเกิดอะไรขึ้น?",
+    "choices": [
+      "เฉพาะ PC ในแผนกเดียวกันได้รับ",
+      "Router ทิ้ง broadcast",
+      "ไม่มีใครได้รับ",
+      "Switch flood ไปทุกพอร์ต ทุกเครื่องในเครือข่ายได้รับ"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — การแยกแผนกต้องใช้ VLAN",
+      "ผิด — broadcast ถูก flood ใน switch ก่อน",
+      "ผิด — broadcast ไปถึงทุกเครื่อง",
+      "ถูก — ทุกเครื่องอยู่ broadcast domain เดียว"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมอุปกรณ์ต่าง VLAN จึงคุยกันตรง ๆ ที่ layer 2 ไม่ได้?",
+    "choices": [
+      "เพราะแต่ละ VLAN แยก broadcast domain และมี IP subnet ของตัวเอง ต้องผ่านอุปกรณ์ layer 3",
+      "เพราะใช้สายคนละชนิด",
+      "เพราะ MAC address ซ้ำกัน",
+      "เพราะ trunk บล็อกทุก frame"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — เช่นต้องผ่าน router R1",
+      "ผิด — ไม่เกี่ยวกับชนิดสาย",
+      "ผิด — ไม่ใช่เหตุผล",
+      "ผิด — trunk ส่งหลาย VLAN ได้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมต้องคำนวณ FCS ใหม่เมื่อใส่หรือถอด 802.1Q tag?",
+    "choices": [
+      "เพราะ MAC address เปลี่ยน",
+      "เพราะ tag เปลี่ยนเนื้อหาของ frame ค่า CRC เดิมจึงไม่ตรงอีกต่อไป",
+      "เพราะ VLAN ID ต้องเข้ารหัส",
+      "เพราะ frame ยาวเกิน 64 bytes"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — MAC ไม่เปลี่ยน",
+      "ถูก — FCS คำนวณจากเนื้อหา frame (FCS1 ≠ FCS2)",
+      "ผิด — ไม่มีการเข้ารหัส",
+      "ผิด — ไม่ใช่เหตุผล"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม end device (PC) จึงไม่เห็น 802.1Q tag?",
+    "choices": [
+      "เพราะ PC ไม่มี NIC",
+      "เพราะ tag ถูกเข้ารหัส",
+      "เพราะ tag ใช้เฉพาะระหว่าง VLAN switch และถูกถอดก่อนส่งถึงอุปกรณ์ปลายทาง",
+      "เพราะ PC ใช้ extended range"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — PC มี NIC",
+      "ผิด — ไม่มีการเข้ารหัส",
+      "ถูก — ผู้ส่งและผู้รับปลายทางเห็น frame ปกติ",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "บทบาทของ trunk link ในเครือข่ายหลาย switch คืออะไร?",
+    "choices": [
+      "ส่ง traffic ได้เพียง 1 VLAN",
+      "แปลง VLAN เป็น subnet",
+      "ใช้ต่อ PC เข้ากับ switch",
+      "ส่ง traffic หลาย VLAN ข้าม switch ทำให้ VLAN เดียวกันกระจายหลายตึกได้"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — นั่นคือ access port",
+      "ผิด — ไม่ใช่หน้าที่ของ trunk",
+      "ผิด — PC ต่อ access port",
+      "ถูก — เช่น Faculty VLAN 10 อยู่ทั้ง S2 และ S3"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไม Cisco จึงแนะนำให้ย้ายหน้าที่ default ของ VLAN 1 ไป VLAN อื่น?",
+    "choices": [
+      "เพื่อความปลอดภัย เพราะทุกพอร์ตและหน้าที่สำคัญอยู่ VLAN 1 ตั้งแต่แรก",
+      "เพราะ VLAN 1 จะถูกลบเมื่อ reload",
+      "เพราะ VLAN 1 อยู่ extended range",
+      "เพราะ VLAN 1 ไม่รองรับ trunk"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — ลดความเสี่ยงจากค่าเริ่มต้นที่คนรู้กันทั่วไป",
+      "ผิด — VLAN 1 ลบไม่ได้",
+      "ผิด — VLAN 1 อยู่ normal range",
+      "ผิด — VLAN 1 เป็น default native ของ trunk"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมโทรศัพท์ VoIP จึงติด tag voice traffic พร้อมค่า CoS?",
+    "choices": [
+      "เพื่อให้ PC ใช้ VLAN เดียวกับเสียง",
+      "เพื่อเปลี่ยน MAC ของโทรศัพท์",
+      "เพื่อลดขนาด frame",
+      "เพื่อแยก voice VLAN และให้ switch จัดลำดับความสำคัญของเสียง (QoS layer 2)"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — PC อยู่ data VLAN แยก",
+      "ผิด — ไม่เกี่ยวข้อง",
+      "ผิด — tag ทำให้ frame ยาวขึ้น",
+      "ถูก — เสียงต้องการความหน่วงต่ำ"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "Extended range VLAN ต่างจาก normal range อย่างไร?",
+    "choices": [
+      "Extended เก็บใน vlan.dat",
+      "Extended ใช้ในธุรกิจขนาดเล็กเท่านั้น",
+      "Extended (1006–4095) เก็บใน running-config ใช้โดย service provider และรองรับ feature น้อยกว่า",
+      "Extended ลบไม่ได้ทั้งหมด"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — normal range เก็บใน vlan.dat",
+      "ผิด — ธุรกิจเล็ก-กลางใช้ normal range",
+      "ถูก — ตามตารางในสไลด์",
+      "ผิด — VLAN ที่ลบไม่ได้คือ 1 และ 1002–1005"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ทำไมต้องย้ายพอร์ตสมาชิกออกก่อนลบ VLAN ด้วย no vlan?",
+    "choices": [
+      "เพราะคำสั่งจะไม่ทำงาน",
+      "เพราะพอร์ตที่ยังผูกกับ VLAN ที่ถูกลบจะใช้งานไม่ได้",
+      "เพราะ switch จะ reload อัตโนมัติ",
+      "เพราะ trunk จะหายไป"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — คำสั่งทำงานได้ แต่ผลกระทบคือพอร์ตใช้ไม่ได้",
+      "ถูก — พอร์ตค้างอยู่ใน VLAN ที่ไม่มีแล้ว",
+      "ผิด — ไม่ reload อัตโนมัติ",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "ใน show interfaces switchport Administrative mode ต่างจาก Operational mode อย่างไร?",
+    "choices": [
+      "Administrative คือโหมดที่ตั้งค่า ส่วน Operational คือโหมดที่ทำงานจริง",
+      "ทั้งสองเหมือนกันทุกประการ",
+      "Operational คือโหมดที่ตั้งค่า",
+      "Administrative ใช้เฉพาะ voice VLAN"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — เช่น ตั้ง trunk และทำงานเป็น trunk จริง",
+      "ผิด — ความหมายต่างกัน แม้ค่าอาจตรงกัน",
+      "ผิด — สลับกัน",
+      "ผิด — ไม่เกี่ยวข้อง"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "หลังใช้ no switchport trunk allowed vlan และ no switchport trunk native vlan trunk จะเป็นอย่างไร?",
+    "choices": [
+      "กลายเป็น access port",
+      "ส่งได้เฉพาะ VLAN 99",
+      "ทุก VLAN ผ่านได้ และ native VLAN กลับเป็น VLAN 1",
+      "ปิดพอร์ต"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — การกลับเป็น access ใช้ switchport mode access",
+      "ผิด — ค่าถูกรีเซ็ตแล้ว",
+      "ถูก — คืนค่าเริ่มต้นของ trunk",
+      "ผิด — ไม่ได้ปิดพอร์ต"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ต้องการให้ Fa0/1 เป็น trunk ส่ง VLAN 10, 20, 30, 99 และใช้ native VLAN 99 ข้อใดครบถ้วน?",
+    "choices": [
+      "switchport mode access / switchport access vlan 99",
+      "switchport mode trunk / switchport trunk native vlan 99 / switchport trunk allowed vlan 10,20,30,99",
+      "vlan 99 / name native",
+      "switchport mode trunk / switchport access vlan 10,20,30"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — เป็น access port",
+      "ถูก — ตั้งโหมด native VLAN และรายการ VLAN ที่อนุญาต",
+      "ผิด — แค่สร้าง VLAN",
+      "ผิด — access vlan ไม่ใช้กับ trunk"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "บริษัทต้องการ VLAN 3,000 สำหรับลูกค้าของผู้ให้บริการ หมายเลขนี้อยู่ช่วงใดและเก็บที่ไหน?",
+    "choices": [
+      "Normal range, vlan.dat",
+      "Legacy range, flash",
+      "Reserved, ใช้ไม่ได้",
+      "Extended range, running-config"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — normal สุดที่ 1005",
+      "ผิด — legacy คือ 1002–1005",
+      "ผิด — 3000 ใช้ได้",
+      "ถูก — 1006–4095 เก็บใน running-config"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "802.1Q รองรับ VLAN ได้สูงสุดกี่หมายเลขตามขนาด VID?",
+    "choices": [
+      "1024",
+      "1005",
+      "4096",
+      "65536"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — นั่นคือ 10 บิต",
+      "ผิด — นั่นคือขอบบนของ normal range",
+      "ถูก — 2¹² = 4096",
+      "ผิด — นั่นคือ 16 บิต"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ต้องการสร้าง VLAN 20 ชื่อ student แล้วให้ Fa0/18 เป็นสมาชิก ลำดับคำสั่งใดถูกต้อง?",
+    "choices": [
+      "vlan 20 → name student → interface fa0/18 → switchport mode access → switchport access vlan 20",
+      "interface fa0/18 → vlan 20 → switchport mode trunk",
+      "switchport access vlan 20 → vlan 20 → name student",
+      "name student → vlan 20 → switchport trunk native vlan 20"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — สร้าง VLAN ก่อน แล้วกำหนดพอร์ตเป็น access",
+      "ผิด — ไม่ต้องเป็น trunk",
+      "ผิด — ลำดับไม่ครบและไม่ตั้ง access mode",
+      "ผิด — name ต้องอยู่ใน config-vlan และไม่ใช่ trunk"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "พอร์ต Fa0/18 ต่อโทรศัพท์ IP และ PC ผ่านโทรศัพท์ ผล show interfaces ควรแสดงอย่างไร?",
+    "choices": [
+      "Operational Mode: trunk, Native VLAN 150",
+      "Access Mode VLAN: 20 (student), Voice VLAN: 150 (voice)",
+      "Access Mode VLAN: 150, Voice VLAN: none",
+      "Administrative Mode: dynamic, VLAN: ALL"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — เป็น static access ไม่ใช่ trunk",
+      "ถูก — data VLAN สำหรับ PC และ voice VLAN สำหรับโทรศัพท์",
+      "ผิด — PC ควรอยู่ data VLAN",
+      "ผิด — ไม่ตรงกับตัวอย่างในสไลด์"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ต้องการคืนค่า switch เป็นค่าโรงงานให้หมดรวม VLAN ขั้นตอนใดถูกต้อง?",
+    "choices": [
+      "no vlan 1 แล้ว reload",
+      "switchport mode access ทุกพอร์ต",
+      "delete startup-config อย่างเดียว",
+      "ถอดสาย data → ลบ startup-config → ลบ vlan.dat → reload"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — VLAN 1 ลบไม่ได้",
+      "ผิด — ไม่ได้ลบ VLAN",
+      "ผิด — VLAN ยังอยู่ใน vlan.dat",
+      "ถูก — ตามขั้นตอน factory reset ในสไลด์"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

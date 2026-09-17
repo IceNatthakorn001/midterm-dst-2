@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter VI — Storage Systems (External Memory) · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+<div class="lesson-layout">
+  <aside class="toc" id="toc">
+    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+    <div class="toc-inner">
+      <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+      <ol><li><a href="#1-course-outline">1. Course Outline</a></li><li><a href="#2-magnetic-disk">2. Magnetic Disk</a></li><li><a href="#3-read-write-process">3. Read / Write Process</a></li><li><a href="#4-data-organization-and-formatting">4. Data Organization and Formatting</a></li><li><a href="#5-physical-characteristics">5. Physical Characteristics</a></li><li><a href="#6-disk-performance-parameters">6. Disk Performance Parameters ⭐⭐</a></li><li><a href="#7-raid">7. RAID ⭐</a></li><li><a href="#8-raid-level-06">8. RAID Level 0–6</a></li><li><a href="#9-table-64-raid-comparison">9. Table 6.4 — RAID Comparison ⭐</a></li><li><a href="#10-ssd">10. SSD</a></li><li><a href="#11-optical-memory">11. Optical Memory</a></li><li><a href="#12-magnetic-tape">12. Magnetic Tape</a></li><li><a href="#13-summary-chapter-6-external-memory">13. Summary (Chapter 6 External Memory)</a></li><li><a href="#14-คำศัพท์สำคัญ">14. คำศัพท์สำคัญ</a></li><li><a href="#15-สรุปท้ายบท-จุดที่มักออกสอบ">15. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+  <main class="lesson">
+    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter06</div>
+    <h1 class="lesson-title">Chapter VI — Storage Systems (External Memory)</h1>
+    <div class="lesson-actions"><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> main memory เร็วแต่ไฟดับแล้วข้อมูลหาย และจุได้ไม่มาก เราจึงต้องมี <strong>external memory</strong> ไว้เก็บข้อมูลถาวร บทนี้ไล่ดูทีละแบบ:</p>
+<ul>
+<li><strong>Magnetic disk:</strong> หลักการอ่านเขียน, การจัดข้อมูล, ชนิดของ disk, ค่าประสิทธิภาพ</li>
+<li><strong>RAID 0–6:</strong> การรวม disk หลายลูกให้ทำงานเป็นลูกเดียว</li>
+<li><strong>SSD:</strong> เทียบกับ HDD และปัญหาในการใช้งานจริง</li>
+<li><strong>Optical memory:</strong> CD, DVD, Blu-ray</li>
+<li><strong>Magnetic tape</strong></li>
+</ul>
+<p>บทนี้ต่อจาก Chapter 04 (memory hierarchy, flash, disk access) และ Chapter 05 (I/O)</p>
+</blockquote>
+<h2 id="1-course-outline">1. Course Outline</h2>
+<ul>
+<li>บทนี้คือหัวข้อ <strong>storage systems</strong> ของวิชา (ต่อจาก input and output systems และก่อน computing units)</li>
+<li><strong>หัวข้อย่อยของบท:</strong>
+<ul>
+<li>Magnetic Disk</li>
+<li>RAID</li>
+<li>SSD</li>
+<li>Practical Issues</li>
+<li>Optical Memory</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="2-magnetic-disk">2. Magnetic Disk</h2>
+<ul>
+<li><strong>disk คือจานกลม (platter)</strong> ทำจากวัสดุที่ไม่เป็นแม่เหล็ก เรียกว่า <strong>substrate</strong> แล้วเคลือบด้วย <strong>วัสดุที่ทำให้เป็นแม่เหล็กได้</strong>
+<ul>
+<li>เดิม substrate ทำจาก <strong>อะลูมิเนียม หรือโลหะผสมอะลูมิเนียม</strong></li>
+<li><strong>ช่วงหลังเริ่มใช้ substrate แบบแก้ว (glass)</strong></li>
+</ul>
+</li>
+<li><strong>ข้อดีของ glass substrate:</strong>
+<ul>
+<li><strong>ผิวฟิล์มแม่เหล็กสม่ำเสมอขึ้น</strong> → disk เชื่อถือได้มากขึ้น</li>
+<li><strong>ตำหนิบนผิวลดลงมาก</strong> → อ่านเขียนผิดพลาดน้อยลง</li>
+<li><strong>รองรับ fly height ต่ำลง</strong> (หัวอ่านบินใกล้จานได้มากขึ้น)</li>
+<li><strong>แข็งแรงกว่า</strong> → ลดการสั่นไหวของ disk</li>
+<li><strong>ทนแรงกระแทกและความเสียหายได้ดีกว่า</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="3-read-write-process">3. Read / Write Process</h2>
+<p><img loading="lazy" src="img/c6-p005.jpg" alt="ขั้นตอนเขียนและอ่านข้อมูลบนจานแม่เหล็ก" /></p>
+<p><strong>การเขียน (write)</strong></p>
+<ol>
+<li><strong>กระแสไฟฟ้า</strong> ไหลผ่านขดลวด</li>
+<li>เกิด <strong>สนามแม่เหล็ก</strong> จากขดลวด</li>
+<li><strong>จัดเรียงทิศทาง</strong> อนุภาคแม่เหล็กบนผิวจาน</li>
+</ol>
+<p><strong>การอ่าน (read)</strong></p>
+<ol>
+<li>อ่าน <strong>ทิศทางแม่เหล็ก</strong> บนผิวจาน</li>
+<li>ทิศทางนั้น <strong>เหนี่ยวนำสัญญาณไฟฟ้า</strong> ที่หัวอ่าน</li>
+<li><strong>แปลงเป็นข้อมูล</strong> บิต 0 และ 1</li>
+</ol>
+<ul>
+<li>สไลด์สรุปว่า <strong>ทิศทางของอนุภาคแม่เหล็กบนผิวจานใช้แทนค่า &quot;0&quot; และ &quot;1&quot;</strong></li>
+</ul>
+<h3 id="figure-61-inductive-write-magnetoresistive-read-head">Figure 6.1 — Inductive Write / Magnetoresistive Read Head</h3>
+<p><img loading="lazy" src="img/c6-p006.jpg" alt="หัวเขียนแบบ inductive และหัวอ่านแบบ MR sensor" /></p>
+<ul>
+<li><strong>Inductive write element:</strong> ใช้ <strong>Write current</strong> สร้างสนามแม่เหล็กเพื่อเขียน</li>
+<li><strong>MR (magnetoresistive) sensor:</strong> ใช้ <strong>Read current</strong> อ่านค่า
+<ul>
+<li>ค่าความต้านทานของ sensor เปลี่ยนตามทิศทางแม่เหล็ก <em>(เสริม)</em></li>
+</ul>
+</li>
+<li><strong>Shield</strong> กั้นระหว่างหัวเขียนกับหัวอ่าน</li>
+<li>บน <strong>Recording medium</strong> มีบริเวณ <strong>Magnetization</strong> เรียงเป็น N–S กว้างเท่า <strong>Track width</strong></li>
+</ul>
+<hr />
+<h2 id="4-data-organization-and-formatting">4. Data Organization and Formatting</h2>
+<h3 id="41-figure-62-disk-data-layout">4.1 Figure 6.2 — Disk Data Layout</h3>
+<p><img loading="lazy" src="img/c6-p007.jpg" alt="track, sector, cylinder, platter, read-write head" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platter</strong></td>
+<td>จานแต่ละแผ่น หมุนรอบ <strong>Spindle</strong></td>
+</tr>
+<tr>
+<td><strong>Track</strong></td>
+<td>วงกลมซ้อนกันบนผิวจาน</td>
+</tr>
+<tr>
+<td><strong>Sector</strong></td>
+<td>ส่วนย่อยของ track (S1, S2, …, SN)</td>
+</tr>
+<tr>
+<td><strong>Inter-track gap</strong></td>
+<td>ช่องว่างระหว่าง track</td>
+</tr>
+<tr>
+<td><strong>Inter-sector gap</strong></td>
+<td>ช่องว่างระหว่าง sector</td>
+</tr>
+<tr>
+<td><strong>Cylinder</strong></td>
+<td><strong>track ตำแหน่งเดียวกันของทุก platter</strong></td>
+</tr>
+<tr>
+<td><strong>Read-write head</strong></td>
+<td><strong>1 หัวต่อ 1 ผิวจาน</strong> ติดกับ <strong>Boom</strong> ที่เคลื่อนตาม <strong>Direction of arm motion</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 gap มีไว้กันไม่ให้สนามแม่เหล็กของข้อมูลที่อยู่ติดกันรบกวนกัน <em>(เสริม)</em></p>
+</blockquote>
+<h3 id="42-figure-63-comparison-of-disk-layout-methods">4.2 Figure 6.3 — Comparison of Disk Layout Methods</h3>
+<p><img loading="lazy" src="img/c6-p008.jpg" alt="(a) Constant angular velocity (b) Multiple zone recording" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>ลักษณะ</th>
+<th>ข้อดี / ข้อเสีย (เสริม)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(a) Constant angular velocity (CAV)</strong></td>
+<td><strong>ทุก track มีจำนวน sector เท่ากัน</strong> sector ด้านนอกจึงกว้างกว่าด้านใน</td>
+<td>ควบคุมง่าย แต่ <strong>track ด้านนอกเก็บข้อมูลได้ไม่เต็มที่</strong></td>
+</tr>
+<tr>
+<td><strong>(b) Multiple zone recording</strong></td>
+<td>แบ่งจานเป็น <strong>zone</strong> โดย <strong>zone ด้านนอกมี sector มากกว่า</strong></td>
+<td><strong>จุข้อมูลได้มากขึ้น</strong> แต่วงจรซับซ้อนขึ้น</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="43-winchester-disk-format-seagate-st506">4.3 Winchester Disk Format (Seagate ST506)</h3>
+<p><img loading="lazy" src="img/c6-p009.jpg" alt="รูปแบบ sector ของ Seagate ST506" /></p>
+<ul>
+<li>สัญญาณ <strong>index</strong> บอกจุดเริ่มต้นของ track</li>
+<li>สัญญาณ <strong>sector</strong> บอกจุดเริ่มต้นของแต่ละ sector</li>
+<li><strong>track หนึ่งมี 30 physical sectors</strong> (sector 0 ถึง 29)</li>
+</ul>
+<p><strong>โครงสร้างของ 1 sector = 600 bytes/sector</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>gap 1</th>
+<th>ID field</th>
+<th>gap 2</th>
+<th>data field</th>
+<th>gap 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bytes</td>
+<td>17</td>
+<td><strong>7</strong></td>
+<td>41</td>
+<td><strong>515</strong></td>
+<td>20</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ข้างใน ID field (7 bytes)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>synch byte</th>
+<th>track #</th>
+<th>head #</th>
+<th>sector #</th>
+<th>CRC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bytes</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ข้างใน data field (515 bytes)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>synch byte</th>
+<th>data</th>
+<th>CRC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bytes</td>
+<td>1</td>
+<td><strong>512</strong></td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ลองบวกเช็ก: 17 + 7 + 41 + 515 + 20 = <strong>600</strong> — ข้อมูลจริงมีแค่ <strong>512 bytes</strong> ส่วนที่เหลือเป็น gap, ID และ CRC</p>
+</blockquote>
+<hr />
+<h2 id="5-physical-characteristics">5. Physical Characteristics</h2>
+<h3 id="51-table-61-physical-characteristics-of-disk-systems">5.1 Table 6.1 — Physical Characteristics of Disk Systems ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th>ตัวเลือก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Head Motion</strong></td>
+<td><strong>Fixed head</strong> (one per track), <strong>Movable head</strong> (one per surface)</td>
+</tr>
+<tr>
+<td><strong>Disk Portability</strong></td>
+<td><strong>Nonremovable disk</strong>, <strong>Removable disk</strong></td>
+</tr>
+<tr>
+<td><strong>Sides</strong></td>
+<td><strong>Single sided</strong>, <strong>Double sided</strong></td>
+</tr>
+<tr>
+<td><strong>Platters</strong></td>
+<td><strong>Single platter</strong>, <strong>Multiple platter</strong></td>
+</tr>
+<tr>
+<td><strong>Head Mechanism</strong></td>
+<td><strong>Contact (floppy)</strong>, <strong>Fixed gap</strong>, <strong>Aerodynamic gap (Winchester)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-characteristics">5.2 Characteristics</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fixed-head disk</strong></td>
+<td><strong>มีหัวอ่านเขียน 1 หัวต่อ 1 track</strong> หัวทั้งหมดติดบนแขนแข็งที่ยื่นคร่อมทุก track</td>
+</tr>
+<tr>
+<td><strong>Movable-head disk</strong></td>
+<td><strong>มีหัวอ่านเขียนหัวเดียว</strong> ติดบนแขนที่ <strong>ยืดเข้าออกได้</strong></td>
+</tr>
+<tr>
+<td><strong>Non-removable disk</strong></td>
+<td><strong>ติดตายอยู่ใน drive</strong> เช่น hard disk ใน PC</td>
+</tr>
+<tr>
+<td><strong>Removable disk</strong></td>
+<td><strong>ถอดเปลี่ยนเป็นแผ่นอื่นได้</strong></td>
+</tr>
+<tr>
+<td><strong>Double sided disk</strong></td>
+<td><strong>เคลือบสารแม่เหล็กทั้งสองด้าน</strong> ของ platter</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>ข้อดีของ removable disk:</strong>
+<ul>
+<li><strong>มีที่เก็บข้อมูลได้ไม่จำกัด</strong> โดยใช้ disk system จำนวนจำกัด</li>
+<li><strong>ย้าย disk ไปใช้กับคอมพิวเตอร์เครื่องอื่นได้</strong></li>
+<li>ตัวอย่าง: <strong>floppy disk</strong> และ <strong>ZIP cartridge disk</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="53-disk-classification-ตาม-head-mechanism">5.3 Disk Classification ตาม Head Mechanism</h3>
+<p><strong>แบ่ง disk ตามกลไกของหัวอ่านได้ 3 แบบ:</strong> contact, fixed gap, aerodynamic gap</p>
+<ul>
+<li><strong>หัวต้องสร้างหรือรับสนามแม่เหล็กที่แรงพอ</strong> จึงจะอ่านเขียนได้ถูกต้อง</li>
+<li><strong>หัวยิ่งแคบ ยิ่งต้องอยู่ใกล้ผิวจาน</strong>
+<ul>
+<li>หัวแคบ → <strong>track แคบ</strong> → <strong>ความหนาแน่นข้อมูลสูงขึ้น</strong></li>
+<li>แต่หัวยิ่งใกล้จาน → <strong>เสี่ยงผิดพลาดจากฝุ่นหรือตำหนิมากขึ้น</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>Winchester Heads</strong></p>
+<ul>
+<li>ใช้ใน <strong>drive ที่ปิดผนึก</strong> เกือบไม่มีสิ่งปนเปื้อน</li>
+<li>ออกแบบให้ <strong>ทำงานใกล้ผิวจานกว่าหัวของ rigid disk ทั่วไป</strong> → <strong>ความหนาแน่นข้อมูลสูงขึ้น</strong></li>
+<li>ตัวหัวเป็น <strong>aerodynamic foil</strong>
+<ul>
+<li><strong>ตอนจานหยุด</strong> หัวจะวางเบา ๆ บนผิวจาน</li>
+<li><strong>ตอนจานหมุน</strong> แรงดันอากาศจะยกหัวให้ลอยขึ้นเหนือผิว</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 คล้ายปีกเครื่องบิน: พอจานหมุนเร็ว อากาศจะยกหัวให้ลอยในระยะที่ใกล้มากแต่ไม่แตะจาน <em>(เสริม)</em></p>
+</blockquote>
+<h3 id="54-table-62-typical-hard-disk-drive-parameters">5.4 Table 6.2 — Typical Hard Disk Drive Parameters</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Characteristics</th>
+<th>Seagate Enterprise</th>
+<th>Seagate Barracuda XT</th>
+<th>Seagate Cheetah NS</th>
+<th>Seagate Laptop HDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application</strong></td>
+<td>Enterprise</td>
+<td>Desktop</td>
+<td>Network attached storage, application servers</td>
+<td>Laptop</td>
+</tr>
+<tr>
+<td><strong>Capacity</strong></td>
+<td>6 TB</td>
+<td>3 TB</td>
+<td>600 GB</td>
+<td>2 TB</td>
+</tr>
+<tr>
+<td><strong>Average seek time</strong></td>
+<td>4.16 ms</td>
+<td>N/A</td>
+<td>3.9 ms read, 4.2 ms write</td>
+<td>13 ms</td>
+</tr>
+<tr>
+<td><strong>Spindle speed</strong></td>
+<td>7200 rpm</td>
+<td>7200 rpm</td>
+<td>10,075 rpm</td>
+<td>5400 rpm</td>
+</tr>
+<tr>
+<td><strong>Average latency</strong></td>
+<td>4.16 ms</td>
+<td>4.16 ms</td>
+<td>2.98</td>
+<td>5.6 ms</td>
+</tr>
+<tr>
+<td><strong>Maximum sustained transfer rate</strong></td>
+<td>216 MB/s</td>
+<td>149 MB/s</td>
+<td>97 MB/s</td>
+<td>300 MB/s</td>
+</tr>
+<tr>
+<td><strong>Bytes per sector</strong></td>
+<td>512/4096</td>
+<td>512</td>
+<td>512</td>
+<td>4096</td>
+</tr>
+<tr>
+<td><strong>Tracks per cylinder</strong> (number of platter surfaces)</td>
+<td>8</td>
+<td>10</td>
+<td>8</td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>Cache</strong></td>
+<td>128 MB</td>
+<td>64 MB</td>
+<td>16 MB</td>
+<td>8 MB</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>7200 rpm → average latency 4.16 ms</strong>: หมุน 1 รอบใช้ 60/7200 วินาที = 8.33 ms ค่าเฉลี่ยคือรอครึ่งรอบ = <strong>4.16 ms</strong> (วิธีคิดเดียวกับ Chapter 04) <em>(เสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="6-disk-performance-parameters">6. Disk Performance Parameters ⭐⭐</h2>
+<h3 id="61-figure-65-timing-of-a-disk-io-transfer">6.1 Figure 6.5 — Timing of a Disk I/O Transfer</h3>
+<p><img loading="lazy" src="img/c6-p014.jpg" alt="ลำดับเวลาของการโอนข้อมูลกับ disk" /></p>
+<p><strong>ลำดับเวลา:</strong></p>
+<ol>
+<li><strong>Wait for Device</strong></li>
+<li><strong>Wait for Channel</strong></li>
+<li><strong>Seek</strong></li>
+<li><strong>Rotational Delay</strong></li>
+<li><strong>Data Transfer</strong></li>
+</ol>
+<ul>
+<li>ช่วง <strong>Seek → Rotational Delay → Data Transfer</strong> คือช่วง <strong>Device Busy</strong></li>
+</ul>
+<h3 id="62-นิยามค่าต่าง-ๆ">6.2 นิยามค่าต่าง ๆ</h3>
+<ul>
+<li>ตอน drive ทำงาน <strong>จานหมุนด้วยความเร็วคงที่</strong></li>
+<li>จะอ่านหรือเขียนได้ <strong>หัวต้องอยู่ที่ track ที่ต้องการ และตรงจุดเริ่มของ sector ที่ต้องการ</strong>
+<ul>
+<li><strong>การเลือก track:</strong>
+<ul>
+<li>ระบบ movable-head ต้อง <strong>เลื่อนหัว</strong></li>
+<li>ระบบ fixed-head ใช้ <strong>เลือกหัวทางอิเล็กทรอนิกส์</strong></li>
+</ul>
+</li>
+<li>พอได้ track แล้ว controller จะ <strong>รอให้ sector ที่ต้องการหมุนมาตรงหัว</strong></li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ค่า</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Seek time</strong></td>
+<td>(ระบบ movable-head) <strong>เวลาที่ใช้เลื่อนหัวไปยัง track</strong></td>
+</tr>
+<tr>
+<td><strong>Rotational delay (rotational latency)</strong></td>
+<td><strong>เวลาที่รอให้จุดเริ่มของ sector หมุนมาถึงหัว</strong></td>
+</tr>
+<tr>
+<td><strong>Access time</strong></td>
+<td><strong>Seek time + Rotational delay</strong> = เวลาที่ใช้จนหัวพร้อมอ่านหรือเขียน</td>
+</tr>
+<tr>
+<td><strong>Transfer time</strong></td>
+<td>เมื่อหัวเข้าที่แล้ว ก็อ่านหรือเขียนขณะที่ sector เคลื่อนผ่านหัว = <strong>ช่วงโอนข้อมูลจริง</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Access time ไม่รวม transfer time</strong> — access time = seek + rotational delay เท่านั้น</p>
+</blockquote>
+<hr />
+<h2 id="7-raid">7. RAID ⭐</h2>
+<p><strong>RAID = Redundant Array of Independent Disks</strong></p>
+<ul>
+<li>สไลด์อธิบายว่าเป็น <strong>เทคนิคนำ HD หลายตัวมารวมกันให้ทำงานเป็นกลุ่มเดียว</strong></li>
+<li><strong>มี 7 levels (0–6)</strong>
+<ul>
+<li>⚠️ <strong>level ไม่ได้บอกว่าอันไหนดีกว่า</strong> เป็นแค่สถาปัตยกรรมที่ต่างกัน</li>
+</ul>
+</li>
+<li>ทุก level มี <strong>ลักษณะร่วม 3 ข้อ:</strong>
+<ol>
+<li><strong>OS มองเห็น disk จริงหลายลูกเป็น logical drive ลูกเดียว</strong></li>
+<li><strong>ข้อมูลถูกกระจายไปบน disk จริงหลายลูก</strong> ด้วยวิธีที่เรียกว่า <strong>striping</strong></li>
+<li><strong>ใช้พื้นที่ส่วนเกิน (redundant) เก็บ parity</strong> เพื่อ <strong>กู้ข้อมูลได้เมื่อ disk เสีย</strong></li>
+</ol>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อ 3 <strong>ไม่เป็นจริงกับ RAID 0</strong> เพราะ RAID 0 ไม่มี redundancy และ RAID 1 ใช้การทำสำเนาแทน parity <em>(ตำราระบุไว้เช่นกัน)</em></p>
+</blockquote>
+<h3 id="71-table-63-raid-levels">7.1 Table 6.3 — RAID Levels ⭐⭐</h3>
+<p>N = จำนวน data disks, m ∝ log N</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Level</th>
+<th>Description</th>
+<th>Disks Required</th>
+<th>Data Availability</th>
+<th>Large I/O Data Transfer Capacity</th>
+<th>Small I/O Request Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Striping</strong></td>
+<td><strong>0</strong></td>
+<td><strong>Nonredundant</strong></td>
+<td><strong>N</strong></td>
+<td><strong>ต่ำกว่า disk เดี่ยว</strong></td>
+<td>Very high</td>
+<td>Very high for both read and write</td>
+</tr>
+<tr>
+<td><strong>Mirroring</strong></td>
+<td><strong>1</strong></td>
+<td><strong>Mirrored</strong></td>
+<td><strong>2N</strong></td>
+<td>สูงกว่า RAID 2, 3, 4, 5 แต่ต่ำกว่า RAID 6</td>
+<td>อ่านเร็วกว่า disk เดี่ยว เขียนใกล้เคียง disk เดี่ยว</td>
+<td>อ่านได้ถึง 2 เท่าของ disk เดี่ยว เขียนใกล้เคียง disk เดี่ยว</td>
+</tr>
+<tr>
+<td><strong>Parallel access</strong></td>
+<td><strong>2</strong></td>
+<td><strong>Redundant via Hamming code</strong></td>
+<td><strong>N + m</strong></td>
+<td>สูงกว่า disk เดี่ยวมาก ใกล้เคียง RAID 3, 4, 5</td>
+<td><strong>สูงที่สุดในทุกแบบ</strong></td>
+<td>ประมาณ 2 เท่าของ disk เดี่ยว</td>
+</tr>
+<tr>
+<td><strong>Parallel access</strong></td>
+<td><strong>3</strong></td>
+<td><strong>Bit-interleaved parity</strong></td>
+<td><strong>N + 1</strong></td>
+<td>สูงกว่า disk เดี่ยวมาก ใกล้เคียง RAID 2, 4, 5</td>
+<td><strong>สูงที่สุดในทุกแบบ</strong></td>
+<td>ประมาณ 2 เท่าของ disk เดี่ยว</td>
+</tr>
+<tr>
+<td><strong>Independent access</strong></td>
+<td><strong>4</strong></td>
+<td><strong>Block-interleaved parity</strong></td>
+<td><strong>N + 1</strong></td>
+<td>สูงกว่า disk เดี่ยวมาก ใกล้เคียง RAID 2, 3, 5</td>
+<td>อ่านใกล้เคียง RAID 0 เขียนต่ำกว่า disk เดี่ยวมาก</td>
+<td>อ่านใกล้เคียง RAID 0 เขียนต่ำกว่า disk เดี่ยวมาก</td>
+</tr>
+<tr>
+<td><strong>Independent access</strong></td>
+<td><strong>5</strong></td>
+<td><strong>Block-interleaved distributed parity</strong></td>
+<td><strong>N + 1</strong></td>
+<td>สูงกว่า disk เดี่ยวมาก ใกล้เคียง RAID 2, 3, 4</td>
+<td>อ่านใกล้เคียง RAID 0 เขียนต่ำกว่า disk เดี่ยว</td>
+<td>อ่านใกล้เคียง RAID 0 เขียนโดยทั่วไปต่ำกว่า disk เดี่ยว</td>
+</tr>
+<tr>
+<td><strong>Independent access</strong></td>
+<td><strong>6</strong></td>
+<td><strong>Block-interleaved dual distributed parity</strong></td>
+<td><strong>N + 2</strong></td>
+<td><strong>สูงที่สุดในทุกแบบ</strong></td>
+<td>อ่านใกล้เคียง RAID 0 เขียนต่ำกว่า RAID 5</td>
+<td>อ่านใกล้เคียง RAID 0 เขียนต่ำกว่า RAID 5 มาก</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>โน้ตภาษาไทยในสไลด์:</strong></p>
+<ul>
+<li><strong>Striping:</strong> แบ่งข้อมูลเป็นชิ้นเล็ก ๆ แล้วกระจายเขียนลงหลายดิสก์พร้อมกัน</li>
+<li><strong>Mirroring:</strong> เขียนข้อมูลชุดเดียวกันซ้ำลงดิสก์สองตัว → ปลอดภัยแต่เปลือง</li>
+<li><strong>Parity:</strong> คำนวณค่าตรวจสอบ (parity bit) เก็บแยกไว้ ใช้กู้ข้อมูลเมื่อดิสก์ตัวใดตัวหนึ่งเสีย โดยไม่ต้องสำรองข้อมูลเต็มรูปแบบ</li>
+</ul>
+<h3 id="72-figure-66-raid-levels-ภาพ">7.2 Figure 6.6 — RAID Levels (ภาพ)</h3>
+<p><img loading="lazy" src="img/c6-p018.jpg" alt="RAID 0, 1, 2" /></p>
+<ul>
+<li><strong>(a) RAID 0 (non-redundant):</strong> strip 0–15 กระจายไป 4 disk (disk แรกมี strip 0, 4, 8, 12 …)</li>
+<li><strong>(b) RAID 1 (mirrored):</strong> เหมือน RAID 0 แต่มี <strong>อีก 4 disk ที่เป็นสำเนา</strong></li>
+<li><strong>(c) RAID 2 (redundancy through Hamming code):</strong> data disks b0–b3 + disk ของ Hamming code <strong>f0(b), f1(b), f2(b)</strong></li>
+</ul>
+<p><img loading="lazy" src="img/c6-p019.jpg" alt="RAID 3, 4, 5, 6" /></p>
+<ul>
+<li><strong>(d) RAID 3 (bit-interleaved parity):</strong> b0–b3 + <strong>P(b)</strong> disk เดียว</li>
+<li><strong>(e) RAID 4 (block-level parity):</strong> block 0–15 + <strong>parity disk แยก 1 ลูก</strong> (P(0-3), P(4-7), …)</li>
+<li><strong>(f) RAID 5 (block-level distributed parity):</strong> <strong>parity หมุนเวียนไปอยู่คนละ disk</strong> ในแต่ละแถว</li>
+<li><strong>(g) RAID 6 (dual redundancy):</strong> มีทั้ง <strong>P และ Q</strong> กระจายอยู่คนละ disk</li>
+</ul>
+<hr />
+<h2 id="8-raid-level-06">8. RAID Level 0–6</h2>
+<h3 id="81-figure-67-data-mapping-for-a-raid-level-0-array">8.1 Figure 6.7 — Data Mapping for a RAID Level 0 Array</h3>
+<p><img loading="lazy" src="img/c6-p020.jpg" alt="Array Management Software map logical disk ไป physical disk 0–3" /></p>
+<ul>
+<li><strong>Logical Disk</strong> มี strip 0–15 เรียงต่อกัน</li>
+<li><strong>Array Management Software</strong> กระจาย strip ไปยัง <strong>Physical Disk 0–3</strong> แบบวนรอบ
+<ul>
+<li>Disk 0: strip 0, 4, 8, 12</li>
+<li>Disk 1: strip 1, 5, 9, 13</li>
+<li>Disk 2: strip 2, 6, 10, 14</li>
+<li>Disk 3: strip 3, 7, 11, 15</li>
+</ul>
+</li>
+</ul>
+<h3 id="82-raid-level-0">8.2 RAID Level 0</h3>
+<p><strong>RAID 0 for High Data Transfer Capacity</strong></p>
+<ul>
+<li>ถ้าจะให้แอปได้ transfer rate สูง ต้องมี <strong>2 เงื่อนไข</strong>:
+<ol>
+<li><strong>ทุกช่วงทางระหว่าง host memory กับ disk แต่ละลูกต้องรองรับ transfer capacity สูง</strong></li>
+<li><strong>แอปต้องส่ง I/O request ในแบบที่ใช้ disk array ได้อย่างมีประสิทธิภาพ</strong></li>
+</ol>
+</li>
+</ul>
+<p><strong>RAID 0 for High I/O Request Rate</strong></p>
+<ul>
+<li>เรื่องนี้ขึ้นกับ <strong>รูปแบบ request ของ host</strong> และ <strong>การวางข้อมูล</strong>
+<ul>
+<li>ผลของ redundancy ไม่ได้เข้ามาเกี่ยวในการวิเคราะห์นี้</li>
+</ul>
+</li>
+<li><strong>request เล็ก ๆ แต่ละครั้ง</strong> ใช้เวลาไปกับ <strong>seek time และ rotational latency เป็นหลัก</strong></li>
+<li><strong>disk array ช่วยให้ทำ I/O ได้เร็ว</strong> เพราะ <strong>กระจายภาระ I/O ไปหลาย disk</strong></li>
+<li>ถ้า <strong>strip ค่อนข้างใหญ่</strong> request ที่รออยู่หลายตัวจะ <strong>ทำขนานกันได้</strong> → <strong>ลดเวลารอคิว</strong></li>
+</ul>
+<h3 id="83-raid-level-1-mirroring-เขียนข้อมูลซ้ำ">8.3 RAID Level 1 — Mirroring (เขียนข้อมูลซ้ำ)</h3>
+<p><strong>Characteristics</strong></p>
+<ul>
+<li><strong>สร้าง redundancy ต่างจาก RAID 2–6</strong>
+<ul>
+<li>ใช้วิธีง่าย ๆ คือ <strong>ทำสำเนาข้อมูลทั้งหมด</strong></li>
+</ul>
+</li>
+<li>ยังใช้ <strong>data striping</strong> แต่ <strong>แต่ละ logical strip ถูกเขียนลง disk จริง 2 ลูก</strong>
+<ul>
+<li><strong>ทุก disk ใน array จึงมี mirror disk</strong> ที่เก็บข้อมูลเหมือนกัน</li>
+</ul>
+</li>
+<li><strong>ทำ RAID 1 โดยไม่ striping ก็ได้</strong> แต่ไม่ค่อยนิยม</li>
+</ul>
+<p><strong>Positive Aspects</strong></p>
+<ul>
+<li><strong>read request ใช้ disk ลูกไหนก็ได้</strong> จากสองลูกที่มีข้อมูล</li>
+<li><strong>ไม่มี &quot;write penalty&quot;</strong> (ไม่ต้องคำนวณ parity)</li>
+<li><strong>กู้คืนง่าย:</strong> disk ลูกหนึ่งเสียก็ <strong>อ่านจากอีกลูกได้เลย</strong></li>
+<li><strong>มีสำเนาข้อมูลทั้งหมดแบบ real-time</strong></li>
+<li><strong>รับ I/O request ได้เร็ว</strong> ถ้างานส่วนใหญ่เป็นการอ่าน</li>
+<li><strong>ข้อเสียหลักคือราคาแพง</strong></li>
+</ul>
+<h3 id="84-raid-level-2">8.4 RAID Level 2</h3>
+<p><strong>Characteristics</strong></p>
+<ul>
+<li>ใช้ <strong>parallel access</strong>
+<ul>
+<li>ใน parallel access array <strong>ทุก disk ต้องช่วยทำทุก I/O request</strong></li>
+<li><strong>spindle ของทุก drive หมุนพร้อมกัน (synchronized)</strong> หัวของแต่ละ disk จึงอยู่ตำแหน่งเดียวกันตลอด</li>
+</ul>
+</li>
+<li>ใช้ <strong>data striping</strong>
+<ul>
+<li><strong>strip เล็กมาก</strong> บางครั้งเล็กแค่ <strong>1 byte หรือ 1 word</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>Performance</strong></p>
+<ul>
+<li><strong>คำนวณ error-correcting code จากบิตที่ตรงกันของทุก data disk</strong> แล้วเก็บบิตของ code ไว้ใน <strong>parity disk หลายลูก</strong></li>
+<li>มักใช้ <strong>Hamming code</strong> → <strong>แก้ single-bit error และตรวจจับ double-bit error ได้</strong></li>
+<li><strong>จำนวน redundant disk แปรตาม log ของจำนวน data disk</strong></li>
+<li><strong>คุ้มเฉพาะในสภาพแวดล้อมที่ disk error เกิดบ่อย</strong></li>
+</ul>
+<p><strong>โน้ตภาษาไทยในสไลด์:</strong></p>
+<ul>
+<li>ใช้ <strong>bit-level striping</strong> ร่วมกับ Hamming code (ECC) ที่เก็บแยกไว้ใน disk ต่างหาก</li>
+<li><strong>ซับซ้อนที่สุด และแทบไม่มีใครใช้งานจริงในปัจจุบัน</strong></li>
+</ul>
+<h3 id="85-raid-level-3">8.5 RAID Level 3</h3>
+<p><strong>Redundancy</strong></p>
+<ul>
+<li><strong>ใช้ redundant disk แค่ลูกเดียว</strong> ไม่ว่า array จะใหญ่แค่ไหน</li>
+<li>ใช้ <strong>parallel access</strong> และแบ่งข้อมูลเป็น <strong>strip เล็ก ๆ</strong></li>
+<li><strong>ไม่ใช้ ECC แต่คำนวณ parity bit ธรรมดา</strong> จากบิตตำแหน่งเดียวกันของทุก data disk</li>
+<li><strong>ถ้า drive เสีย:</strong>
+<ul>
+<li>ใช้ parity drive <strong>สร้างข้อมูลคืนจาก disk ที่เหลือ</strong></li>
+<li>พอเปลี่ยน drive ใหม่แล้ว ก็กู้ข้อมูลลง drive ใหม่และทำงานต่อ</li>
+</ul>
+</li>
+</ul>
+<p><strong>Performance</strong></p>
+<ul>
+<li><strong>ได้ data transfer rate สูงมาก</strong></li>
+<li><strong>ตอน disk เสีย ข้อมูลยังใช้ได้ครบ</strong> ในโหมดที่เรียกว่า <strong>reduced mode</strong>
+<ul>
+<li>จะกลับมาทำงานเต็มรูปแบบได้ ต้อง <strong>เปลี่ยน disk และสร้างข้อมูลของ disk ที่เสียขึ้นมาใหม่ทั้งหมด</strong></li>
+</ul>
+</li>
+<li><strong>ในงานแบบ transaction ประสิทธิภาพจะแย่</strong>
+<ul>
+<li>ทุก request ต้องใช้ทุก disk จึงทำหลาย request พร้อมกันไม่ได้ <em>(เสริม)</em></li>
+</ul>
+</li>
+</ul>
+<p><strong>โน้ตในสไลด์:</strong> Byte-level striping + Parity ดิสก์เดียว</p>
+<h3 id="86-raid-level-4">8.6 RAID Level 4</h3>
+<p><strong>Characteristics</strong></p>
+<ul>
+<li>ใช้ <strong>independent access</strong>
+<ul>
+<li><strong>disk แต่ละลูกทำงานอิสระ</strong> → <strong>I/O request หลายตัวทำขนานกันได้</strong></li>
+</ul>
+</li>
+<li>ใช้ <strong>data striping</strong> โดย <strong>strip ค่อนข้างใหญ่</strong></li>
+</ul>
+<p><strong>Performance</strong></p>
+<ul>
+<li><strong>มี write penalty</strong> ตอนเขียน I/O ขนาดเล็ก</li>
+<li><strong>เขียนแต่ละครั้ง</strong> array management software ต้องอัปเดตทั้ง <strong>ข้อมูลผู้ใช้</strong> และ <strong>parity bits ที่เกี่ยวข้อง</strong></li>
+<li>จะคำนวณ parity ใหม่ได้ ต้อง <strong>อ่าน user strip เดิม และ parity strip เดิม</strong> ก่อน</li>
+<li><strong>การเขียน 1 strip จึงต้องใช้ 2 reads + 2 writes</strong></li>
+</ul>
+<p><strong>โน้ตภาษาไทยในสไลด์:</strong></p>
+<ul>
+<li>ใช้ <strong>block-level striping</strong> กับ <strong>parity disk แยกเฉพาะ 1 ตัว</strong></li>
+<li><strong>parity disk กลายเป็นคอขวด</strong> → <strong>RAID 5 จึงมาแก้ปัญหานี้</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 สูตร parity ใหม่ (เสริมจากตำรา): <strong>P' = P ⊕ D_old ⊕ D_new</strong> จึงต้องอ่าน P และ D_old ก่อน (2 reads) แล้วเขียน D_new และ P' (2 writes)</p>
+</blockquote>
+<h3 id="87-raid-level-5">8.7 RAID Level 5</h3>
+<p><strong>Characteristics</strong></p>
+<ul>
+<li><strong>จัดวางคล้าย RAID 4</strong></li>
+<li><strong>ต่างกันตรงที่กระจาย parity strip ไปทุก disk</strong>
+<ul>
+<li>มักใช้แบบ <strong>round-robin</strong></li>
+</ul>
+</li>
+<li><strong>เมื่อกระจาย parity ไปทุก drive</strong> จึง <strong>เลี่ยงคอขวด I/O ของ RAID 4</strong></li>
+</ul>
+<p><strong>โน้ตในสไลด์:</strong> Block-level striping + Parity หมุนเวียน</p>
+<h3 id="88-raid-level-6">8.8 RAID Level 6</h3>
+<p><strong>Characteristics</strong></p>
+<ul>
+<li><strong>คำนวณ parity 2 แบบ</strong> แล้วเก็บไว้คนละ block บน disk คนละลูก (P และ Q)</li>
+<li><strong>ข้อดี:</strong> ข้อมูลพร้อมใช้งาน <strong>สูงมาก</strong>
+<ul>
+<li>ข้อมูลจะหายก็ต่อเมื่อ <strong>disk เสีย 3 ลูกภายในช่วง MTTR</strong> (mean time to repair)</li>
+</ul>
+</li>
+<li><strong>ข้อเสีย:</strong> <strong>write penalty สูงมาก</strong> เพราะเขียนแต่ละครั้งกระทบ <strong>parity 2 block</strong></li>
+</ul>
+<p><strong>โน้ตในสไลด์:</strong> เหมือน RAID 5 แต่ Parity 2 ชุด</p>
+<hr />
+<h2 id="9-table-64-raid-comparison">9. Table 6.4 — RAID Comparison ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Advantages</th>
+<th>Disadvantages</th>
+<th>Applications</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td><strong>I/O เร็วขึ้นมาก</strong> เพราะกระจายภาระไปหลาย channel และหลาย drive; <strong>ไม่มี overhead คำนวณ parity</strong>; ออกแบบง่ายมาก; ทำง่าย</td>
+<td><strong>drive เสียแค่ลูกเดียว ข้อมูลทั้ง array หายหมด</strong></td>
+<td>Video production and editing, Image editing, Pre-press applications, งานที่ต้องการ bandwidth สูง</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>redundancy 100%</strong> disk เสียก็ไม่ต้อง rebuild แค่คัดลอกลง disk ใหม่; บางกรณีรับ drive เสียพร้อมกันหลายลูกได้; ระบบ RAID ที่ออกแบบง่ายที่สุด</td>
+<td><strong>disk overhead สูงที่สุด (100%)</strong> — ไม่คุ้ม</td>
+<td>Accounting, Payroll, Financial, งานที่ต้องการ availability สูงมาก</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>transfer rate สูงมากได้; ยิ่งต้องการ transfer rate สูง อัตรา data disk ต่อ ECC disk ยิ่งดี; controller ง่ายกว่า RAID 3, 4, 5</td>
+<td><strong>อัตรา ECC disk ต่อ data disk สูงมาก</strong> เมื่อ word size เล็ก — ไม่คุ้ม; ต้นทุนเริ่มต้นสูงมาก ต้องมีความต้องการ transfer rate สูงมากจึงคุ้ม</td>
+<td><strong>ไม่มีการใช้เชิงพาณิชย์ / ไม่คุ้มในเชิงพาณิชย์</strong></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>อ่านเร็วมาก เขียนเร็วมาก</strong>; disk เสียแทบไม่กระทบ throughput; อัตรา parity disk ต่อ data disk ต่ำ จึงคุ้ม</td>
+<td><strong>transaction rate ดีที่สุดก็แค่เท่า disk เดี่ยว</strong> (ถ้า spindle synchronized); controller ค่อนข้างซับซ้อน</td>
+<td>Video production and live streaming, Image editing, Video editing, Prepress applications, งานที่ต้องการ throughput สูง</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>read transaction rate สูงมาก</strong>; อัตรา parity disk ต่อ data disk ต่ำ จึงคุ้ม</td>
+<td>controller ซับซ้อน; <strong>write transaction rate และ write aggregate transfer rate แย่ที่สุด</strong>; rebuild ยากและไม่คุ้มเมื่อ disk เสีย</td>
+<td><strong>ไม่มีการใช้เชิงพาณิชย์ / ไม่คุ้มในเชิงพาณิชย์</strong></td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>read transaction rate สูงที่สุด</strong>; อัตรา parity disk ต่อ data disk ต่ำ; aggregate transfer rate ดี</td>
+<td><strong>controller ซับซ้อนที่สุด</strong>; rebuild ยากเมื่อ disk เสีย (เทียบกับ RAID 1)</td>
+<td>File and application servers, Database servers, Web/e-mail/news servers, Intranet servers — <strong>RAID level ที่ใช้ได้หลากหลายที่สุด</strong></td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>ทนความผิดพลาดของข้อมูลได้สูงมาก</strong> และรับ drive เสียพร้อมกันหลายลูกได้</td>
+<td>controller ซับซ้อนกว่า; <strong>overhead ของ controller ในการคำนวณ parity สูงมาก</strong></td>
+<td><strong>เหมาะที่สุดกับงาน mission critical</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-ssd">10. SSD</h2>
+<h3 id="101-ssd-compared-to-hdd">10.1 SSD Compared to HDD</h3>
+<p><strong>ข้อดีของ SSD เมื่อเทียบกับ HDD:</strong></p>
+<ul>
+<li><strong>IOPS สูง</strong> (input/output operations per second)</li>
+<li><strong>ทนทาน (durability)</strong></li>
+<li><strong>อายุการใช้งานยาวกว่า</strong></li>
+<li><strong>กินไฟน้อยกว่า</strong></li>
+<li><strong>เงียบกว่า และเย็นกว่า</strong></li>
+<li><strong>access time และ latency ต่ำกว่า</strong></li>
+</ul>
+<h3 id="102-table-65-comparison-of-solid-state-drives-and-disk-drives">10.2 Table 6.5 — Comparison of Solid State Drives and Disk Drives</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>NAND Flash Drives</strong></th>
+<th><strong>Seagate Laptop Internal HDD</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File copy/write speed</strong></td>
+<td><strong>200–550 Mbps</strong></td>
+<td><strong>50–120 Mbps</strong></td>
+</tr>
+<tr>
+<td><strong>Power draw/battery life</strong></td>
+<td>กินไฟน้อยกว่า เฉลี่ย <strong>2–3 watts</strong> แบตอยู่ได้นานขึ้น <strong>30+ นาที</strong></td>
+<td>กินไฟมากกว่า เฉลี่ย <strong>6–7 watts</strong> เปลืองแบตกว่า</td>
+</tr>
+<tr>
+<td><strong>Storage capacity</strong></td>
+<td>ขนาด notebook ปกติ <strong>ไม่เกิน 512 GB</strong>; desktop สูงสุด <strong>1 TB</strong></td>
+<td>ขนาด notebook ประมาณ <strong>500 GB สูงสุด 2 TB</strong>; desktop สูงสุด <strong>4 TB</strong></td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>ประมาณ <strong>$0.50/GB</strong> (drive 1 TB)</td>
+<td>ประมาณ <strong>$0.15/GB</strong> (drive 4 TB)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="103-figure-68-solid-state-drive-architecture">10.3 Figure 6.8 — Solid State Drive Architecture</h3>
+<p><img loading="lazy" src="img/c6-p031.jpg" alt="สถาปัตยกรรม SSD: host system กับ SSD" /></p>
+<p><strong>Host System</strong></p>
+<ul>
+<li><strong>Operating System Software</strong></li>
+<li><strong>File System Software</strong></li>
+<li><strong>I/O Driver Software</strong></li>
+<li><strong>Interface</strong></li>
+</ul>
+<p><strong>SSD</strong></p>
+<ul>
+<li><strong>Interface</strong></li>
+<li><strong>Controller</strong></li>
+<li><strong>Addressing</strong></li>
+<li><strong>Data buffer/cache</strong></li>
+<li><strong>Error correction</strong></li>
+<li><strong>Flash memory components</strong> (หลายชุด)</li>
+</ul>
+<h3 id="104-practical-issues">10.4 Practical Issues ⭐</h3>
+<p>SSD มี <strong>ปัญหาในการใช้งานจริง 2 ข้อที่ HDD ไม่มี</strong>:</p>
+<p><strong>1) ประสิทธิภาพ SSD มักลดลงเมื่อใช้ไปนาน ๆ</strong></p>
+<ul>
+<li>การแก้ข้อมูลต้องทำทั้ง block:
+<ol>
+<li><strong>อ่านทั้ง block จาก flash มาไว้ใน RAM buffer</strong></li>
+<li><strong>ก่อนเขียนกลับ ต้องลบ (erase) ทั้ง block ของ flash</strong></li>
+<li><strong>เขียนทั้ง block จาก buffer กลับลง flash</strong></li>
+</ol>
+</li>
+</ul>
+<p><strong>2) flash memory ใช้ไม่ได้หลังเขียนครบจำนวนครั้งหนึ่ง</strong></p>
+<ul>
+<li><strong>เทคนิคยืดอายุ:</strong>
+<ul>
+<li><strong>มี cache ข้างหน้า flash</strong> เพื่อ <strong>หน่วงและรวบการเขียน</strong> เป็นชุด</li>
+<li><strong>wear-leveling algorithms</strong> กระจายการเขียนให้ <strong>ทั่วทุก block ของ cell</strong></li>
+<li><strong>bad-block management</strong></li>
+</ul>
+</li>
+<li><strong>flash ส่วนใหญ่ประเมินอายุที่เหลือของตัวเองได้</strong> ระบบจึง <strong>เตรียมรับมือก่อนเสีย</strong> ได้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนแก้คำเดียวในหน้ากระดาษที่ห้ามใช้ยางลบ ต้องถ่ายเอกสารทั้งหน้า ฉีกหน้าเดิม แล้วเขียนหน้าใหม่ทั้งหน้า ทำบ่อย ๆ กระดาษ (cell) ก็เสื่อม <em>(เสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="11-optical-memory">11. Optical Memory</h2>
+<h3 id="111-table-66-optical-disk-products">11.1 Table 6.6 — Optical Disk Products ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ผลิตภัณฑ์</th>
+<th>คำอธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CD</strong></td>
+<td><strong>Compact Disk</strong> — <strong>ลบไม่ได้</strong> เก็บ <strong>เสียงดิจิทัล</strong>; แผ่น <strong>12 cm</strong> เล่นต่อเนื่องได้ <strong>มากกว่า 60 นาที</strong></td>
+</tr>
+<tr>
+<td><strong>CD-ROM</strong></td>
+<td><strong>Compact Disk Read-Only Memory</strong> — ลบไม่ได้ เก็บ <strong>ข้อมูลคอมพิวเตอร์</strong>; แผ่น 12 cm จุ <strong>มากกว่า 650 MB</strong></td>
+</tr>
+<tr>
+<td><strong>CD-R</strong></td>
+<td><strong>CD Recordable</strong> — คล้าย CD-ROM แต่ <strong>ผู้ใช้เขียนได้ครั้งเดียว</strong></td>
+</tr>
+<tr>
+<td><strong>CD-RW</strong></td>
+<td><strong>CD Rewritable</strong> — <strong>ลบและเขียนใหม่ได้หลายครั้ง</strong></td>
+</tr>
+<tr>
+<td><strong>DVD</strong></td>
+<td><strong>Digital Versatile Disk</strong> — เก็บ <strong>วิดีโอแบบบีบอัด</strong> และข้อมูลดิจิทัลปริมาณมาก; มีขนาด <strong>8 และ 12 cm</strong>; แบบสองหน้าจุ <strong>สูงสุด 17 GB</strong>; DVD พื้นฐานคือ <strong>อ่านอย่างเดียว (DVD-ROM)</strong></td>
+</tr>
+<tr>
+<td><strong>DVD-R</strong></td>
+<td><strong>DVD Recordable</strong> — เขียนได้ครั้งเดียว <strong>ใช้ได้เฉพาะแผ่นหน้าเดียว</strong></td>
+</tr>
+<tr>
+<td><strong>DVD-RW</strong></td>
+<td><strong>DVD Rewritable</strong> — ลบและเขียนใหม่ได้หลายครั้ง <strong>ใช้ได้เฉพาะแผ่นหน้าเดียว</strong></td>
+</tr>
+<tr>
+<td><strong>Blu-Ray DVD</strong></td>
+<td><strong>High definition video disk</strong> — ความหนาแน่นสูงกว่า DVD มาก ใช้ <strong>laser 405 nm (blue-violet)</strong>; <strong>1 ชั้น 1 หน้า จุ 25 GB</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="112-compact-disk-read-only-memory-cd-rom">11.2 Compact Disk Read-Only Memory (CD-ROM)</h3>
+<ul>
+<li><strong>audio CD กับ CD-ROM ใช้เทคโนโลยีคล้ายกัน</strong>
+<ul>
+<li><strong>ข้อต่างหลัก:</strong> เครื่องเล่น CD-ROM <strong>ทนทานกว่า</strong> และมี <strong>อุปกรณ์แก้ error</strong> เพื่อให้ข้อมูลถูกต้อง</li>
+</ul>
+</li>
+<li><strong>ขั้นตอนการผลิต:</strong>
+<ol>
+<li>แผ่นทำจาก <strong>resin เช่น polycarbonate</strong></li>
+<li>ข้อมูลดิจิทัลถูก <strong>ประทับเป็นหลุมเล็ก ๆ (pits)</strong> บนผิว polycarbonate</li>
+<li>ใช้ <strong>laser ความเข้มสูงที่โฟกัสละเอียด</strong> สร้าง <strong>master disk</strong></li>
+<li>ใช้ master <strong>ทำแม่พิมพ์ (die)</strong> แล้ว <strong>ปั๊มสำเนา</strong> ลง polycarbonate</li>
+<li><strong>เคลือบผิวที่มีหลุมด้วยชั้นสะท้อนแสง</strong> มักเป็น <strong>อะลูมิเนียมหรือทอง</strong></li>
+<li><strong>เคลือบ acrylic ใส</strong> ทับไว้กันฝุ่นและรอยขีดข่วน</li>
+<li>สุดท้าย <strong>silkscreen ฉลาก</strong> ลงบน acrylic</li>
+</ol>
+</li>
+</ul>
+<h3 id="113-figure-69-cd-operation">11.3 Figure 6.9 — CD Operation</h3>
+<p><img loading="lazy" src="img/c6-p035.jpg" alt="ชั้นของแผ่น CD: label, protective acrylic, aluminum, polycarbonate, pit/land" /></p>
+<ul>
+<li><strong>ชั้นจากบนลงล่าง:</strong>
+<ul>
+<li><strong>Label</strong></li>
+<li><strong>Protective acrylic</strong></li>
+<li><strong>Aluminum</strong></li>
+<li><strong>Polycarbonate plastic</strong></li>
+</ul>
+</li>
+<li><strong>Laser transmit/receive</strong> ยิงจากด้านล่าง แยก <strong>Pit</strong> กับ <strong>Land</strong> จากแสงที่สะท้อนกลับ</li>
+</ul>
+<h3 id="114-figure-610-cd-rom-block-format">11.4 Figure 6.10 — CD-ROM Block Format</h3>
+<p><img loading="lazy" src="img/c6-p036.jpg" alt="รูปแบบ block ของ CD-ROM 2352 bytes" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ขนาด</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SYNC</strong></td>
+<td><strong>12 bytes</strong></td>
+<td>00, FF … FF, 00</td>
+</tr>
+<tr>
+<td><strong>ID</strong> (header)</td>
+<td><strong>4 bytes</strong></td>
+<td><strong>MIN, SEC, Sector, Mode</strong></td>
+</tr>
+<tr>
+<td><strong>Data</strong></td>
+<td><strong>2048 bytes</strong></td>
+<td>ข้อมูลผู้ใช้</td>
+</tr>
+<tr>
+<td><strong>L-ECC</strong> (Layered ECC)</td>
+<td><strong>288 bytes</strong></td>
+<td>แก้ error</td>
+</tr>
+<tr>
+<td><strong>รวม</strong></td>
+<td><strong>2352 bytes</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="115-cd-rom-ข้อดีและข้อเสีย">11.5 CD-ROM: ข้อดีและข้อเสีย</h3>
+<ul>
+<li><strong>เหมาะกับการแจกจ่ายข้อมูลปริมาณมากให้ผู้ใช้จำนวนมาก</strong></li>
+<li><strong>ไม่เหมาะกับงานเฉพาะบุคคล</strong> เพราะการเขียนครั้งแรกมีต้นทุนสูง</li>
+<li><strong>ข้อดี 2 ข้อ:</strong>
+<ul>
+<li><strong>ผลิตแผ่นพร้อมข้อมูลจำนวนมากได้ถูก</strong></li>
+<li><strong>ถอดได้ (removable)</strong> ใช้เก็บข้อมูลระยะยาว (archival) ได้</li>
+</ul>
+</li>
+<li><strong>ข้อเสีย 2 ข้อ:</strong>
+<ul>
+<li><strong>อ่านได้อย่างเดียว อัปเดตไม่ได้</strong></li>
+<li><strong>access time นานกว่า magnetic disk drive มาก</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="116-cd-recordable-cd-r-และ-cd-rewritable-cd-rw">11.6 CD Recordable (CD-R) และ CD Rewritable (CD-RW) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CD-R</strong></th>
+<th><strong>CD-RW</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>หลักการ</td>
+<td><strong>Write-once read-many</strong> (WORM)</td>
+<td><strong>เขียนทับซ้ำได้หลายครั้ง</strong></td>
+</tr>
+<tr>
+<td>เหมาะกับ</td>
+<td>งานที่ต้องการสำเนาข้อมูล <strong>1 ชุดหรือไม่กี่ชุด</strong></td>
+<td>งานที่ต้องแก้ข้อมูล</td>
+</tr>
+<tr>
+<td>กลไก</td>
+<td>แผ่นถูกเตรียมให้ <strong>เขียนได้ครั้งเดียวด้วย laser ความเข้มปานกลาง</strong>; มี <strong>ชั้น dye (สีย้อม)</strong> ที่เปลี่ยนการสะท้อนแสงเมื่อโดน <strong>laser ความเข้มสูง</strong></td>
+<td><strong>Phase change disk:</strong> วัสดุมี <strong>การสะท้อนแสงต่างกันมากใน 2 สถานะ</strong> และ laser เปลี่ยนสถานะไปมาได้</td>
+</tr>
+<tr>
+<td>จุดเด่น</td>
+<td><strong>บันทึกข้อมูลปริมาณมากแบบถาวร</strong></td>
+<td><strong>เขียนใหม่ได้</strong></td>
+</tr>
+<tr>
+<td>ข้อเสีย</td>
+<td>เขียนได้ครั้งเดียว</td>
+<td><strong>วัสดุจะเสื่อมคุณสมบัติอย่างถาวรในที่สุด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>2 สถานะของ phase change:</strong></p>
+<ul>
+<li><strong>Amorphous state:</strong> โมเลกุล <strong>เรียงแบบสุ่ม</strong> → <strong>สะท้อนแสงได้ไม่ดี</strong></li>
+<li><strong>Crystalline state:</strong> <strong>ผิวเรียบ</strong> → <strong>สะท้อนแสงได้ดี</strong></li>
+</ul>
+<h3 id="117-figure-611-cd-rom-and-dvd-rom">11.7 Figure 6.11 — CD-ROM and DVD-ROM</h3>
+<p><img loading="lazy" src="img/c6-p039.jpg" alt="โครงสร้างชั้นของ CD-ROM และ DVD-ROM สองหน้าสองชั้น" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>(a) CD-ROM</strong></th>
+<th><strong>(b) DVD-ROM double-sided, dual-layer</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capacity</strong></td>
+<td><strong>682 MB</strong></td>
+<td><strong>17 GB</strong></td>
+</tr>
+<tr>
+<td>ความหนา</td>
+<td>1.2 mm</td>
+<td>1.2 mm</td>
+</tr>
+<tr>
+<td>ชั้น</td>
+<td>Label, Protective layer (acrylic), Reflective layer (aluminum), Polycarbonate substrate (plastic)</td>
+<td>ต่อด้านมี <strong>Polycarbonate substrate, Semireflective layer, Polycarbonate layer, Fully reflective layer</strong> (side 1 และ side 2)</td>
+</tr>
+<tr>
+<td>การอ่าน</td>
+<td><strong>laser โฟกัสที่หลุมใน polycarbonate หน้า reflective layer</strong></td>
+<td><strong>laser โฟกัสที่หลุมทีละชั้น ทีละหน้า</strong> — <strong>ต้องกลับแผ่นเพื่ออ่านอีกหน้า</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="118-figure-612-optical-memory-characteristics">11.8 Figure 6.12 — Optical Memory Characteristics ⭐</h3>
+<p><img loading="lazy" src="img/c6-p040.jpg" alt="เทียบ beam spot, pit, track ของ CD, DVD, Blu-ray" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CD</strong></th>
+<th><strong>DVD</strong></th>
+<th><strong>Blu-ray</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Laser wavelength</strong></td>
+<td><strong>780 nm</strong></td>
+<td><strong>650 nm</strong></td>
+<td><strong>405 nm</strong></td>
+</tr>
+<tr>
+<td><strong>ขนาด beam spot</strong></td>
+<td><strong>2.11 µm</strong></td>
+<td><strong>1.32 µm</strong></td>
+<td><strong>0.58 µm</strong></td>
+</tr>
+<tr>
+<td><strong>ระยะ data layer</strong> (ตามภาพ)</td>
+<td><strong>1.2 µm</strong></td>
+<td><strong>0.6 µm</strong></td>
+<td><strong>0.1 µm</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ความยาวคลื่นสั้นลง → beam spot เล็กลง → pit และ track ถี่ขึ้น → จุข้อมูลได้มากขึ้น</strong></p>
+<p class="c-warn">⚠️ ในภาพเขียนหน่วยของระยะ data layer เป็น µm (ความหนาจริงของชั้นป้องกันอยู่ในหลัก mm) <em>(ข้อสังเกตเสริม)</em></p>
+</blockquote>
+<hr />
+<h2 id="12-magnetic-tape">12. Magnetic Tape</h2>
+<h3 id="121-หลักการ">12.1 หลักการ</h3>
+<ul>
+<li><strong>อ่านเขียนด้วยเทคนิคเดียวกับ disk</strong></li>
+<li><strong>ตัวกลางคือเทป polyester ที่ยืดหยุ่น</strong> เคลือบด้วยวัสดุที่ทำให้เป็นแม่เหล็กได้
+<ul>
+<li>สารเคลือบอาจเป็น <strong>อนุภาคโลหะบริสุทธิ์ใน binder พิเศษ</strong> หรือ <strong>ฟิล์มโลหะแบบ vapor-plated</strong></li>
+</ul>
+</li>
+<li><strong>ข้อมูลเรียงเป็น track ขนานกันหลายเส้นตามความยาวเทป</strong></li>
+<li><strong>Serial recording:</strong> ข้อมูลเรียงเป็น <strong>ลำดับบิตตามแต่ละ track</strong></li>
+<li><strong>อ่านเขียนเป็นก้อนต่อเนื่อง</strong> เรียกว่า <strong>physical records</strong></li>
+<li><strong>ระหว่าง block มีช่องว่าง</strong> เรียกว่า <strong>inter-record gaps</strong></li>
+</ul>
+<h3 id="122-figure-613-typical-magnetic-tape-features">12.2 Figure 6.13 — Typical Magnetic Tape Features</h3>
+<p><img loading="lazy" src="img/c6-p042.jpg" alt="(a) serpentine recording (b) block layout ที่อ่านเขียน 4 track พร้อมกัน" /></p>
+<ul>
+<li><strong>(a) Serpentine reading and writing</strong>
+<ul>
+<li>เขียน <strong>Track 0</strong> ไปทางหนึ่ง</li>
+<li>พอสุดเทปก็ <strong>กลับทิศ</strong> เขียน <strong>Track 1</strong></li>
+<li>แล้วต่อ <strong>Track 2</strong> … วนไปมาแบบงู</li>
+</ul>
+</li>
+<li><strong>(b) Block layout สำหรับระบบที่อ่านเขียน 4 track พร้อมกัน</strong>
+<ul>
+<li>block 1–4 อยู่คนละ track ในแนวเดียวกัน</li>
+<li>แล้วต่อด้วย block 5–8 และ 9–12 ไปเรื่อย ๆ</li>
+</ul>
+</li>
+</ul>
+<h3 id="123-table-67-lto-tape-drives">12.3 Table 6.7 — LTO Tape Drives</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>LTO-1</th>
+<th>LTO-2</th>
+<th>LTO-3</th>
+<th>LTO-4</th>
+<th>LTO-5</th>
+<th>LTO-6</th>
+<th>LTO-7</th>
+<th>LTO-8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Release date</strong></td>
+<td>2000</td>
+<td>2003</td>
+<td>2005</td>
+<td>2007</td>
+<td>2010</td>
+<td>TBA</td>
+<td>TBA</td>
+<td>TBA</td>
+</tr>
+<tr>
+<td><strong>Compressed capacity</strong></td>
+<td>200 GB</td>
+<td>400 GB</td>
+<td>800 GB</td>
+<td>1600 GB</td>
+<td>3.2 TB</td>
+<td>8 TB</td>
+<td>16 TB</td>
+<td>32 TB</td>
+</tr>
+<tr>
+<td><strong>Compressed transfer rate</strong></td>
+<td>40 MB/s</td>
+<td>80 MB/s</td>
+<td>160 MB/s</td>
+<td>240 MB/s</td>
+<td>280 MB/s</td>
+<td>525 MB/s</td>
+<td>788 MB/s</td>
+<td>1.18 GB/s</td>
+</tr>
+<tr>
+<td><strong>Linear density (bits/mm)</strong></td>
+<td>4880</td>
+<td>7398</td>
+<td>9638</td>
+<td>13250</td>
+<td>15142</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Tape tracks</strong></td>
+<td>384</td>
+<td>512</td>
+<td>704</td>
+<td>896</td>
+<td>1280</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Tape length</strong></td>
+<td>609 m</td>
+<td>609 m</td>
+<td>680 m</td>
+<td>820 m</td>
+<td>846 m</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Tape width (cm)</strong></td>
+<td>1.27</td>
+<td>1.27</td>
+<td>1.27</td>
+<td>1.27</td>
+<td>1.27</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Write elements</strong></td>
+<td>8</td>
+<td>8</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>WORM?</strong></td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Encryption Capable?</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Partitioning?</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>สังเกตแนวโน้ม:</strong></p>
+<ul>
+<li><strong>ความจุเพิ่มเท่าตัวแทบทุกรุ่น</strong></li>
+<li><strong>WORM เริ่มมีตั้งแต่ LTO-3</strong></li>
+<li><strong>Encryption เริ่มมีตั้งแต่ LTO-4</strong></li>
+<li><strong>Partitioning เริ่มมีตั้งแต่ LTO-5</strong></li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="13-summary-chapter-6-external-memory">13. Summary (Chapter 6 External Memory)</h2>
+<p><strong>Magnetic disk</strong></p>
+<ul>
+<li>Magnetic read and write mechanisms</li>
+<li>Data organization and formatting</li>
+<li>Physical characteristics</li>
+<li>Disk performance parameters</li>
+</ul>
+<p><strong>Solid state drives</strong></p>
+<ul>
+<li>SSD compared to HDD</li>
+<li>SSD organization</li>
+<li>Practical issues</li>
+</ul>
+<p><strong>Magnetic tape</strong></p>
+<p><strong>RAID</strong></p>
+<ul>
+<li>RAID level 0 ถึง RAID level 6</li>
+</ul>
+<p><strong>Optical memory</strong></p>
+<ul>
+<li>Compact disk</li>
+<li>Digital versatile disk</li>
+<li>High-definition optical disks</li>
+</ul>
+<blockquote class="callout">
+<p>Q &amp; A (สไลด์สุดท้าย)</p>
+</blockquote>
+<hr />
+<h2 id="14-คำศัพท์สำคัญ">14. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Platter / Substrate</strong></td>
+<td>จาน / วัสดุฐานของจาน (อะลูมิเนียม, แก้ว)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Inductive write head</strong></td>
+<td>หัวเขียนที่ใช้กระแสสร้างสนามแม่เหล็ก</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>MR (magnetoresistive) sensor</strong></td>
+<td>หัวอ่านที่ความต้านทานเปลี่ยนตามทิศทางแม่เหล็ก</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Track / Sector / Cylinder</strong></td>
+<td>วงรอบ / ส่วนย่อยของ track / track เดียวกันทุกจาน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Inter-track / Inter-sector gap</strong></td>
+<td>ช่องว่างกันสัญญาณรบกวน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CAV</strong></td>
+<td>Constant angular velocity — sector ต่อ track เท่ากัน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Multiple zone recording</strong></td>
+<td>zone ด้านนอกมี sector มากกว่า</td>
+<td>จุมากกว่า</td>
+</tr>
+<tr>
+<td><strong>Fixed / Movable head</strong></td>
+<td>หัวต่อ track / หัวเดียวบนแขนเลื่อน</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Winchester head</strong></td>
+<td>aerodynamic foil ลอยด้วยแรงอากาศ ใน drive ปิดผนึก</td>
+<td>ปีกเครื่องบิน</td>
+</tr>
+<tr>
+<td><strong>Seek time</strong></td>
+<td>เวลาเลื่อนหัวไปยัง track</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Rotational delay (latency)</strong></td>
+<td>เวลารอ sector หมุนมาถึง</td>
+<td>ครึ่งรอบโดยเฉลี่ย</td>
+</tr>
+<tr>
+<td><strong>Access time</strong></td>
+<td>seek + rotational delay</td>
+<td>ไม่รวม transfer</td>
+</tr>
+<tr>
+<td><strong>Transfer time</strong></td>
+<td>เวลาอ่านเขียนจริง</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>RAID</strong></td>
+<td>Redundant Array of Independent Disks</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Striping</strong></td>
+<td>แบ่งข้อมูลกระจายหลาย disk</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Mirroring</strong></td>
+<td>ทำสำเนาข้อมูลลง 2 disk</td>
+<td>RAID 1</td>
+</tr>
+<tr>
+<td><strong>Parity</strong></td>
+<td>ค่าตรวจสอบสำหรับกู้ข้อมูล</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Parallel / Independent access</strong></td>
+<td>ทุก disk ช่วยทุก request (RAID 2, 3) / แยกกันทำ (RAID 4–6)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Reduced mode</strong></td>
+<td>ทำงานต่อได้ขณะที่มี disk เสีย (RAID 3)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Write penalty</strong></td>
+<td>ต้องอัปเดต parity ด้วย (2 reads + 2 writes)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>IOPS</strong></td>
+<td>Input/output operations per second</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Wear leveling</strong></td>
+<td>กระจายการเขียนทั่วทุก block</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Bad-block management</strong></td>
+<td>จัดการ block ที่เสีย</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Pit / Land</strong></td>
+<td>หลุม / พื้นเรียบบนแผ่น optical</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>L-ECC</strong></td>
+<td>Layered ECC ใน CD-ROM (288 bytes)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>WORM</strong></td>
+<td>Write-once read-many</td>
+<td>CD-R</td>
+</tr>
+<tr>
+<td><strong>Phase change (amorphous / crystalline)</strong></td>
+<td>สะท้อนแสงไม่ดี / ดี</td>
+<td>CD-RW</td>
+</tr>
+<tr>
+<td><strong>Serial recording / Serpentine</strong></td>
+<td>เขียนเป็นลำดับบิต / กลับทิศทีละ track</td>
+<td>tape</td>
+</tr>
+<tr>
+<td><strong>Physical record / Inter-record gap</strong></td>
+<td>block บนเทป / ช่องว่างระหว่าง block</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LTO</strong></td>
+<td>Linear Tape-Open</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="15-สรุปท้ายบท-จุดที่มักออกสอบ">15. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>Glass substrate มีข้อดี 5 ข้อ:</strong> ผิวสม่ำเสมอ, ตำหนิน้อย, fly height ต่ำลง, แข็งแรง, ทนแรงกระแทก</li>
+<li><strong>การอ่านเขียน:</strong> ทิศทางแม่เหล็กแทน 0/1; หัวเขียนแบบ inductive และหัวอ่านแบบ MR</li>
+<li><strong>Disk layout:</strong> track, sector, cylinder, gap</li>
+<li><strong>CAV vs multiple zone recording</strong></li>
+<li><strong>ST506:</strong> 600 bytes/sector, data 512 bytes, 30 sectors ต่อ track</li>
+<li><strong>Table 6.1 มี 5 หัวข้อ:</strong> head motion, portability, sides, platters, head mechanism (contact, fixed gap, aerodynamic gap)</li>
+<li><strong>หัวแคบ → ต้องอยู่ใกล้จาน → density สูงขึ้น แต่เสี่ยง error มากขึ้น</strong>; Winchester head</li>
+<li><strong>Access time = seek + rotational delay</strong>; ลำดับ wait for device → wait for channel → seek → rotational delay → transfer</li>
+<li><strong>RAID มีลักษณะร่วม 3 ข้อ</strong> และ <strong>ตาราง RAID levels:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>จุดเด่น</th>
+<th>จำนวน disk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>striping ล้วน ไม่มี redundancy</td>
+<td>N</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>mirror</td>
+<td>2N</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Hamming code, bit-level</td>
+<td>N + m</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>parity disk เดียว, parallel</td>
+<td>N + 1</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>block parity disk เดียว (คอขวด)</td>
+<td>N + 1</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>parity หมุนเวียน</td>
+<td>N + 1</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>P + Q (dual parity)</td>
+<td>N + 2</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>RAID 1:</strong> อ่านจากลูกไหนก็ได้, ไม่มี write penalty, ข้อเสียคือแพง</li>
+<li><strong>RAID 3:</strong> reduced mode, งาน transaction แย่</li>
+<li><strong>RAID 4:</strong> write penalty = 2 reads + 2 writes; parity disk เป็นคอขวด → แก้ด้วย RAID 5</li>
+<li><strong>RAID 6:</strong> ข้อมูลหายเมื่อ 3 disk เสียภายใน MTTR; write penalty สูง</li>
+<li><strong>Table 6.4 applications:</strong>
+<ul>
+<li>RAID 0: video/image editing</li>
+<li>RAID 1: accounting, payroll, financial</li>
+<li>RAID 2, 4: ไม่มีใช้เชิงพาณิชย์</li>
+<li>RAID 5: server ทั่วไป (most versatile)</li>
+<li>RAID 6: mission critical</li>
+</ul>
+</li>
+<li><strong>ข้อดี SSD 6 ข้อ</strong> และ <strong>Table 6.5:</strong>
+<ul>
+<li>SSD: 200–550 Mbps, 2–3 W, $0.50/GB</li>
+<li>HDD: 50–120 Mbps, 6–7 W, $0.15/GB</li>
+</ul>
+</li>
+<li><strong>SSD practical issues:</strong>
+<ul>
+<li>ช้าลงเมื่อใช้ไปนาน (read block → erase → write block)</li>
+<li>อายุจำกัด (แก้ด้วย cache, wear leveling, bad-block management)</li>
+</ul>
+</li>
+<li><strong>Optical:</strong>
+<ul>
+<li>CD &gt; 60 นาที; CD-ROM &gt; 650 MB (ในภาพ 682 MB)</li>
+<li>DVD สองหน้าจุ 17 GB; Blu-ray 1 ชั้นจุ 25 GB ด้วย laser 405 nm</li>
+<li>DVD-R/RW ใช้ได้เฉพาะแผ่นหน้าเดียว</li>
+</ul>
+</li>
+<li><strong>CD-ROM:</strong>
+<ul>
+<li>ขั้นตอนการผลิต</li>
+<li>block 2352 bytes (sync 12, ID 4, data 2048, L-ECC 288)</li>
+<li>ข้อดี: ผลิตซ้ำถูก, ถอดได้</li>
+<li>ข้อเสีย: อ่านอย่างเดียว, access ช้า</li>
+</ul>
+</li>
+<li><strong>CD-R ใช้ dye layer (WORM)</strong>; <strong>CD-RW ใช้ phase change</strong> (amorphous สะท้อนแสงไม่ดี, crystalline สะท้อนแสงดี)</li>
+<li><strong>Laser: CD 780 nm, DVD 650 nm, Blu-ray 405 nm</strong></li>
+<li><strong>Tape:</strong> polyester, parallel tracks, serial recording, physical records, inter-record gaps, serpentine</li>
+<li><strong>LTO:</strong> WORM ตั้งแต่ LTO-3, encryption ตั้งแต่ LTO-4, partitioning ตั้งแต่ LTO-5</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access time vs Transfer time</td>
+<td>seek + rotational vs ช่วงอ่านเขียนจริง</td>
+</tr>
+<tr>
+<td>CAV vs Multiple zone</td>
+<td>sector ต่อ track เท่ากัน vs zone นอกมี sector มากกว่า</td>
+</tr>
+<tr>
+<td>Fixed-head vs Movable-head</td>
+<td>หัวต่อ track vs หัวเดียวเลื่อนได้</td>
+</tr>
+<tr>
+<td>RAID 0 vs RAID 1</td>
+<td>striping ไม่มีสำรอง vs mirror</td>
+</tr>
+<tr>
+<td>RAID 2 vs RAID 3</td>
+<td>Hamming code หลาย disk vs parity disk เดียว</td>
+</tr>
+<tr>
+<td>RAID 3 vs RAID 4</td>
+<td>parallel access strip เล็ก vs independent access strip ใหญ่</td>
+</tr>
+<tr>
+<td>RAID 4 vs RAID 5</td>
+<td>parity disk เดียว (คอขวด) vs parity กระจาย</td>
+</tr>
+<tr>
+<td>RAID 5 vs RAID 6</td>
+<td>parity 1 ชุด (N+1) vs 2 ชุด (N+2)</td>
+</tr>
+<tr>
+<td>CD-R vs CD-RW</td>
+<td>dye เขียนครั้งเดียว vs phase change เขียนซ้ำได้</td>
+</tr>
+<tr>
+<td>Amorphous vs Crystalline</td>
+<td>สะท้อนแสงไม่ดี vs สะท้อนแสงดี</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+    <nav class="pager"><a class="pg prev" href="../chapter05/index.html"><small>← บทก่อนหน้า</small><span>Chapter V — I/O Systems</span></a><a class="pg next" href="../chapter07/index.html"><small>บทถัดไป →</small><span>Chapter VII — Computing Unit (Pipelining)</span></a></nav>
+  </main>
+</div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

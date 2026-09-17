@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Chapter 07 - Computing Unit</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Chapter 07 - Computing Unit (Pipelining)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ===== ความจำ (Recall) 12 ข้อ =====
+  {
+    type: "recall",
+    q: "RISC-V pipeline มีกี่ stage และมีอะไรบ้าง?",
+    choices: [
+      "4 stage: IF, ID, EX, WB",
+      "3 stage: Fetch, Decode, Execute",
+      "5 stage: IF, ID, EX, MEM, WB",
+      "6 stage: IF, ID, EX, MEM, WB, CM"
+    ],
+    correct: 2,
+    explain: [
+      "ขาด stage MEM ไป ไม่ตรงกับที่สไลด์ระบุ",
+      "เป็นแนวคิดกว้าง ๆ ของ CPU ทั่วไป ไม่ตรงกับจำนวน stage ที่ RISC-V pipeline แบ่งไว้จริง",
+      "ถูก — สไลด์ระบุ 5 stage คือ IF (fetch), ID (decode & register read), EX (execute/calc address), MEM (access memory), WB (write back)",
+      "ไม่มี stage ชื่อ CM ในสไลด์นี้ และจำนวน stage ก็ไม่ตรง"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ระยะเวลาสำหรับการอ่าน/เขียน register ตามตัวอย่างในสไลด์คือกี่ ps?",
+    choices: ["100ps", "200ps", "300ps", "800ps"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุ 100ps สำหรับ register read/write",
+      "200ps คือเวลาของ stage อื่น (IF, EX, MEM) ไม่ใช่ register read/write",
+      "ไม่ตรงกับตัวเลขในสไลด์",
+      "800ps คือเวลารวมของคำสั่ง ld แบบ single-cycle ไม่ใช่เวลาต่อการอ่าน/เขียน register ครั้งเดียว"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ระยะเวลาของ stage อื่น ๆ (เช่น IF, EX, MEM) นอกเหนือจาก register read/write ตามสไลด์คือกี่ ps?",
+    choices: ["100ps", "150ps", "250ps", "200ps"],
+    correct: 3,
+    explain: [
+      "100ps คือเวลาของ register read/write ไม่ใช่ stage อื่น",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "ถูก — สไลด์ระบุ 200ps สำหรับ stage อื่นนอกเหนือจาก register read/write"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ในตารางเปรียบเทียบของสไลด์ คำสั่ง ld (load) ใช้เวลารวมกี่ ps แบบ single-cycle?",
+    choices: ["500ps", "800ps", "700ps", "600ps"],
+    correct: 1,
+    explain: [
+      "500ps คือเวลารวมของคำสั่ง beq ไม่ใช่ ld",
+      "ถูก — ld ผ่านครบทุก stage (IF 200 + reg read 100 + EX 200 + MEM 200 + WB 100) รวม 800ps",
+      "700ps คือเวลารวมของคำสั่ง sd ไม่ใช่ ld",
+      "600ps คือเวลารวมของคำสั่ง R-format ไม่ใช่ ld"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Clock cycle time (Tc) ของ pipelined datapath ในตัวอย่างของสไลด์คือกี่ ps?",
+    choices: ["200ps", "100ps", "500ps", "800ps"],
+    correct: 0,
+    explain: [
+      "ถูก — pipeline ถูกจำกัดด้วย stage ที่ใช้เวลานานที่สุดคือ 200ps ต่อ cycle",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "ไม่ตรงกับตัวเลขที่สไลด์ระบุ",
+      "800ps คือ Tc ของ single-cycle datapath ไม่ใช่ pipelined datapath"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RISC-V ออกแบบให้ทุกคำสั่งมีขนาดกี่บิต?",
+    choices: ["16-bit", "64-bit", "1-17 byte (ผันแปร)", "32-bit"],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "1-17 byte คือลักษณะของ x86 ซึ่งสไลด์ยกมาเปรียบเทียบว่าต่างจาก RISC-V",
+      "ถูก — สไลด์ระบุว่าทุกคำสั่งของ RISC-V มีขนาด 32-bit เท่ากันหมด"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Hazard ในสไลด์นี้แบ่งเป็นกี่ประเภทหลัก อะไรบ้าง?",
+    choices: [
+      "2 ประเภท: Data, Control",
+      "3 ประเภท: Structural, Data, Control",
+      "4 ประเภท: Structural, Data, Control, Memory",
+      "3 ประเภท: Fetch, Decode, Execute"
+    ],
+    correct: 1,
+    explain: [
+      "ขาด Structural hazard ไป",
+      "ถูก — สไลด์ระบุ 3 ประเภทคือ Structural, Data, และ Control hazard",
+      "ไม่มี Memory hazard เป็นประเภทแยกต่างหากในสไลด์นี้",
+      "Fetch, Decode, Execute คือ stage ของ pipeline ไม่ใช่ประเภทของ hazard"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Forwarding มีอีกชื่อเรียกว่าอะไรตามสไลด์?",
+    choices: ["Stalling", "Flushing", "Bypassing", "Scheduling"],
+    correct: 2,
+    explain: [
+      "Stalling คือการหยุดรอ เป็นคนละแนวคิดกับ forwarding",
+      "Flushing คือการล้างคำสั่งที่ fetch ผิดทิ้ง ไม่ใช่ชื่อของ forwarding",
+      "ถูก — สไลด์ระบุ \"Forwarding (aka Bypassing)\"",
+      "Scheduling คือการเรียงลำดับคำสั่งใหม่โดย compiler ไม่ใช่ชื่อของ forwarding"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตัวอย่าง code scheduling ในสไลด์ (คำนวณ a=b+e, c=b+f) ลดจำนวน cycle จากกี่ cycle เหลือกี่ cycle?",
+    choices: ["13 → 11", "15 → 10", "12 → 9", "13 → 8"],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ระบุว่าลดจาก 13 cycle เหลือ 11 cycle หลังจัดเรียงคำสั่งใหม่",
+      "ไม่ตรงกับตัวเลขในสไลด์",
+      "ไม่ตรงกับตัวเลขในสไลด์",
+      "ไม่ตรงกับตัวเลขในสไลด์"
+    ]
+  },
+  {
+    type: "recall",
+    q: "RISC-V pipeline เลือกทายผล branch แบบใดเป็นค่าเริ่มต้น (default)?",
+    choices: [
+      "predict taken เสมอ",
+      "สุ่มทายแบบ 50/50",
+      "ไม่ทายเลย รอผลจริงเสมอ",
+      "predict not taken เสมอ"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่ตรงกับที่สไลด์ระบุ",
+      "ไม่มีข้อมูลนี้ในสไลด์",
+      "การรอผลจริงเสมอจะทำให้เสียเวลามาก ซึ่งเป็นปัญหาที่ branch prediction ถูกออกแบบมาแก้",
+      "ถูก — สไลด์ระบุ \"Can predict branches not taken\" เป็นค่าเริ่มต้นของ RISC-V pipeline นี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามตาราง Forwarding Conditions ค่า ForwardA = 00 หมายถึง operand ตัวแรกของ ALU มาจากไหน?",
+    choices: [
+      "EX/MEM pipeline register",
+      "register file ปกติผ่าน ID/EX",
+      "MEM/WB pipeline register",
+      "Memory โดยตรง"
+    ],
+    correct: 1,
+    explain: [
+      "EX/MEM คือค่า ForwardA = 10 ไม่ใช่ 00",
+      "ถูก — ForwardA/B = 00 หมายถึงใช้ค่าจาก ID/EX ปกติ (มาจาก register file) ไม่มีการ forward",
+      "MEM/WB คือค่า ForwardA = 01 ไม่ใช่ 00",
+      "ไม่มีตัวเลือกใดในตารางที่หมายถึงการดึงจาก memory โดยตรงแบบนี้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Static branch prediction ในสไลด์ ทายว่า backward branch (กระโดดถอยหลัง เช่นในลูป) จะมีผลเป็นอย่างไร?",
+    choices: [
+      "ขึ้นอยู่กับค่าที่ compiler กำหนดเท่านั้น",
+      "Not taken (ไม่กระโดด)",
+      "Taken (กระโดด)",
+      "ไม่มีการทายในกรณีนี้"
+    ],
+    correct: 2,
+    explain: [
+      "สไลด์ระบุกฎการทายที่ชัดเจน ไม่ได้ขึ้นอยู่กับ compiler เพียงอย่างเดียว",
+      "Not taken คือค่าที่ทายสำหรับ forward branch ไม่ใช่ backward branch",
+      "ถูก — สไลด์ระบุ \"Predict backward branches taken\"",
+      "static prediction ทายทุก branch รวมถึง backward branch ด้วย"
+    ]
+  },
+
+  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
+  {
+    type: "understand",
+    q: "ทำไม pipelining เพิ่ม throughput แต่ latency ของแต่ละคำสั่งเดี่ยว ๆ ไม่ได้สั้นลง?",
+    choices: [
+      "เพราะคำสั่งที่ซับซ้อนจะถูกข้าม stage บางอันไปเลย",
+      "เพราะ pipelining ลดจำนวน stage ที่คำสั่งต้องผ่าน",
+      "เพราะ pipelining เพิ่มความเร็วสัญญาณนาฬิกาของแต่ละ stage ให้เร็วขึ้นเป็นสองเท่า",
+      "เพราะคำสั่งแต่ละตัวยังต้องผ่านทุก stage ครบเหมือนเดิม เพียงแต่หลายคำสั่งซ้อนกันในเวลาเดียวกัน"
+    ],
+    correct: 3,
+    explain: [
+      "ทุกคำสั่งยังต้องผ่านทุก stage ตามปกติ ไม่มีการข้าม stage",
+      "pipelining ไม่ได้ลดจำนวน stage แต่ทำให้หลาย stage ทำงานคู่ขนานกันในคนละคำสั่ง",
+      "ไม่เกี่ยวกับความเร็วสัญญาณนาฬิกาของแต่ละ stage โดยตรง เป็นเรื่องของการซ้อนงาน",
+      "ถูก — คำสั่งหนึ่งยังต้องผ่านครบ 5 stage เหมือนเดิม (latency เท่าเดิม) แต่เพราะหลายคำสั่งไหลซ้อนกัน จำนวนคำสั่งที่เสร็จต่อหน่วยเวลาจึงสูงขึ้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม RISC-V ต้องกำหนดให้ทุกคำสั่งมีขนาดเท่ากัน (32-bit) เพื่อรองรับ pipeline?",
+    choices: [
+      "เพื่อให้โปรแกรมมีขนาดไฟล์เล็กลง",
+      "เพื่อให้ fetch และ decode คำสั่งได้ง่ายและเสร็จภายในหนึ่ง cycle เสมอ",
+      "เพื่อให้ตัวแปรในโปรแกรมเก็บค่าได้มากขึ้น",
+      "เพื่อลดจำนวน register ที่ต้องใช้"
+    ],
+    correct: 1,
+    explain: [
+      "ขนาดคำสั่งคงที่ไม่ได้แปลว่าโปรแกรมมีขนาดเล็กลง อาจใหญ่กว่าด้วยซ้ำเมื่อเทียบกับ ISA ที่ยืดหยุ่นกว่า",
+      "ถูก — ถ้าคำสั่งมีความยาวไม่แน่นอน (แบบ x86) การ fetch/decode ในเวลาคงที่แต่ละ cycle จะทำได้ยากกว่ามาก",
+      "ไม่เกี่ยวกับขนาดของตัวแปรในโปรแกรม",
+      "ไม่เกี่ยวกับจำนวน register โดยตรง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม Structural hazard จึงเกิดขึ้นถ้าใช้ memory ตัวเดียวสำหรับทั้ง instruction และ data?",
+    choices: [
+      "เพราะคำสั่ง load/store ต้องแย่ง memory ตัวเดียวกับการ fetch คำสั่งถัดไปในจังหวะเดียวกัน",
+      "เพราะ memory ตัวเดียวมีความจุน้อยเกินไปเสมอ",
+      "เพราะ CPU ไม่รองรับการอ่าน memory มากกว่า 1 ครั้งต่อโปรแกรม",
+      "เพราะข้อมูลกับคำสั่งต้องมีขนาดเท่ากันเป๊ะ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — เมื่อคำสั่ง load/store ต้องเข้าถึงข้อมูลใน MEM stage พร้อมกับที่คำสั่งถัดไปต้องถูก fetch จาก memory ตัวเดียวกัน จะเกิดการแย่งทรัพยากร",
+      "ไม่เกี่ยวกับความจุ แต่เกี่ยวกับการที่ทรัพยากรเดียวถูกใช้พร้อมกันสองจุด",
+      "ไม่ใช่เหตุผลที่สไลด์กล่าวถึง ปัญหาคือใช้พร้อมกันไม่ได้ ไม่ใช่ทำไม่ได้เลย",
+      "ไม่เกี่ยวกับขนาดของข้อมูลหรือคำสั่ง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม forwarding ถึงช่วยลด stall จาก data hazard ได้?",
+    choices: [
+      "เพราะเปลี่ยนลำดับคำสั่งในโปรแกรมใหม่ทั้งหมด",
+      "เพราะลบคำสั่งที่ทำให้เกิด hazard ทิ้งไปเลย",
+      "เพราะส่งค่าที่คำนวณเสร็จให้คำสั่งถัดไปใช้ได้ทันที โดยไม่ต้องรอเขียนเข้า register ก่อน",
+      "เพราะเพิ่มความเร็วสัญญาณนาฬิกาของทั้งระบบ"
+    ],
+    correct: 2,
+    explain: [
+      "การเปลี่ยนลำดับคำสั่งคือ code scheduling ซึ่งเป็นคนละวิธีกับ forwarding",
+      "forwarding ไม่ได้ลบคำสั่งใด ๆ ทิ้ง เพียงแค่ส่งข้อมูลให้เร็วขึ้น",
+      "ถูก — forwarding ส่งผลลัพธ์ข้ามจาก pipeline register (เช่น EX/MEM) ไปให้คำสั่งถัดไปใช้ได้เลย โดยไม่ต้องรอรอบ WB",
+      "forwarding ไม่เกี่ยวกับความเร็วสัญญาณนาฬิกาของระบบ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม load-use hazard ถึง forwarding แก้ไม่ได้เสมอไป ต้อง stall แทน?",
+    choices: [
+      "เพราะ load เป็นคำสั่งที่ห้ามใช้ forwarding ในทุกกรณี",
+      "เพราะข้อมูลจาก memory ยังไม่พร้อมตอนที่คำสั่งถัดไปต้องใช้ ส่งย้อนเวลากลับไปให้ไม่ได้",
+      "เพราะ forwarding ใช้ได้เฉพาะกับคำสั่ง ALU เท่านั้นตามกฎที่ตายตัว",
+      "เพราะ stall ทำให้โปรแกรมทำงานเร็วขึ้นกว่าการ forward"
+    ],
+    correct: 1,
+    explain: [
+      "load ก็ใช้ forwarding ได้ในหลายกรณี เพียงแต่กรณี load-use ที่ติดกันทันทีทำไม่ได้",
+      "ถูก — ค่าจาก load ยังไม่ถูกอ่านออกมาจาก memory เสร็จตอนที่คำสั่งถัดไปต้องการใช้ ทำให้ forward ไปให้ทันเวลาไม่ได้",
+      "forwarding ใช้ได้กับหลายสถานการณ์ ไม่ได้จำกัดเฉพาะคำสั่ง ALU",
+      "stall ไม่ได้ทำให้เร็วขึ้น แต่เป็นทางเลือกที่จำเป็นเมื่อ forwarding ทำไม่ทัน"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม code scheduling (เรียงลำดับคำสั่งใหม่โดย compiler) ถึงช่วยลด stall ได้โดยไม่ต้องเปลี่ยนฮาร์ดแวร์?",
+    choices: [
+      "เพราะเพิ่มจำนวน stage ของ pipeline ให้มากขึ้น",
+      "เพราะลบคำสั่ง load ออกจากโปรแกรมไปเลย",
+      "เพราะเปลี่ยนขนาดคำสั่งให้เล็กลง",
+      "เพราะแทรกคำสั่งอื่นคั่นระหว่าง load กับคำสั่งที่ใช้ผล ทำให้ผลพร้อมพอดีโดยไม่ต้องหยุดรอ"
+    ],
+    correct: 3,
+    explain: [
+      "code scheduling เป็นเรื่องของ compiler ไม่เกี่ยวกับการเปลี่ยนโครงสร้างฮาร์ดแวร์",
+      "โปรแกรมยังต้องใช้ผลจาก load เดิม ไม่สามารถลบทิ้งได้",
+      "ไม่เกี่ยวกับขนาดคำสั่ง เป็นเรื่องของลำดับการจัดเรียง",
+      "ถูก — การแทรกคำสั่งที่ไม่เกี่ยวข้องคั่นไว้ ทำให้เวลาผ่านไปพอดีจน load เสร็จก่อนถูกใช้ จึงไม่ต้อง stall"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม control hazard ถึงรุนแรงขึ้นถ้า pipeline มีจำนวน stage มากขึ้น (ยาวขึ้น)?",
+    choices: [
+      "เพราะ pipeline ยาวขึ้นทำให้รู้ผล branch ช้าลง คำสั่งที่ fetch ล่วงหน้าต้อง flush ทิ้งมากขึ้นถ้าทายผิด",
+      "เพราะ pipeline ที่ยาวขึ้นจะไม่มี hazard ประเภท control อีกต่อไป",
+      "เพราะจำนวน stage ที่มากขึ้นทำให้ forwarding ทำไม่ได้เลย",
+      "เพราะ pipeline ที่ยาวขึ้นจะลดความเร็วสัญญาณนาฬิกาลงเสมอ"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ยิ่งมีหลาย stage ก่อนจะรู้ผล branch ยิ่งมีคำสั่งถูก fetch ล่วงหน้าไปมากขึ้น ถ้าทายผิดก็ต้อง flush ทิ้งมากขึ้นตามไปด้วย",
+      "ตรงข้ามกับความจริง — pipeline ที่ยาวขึ้นยิ่งเสี่ยงต่อ control hazard มากขึ้น ไม่ใช่หายไป",
+      "forwarding ยังทำได้ เพียงแต่ต้องออกแบบ path เพิ่มตามจำนวน stage",
+      "ความยาวของ pipeline ไม่ได้กำหนดความเร็วสัญญาณนาฬิกาโดยตรงเสมอไป"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม double data hazard ต้อง priority ค่าจาก EX/MEM มากกว่า MEM/WB?",
+    choices: [
+      "เพราะ EX/MEM ใช้ได้เฉพาะกับคำสั่ง load เท่านั้น",
+      "เพราะ MEM/WB pipeline register ไม่สามารถเก็บค่าได้เลย",
+      "เพราะค่าใน EX/MEM คือผลลัพธ์ล่าสุดที่เพิ่งทำเสร็จ ควรใช้แทนค่าเก่าใน MEM/WB",
+      "เพราะการเลือก MEM/WB ก่อนจะทำให้ระบบ error ทันที"
+    ],
+    correct: 2,
+    explain: [
+      "EX/MEM ใช้ได้กับหลายประเภทคำสั่ง ไม่ได้จำกัดเฉพาะ load",
+      "MEM/WB ก็เก็บค่าได้ปกติ เพียงแต่เป็นค่าที่เก่ากว่า EX/MEM",
+      "ถูก — เมื่อมีหลายคำสั่งเขียน register เดียวกันติด ๆ กัน ค่าจาก EX/MEM คือค่าล่าสุดที่ควรใช้ ไม่ใช่ค่าเก่าจาก MEM/WB",
+      "ไม่ทำให้เกิด error แต่จะทำให้ได้ค่าที่ไม่ใช่ค่าล่าสุด (ผิดพลาดทางตรรกะ) ถ้าเลือกผิดลำดับ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมการย้ายฮาร์ดแวร์คำนวณผล branch มาไว้ที่ ID stage ถึงช่วยลดปัญหา control hazard?",
+    choices: [
+      "เพราะทำให้ไม่ต้องมีการ fetch คำสั่งใด ๆ อีกเลย",
+      "เพราะรู้ผลของ branch เร็วขึ้น ทำให้คำสั่งที่ fetch ผิดไปก่อนต้อง flush น้อยลง",
+      "เพราะลบ stage EX ออกจาก pipeline ไปเลย",
+      "เพราะทำให้ไม่ต้องมี branch prediction อีกต่อไป"
+    ],
+    correct: 1,
+    explain: [
+      "ยังต้อง fetch คำสั่งตามปกติ เพียงแต่รู้ผลตรวจสอบเร็วขึ้น",
+      "ถูก — ยิ่งรู้ผล branch เร็วเท่าไหร่ (เช่นที่ ID แทนที่จะเป็น stage หลัง ๆ) จำนวนคำสั่งที่ fetch ผิดไปก่อนก็ยิ่งน้อยลง",
+      "stage EX ยังคงอยู่สำหรับคำสั่งประเภทอื่น ไม่ได้ถูกลบออก",
+      "ยังต้องมี branch prediction อยู่ เพียงแต่ความเสียหายเมื่อทายผิดจะน้อยลง"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบายความแตกต่างระหว่าง static กับ dynamic branch prediction ได้ถูกต้อง?",
+    choices: [
+      "Static ทายจากพฤติกรรมทั่วไปของโค้ดที่คงที่ ส่วน Dynamic ให้ฮาร์ดแวร์เก็บประวัติจริงของแต่ละ branch แล้วทายตามแนวโน้ม",
+      "Static กับ Dynamic มีวิธีทายเหมือนกันทุกประการ",
+      "Static ใช้ฮาร์ดแวร์เก็บประวัติ ส่วน Dynamic ทายจากโครงสร้างโค้ดทั่วไป",
+      "Static ใช้ได้เฉพาะกับ loop เท่านั้น ส่วน Dynamic ใช้ได้กับทุกคำสั่ง"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — ตรงกับนิยามในสไลด์ทั้งสองแบบ",
+      "สองแบบนี้ต่างกันชัดเจนตามที่สไลด์อธิบาย",
+      "สลับความหมายกัน ผิด — Dynamic ต่างหากที่ใช้ฮาร์ดแวร์เก็บประวัติ",
+      "Static ก็ใช้ได้กับ branch ทั่วไป ไม่ได้จำกัดเฉพาะ loop"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมเมื่อเกิด stall ต้องบังคับค่า control ใน ID/EX register ให้เป็น 0 ทั้งหมด (เหมือนแทรก nop)?",
+    choices: [
+      "เพราะเป็นข้อบังคับของภาษาแอสเซมบลีที่ต้องทำทุกครั้ง",
+      "เพื่อให้คำสั่งนั้นถูกลบออกจากโปรแกรมถาวร",
+      "เพื่อเพิ่มความเร็วในการประมวลผลของคำสั่งนั้น",
+      "เพื่อไม่ให้คำสั่งที่ยังไม่พร้อมไปกระทบ stage ถัดไป (EX, MEM, WB จะไม่ทำอะไรเลยรอบนั้น)"
+    ],
+    correct: 3,
+    explain: [
+      "ไม่ใช่ข้อบังคับของภาษา แต่เป็นกลไกของฮาร์ดแวร์ pipeline",
+      "คำสั่งยังอยู่ในโปรแกรม เพียงแค่ยังไม่ถูกดำเนินการต่อในรอบนั้น จะถูก decode ใหม่ในรอบถัดไป",
+      "การ stall คือการหยุดชั่วคราว ไม่ได้เพิ่มความเร็ว",
+      "ถูก — การตั้งค่า control เป็น 0 ทำให้ stage ถัดไปไม่ทำงานอะไรเลยในรอบนั้น (เหมือนมี nop) ป้องกันไม่ให้ผลลัพธ์ผิดพลาดหลุดออกไป"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไม RISC-V ISA ที่มี load/store addressing แบบเรียบง่ายถึงเหมาะกับ 5-stage pipeline?",
+    choices: [
+      "เพราะทำให้ไม่ต้องมีขั้นตอน WB เลย",
+      "เพราะทำให้ไม่ต้องมีขั้นตอน MEM เลย",
+      "เพราะคำนวณ address เสร็จพอดีที่ EX แล้วเข้าถึง memory จริงที่ MEM โดยไม่ต้องเพิ่ม stage ใหม่",
+      "เพราะลดจำนวนคำสั่งในโปรแกรมให้เหลือน้อยที่สุด"
+    ],
+    correct: 2,
+    explain: [
+      "WB stage ยังจำเป็นสำหรับเขียนผลลัพธ์กลับ register",
+      "MEM stage ยังจำเป็นสำหรับคำสั่ง load/store โดยเฉพาะ",
+      "ถูก — การคำนวณ address เสร็จพอดีที่ EX แล้วต่อด้วยการเข้าถึง memory ที่ MEM ทำให้ทั้ง 5 stage ใช้งานได้ลงตัวโดยไม่ต้องเพิ่ม stage ใหม่",
+      "ไม่เกี่ยวกับจำนวนคำสั่งในโปรแกรม แต่เกี่ยวกับการจัดสรร stage ให้ลงตัว"
+    ]
+  },
+
+  // ===== การนำไปใช้ (Application) 6 ข้อ =====
+  {
+    type: "apply",
+    q: "ถ้ามีลำดับคำสั่ง add x19,x0,x1 ตามด้วย sub x2,x19,x3 ทันที (สมมติว่าระบบไม่มี forwarding) จะเกิดอะไรขึ้น?",
+    choices: [
+      "ต้อง stall รอจนกว่า x19 จะถูกเขียนกลับ register ก่อน sub ถึงจะอ่านค่าได้ถูกต้อง",
+      "ระบบจะรันสองคำสั่งนี้พร้อมกันโดยไม่มีปัญหาอะไรเลย",
+      "ค่า x19 จะถูกคำนวณผิดพลาดเสมอไม่ว่าจะทำอย่างไร",
+      "โปรแกรมจะหยุดทำงานทันที (crash)"
+    ],
+    correct: 0,
+    explain: [
+      "ถูก — นี่คือ data hazard แบบตรงไปตรงมา ถ้าไม่มี forwarding ต้องรอจน x19 ถูกเขียนกลับ register ก่อน sub ถึงจะอ่านค่าที่ถูกต้องได้",
+      "ถ้าไม่มี forwarding และไม่ stall จะได้ค่า x19 ที่ยังไม่อัปเดต ทำให้ผลลัพธ์ผิด",
+      "ปัญหานี้แก้ได้ด้วย stall หรือ forwarding ไม่ใช่ว่าจะผิดพลาดเสมอไม่ว่าจะทำอย่างไร",
+      "เป็นเพียง data hazard ธรรมดา ไม่ได้ทำให้โปรแกรม crash"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ในตัวอย่างซักผ้าของสไลด์ ถ้าซักไปเรื่อย ๆ แบบไม่หยุด (non-stop) speedup ตามหลักการที่เรียนมาจะเข้าใกล้ค่าใด?",
+    choices: [
+      "จำนวนรอบการซักทั้งหมด",
+      "จำนวน stage ของ pipeline (ในตัวอย่างคือ 4)",
+      "ค่าคงที่ 2.3 เสมอไม่ว่ากรณีใด",
+      "ค่าที่น้อยกว่า 1 เสมอ"
+    ],
+    correct: 1,
+    explain: [
+      "speedup ไม่ได้ขึ้นกับจำนวนรอบทั้งหมดโดยตรง แต่เข้าใกล้ค่าคงที่ตามจำนวน stage",
+      "ถูก — สไลด์ระบุว่า non-stop speedup = 2n/(0.5n+1.5) ซึ่งเข้าใกล้จำนวน stage (4) เมื่อ n มีค่ามากขึ้นเรื่อย ๆ",
+      "2.3 คือ speedup ของกรณี 4 loads เท่านั้น ไม่ใช่ค่าที่ non-stop จะเข้าใกล้",
+      "speedup ที่มากกว่า 1 หมายถึงเร็วขึ้น ซึ่งเป็นเป้าหมายของ pipelining ไม่ใช่ค่าน้อยกว่า 1"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมมีคำสั่ง ld x1,0(x0) ตามด้วย add x2,x1,x3 ทันที (ใช้ค่า x1 ที่เพิ่ง load) ควรแก้ปัญหานี้อย่างไรตามหลักการในสไลด์?",
+    choices: [
+      "ลบคำสั่ง add ทิ้งไปเลย",
+      "Forward ค่าได้ทันทีโดยไม่ต้อง stall เลย เพราะ forwarding แก้ได้ทุกกรณี",
+      "Stall 1 cycle รอ MEM อ่านข้อมูลเสร็จ แล้วค่อย forward ค่าไปให้ EX ของคำสั่งถัดไป",
+      "เปลี่ยนคำสั่ง ld ให้กลายเป็นคำสั่ง store แทน"
+    ],
+    correct: 2,
+    explain: [
+      "โปรแกรมยังต้องใช้ผลจาก add ตามที่ตั้งใจไว้ ลบทิ้งไม่ได้",
+      "load-use hazard คือกรณีที่ forwarding อย่างเดียวไม่พอ ต้อง stall ก่อนเสมอ 1 cycle",
+      "ถูก — นี่คือ load-use hazard ซึ่งต้อง stall 1 cycle ก่อน แล้วค่อย forward ค่าที่ได้จาก MEM ไปให้ EX ของคำสั่งถัดไป",
+      "การเปลี่ยน ld เป็น store จะเปลี่ยนความหมายของโปรแกรมไปเลย ไม่ใช่การแก้ hazard"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ต้องการคำนวณ a=b+e และ c=b+f ตามตัวอย่าง code scheduling ในสไลด์ ควรจัดเรียงคำสั่งอย่างไรจึงลด stall ได้?",
+    choices: [
+      "สลับคำสั่ง store ให้มาก่อนคำสั่ง load เสมอ",
+      "เรียงคำสั่ง load ทั้งหมดไว้ท้ายสุดของโปรแกรม",
+      "ลบคำสั่ง load ที่ซ้ำกันออกทั้งหมด",
+      "แทรกคำสั่ง load อื่นที่ยังไม่เกี่ยวข้องคั่นระหว่าง load กับคำสั่งที่ใช้ผลลัพธ์ทันที"
+    ],
+    correct: 3,
+    explain: [
+      "การสลับ store มาก่อน load อาจทำให้ผลลัพธ์ผิดถ้า store นั้นต้องใช้ค่าที่ยังไม่ได้ load มา",
+      "ถ้าเรียง load ไว้ท้ายสุด ผลลัพธ์ที่ต้องใช้ก่อนหน้าจะยังไม่มี ทำให้โปรแกรมทำงานผิดลำดับ",
+      "คำสั่ง load ในตัวอย่างต่างก็อ่านค่าคนละตำแหน่ง ไม่ใช่คำสั่งซ้ำที่ลบทิ้งได้",
+      "ถูก — ตามตัวอย่างในสไลด์ การแทรกคำสั่ง load อื่นคั่นไว้ ทำให้เวลาผ่านไปพอดีก่อนจะถึงคำสั่งที่ใช้ผลลัพธ์ ลด stall จาก 13 เหลือ 11 cycle"
+    ]
+  },
+  {
+    type: "apply",
+    q: "โปรแกรมมี loop ที่ branch กระโดดกลับไปต้น loop บ่อยครั้ง ควรใช้ static prediction แบบใดจึงทายถูกบ่อยที่สุดตามหลักการในสไลด์?",
+    choices: [
+      "ทายว่า backward branch จะ not taken เสมอ",
+      "ทายว่า backward branch จะ taken (กระโดด) เสมอ",
+      "ไม่ต้องทายเลยเพราะ loop ไม่มี branch",
+      "ทายแบบสุ่ม 50/50 ทุกครั้ง"
+    ],
+    correct: 1,
+    explain: [
+      "การทาย not taken สำหรับ backward branch จะทายผิดบ่อยในกรณี loop ที่วนซ้ำหลายรอบ",
+      "ถูก — สไลด์ระบุว่า static prediction ทาย backward branch (แบบที่พบใน loop) ว่า taken เพราะ loop ส่วนใหญ่จะวนซ้ำหลายรอบก่อนออกจาก loop",
+      "loop ที่วนซ้ำต้องอาศัย branch เพื่อกลับไปต้น loop เสมอ",
+      "การสุ่มทายจะแม่นยำน้อยกว่าการใช้ static prediction ที่อิงจากพฤติกรรมทั่วไปของโค้ด"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ถ้าต้องการลดจำนวนคำสั่งที่ต้อง flush เมื่อ branch prediction ผิดพลาด ควรทำอย่างไรกับฮาร์ดแวร์ที่ใช้คำนวณผล branch?",
+    choices: [
+      "เอาฮาร์ดแวร์คำนวณ branch ออกจาก pipeline ไปเลย",
+      "ย้ายฮาร์ดแวร์นั้นไปไว้ที่ stage WB แทน",
+      "ย้ายฮาร์ดแวร์เปรียบเทียบและคำนวณ target address มาไว้ที่ stage ID ให้เร็วขึ้น",
+      "เพิ่มจำนวน stage ให้ pipeline ยาวขึ้นอีกเท่าตัว"
+    ],
+    correct: 2,
+    explain: [
+      "ถ้าไม่มีฮาร์ดแวร์คำนวณผล branch เลย ระบบจะไม่รู้ว่าจะกระโดดไปที่ไหน",
+      "ย้ายไปไว้ stage WB (ซึ่งอยู่ท้าย pipeline) จะยิ่งทำให้รู้ผลช้าลง และมีคำสั่งต้อง flush มากขึ้น",
+      "ถูก — ตามที่สไลด์อธิบายเรื่อง Reducing Branch Delay การย้ายตัวเปรียบเทียบ register และตัวคำนวณ target address มาไว้ที่ ID stage ทำให้รู้ผล branch เร็วขึ้น ลดจำนวนคำสั่งที่ fetch ผิดไปก่อน",
+      "การเพิ่ม stage จะยิ่งทำให้รู้ผล branch ช้าลง ตรงข้ามกับเป้าหมายที่ต้องการ"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
