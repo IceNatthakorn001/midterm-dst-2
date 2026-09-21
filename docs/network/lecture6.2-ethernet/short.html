@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 6.2 — Ethernet · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+        <ol><li><a href="#1-ethernet-คืออะไร-ประวัติ">1. Ethernet คืออะไร &amp;amp; ประวัติ ⭐</a></li><li><a href="#2-ieee-project-802-ethernet-ใน-osi">2. IEEE Project 802 &amp;amp; Ethernet ใน OSI</a></li><li><a href="#3-วิวัฒนาการ-4-รุ่น">3. วิวัฒนาการ 4 รุ่น ⭐</a></li><li><a href="#4-flow-control-error-control">4. Flow Control &amp;amp; Error Control ⭐</a></li><li><a href="#5-ethernet-frame-format">5. Ethernet Frame Format ⭐⭐</a></li><li><a href="#6-frame-length">6. Frame Length ⭐</a></li><li><a href="#7-mac-address">7. MAC Address ⭐⭐</a></li><li><a href="#8-unicast-multicast-broadcast">8. Unicast / Multicast / Broadcast ⭐</a></li><li><a href="#9-mac-vs-ip-address">9. MAC vs IP Address ⭐⭐</a></li><li><a href="#10-standard-ethernet-csmacd">10. Standard Ethernet: CSMA/CD ⭐</a></li><li><a href="#11-switched-fast-gigabit-ethernet">11. Switched, Fast, Gigabit Ethernet</a></li><li><a href="#12-ethernet-switch">12. Ethernet Switch ⭐⭐</a></li><li><a href="#13-ประเภท-switch-auto-mdix">13. ประเภท Switch &amp;amp; Auto-MDIX ⭐</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture6.2-Ethernet</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 6.2 — Ethernet</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><h2 id="1-ethernet-คืออะไร-ประวัติ">1. Ethernet คืออะไร &amp; ประวัติ ⭐</h2>
+<ul>
+<li>data-link + physical layer มีโปรโตคอลมากเกินไป <strong>สร้างปัญหาและความสับสน</strong> → กำหนด <strong>มาตรฐานโดยพฤตินัย (de facto standard)</strong> ชื่อ <strong>Ethernet</strong></li>
+<li>⭐ <strong>Ethernet ครอบคลุมทั้ง data-link layer และ physical layer ในมาตรฐานเดียว</strong></li>
+<li><strong>ยุคเก่า:</strong> bus network (มี terminator สองปลาย), ring, star ที่ใช้ <strong>hub</strong> | <strong>ปัจจุบัน:</strong> LAN แบบ star ใช้ <strong>switch</strong>, home network ใช้ wireless router + Cat 5/Cat 6</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เหตุการณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1973–1974</strong></td>
+<td>พัฒนาที่ <strong>Xerox PARC</strong> ได้แรงบันดาลใจจาก <strong>ALOHAnet</strong> โดย <strong>Robert Metcalfe</strong></td>
+</tr>
+<tr>
+<td>1978</td>
+<td>Metcalfe ออกจาก Xerox ตั้ง <strong>3Com</strong></td>
+</tr>
+<tr>
+<td>—</td>
+<td>ชักชวน <strong>DEC, Intel, Xerox (DIX)</strong> ผลักดันเป็นมาตรฐาน; แข่งกับ <strong>IBM Token Ring</strong> ที่แพง; ใช้ <strong>10BASE2</strong> (thin coax ราคาถูก)</td>
+</tr>
+<tr>
+<td><strong>1983</strong></td>
+<td>เป็นมาตรฐาน <strong>IEEE 802.3</strong></td>
+</tr>
+<tr>
+<td><strong>1990</strong></td>
+<td>เปลี่ยนเป็น <strong>twisted pair — 10BASE-T (UTP)</strong></td>
+</tr>
+<tr>
+<td><strong>1995+</strong></td>
+<td><strong>ฆ่า Token Ring</strong> และโปรโตคอล proprietary ในตลาด PC ได้สมบูรณ์</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ทำไม Ethernet ชนะ:</strong> <strong>วิวัฒนาการตามความต้องการความเร็วได้</strong> / <strong>เปิดให้ทุกคน</strong> (ใครก็ผลิตได้ถ้าทำตาม IEEE 802.3) / <strong>ราคาถูกกว่า</strong></p>
+<h2 id="2-ieee-project-802-ethernet-ใน-osi">2. IEEE Project 802 &amp; Ethernet ใน OSI</h2>
+<p><strong>Project 802</strong> เริ่มเพื่อ<strong>รวมหน้าที่และข้อกำหนดของ physical + data-link layer</strong> ของ LAN เพราะมี<strong>โปรโตคอลมากเกินไป</strong> และสองชั้น<strong>ต้องทำงานใกล้ชิดกัน</strong></p>
+<ul>
+<li><strong>Data-link layer</strong> = <strong>LLC (ร่วมกัน)</strong> + <strong>MAC เฉพาะเทคโนโลยี</strong> (Ethernet MAC, Token Ring MAC, …)</li>
+<li>⚠️ <strong>LLC (IEEE 802.2) ไม่ได้เป็นส่วนหนึ่งของ Ethernet</strong></li>
+<li><strong>Ethernet == IEEE 802.3</strong> กำหนดโดยโปรโตคอลชั้น <strong>data link (MAC) และ physical</strong></li>
+<li><strong>LLC sublayer</strong> จัดการการสื่อสารระหว่างชั้นบนกับชั้นล่าง — รับข้อมูลโปรโตคอลเครือข่าย (มักเป็น <strong>IPv4 packet</strong>) แล้ว<strong>เพิ่ม control information</strong></li>
+</ul>
+<h2 id="3-วิวัฒนาการ-4-รุ่น">3. วิวัฒนาการ 4 รุ่น ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รุ่น</th>
+<th>ความเร็ว</th>
+<th>การเข้าถึงสื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Standard Ethernet</strong></td>
+<td><strong>10 Mbps</strong></td>
+<td><strong>ใช้ CSMA/CD</strong> (bus หรือ hub)</td>
+</tr>
+<tr>
+<td><strong>Fast Ethernet</strong></td>
+<td><strong>100 Mbps</strong></td>
+<td><strong>CSMA/CD เป็น optional</strong> (เฉพาะเมื่อใช้ hub)</td>
+</tr>
+<tr>
+<td><strong>Gigabit Ethernet</strong></td>
+<td><strong>1 Gbps</strong></td>
+<td><strong>ไม่ใช้ CSMA/CD</strong> (switch)</td>
+</tr>
+<tr>
+<td><strong>10 Gigabit Ethernet</strong></td>
+<td><strong>10 Gbps</strong></td>
+<td><strong>ไม่ใช้ CSMA/CD</strong> (switch)</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>ปัจจุบันรองรับถึง <strong>40 Gbps และ 100 Gbps</strong></em></p>
+<h2 id="4-flow-control-error-control">4. Flow Control &amp; Error Control ⭐</h2>
+<p><strong>Flow Control — Ethernet ไม่มี:</strong></p>
+<ul>
+<li>ให้บริการแบบ <strong>connectionless</strong> — แต่ละ frame <strong>อิสระ</strong>, <strong>ไม่มีขั้นตอนสร้างหรือปิด connection</strong></li>
+<li><strong>เพราะ Ethernet ไม่มี LLC</strong> ผู้ส่งจึงส่งทันทีที่มี → อาจส่งท่วมผู้รับ → <strong>frame ถูกทิ้งและผู้ส่งไม่รู้</strong></li>
+<li>ต้องพึ่งชั้นสูง: <strong>IP (L3) ก็ connectionless ไม่รู้ว่า frame หาย</strong> → ถ้า transport เป็น <strong>UDP</strong> frame หายไปเลย ต้องพึ่ง <strong>application layer</strong> / ถ้าเป็น <strong>TCP</strong> ผู้ส่งไม่ได้ ACK → <strong>ส่งใหม่</strong></li>
+</ul>
+<p><strong>Error Control:</strong></p>
+<ul>
+<li><strong>Ethernet unreliable เหมือน IP และ UDP</strong> — ในทางปฏิบัติใช้ Ethernet <strong>โดยไม่มี flow control</strong> แล้วปล่อยให้ transport จัดการ <strong>เพื่อความเร็ว</strong></li>
+<li>มี <strong>CRC-32</strong> ตรวจ error → ถ้าเสียและตรวจพบ → <strong>ทิ้ง frame เงียบ ๆ (drop silently)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Ethernet ตรวจ error ได้ (CRC-32) แต่ไม่แก้และไม่แจ้ง — ทิ้งเงียบ ๆ แล้วให้ TCP ส่งใหม่</strong></p>
+</blockquote>
+<h2 id="5-ethernet-frame-format">5. Ethernet Frame Format ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Preamble</th>
+<th>SFD</th>
+<th>DA</th>
+<th>SA</th>
+<th>Type</th>
+<th>Data + padding</th>
+<th>CRC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>7 bytes</strong></td>
+<td><strong>1 byte</strong></td>
+<td><strong>6 bytes</strong></td>
+<td><strong>6 bytes</strong></td>
+<td><strong>2 bytes</strong></td>
+<td><strong>46–1500 bytes</strong></td>
+<td><strong>4 bytes</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Preamble</strong> (7 B = 56 bits)</td>
+<td>บิต <strong>0 และ 1 สลับกัน</strong> เตือนว่า frame กำลังมา + <strong>synchronize clock</strong> — <strong>เพิ่มที่ physical layer ไม่ใช่ส่วนของ frame อย่างเป็นทางการ</strong></td>
+</tr>
+<tr>
+<td><strong>SFD</strong> (1 B = <strong>10101011</strong>)</td>
+<td>บอก<strong>จุดเริ่มต้นของ frame</strong>, <strong>โอกาสสุดท้ายในการ synchronize</strong>, จริง ๆ คือ <strong>flag</strong> — เพิ่มที่ physical layer</td>
+</tr>
+<tr>
+<td><strong>Destination address (DA)</strong></td>
+<td>link-layer address ของปลายทาง</td>
+</tr>
+<tr>
+<td><strong>Source address (SA)</strong></td>
+<td>link-layer address ของผู้ส่ง</td>
+</tr>
+<tr>
+<td><strong>Type</strong> (2 B)</td>
+<td>ระบุ<strong>โปรโตคอลชั้นบน</strong> เช่น <strong>IP, ARP, OSPF</strong></td>
+</tr>
+<tr>
+<td><strong>Data</strong> (46–1500 B)</td>
+<td>ต้องมีความยาวขั้นต่ำเพราะ <strong>CSMA/CD ต้องฟัง frame ที่เข้ามา</strong>; สั้นเกินใส่ <strong>0-padding</strong></td>
+</tr>
+<tr>
+<td><strong>CRC</strong> (4 B)</td>
+<td><strong>CRC-32</strong> คำนวณจาก <strong>addresses, type และ data</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>Wireshark ปกติไม่แสดง preamble, SFD และ FCS</strong></p>
+<h2 id="6-frame-length">6. Frame Length ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>frame</th>
+<th>payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ต่ำสุด</strong></td>
+<td><strong>64 bytes (512 bits)</strong></td>
+<td><strong>46 bytes</strong></td>
+</tr>
+<tr>
+<td><strong>สูงสุด</strong></td>
+<td><strong>1518 bytes (12,144 bits)</strong></td>
+<td><strong>1500 bytes</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>header + trailer = 18 bytes</strong> (6 SA + 6 DA + 2 type + 4 CRC) → 64 − 18 = <strong>46</strong></li>
+<li><strong>ทำไม min 64 bytes?</strong> เพื่อรองรับ <strong>CSMA/CD</strong></li>
+<li><strong>ทำไม max 1518?</strong> 1. สมัยออกแบบ <strong>หน่วยความจำแพงมาก</strong> → ลดขนาด buffer 2. <strong>ป้องกันสถานีเดียวผูกขาดสื่อกลางที่แชร์</strong></li>
+</ul>
+<h2 id="7-mac-address">7. MAC Address ⭐⭐</h2>
+<ul>
+<li>ทุกสถานีมี <strong>NIC (Network Interface Card)</strong> ที่ให้ <strong>link-layer address</strong></li>
+<li><strong>Ethernet address = 6 bytes (48 bits)</strong> เขียนเป็น<strong>เลขฐาน 16 คั่นด้วย colon</strong> เช่น <code>4A:30:10:21:10:1A</code></li>
+<li><strong>24 บิตแรก = OUI</strong> (Organizationally Unique Identifier) กำหนดโดย <strong>IEEE</strong> ให้ผู้ผลิต | <strong>24 บิตหลัง = vendor กำหนด</strong></li>
+<li>⚠️ <strong>MAC ซ้ำกันได้</strong> จากความผิดพลาดตอนผลิตหรือ virtual machine</li>
+</ul>
+<p><strong>การส่ง address บนสาย:</strong> ส่ง <strong>ซ้ายไปขวาทีละไบต์</strong> แต่ <strong>ในแต่ละไบต์ส่ง LSB ก่อน</strong> → ⭐ <strong>บิตที่บอก unicast/multicast มาถึงผู้รับก่อน</strong> (<strong>Unicast = 0, Multicast = 1</strong>)</p>
+<p><strong>ชนิดของ MAC address ⭐⭐ — ดูเลขฐาน 16 หลักที่ 2 จากซ้าย:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Address</th>
+<th>หลักที่ 2</th>
+<th>ชนิด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4A:30:10:21:10:1A</code></td>
+<td>A = 1010 (<strong>คู่</strong>)</td>
+<td><strong>Unicast</strong></td>
+</tr>
+<tr>
+<td><code>47:20:1B:2E:08:EE</code></td>
+<td>7 = 0111 (<strong>คี่</strong>)</td>
+<td><strong>Multicast</strong></td>
+</tr>
+<tr>
+<td><code>FF:FF:FF:FF:FF:FF</code></td>
+<td>ทั้งหมดเป็น F</td>
+<td><strong>Broadcast</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>ทำไมดูหลักที่ 2?</strong> เพราะเป็น 4 บิตล่างของไบต์แรก บิต LSB ของมันเป็นตัวบอก unicast/multicast — <strong>เลขคู่ LSB = 0, เลขคี่ LSB = 1</strong></p>
+<h2 id="8-unicast-multicast-broadcast">8. Unicast / Multicast / Broadcast ⭐</h2>
+<p><strong>บน shared medium (Standard Ethernet) ทุกการส่งถูก broadcast อยู่แล้ว ต่างกันที่ผู้รับทำอะไร:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ใครได้รับ</th>
+<th>ใครเก็บไว้ประมวลผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unicast</strong></td>
+<td>ทุกสถานี</td>
+<td><strong>เฉพาะผู้รับที่ตั้งใจ</strong> ที่เหลือทิ้ง</td>
+</tr>
+<tr>
+<td><strong>Multicast</strong></td>
+<td>ทุกสถานี</td>
+<td><strong>เฉพาะสมาชิกของกลุ่ม</strong> ที่เหลือทิ้ง</td>
+</tr>
+<tr>
+<td><strong>Broadcast</strong></td>
+<td>ทุกสถานี (ยกเว้นผู้ส่ง)</td>
+<td><strong>ทุกสถานี (ยกเว้นผู้ส่ง)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>Dest MAC</th>
+<th>Dest IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unicast</strong></td>
+<td>00-07-E9-42-AC-28</td>
+<td>192.168.1.200</td>
+</tr>
+<tr>
+<td><strong>Broadcast</strong></td>
+<td><strong>FF-FF-FF-FF-FF-FF</strong></td>
+<td><strong>192.168.1.255</strong></td>
+</tr>
+<tr>
+<td><strong>Multicast</strong></td>
+<td><strong>01-00-5E-00-00-C8</strong></td>
+<td><strong>224.0.0.200</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Broadcast</strong> ใช้กับโปรโตคอลที่ต้อง broadcast เพื่อหาข้อมูล เช่น <strong>DHCP และ ARP</strong></li>
+<li><strong>Multicast:</strong> <strong>IPv4 = 224.0.0.0 – 239.255.255.255</strong> | <strong>IPv6 = FF00::/8</strong> | แทน <strong>กลุ่ม (host group)</strong> → ⭐ <strong>ใช้ได้เฉพาะเป็น destination — source เป็น unicast เสมอ</strong> | host สมัครเข้ากลุ่มด้วย <strong>IGMP</strong> | <strong>ช่วยผู้ส่งลดจำนวน frame</strong> (router/switch ช่วยทำสำเนา) | ใช้ใน <strong>เกมออนไลน์หลายผู้เล่น</strong> และ <strong>distance learning</strong></li>
+</ul>
+<h2 id="9-mac-vs-ip-address">9. MAC vs IP Address ⭐⭐</h2>
+<ul>
+<li><strong>MAC address</strong> ใช้ route และ forward <strong>frames</strong> | <strong>IP address</strong> ใช้ route และ forward <strong>packets</strong></li>
+<li>⭐ <strong>IP ต้นทางและปลายทางไม่เปลี่ยน แต่ MAC address เปลี่ยนทุก hop!</strong></li>
+</ul>
+<p><strong>ตัวอย่าง A → Router B → Router C → Server D:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่วง</th>
+<th>MAC</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A → B</td>
+<td>From A, To B</td>
+<td>From A, To D</td>
+</tr>
+<tr>
+<td>B → C</td>
+<td>From B, To C</td>
+<td>From A, To D</td>
+</tr>
+<tr>
+<td>C → D</td>
+<td>From C, To D</td>
+<td>From A, To D</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Local Network:</strong> A (192.168.1.110, MAC 00-0A) ส่งถึง Server (192.168.1.50, MAC 00-0B) → <strong>Destination MAC = 00-0B</strong> (ของ server โดยตรง)</li>
+<li><strong>Remote Network:</strong> A ส่งถึง Server (172.16.1.99) คนละเครือข่าย → <strong>Destination MAC = 00-0C (NIC ของ router = default gateway)</strong> แต่ <strong>Destination IP = 172.16.1.99</strong> (ปลายทางจริง)
+💡 <strong>IP = ที่อยู่ปลายทางบนซองจดหมาย (ไม่เปลี่ยน) / MAC = ชื่อคนส่งต่อคนถัดไป (เปลี่ยนทุกช่วง)</strong></li>
+</ul>
+<h2 id="10-standard-ethernet-csmacd">10. Standard Ethernet: CSMA/CD ⭐</h2>
+<ul>
+<li><strong>เฉพาะ Standard Ethernet ที่ต้องใช้ CSMA/CD</strong> — เลือกแบบ <strong>1-persistent</strong> (ผู้ส่ง<strong>ฟังต่อระหว่างส่ง</strong>)</li>
+<li>ส่ง frame ขนาดต่ำสุด <strong>64 bytes (512 bits)</strong></li>
+</ul>
+<p><strong>เหตุผลของ 512 bits:</strong></p>
+<ul>
+<li>Ethernet 10 Mbps → ส่ง 512 bits ใช้ 512/10M = <strong>51.2 µs</strong></li>
+<li>ความเร็วสัญญาณ 2 × 10⁸ m/s → บิตแรกไปได้ <strong>10,240 m (ขาเดียว)</strong> = <strong>5,120 m (ไป-กลับ)</strong></li>
+<li><strong>ถ้าจะเกิด collision ต้องเกิดก่อนผู้ส่งส่งครบ 512 bits</strong></li>
+<li>ในทางปฏิบัติ <strong>ความยาวสายสูงสุด 2,500 m</strong> เพื่อชดเชย delay ในสื่อ
+💡 ถ้า frame สั้นเกินไป ผู้ส่งจะส่งจบก่อนสัญญาณชนย้อนกลับมา → <strong>ไม่รู้ว่าชน</strong></li>
+</ul>
+<h2 id="11-switched-fast-gigabit-ethernet">11. Switched, Fast, Gigabit Ethernet</h2>
+<p><strong>Switched Ethernet ⭐:</strong> <strong>switch สร้าง collision domain แยกให้แต่ละพอร์ต</strong> → บน <strong>full-duplex point-to-point link</strong> ทั้งสองฝั่งส่งพร้อมกันได้ → <strong>ไม่มี collision และไม่ใช้ CSMA/CD</strong> <em>(half-duplex shared Ethernet ยังชนได้ แต่เป็น legacy)</em></p>
+<p><strong>Fast Ethernet (100 Mbps):</strong></p>
+<ul>
+<li><strong>Hub-based:</strong> min frame ยัง <strong>64 bytes</strong> แต่เร็วขึ้น 10 เท่า → <strong>ความยาวสายลดจาก 2,500 m เหลือ 250 m</strong> (ใช้จริง <strong>100 m</strong>)</li>
+<li><strong>Switched:</strong> <strong>ไม่ต้องใช้ CSMA/CD</strong> — switch รับ frame เก็บใน <strong>buffer (queue)</strong> → ตรวจ destination → ส่งออกพอร์ตที่ตรง | การเชื่อมต่อเป็น <strong>full-duplex</strong> | <strong>สื่อที่แชร์เปลี่ยนเป็น point-to-point หลายเส้น</strong></li>
+<li><strong>Backward Compatibility:</strong> มี <strong>autonegotiation</strong> ให้อุปกรณ์ตกลงความเร็ว (มักใช้<strong>ตัวที่ช้ากว่า</strong>)</li>
+</ul>
+<p><strong>Gigabit Ethernet ⭐ (IEEE 802.3z):</strong></p>
+<ul>
+<li><strong>1 Gbps</strong> | ใช้ร่วมกับ Standard/Fast ได้ด้วย <strong>autonegotiation</strong> | ใช้ <strong>framing specification เดิม</strong></li>
+<li>⭐ <strong>เพิ่ม min frame เป็น 512 bytes (4096 bits)</strong> จาก 64 bytes → เรียกว่า <strong>Carrier Extension</strong> (ถ้าไม่ถึงใส่ <strong>padding</strong>)</li>
+<li>⭐ <strong>รวมหลาย frame เป็น frame ใหญ่ได้ = Frame Bursting</strong></li>
+<li><strong>ไม่มี collision</strong> เพราะใช้ switch + full-duplex — <strong>ไม่มี Gigabit Ethernet hub</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Medium</th>
+<th>Length</th>
+<th>Wires</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1000Base-SX</strong></td>
+<td>Fiber short-wave</td>
+<td><strong>550 m</strong></td>
+<td>2</td>
+<td>8B/10B + NRZ</td>
+</tr>
+<tr>
+<td><strong>1000Base-LX</strong></td>
+<td>Fiber long-wave</td>
+<td><strong>5000 m</strong></td>
+<td>2</td>
+<td>8B/10B + NRZ</td>
+</tr>
+<tr>
+<td><strong>1000Base-CX</strong></td>
+<td>STP</td>
+<td><strong>25 m</strong></td>
+<td>2</td>
+<td>8B/10B + NRZ</td>
+</tr>
+<tr>
+<td><strong>1000Base-T4</strong></td>
+<td>UTP</td>
+<td><strong>100 m</strong></td>
+<td>4</td>
+<td><strong>4D-PAM5</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Standards สรุป:</strong> 10BASE-5 (Coax 50Ω, <strong>500 m</strong>) | 10BASE-2 (Coax BNC, <strong>185 m</strong>) | 10BASE-T / 100BASE-TX / 1000BASE-T (UTP RJ-45, <strong>100 m</strong>) | 1000BASE-CX (STP, 25 m) | 1000BASE-ST (MM Fiber, 220–550 m) | 1000BASE-LX (MM/SM Fiber, 550–5000 m)
+💡 อ่านชื่อ: <strong>10BASE-T</strong> = 10 Mbps, BASEband, Twisted pair / <strong>10BASE-5</strong> = สาย 500 m</p>
+<h2 id="12-ethernet-switch">12. Ethernet Switch ⭐⭐</h2>
+<p><strong>Learning:</strong> switch สร้าง <strong>MAC address table แบบ dynamic</strong> โดยดู <strong>source MAC</strong> ของ frame ที่เข้าแต่ละพอร์ต</p>
+<ul>
+<li>source MAC <strong>ยังไม่มี</strong> → <strong>เพิ่มพร้อมหมายเลขพอร์ตขาเข้า</strong> | <strong>เก็บ entry ไว้ 5 นาที</strong> | มีอยู่แล้วแต่<strong>คนละพอร์ต</strong> → <strong>แทนที่ด้วยพอร์ตล่าสุด</strong></li>
+</ul>
+<p><strong>Forwarding:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>switch ทำอะไร</th>
+<th>ชื่อเรียก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>destination MAC <strong>อยู่ในตาราง</strong></td>
+<td>ส่งออก<strong>พอร์ตที่ระบุ</strong>เท่านั้น</td>
+<td><strong>frame filtering</strong></td>
+</tr>
+<tr>
+<td>destination MAC <strong>ไม่อยู่ในตาราง</strong></td>
+<td>ส่งออก<strong>ทุกพอร์ตยกเว้นพอร์ตขาเข้า</strong></td>
+<td><strong>unknown unicast (flooding)</strong></td>
+</tr>
+<tr>
+<td><strong>broadcast หรือ multicast</strong></td>
+<td><strong>flood ทุกพอร์ตยกเว้นพอร์ตขาเข้า</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>จำ: Learn จาก source, Forward ตาม destination</strong></p>
+<p><strong>Connected Switches:</strong> ⭐ <strong>1 พอร์ตมีหลาย MAC address ได้</strong> — เกิดบ่อยเมื่อ <strong>switch ต่อกับ switch</strong> (switch มี entry แยกสำหรับแต่ละ source MAC ที่ได้รับ)
+<strong>Sending Frame outside LAN:</strong> IP ปลายทางคนละเครือข่าย → <strong>ส่ง frame ไปที่ MAC address ของ default gateway (router)</strong> — อุปกรณ์รู้ MAC ของ default gateway ผ่าน <strong>DHCP</strong></p>
+<h2 id="13-ประเภท-switch-auto-mdix">13. ประเภท Switch &amp; Auto-MDIX ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Store-and-forward</strong></th>
+<th><strong>Cut-through</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>วิธีทำงาน</td>
+<td><strong>รับ frame ทั้งหมด → ตรวจ CRC → ส่งต่อถ้า CRC ถูก</strong></td>
+<td><strong>ส่งต่อก่อนรับครบ</strong> โดยดู destination address ก่อน</td>
+</tr>
+<tr>
+<td>ความเร็ว</td>
+<td>ช้ากว่า</td>
+<td><strong>เร็วกว่า</strong></td>
+</tr>
+<tr>
+<td>ตรวจ error</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>QoS</strong></td>
+<td><strong>จำเป็นสำหรับ QoS</strong></td>
+<td>เหมาะกับงานที่ไม่ต้องการ QoS</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Cut-through 2 แบบ:</strong> <strong>Fast forwarding</strong> (ดู destination แล้วส่งเลย) | <strong>Fragment-free</strong> (<strong>ตรวจ 64 bytes แรก</strong>ก่อนส่ง เพราะ collision ตาม CSMA/CD มักเกิดใน 64 bytes แรก)</p>
+<p><strong>Auto-MDIX</strong> = automatic medium-dependent interface crossover — switch <strong>ตรวจชนิดสายที่ต่ออัตโนมัติ</strong> → ใช้ <strong>สาย crossover หรือ straight-through ก็ได้</strong> (ค่าเริ่มต้นบน Cisco IOS 12.2(18)SE ขึ้นไป)</p>
+<p><strong>สายแบบดั้งเดิม:</strong> switch–switch = <strong>crossover</strong> | switch–router = straight-through | switch–PC = straight-through | router–PC = <strong>crossover</strong>
+💡 <strong>อุปกรณ์ชนิดเดียวกัน → crossover / ต่างชนิดกัน → straight-through</strong> (router กับ PC ถือเป็นกลุ่มเดียวกัน)
+⚠️ <strong>Auto-MDIX (ตรวจชนิดสาย) ≠ Autonegotiation (ตกลงความเร็วและ duplex)</strong></p>
+<hr />
+<h2 id="จุดที่มักออกสอบ">จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Ethernet = IEEE 802.3</strong> (data link MAC + physical); <strong>LLC (802.2) ไม่ใช่ส่วนของ Ethernet</strong></li>
+<li><strong>ประวัติ:</strong> Xerox PARC 1973–74 (ALOHAnet, Metcalfe), 3Com 1978, <strong>IEEE 802.3 ปี 1983</strong>, 10BASE-T ปี 1990</li>
+<li><strong>4 รุ่น:</strong> Standard 10M (CSMA/CD), Fast 100M (optional/hub), <strong>Gigabit + 10G ไม่มี CSMA/CD</strong></li>
+<li><strong>Ethernet connectionless, ไม่มี flow control, unreliable</strong> — CRC-32 ผิดแล้ว<strong>ทิ้งเงียบ</strong> ให้ TCP ส่งใหม่</li>
+<li><strong>Frame:</strong> Preamble 7 | SFD 1 (<strong>10101011</strong>) | DA 6 | SA 6 | Type 2 | Data 46–1500 | CRC 4</li>
+<li><strong>Min 64 bytes (payload 46) / Max 1518 (payload 1500)</strong> — และ<strong>เหตุผล</strong>ของทั้งคู่</li>
+<li><strong>MAC 48 บิต:</strong> 24 บิตแรก <strong>OUI (IEEE)</strong>, 24 บิตหลัง vendor; <strong>ส่ง LSB ก่อน</strong></li>
+<li>⭐ <strong>ชนิด MAC: หลักฐาน 16 ที่ 2 — คู่ = unicast, คี่ = multicast, FF ทั้งหมด = broadcast</strong></li>
+<li><strong>Broadcast:</strong> DHCP, ARP | <strong>Multicast:</strong> IPv4 <strong>224.0.0.0–239.255.255.255</strong>, IPv6 <strong>FF00::/8</strong>, <strong>เป็น destination เท่านั้น</strong>, IGMP</li>
+<li>⭐ <strong>MAC เปลี่ยนทุก hop / IP ไม่เปลี่ยน</strong>; ส่งต่างเครือข่าย → <strong>dest MAC = default gateway</strong></li>
+<li><strong>ทำไม 512 bits:</strong> 10 Mbps → 51.2 µs → 10,240 m (ไป-กลับ 5,120 m); ใช้จริงสายยาวสุด <strong>2,500 m</strong></li>
+<li><strong>Fast Ethernet hub → สาย 250 m (ใช้จริง 100 m)</strong>; autonegotiation ใช้ความเร็วที่ช้ากว่า</li>
+<li><strong>Gigabit (802.3z):</strong> min frame <strong>512 bytes = Carrier Extension</strong>, <strong>Frame Bursting</strong>, <strong>ไม่มี hub</strong></li>
+<li><strong>Switch:</strong> learn จาก <strong>source MAC</strong> (เก็บ 5 นาที) / forward ตาม <strong>destination</strong> — <strong>filtering / unknown unicast flood / broadcast flood</strong></li>
+<li><strong>Store-and-forward (ตรวจ CRC, รองรับ QoS) vs Cut-through (fast forwarding, fragment-free ตรวจ 64 bytes แรก)</strong></li>
+<li><strong>Auto-MDIX ≠ Autonegotiation</strong></li>
+</ol>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../lecture6.1-mac/short.html"><small>← บทก่อนหน้า</small><span>Lecture 6.1 — Media Access Control Protocols</span></a><a class="pg next" href="../lecture7-vlan/short.html"><small>บทถัดไป →</small><span>Lecture 7 — VLAN (Virtual LAN)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

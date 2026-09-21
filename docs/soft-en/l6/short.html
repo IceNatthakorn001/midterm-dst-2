@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 6 – Requirements Modeling with Flow Modeling I (Data Flow Diagram) · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+        <ol><li><a href="#1-requirements-modeling-strategies">1. Requirements Modeling Strategies ⭐</a></li><li><a href="#2-flow-oriented-modeling">2. Flow-Oriented Modeling ⭐</a></li><li><a href="#3-สัญลักษณ์-dfd-4-ตัว">3. สัญลักษณ์ DFD — 4 ตัว ⭐⭐</a></li><li><a href="#4-dfd-หลายระดับ-decomposition">4. DFD หลายระดับ (Decomposition) ⭐</a></li><li><a href="#5-context-diagram-level-0">5. Context Diagram (Level 0) ⭐</a></li><li><a href="#6-data-flow-hierarchy-flow-modeling-notes">6. Data Flow Hierarchy &amp;amp; Flow Modeling Notes</a></li><li><a href="#7-balancing">7. Balancing ⭐⭐</a></li><li><a href="#8-กฎของ-dfd">8. กฎของ DFD ⭐⭐</a></li><li><a href="#9-internal-consistency-ภายในแผ่นเดียว">9. Internal Consistency (ภายในแผ่นเดียว) ⭐</a></li><li><a href="#10-hierarchical-consistency-ระหว่างระดับ">10. Hierarchical Consistency (ระหว่างระดับ) ⭐</a></li><li><a href="#11-diagram-numbering">11. Diagram Numbering ⭐</a></li><li><a href="#12-ตัวอย่าง-library-query-system">12. ตัวอย่าง: Library Query System</a></li><li><a href="#13-แบบฝึก-correctincorrect">13. แบบฝึก Correct/Incorrect ⭐</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li><li><a href="#แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L6</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 6 – Requirements Modeling with Flow Modeling I (Data Flow Diagram)</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><h2 id="1-requirements-modeling-strategies">1. Requirements Modeling Strategies ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Structured analysis</strong></th>
+<th><strong>Object-oriented analysis</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>มองระบบอย่างไร</td>
+<td><strong>แยกข้อมูล (data) กับ process ที่แปลงข้อมูล</strong>ออกเป็นคนละส่วน</td>
+<td>มองเป็น <strong>class</strong> ที่ทำงานร่วมกัน</td>
+</tr>
+<tr>
+<td>เน้น</td>
+<td><strong>data + process</strong></td>
+<td><strong>นิยาม class</strong> และ <strong>วิธีที่ class ร่วมมือกัน</strong></td>
+</tr>
+<tr>
+<td>แผนภาพ</td>
+<td>⭐ <strong>DFD, ERD</strong></td>
+<td>Class diagram</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 ⭐ <strong>DFD เป็นเครื่องมือของ structured analysis</strong>
+<strong>Elements of Requirements Analysis:</strong> software requirements ตรงกลาง ล้อมด้วย <strong>Scenario-based (L4), Class, Behavioral, Flow models (บทนี้)</strong></p>
+<h2 id="2-flow-oriented-modeling">2. Flow-Oriented Modeling ⭐</h2>
+<ul>
+<li>แสดงว่า <strong>data object ถูกแปลง (transform) อย่างไร</strong> ขณะเคลื่อนผ่านระบบ — แผนภาพคือ <strong>DFD</strong></li>
+<li>⭐ หลายคนมองว่าเป็น <strong>&quot;old school&quot;</strong> แต่ยังให้มุมมองที่<strong>ไม่เหมือนโมเดลอื่น</strong> จึงควรใช้ <strong>เสริม</strong> analysis model อื่น</li>
+</ul>
+<blockquote class="callout">
+<p>⭐ <strong>ระบบคอมพิวเตอร์ทุกระบบแปลง input เป็น output</strong></p>
+</blockquote>
+<h2 id="3-สัญลักษณ์-dfd-4-ตัว">3. สัญลักษณ์ DFD — 4 ตัว ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th><strong>Yourdon / DeMarco</strong></th>
+<th><strong>Gane / Sarson</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>External entity</strong></td>
+<td>สี่เหลี่ยม</td>
+<td>สี่เหลี่ยม (มักมีเงา)</td>
+</tr>
+<tr>
+<td><strong>Process</strong></td>
+<td><strong>วงกลม (bubble)</strong></td>
+<td><strong>สี่เหลี่ยมมุมมน</strong> มีช่องเลขด้านบน</td>
+</tr>
+<tr>
+<td><strong>Data flow</strong></td>
+<td>ลูกศร</td>
+<td>ลูกศร</td>
+</tr>
+<tr>
+<td><strong>Data store</strong></td>
+<td><strong>เส้นขนาน 2 เส้น</strong></td>
+<td><strong>สี่เหลี่ยมเปิดด้านขวา</strong> มีช่อง ID (D1) ด้านซ้าย</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>ใช้สัญลักษณ์สำนักเดียวกันตลอดทั้งแผนภาพ อย่าผสมกัน</strong></p>
+<p><strong>(1) External Entity:</strong> <strong>ผู้ผลิตหรือผู้บริโภคข้อมูล</strong> — คน องค์กร หรือระบบที่อยู่<strong>ภายนอก</strong>ระบบ มีปฏิสัมพันธ์กับระบบ (คน, อุปกรณ์, sensor, ระบบคอมพิวเตอร์อื่น)
+💡 ⭐ <strong>ข้อมูลต้องมีต้นทางและปลายทางเสมอ</strong> — external entity คือต้นทางและปลายทางนั้น</p>
+<p><strong>(2) Process:</strong> <strong>ตัวแปลงข้อมูล (data transformer)</strong> เปลี่ยน input → output (compute taxes, determine area, format report, display graph)
+<strong>Logical process ที่ควรใส่ใน DFD 6 ชนิด:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ทำการคำนวณ</strong></td>
+<td>calculate grade point average</td>
+</tr>
+<tr>
+<td><strong>ตัดสินใจ</strong></td>
+<td>determine availability of ordered products</td>
+</tr>
+<tr>
+<td><strong>เรียง กรอง หรือสรุปข้อมูล</strong></td>
+<td>identify overdue invoices</td>
+</tr>
+<tr>
+<td><strong>จัดข้อมูลให้เป็นสารสนเทศที่มีประโยชน์</strong></td>
+<td>generate a report, answer a question</td>
+</tr>
+<tr>
+<td><strong>สั่งให้ process อื่นทำงาน</strong></td>
+<td>turn on the furnace, instruct a robot</td>
+</tr>
+<tr>
+<td><strong>ใช้ข้อมูลที่เก็บไว้</strong></td>
+<td><strong>CRUD</strong> (create, read, update, delete a record)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 ตั้งชื่อ process แบบ <strong>กริยา + กรรม</strong> (&quot;Calculate Gross Pay&quot;, &quot;Search for book&quot;)</p>
+<p><strong>(3) Data Flow:</strong> <strong>ข้อมูลที่กำลังเคลื่อนที่ (data in motion)</strong> — เป็น input/output ของ process หรือการสร้าง/ลบ/อัปเดตข้อมูลใน data store
+💡 ตั้งชื่อ data flow ด้วย <strong>คำนาม</strong> (&quot;Invoice&quot;, &quot;Hours Worked&quot;)
+⭐ <strong>Data Flow Packet Concept: ข้อมูลที่ไปด้วยกันควรแสดงเป็น data flow เส้นเดียว</strong> ไม่ว่าจะมีเอกสารจริงกี่ชิ้น</p>
+<p><strong>(4) Data Store:</strong> ที่เก็บ <strong>ข้อมูลถาวร (persistent data)</strong></p>
+<ul>
+<li>⭐ <strong>Data flow ที่ออกจาก data store = การดึงข้อมูล (retrievals)</strong></li>
+<li>⭐ <strong>Data flow ที่เข้า data store = การอัปเดตหรือเพิ่มข้อมูลใหม่</strong></li>
+</ul>
+<h2 id="4-dfd-หลายระดับ-decomposition">4. DFD หลายระดับ (Decomposition) ⭐</h2>
+<ul>
+<li><strong>Business process ซับซ้อนเกินกว่าจะแสดงใน DFD แผ่นเดียว</strong> → สร้าง<strong>ลำดับชั้นหลาย &quot;level&quot;</strong> ด้วย <strong>Decomposition</strong></li>
+<li>⭐ <strong>Child diagram แสดงส่วนหนึ่งของ parent diagram อย่างละเอียดขึ้น</strong></li>
+</ul>
+<p><strong>Guidelines 5 ข้อ ⭐:</strong></p>
+<ol>
+<li><strong>ทุกสัญลักษณ์ต้องมีชื่อที่มีความหมาย</strong></li>
+<li>DFD พัฒนาผ่าน<strong>หลายระดับความละเอียด</strong></li>
+<li>⭐ <strong>เริ่มจาก context level diagram เสมอ (= level 0)</strong></li>
+<li>⭐ <strong>แสดง external entities ที่ level 0 เสมอ</strong></li>
+<li>⭐ <strong>ใส่ชื่อ data flow ทุกเส้นเสมอ</strong></li>
+</ol>
+<p><strong>ขั้นตอนสร้าง DFD:</strong> 1. <strong>ทบทวน user scenarios / data model</strong> แยก data object ออกมา ใช้ <strong>grammatical parse</strong> หา &quot;operations&quot; → 2. <strong>หา external entities</strong> → 3. <strong>สร้าง level 0 DFD (context diagram)</strong>
+💡 <strong>Grammatical parse</strong> = อ่านคำอธิบายระบบแล้วขีดเส้น <strong>คำนาม</strong> (entity, data store, data flow) และ <strong>คำกริยา</strong> (process) — เทคนิคเดียวกับการหา actor/use case ใน L4</p>
+<h2 id="5-context-diagram-level-0">5. Context Diagram (Level 0) ⭐</h2>
+<ul>
+<li><strong>DFD ระดับบนสุด</strong> แสดง<strong>บริบท</strong>ว่า business process อยู่ในสภาพแวดล้อมแบบไหน</li>
+<li>⭐ <strong>แสดงทั้ง business process เป็น process เดียว คือ process &quot;zero&quot; (0)</strong></li>
+<li>⭐ <strong>แสดง external entities ทั้งหมด</strong> ที่รับหรือส่งข้อมูลกับระบบ</li>
+<li>⚠️ ⭐ <strong>Context diagram ไม่มี data store</strong> (ทุก data store อยู่ภายในระบบซึ่งยุบรวมเป็น process 0 แล้ว)</li>
+</ul>
+<p><em>ตัวอย่าง Digital video processor: entities = <strong>user, video source, monitor</strong> / process เดียว = digital video processor</em></p>
+<h2 id="6-data-flow-hierarchy-flow-modeling-notes">6. Data Flow Hierarchy &amp; Flow Modeling Notes</h2>
+<ul>
+<li>process <strong>P</strong> ใน level 0 ถูกแตกเป็น <strong>p1–p5</strong> ใน level 1 โดย ⭐ <strong>input a และ output b ยังเหมือนเดิม</strong> ส่วน c, d, e, f, g เป็น data flow ใหม่ภายใน</li>
+<li>💡 ⭐ <strong>V, W, X, Y, Z ของ context diagram ยังอยู่ครบใน level 1 ส่วน A–G และ data store D1, D2 เพิ่งโผล่มา</strong> = หลัก <strong>balancing</strong></li>
+</ul>
+<p><strong>Flow Modeling Notes ⭐:</strong></p>
+<ul>
+<li><strong>แตกแต่ละ bubble (process) ไปเรื่อย ๆ จนกว่าจะทำแค่อย่างเดียว</strong></li>
+<li>⭐ <strong>Expansion ratio ลดลงเมื่อจำนวนระดับเพิ่มขึ้น</strong> (ระดับลึกแตกออกน้อยลง)</li>
+<li>⭐ <strong>ระบบส่วนใหญ่ต้องใช้ 3–7 ระดับ</strong></li>
+<li><strong>data flow เส้นเดียวอาจถูกแตกย่อย</strong>เมื่อระดับลึกขึ้น โดยดูรายละเอียดจาก <strong>data dictionary</strong></li>
+</ul>
+<h2 id="7-balancing">7. Balancing ⭐⭐</h2>
+<ul>
+<li>ทำให้มั่นใจว่า <strong>ข้อมูลที่แสดงใน DFD ระดับหนึ่ง ถูกแสดงอย่างถูกต้องในระดับถัดไป</strong></li>
+<li>⭐ <strong>Data flow ของ parent ต้องถูกนำลงไปใน child</strong></li>
+<li>⭐ <strong>Child diagram เพิ่ม process และ data flow ใหม่ได้</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จุดสังเกต</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Matching parent-child decomposition</strong></td>
+<td>process 3 แตกเป็น <strong>3.1, 3.2, 3.3</strong></td>
+</tr>
+<tr>
+<td><strong>Input/output ต้องตรงกับ parent process</strong></td>
+<td>ทั้ง input และ output ของ process 3 ต้องปรากฏใน child</td>
+</tr>
+<tr>
+<td><strong>Matching data store</strong></td>
+<td>D1 ที่ parent ใช้ ต้องปรากฏใน child ด้วย</td>
+</tr>
+<tr>
+<td>⭐ <strong>Error lines and transaction files</strong></td>
+<td><strong>เพิ่มได้ใน child diagram</strong> ที่ละเอียด (parent ไม่มีก็ได้)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="8-กฎของ-dfd">8. กฎของ DFD ⭐⭐</h2>
+<p><strong>Rules for Data Flows:</strong></p>
+<ul>
+<li><strong>Data flow ต้องมีชื่อเสมอ</strong></li>
+<li>⭐ ใน <strong>logical modeling</strong> ชื่อ data flow ต้อง<strong>บอกว่าเป็นข้อมูลอะไร โดยไม่บอกวิธี implement</strong> (ใช้ &quot;Customer Order&quot; ไม่ใช่ &quot;Order Email&quot; หรือ &quot;SQL Query&quot;)</li>
+<li><strong>ทุก data flow ต้องเริ่มและ/หรือจบที่ process</strong></li>
+</ul>
+<p><strong>❌ Don't Break DFD Rules — 3 ข้อห้าม:</strong></p>
+<ol>
+<li><strong>Data flow ไม่ควรแยกออกเป็น 2 เส้นขึ้นไปที่เป็นข้อมูลต่างกัน</strong></li>
+<li>⭐ <strong>ทุก data flow ต้องเริ่มหรือจบที่ process</strong></li>
+<li>⭐ <strong>Process ต้องมี input อย่างน้อย 1 เส้น และ output อย่างน้อย 1 เส้น</strong></li>
+</ol>
+<p><strong>ชื่อเรียกความผิดที่พบบ่อย:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชื่อ</th>
+<th>อาการ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Black hole</strong></td>
+<td>process มีแต่ input <strong>ไม่มี output</strong></td>
+</tr>
+<tr>
+<td><strong>Miracle</strong> (spontaneous generation)</td>
+<td>process มีแต่ output <strong>ไม่มี input</strong></td>
+</tr>
+<tr>
+<td><strong>Gray hole</strong></td>
+<td>input ไม่พอจะสร้าง output ได้</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตารางต่อจากอะไรไปอะไรได้:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จาก \ ไป</th>
+<th>Process</th>
+<th>External Entity</th>
+<th>Data Store</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Process</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>External Entity</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Data Store</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 ⭐ <strong>จำง่าย ๆ: ทุกเส้นต้องแตะ process อย่างน้อยหนึ่งฝั่ง</strong></p>
+<h2 id="9-internal-consistency-ภายในแผ่นเดียว">9. Internal Consistency (ภายในแผ่นเดียว) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>กฎ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context Diagram</strong></td>
+<td><strong>ต้องมี</strong> / <strong>มีแค่ process เดียว</strong> / มี input จาก entity ≥1 และ output ไป entity ≥1 / process <strong>ต้องมีเลข 0</strong></td>
+</tr>
+<tr>
+<td><strong>Detailed DFDs</strong></td>
+<td>มี process <strong>อย่างน้อย 1</strong> และ ⭐ <strong>ไม่เกิน 7</strong></td>
+</tr>
+<tr>
+<td><strong>Process</strong></td>
+<td>มี input ≥1 และ output ≥1 / <strong>ต้องเชื่อมกับ</strong> data store, process หรือ external entity / <strong>ต้องมีชื่อ</strong></td>
+</tr>
+<tr>
+<td><strong>External Entity</strong></td>
+<td><strong>ต้องปรากฏเฉพาะใน context diagram</strong> / ต้องเชื่อมกับ process / ต้องมีชื่อ</td>
+</tr>
+<tr>
+<td><strong>Data Flow</strong></td>
+<td>ต้องเป็น <strong>interface ระหว่าง process</strong> กับ process อื่น/data store/entity / flow เข้า-ออก data store ต้องมี<strong>องค์ประกอบเป็น subset ของ data store</strong> / ต้องมีชื่อ</td>
+</tr>
+<tr>
+<td><strong>Data Store</strong></td>
+<td>⭐ <strong>ต้องเป็น interface ระหว่าง 2 process</strong> / ต้องมีชื่อ</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-hierarchical-consistency-ระหว่างระดับ">10. Hierarchical Consistency (ระหว่างระดับ) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>กฎ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data Flow Diagram</strong></td>
+<td><strong>ต้องมี parent diagram</strong> ยกเว้น context diagram</td>
+</tr>
+<tr>
+<td><strong>Process</strong></td>
+<td>ต้องแตกย่อยเป็น<strong>แผนภาพอื่น</strong>หรือเป็น <strong>primitive process specification</strong> (L7) / <strong>ต้องมีเลขที่อ้างอิงกับ parent</strong></td>
+</tr>
+<tr>
+<td><strong>Data Flow</strong></td>
+<td>⭐ <strong>input (output) ใน parent ต้องปรากฏใน child เป็น input (output)</strong> และกลับกัน / ชุด flow ใน child ที่แยกจาก parent ต้องมี<strong>องค์ประกอบรวมกันตรงกับ</strong> flow ของ parent / แตกย่อยเป็น <strong>record/element definition</strong></td>
+</tr>
+<tr>
+<td><strong>Data Store</strong></td>
+<td>แตกย่อยเป็น <strong>file definition</strong> หรือ <strong>record definition</strong></td>
+</tr>
+<tr>
+<td><strong>Primitive Process Spec</strong></td>
+<td><strong>input/output ทั้งหมดต้องตรงกับ</strong> primitive process ใน DFD / <strong>มี identifier เดียวกัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>ข้อยกเว้นที่ child ต่างจาก parent ได้: เส้น error และ transaction file</strong></p>
+<h2 id="11-diagram-numbering">11. Diagram Numbering ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>รูปแบบเลข</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context Diagram</strong></td>
+<td><strong>&quot;Level 0&quot;</strong> (process 0)</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Level 1</strong></td>
+<td><strong>เลขจำนวนเต็ม</strong></td>
+<td><strong>1, 2, 3</strong></td>
+</tr>
+<tr>
+<td><strong>Level 2</strong></td>
+<td><strong>1 จุด:</strong> parent . เลขเฉพาะ</td>
+<td><strong>1.1, 1.2, 1.3</strong></td>
+</tr>
+<tr>
+<td><strong>Level 3</strong></td>
+<td><strong>2 จุด</strong></td>
+<td><strong>1.1.1, 1.1.2</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="12-ตัวอย่าง-library-query-system">12. ตัวอย่าง: Library Query System</h2>
+<p><strong>Level 0 (Context):</strong> entities = <strong>Student, Publishers</strong> | process = <strong>0 Library Query System</strong></p>
+<ul>
+<li><strong>Input:</strong> Name of book, Author name, Library ID (จาก Student), Book information (จาก Publishers)</li>
+<li><strong>Output:</strong> Member status, Author(s)/Name of book/Preface/Number of pages, List of books (ไป Student)</li>
+</ul>
+<p><strong>Level 2</strong> (แตกจาก process 1 Search for book): <strong>1.1 Search by book name</strong> (ใส่ชื่อหนังสือ → ได้ผู้แต่ง ชื่อหนังสือ คำนำ จำนวนหน้า) | <strong>1.2 Search by author name</strong> (ใส่ชื่อผู้แต่ง → ได้รายการหนังสือ) — <strong>output ตรงกับ level 0 ✅</strong></p>
+<h2 id="13-แบบฝึก-correctincorrect">13. แบบฝึก Correct/Incorrect ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ภาพ</th>
+<th>ถูก/ผิด</th>
+<th>เหตุผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.0 Create Invoice: Services Performed → process → Invoice</td>
+<td>✅</td>
+<td>มีเลข ชื่อ input output</td>
+</tr>
+<tr>
+<td>Apply Insurance Premium: มีแต่ลูกศร<strong>ออก</strong> ไม่มีเข้า ไม่มีเลข</td>
+<td>❌</td>
+<td><strong>ไม่มี input (miracle)</strong> + ไม่มีเลข</td>
+</tr>
+<tr>
+<td>2.1 Calculate Gross Pay: Hours Worked, Pay Rate <strong>เข้า</strong>ทั้งคู่ ไม่มีออก</td>
+<td>❌</td>
+<td><strong>ไม่มี output (black hole)</strong></td>
+</tr>
+<tr>
+<td>Courses (store) → Class List → Students (store)</td>
+<td>❌</td>
+<td><strong>data store → data store</strong> ต้องผ่าน process</td>
+</tr>
+<tr>
+<td>5.0 Post Payment → D2 Daily Payments → 6.0 Prepare Deposit</td>
+<td>✅</td>
+<td><strong>data store อยู่ระหว่าง 2 process</strong></td>
+</tr>
+<tr>
+<td>D2 Accounts Receivable ⇄ 3.0 Post Payment</td>
+<td>✅</td>
+<td>อ่าน (retrieval) + เขียน (update) ผ่าน process</td>
+</tr>
+<tr>
+<td>PAYROLL DEPARTMENT → Paycheck → EMPLOYEE</td>
+<td>❌</td>
+<td><strong>entity → entity</strong></td>
+</tr>
+<tr>
+<td>CUSTOMER → Payment → 3.0 Apply Payment</td>
+<td>✅</td>
+<td>entity → process</td>
+</tr>
+<tr>
+<td>CUSTOMER → Payment → Accounts Receivable (store)</td>
+<td>❌</td>
+<td><strong>entity → data store</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>List the Errors — เช็คลิสต์:</strong> 1. <strong>entity → entity</strong> 2. <strong>entity → data store</strong> 3. <strong>data store ไม่ได้เป็น interface ระหว่าง 2 process</strong> 4. <strong>process มีแต่ input (black hole)</strong> 5. <strong>ใช้ชื่อ data flow ซ้ำกับเส้นที่ข้อมูลต่างกัน</strong> 6. <strong>entity วาดซ้ำโดยไม่มีเครื่องหมาย</strong> 7. <strong>ชื่อไม่มีความหมาย / เลขกับชื่อสลับกัน</strong></p>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DFD / Use case diagram</strong></td>
+<td>มุมข้อมูลไหล / มุมผู้ใช้ทำอะไร</td>
+</tr>
+<tr>
+<td><strong>External entity / Data store</strong></td>
+<td>อยู่นอกระบบ ส่งหรือรับข้อมูล / อยู่ในระบบ เก็บข้อมูล</td>
+</tr>
+<tr>
+<td>⭐ <strong>Data flow ออกจาก store / เข้า store</strong></td>
+<td><strong>อ่านข้อมูล (retrieval) / เขียนข้อมูล (update)</strong></td>
+</tr>
+<tr>
+<td><strong>Internal / Hierarchical consistency</strong></td>
+<td>ถูกต้องในแผ่นเดียว / สอดคล้องระหว่าง parent–child</td>
+</tr>
+<tr>
+<td><strong>Context diagram / Level 1</strong></td>
+<td><strong>process เดียว ไม่มี data store</strong> / หลาย process และมี data store ได้</td>
+</tr>
+<tr>
+<td><strong>Black hole / Miracle</strong></td>
+<td>ไม่มี output / ไม่มี input</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</h2>
+<ul>
+<li><strong>ทำไม DFD ยังสำคัญแม้เป็น &quot;old school&quot;</strong> → ให้มุมมองการไหลและการแปลงข้อมูลที่โมเดลอื่นไม่มี ใช้เสริมกันได้</li>
+<li><strong>ทำไมต้องแตก DFD หลายระดับ</strong> → business process ซับซ้อนเกินจะแสดงในแผ่นเดียว</li>
+<li><strong>ทำไมต้อง balancing</strong> → ไม่ให้ข้อมูลหายหรือโผล่มาเองระหว่างระดับ ถ้าไม่ balance แสดงว่ามีข้อมูลที่<strong>ไม่รู้ที่มาหรือไม่มีที่ไป</strong></li>
+<li><strong>ทำไมห้ามต่อ entity → store</strong> → ข้อมูลต้องถูก process (ตรวจสอบหรือแปลง) ก่อนเก็บ ภายนอกระบบเขียนลงฐานข้อมูลตรง ๆ ไม่ได้</li>
+<li><strong>โจทย์หาข้อผิด:</strong> ไล่เช็กว่า <strong>ทุกเส้นแตะ process ไหม / process มี input และ output ไหม / store อยู่ระหว่าง 2 process ไหม / ทุกอย่างมีชื่อและเลขถูกไหม / ชื่อซ้ำหรือกำกวมไหม</strong></li>
+</ul>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../l4/short.html"><small>← บทก่อนหน้า</small><span>Lecture 4 – Requirements Analysis with Scenario-based Modeling I (Use Case Modeling)</span></a><a class="pg next" href="../l7/short.html"><small>บทถัดไป →</small><span>Lecture 7 – Requirements Modeling with Flow Modeling II</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

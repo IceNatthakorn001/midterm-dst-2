@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 2 — Process · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+        <ol><li><a href="#1-process-คืออะไร">1. Process คืออะไร ⭐</a></li><li><a href="#2-address-space-machine-state">2. Address Space &amp;amp; Machine State</a></li><li><a href="#3-process-execution">3. Process Execution</a></li><li><a href="#4-process-api-creation">4. Process API &amp;amp; Creation</a></li><li><a href="#5-process-states">5. Process States ⭐⭐</a></li><li><a href="#6-process-control-block-pcb">6. Process Control Block (PCB) ⭐</a></li><li><a href="#7-unix-process-api">7. UNIX Process API ⭐⭐</a></li><li><a href="#8-limited-direct-execution-system-calls">8. Limited Direct Execution &amp;amp; System Calls ⭐⭐</a></li><li><a href="#9-context-switching">9. Context Switching ⭐⭐</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li><li><a href="#แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Lecture2</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 2 — Process</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><p><strong>3 คำถามใหญ่ของบทนี้:</strong> (1) Process API หน้าตาเป็นอย่างไร (2) process เข้าถึงทรัพยากรได้อย่างไร (3) OS สลับระหว่าง process ได้อย่างไร</p>
+<h2 id="1-process-คืออะไร">1. Process คืออะไร ⭐</h2>
+<ul>
+<li><strong>รันโปรแกรมด้วยมือเองยาก</strong> (โหลดโค้ด จอง memory ตั้ง register) + <strong>Multiprogramming และ Virtualization ต้องการหน่วยที่ OS จัดการได้</strong> → <strong>Process = abstraction ที่พื้นฐานที่สุดที่ OS ให้ = โปรแกรมที่กำลังรัน (a running program)</strong></li>
+<li>ผู้ใช้รันหลายโปรแกรมได้โดยไม่ต้องสนใจว่า CPU ว่างหรือไม่</li>
+</ul>
+<p><strong>Program vs Process (อุปมาอบเค้ก):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>การอบขนม</th>
+<th>คอมพิวเตอร์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>สูตร (Recipe)</strong></td>
+<td><strong>Program</strong></td>
+</tr>
+<tr>
+<td><strong>วัตถุดิบ (Ingredient)</strong></td>
+<td><strong>Input</strong></td>
+</tr>
+<tr>
+<td><strong>คนอบ (Baker)</strong></td>
+<td><strong>OS</strong></td>
+</tr>
+<tr>
+<td><strong>เตาอบ (Oven)</strong></td>
+<td><strong>Resources</strong></td>
+</tr>
+<tr>
+<td><strong>การอบ (Baking)</strong></td>
+<td><strong>Process</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>Program = static (ลำดับคำสั่ง+ข้อมูลบน disk) / Process = dynamic</strong> — โปรแกรมเดียวรันได้หลาย process</p>
+<h2 id="2-address-space-machine-state">2. Address Space &amp; Machine State</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ตำแหน่ง</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>stack</strong></td>
+<td>บนสุด <strong>โตลงล่าง</strong></td>
+<td><strong>return address, parameter ของ function call, local variables</strong></td>
+</tr>
+<tr>
+<td>(ช่องว่าง)</td>
+<td>ตรงกลาง</td>
+<td>ให้ stack กับ heap โตเข้าหากัน</td>
+</tr>
+<tr>
+<td><strong>heap</strong></td>
+<td><strong>โตขึ้นบน</strong></td>
+<td><strong>memory ที่จองแบบ dynamic</strong> (<code>malloc</code>)</td>
+</tr>
+<tr>
+<td><strong>data</strong></td>
+<td></td>
+<td><strong>global variables</strong></td>
+</tr>
+<tr>
+<td><strong>text</strong></td>
+<td>ล่างสุด (address 0)</td>
+<td><strong>instructions (code)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 จำจากล่างขึ้นบน: <strong>T-D-H-S</strong> = Text → Data → Heap → Stack</p>
+<p><strong>Machine State</strong> = ส่วนของเครื่องที่เกี่ยวข้องกับการรันโปรแกรม:</p>
+<ul>
+<li><strong>Instructions และ data</strong> ใน <strong>memory (address space)</strong></li>
+<li><strong>Registers:</strong> <strong>general purpose</strong> (eax, ebx…), <strong>program counter (PC)</strong> (ชี้คำสั่งถัดไป), <strong>stack pointer</strong> (ยอดของ stack), <strong>frame pointer</strong> (frame ของ function ปัจจุบัน)</li>
+<li><strong>I/O devices</strong> เช่น <strong>ไฟล์ที่เปิดอยู่</strong></li>
+</ul>
+<p class="c-tip">💡 machine state = &quot;ภาพถ่าย&quot; ของการทำงาน ณ ขณะหนึ่ง → เก็บไว้ได้ = หยุดแล้วกลับมาทำต่อได้ (หัวใจของ context switch)</p>
+<h2 id="3-process-execution">3. Process Execution</h2>
+<ol>
+<li><strong>Program</strong> (Instruction #1…#N) เก็บบน <strong>Disk</strong> → 2. OS <strong>instantiate</strong> เป็น <strong>Process ใน RAM</strong> → 3. OS เก็บ <strong>ตารางของ thread + priority</strong> (high/med/low) และ pointers → 4. <strong>Scheduler</strong> เลือกว่าใครรัน → <strong>context switch</strong> → <strong>execute บน CPU</strong> → 5. อาจเกิด <strong>preemption</strong> (ถูกแย่ง CPU กลางคัน) แล้ววนเลือกใหม่</li>
+</ol>
+<p><strong>ดู process จริง:</strong> Windows <strong>Task Manager</strong> / macOS <strong>Activity Monitor</strong> / Linux คำสั่ง <strong><code>top</code></strong> (tasks: total, running, sleeping, stopped, <strong>zombie</strong>; PID, USER, PR, NI, VIRT, RES, SHR, S, %CPU, %MEM, TIME+, COMMAND)</p>
+<h2 id="4-process-api-creation">4. Process API &amp; Creation</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>API</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Create</strong></td>
+<td>เริ่มโปรแกรม → สร้าง process</td>
+</tr>
+<tr>
+<td><strong>Destroy</strong></td>
+<td>process ส่วนใหญ่จบเอง แต่ <strong>สั่ง kill</strong> ได้</td>
+</tr>
+<tr>
+<td><strong>Wait</strong></td>
+<td>process <strong>รอ</strong> process อื่น</td>
+</tr>
+<tr>
+<td><strong>Miscellaneous Control</strong></td>
+<td><strong>suspend / resume</strong></td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>ดู run time หรือ state</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Process Creation 4 ขั้น ⭐:</strong></p>
+<ol>
+<li>OS <strong>โหลด code และ static data จาก disk เข้า memory</strong> (จัดเตรียม code, data, heap, stack)</li>
+<li>OS <strong>ตั้งค่า I/O เริ่มต้น</strong> — Unix มี 3 ตัว: <strong>stdin, stdout, stderr</strong></li>
+<li>OS <strong>ตั้งคำสั่งแรกที่จะรัน</strong> เช่น <strong><code>main()</code></strong></li>
+<li>OS <strong>ส่งการควบคุม CPU</strong> ให้ process</li>
+</ol>
+<h2 id="5-process-states">5. Process States ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Running</strong></td>
+<td>CPU <strong>กำลังรันคำสั่ง</strong>ของ process นี้</td>
+</tr>
+<tr>
+<td><strong>Ready</strong></td>
+<td><strong>พร้อมรัน</strong> แต่ OS <strong>ยังไม่เลือก</strong>ให้ใช้ CPU</td>
+</tr>
+<tr>
+<td><strong>Blocked</strong></td>
+<td><strong>รอ event</strong> ส่วนใหญ่คือรอ <strong>I/O request ให้เสร็จ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จาก → ไป</th>
+<th>เกิดเมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ready → Running</td>
+<td><strong>Scheduled</strong></td>
+</tr>
+<tr>
+<td>Running → Ready</td>
+<td><strong>Descheduled</strong></td>
+</tr>
+<tr>
+<td>Running → Blocked</td>
+<td><strong>I/O: initiate</strong></td>
+</tr>
+<tr>
+<td>Blocked → Ready</td>
+<td><strong>I/O: done</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>Blocked → Running ตรง ๆ ไม่ได้ ต้องกลับไป Ready ก่อน</strong>
+💡 ร้านตัดผม: Running = กำลังนั่งตัด / Ready = นั่งรอคิว / Blocked = รอสีผมแห้ง (ต่อให้ช่างว่างก็ยังตัดต่อไม่ได้)</p>
+<p><strong>ตัวอย่างตาราง:</strong> t1–3 P₀ Running, P₁ Ready (t3: <strong>P₀ initiates I/O</strong>) → t4–6 <strong>P₀ Blocked, P₁ Running</strong> → t7 <strong>I/O done</strong> → P₀ <strong>Ready</strong> (ยังต้องรอ P₁) → t8 P₁ done → t9–10 P₀ Running จนจบ
+<strong>ใจความ:</strong> ตอน P₀ รอ I/O <strong>OS ไม่ปล่อย CPU ว่าง แต่ให้ P₁ รันแทน</strong></p>
+<h2 id="6-process-control-block-pcb">6. Process Control Block (PCB) ⭐</h2>
+<ul>
+<li>OS ต้องติดตามข้อมูลหลายอย่างของ process (เช่น <strong>state</strong> เพื่อ schedule ได้ถูก) → เก็บเป็น <strong>struct</strong> เรียกว่า <strong>PCB</strong></li>
+<li><strong>Process Table</strong> = แถวละ process มี <strong>PID</strong> + <strong>pointer ไปยัง PCB</strong></li>
+<li><strong>PCB เก็บ:</strong> Program counter, Registers, State, Priority, Address space, Open files, Other flags</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process management</th>
+<th>Memory management</th>
+<th>File management</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Registers, Program counter, <strong>Program status word</strong>, Stack pointer, Process state, Priority, Scheduling parameters, <strong>Process ID, Parent process, Process group</strong>, Signals, Time when process started, CPU time used, Children's CPU time, Time of next alarm</td>
+<td>Pointer to <strong>text segment</strong>, <strong>data segment</strong>, <strong>stack segment</strong></td>
+<td>Root directory, Working directory, <strong>File descriptors</strong>, User ID, Group ID</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง xv6 <code>struct proc</code>:</strong> <code>char *mem</code> / <code>uint sz</code> / <code>char *kstack</code> / <code>enum proc_state state</code> / <code>int pid</code> / <code>struct proc *parent</code> / <code>void *chan</code> / <code>int killed</code> / <code>struct file *ofile[NOFILE]</code> / <code>struct inode *cwd</code> / <strong><code>struct context context</code></strong> (eip=PC, esp=SP, ebx, ecx, edx, esi, edi, ebp — ใช้ตอน context switch) / <code>struct trapframe *tf</code>
+<strong>xv6 states (ละเอียดกว่า 3 state):</strong> <strong>UNUSED</strong> (ช่องว่าง), <strong>EMBRYO</strong> (กำลังสร้าง), <strong>SLEEPING</strong> (≈blocked), <strong>RUNNABLE</strong> (≈ready), <strong>RUNNING</strong>, <strong>ZOMBIE</strong> (จบแล้วแต่ parent ยังไม่เก็บผล)</p>
+<h2 id="7-unix-process-api">7. UNIX Process API ⭐⭐</h2>
+<h3 id="fork"><code>fork()</code></h3>
+<ul>
+<li><strong>สร้าง process ใหม่</strong> — ตัวที่เรียก = <strong>parent</strong>, ตัวที่ถูกสร้าง = <strong>child</strong></li>
+<li>⚠️ <strong>child เริ่มต้นเป็นสำเนาเหมือน parent ทุกประการ!</strong></li>
+<li><strong>ค่าที่คืน: คืน PID ของ child ให้ parent / คืน 0 ให้ child</strong> → จึงแยกทางได้ด้วย <code>if (pid &gt; 0)</code> vs <code>else</code></li>
+<li><code>getpid()</code> = PID ตัวเอง, <code>getppid()</code> = PID ของ parent</li>
+<li><strong>child มี address space และ PCB เป็นของตัวเอง</strong> (stack, heap, data, text แยก) → <strong>child แก้ตัวแปร ค่าใน parent ไม่เปลี่ยน</strong></li>
+</ul>
+<pre><code class="language-c">pid = fork();
+if (pid &gt; 0) { printf(&quot;parent PID=%d of child %d\n&quot;, getpid(), pid); wait(NULL); exit(0); }
+else { printf(&quot;child PID=%d, parent=%d\n&quot;, getpid(), getppid()); exit(0); }
+</code></pre>
+<h3 id="wait"><code>wait()</code></h3>
+<ul>
+<li><strong>ทำให้ process รอ process อื่น</strong> — มีประโยชน์เมื่ออยากให้ <strong>parent รอ child จบก่อน</strong> (เช่นบังคับให้ child พิมพ์ก่อนเสมอ ไม่งั้นลำดับขึ้นกับ scheduler)</li>
+<li><strong>โจทย์นับ process:</strong> ทุก fork ทำให้จำนวน process <strong>เป็น 2 เท่า</strong> → fork 1 ครั้งก่อน loop + fork 2 ครั้งใน loop = <strong>2 × 2 × 2 = 8 process</strong> (ทุก process ที่ fork ออกมารันโค้ดส่วนที่เหลือต่อด้วย)</li>
+</ul>
+<h3 id="exec"><code>exec()</code></h3>
+<ul>
+<li><strong>เปลี่ยน process ให้กลายเป็นโปรแกรมอื่น</strong></li>
+<li>⚠️ <strong>ไม่ได้สร้าง process ใหม่</strong> (PID เดิม เนื้อในเปลี่ยน) | ⚠️ <strong>ถ้าเรียกสำเร็จ จะไม่ return กลับมา</strong> (โค้ดเดิมถูกแทนที่หมดแล้ว) → บรรทัดหลัง exec ไม่ถูกรัน</li>
+<li><strong>6 รูปแบบ:</strong> <code>execl</code>, <code>execv</code>, <code>execlp</code>, <code>execvp</code>, <code>execle</code>, <code>execvpe</code>
+💡 <strong>l</strong> = argument เป็น <strong>list</strong>, <strong>v</strong> = เป็น <strong>vector (array)</strong>, <strong>p</strong> = ค้นใน <strong>PATH</strong>, <strong>e</strong> = ส่ง <strong>environment</strong> เอง</li>
+<li>💡 <strong>fork + exec = วิธีที่ shell รันคำสั่ง</strong> — shell fork ตัวเองเป็น child → child exec เป็นคำสั่งที่พิมพ์ → shell (parent) wait รอ</li>
+</ul>
+<h2 id="8-limited-direct-execution-system-calls">8. Limited Direct Execution &amp; System Calls ⭐⭐</h2>
+<ul>
+<li>OS ให้ process <strong>รันตรงบน CPU (natively)</strong> เพื่อความเร็ว = <strong>&quot;Direct Execution&quot;</strong> แต่ <strong>OS + hardware ป้องกันไม่ให้ user process เข้าถึงทรัพยากรระบบโดยตรง</strong> → จึงเป็น <strong>&quot;Limited&quot;</strong> → process ขอทรัพยากรเพิ่มผ่าน <strong>system call</strong></li>
+</ul>
+<p><strong>Dual Mode:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>User mode</strong></th>
+<th><strong>Kernel mode</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>จำกัดสิทธิ์</strong> (<strong>mode bit = 1</strong>)</td>
+<td>OS (kernel) รัน <strong>ทำ privileged operation ได้</strong> (<strong>mode bit = 0</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ลำดับ:</strong> user process executing → calls system call → <strong>trap (mode bit = 0)</strong> → kernel <strong>execute system call</strong> → <strong>return (mode bit = 1)</strong> → return from system call
+💡 ลูกค้าธนาคารเดินเข้าห้องนิรภัยเองไม่ได้ (user mode) ต้องยื่นคำขอที่เคาน์เตอร์ (system call) ให้พนักงานที่มีกุญแจ (kernel mode) ไปหยิบให้</p>
+<p><strong>ตัวอย่าง system call:</strong> <code>open</code>, <code>read</code>, <code>write</code>, <code>close</code>, <code>kill</code>, <code>signal</code>, <code>fork</code>, <code>wait</code>, <code>exec</code>, <code>getpid</code>, <code>link</code>, <code>unlink</code>, <code>mount</code>, <code>chdir</code>, <code>setuid</code>, <code>getuid</code>, <code>chown</code>
+<strong>Standard library เปิด system call ออกมาเป็น function ภาษา C</strong> → เรียกได้ด้วย procedure call ธรรมดา (<code>printf(&quot;Greetings&quot;)</code> → standard C library → <strong><code>write()</code> system call</strong>)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>System calls</th>
+<th>Library calls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>open</code></td>
+<td><code>fopen</code></td>
+</tr>
+<tr>
+<td><code>close</code></td>
+<td><code>fclose</code></td>
+</tr>
+<tr>
+<td><code>read</code></td>
+<td><code>fread, getchar, scanf, fscanf, getc, fgetc, gets, fgets</code></td>
+</tr>
+<tr>
+<td><code>write</code></td>
+<td><code>fwrite, putchar, **printf**, fprintf, putc, fputc, puts, fputs</code></td>
+</tr>
+<tr>
+<td><code>lseek</code></td>
+<td><code>fseek</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong><code>printf</code> ไม่ใช่ system call แต่เป็น library call ที่ข้างในเรียก <code>write</code></strong></p>
+<h3 id="ขั้นตอนของ-readfd-nbytes-buffer-11-ขั้น">ขั้นตอนของ <code>read(fd, nbytes, buffer)</code> — 11 ขั้น</h3>
+<p><strong>Trap = สัญญาณซอฟต์แวร์ที่ตั้งใจสร้างโดยโปรแกรมผู้ใช้ เพื่อสลับ CPU จาก user mode ไป kernel mode</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ที่ไหน</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–3</td>
+<td>User program</td>
+<td><strong>Push parameter ลง stack:</strong> nbytes, &amp;buffer, fd</td>
+</tr>
+<tr>
+<td>4</td>
+<td>User program</td>
+<td><strong>Call read</strong> (library procedure)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Library <code>read</code></td>
+<td><strong>ใส่รหัสของ read ลงใน register</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Library</td>
+<td><strong>Trap to the kernel</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Kernel</td>
+<td><strong>Dispatch</strong> — ดูรหัสแล้วเลือก handler จากตาราง</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Kernel</td>
+<td><strong>Sys call handler ทำงาน</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Kernel → Library</td>
+<td>คืนการควบคุมกลับ user space</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Library</td>
+<td><strong>Return to caller</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td>User program</td>
+<td><strong>Increment SP</strong> (ล้าง parameter ออกจาก stack)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="limited-direct-execution-protocol">Limited Direct Execution Protocol</h3>
+<p><strong>@ Boot (kernel mode):</strong> <strong>Trap table</strong> บอก hardware ว่า <strong>trap handler อยู่ที่ไหน</strong> สำหรับแต่ละ event (system call, keyboard interrupt) | <strong>Trap handlers = function พิเศษใน memory</strong> | hardware <strong>จำ address</strong> ของ syscall handler
+<strong>@ Run:</strong> <strong>Trap เข้า OS (raise privilege)</strong> → <strong>Kernel stack เก็บข้อมูลของ process ที่เรียก</strong> → <strong><code>return-from-trap</code></strong> = คำสั่งพิเศษที่ใช้กลับไปยัง process ที่เรียก (<strong>lower privilege</strong>)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>OS (kernel mode)</th>
+<th>Hardware</th>
+<th>Program (user mode)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create entry for process list, allocate memory, load program, setup user stack with argv, fill kernel stack with reg/PC, <strong>return-from-trap</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>restore regs (from kernel stack), <strong>move to user mode</strong>, jump to main</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><strong>Run main()</strong> … Call system call, <strong>trap into OS</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>save regs (to kernel stack)</strong>, move to kernel mode, jump to trap handler</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Handle trap:</strong> do work of syscall, <strong>return-from-trap</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>restore regs, move to user mode, jump to PC after trap</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>return from main, trap (via <code>exit()</code>)</td>
+</tr>
+<tr>
+<td>free memory of process, remove from process list</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="9-context-switching">9. Context Switching ⭐⭐</h2>
+<p><strong>เมื่อไหร่ OS จะได้ CPU คืน?</strong> process <strong>yields เอง</strong> / process <strong>ถูก block</strong> (รอ I/O) / process <strong>สร้าง child แล้วรอ</strong> / process <strong>terminated</strong>
+⚠️ <strong>แต่ถ้า process วน infinite loop?</strong> ไม่ yield ไม่ block ไม่จบ → OS ไม่มีทางได้ CPU คืน → <strong>ต้องมี timer interrupt</strong></p>
+<p><strong>Timer Interrupt:</strong> <strong>Timer device สร้าง interrupt ทุก ๆ ไม่กี่มิลลิวินาที</strong> → <strong>Interrupt handler ใน OS ทำงาน</strong> → <strong>OS ได้ CPU คืน</strong>
+<strong>ตอน boot:</strong> OS <strong>บอก hardware</strong> ว่าเมื่อ timer interrupt ให้รันโค้ดไหน + <strong>เริ่มจับเวลา (starts the timer)</strong></p>
+<p><strong>Context switching = routine ของ OS ตอนสลับ process ที่กำลังรัน</strong></p>
+<ol>
+<li><strong>บันทึก context (registers)</strong> ของ process ที่กำลังรัน</li>
+<li><strong>คืน context (registers)</strong> ของอีก process หนึ่ง
+<em>(ค่า SP/PC ของ CPU ถูกเก็บลง <strong>Prog1 State</strong> → OS suspends Prog1 / ค่าจาก <strong>Prog2 State</strong> ถูกโหลดเข้า CPU → OS resumes Prog2)</em></li>
+</ol>
+<p><strong>ขั้นตอนละเอียด:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>OS @ boot</th>
+<th>Hardware</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>initialize trap table</strong></td>
+<td>remember addresses of <strong>syscall handler, timer handler</strong></td>
+</tr>
+<tr>
+<td><strong>start interrupt timer</strong></td>
+<td>start timer, interrupt CPU in X ms</td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>OS @ run (kernel mode)</th>
+<th>Hardware</th>
+<th>Program (user mode)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td>Process A …</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>timer interrupt:</strong> save regs(A) → <strong>k-stack(A)</strong>, move to kernel mode, jump to trap handler</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Handle the trap:</strong> call <strong><code>switch()</code></strong> — save regs(A) → <strong>proc_t(A)</strong>, restore regs(B) ← <strong>proc_t(B)</strong>, switch to k-stack(B), <strong>return-from-trap (into B)</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>restore regs(B) ← k-stack(B), move to user mode, jump to B's PC</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>Process B …</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>มีการเก็บ register 2 ครั้ง:</strong> ครั้งแรก <strong>hardware เก็บลง kernel stack</strong> ตอน interrupt / ครั้งที่สอง <strong>OS (<code>switch()</code>) เก็บลง PCB (proc_t)</strong> ตอนตัดสินใจสลับ</p>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Program / Process</strong></td>
+<td>สูตร (นิ่ง) / การทำตามสูตร (กำลังรัน)</td>
+</tr>
+<tr>
+<td><strong>Ready / Blocked</strong></td>
+<td>รอ CPU / รอ event หรือ I/O</td>
+</tr>
+<tr>
+<td>Stack / Heap</td>
+<td>local ชั่วคราว อัตโนมัติ / จองเองแบบ dynamic</td>
+</tr>
+<tr>
+<td><strong>fork() / exec()</strong></td>
+<td>สร้าง process ใหม่ (สำเนา) / แทนที่โปรแกรมใน process เดิม</td>
+</tr>
+<tr>
+<td>fork() return ให้ parent / child</td>
+<td><strong>PID ของ child</strong> / <strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>System call / Library call</strong></td>
+<td>เข้า kernel จริง / function ใน library ที่อาจเรียก system call</td>
+</tr>
+<tr>
+<td>User mode / Kernel mode</td>
+<td>จำกัดสิทธิ์ (bit 1) / สิทธิ์เต็ม (bit 0)</td>
+</tr>
+<tr>
+<td><strong>Trap / Timer interrupt</strong></td>
+<td>โปรแกรมตั้งใจเรียกเอง / hardware ขัดจังหวะตามเวลา</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</h2>
+<ul>
+<li><strong>ทำไมต้องมี dual mode:</strong> ถ้าให้ user process เข้าถึง hardware ตรง ๆ โปรแกรมหนึ่งอาจทำลายข้อมูลหรือ process อื่นได้</li>
+<li><strong>ทำไมต้องมี timer interrupt:</strong> ถ้า process วน infinite loop โดยไม่ yield/block OS จะไม่มีทางได้ CPU คืน</li>
+<li><strong>ทำไม child แก้ตัวแปรแล้ว parent ไม่เปลี่ยน:</strong> เพราะ child มี address space แยกเป็นของตัวเอง</li>
+<li><strong>ทำไมบรรทัดหลัง exec() ไม่ถูกรัน:</strong> เพราะโค้ดของ process ถูกแทนที่ด้วยโปรแกรมใหม่แล้ว</li>
+</ul>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../lecture1/short.html"><small>← บทก่อนหน้า</small><span>Lecture 1 — Introduction to Operating Systems</span></a><span></span></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

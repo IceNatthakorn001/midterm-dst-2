@@ -130,12 +130,14 @@ def find_lessons(subj):
         if not mds:
             continue
         quizzes = sorted(f.glob("quiz-*.html"))
+        short = f / "สรุปสั้นๆ.md"
         text = mds[0].read_text(encoding="utf-8")
         m = re.search(r"^#\s+(.+)$", text, re.M)
         title = m.group(1).strip() if m else mds[0].stem
         title = re.sub(r"^สรุป\s*[:：]\s*", "", title)
         lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title,
-                        "md": text, "quiz": quizzes[0] if quizzes else None})
+                        "md": text, "quiz": quizzes[0] if quizzes else None,
+                        "short": short.read_text(encoding="utf-8") if short.exists() else None})
     return lessons
 
 
@@ -174,10 +176,10 @@ def copy_image(src: Path, dst: Path):
         shutil.copy2(src, dst)
 
 
-def render_lesson(lesson):
+def render_lesson(lesson, key="md"):
     global _slug_seen
     _slug_seen = {}
-    text = lesson["md"]
+    text = lesson[key]
     text = re.sub(r"^#\s+.+\n", "", text, count=1)  # title rendered in the header
     # consecutive "> text" lines are separate notes in the source; keep them as separate paragraphs
     text = re.sub(r"^(>[ \t]*\S.*)\n(?=>[ \t]*[^\s\-*|\d>])", r"\1\n>\n", text, flags=re.M)
@@ -236,40 +238,49 @@ def build():
             for img in list(les["folder"].glob("img/*")) + list(les["folder"].glob("diagrams/*.png")):
                 copy_image(img, ldir / img.parent.name / img.name)
 
-            body, toc = render_lesson(les)
-            prev_l = lessons[i - 1] if i > 0 else None
-            next_l = lessons[i + 1] if i + 1 < len(lessons) else None
-            toc_html = "".join(f'<li><a href="#{a}">{esc(t)}</a></li>' for a, t in toc)
-            quiz_btn = ('<a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a>' if les["quiz"] else "")
-            pager = '<nav class="pager">'
-            pager += (f'<a class="pg prev" href="../{prev_l["slug"]}/index.html"><small>← บทก่อนหน้า</small>'
-                      f'<span>{esc(prev_l["title"])}</span></a>' if prev_l else "<span></span>")
-            pager += (f'<a class="pg next" href="../{next_l["slug"]}/index.html"><small>บทถัดไป →</small>'
-                      f'<span>{esc(next_l["title"])}</span></a>' if next_l else "<span></span>")
-            pager += "</nav>"
-            quiz_end = (f'<div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong>'
-                        f'<p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div>{quiz_btn}</div>'
-                        if les["quiz"] else "")
-            content = f"""
-<div class="lesson-layout">
-  <aside class="toc" id="toc">
-    <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
-    <div class="toc-inner">
-      <a class="toc-back" href="../index.html">← {esc(subj['code'])} ทุกบท</a>
-      <ol>{toc_html}</ol>
-    </div>
-  </aside>
-  <main class="lesson">
-    <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">{esc(subj['icon'])} {esc(subj['code'])}</a> / {esc(les['label'])}</div>
-    <h1 class="lesson-title">{esc(les['title'])}</h1>
-    <div class="lesson-actions">{quiz_btn}</div>
-    <article class="prose">{body}</article>
-    {quiz_end}
-    {pager}
-  </main>
-</div>"""
-            (ldir / "index.html").write_text(
-                page(f"{les['title']} · {subj['code']}", content, 2, subj["accent"]), encoding="utf-8")
+            for variant in (["md", "short"] if les["short"] else ["md"]):
+              is_short = variant == "short"
+              body, toc = render_lesson(les, variant)
+              if not is_short:
+                  full_toc = toc
+              prev_l = lessons[i - 1] if i > 0 else None
+              next_l = lessons[i + 1] if i + 1 < len(lessons) else None
+              toc_html = "".join(f'<li><a href="#{a}">{esc(t)}</a></li>' for a, t in toc)
+              quiz_btn = ('<a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a>' if les["quiz"] else "")
+              switch_btn = ('' if not les["short"] else
+                            '<a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a>' if is_short else
+                            '<a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a>')
+              page_name = "short.html" if is_short else "index.html"
+              nb = lambda l: "short.html" if is_short and l["short"] else "index.html"
+              pager = '<nav class="pager">'
+              pager += (f'<a class="pg prev" href="../{prev_l["slug"]}/{nb(prev_l)}"><small>← บทก่อนหน้า</small>'
+                        f'<span>{esc(prev_l["title"])}</span></a>' if prev_l else "<span></span>")
+              pager += (f'<a class="pg next" href="../{next_l["slug"]}/{nb(next_l)}"><small>บทถัดไป →</small>'
+                        f'<span>{esc(next_l["title"])}</span></a>' if next_l else "<span></span>")
+              pager += "</nav>"
+              quiz_end = (f'<div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong>'
+                          f'<p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div>{quiz_btn}</div>'
+                          if les["quiz"] else "")
+              content = f"""
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← {esc(subj['code'])} ทุกบท</a>
+        <ol>{toc_html}</ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">{esc(subj['icon'])} {esc(subj['code'])}</a> / {esc(les['label'])}</div>
+      <h1 class="lesson-title">{"⚡ สรุปสั้น · " if is_short else ""}{esc(les['title'])}</h1>
+      <div class="lesson-actions">{switch_btn}{quiz_btn}</div>
+      <article class="prose">{body}</article>
+      {quiz_end}
+      {pager}
+    </main>
+  </div>"""
+              (ldir / page_name).write_text(
+                  page(f"{'สรุปสั้น · ' if is_short else ''}{les['title']} · {subj['code']}", content, 2, subj["accent"]), encoding="utf-8")
 
             if les["quiz"]:
                 q = les["quiz"].read_text(encoding="utf-8")
@@ -279,7 +290,7 @@ def build():
                 (ldir / "quiz.html").write_text(q, encoding="utf-8")
 
             search_index.append({"s": subj["code"], "t": les["title"], "u": f"{subj['slug']}/{les['slug']}/index.html",
-                                 "h": [t for _, t in toc]})
+                                 "h": [t for _, t in full_toc]})
 
         reviews = find_reviews(subj)
         for rv in reviews:
@@ -303,10 +314,11 @@ def build():
         rows = ""
         for n, les in enumerate(lessons, 1):
             qlink = (f'<a class="chip chip-quiz" href="{les["slug"]}/quiz.html">📝 Quiz</a>' if les["quiz"] else "")
+            slink = (f'<a class="chip" href="{les["slug"]}/short.html">⚡ สรุปสั้น</a>' if les["short"] else "")
             rows += (f'<li class="lesson-row"><span class="num">{n:02d}</span>'
                      f'<a class="lesson-link" href="{les["slug"]}/index.html"><small>{esc(les["label"])}</small>'
                      f'<span>{esc(les["title"])}</span></a>'
-                     f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{qlink}</div></li>')
+                     f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
         nq = sum(1 for l in lessons if l["quiz"])
         sbody = f"""
 <main class="wrap">

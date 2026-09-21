@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 2 – Software Process Models · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a>
+        <ol><li><a href="#1-กรณีศึกษา-เมื่อกระบวนการพัง">1. กรณีศึกษา: เมื่อกระบวนการพัง</a></li><li><a href="#2-กิจกรรมพื้นฐาน-6-อย่าง">2. กิจกรรมพื้นฐาน 6 อย่าง ⭐</a></li><li><a href="#3-layered-technology">3. Layered Technology ⭐</a></li><li><a href="#4-process-framework-vs-development-framework">4. Process Framework vs Development Framework</a></li><li><a href="#5-umbrella-activities-8-อย่าง">5. Umbrella Activities — 8 อย่าง ⭐</a></li><li><a href="#6-process-models-คืออะไร">6. Process Models คืออะไร ⭐</a></li><li><a href="#7-code-and-fix-model">7. Code and Fix Model</a></li><li><a href="#8-waterfall-model">8. Waterfall Model ⭐</a></li><li><a href="#9-incremental-model">9. Incremental Model ⭐</a></li><li><a href="#10-spiral-model">10. Spiral Model ⭐</a></li><li><a href="#11-agile-และ-scrum">11. Agile และ Scrum ⭐⭐</a></li><li><a href="#12-agile-vs-traditional-heavy">12. Agile vs Traditional (Heavy) ⭐</a></li><li><a href="#13-spotify-vs-healthcaregov">13. Spotify vs HealthCare.gov ⭐</a></li><li><a href="#14-process-assessment">14. Process Assessment</a></li><li><a href="#15-เปรียบเทียบทุกโมเดล">15. เปรียบเทียบทุกโมเดล ⭐</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li><li><a href="#แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L2</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 2 – Software Process Models</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><h2 id="1-กรณีศึกษา-เมื่อกระบวนการพัง">1. กรณีศึกษา: เมื่อกระบวนการพัง</h2>
+<p><strong>CrowdStrike Outage (2024):</strong> บั๊กใน <strong>Content Validator</strong> ซึ่งเป็นส่วนหนึ่งของ <strong>deployment process</strong> ปล่อยให้อัปเดตที่ผิดพลาดหลุดออกไป → เครื่อง Windows ทั่วโลกขึ้น <strong>จอฟ้า (Blue Screen)</strong> แล้ว restart วนไป
+<strong>บทเรียน:</strong> <strong>ตัว &quot;ด่านตรวจ&quot; ในกระบวนการเองก็มีบั๊กได้</strong> ถ้าไม่มีการป้องกันหลายชั้น ความผิดพลาดเล็ก ๆ ก็ลุกลาม</p>
+<p><strong>Knight Capital (2012):</strong> ระบบเทรดส่งคำสั่งที่ไม่ได้ตั้งใจจำนวนมหาศาล <strong>เทรดต่อเนื่อง ~45 นาที</strong> → <strong>เสียหายมากกว่า $440 ล้าน</strong>
+<strong>ต้นเหตุจริงไม่ใช่แค่บั๊ก</strong> แต่เป็นความล้มเหลวของ <strong>การ deploy และการควบคุมการปฏิบัติงาน</strong>: ทดสอบไม่เพียงพอ / <strong>ไม่มี safeguards</strong> / บริหารความเสี่ยงไม่ดี</p>
+<p class="c-tip">💡 ⭐ <strong>กระบวนการที่ดีคือกำแพงกั้นความผิดพลาดของคน</strong></p>
+<h2 id="2-กิจกรรมพื้นฐาน-6-อย่าง">2. กิจกรรมพื้นฐาน 6 อย่าง ⭐</h2>
+<p><em>(ทุกโมเดลมีเหมือนกัน ต่างแค่ <strong>ลำดับ จำนวนรอบ และความละเอียด</strong>)</em></p>
+<ol>
+<li><strong>Requirements analysis</strong> — หาว่าผู้ใช้ต้องการอะไร</li>
+<li><strong>System and software design</strong> — วางโครงสร้างระบบ</li>
+<li><strong>Implementation (coding)</strong></li>
+<li><strong>Testing and quality assurance</strong></li>
+<li><strong>Deployment and release</strong></li>
+<li><strong>Maintenance and evolution</strong></li>
+</ol>
+<h2 id="3-layered-technology">3. Layered Technology ⭐</h2>
+<p><strong>SE เป็นชั้น ๆ ซ้อนกัน (บนลงล่าง):</strong> <strong>Tools</strong> → <strong>Methods</strong> → <strong>Process</strong> → <strong>Quality focus (ฐานของทุกอย่าง)</strong></p>
+<ul>
+<li><strong>Quality focus</strong> เป็นฐาน | <strong>Process</strong> เป็นตัวยึดชั้นต่าง ๆ ไว้ด้วยกัน กำหนดกรอบการทำงาน | <strong>Methods</strong> = วิธีทำเชิงเทคนิค | <strong>Tools</strong> ช่วยให้ทำได้ง่ายหรืออัตโนมัติ</li>
+</ul>
+<h2 id="4-process-framework-vs-development-framework">4. Process Framework vs Development Framework</h2>
+<p><strong>A Process Framework (กล่องซ้อนกัน):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Common Process Framework</strong></td>
+<td>กรอบใหญ่ที่ใช้ได้กับทุกโครงการ</td>
+</tr>
+<tr>
+<td><strong>Framework Activities</strong></td>
+<td>กิจกรรมหลัก (requirement, design, coding, testing)</td>
+</tr>
+<tr>
+<td><strong>Task Sets</strong></td>
+<td><strong>Work tasks</strong> (งานที่ต้องทำ) + <strong>Work products</strong> (ชิ้นงาน) + <strong>Milestones, deliverables</strong> + <strong>QA checkpoints</strong></td>
+</tr>
+<tr>
+<td><strong>Umbrella Activities</strong></td>
+<td>กิจกรรมที่ครอบทุกช่วง</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>A Development Framework</strong> (React, Django, Laravel): <strong>Foundation</strong> (โครงสร้างพื้นฐาน ไม่ต้องเริ่มจากศูนย์) / <strong>Components and Tools</strong> (สำเร็จรูป พัฒนาเร็วขึ้น) / <strong>Best Practices and Guidelines</strong> / <strong>Customization</strong>
+⚠️ <strong>Process framework = กรอบ &quot;วิธีทำงาน&quot; ของทีม / Development framework = &quot;โครงโค้ด&quot; สำเร็จรูป</strong></p>
+<h2 id="5-umbrella-activities-8-อย่าง">5. Umbrella Activities — 8 อย่าง ⭐</h2>
+<p><em>(ทำต่อเนื่องตลอดโครงการ ไม่ได้อยู่ช่วงใดช่วงหนึ่ง)</em></p>
+<ol>
+<li><strong>Software project management</strong> (POMA) 2. <strong>Formal technical reviews</strong> 3. <strong>Software quality assurance</strong> 4. <strong>Software configuration management</strong> (จัดการเวอร์ชัน เช่น Git) 5. <strong>Work product preparation and production</strong> 6. <strong>Reusability management</strong> 7. <strong>Measurement</strong> 8. <strong>Risk management</strong></li>
+</ol>
+<h2 id="6-process-models-คืออะไร">6. Process Models คืออะไร ⭐</h2>
+<ul>
+<li>เป็น <strong>framework มาตรฐาน</strong> ให้แนวทางในการ <strong>ประสานงานและควบคุม task และคนที่ทำ task</strong></li>
+<li>อธิบาย <strong>ลำดับกิจกรรม, บทบาท (roles), ชิ้นงาน (artifacts) และ workflow</strong></li>
+<li><strong>มีไว้เพื่อ 3 อย่าง:</strong> 1. ช่วยทีม <strong>วางแผน ลงมือทำ และบริหาร</strong> 2. ทำให้ชิ้นงาน <strong>สม่ำเสมอและมีคุณภาพ</strong> 3. ช่วย <strong>สื่อสารและประสานงาน</strong>ระหว่าง stakeholders
+💡 คำสำคัญ: <strong>coordination, tasks, people</strong></li>
+</ul>
+<p><strong>⭐ Process model ต้องกำหนด 5 อย่าง:</strong></p>
+<ol>
+<li><strong>ชุดของ task</strong> 2. <strong>Input และ output</strong> ของแต่ละ task 3. <strong>Pre-conditions และ post-conditions</strong> 4. <strong>ลำดับการไหล</strong> ของ task 5. <strong>คนที่ทำ</strong> แต่ละ task</li>
+</ol>
+<h2 id="7-code-and-fix-model">7. Code and Fix Model</h2>
+<p>เขียนโค้ด → คอมไพล์ → ทดสอบ → เจอปัญหากลับไปแก้ → วนจนใช้ได้ → ปล่อย
+<strong>ข้อสังเกต:</strong> 1. คนส่วนใหญ่ทำแบบนี้ <strong>แต่บางคนข้าม unit test หรือ debug ไปเลย</strong> 2. บางคน <strong>เริ่มทำโดยยังไม่เข้าใจ problem statement (= requirement)</strong>
+⚠️ เหมาะกับ<strong>งานเล็กมาก ๆ</strong> เท่านั้น — ใช้กับระบบใหญ่จะแก้ไม่จบ</p>
+<h2 id="8-waterfall-model">8. Waterfall Model ⭐</h2>
+<p><strong>Traditional – Linear and sequential</strong>
+<strong>Key Characteristics:</strong> ⭐ <strong>ช่วงต่าง ๆ ไม่ซ้อนทับกัน ต้องจบช่วงหนึ่งก่อนเริ่มถัดไป</strong> / ⭐ <strong>แต่ละช่วงผลิต deliverable ที่เป็น input ของช่วงถัดไป</strong> / <strong>เน้นเอกสารและการวางแผน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Pros</th>
+<th>❌ Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เรียบง่าย เข้าใจง่าย</td>
+<td><strong>ใช้เวลาพัฒนานาน</strong></td>
+</tr>
+<tr>
+<td>เหมาะกับโครงการเล็กที่ requirement <strong>ชัดและไม่เปลี่ยน</strong></td>
+<td><strong>ไม่ยืดหยุ่น</strong> เมื่อเริ่มพัฒนาแล้วเปลี่ยนยาก</td>
+</tr>
+<tr>
+<td><strong>เอกสารครบ</strong> ช่วยการดูแลระยะยาว</td>
+<td>⭐ <strong>เจอปัญหาช้า</strong> เพราะทดสอบหลังเขียนโค้ดเสร็จ</td>
+</tr>
+<tr>
+<td></td>
+<td>ไม่เหมาะกับ requirement ที่เปลี่ยนบ่อย</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 เหมือน <strong>สร้างบ้าน</strong> — สร้างเสร็จแล้วอยากย้ายห้องน้ำต้องทุบใหม่ แพงมาก</p>
+<h2 id="9-incremental-model">9. Incremental Model ⭐</h2>
+<p><strong>แบบ A – Integration Bucket:</strong> ⭐ <strong>แต่ละ requirement หลักพัฒนาแยกกัน</strong> ผ่านลำดับเดียวกัน (requirement → design → code → unit test) → ชิ้นที่เสร็จถูกรวมเข้า <strong>&quot;ถังรวม (integration bucket)&quot; อย่างต่อเนื่อง</strong> เพื่อทำ integrated system test
+<strong>แบบ B – Multiple Release:</strong> requirement แต่ละชุดเล็ก ๆ ถูก <strong>พัฒนา แพ็ก และปล่อยเป็นหลาย release</strong>
+⚠️ <strong>ความต่าง: A รวมทุกชิ้นแล้วส่งครั้งเดียว / B ส่งให้ผู้ใช้ทีละ release</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Pros</th>
+<th>❌ Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ <strong>Divide and conquer</strong></td>
+<td>ต้องทำงานขนานกันหลายส่วน (<strong>parallel execution</strong>)</td>
+</tr>
+<tr>
+<td>เหมาะกับ <strong>ระบบใหญ่และซับซ้อนมาก</strong></td>
+<td>ใช้แรงบริหารจัดการมากขึ้น</td>
+</tr>
+<tr>
+<td></td>
+<td>⭐ <strong>ปัญหาตอนรวมระบบ (integration challenges)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-spiral-model">10. Spiral Model ⭐</h2>
+<p><strong>วนเป็นเกลียว</strong> แต่ละรอบผ่าน <strong>4 quadrant</strong> และ<strong>แต่ละรอบใหญ่ขึ้นเรื่อย ๆ</strong> (ต้นทุนสะสมมากขึ้น) มีจุด <strong>&quot;Review&quot;</strong> คั่นระหว่างรอบ</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Quadrant</th>
+<th>กิจกรรม</th>
+<th>ตัวอย่างงาน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Plan Next Phase</strong></td>
+<td>วางแผนรอบถัดไป</td>
+<td>req. plan, dev plan, test plan</td>
+</tr>
+<tr>
+<td><strong>2. Determine Objectives, Alternatives, Constraints</strong></td>
+<td>กำหนดเป้าหมาย ทางเลือก ข้อจำกัด</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>3. Evaluate Alternatives, Identify, Resolve Risks</strong></td>
+<td>ประเมินทางเลือก <strong>หาและแก้ความเสี่ยง</strong></td>
+<td><strong>risk analysis, prototype</strong></td>
+</tr>
+<tr>
+<td><strong>4. Develop, Verify Next-level Product</strong></td>
+<td>พัฒนาและตรวจสอบผลิตภัณฑ์ระดับถัดไป</td>
+<td>req. spec, design, code, unit test, sys. test</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ลำดับตามเกลียว (ในสุดออกนอก):</strong> รอบแรก = แผนและ <strong>prototype</strong> → รอบกลาง = spec และ design → รอบนอกสุด = code, unit test, system test</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Pros</th>
+<th>❌ Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>บังคับให้มี prototyping และ modeling</strong></td>
+<td>⭐ <strong>ต้องมีผู้เชี่ยวชาญการประเมินความเสี่ยง</strong></td>
+</tr>
+<tr>
+<td><strong>Iterative และ evolutionary</strong> ทุกกิจกรรม ปรับตาม<strong>จำนวนความเสี่ยง</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>แก้สิ่งที่ทำไปในรอบก่อนได้</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 ⭐ <strong>Spiral = ขับเคลื่อนด้วยความเสี่ยง (risk-driven)</strong> เหมาะกับโครงการใหญ่ที่เสี่ยงสูง</p>
+<h2 id="11-agile-และ-scrum">11. Agile และ Scrum ⭐⭐</h2>
+<p><strong>Agile Manifesto — ให้คุณค่ากับด้านซ้ายมากกว่าด้านขวา:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ ให้ความสำคัญมากกว่า</th>
+<th>มากกว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Individuals and interactions</strong></td>
+<td>processes and tools</td>
+</tr>
+<tr>
+<td><strong>Working software</strong></td>
+<td>comprehensive documentation</td>
+</tr>
+<tr>
+<td><strong>Customer collaboration</strong></td>
+<td>contract negotiation</td>
+</tr>
+<tr>
+<td><strong>Responding to change</strong></td>
+<td>following a plan</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>&quot;over&quot; ไม่ได้แปลว่า &quot;ไม่เอา&quot;</strong> — Agile ยังมีเอกสารและแผน แต่ให้น้ำหนักด้านซ้ายมากกว่า</p>
+<p><strong>Agile Processes:</strong> เป็น <strong>ตระกูล (family)</strong> ของวิธี ไม่ใช่วิธีเดียว — <strong>Short releases and iterations</strong> / <strong>Incremental design</strong> / <strong>User involvement</strong> / <strong>Minimal documentation</strong> / <strong>Informal communications</strong> / <strong>Change</strong></p>
+<p><strong>Scrum</strong> (วิธีหนึ่งใน Agile):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>องค์ประกอบ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vision</strong></td>
+<td>ภาพเป้าหมายของผลิตภัณฑ์</td>
+</tr>
+<tr>
+<td><strong>Product Backlog</strong></td>
+<td>รายการฟีเจอร์และงานทั้งหมด <strong>เรียงตามความสำคัญ</strong></td>
+</tr>
+<tr>
+<td><strong>Sprint Backlog</strong></td>
+<td>งานที่เลือกมาทำในรอบนี้</td>
+</tr>
+<tr>
+<td><strong>Sprint</strong></td>
+<td>⭐ รอบการทำงาน <strong>2–4 สัปดาห์</strong></td>
+</tr>
+<tr>
+<td><strong>Daily Scrum Meeting</strong></td>
+<td>⭐ ประชุมสั้น ๆ <strong>ทุก 24 ชั่วโมง</strong></td>
+</tr>
+<tr>
+<td><strong>Potentially Shippable Product Increment</strong></td>
+<td>จบแต่ละ sprint ได้ชิ้นงานที่ <strong>พร้อมส่งมอบได้</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Key Characteristics:</strong> Iterative development / Incremental delivery / Customer collaboration / Responding to change / ⭐ <strong>Cross-functional teams</strong> (ทีมที่มีทักษะครบในทีมเดียว) / Minimal documentation</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Pros (Agile)</th>
+<th>❌ Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ยืดหยุ่นและปรับตัวสูง</strong></td>
+<td>ต้องการทีมที่ <strong>มีประสบการณ์และมีวินัย</strong></td>
+</tr>
+<tr>
+<td><strong>ส่งซอฟต์แวร์ที่ใช้ได้เร็วขึ้น</strong></td>
+<td>⭐ <strong>คาดการณ์ต้นทุนและเวลาได้ยาก</strong></td>
+</tr>
+<tr>
+<td>ลูกค้าพอใจมากขึ้น (feedback สม่ำเสมอ)</td>
+<td>ยากกับโครงการใหญ่ที่ <strong>scope ตายตัว</strong></td>
+</tr>
+<tr>
+<td>⭐ <strong>เจอปัญหาเร็ว</strong></td>
+<td>เอกสารอาจไม่พอถ้าจัดการไม่ดี</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="12-agile-vs-traditional-heavy">12. Agile vs Traditional (Heavy) ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ด้าน</th>
+<th><strong>Agile</strong></th>
+<th><strong>Traditional / Heavy</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Requirements</strong></td>
+<td>สมมติว่า<strong>จะเปลี่ยน</strong>, ไม่เป็นทางการ, คุยกับผู้ใช้ตลอด</td>
+<td>สมมติว่า<strong>ไม่เปลี่ยน</strong>, เอกสารครบ ละเอียด เป็นทางการ</td>
+</tr>
+<tr>
+<td><strong>Design</strong></td>
+<td>ไม่เป็นทางการ, <strong>iterative</strong></td>
+<td>เป็นทางการ, ทำล่วงหน้าทั้งหมด (<strong>upfront</strong>)</td>
+</tr>
+<tr>
+<td><strong>User involvement</strong></td>
+<td>⭐ <strong>สำคัญมาก บ่อย</strong></td>
+<td>⭐ แค่<strong>ตอนต้น (requirement)</strong> และ<strong>ตอนท้าย (acceptance test)</strong></td>
+</tr>
+<tr>
+<td><strong>Documentation</strong></td>
+<td>น้อยที่สุด, <strong>source code ก็เป็นเอกสาร</strong></td>
+<td>เอกสารหนัก เป็นทางการ</td>
+</tr>
+<tr>
+<td><strong>Communication</strong></td>
+<td>ไม่เป็นทางการ ตลอดโครงการ</td>
+<td>ผ่านเอกสาร memo และประชุมทางการ</td>
+</tr>
+<tr>
+<td><strong>Complexity</strong></td>
+<td>ต่ำ</td>
+<td>สูง</td>
+</tr>
+<tr>
+<td><strong>Overhead</strong></td>
+<td>ต่ำ</td>
+<td>สูง</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>เลือกอย่างไร:</strong> requirement ชัด ไม่เปลี่ยน มีกฎหมาย/สัญญาคุม → <strong>Traditional</strong> | requirement ไม่แน่นอน ต้องแข่งขันเร็ว ลูกค้าคุยได้บ่อย → <strong>Agile</strong></p>
+<h2 id="13-spotify-vs-healthcaregov">13. Spotify vs HealthCare.gov ⭐</h2>
+<p><strong>✅ Spotify's &quot;Squad&quot; Model (สำเร็จ)</strong> — อยากออกฟีเจอร์ใหม่เร็วในตลาดที่แข่งขันสูง</p>
+<ul>
+<li><strong>Squads</strong> = ทีมเล็ก <strong>อิสระ (autonomous)</strong> และ <strong>cross-functional</strong> เป็นเจ้าของฟีเจอร์เฉพาะด้าน | <strong>Tribes</strong> = กลุ่มของ squads</li>
+<li>เน้น <strong>continuous delivery, A/B testing, feedback ที่รวดเร็ว</strong></li>
+<li><strong>ทำไมสำเร็จ:</strong> <strong>Fast iteration</strong> (ไอเดียถึงปล่อยใช้ในไม่กี่สัปดาห์) / <strong>Autonomy</strong> (ไม่ต้องรออนุมัติจากเบื้องบน) / <strong>Data-driven decisions</strong> (ข้อมูลผู้ใช้ real-time)</li>
+</ul>
+<p><strong>❌ HealthCare.gov (ล้มเหลว)</strong> — เว็บกลางให้คนอเมริกันสมัครประกันสุขภาพ</p>
+<ul>
+<li>อ้างว่าใช้ Agile: ผู้รับจ้างหลายเจ้าทำคนละ module, ประชุมบ่อย</li>
+<li><strong>ทำไมล้มเหลว:</strong> ⭐ <strong>Fake Agile</strong> (ยังมี deadline ตายตัวและ scope มหาศาลแบบ Waterfall <strong>แต่ไม่มีวินัยการประสานงาน</strong>) / <strong>Poor integration</strong> / <strong>Late testing</strong> (ทดสอบทั้งระบบแค่ไม่กี่สัปดาห์ก่อนเปิด) / <strong>ไม่มีรอบ feedback จากผู้ใช้จริง</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Factor</th>
+<th><strong>Spotify</strong></th>
+<th><strong>HealthCare.gov</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Iteration &amp; Delivery</strong></td>
+<td>รอบสั้น, continuous delivery</td>
+<td>deadline ตายตัว scope ใหญ่ ปล่อยครั้งเดียว</td>
+</tr>
+<tr>
+<td><strong>User Feedback</strong></td>
+<td>A/B testing, real-time</td>
+<td>ไม่มี — ผู้ใช้ได้ลองครั้งแรกวันเปิดตัว</td>
+</tr>
+<tr>
+<td><strong>Team Autonomy</strong></td>
+<td>squad ตัดสินใจเองได้</td>
+<td>ผู้รับจ้างหลายเจ้าแยกกัน ขาดการประสาน</td>
+</tr>
+<tr>
+<td><strong>Integration Testing</strong></td>
+<td>รวมและทดสอบบ่อย</td>
+<td>ประกอบแล้วใช้ไม่ได้ ทดสอบช้าเกินไป</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ ⭐ <strong>บทเรียน: แค่ประชุมบ่อยไม่ได้ทำให้เป็น Agile</strong> — หัวใจคือ<strong>ส่งของที่ใช้ได้เป็นรอบ ๆ, ได้ feedback จริง, รวมระบบและทดสอบตั้งแต่เนิ่น ๆ</strong></p>
+<h2 id="14-process-assessment">14. Process Assessment</h2>
+<p><strong>คำถาม:</strong> องค์กรของเรามีกระบวนการ SE ที่ <strong>&quot;โตเต็มที่ (mature)&quot;</strong> แค่ไหน และต้องปรับปรุงไหม?
+<strong>องค์กรที่ช่วยประเมิน:</strong> <strong>ISO</strong> (มาตรฐาน <strong>ISO 9000 series</strong>) และ <strong>SEI (Software Engineering Institute ที่ Carnegie Mellon)</strong>
+<em>(SEI พัฒนา <strong>CMM/CMMI</strong> แบ่งความ mature เป็น 5 ระดับ: Initial → Optimizing)</em></p>
+<h2 id="15-เปรียบเทียบทุกโมเดล">15. เปรียบเทียบทุกโมเดล ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โมเดล</th>
+<th>ลักษณะ</th>
+<th>เหมาะกับ</th>
+<th>จุดอ่อนหลัก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code and Fix</strong></td>
+<td>เขียน → ทดสอบ → แก้ วนไป</td>
+<td>งานเล็กมาก</td>
+<td>มักข้าม test และไม่เข้าใจ requirement</td>
+</tr>
+<tr>
+<td><strong>Waterfall</strong></td>
+<td>เรียงเส้นตรง <strong>ไม่ซ้อนทับ</strong> เอกสารเยอะ</td>
+<td>requirement ชัด ไม่เปลี่ยน โครงการเล็ก</td>
+<td><strong>ไม่ยืดหยุ่น เจอปัญหาช้า</strong></td>
+</tr>
+<tr>
+<td><strong>Incremental</strong></td>
+<td>แบ่ง requirement เป็นชิ้น พัฒนาแยกแล้วรวม / ปล่อยหลาย release</td>
+<td><strong>ระบบใหญ่ ซับซ้อน</strong></td>
+<td>บริหารยาก <strong>integration ยาก</strong></td>
+</tr>
+<tr>
+<td><strong>Spiral</strong></td>
+<td>วนเกลียว <strong>4 quadrant</strong> เน้น<strong>ความเสี่ยง</strong> มี prototype</td>
+<td>โครงการใหญ่ <strong>ความเสี่ยงสูง</strong></td>
+<td>ต้องมีผู้เชี่ยวชาญประเมินความเสี่ยง</td>
+</tr>
+<tr>
+<td><strong>Agile / Scrum</strong></td>
+<td>รอบสั้น <strong>2–4 สัปดาห์</strong> ลูกค้ามีส่วนร่วม ยอมรับการเปลี่ยนแปลง</td>
+<td><strong>requirement ไม่แน่นอน ต้องเร็ว</strong></td>
+<td><strong>คาดการณ์เวลาและเงินยาก</strong> ต้องใช้ทีมมีวินัย</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Incremental A / B</strong></td>
+<td>รวมใน integration bucket แล้วทดสอบทั้งระบบ / ปล่อยเป็นหลาย release</td>
+</tr>
+<tr>
+<td>Incremental / Spiral</td>
+<td>แบ่งตาม requirement / วนรอบตามความเสี่ยง</td>
+</tr>
+<tr>
+<td><strong>Process framework / Development framework</strong></td>
+<td>กรอบวิธีทำงาน / โครงโค้ดสำเร็จรูป</td>
+</tr>
+<tr>
+<td>Agile / Traditional: user involvement</td>
+<td>ตลอดโครงการ / แค่ตอนต้นกับตอนท้าย</td>
+</tr>
+<tr>
+<td><strong>Real Agile / Fake Agile</strong></td>
+<td>ส่งของเป็นรอบ มี feedback / ประชุมบ่อยแต่ scope และ deadline ตายตัว</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</h2>
+<ul>
+<li><strong>ทำไม Waterfall เจอปัญหาช้า?</strong> → testing มาหลัง implementation ถ้า requirement ผิดตั้งแต่ต้น จะรู้ตอนท้าย ซึ่งแก้แพงที่สุด</li>
+<li><strong>ทำไม Incremental เหมาะกับระบบใหญ่?</strong> → <strong>divide and conquer</strong> แต่แลกกับการบริหารและ integration ที่ยากขึ้น</li>
+<li><strong>ทำไม Spiral ต้องมีผู้เชี่ยวชาญความเสี่ยง?</strong> → ทุกรอบขับเคลื่อนด้วยการวิเคราะห์ความเสี่ยง ถ้าประเมินผิดทั้งกระบวนการเสีย</li>
+<li><strong>ทำไม HealthCare.gov ล้มเหลวทั้งที่ &quot;ใช้ Agile&quot;?</strong> → นำแค่พิธีกรรม (ประชุมบ่อย) มาใช้ แต่ไม่มีหลักสำคัญ</li>
+<li><strong>โจทย์ &quot;ควรใช้โมเดลไหน&quot;:</strong> ดู 3 อย่าง — <strong>requirement ชัดไหม / ระบบใหญ่และเสี่ยงแค่ไหน / ลูกค้าคุยได้บ่อยไหม</strong></li>
+</ul>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../l1/short.html"><small>← บทก่อนหน้า</small><span>Lecture 1 – Software Engineering Foundation &amp; Software Project Management</span></a><a class="pg next" href="../l3/short.html"><small>บทถัดไป →</small><span>Lecture 3 – Requirement Engineering</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

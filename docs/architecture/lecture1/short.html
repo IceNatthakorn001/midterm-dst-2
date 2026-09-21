@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 1 — Introduction to Operating Systems · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+        <ol><li><a href="#1-course-logistics">1. Course Logistics</a></li><li><a href="#2-computer-architecture-review">2. Computer Architecture Review</a></li><li><a href="#3-roles-of-os">3. Roles of OS ⭐⭐</a></li><li><a href="#4-design-goals-ของ-os">4. Design Goals ของ OS</a></li><li><a href="#5-history-of-operating-systems-5-ยุค">5. History of Operating Systems — 5 ยุค ⭐</a></li><li><a href="#6-os-zoo">6. OS Zoo</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li><li><a href="#แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Lecture1</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 1 — Introduction to Operating Systems</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><p><em>(ครึ่ง OS ของ ITDS211 — รศ.ดร.สุดสงวน งามสุริยโรจน์)</em></p>
+<h2 id="1-course-logistics">1. Course Logistics</h2>
+<p><strong>ทำไมต้องเรียน OS:</strong> เป็นซอฟต์แวร์ที่<strong>ใหญ่และซับซ้อนที่สุด</strong> / แนวคิดเอาไปใช้ที่อื่นได้เยอะ (<strong>Abstraction, Performance tuning, Resource coordination</strong>) / เป็นพื้นฐานของ <strong>Computer Security และ Parallel computing</strong></p>
+<p><strong>Principles of OS — 4 เรื่อง:</strong> Process, Memory, Files, I/O
+<strong>3 คำถามหลักของวิชา ⭐</strong> <em>(= Virtualization – Concurrency – Persistence)</em></p>
+<ol>
+<li>จะ <strong>virtualize ทรัพยากร</strong> อย่างไร (ให้แต่ละโปรแกรมรู้สึกเหมือนมีเครื่องของตัวเอง)</li>
+<li>จะสร้าง <strong>โปรแกรมที่ทำงานพร้อมกัน (concurrent) ให้ถูกต้อง</strong> ได้อย่างไร</li>
+<li>จะ <strong>เก็บข้อมูลให้คงอยู่ถาวร (persistently)</strong> ได้อย่างไร</li>
+</ol>
+<p><strong>หนังสือ:</strong> <em>Operating Systems: Three Easy Pieces</em> (Remzi &amp; Andrea A.) | <em>Modern Operating Systems</em> (Tanenbaum &amp; Boss) | <em>Operating System Principles</em> (Silberschatz)
+<strong>Outline 7 คาบ:</strong> OS#1 Intro → OS#2 <strong>Process and Process Scheduling</strong> → OS#3 <strong>Synchronization</strong> → OS#4 <strong>Memory Management</strong> → OS#5 <strong>File Systems</strong> → OS#6 <strong>Disk and I/O Management</strong> → OS#7 <strong>Deadlock</strong>
+<strong>Grading (ส่วน OS):</strong> <strong>Quizzes 10% / Homework 10% / Final Exam 30%</strong> — ⚠️ ลอกงาน = ได้ศูนย์ทุกคนที่เกี่ยวข้อง | รวมกับส่วน Computer Architecture</p>
+<h2 id="2-computer-architecture-review">2. Computer Architecture Review</h2>
+<p><strong>ระบบคอมพิวเตอร์ 4 ชั้น (ล่างขึ้นบน):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ส่วนประกอบ</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Hardware</strong></td>
+<td>ทรัพยากรพื้นฐาน: <strong>CPU, memory, I/O devices</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Operating system</strong></td>
+<td><strong>ควบคุมและประสาน</strong> การใช้ hardware ระหว่างโปรแกรมของผู้ใช้หลายคน</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Application programs</strong></td>
+<td>กำหนดว่าจะ <strong>ใช้ทรัพยากรแก้ปัญหา</strong> อย่างไร (compiler, assembler, text editor, database)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Users</strong></td>
+<td>คน เครื่องจักร หรือคอมพิวเตอร์อื่น</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>OS อยู่ตรงกลาง — โปรแกรมไม่ได้คุยกับ hardware ตรง ๆ ต้องผ่าน OS เสมอ</strong></p>
+<p><strong>Simplified architecture:</strong> <strong>CPU</strong> = Registers + <strong>ALU</strong> + <strong>Control Unit</strong> | <strong>Memory (RAM)</strong> | <strong>I/O Controllers</strong> เชื่อมไป I/O Devices (HDD, Floppy, CD-ROM, Tape, Mouse, Keyboard, Monitor, Printer, Network, Modem, Robots, Instrumentation) — ทุกส่วนเชื่อมด้วย <strong>bus</strong></p>
+<p><strong>Fetch-Decode-Execute:</strong> <strong>Fetch</strong> (ดึงคำสั่งจาก memory) → <strong>Decode</strong> (ถอดความว่าต้องทำอะไร) → <strong>Execute</strong> (ทำตามคำสั่ง) → <strong>วนซ้ำจนโปรแกรมจบ</strong></p>
+<h2 id="3-roles-of-os">3. Roles of OS ⭐⭐</h2>
+<p><strong>Fetch-Decode-Execute ดูง่าย แต่จริง ๆ ต้องจัดการ:</strong> รันหลายโปรแกรมพร้อมกัน / แบ่ง memory ให้หลายโปรแกรม / ควบคุมการเข้าถึง I/O
+➜ <strong>OS ทำให้ระบบทำงาน ถูกต้อง (correctly) + มีประสิทธิภาพ (efficiently) + ใช้งานง่าย (easy-to-use)</strong></p>
+<h3 id="บทบาทที่-1-virtualization-of-hardware">บทบาทที่ 1: Virtualization of hardware</h3>
+<ul>
+<li><strong>ทำไมต้อง virtualize:</strong> CPU รันได้ทีละไม่กี่คำสั่ง / memory ต้องแบ่งกันใช้ → OS ทำให้ทรัพยากรจริง <strong>&quot;ดูเหมือนมีไม่จำกัด&quot;</strong> → จึงเรียก OS ว่า <strong>virtual machine / extended machine</strong></li>
+<li><strong>Virtualizing CPU:</strong> CPU รันได้ทีละคำสั่ง แต่ OS <strong>สลับระหว่างโปรแกรมเร็ว ๆ</strong> จนดูเหมือนรันพร้อมกัน → คำถามต่อ: <strong>จะสลับ process อย่างไร? โปรแกรมไหนควรได้ CPU ก่อน (scheduling)?</strong> <em>(ตอบใน Lecture 2)</em></li>
+<li><strong>Virtualizing Memory:</strong> แต่ละโปรแกรมมี <strong>address space ของตัวเอง</strong> ทุกโปรแกรมเห็น address เริ่มที่ <strong>0x00000 (virtual)</strong> แต่จริง ๆ อยู่คนละตำแหน่งใน physical memory → คำถามต่อ: <strong>map virtual → physical อย่างไร? จัดสรร memory อย่างไร? ถ้า physical memory ไม่พอทำอย่างไร?</strong></li>
+</ul>
+<h3 id="บทบาทที่-2-apis">บทบาทที่ 2: APIs</h3>
+<p>OS ให้ <strong>APIs (system calls / standard library)</strong> เพื่อให้ผู้ใช้บอก OS ได้ว่าต้องการอะไร (รันโปรแกรม, เข้าถึงไฟล์, จอง memory) — <strong>APIs ซ่อนความซับซ้อนของ hardware</strong>
+<strong>OS as an Interface:</strong> ให้ <strong>&quot;beautiful interface&quot;</strong> กับ application ด้านบน ซ่อน <strong>&quot;ugly interface&quot;</strong> ของ hardware ด้านล่าง
+💡 เขียน <code>open(&quot;file.txt&quot;)</code> ได้เลย ไม่ต้องรู้ว่าหัวอ่านดิสก์ต้องไป sector ไหน</p>
+<h3 id="บทบาทที่-3-resource-manager">บทบาทที่ 3: Resource Manager</h3>
+<p>หลายโปรแกรมที่รัน <strong>concurrently</strong> ต้องแบ่ง <strong>CPU time / Memory space / Disk และ I/O devices</strong> → OS แจกทรัพยากรเพื่อ <strong>efficiency + fairness</strong>
+⚠️ <strong>Virtualization = ทำให้ &quot;ดูเหมือนมีไม่จำกัด&quot; / Resource manager = &quot;ตัดสินใจว่าใครได้อะไรเมื่อไหร่&quot;</strong> — ทำงานคู่กัน</p>
+<h2 id="4-design-goals-ของ-os">4. Design Goals ของ OS</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เป้าหมาย</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Abstraction</strong></td>
+<td>ทำให้ระบบ<strong>สะดวกและใช้ง่าย</strong></td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td><strong>ลด overhead</strong> จากการ virtualize และจัดการทรัพยากร</td>
+</tr>
+<tr>
+<td><strong>Protection</strong></td>
+<td><strong>แยก process ออกจากกัน</strong> ไม่ให้ตัวหนึ่งทำร้ายตัวอื่น</td>
+</tr>
+<tr>
+<td><strong>Others</strong></td>
+<td><strong>energy-efficient, security, mobility</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-history-of-operating-systems-5-ยุค">5. History of Operating Systems — 5 ยุค ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ยุค</th>
+<th>ชื่อ</th>
+<th>Hardware / สภาพ</th>
+<th>แนวคิดสำคัญ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Human OS</strong></td>
+<td>Mainframes</td>
+<td><strong>คน (operator) คุมเครื่องเอง ทำทีละ job</strong> — เวลาเครื่องเสียเปล่าขณะ operator เดินไปมา</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Batch System</strong></td>
+<td>Mainframes, <strong>punch cards</strong>, tape</td>
+<td><strong>OS ตัวแรก: Automatic job sequencing</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Multiprogramming</strong></td>
+<td><strong>Hardware ถูก คนแพง</strong> (IBM System/360)</td>
+<td>โหลดหลาย job ใน memory, <strong>spooling</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Personal Computer</strong></td>
+<td><strong>Hardware ถูกมาก คนแพงมาก</strong></td>
+<td><strong>Multitasking, Multiprocessing, GUI</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Mobile Computers</strong></td>
+<td>อุปกรณ์เล็ก</td>
+<td><strong>ประหยัดพลังงาน, UI แบบใหม่, wireless</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ยุค 2 — Batch System:</strong> operator รับ <strong>punch cards</strong> มาโหลด | <strong>Automatic job sequencing</strong> = ส่งต่อการควบคุมจาก job หนึ่งไปอีก job อัตโนมัติ + <strong>ลดเวลา setup</strong> โดยรวม job คล้ายกันเป็นชุด | ใช้กับงานคำนวณวิทยาศาสตร์/วิศวกรรม ภาษา <strong>FORTRAN + Assembly</strong>
+<strong>ขั้นตอนเครื่อง 1401/7094:</strong> นำ cards ไปเครื่อง <strong>1401</strong> → อ่าน cards <strong>ลง tape</strong> → นำ tape ไปเครื่อง <strong>7094 ทำการคำนวณ</strong> → นำ tape กลับไปเครื่อง <strong>1401 เพื่อพิมพ์ผล</strong>
+<em>(แยกเครื่องเพราะ 7094 แพงและเร็ว ให้ทำแต่การคำนวณ ส่วนงาน I/O ช้า ๆ ให้ 1401 ที่ถูกกว่า)</em></p>
+<p><strong>ยุค 3 — Multiprogramming:</strong> <strong>โหลดหลาย job ไว้ใน memory แล้วสลับระหว่างกันอย่างรวดเร็ว</strong> → <strong>เพิ่ม CPU utilization</strong> (CPU ไม่ต้องนั่งรอตอน job หนึ่งรอ I/O) | memory แบ่งเป็น <strong>partitions</strong> (OS, Job 1, Job 2, Job 3) — เครื่องตัวอย่าง <strong>IBM System/360</strong>
+<strong>Spooling = Simultaneous Peripheral Operation On Line:</strong> <strong>ทำ I/O ของ job หนึ่งซ้อนเวลากับการคำนวณของอีก job</strong> — ขณะรัน job หนึ่ง OS จะ <strong>อ่าน job ถัดไปจาก card reader ไปเก็บใน job queue บน disk</strong> และ <strong>ส่ง printout ของ job ก่อนหน้าจาก disk ไป printer</strong>
+<strong>Job pool (Job queue):</strong> โครงสร้างให้ OS <strong>เลือกว่าจะรัน job ไหนต่อ</strong> เพื่อเพิ่ม CPU utilization โดยเอา job ไปพักใน buffer
+⚠️ <strong>Multiprogramming = หลาย job ใน memory แล้ว CPU สลับ / Spooling = ใช้ disk เป็นบัฟเฟอร์ให้ I/O ช้า ๆ ทำพร้อมการคำนวณ</strong></p>
+<p><strong>ยุค 4 — PC:</strong> OS ให้ผู้ใช้คนเดียวทำหลายงานพร้อมกัน | <strong>Multitasking</strong> = รันหลาย<strong>โปรแกรม</strong>พร้อมกัน (CPU ตัวเดียวก็ทำได้ด้วยการสลับ) | <strong>Multiprocessing</strong> = ใช้หลาย <strong>processor</strong> (ทำพร้อมกันจริง) | ใช้ <strong>GUI</strong>
+<em>ไทม์ไลน์เด่น: 1975 IBM 5100, 1977 Apple II, <strong>1983 Apple Lisa (GUI แรก)</strong>, 1985 Atari/Amiga Workbench GUI, 1992 Windows 3.1, 1995 Windows 95, 2001 Mac OS X, 2009 Windows 7</em></p>
+<p><strong>ยุค 5 — Mobile:</strong> OS ต้องรองรับ <strong>Energy efficiency</strong> (แบตจำกัด) / <strong>User interface แบบใหม่</strong> (จอสัมผัส) / <strong>Wireless network communication</strong> | <strong>Mobile OS คือ OS ที่ถูกใช้มากที่สุดตั้งแต่ปี 2017</strong>
+<em>ไทม์ไลน์ HTC: 1997 ก่อตั้ง, 1998 Windows CE PDA เครื่องแรก, 2005 สมาร์ทโฟน Windows 3G, 2007 HTC Touch (จอสัมผัส), <strong>2008 HTC Dream (Android เครื่องแรก)</strong>, 2009 HTC Sense, 2010 4G Android เครื่องแรกในสหรัฐฯ, 2014–2017 HTC VIVE (VR)</em></p>
+<p><strong>Migration of OS Concepts:</strong> แนวคิดเกิดบน <strong>mainframes</strong> ก่อน (compilers, time shared, batch, resident monitors, multiuser, distributed, multiprocessor, fault tolerant) แล้ว<strong>ค่อย ๆ ย้ายลง</strong> <strong>minicomputers → microcomputers → network computers</strong> | เส้นทแยง <strong>MULTICS (1960s, mainframe) → UNIX (1970, mini) → UNIX (1980, micro)</strong></p>
+<h2 id="6-os-zoo">6. OS Zoo</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mainframe OS</strong></td>
+<td>OS/360</td>
+</tr>
+<tr>
+<td><strong>Server OS</strong></td>
+<td>UNIX (Linux, FreeBSD, AIX), Windows 2012 R2</td>
+</tr>
+<tr>
+<td><strong>Personal computer OS</strong></td>
+<td>Windows 7/10, Mac OS, Linux</td>
+</tr>
+<tr>
+<td><strong>Real-time OS</strong></td>
+<td><strong>VxWorks, QNX</strong> (ต้องตอบสนองทันเวลาเสมอ — รถยนต์ เครื่องบิน เครื่องมือแพทย์)</td>
+</tr>
+<tr>
+<td><strong>Mobile OS</strong></td>
+<td>Android, iOS</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Virtualization / Resource manager</strong></td>
+<td>ทำให้ดูเหมือนมีไม่จำกัด / ตัดสินใจแจกทรัพยากร</td>
+</tr>
+<tr>
+<td>Virtual / Physical address</td>
+<td>ที่โปรแกรมเห็น / ตำแหน่งจริงใน RAM</td>
+</tr>
+<tr>
+<td>Batch / Multiprogramming</td>
+<td>ทำทีละ job ต่อกัน / หลาย job ใน memory แล้วสลับ</td>
+</tr>
+<tr>
+<td><strong>Multiprogramming / Spooling</strong></td>
+<td>CPU สลับหลาย job / ใช้ disk พัก I/O</td>
+</tr>
+<tr>
+<td><strong>Multitasking / Multiprocessing</strong></td>
+<td>หลายโปรแกรม / หลาย processor</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="แนวคิดที่ต้องอธิบายได้">แนวคิดที่ต้องอธิบายได้</h2>
+<ul>
+<li><strong>ทำไมต้องมี OS</strong> ทั้งที่ fetch-decode-execute ดูง่าย → เพราะต้องรันหลายโปรแกรม แบ่ง memory คุม I/O ให้ถูกต้อง มีประสิทธิภาพ และใช้ง่าย</li>
+<li><strong>ทำไม OS ถูกเรียกว่า extended machine</strong> → เพราะให้เครื่องเสมือนที่ใช้ง่ายกว่าและดูมีทรัพยากรมากกว่าของจริง</li>
+<li><strong>ทำไม multiprogramming เพิ่ม CPU utilization</strong> → CPU ไม่ต้องรอเมื่อ job หนึ่งรอ I/O สลับไปทำ job อื่นได้</li>
+<li><strong>ทำไมยุค mobile ต้องเน้นพลังงาน</strong> → เพราะอุปกรณ์ใช้แบตเตอรี่</li>
+</ul>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../chapter08/short.html"><small>← บทก่อนหน้า</small><span>Chapter VIII — Parallel Processors from Client to Cloud</span></a><a class="pg next" href="../lecture2/short.html"><small>บทถัดไป →</small><span>Lecture 2 — Process</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

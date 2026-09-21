@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Chapter VII — Computing Unit (Pipelining) · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+        <ol><li><a href="#1-pipelining-analogy">1. Pipelining Analogy ⭐</a></li><li><a href="#2-risc-v-pipeline-5-stages">2. RISC-V Pipeline — 5 Stages ⭐⭐</a></li><li><a href="#3-pipeline-performance">3. Pipeline Performance ⭐⭐</a></li><li><a href="#4-pipelining-and-isa-design">4. Pipelining and ISA Design ⭐</a></li><li><a href="#5-hazards">5. Hazards ⭐⭐</a></li><li><a href="#6-pipeline-summary-big-picture">6. Pipeline Summary (BIG Picture)</a></li><li><a href="#7-pipelined-datapath-pipeline-registers">7. Pipelined Datapath &amp;amp; Pipeline Registers</a></li><li><a href="#8-pipeline-operation-ทีละ-stage">8. Pipeline Operation ทีละ Stage</a></li><li><a href="#9-data-hazards-forwarding">9. Data Hazards: Forwarding ⭐⭐</a></li><li><a href="#10-load-use-hazard-detection-stalling">10. Load-Use Hazard Detection &amp;amp; Stalling ⭐⭐</a></li><li><a href="#11-control-hazards-branch">11. Control Hazards: Branch ⭐⭐</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter07</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Chapter VII — Computing Unit (Pipelining)</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><h2 id="1-pipelining-analogy">1. Pipelining Analogy ⭐</h2>
+<p><strong>Pipelined laundry: overlapping execution</strong> — ซักผ้า 4 ขั้น (ซัก → อบ → พับ → เก็บ)</p>
+<ul>
+<li><strong>ไม่ใช้ pipeline:</strong> ทำตะกร้า A ครบ 4 ขั้นก่อน แล้วค่อยเริ่ม B | <strong>ใช้ pipeline:</strong> A ย้ายไปอบเมื่อไหร่ ใส่ B ลงเครื่องซักได้ทันที</li>
+<li><strong>Four loads: speedup = 8/3.5 = 2.3</strong> | <strong>Non-stop (n ตะกร้า): 2n/(0.5n+1.5) ≈ 4 = จำนวน stage</strong></li>
+<li><strong>Parallelism improves performance</strong> — pipeline <strong>ไม่ได้ทำให้ตะกร้าเดียวเสร็จเร็วขึ้น</strong> แต่ทำให้เสร็จต่อชั่วโมงได้มากขึ้น (<strong>throughput</strong>)</li>
+</ul>
+<h2 id="2-risc-v-pipeline-5-stages">2. RISC-V Pipeline — 5 Stages ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Stage</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>IF</strong></td>
+<td><strong>Instruction fetch</strong> จาก memory</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>ID</strong></td>
+<td><strong>Instruction decode &amp; register read</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>EX</strong></td>
+<td><strong>Execute operation หรือ calculate address</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>MEM</strong></td>
+<td><strong>Access memory operand</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>WB</strong></td>
+<td><strong>Write result back to register</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-pipeline-performance">3. Pipeline Performance ⭐⭐</h2>
+<p>สมมติ register read/write = <strong>100ps</strong>, stage อื่น = <strong>200ps</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Instr</th>
+<th>IF</th>
+<th>Reg read</th>
+<th>ALU</th>
+<th>Mem</th>
+<th>Reg write</th>
+<th><strong>Total</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ld</strong></td>
+<td>200</td>
+<td>100</td>
+<td>200</td>
+<td>200</td>
+<td>100</td>
+<td><strong>800ps</strong></td>
+</tr>
+<tr>
+<td><strong>sd</strong></td>
+<td>200</td>
+<td>100</td>
+<td>200</td>
+<td>200</td>
+<td>–</td>
+<td><strong>700ps</strong></td>
+</tr>
+<tr>
+<td><strong>R-format</strong></td>
+<td>200</td>
+<td>100</td>
+<td>200</td>
+<td>–</td>
+<td>100</td>
+<td><strong>600ps</strong></td>
+</tr>
+<tr>
+<td><strong>beq</strong></td>
+<td>200</td>
+<td>100</td>
+<td>200</td>
+<td>–</td>
+<td>–</td>
+<td><strong>500ps</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(sd ไม่เขียน register / R-format ไม่ใช้ memory / beq ไม่ใช้ทั้งคู่)</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Single-cycle</strong></th>
+<th><strong>Pipelined</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tc</strong></td>
+<td><strong>800ps</strong> (พอกับคำสั่งช้าที่สุด = <code>ld</code>)</td>
+<td><strong>200ps</strong> (พอกับ stage ช้าที่สุด)</td>
+</tr>
+<tr>
+<td>เริ่มคำสั่งใหม่ทุก</td>
+<td>800 ps</td>
+<td>200 ps</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Speedup อุดมคติ = 800/200 = 4 เท่า</strong> — ไม่ถึง 5 (จำนวน stage) เพราะแต่ละ stage ใช้เวลาไม่เท่ากัน</li>
+<li>⚠️ <strong>Pipeline เพิ่ม throughput แต่ไม่ลด latency</strong> — คำสั่งเดียวใน pipeline ใช้ 5 × 200 = <strong>1000ps</strong> ซึ่ง<strong>นานกว่า</strong> 800ps ของ single-cycle ด้วยซ้ำ</li>
+</ul>
+<h2 id="4-pipelining-and-isa-design">4. Pipelining and ISA Design ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คุณสมบัติของ RISC-V ISA</th>
+<th>ช่วย pipeline อย่างไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ทุกคำสั่งยาว 32 บิต</strong></td>
+<td>fetch/decode ใน 1 cycle ง่ายกว่า (<strong>x86 คำสั่งยาว 1–17 bytes</strong>)</td>
+</tr>
+<tr>
+<td><strong>รูปแบบคำสั่งน้อยและสม่ำเสมอ</strong></td>
+<td>decode + อ่าน register ได้ในขั้นเดียว</td>
+</tr>
+<tr>
+<td><strong>Load/store addressing</strong></td>
+<td>คำนวณ address ใน <strong>stage 3</strong> และเข้าถึง memory ใน <strong>stage 4</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-hazards">5. Hazards ⭐⭐</h2>
+<p><strong>สถานการณ์ที่ทำให้เริ่มคำสั่งถัดไปใน cycle ถัดไปไม่ได้</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Hazard</th>
+<th>สาเหตุ</th>
+<th>วิธีแก้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Structure</strong></td>
+<td><strong>ทรัพยากรที่ต้องใช้ไม่ว่าง</strong></td>
+<td><strong>แยก instruction memory กับ data memory</strong> (หรือ split I-cache/D-cache)</td>
+</tr>
+<tr>
+<td><strong>Data</strong></td>
+<td>ต้องรอคำสั่งก่อนหน้าอ่าน/เขียนข้อมูลเสร็จ</td>
+<td><strong>Forwarding</strong>, stall, code scheduling</td>
+</tr>
+<tr>
+<td><strong>Control</strong></td>
+<td>การตัดสินใจว่าจะทำอะไรต่อขึ้นกับผลของคำสั่งก่อนหน้า</td>
+<td><strong>Branch prediction</strong>, ย้ายการตัดสิน branch ไป ID</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="structure-hazard">Structure Hazard</h3>
+<p>ถ้ามี <strong>memory เดียว</strong>: load/store ต้องเข้า data memory → <strong>instruction fetch ต้อง stall</strong> → เกิด <strong>pipeline &quot;bubble&quot;</strong> → ต้องแยก instruction/data memory</p>
+<h3 id="data-hazard-forwarding">Data Hazard &amp; Forwarding ⭐</h3>
+<pre><code>add x19, x0, x1
+sub x2, x19, x3     ← ต้องใช้ x19 แต่ add ยังไม่เขียน (เขียนตอน WB)
+</code></pre>
+<ul>
+<li><strong>Forwarding (bypassing):</strong> <strong>ใช้ผลลัพธ์ทันทีที่คำนวณเสร็จ ไม่ต้องรอเก็บลง register ก่อน</strong> — ต้องเพิ่มเส้นทางเชื่อมใน datapath</li>
+<li><strong>Load-use data hazard:</strong> forwarding <strong>ไม่ช่วยทุกกรณี</strong> — <strong>&quot;Can't forward backward in time!&quot;</strong> เพราะ <code>ld</code> ได้ค่าตอน<strong>ปลาย MEM</strong> แต่คำสั่งถัดไปต้องใช้ตอน<strong>ต้น EX</strong> (เวลาเดียวกัน)</li>
+</ul>
+<h3 id="code-scheduling-to-avoid-stalls">Code Scheduling to Avoid Stalls ⭐</h3>
+<p>C: <code>a = b + e; c = b + f;</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>โค้ดเดิม (13 cycles)</strong></th>
+<th><strong>โค้ดเรียงใหม่ (11 cycles)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ld x1, 0(x0)</code></td>
+<td><code>ld x1, 0(x0)</code></td>
+</tr>
+<tr>
+<td><code>ld x2, 8(x0)</code></td>
+<td><code>ld x2, 8(x0)</code></td>
+</tr>
+<tr>
+<td><strong>stall</strong> → <code>add x3, x1, x2</code></td>
+<td><strong><code>ld x4, 16(x0)</code></strong> ← ย้ายขึ้นมา</td>
+</tr>
+<tr>
+<td><code>sd x3, 24(x0)</code></td>
+<td><code>add x3, x1, x2</code></td>
+</tr>
+<tr>
+<td><code>ld x4, 16(x0)</code></td>
+<td><code>sd x3, 24(x0)</code></td>
+</tr>
+<tr>
+<td><strong>stall</strong> → <code>add x5, x1, x4</code></td>
+<td><code>add x5, x1, x4</code></td>
+</tr>
+<tr>
+<td><code>sd x5, 32(x0)</code></td>
+<td><code>sd x5, 32(x0)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><em>นับ cycle: 7 คำสั่ง, pipeline 5 stage = 5 + (7−1) = <strong>11 cycles</strong>; + stall 2 = <strong>13</strong></em></p>
+<h3 id="control-hazard-branch-prediction">Control Hazard &amp; Branch Prediction</h3>
+<ul>
+<li>branch กำหนดว่าจะทำคำสั่งไหนต่อ → pipeline fetch คำสั่งที่ถูกต้องไม่ได้เสมอ เพราะ branch <strong>ยังอยู่ที่ ID</strong></li>
+<li><strong>Stall on branch:</strong> รอจนรู้ผลแล้วค่อย fetch → <code>or</code> ถูก fetch ช้าไป <strong>400ps</strong> แทน 200ps = <strong>เสีย 1 cycle</strong></li>
+<li><strong>Branch prediction:</strong> pipeline ยาวขึ้นรู้ผล branch เร็วไม่ได้ → stall penalty สูงจนรับไม่ได้ → <strong>เดาผล แล้ว stall เฉพาะตอนเดาผิด</strong> | <strong>RISC-V เดาว่า branch not taken</strong> → fetch คำสั่งถัดไปได้เลย</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Static branch prediction</strong></th>
+<th><strong>Dynamic branch prediction</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>วิธี</td>
+<td>ดูจาก<strong>พฤติกรรมทั่วไป</strong>ของ branch</td>
+<td><strong>hardware วัดพฤติกรรมจริง</strong> เก็บ<strong>ประวัติล่าสุดของแต่ละ branch</strong> ถือว่าอนาคตเป็นไปตามแนวโน้มเดิม</td>
+</tr>
+<tr>
+<td>กฎ</td>
+<td><strong>backward branch → เดา taken</strong> (ท้าย loop), <strong>forward branch → เดา not taken</strong></td>
+<td>ถ้าเดาผิด: stall ระหว่าง fetch ใหม่ แล้ว <strong>อัปเดตประวัติ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="6-pipeline-summary-big-picture">6. Pipeline Summary (BIG Picture)</h2>
+<ul>
+<li>pipelining เพิ่มประสิทธิภาพด้วยการ<strong>เพิ่ม instruction throughput</strong> (ทำหลายคำสั่งพร้อมกัน) <strong>แต่ละคำสั่งยังมี latency เท่าเดิม</strong></li>
+<li>มี hazards: <strong>structure, data, control</strong> | <strong>การออกแบบ instruction set มีผลต่อความซับซ้อนของ pipeline</strong></li>
+</ul>
+<h2 id="7-pipelined-datapath-pipeline-registers">7. Pipelined Datapath &amp; Pipeline Registers</h2>
+<ul>
+<li>ข้อมูลส่วนใหญ่ไหล <strong>ซ้ายไปขวา</strong> (IF → WB) — <strong>การไหลขวาไปซ้ายทำให้เกิด hazards</strong> มี 2 จุด:
+<ul>
+<li><strong>WB → ID</strong> (เขียนผลกลับ register) = <strong>data hazard</strong></li>
+<li><strong>MEM → IF</strong> (ส่งผล branch กลับไปเลือก PC) = <strong>control hazard</strong></li>
+</ul>
+</li>
+<li><strong>Pipeline registers 4 ตัว:</strong> <strong>IF/ID, ID/EX, EX/MEM, MEM/WB</strong> — เก็บข้อมูลที่ stage ก่อนหน้าสร้างไว้ใน cycle ที่แล้ว (ตั้งชื่อตาม stage สองฝั่งที่คั่น)</li>
+</ul>
+<h2 id="8-pipeline-operation-ทีละ-stage">8. Pipeline Operation ทีละ Stage</h2>
+<ul>
+<li><strong>IF:</strong> อ่านคำสั่งจาก instruction memory ตาม PC + คำนวณ <strong>PC + 4</strong> → เก็บลง <strong>IF/ID</strong></li>
+<li><strong>ID:</strong> อ่านค่า <strong>register 2 ตัว</strong> + <strong>sign-extend immediate</strong> → เก็บลง <strong>ID/EX</strong> (รวมค่า PC)</li>
+<li><strong>EX (load):</strong> <strong>ALU บวก base register + offset</strong> → ได้ address → เก็บลง <strong>EX/MEM</strong></li>
+<li><strong>MEM (load):</strong> <strong>อ่าน data memory</strong> → เก็บลง <strong>MEM/WB</strong></li>
+<li><strong>WB (load) ⚠️:</strong> เขียนค่ากลับ register — <strong>ปัญหา: เลข register ปลายทางมาจาก IF/ID ปัจจุบัน ซึ่งเป็นคำสั่งอื่นแล้ว = wrong register number</strong></li>
+<li><strong>แก้:</strong> <strong>ส่งเลข rd ตามไปกับ pipeline register</strong> ID/EX → EX/MEM → MEM/WB
+💡 <strong>หลักสำคัญ:</strong> ข้อมูลที่ stage ถัดไปต้องใช้ <strong>ต้องถูกส่งต่อไปกับ pipeline register</strong> ไม่งั้นถูกคำสั่งใหม่เขียนทับ</li>
+<li><strong>EX (store):</strong> ALU คำนวณ address + <strong>ส่งค่าจาก rs2 ที่จะเขียนต่อไปที่ EX/MEM</strong></li>
+<li><strong>MEM (store):</strong> เขียนข้อมูลลง data memory | <strong>WB (store): ไม่ทำอะไร</strong> (sd ไม่เขียน register)</li>
+</ul>
+<p><strong>Pipeline diagrams:</strong> <strong>Multi-clock-cycle</strong> = การทำงานตามเวลา (แบบรูปทรัพยากร IM/Reg/ALU/DM หรือแบบเขียนชื่อ stage <code>IF ID EX MEM WB</code> เลื่อนทีละ cycle) | <strong>Single-clock-cycle</strong> = สถานะของ pipeline ใน cycle ที่กำหนด (ในแต่ละ stage มีคำสั่งไหนอยู่)</p>
+<p><strong>Pipelined Control:</strong> <strong>สัญญาณควบคุมถูกสร้างตอน ID จาก opcode</strong> แล้วส่งต่อไปกับ pipeline register</p>
+<ul>
+<li><strong>EX:</strong> ALUOp, ALUSrc | <strong>MEM:</strong> Branch, MemRead, MemWrite | <strong>WB:</strong> MemtoReg, RegWrite</li>
+</ul>
+<h2 id="9-data-hazards-forwarding">9. Data Hazards: Forwarding ⭐⭐</h2>
+<pre><code>sub x2, x1, x3
+and x12, x2, x5     ← ต้อง forward (กรณี 1a: EX/MEM)
+or  x13, x6, x2     ← ต้อง forward (กรณี 2b: MEM/WB)
+add x14, x2, x2     ← cycle เดียวกับ WB: register เขียนครึ่งแรก อ่านครึ่งหลัง จึงได้ค่าถูก
+sd  x15, 100(x2)    ← มาหลัง WB แล้ว ไม่มีปัญหา
+</code></pre>
+<h3 id="เงื่อนไขตรวจจับ">เงื่อนไขตรวจจับ</h3>
+<p><strong>ส่งเลข register ไปตาม pipeline</strong> — operand ของ ALU ใน EX คือ <strong>ID/EX.RegisterRs1</strong> และ <strong>ID/EX.RegisterRs2</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>เงื่อนไข</th>
+<th>forward จาก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1a</strong></td>
+<td>EX/MEM.RegisterRd = ID/EX.RegisterRs1</td>
+<td><strong>EX/MEM</strong></td>
+</tr>
+<tr>
+<td><strong>1b</strong></td>
+<td>EX/MEM.RegisterRd = ID/EX.RegisterRs2</td>
+<td><strong>EX/MEM</strong></td>
+</tr>
+<tr>
+<td><strong>2a</strong></td>
+<td>MEM/WB.RegisterRd = ID/EX.RegisterRs1</td>
+<td><strong>MEM/WB</strong></td>
+</tr>
+<tr>
+<td><strong>2b</strong></td>
+<td>MEM/WB.RegisterRd = ID/EX.RegisterRs2</td>
+<td><strong>MEM/WB</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เพิ่มเติม:</strong> forward เฉพาะเมื่อ <strong>EX/MEM.RegWrite / MEM/WB.RegWrite = 1</strong> (เขียน register จริง) และ <strong>RegisterRd ≠ 0</strong> (⚠️ เพราะ x0 เป็น 0 เสมอ ถ้า forward จะได้ค่าผิด)</p>
+<h3 id="forwarding-conditions">Forwarding Conditions ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mux control</th>
+<th>Source</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ForwardA/B = 00</strong></td>
+<td><strong>ID/EX</strong></td>
+<td>มาจาก register file (ไม่ forward)</td>
+</tr>
+<tr>
+<td><strong>ForwardA/B = 10</strong></td>
+<td><strong>EX/MEM</strong></td>
+<td>forward จากผล ALU ของคำสั่งก่อนหน้า</td>
+</tr>
+<tr>
+<td><strong>ForwardA/B = 01</strong></td>
+<td><strong>MEM/WB</strong></td>
+<td>forward จาก data memory หรือผล ALU ที่เก่ากว่า</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 จำ: <strong>10 = ใกล้กว่า (EX/MEM), 01 = ไกลกว่า (MEM/WB), 00 = ไม่ forward</strong>
+<strong>Forwarding unit</strong> รับ Rs1/Rs2 จาก ID/EX และ Rd + RegWrite จาก EX/MEM และ MEM/WB → ควบคุม <strong>mux ForwardA/ForwardB หน้า ALU</strong></p>
+<h3 id="double-data-hazard">Double Data Hazard ⭐</h3>
+<pre><code>add x1, x1, x2
+add x1, x1, x3
+add x1, x1, x4
+</code></pre>
+<p>เกิด <strong>EX hazard และ MEM hazard พร้อมกัน</strong> (ชี้ไป x1 ทั้งคู่) → <strong>ต้องใช้ค่าล่าสุด = EX/MEM</strong>
+<strong>ปรับเงื่อนไข:</strong> <strong>forward จาก MEM/WB ก็ต่อเมื่อเงื่อนไข EX hazard ไม่เป็นจริง</strong></p>
+<pre><code>if (MEM/WB.RegWrite
+    and (MEM/WB.RegisterRd ≠ 0)
+    and not(EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0)
+            and (EX/MEM.RegisterRd = ID/EX.RegisterRs1))
+    and (MEM/WB.RegisterRd = ID/EX.RegisterRs1)) ForwardA = 01
+</code></pre>
+<p><strong>อ่าน 4 ข้อ:</strong> 1. คำสั่งใน MEM/WB เขียน register จริง 2. rd ไม่ใช่ x0 3. <strong>ไม่มี EX hazard ที่ชี้ไป register เดียวกัน</strong> (มีเมื่อไหร่ EX/MEM ชนะ) 4. rd ตรงกับ Rs1/Rs2 ของคำสั่งใน EX</p>
+<h2 id="10-load-use-hazard-detection-stalling">10. Load-Use Hazard Detection &amp; Stalling ⭐⭐</h2>
+<p><strong>ตรวจตอนที่คำสั่งที่ใช้ค่าถูก decode อยู่ใน ID stage</strong> — operand ใน ID คือ <strong>IF/ID.RegisterRs1, IF/ID.RegisterRs2</strong></p>
+<pre><code>ID/EX.MemRead and
+  ((ID/EX.RegisterRd = IF/ID.RegisterRs1) or
+   (ID/EX.RegisterRd = IF/ID.RegisterRs2))
+</code></pre>
+<p><em>(<strong>ID/EX.MemRead = 1</strong> แปลว่าคำสั่งใน EX เป็น <code>ld</code>)</em></p>
+<p><strong>วิธี stall ⭐ 3 ข้อ:</strong></p>
+<ol>
+<li><strong>บังคับสัญญาณควบคุมใน ID/EX register ให้เป็น 0</strong> → EX, MEM, WB ทำ <strong>nop</strong> = <strong>bubble</strong></li>
+<li><strong>ไม่ให้อัปเดต PC และ IF/ID register</strong> → คำสั่งที่ใช้ค่าถูก decode ซ้ำ, คำสั่งถัดไปถูก fetch ซ้ำ</li>
+<li><strong>stall 1 cycle ทำให้ MEM อ่านข้อมูลของ <code>ld</code> ได้ทัน</strong> → จากนั้น <strong>forward ไป EX stage</strong> ได้</li>
+</ol>
+<p><strong>Hazard detection unit</strong> (ที่ ID stage): รับ <strong>ID/EX.MemRead, ID/EX.RegisterRd, IF/ID.RegisterRs1/Rs2</strong> → ส่ง <strong>PCWrite</strong> และ <strong>IF/IDWrite</strong> เพื่อหยุดการอัปเดต + ควบคุม mux ที่เลือก control = 0
+<strong>Stalls and Performance:</strong> stall ทำให้ประสิทธิภาพลดลง <strong>แต่จำเป็น</strong>เพื่อผลลัพธ์ที่ถูกต้อง | <strong>compiler จัดเรียงโค้ดเลี่ยง hazard ได้ แต่ต้องรู้โครงสร้างของ pipeline</strong></p>
+<h2 id="11-control-hazards-branch">11. Control Hazards: Branch ⭐⭐</h2>
+<p><strong>ถ้ารู้ผล branch ตอน MEM stage:</strong> pipeline fetch มาแล้ว <strong>3 คำสั่ง</strong> (<code>40 beq</code>, <code>44 and</code>, <code>48 or</code>, <code>52 add</code>) → ถ้า taken ต้อง <strong>Flush these instructions (set control values to 0)</strong> แล้ว PC ไปที่ 72</p>
+<p><strong>Reducing Branch Delay ⭐:</strong> <strong>ย้าย hardware ตัดสิน branch มาไว้ที่ ID stage</strong></p>
+<ul>
+<li><strong>Target address adder</strong> (บวกหา address ปลายทาง) + <strong>Register comparator</strong> (เปรียบเทียบ register)</li>
+</ul>
+<pre><code>36:  sub x10, x4, x8
+40:  beq x1, x3, 16    // PC-relative → 40 + 16*2 = 72
+44:  and x12, x2, x5
+48:  or  x13, x2, x6
+52:  add x14, x4, x2
+56:  sub x15, x6, x7
+72:  ld  x4, 50(x7)
+</code></pre>
+<p><strong>target = 40 + 16 × 2 = 72</strong> <em>(offset ของ branch ใน RISC-V คูณ 2 — เชื่อมกับ SB-format)</em></p>
+<ul>
+<li><strong>Clock 3:</strong> <code>and</code> อยู่ IF, <code>beq</code> อยู่ <strong>ID</strong> (comparator พบ x1 = x3 → <strong>taken</strong>, adder คำนวณ target 72), <code>sub</code> อยู่ EX → ยก <strong>IF.Flush</strong> ล้างคำสั่ง <code>and</code> ที่ fetch ผิด</li>
+<li><strong>Clock 4:</strong> <code>ld x4, 50(x7)</code> อยู่ IF (fetch จาก 72), <strong>Bubble (nop)</strong> อยู่ ID, <code>beq</code> อยู่ EX, <code>sub</code> อยู่ MEM</li>
+<li><strong>เสียไปแค่ 1 cycle</strong> (เทียบกับ <strong>3 cycles</strong> ถ้าตัดสินที่ MEM)</li>
+</ul>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Throughput / Latency</strong></td>
+<td>pipeline เพิ่มอย่างแรก, latency ของคำสั่งไม่ลด</td>
+</tr>
+<tr>
+<td>Single-cycle Tc / Pipelined Tc</td>
+<td>คำสั่งช้าสุด (800) / stage ช้าสุด (200)</td>
+</tr>
+<tr>
+<td>Structure / Data / Control hazard</td>
+<td>ทรัพยากร / ข้อมูล / branch</td>
+</tr>
+<tr>
+<td><strong>Forwarding / Stalling</strong></td>
+<td>ส่งค่าข้าม stage / หยุดรอ (ใช้เมื่อ forward ไม่ทัน เช่น load-use)</td>
+</tr>
+<tr>
+<td><strong>EX hazard (10) / MEM hazard (01)</strong></td>
+<td>forward จาก EX/MEM (ใหม่กว่า) / MEM/WB (เก่ากว่า)</td>
+</tr>
+<tr>
+<td>Static / Dynamic prediction</td>
+<td>กฎตายตัว (backward taken, forward not taken) / ประวัติจริง</td>
+</tr>
+<tr>
+<td><strong>Stall / Flush</strong></td>
+<td>หยุดรอไม่ fetch ใหม่ / ล้างคำสั่งที่ fetch ผิด</td>
+</tr>
+<tr>
+<td>Single-clock-cycle / Multi-clock-cycle diagram</td>
+<td>ภาพ cycle เดียว / ภาพตามเวลา</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../chapter06/short.html"><small>← บทก่อนหน้า</small><span>Chapter VI — Storage Systems (External Memory)</span></a><a class="pg next" href="../chapter08/short.html"><small>บทถัดไป →</small><span>Chapter VIII — Parallel Processors from Client to Cloud</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 5.0 — Introduction to the Data Link Layer · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+        <ol><li><a href="#1-แผนการเรียน-data-link-layer">1. แผนการเรียน Data Link Layer</a></li><li><a href="#2-tcpip-communication-model">2. TCP/IP Communication Model ⭐</a></li><li><a href="#3-frame-study-with-wireshark">3. Frame Study with Wireshark</a></li><li><a href="#4-hop-by-hop-reframing">4. Hop-by-Hop &amp;amp; Reframing ⭐</a></li><li><a href="#5-core-services-และ-sublayers">5. Core Services และ Sublayers ⭐</a></li><li><a href="#6-data-link-protocols">6. Data Link Protocols</a></li><li><a href="#7-dedicated-vs-shared-links-multiple-access">7. Dedicated vs Shared Links &amp;amp; Multiple Access</a></li><li><a href="#8-framing">8. Framing ⭐</a></li><li><a href="#9-byte-stuffing-ppp">9. Byte Stuffing (PPP) ⭐</a></li><li><a href="#10-bit-stuffing-hdlc">10. Bit Stuffing (HDLC) ⭐</a></li><li><a href="#11-เปรียบเทียบวิธี-framing">11. เปรียบเทียบวิธี Framing ⭐</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture5.0-DLP-Foundation</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 5.0 — Introduction to the Data Link Layer</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><h2 id="1-แผนการเรียน-data-link-layer">1. แผนการเรียน Data Link Layer</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lecture</th>
+<th>ธีม</th>
+<th>คำถามหลัก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5.0 Foundation</strong></td>
+<td>พื้นฐาน</td>
+<td>TCP/IP model, hop-by-hop, LLC &amp; MAC, framing</td>
+</tr>
+<tr>
+<td><strong>5.1 Data Integrity</strong></td>
+<td>ความถูกต้อง</td>
+<td><strong>ผู้รับเชื่อบิตที่ได้รับได้ไหม?</strong> (Parity, checksum, CRC, Hamming, interleaving)</td>
+</tr>
+<tr>
+<td><strong>5.2 Delivery Control</strong></td>
+<td>ควบคุมการส่ง</td>
+<td><strong>ผู้ส่งกับผู้รับประสานงานกันได้ไหม?</strong> (Flow control, ARQ, HDLC, Stop-and-Wait, GBN, SR)</td>
+</tr>
+<tr>
+<td><strong>6.1 Medium Access</strong></td>
+<td>เข้าถึงสื่อกลาง</td>
+<td><strong>ใครมีสิทธิ์ส่งบนสื่อที่แชร์?</strong> (ALOHA, CSMA/CD, CSMA/CA, controlled access, channelization)</td>
+</tr>
+<tr>
+<td><strong>6.2 Ethernet</strong></td>
+<td>รวมทุกแนวคิด</td>
+<td>Frames &amp; FCS, MAC addresses, switched forwarding, IEEE 802.3</td>
+</tr>
+<tr>
+<td><strong>7 VLAN</strong></td>
+<td>ขยาย switched LAN</td>
+<td>Logical segmentation, access ports, trunks, IEEE 802.1Q</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="2-tcpip-communication-model">2. TCP/IP Communication Model ⭐</h2>
+<p><strong>Encapsulation ที่ผู้ส่ง:</strong> Application → <strong>Message</strong> → Transport (+TCP header) → <strong>Segment</strong> → Network (+IP header) → <strong>Packet</strong> → Data Link (+Frame header/trailer) → <strong>Frame</strong> → Physical → <strong>Bits</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>ประเภทการเชื่อมต่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application / Transport</td>
+<td>logical, <strong>end-to-end</strong></td>
+</tr>
+<tr>
+<td>Network</td>
+<td>logical, <strong>host-to-host</strong></td>
+</tr>
+<tr>
+<td><strong>Data Link</strong></td>
+<td><strong>hop-by-hop</strong> (Alice↔R1, R1↔R2, R2↔Bob)</td>
+</tr>
+<tr>
+<td>Physical</td>
+<td>physical connections (point-to-point)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ที่แต่ละ router:</strong> รับ frame → <strong>ถอด data link header &amp; trailer ออก</strong> → เหลือ IP packet → <strong>ใส่ header &amp; trailer ใหม่</strong> → ส่งเป็น bits</p>
+<blockquote class="callout">
+<p>⭐ <strong>Takeaway: layer บนสื่อสารแบบ logical end-to-end / data-link frames และ physical signals ทำงาน hop by hop</strong></p>
+</blockquote>
+<h2 id="3-frame-study-with-wireshark">3. Frame Study with Wireshark</h2>
+<ol>
+<li><strong>Framing</strong> ห่อหุ้ม network-layer packet เพื่อส่งบน<strong>ลิงก์ท้องถิ่น 1 ลิงก์</strong></li>
+<li><strong>Frame header</strong> มี <strong>source และ destination link-layer addresses</strong></li>
+<li><strong>Trailer</strong> มี <strong>FCS (frame check sequence)</strong> ตรวจจับข้อผิดพลาด</li>
+<li><strong>ที่ทุก router</strong> frame ขาเข้าถูกถอด และสร้าง <strong>frame ใหม่</strong>สำหรับลิงก์ถัดไป</li>
+</ol>
+<ul>
+<li>ใน Wireshark เห็น <code>Ethernet II, Src: …, Dst: …</code> ตามด้วย IPv4, TCP, TLS</li>
+<li>⚠️ <strong>Wireshark ปกติไม่แสดง preamble, SFD (Start Frame Delimiter), FCS</strong> (การ์ดเครือข่ายตัดออกก่อน)</li>
+</ul>
+<h2 id="4-hop-by-hop-reframing">4. Hop-by-Hop &amp; Reframing ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>มุมมอง</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>End-to-end (แอปมองเห็น)</strong></td>
+<td>เส้นทางเดียว Node–Link–Node–Link–Node</td>
+</tr>
+<tr>
+<td><strong>Hop-by-hop (ความจริง)</strong></td>
+<td>LAN → point-to-point → LAN → point-to-point → LAN ทีละช่วง <strong>แต่ละช่วงเป็นเทคโนโลยีต่างกัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>A Packet Is Reframed at Every Hop:</strong> network layer ส่ง IP packet ลงมา → ผู้ส่งห่อด้วย frame <strong>ที่เหมาะกับลิงก์ปัจจุบัน</strong> → ที่ router ถัดไป frame ถูกถอดและสร้าง <strong>frame ใหม่</strong> → physical layer ส่งเป็นสัญญาณ
+⚠️ <strong>IP packet (datagram) ไม่เปลี่ยนตลอดทาง (IP ต้นทาง/ปลายทางเดิม) แต่ frame และ MAC address เปลี่ยนทุก hop</strong>
+💡 เหมือนส่งพัสดุข้ามจังหวัด: ลูกค้าเห็น &quot;กรุงเทพ→เชียงใหม่&quot; แต่จริง ๆ ผ่านมอเตอร์ไซค์ → รถบรรทุก → รถกระบะ ทีละช่วง</p>
+<h2 id="5-core-services-และ-sublayers">5. Core Services และ Sublayers ⭐</h2>
+<p><strong>Physical layer ขนส่งบิต / Data link layer จัดระเบียบการส่งข้ามลิงก์ท้องถิ่น 1 ลิงก์</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บริการ</th>
+<th>ใครทำ</th>
+<th>คำอธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Network-layer interface</strong></td>
+<td><strong>LLC</strong></td>
+<td>multiplex โปรโตคอลชั้นบน (IPv4, IPv6, ARP)</td>
+</tr>
+<tr>
+<td><strong>Framing</strong></td>
+<td><strong>MAC</strong> ใน IEEE 802; ทำโดยตรงใน PPP/HDLC</td>
+<td>จัดบิตเป็น frame</td>
+</tr>
+<tr>
+<td><strong>Link addressing</strong></td>
+<td><strong>MAC</strong></td>
+<td>ระบุอุปกรณ์บนลิงก์ท้องถิ่น</td>
+</tr>
+<tr>
+<td><strong>Error detection</strong></td>
+<td>FCS/CRC</td>
+<td>ตรวจว่าบิตเสียไหม</td>
+</tr>
+<tr>
+<td><strong>Error recovery</strong> <em>(optional)</em></td>
+<td>—</td>
+<td>ACKs + retransmission</td>
+</tr>
+<tr>
+<td><strong>Flow control</strong> <em>(optional)</em></td>
+<td>—</td>
+<td>ควบคุมอัตราการส่ง</td>
+</tr>
+<tr>
+<td><strong>Medium access</strong></td>
+<td><strong>MAC</strong></td>
+<td>ประสานสถานีที่ใช้สื่อกลางร่วมกัน</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>2 Sublayers:</strong> <strong>LLC (Logical Link Control)</strong> = network-layer interface + protocol multiplexing (อยู่บน ติด network layer) | <strong>MAC (Media Access Control)</strong> = frame format, MAC addressing, medium access, FCS (อยู่ล่าง ติด physical layer)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Dedicated / full-duplex link</strong></th>
+<th><strong>Shared medium</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ไม่มีการแย่งช่องสัญญาณ (no contention)</strong> แต่ยังต้อง framing</td>
+<td><strong>MAC ต้องประสาน</strong>การเข้าถึงช่องสัญญาณ</td>
+</tr>
+<tr>
+<td>มีแค่ data link control sublayer</td>
+<td>มี data link control + <strong>media access control sublayer</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="6-data-link-protocols">6. Data Link Protocols</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Link type</th>
+<th>Example</th>
+<th>Architecture</th>
+<th>Key function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shared LAN</td>
+<td><strong>Ethernet 802.3</strong></td>
+<td>LLC/SNAP + MAC</td>
+<td>Framing, addressing, FCS</td>
+</tr>
+<tr>
+<td>Wireless LAN</td>
+<td><strong>Wi-Fi 802.11</strong></td>
+<td>LLC/SNAP + MAC</td>
+<td>Access, ACK, retransmission</td>
+</tr>
+<tr>
+<td>Token LAN</td>
+<td>Token Ring 802.5</td>
+<td>LLC + MAC</td>
+<td>Token access (legacy)</td>
+</tr>
+<tr>
+<td>Low-power WPAN</td>
+<td>IEEE 802.15.4</td>
+<td>Adaptation + MAC</td>
+<td>Low-power framing/access</td>
+</tr>
+<tr>
+<td>Point-to-point</td>
+<td><strong>PPP</strong></td>
+<td>Single data-link protocol</td>
+<td>Framing, <strong>LCP/NCP</strong>, FCS</td>
+</tr>
+<tr>
+<td>Point-to-point</td>
+<td><strong>HDLC</strong></td>
+<td>Single data-link protocol</td>
+<td>Framing, link control</td>
+</tr>
+<tr>
+<td>X.25 WAN</td>
+<td>LAPB</td>
+<td>Single protocol</td>
+<td>Reliable HDLC-derived link</td>
+</tr>
+<tr>
+<td>Cellular</td>
+<td>LTE / 5G</td>
+<td>System-specific</td>
+<td><strong>PDCP, RLC, MAC</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>IEEE 802 LAN/WLAN</strong></th>
+<th><strong>PPP และ HDLC</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLC/SNAP</strong> (interface + multiplexing) + <strong>MAC</strong> (framing, addressing, FCS, medium access)</td>
+<td><strong>data-link protocol point-to-point ที่ครบในตัว</strong> ทำ framing <strong>โดยตรง ไม่มีการแบ่ง LLC/MAC</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 PPP/HDLC ไม่ต้องมี MAC sublayer เพราะเป็นลิงก์ point-to-point มีแค่ 2 ฝั่ง <strong>ไม่มีใครมาแย่งใช้สื่อ</strong></p>
+<h2 id="7-dedicated-vs-shared-links-multiple-access">7. Dedicated vs Shared Links &amp; Multiple Access</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Dedicated Links</strong></th>
+<th><strong>Shared Links</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Full-duplex switch — Star topology</strong></td>
+<td><strong>Bus topology</strong> / <strong>Wireless</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Multiple Access:</strong> หลายอุปกรณ์ใช้ช่องสัญญาณเดียวกัน อาจมี <strong>มากกว่า 1 สถานีส่งพร้อมกัน</strong>
+ตัวอย่างสื่อที่แชร์: <strong>shared wire</strong> (Ethernet เก่า), <strong>shared wireless</strong> (Wavelan), <strong>satellite</strong>, <strong>cocktail party</strong>
+⭐ <strong>คำถามหลัก:</strong> สถานีจะแชร์สื่อกลางอย่าง <strong>ยุติธรรม (fairly) / มีประสิทธิภาพ (efficiently) / ชนกันน้อยลง (fewer collisions)</strong> ได้อย่างไร?
+<strong>Preview MAC:</strong> การส่งพร้อมกันอาจ <strong>ชนกัน (collide)</strong> — ปลายของ B ชนต้นของ A และปลายของ A ชนต้นของ C → <strong>Vulnerable time = 2 × T_fr</strong></p>
+<h2 id="8-framing">8. Framing ⭐</h2>
+<ul>
+<li><strong>Physical layer ส่งบิต / Data-link layer จัดกลุ่ม bit stream เป็น frames</strong></li>
+<li><strong>แต่ละ frame ต้องบอกขอบเขตของตัวเอง</strong> เพื่อให้ผู้รับแยก frame ได้</li>
+<li>โครงสร้างทั่วไป: <strong>Flag | Address | Control | Data (information) | FCS | Flag</strong>
+💡 frame = <strong>ซองจดหมาย</strong> (ซองแยกจดหมายฉบับหนึ่งจากอีกฉบับ, header = ที่อยู่, FCS = ตรวจว่าของข้างในเสียไหม)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Character-oriented (byte-oriented)</strong></th>
+<th><strong>Bit-oriented</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ข้อมูลเป็น <strong>ตัวอักษร 8 บิต</strong> (ASCII)</td>
+<td>ข้อมูลเป็น <strong>ลำดับบิต</strong> ที่ชั้นบนตีความเป็น text/graphic/audio/video</td>
+</tr>
+<tr>
+<td><strong>UART, PPP, Modbus, Bisync</strong></td>
+<td><strong>HDLC, SDLC, CAN, Frame Relay, ATM, X.25</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="9-byte-stuffing-ppp">9. Byte Stuffing (PPP) ⭐</h2>
+<p><strong>ข้อจำกัดของ byte-oriented framing 3 ข้อ:</strong></p>
+<ol>
+<li>ส่งข้อมูลรูปแบบอื่น (graphics, audio, video) <strong>มีปัญหา</strong></li>
+<li>ถ้า <strong>แพทเทิร์นเดียวกับ flag โผล่ในข้อมูล</strong> ต้องใช้ <strong>escape character (ESC)</strong> → <strong>byte stuffing</strong></li>
+<li><strong>Unicode มีตัวอักษร 16 และ 32 บิต ซึ่งขัดกับตัวอักษร 8 บิต</strong></li>
+</ol>
+<p><strong>นิยาม:</strong> Byte stuffing = <strong>เพิ่ม 1 ไบต์พิเศษ (ESC) ทุกครั้งที่มี flag หรือ escape character อยู่ในข้อความ</strong>
+<strong>ขั้นตอน:</strong></p>
+<ol>
+<li><strong>Data from upper layer:</strong> <code>… Flag … ESC …</code></li>
+<li><strong>Stuffed (Sent):</strong> <code>Flag | Header | … ESC Flag … ESC ESC … | Trailer | Flag</code> (<strong>extra byte 2 ตัว</strong>)</li>
+<li><strong>Received frame:</strong> เหมือนที่ส่ง</li>
+<li><strong>Unstuffed:</strong> ผู้รับลบ ESC ที่ใส่เพิ่ม → ได้ <code>… Flag … ESC …</code> เหมือนเดิม</li>
+</ol>
+<p class="c-warn">⚠️ <strong>ต้อง stuff ESC ที่อยู่ในข้อมูลด้วย</strong> ไม่งั้นผู้รับจะเข้าใจว่า ESC นั้นเป็นตัว escape ของไบต์ถัดไปแล้วลบผิด
+<strong>PPP ปัจจุบัน:</strong> <strong>PPPoE</strong> (broadband/DSL, บาง fiber access), router และ WAN บางระบบ, ระบบเดิมที่ใช้ point-to-point serial links</p>
+<h2 id="10-bit-stuffing-hdlc">10. Bit Stuffing (HDLC) ⭐</h2>
+<p><strong>HDLC Flag = 0x7E = <code>01111110</code></strong>
+<strong>นิยาม:</strong> Bit stuffing = <strong>เพิ่ม 0 หนึ่งตัว ทุกครั้งที่มี 1 ติดกัน 5 ตัว ตามหลัง 0</strong></p>
+<p><strong>ตัวอย่าง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้นตอน</th>
+<th>บิต</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data from upper layer</td>
+<td><code>0001111111001111101000</code></td>
+</tr>
+<tr>
+<td><strong>Stuffed (Frame sent)</strong></td>
+<td><code>000111110110011111001000</code> (<strong>เพิ่ม 2 บิต</strong>)</td>
+</tr>
+<tr>
+<td>Frame received</td>
+<td>เหมือน frame sent</td>
+</tr>
+<tr>
+<td>Unstuffed</td>
+<td><code>0001111111001111101000</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ไล่:</strong> <code>000</code> <strong><code>11111</code></strong> <code>1100</code> <strong><code>11111</code></strong> <code>01000</code> → เจอ 1 ติดกัน 5 ตัวครั้งแรก <strong>แทรก <code>0</code></strong> → เจออีกครั้ง <strong>แทรก <code>0</code></strong> อีกตัว
+<strong>ผู้รับ:</strong> เมื่อเจอ <code>0</code> + <code>11111</code> แล้วตามด้วย <code>0</code> → <strong>ลบ 0 นั้นทิ้ง</strong>
+💡 <strong>ทำไมเลข 5?</strong> flag มี 1 ติดกัน <strong>6 ตัว</strong> ถ้าไม่ยอมให้ข้อมูลมี 1 ติดกันเกิน 5 ตัว ข้อมูลก็จะไม่มีวันหน้าตาเหมือน flag
+<strong>HDLC ปัจจุบัน:</strong> <strong>synchronous serial WAN</strong> (T1/E1, T3/E3, SONET/SDH), ระบบโทรคมนาคม, อุปกรณ์อุตสาหกรรม/ระบบเดิม, <strong>Cisco HDLC</strong></p>
+<h2 id="11-เปรียบเทียบวิธี-framing">11. เปรียบเทียบวิธี Framing ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th><strong>Byte-Oriented</strong></th>
+<th><strong>Bit-Oriented</strong></th>
+<th><strong>Length/Fixed-Size</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Frame boundary</strong></td>
+<td><strong>delimiter bytes</strong></td>
+<td><strong>flag bit pattern</strong></td>
+<td><strong>length field</strong> / fixed size / PHY sync</td>
+</tr>
+<tr>
+<td><strong>Data transparency</strong></td>
+<td><strong>byte stuffing</strong></td>
+<td><strong>bit stuffing</strong></td>
+<td><strong>ไม่ต้อง stuff</strong></td>
+</tr>
+<tr>
+<td><strong>Protocols</strong></td>
+<td>BISYNC, SLIP, asynchronous PPP</td>
+<td>HDLC, synchronous PPP, Frame Relay, CAN</td>
+<td><strong>Ethernet, IEEE 802.11, ATM cells</strong></td>
+</tr>
+<tr>
+<td><strong>Stuffing rule</strong></td>
+<td>escape special bytes</td>
+<td>แทรก 0 หลัง 1 ติดกันตามจำนวน</td>
+<td>ไม่ stuff; <strong>อาจต้อง padding</strong></td>
+</tr>
+<tr>
+<td><strong>Overhead</strong></td>
+<td>escape bytes ขึ้นกับข้อมูล</td>
+<td>stuffed bits ขึ้นกับข้อมูล</td>
+<td><strong>คาดการณ์ได้เกือบทั้งหมด</strong></td>
+</tr>
+<tr>
+<td><strong>Key advantage</strong></td>
+<td>ประมวลผลง่ายบนลิงก์แบบ byte</td>
+<td><strong>ไม่ขึ้นกับ character encoding</strong></td>
+<td><strong>มีประสิทธิภาพ เหมาะกับ LAN ความเร็วสูง</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>หมายเหตุ:</strong> UART ใช้ <strong>start/stop bits</strong> | I²C ใช้ <strong>START/STOP conditions</strong> | SPI <strong>ไม่มีรูปแบบ frame มาตรฐานเดียว</strong>
+⚠️ <strong>Ethernet padding ≠ stuffing</strong> — padding ทำให้ frame มี<strong>ขนาดขั้นต่ำ</strong> ไม่ได้ป้องกันไม่ให้ payload ถูกเข้าใจว่าเป็น delimiter</p>
+<hr />
+<h2 id="จุดที่มักออกสอบ">จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Layer บน = logical end-to-end / data link + physical = hop-by-hop</strong></li>
+<li><strong>Encapsulation units: Message → Segment → Packet → Frame → Bits</strong></li>
+<li><strong>ทุก router ถอด frame เดิมแล้วสร้าง frame ใหม่</strong> — <strong>IP packet เดิม, frame เปลี่ยนตามชนิดลิงก์</strong></li>
+<li><strong>Header มี source/dest link-layer address / trailer มี FCS</strong>; Wireshark ไม่แสดง preamble, SFD, FCS</li>
+<li><strong>บริการ data link 7 อย่าง</strong> และ <strong>LLC vs MAC ทำอะไร</strong></li>
+<li><strong>IEEE 802 แบ่ง LLC/SNAP + MAC / PPP-HDLC ทำ framing เอง ไม่แบ่ง</strong></li>
+<li><strong>Dedicated (star, full-duplex switch) ไม่มี contention / Shared (bus, wireless) ต้องมี MAC</strong></li>
+<li><strong>Multiple access:</strong> fair, efficient, fewer collisions; <strong>Vulnerable time = 2 × T_fr</strong></li>
+<li><strong>Generic frame: Flag | Address | Control | Data | FCS | Flag</strong></li>
+<li><strong>Byte stuffing:</strong> เพิ่ม ESC ทุกครั้งที่เจอ flag หรือ ESC ในข้อมูล</li>
+<li><strong>Bit stuffing:</strong> <strong>HDLC flag = 01111110</strong>, แทรก 0 หลัง 1 ติดกัน 5 ตัว — <strong>ฝึกโจทย์ stuff/unstuff</strong></li>
+<li><strong>ตารางเปรียบเทียบ 3 แบบ</strong> และ <strong>Ethernet padding ≠ stuffing</strong></li>
+</ol>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../internet-architecture/short.html"><small>← บทก่อนหน้า</small><span>โครงข่ายพิมพ์เขียว — สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต (Internet Architecture)</span></a><a class="pg next" href="../lecture5.1-error-detection/short.html"><small>บทถัดไป →</small><span>Lecture 5.1 — Error Detection and Correction</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

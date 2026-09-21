@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 5.2 — Flow Control, ARQ, and HDLC · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+        <ol><li><a href="#1-flow-control">1. Flow Control</a></li><li><a href="#2-stop-and-wait-arq">2. Stop-and-Wait ARQ ⭐</a></li><li><a href="#3-pipelining">3. Pipelining</a></li><li><a href="#4-go-back-n-arq">4. Go-Back-N ARQ ⭐⭐</a></li><li><a href="#5-selective-repeat-arq">5. Selective Repeat ARQ ⭐⭐</a></li><li><a href="#6-เปรียบเทียบ-3-แบบ">6. เปรียบเทียบ 3 แบบ ⭐</a></li><li><a href="#7-hdlc">7. HDLC</a></li><li><a href="#8-performance">8. Performance ⭐⭐</a></li><li><a href="#9-summary-ขนาด-window">9. Summary: ขนาด Window ⭐</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture5.2-Flow-Control</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 5.2 — Flow Control, ARQ, and HDLC</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><p><em>ตอบคำถาม <strong>&quot;ผู้ส่งกับผู้รับประสานงานกันได้ไหม?&quot;</strong> (Delivery Control)</em></p>
+<h2 id="1-flow-control">1. Flow Control</h2>
+<p><strong>ทำไมต้องมี:</strong> <strong>ส่งเร็วเกินไป</strong> → ผู้รับรับไม่ทัน <strong>buffer overflow / frame loss</strong> | <strong>ส่งช้าเกินไป</strong> → ผู้รับเสียเวลารอ <strong>ประสิทธิภาพลดลง</strong></p>
+<ul>
+<li><strong>Sender buffer</strong> = เก็บ frame ที่<strong>รอส่ง/รอส่งใหม่</strong> | <strong>Receiver buffer</strong> = เก็บ frame จน<strong>ชั้นบนพร้อมประมวลผล</strong></li>
+<li><strong>Feedback:</strong> <strong>ACK</strong> (ยืนยันรับสำเร็จ) / <strong>NAK หรือ retransmission request</strong> (ขอส่งใหม่) — ใช้ทั้ง flow control และ error recovery</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>For noiseless channel</strong></th>
+<th><strong>For noisy channel</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simplest / Stop-and-Wait</td>
+<td><strong>Stop-and-Wait ARQ / Go-Back-N ARQ / Selective Repeat ARQ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Simple Protocol:</strong> <strong>ไม่มีทั้ง flow control และ error control</strong> — packet จาก network layer → ทำเป็น frame แล้วส่ง</p>
+<h2 id="2-stop-and-wait-arq">2. Stop-and-Wait ARQ ⭐</h2>
+<p><strong>หลักการ:</strong> ผู้ส่ง <strong>ส่งทีละ 1 frame</strong> แล้ว<strong>รอ ACK</strong> ก่อนส่งตัวถัดไป | <strong>เก็บสำเนา frame ล่าสุด</strong>ไว้จนได้ ACK</p>
+<ul>
+<li>frame <strong>ถูกต้อง</strong> → ผู้รับส่ง <strong>ACK</strong> | frame <strong>มี error</strong> → ผู้รับ<strong>ไม่ส่ง ACK + ทิ้ง frame</strong> → <strong>timer หมดเวลา</strong> → <strong>ส่งใหม่</strong>
+⚠️ <strong>ไม่มีประสิทธิภาพบนลิงก์ bandwidth สูงหรือ delay ยาว</strong></li>
+</ul>
+<p><strong>Sequence &amp; ACK Numbers:</strong></p>
+<ul>
+<li>ต้องมี <strong>sequence number</strong> เพื่อแยก frame ใหม่จาก <strong>frame ซ้ำ</strong> — Stop-and-Wait ใช้แค่ <strong>0 และ 1</strong> สลับกัน</li>
+<li><strong>S</strong> = seq ของ frame ที่กำลังส่ง (ฝั่งส่ง) | <strong>R</strong> = seq ของ frame <strong>ถัดไปที่คาดหวัง</strong> (ฝั่งรับ)</li>
+<li>ผู้รับส่งเฉพาะ <strong>positive ACK</strong> — ⭐ <strong>ACK number = frame ถัดไปที่คาดหวัง</strong> → <strong>ACK 1 = รับ frame 0 สำเร็จแล้ว รอ frame 1</strong></li>
+</ul>
+<p><strong>4 สถานการณ์ ⭐</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>สิ่งที่เกิด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(ก) Normal</strong></td>
+<td>S=0 ส่ง F0 → ACK 1 → S=1 ส่ง F1 → ACK 0 → …</td>
+</tr>
+<tr>
+<td><strong>(ข) Lost Frame</strong></td>
+<td>F1 <strong>หาย</strong> → ไม่มี ACK → <strong>Time-out</strong> → <strong>ส่ง F1 ใหม่</strong> → ACK 0</td>
+</tr>
+<tr>
+<td><strong>(ค) Lost ACK</strong></td>
+<td>ผู้รับได้ F1 ส่ง ACK 0 แต่ <strong>ACK หาย</strong> → timeout → ส่ง F1 ซ้ำ → ผู้รับคาดหวัง F0 แต่ได้ F1 → <strong>รู้ว่าซ้ำ ทิ้ง F1 + ส่ง ACK 0 อีกครั้ง</strong></td>
+</tr>
+<tr>
+<td><strong>(ง) Delayed ACK</strong></td>
+<td>ACK 1 มาช้า → timeout ส่ง F0 ซ้ำ → ผู้รับคาดหวัง F1 → <strong>ทิ้ง F0 แล้วส่ง ACK 1 อีกรอบ</strong> → ผู้ส่ง<strong>ทิ้ง ACK 1 ตัวที่สอง</strong> (ACK เก่า)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>Sequence number → ตรวจ frame ซ้ำ / ACK number → ตรวจ ACK เก่าหรือที่มาช้า</strong>
+<strong>เมื่อผู้รับได้ frame ซ้ำ:</strong> 1. รู้จาก seq no. ว่าซ้ำ 2. ทิ้ง frame ซ้ำ 3. ส่ง ACK ที่เหมาะสมอีกครั้ง</p>
+<h2 id="3-pipelining">3. Pipelining</h2>
+<p><strong>Pipelining</strong> = ผู้ส่ง <strong>ส่งหลาย frame ก่อนรอ ACK</strong> → หลาย frame อยู่ระหว่างทางพร้อมกัน → <strong>เพิ่ม link utilization</strong></p>
+<ul>
+<li>มีใน <strong>Go-Back-N และ Selective Repeat</strong> | ⚠️ <strong>Stop-and-Wait ไม่มี pipelining</strong></li>
+</ul>
+<h2 id="4-go-back-n-arq">4. Go-Back-N ARQ ⭐⭐</h2>
+<p><strong>Sequence numbers:</strong> <strong>m บิต → 2^m เลข (0 ถึง 2^m − 1)</strong> แล้ววนซ้ำ (m=3 → 0–7, 0, 1, …)</p>
+<p><strong>Send Window:</strong></p>
+<ul>
+<li>ส่งได้สูงสุด <strong>W frames</strong> โดยไม่รอ ACK ทีละตัว | frame ที่<strong>ส่งแล้วยังไม่ได้ ACK = outstanding frames</strong> (ต้องเก็บสำเนาทั้งหมด)</li>
+<li>⭐ <strong>ขนาด send window สูงสุด W ≤ 2^m − 1</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน (S_f = first outstanding, S_n = next to send)</th>
+<th>สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ซ้ายของ <strong>S_f</strong></td>
+<td>sent, acknowledged, purged</td>
+</tr>
+<tr>
+<td><strong>S_f ถึงก่อน S_n</strong></td>
+<td><strong>outstanding</strong></td>
+</tr>
+<tr>
+<td>S_n ถึงขอบขวา</td>
+<td>ส่งได้เมื่อ process ส่งข้อมูลมา</td>
+</tr>
+<tr>
+<td>ขวาของ window</td>
+<td>ยังส่งไม่ได้</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Sliding:</strong> window เลื่อนเมื่อได้ ACK ที่ไม่มี error (ackNo ≥ S_f และ &lt; S_n) — <em>ตัวอย่าง: S_f = 4, ได้ <strong>ACK 6</strong> → S_f = 6 (frame 4, 5 ถูก ACK แล้วแบบ cumulative)</em></p>
+<p><strong>Receive Window:</strong> ⭐ <strong>ขนาด 1 เสมอ</strong> — รับ<strong>เฉพาะ frame ถัดไปที่คาดหวัง (R_n)</strong> → ถูกต้อง = รับไว้ เลื่อน R_n ส่ง <strong>cumulative ACK</strong> | <strong>frame ที่มาผิดลำดับถูกทิ้ง</strong></p>
+<p><strong>Timers &amp; ACK:</strong></p>
+<ul>
+<li>ผู้ส่งมี <strong>timer ตัวเดียว สำหรับ outstanding frame ที่เก่าที่สุด</strong> | ผู้รับ<strong>ไม่มี</strong> retransmission timer</li>
+<li>timer หมด → <strong>ส่งใหม่ตั้งแต่ frame เก่าสุดที่ยังไม่ได้ ACK และทุก outstanding frame ถัดไป</strong> (&quot;go back N&quot;)</li>
+<li><strong>Cumulative ACK: ACK n = ทุก frame ก่อน n ได้รับแล้ว และรอ frame n</strong></li>
+</ul>
+<p><strong>ทำไม send window ต้อง &lt; 2^m ⭐</strong> (ตัวอย่าง m = 2, เลข 0–3)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Window = 3 (&lt; 2^m) ✅</strong></th>
+<th><strong>Window = 4 (= 2^m) ❌</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ส่ง F0,1,2 → ACK หายหมด → timeout ส่ง F0 ซ้ำ</td>
+<td>ส่ง F0,1,2,3 → ACK หายหมด → timeout ส่ง F0 ซ้ำ</td>
+</tr>
+<tr>
+<td>ผู้รับรอ <strong>frame 3</strong> → ได้ F0 → <strong>Correctly discarded</strong></td>
+<td>ผู้รับรอ <strong>frame 0 ของรอบใหม่</strong>พอดี → <strong>Erroneously accepted</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>สถานการณ์ Lost Frame:</strong> ส่ง F0,1 → ACK 2 → ส่ง <strong>F2 หาย</strong> → ส่ง F3 → ผู้รับรอ F2 → <strong>F3 discarded, not in the window</strong> → <strong>Time-out → ส่งใหม่ทั้ง F2 และ F3</strong>
+<strong>ACK เสีย/หาย/มาช้า:</strong> เพราะ <strong>cumulative ACK</strong> ถ้า ACK2 หายแต่ <strong>ACK3 มาก่อน timeout → ไม่ต้องส่งใหม่</strong> (ACK3 ยืนยัน frame 0,1,2 แบบสะสม) | <strong>Delayed ACK ไม่จำเป็นต้องทำให้ส่งใหม่</strong></p>
+<p><strong>GBN vs Stop-and-Wait:</strong> ⭐ <strong>Stop-and-Wait = กรณีพิเศษของ GBN</strong> ที่ใช้ seq แค่ 0,1 และ <strong>send window = 1</strong>
+<strong>Piggybacking:</strong> <strong>ใส่ ACK ไปใน data frame ที่เดินทางสวนทาง</strong> (Data + ACK ใน frame เดียว) 💡 &quot;ขี่หลังหมู&quot;</p>
+<p><strong>ข้อดี/ข้อเสีย GBN:</strong> ✅ <strong>receiver ง่าย</strong> (window = 1, ไม่ต้อง buffer frame ผิดลำดับ) | ❌ <strong>ไม่มีประสิทธิภาพเมื่อ frame หาย/เสียบ่อย</strong> — frame เดียวหายต้องส่งใหม่ทั้งชุด, บาง frame ที่ผู้รับได้ถูกต้องแล้วกลับถูกทิ้ง → <strong>เปลือง bandwidth, เพิ่ม delay, congestion แย่ลง</strong></p>
+<h2 id="5-selective-repeat-arq">5. Selective Repeat ARQ ⭐⭐</h2>
+<ul>
+<li><strong>sliding-window protocol</strong> รองรับ <strong>pipelined transmission</strong></li>
+<li>⭐ <strong>ต่างจาก GBN:</strong> ผู้รับ <strong>รับและ buffer frame ที่ถูกต้องแต่มาผิดลำดับได้</strong> → frame หาย/เสีย → <strong>ส่งใหม่เฉพาะ frame นั้น</strong></li>
+</ul>
+<p><strong>Window size:</strong> เพื่อไม่ให้สับสนเมื่อเลขวนรอบ ต้อง <strong>ไม่เกินครึ่งของ sequence-number space</strong>
+$$W_S \le 2^{m-1}, \quad W_R \le 2^{m-1}$$
+<em>ตัวอย่าง: seq 3 บิต (0–7), receive window = 4 รอช่วง 0,1,2,3 → ได้ F0, F2, F3 (F1 ยังไม่มา) → <strong>SR: รับทั้ง 3 เก็บ buffer รอ F1</strong> / <strong>GBN: F2, F3 ถูกทิ้ง</strong></em></p>
+<ul>
+<li>ผู้รับอาจใช้ <strong>NAK (negative acknowledgement) / selective reject</strong> ระบุ frame ที่หาย <strong>เพื่อขอส่งใหม่ก่อน timeout</strong></li>
+</ul>
+<p><strong>SR: Lost Frame:</strong> ส่ง F0,1 → ACK 2 → <strong>F2 หาย</strong> → ส่ง F3 → ผู้รับ<strong>รับไว้ใน buffer</strong> + ส่ง <strong>NAK 2</strong> → ผู้ส่ง<strong>ส่งใหม่เฉพาะ F2</strong> → ผู้รับได้ F2 → <strong>ส่ง frame 2, 3 ขึ้นชั้นบนพร้อมกัน</strong></p>
+<p><strong>ทำไม window ≤ 2^(m−1) ⭐</strong> (ตัวอย่าง m = 2 → window ครึ่ง = 2)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Window = 2 ✅</strong></th>
+<th><strong>Window = 3 ❌</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ส่ง F0,1 → ACK หาย → timeout ส่ง F0 ซ้ำ</td>
+<td>ส่ง F0,1,2 → ACK หาย → timeout ส่ง F0 ซ้ำ</td>
+</tr>
+<tr>
+<td>receive window = {2, 3} → F0 ไม่อยู่ → <strong>Correctly discarded</strong></td>
+<td>receive window = {3, 0, 1} → F0 อยู่ใน window → <strong>Erroneously accepted</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Timer &amp; ACK:</strong> <strong>timer แยกสำหรับแต่ละ outstanding frame</strong> → timer ของ frame ไหนหมด <strong>ส่งใหม่เฉพาะ frame นั้น</strong> | <strong>individual acknowledgments</strong> (ACK ได้แม้มาผิดลำดับ ถ้า seq อยู่ใน receive window)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>GBN: frames treated as a group / SR: frames treated individually</strong></p>
+</blockquote>
+<p><strong>Time sequence:</strong> ส่ง F0 → delivered → ACK 1 → <strong>F1 หาย</strong> → F2 <strong>buffer</strong> → F3 <strong>buffer</strong> + ส่ง <strong>NAK 1</strong> → <strong>ส่งซ้ำเฉพาะ F1</strong> → <strong>Frames 1, 2, 3 delivered พร้อมกัน</strong> → <strong>ACK 4</strong></p>
+<h2 id="6-เปรียบเทียบ-3-แบบ">6. เปรียบเทียบ 3 แบบ ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Stop-and-Wait</strong></th>
+<th><strong>Go-Back-N</strong></th>
+<th><strong>Selective Repeat</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipelining</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sequence numbers</td>
+<td>0, 1</td>
+<td>0 ถึง 2^m − 1</td>
+<td>0 ถึง 2^m − 1</td>
+</tr>
+<tr>
+<td><strong>Send window</strong></td>
+<td><strong>1</strong></td>
+<td><strong>≤ 2^m − 1</strong> (เลขคี่เสมอ)</td>
+<td><strong>≤ 2^(m−1)</strong> (เลขคู่เสมอ)</td>
+</tr>
+<tr>
+<td><strong>Receive window</strong></td>
+<td>1</td>
+<td><strong>1</strong></td>
+<td><strong>≤ 2^(m−1)</strong></td>
+</tr>
+<tr>
+<td>Frame ผิดลำดับ</td>
+<td>—</td>
+<td><strong>ทิ้ง</strong></td>
+<td><strong>buffer ไว้</strong></td>
+</tr>
+<tr>
+<td>Timer</td>
+<td>1 ตัว</td>
+<td><strong>1 ตัว (frame เก่าสุด)</strong></td>
+<td><strong>ต่อ frame</strong></td>
+</tr>
+<tr>
+<td>ACK</td>
+<td>ACK = frame ถัดไป</td>
+<td><strong>cumulative</strong></td>
+<td><strong>individual</strong> (+ NAK)</td>
+</tr>
+<tr>
+<td>เมื่อ frame หาย</td>
+<td>ส่ง frame นั้นใหม่</td>
+<td><strong>ส่งใหม่ frame นั้นและทุกตัวถัดไป</strong></td>
+<td><strong>ส่งใหม่เฉพาะ frame นั้น</strong></td>
+</tr>
+<tr>
+<td>ความซับซ้อน receiver</td>
+<td>ง่ายสุด</td>
+<td>ง่าย</td>
+<td><strong>ซับซ้อน</strong> (ต้อง buffer, sort)</td>
+</tr>
+<tr>
+<td>ประสิทธิภาพเมื่อ error บ่อย</td>
+<td>ต่ำ</td>
+<td>ต่ำ</td>
+<td><strong>ดีที่สุด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="7-hdlc">7. HDLC</h2>
+<p><strong>โปรโตคอล data-link แบบ bit-oriented มาตรฐาน</strong> สำหรับลิงก์ serial <strong>point-to-point และ multipoint</strong></p>
+<ul>
+<li><strong>Core concepts:</strong> <strong>flag-based framing + bit stuffing</strong> | flow &amp; error control ด้วย <strong>sequence numbers, ACKs, ARQ</strong> | ทำงานได้ทั้ง <strong>half-duplex และ full-duplex</strong></li>
+<li><strong>Operating modes:</strong> <strong>Unacknowledged Connectionless Mode</strong> | <strong>Connection Oriented:</strong> <strong>NRM (Normal Response Mode</strong> — primary สั่ง secondary ตอบ) และ <strong>ABM (Asynchronous Balanced Mode</strong> — ทั้งสองฝั่งเท่าเทียม)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Connectionless</strong></th>
+<th><strong>Connection-oriented</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แต่ละ frame <strong>จัดการแยกกัน</strong>, <strong>ไม่มี session</strong></td>
+<td><strong>สร้าง logical link ก่อนส่ง</strong> และ <strong>ปิด</strong> หลังจบ</td>
+</tr>
+<tr>
+<td>frame อาจหาย ซ้ำ ไม่เรียงลำดับ (เว้นแต่ชั้นอื่นจัดการ)</td>
+<td>เก็บ <strong>sequence numbers, ACKs, flow-control state</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>HDLC Frame Format ⭐:</strong> <strong>Flag | Address | Control | Information | FCS | Flag</strong></p>
+<ul>
+<li><strong>Control field: 1 หรือ 2 ไบต์</strong> สำหรับ <strong>flow และ error control</strong></li>
+<li><strong>Information field:</strong> ข้อมูลผู้ใช้/จัดการเครือข่าย (มีเฉพาะใน <strong>I- และ U-frames</strong>) ความยาว<strong>คงที่ภายในแต่ละเครือข่าย</strong></li>
+<li><strong>FCS: ITU-T CRC ขนาด 2 หรือ 4 ไบต์</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Format</th>
+<th>โครงสร้าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HDLC</strong></td>
+<td>Flag (0x7E) | Address | Control | Information | FCS | Flag</td>
+</tr>
+<tr>
+<td><strong>PPP</strong></td>
+<td>+ <strong>Protocol field</strong> ระบุโปรโตคอลชั้นบน, <strong>มาตรฐานเปิด</strong> (Address = <strong>0xFF</strong>, Control = <strong>0x03</strong>)</td>
+</tr>
+<tr>
+<td><strong>Cisco HDLC</strong></td>
+<td>+ <strong>Type/Protocol field</strong>, <strong>proprietary ของ Cisco</strong></td>
+</tr>
+<tr>
+<td><strong>LAPB</strong></td>
+<td>HDLC-based สำหรับ <strong>X.25</strong></td>
+</tr>
+<tr>
+<td><strong>Frame Relay</strong></td>
+<td>Flag | <strong>Q.922 Address / DLCI</strong> | Information | FCS | Flag — มีบิต <strong>FECN, BECN, DE</strong></td>
+</tr>
+<tr>
+<td><strong>ATM</strong></td>
+<td><strong>Header 5 bytes + Payload 48 bytes = fixed 53-byte cell</strong> — <strong>ไม่ใช้ flag คั่น</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>HDLC Frame Types ⭐</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ใช้ทำอะไร</th>
+<th>Control field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>I-frames (Information)</strong></td>
+<td>ส่ง<strong>ข้อมูลผู้ใช้</strong> + ข้อมูลควบคุม (<strong>piggybacking</strong>)</td>
+<td><strong>บิตแรก 0</strong> | N(S) 3 บิต | P/F | N(R) 3 บิต</td>
+</tr>
+<tr>
+<td><strong>S-frames (Supervisory)</strong></td>
+<td><strong>เฉพาะข้อมูลควบคุม</strong></td>
+<td><strong>2 บิตแรก 10</strong> | Code 2 บิต | P/F | N(R)</td>
+</tr>
+<tr>
+<td><strong>U-frames (Unnumbered)</strong></td>
+<td><strong>system management</strong></td>
+<td><strong>2 บิตแรก 11</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>P/F (Poll/Final):</strong> <strong>0 = Poll</strong> (primary → secondary), <strong>1 = Final</strong> (secondary → primary)</li>
+<li><strong>N(S)</strong> = seq ของ frame ที่กำลังส่ง | <strong>N(R)</strong> = ค่า ACK เมื่อ piggybacking</li>
+</ul>
+<p><strong>S-Frame Codes ⭐</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>ชื่อ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>00</strong></td>
+<td><strong>RR — Receiver Ready</strong></td>
+<td><strong>ACK</strong> รับได้สมบูรณ์</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><strong>RNR — Receiver Not Ready</strong></td>
+<td>ACK แต่ผู้รับ<strong>ยุ่งอยู่</strong> (ช่วยให้ส่งช้าลง)</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><strong>REJ — Reject</strong></td>
+<td><strong>NAK ใช้ใน Go-Back-N</strong></td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td><strong>SREJ — Selective Reject</strong></td>
+<td><strong>NAK ใช้ใน Selective Repeat</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>REJ ↔ GBN / SREJ ↔ SR</strong></p>
+<p><strong>U-Frame codes:</strong> <strong>SABM</strong> (set asynchronous balanced mode), SABME, <strong>SNRM</strong> (set normal response mode), SNRME, UP, UI, <strong>UA</strong> (unnumbered acknowledgment), RD, <strong>DISC</strong> (disconnect), DM, RIM, SIM, RSET, XID, FRMR</p>
+<p><strong>Connection Establishment/Release ⭐:</strong> A ส่ง <strong>U-frame (SABM)</strong> → B ตอบ <strong>U-frame (UA)</strong> → <strong>Data transfer</strong> → A ส่ง <strong>U-frame (DISC)</strong> → B ตอบ <strong>UA</strong></p>
+<p><strong>Piggybacking ตัวอย่าง (GBN):</strong> A ส่ง I-frame N(S)=0, N(R)=0 → A ส่ง N(S)=1, N(R)=0 → B ส่ง <strong>N(S)=0, N(R)=2</strong> = <strong>&quot;Send my 0, wants your 2!&quot;</strong> → B ส่ง N(S)=1, N(R)=2 → N(S)=2, N(R)=2 → A ไม่มีข้อมูล จึงตอบ <strong>S-frame RR, N(R)=3</strong> = &quot;Wants your 3, Receiver Ready&quot;</p>
+<h2 id="8-performance">8. Performance ⭐⭐</h2>
+<p><strong>ตัวอย่าง:</strong> ระยะทาง 1000 m, propagation 500 m/s, frame 100 bits, ข้อมูลรวม 1000 bits</p>
+<ul>
+<li>round trip ต่อ frame = 2 × 1000 / 500 = <strong>4 วินาที</strong> | จำนวน frame = 1000/100 = <strong>10 frames</strong></li>
+<li><strong>Stop-and-Wait:</strong> 10 × 4 = <strong>40 วินาที</strong></li>
+<li><strong>Go-Back-N (N = 2):</strong> 10/2 = <strong>5 รอบ</strong> × 4 = <strong>20 วินาที</strong></li>
+</ul>
+<p><strong>Bandwidth-Delay Product = bandwidth (bps) × round-trip delay (s)</strong> = <strong>จำนวนบิตที่ระบบส่งออกได้ระหว่างรอ ACK</strong>
+<strong>ตัวอย่าง utilization:</strong> bandwidth <strong>1 Mbps</strong>, round trip <strong>20 ms</strong>, frame <strong>1000 bits</strong></p>
+<ul>
+<li><strong>Bandwidth-delay product = 1×10⁶ × 20×10⁻³ = 20,000 bits</strong></li>
+<li><strong>Stop-and-Wait:</strong> ส่งได้แค่ 1,000 บิต → <strong>Utilization = 1,000/20,000 = 5%</strong></li>
+<li><strong>Go-Back-N (15-frame):</strong> 15 × 1000 = 15,000 บิต → <strong>Utilization = 15,000/20,000 = 75%</strong> (ถ้ามี frame เสียจะน้อยกว่านี้มาก)</li>
+</ul>
+<h2 id="9-summary-ขนาด-window">9. Summary: ขนาด Window ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>m บิต</th>
+<th>จำนวนเลข</th>
+<th><strong>GBN send</strong></th>
+<th><strong>GBN recv</strong></th>
+<th><strong>SR send = recv</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>4</td>
+<td><strong>3</strong></td>
+<td>1</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>8</td>
+<td><strong>7</strong></td>
+<td>1</td>
+<td><strong>4</strong></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>16</strong></td>
+<td><strong>15 (คี่)</strong></td>
+<td><strong>1</strong></td>
+<td><strong>8 (คู่)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><em>ทั้งสอง ARQ ถ้าส่ง 20 packets ไม่มีหาย (m=4): <strong>0, 1, …, 15, 0, 1, 2, 3</strong></em></p>
+<hr />
+<h2 id="จุดที่มักออกสอบ">จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Flow control</strong> กัน buffer overflow; <strong>Noiseless (Simplest, Stop-and-Wait) / Noisy (S&amp;W ARQ, GBN, SR)</strong></li>
+<li><strong>Stop-and-Wait:</strong> seq 0/1, <strong>ACK n = รอ frame n</strong>, 4 สถานการณ์ (normal, lost frame, lost ACK, delayed ACK)</li>
+<li><strong>Pipelining มีใน GBN และ SR ไม่มีใน Stop-and-Wait</strong></li>
+<li><strong>GBN:</strong> send <strong>≤ 2^m − 1</strong>, receive <strong>= 1</strong>, <strong>cumulative ACK</strong>, timer เดียว, timeout ส่งใหม่ทั้งชุด, frame ผิดลำดับทิ้ง</li>
+<li><strong>ทำไม GBN window &lt; 2^m:</strong> frame 0 เก่าจะถูกรับผิดเป็น frame 0 ใหม่</li>
+<li><strong>GBN ACK หาย:</strong> ACK ตัวถัดไปยืนยันแทนได้ (cumulative)</li>
+<li><strong>Stop-and-Wait = GBN ที่ window = 1</strong>; <strong>piggybacking</strong> = ACK ใน data frame</li>
+<li><strong>SR:</strong> send = receive <strong>≤ 2^(m−1)</strong>, buffer ผิดลำดับ, <strong>individual ACK</strong>, timer ต่อ frame, <strong>NAK/SREJ</strong>, ส่งใหม่เฉพาะตัว</li>
+<li><strong>ทำไม SR ≤ 2^(m−1):</strong> window ใหญ่กว่านั้น frame 0 เก่าตกใน receive window ใหม่</li>
+<li><strong>4 บิต:</strong> SR window <strong>8</strong> (คู่), GBN send <strong>15</strong> (คี่) receive <strong>1</strong></li>
+<li><strong>HDLC frame:</strong> Flag | Address | Control (1–2 bytes) | Information | FCS (CRC 2/4) | Flag; modes <strong>connectionless, NRM, ABM</strong></li>
+<li><strong>PPP เพิ่ม Protocol field (open, 0xFF/0x03) / Cisco HDLC เพิ่ม Type field (proprietary) / ATM = fixed 53-byte cell</strong></li>
+<li><strong>Frame types:</strong> I (0), S (10), U (11); <strong>S-frame: 00 RR, 01 RNR, 10 REJ (GBN), 11 SREJ (SR)</strong></li>
+<li><strong>Connection: SABM → UA → data → DISC → UA</strong></li>
+<li><strong>Performance:</strong> round trip 4 s, 10 frames → <strong>S&amp;W 40 s, GBN(N=2) 20 s</strong></li>
+<li><strong>Bandwidth-delay product 1 Mbps × 20 ms = 20,000 bits</strong> → <strong>S&amp;W 5%, GBN 15 frames 75%</strong></li>
+</ol>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../lecture5.1-error-detection/short.html"><small>← บทก่อนหน้า</small><span>Lecture 5.1 — Error Detection and Correction</span></a><a class="pg next" href="../lecture6.1-mac/short.html"><small>บทถัดไป →</small><span>Lecture 6.1 — Media Access Control Protocols</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 5.1 — Error Detection and Correction · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+        <ol><li><a href="#1-recap-data-link-layer">1. Recap: Data Link Layer</a></li><li><a href="#2-bit-error">2. Bit Error</a></li><li><a href="#3-error-control">3. Error Control ⭐</a></li><li><a href="#4-redundancy-block-coding">4. Redundancy &amp;amp; Block Coding ⭐</a></li><li><a href="#5-parity-check">5. Parity Check ⭐</a></li><li><a href="#6-two-dimensional-parity">6. Two-Dimensional Parity ⭐</a></li><li><a href="#7-checksum">7. Checksum ⭐</a></li><li><a href="#8-crc-cyclic-redundancy-check">8. CRC (Cyclic Redundancy Check) ⭐⭐</a></li><li><a href="#9-hamming-code">9. Hamming Code ⭐⭐</a></li><li><a href="#10-interleaving">10. Interleaving ⭐</a></li><li><a href="#11-ตารางเปรียบเทียบ">11. ตารางเปรียบเทียบ</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture5.1-Error-Detection</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 5.1 — Error Detection and Correction</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><p><em>ตอบคำถาม <strong>&quot;ผู้รับเชื่อบิตที่ได้รับได้ไหม?&quot;</strong> (Data Integrity)</em></p>
+<h2 id="1-recap-data-link-layer">1. Recap: Data Link Layer</h2>
+<p><strong>หน้าที่:</strong> Error control, Flow control, Framing, Media access control (+ Addressing) | รับบริการจาก physical layer ให้บริการแก่ network layer</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sublayer</th>
+<th>ดูแลเรื่อง</th>
+<th>ใช้กับ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLC</strong></td>
+<td>สถานีควบคุม<strong>การไหลของข้อมูล</strong>กับคู่สื่อสารอย่างไร</td>
+<td><strong>dedicated medium</strong></td>
+<td>PPP, HDLC, Frame-Relay (WAN)</td>
+</tr>
+<tr>
+<td><strong>MAC</strong></td>
+<td>หลายสถานี<strong>เข้าถึง/แชร์สื่อกลาง</strong>อย่างไร</td>
+<td><strong>shared medium</strong></td>
+<td>Ethernet, 802.11 (LAN)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="2-bit-error">2. Bit Error</h2>
+<p><strong>สาเหตุหลัก = noise:</strong> <strong>Signal interference</strong> / <strong>Thermal noise</strong> / <strong>Hardware malfunction</strong> / <strong>Natural phenomenon</strong> (ฟ้าผ่า) / <strong>Warfare (EMP shockwave)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single-bit error</strong></td>
+<td>มีแค่ <strong>1 บิต</strong> ที่เปลี่ยน (ส่ง <code>00000010</code> รับ <code>00001010</code>)</td>
+</tr>
+<tr>
+<td><strong>Burst error</strong></td>
+<td><strong>2 บิตขึ้นไป</strong> เปลี่ยนในช่วงหนึ่ง (นับจากบิตแรกที่ผิดถึงบิตสุดท้ายที่ผิด)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>burst error พบบ่อยกว่า</strong> เพราะ noise มักกินเวลานานกว่า 1 บิต (data rate ยิ่งสูง noise ช่วงสั้นก็ทำบิตเสียหลายตัว)</p>
+<h2 id="3-error-control">3. Error Control ⭐</h2>
+<p><strong>มนุษย์มี 3 ทางเลือก:</strong> ไม่ทำอะไร / ขอให้ส่งใหม่ / พยายามแก้เอง
+<strong>Error control = error detection + recovery strategy</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>ARQ (Automatic Repeat reQuest)</strong></th>
+<th><strong>FEC (Forward Error Correction)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ตรวจพบ error แล้วขอให้ส่งใหม่</strong></td>
+<td><strong>เพิ่ม redundancy มากพอให้ผู้รับแก้ error เองได้</strong></td>
+</tr>
+<tr>
+<td>redundancy น้อย แต่ต้องมีช่องทางย้อนกลับ</td>
+<td>redundancy มาก แต่ไม่ต้องส่งใหม่</td>
+</tr>
+<tr>
+<td>Lecture 5.2</td>
+<td>Hamming code, interleaving</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>EDC:</strong> ผู้ส่งส่ง <strong>D (ข้อมูล) + EDC (บิตตรวจ/แก้ error)</strong> ผ่าน bit-error prone link → ผู้รับได้ D' + EDC' → ตรวจว่า &quot;all bits in D' OK?&quot; → ไม่ OK = <strong>detected error</strong></p>
+<h2 id="4-redundancy-block-coding">4. Redundancy &amp; Block Coding ⭐</h2>
+<ul>
+<li><strong>Redundancy</strong> = <strong>เพิ่มบิตพิเศษ</strong> เพื่อตรวจ error ที่ปลายทาง — บิตเหล่านี้<strong>ถูกทิ้ง</strong>ทันทีเมื่อตรวจเสร็จ (เป็น &quot;คำใบ้&quot; ช่วยผู้รับ)</li>
+<li><strong>Block coding:</strong> สร้าง redundancy หลังส่งข้อมูลทั้งหมดไม่สมเหตุสมผล → <strong>แบ่งข้อมูลเป็น blocks</strong> ส่งทีละ block พร้อม redundancy</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัญลักษณ์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>k</strong></td>
+<td>บิตของ <strong>dataword</strong> → มีได้ <strong>2^k</strong> แบบ</td>
+</tr>
+<tr>
+<td><strong>r</strong></td>
+<td>บิตของ <strong>redundancy</strong> (r &lt; k ไม่งั้นไม่คุ้ม)</td>
+</tr>
+<tr>
+<td><strong>n = k + r</strong></td>
+<td>ขนาด <strong>codeword</strong> → มีได้ <strong>2^n</strong> แบบ</td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-warn">⚠️ <strong>codeword ที่ใช้จริงมีน้อยกว่า 2^n</strong> — codeword ที่ไม่อยู่ในชุดที่ใช้ = <strong>ตรวจได้ว่าผิด</strong>
+<strong>กระบวนการ:</strong> Sender (<strong>Encoder/Generator</strong>) k-bit dataword → n-bit codeword → unreliable transmission → Receiver (<strong>Decoder/Checker</strong>) → ผ่าน = <strong>Extract</strong> / ไม่ผ่าน = <strong>Discard</strong></p>
+<h2 id="5-parity-check">5. Parity Check ⭐</h2>
+<p><strong>Detection methods 3 วิธี: Parity check, CRC, Checksum</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Even parity</strong></th>
+<th><strong>Odd parity</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เพิ่มบิตให้จำนวน 1 ทั้งหมดใน codeword <strong>เป็นเลขคู่</strong></td>
+<td>เพิ่มบิตให้<strong>เป็นเลขคี่</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง (even):</strong> data <code>1100001</code> (มี 1 สามตัว) → เติม <code>1</code> → ส่ง <code>11000011</code> | ผู้รับนับจำนวน 1 → <strong>เป็นคู่?</strong> Yes = ตัด parity bit ทิ้งรับข้อมูล / No = reject</p>
+<p><strong>Syndrome ⭐:</strong> ผลที่<strong>ผู้รับคำนวณ</strong>จาก codeword ที่ได้รับ (ทำฟังก์ชันเดียวกับผู้ส่ง)</p>
+<ul>
+<li><strong>Syndrome = 0 → ไม่มี error</strong> | <strong>≠ 0 → มี error</strong> | <strong>Hamming code: syndrome = ตำแหน่งของบิตที่ผิด</strong></li>
+<li>ตัวอย่าง: รับ <code>010010011</code> → XOR ทุกบิต = <strong>0</strong> (ไม่มี error) | รับ <code>010010111</code> → <strong>1</strong> (มี error)</li>
+<li>generator กับ checker <strong>ใช้กลไกเดียวกัน (XOR ทุกบิต)</strong> — output ของ generator = parity bit, ของ checker = <strong>syndrome</strong></li>
+</ul>
+<p><strong>ตัวอย่าง &quot;world&quot; (ASCII 7 บิต + even parity):</strong> w <code>1110111</code><strong>0</strong> / o <code>1101111</code><strong>0</strong> / r <code>1110010</code><strong>0</strong> / l <code>1101100</code><strong>0</strong> / d <code>1100100</code><strong>1</strong>
+→ ถ้ารับ <code>11111110</code> (1 เจ็ดตัว = คี่) และ <code>11101100</code> (1 ห้าตัว = คี่) → syndrome = 1 → <strong>รู้ว่ามี error</strong></p>
+<p><strong>ข้อจำกัด ⭐:</strong> ตรวจจับ <strong>single-bit error ได้ทุกกรณี</strong> | ตรวจ burst error ได้<strong>เฉพาะเมื่อจำนวนบิตที่ผิดเป็นเลขคี่</strong> | ⚠️ <strong>ตรวจไม่ได้ถ้าจำนวน error bits เป็นเลขคู่</strong>
+<em>ตัวอย่าง: <code>10010011</code> เปลี่ยนเป็น <code>11011011</code> (ผิด 2 บิต) จำนวน 1 ยังเป็นคู่ → <strong>ตรวจไม่พบ</strong></em></p>
+<h2 id="6-two-dimensional-parity">6. Two-Dimensional Parity ⭐</h2>
+<ul>
+<li>ตรวจ parity ทั้ง <strong>แถว (row) และคอลัมน์ (column)</strong> → เพิ่มมิติการตรวจสำหรับ burst error และ error จำนวนคู่</li>
+<li>⭐ <strong>มีความสามารถแก้ error:</strong> แถวที่ parity &quot;Not even&quot; <strong>ตัดกับ</strong>คอลัมน์ที่ &quot;Not even&quot; = <strong>ตำแหน่งบิตที่ผิด</strong> → <strong>แก้ single-bit error ได้</strong></li>
+<li><strong>ตัวอย่าง (9,16):</strong> databit 9 บิต (<code>011 010 111</code>) จัดตาราง 3×3 เติม parity ท้ายแถว/คอลัมน์ → 4×4 = codeword 16 บิต ส่งแบบ First in First out</li>
+</ul>
+<p><strong>Example:</strong> data 4 แถว × 7 บิต</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แถว</th>
+<th>ข้อมูล</th>
+<th>row parity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1100111</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1011101</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0111001</td>
+<td>0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0101001</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>column parities</strong></td>
+<td><strong>0101010</strong></td>
+<td><strong>1</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>ส่ง: <code>11001111 10111011 01110010 01010011 01010101</code></p>
+<h2 id="7-checksum">7. Checksum ⭐</h2>
+<ul>
+<li><strong>Checksum</strong> = ค่าตรวจ error ที่คำนวณจากข้อความ <strong>ความยาวเท่าไหร่ก็ได้</strong> — <strong>Internet checksum ใช้ one's-complement arithmetic</strong></li>
+<li><strong>IPv4 header checksum</strong> ป้องกัน<strong>เฉพาะ IPv4 header</strong> | <strong>TCP/UDP checksum</strong> ป้องกัน <strong>transport header + data</strong></li>
+<li>⚠️ <strong>Link technologies มักใช้ CRC/FCS แทน เพราะ CRC ตรวจจับ burst error ได้ดีกว่ามาก</strong></li>
+</ul>
+<p><strong>ขั้นตอน:</strong> 1. แบ่งข้อความเป็นหน่วยละ <strong>m บิต</strong> → 2. <strong>Generator</strong> สร้างหน่วย m บิต = <strong>checksum</strong> ส่งไปพร้อมข้อความ → 3. <strong>Checker</strong> สร้าง checksum ใหม่จากข้อความ + checksum ที่ได้รับ → 4. ถ้าได้ <strong>0 ทั้งหมด → รับ</strong>, ไม่งั้น <strong>discard</strong></p>
+<p><strong>Example 1 (8 บิต) — Generator:</strong></p>
+<pre><code>  10101001
++ 00111001
+----------
+  11100010   ← Sum
+  00011101   ← Checksum = กลับบิตของ Sum
+ส่ง: 10101001 00111001 00011101
+</code></pre>
+<p><strong>Checker (ไม่มี error):</strong> 10101001 + 00111001 + 00011101 = <code>11111111</code> → complement = <strong><code>00000000</code> → ถูกต้อง</strong>
+<strong>Checker (มี error):</strong> รับ <code>10101111 11111001 00011101</code></p>
+<pre><code>    10101111 + 11111001 + 00011101
+  1 11000101   ← Partial sum (carry ล้นออกซ้าย)
+  +        1   ← นำ carry มาบวกกลับ (wrap around)
+    11000110   ← Sum
+    00111001   ← Complement ≠ 0 → ข้อมูลเสีย
+</code></pre>
+<p class="c-warn">⚠️ <strong>หัวใจของ one's complement: carry ที่ล้นออกทางซ้ายต้องนำมาบวกกลับทางขวา (wrapped addition)</strong></p>
+<p><strong>Example 2 (4 บิต):</strong> ข้อมูล <strong>7, 11, 12, 0, 6</strong></p>
+<ul>
+<li>Sum = <strong>36</strong> = <code>0010 0100</code> → <strong>Wrapped sum:</strong> <code>0010</code> + <code>0100</code> = <code>0110</code> = <strong>6</strong></li>
+<li><strong>Checksum = complement ของ 6</strong> = <code>1001</code> = <strong>9</strong> → ส่ง <strong>7, 11, 12, 0, 6, 9</strong></li>
+<li><strong>Checker:</strong> 7+11+12+0+6+9 = <strong>45</strong> = <code>0010 1101</code> → wrapped: <code>0010</code> + <code>1101</code> = <code>1111</code> = 15 → complement = <strong><code>0000</code> = 0 → ถูกต้อง</strong>
+💡 <strong>คิดเร็ว (m = 4 บิต):</strong> wrapped sum ≈ sum mod 15; checksum = <strong>15 − wrapped sum</strong> (36 → 6 → 15−6 = 9)</li>
+</ul>
+<h2 id="8-crc-cyclic-redundancy-check">8. CRC (Cyclic Redundancy Check) ⭐⭐</h2>
+<ul>
+<li><strong>เทคนิคตรวจ redundancy ที่ทรงพลังที่สุด</strong> — ต่างจาก parity ที่ใช้<strong>การบวก</strong> CRC ใช้ <strong>การหารฐาน 2</strong> ด้วย <strong>divisor (key) ที่ตกลงกันไว้ล่วงหน้า</strong></li>
+<li>นำ <strong>เศษ (CRC remainder)</strong> ไปต่อท้าย data unit เพื่อให้ผลลัพธ์ <strong>หารด้วยตัวหารลงตัวพอดี</strong></li>
+</ul>
+<p><strong>กฎ 2 ข้อ:</strong> 1. <strong>CRC ต้องมีจำนวนบิตน้อยกว่าตัวหาร 1 บิต</strong> (ตัวหาร n+1 บิต → CRC n บิต) 2. ต่อ CRC ท้าย dataword แล้ว<strong>ต้องหารด้วยตัวหารลงตัว</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Sender</strong></th>
+<th><strong>Receiver</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data + <strong>00…0 (n บิต)</strong> ÷ Divisor (n+1 บิต)</td>
+<td>Data + CRC ที่ได้รับ ÷ Divisor เดียวกัน</td>
+</tr>
+<tr>
+<td>Remainder = <strong>CRC (n บิต)</strong> → ส่ง <strong>Data + CRC</strong></td>
+<td>Remainder <strong>ศูนย์ → accept / ไม่ศูนย์ → reject</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Modulo-2 division:</strong> <strong>ใช้ XOR แทนการลบ</strong> (ไม่มีการยืม) | <strong>ถ้าบิตซ้ายสุดของเศษเป็น 0 → ใช้ <code>0000</code> เป็นตัวหารแทน</strong> (ผลหารบิตนั้น = 0)</p>
+<p><strong>ตัวอย่าง Generator:</strong> Data <code>100100</code>, Divisor <code>1101</code> (4 บิต) → เติม 0 <strong>3 ตัว</strong> → <code>100100000</code> → หาร modulo-2 → ผลหาร <code>111101</code>, <strong>Remainder = <code>001</code></strong> → <strong>Codeword = <code>100100001</code></strong>
+<strong>Checker:</strong> <code>100100001</code> ÷ <code>1101</code> → <strong>Remainder (syndrome) = <code>000</code></strong> → ไม่มี error</p>
+<p><strong>Uncorrupted vs Corrupted (Divisor <code>1011</code>):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Uncorrupted</strong></th>
+<th><strong>Corrupted</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codeword</td>
+<td><code>1001110</code></td>
+<td><code>1000110</code></td>
+</tr>
+<tr>
+<td><strong>Syndrome</strong></td>
+<td><strong><code>000</code> (Zero)</strong></td>
+<td><strong><code>011</code> (Non-Zero)</strong></td>
+</tr>
+<tr>
+<td>ผล</td>
+<td><strong>Dataword <code>1001</code> accepted</strong></td>
+<td><strong>discarded</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CRC(7,4) กับ Divisor <code>1011</code></strong> (k=4, n=7, CRC 3 บิต):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Dataword</th>
+<th>Codeword</th>
+<th>Dataword</th>
+<th>Codeword</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0000</td>
+<td>0000<strong>000</strong></td>
+<td>1000</td>
+<td>1000<strong>101</strong></td>
+</tr>
+<tr>
+<td>0001</td>
+<td>0001<strong>011</strong></td>
+<td>1001</td>
+<td>1001<strong>110</strong></td>
+</tr>
+<tr>
+<td><strong>0010</strong></td>
+<td><strong>0010110</strong></td>
+<td>1010</td>
+<td>1010<strong>011</strong></td>
+</tr>
+<tr>
+<td>0011</td>
+<td>0011<strong>101</strong></td>
+<td>1011</td>
+<td>1011<strong>000</strong></td>
+</tr>
+<tr>
+<td>0100</td>
+<td>0100<strong>111</strong></td>
+<td>1100</td>
+<td>1100<strong>010</strong></td>
+</tr>
+<tr>
+<td>0101</td>
+<td>0101<strong>100</strong></td>
+<td>1101</td>
+<td>1101<strong>001</strong></td>
+</tr>
+<tr>
+<td>0110</td>
+<td>0110<strong>001</strong></td>
+<td>1110</td>
+<td>1110<strong>100</strong></td>
+</tr>
+<tr>
+<td>0111</td>
+<td>0111<strong>010</strong></td>
+<td>1111</td>
+<td>1111<strong>111</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ฮาร์ดแวร์:</strong> Sender (dataword + <code>000</code> → <strong>Generator</strong> ใช้ divisor → remainder → codeword) | <strong>Divisor ถูกใช้ร่วมกัน (shared) ทั้งสองฝั่ง</strong> | Receiver (codeword → <strong>Checker</strong> → <strong>syndrome</strong> → <strong>Decision logic</strong> → accept/discard)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>สูตรลัดทำโจทย์ CRC:</strong> 1. ตัวหาร n+1 บิต → <strong>เติม 0 ท้าย dataword n ตัว</strong> 2. หารแบบ XOR (บิตซ้ายสุด 1 ใช้ตัวหาร, 0 ใช้ 0000) 3. เศษ n บิต = CRC <strong>แทนที่ 0 ที่เติมไว้</strong> 4. ตรวจ: หาร codeword ด้วยตัวหารเดิม เศษต้องเป็น 0</p>
+</blockquote>
+<h2 id="9-hamming-code">9. Hamming Code ⭐⭐</h2>
+<ul>
+<li><strong>แก้ single-bit error ได้</strong> โดย<strong>ระบุตำแหน่งของบิตที่ผิด</strong> — ใช้ simple parity check วาง <strong>redundant bits ที่ตำแหน่ง 2^k</strong> (<strong>1, 2, 4, 8, …</strong>)</li>
+</ul>
+<p><strong>Codeword 11 บิต (dataword 7 บิต):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตำแหน่ง</th>
+<th>11</th>
+<th>10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บิต</td>
+<td>d7</td>
+<td>d6</td>
+<td>d5</td>
+<td><strong>r8</strong></td>
+<td>d4</td>
+<td>d3</td>
+<td>d2</td>
+<td><strong>r4</strong></td>
+<td>d1</td>
+<td><strong>r2</strong></td>
+<td><strong>r1</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Redundant bit</th>
+<th>ตรวจตำแหน่ง</th>
+<th>เทคนิคจำ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>r1</strong></td>
+<td><strong>1, 3, 5, 7, 9, 11, …</strong></td>
+<td>ตำแหน่งที่<strong>บิตหลัก 1</strong> เป็น 1</td>
+</tr>
+<tr>
+<td><strong>r2</strong></td>
+<td><strong>2, 3, 6, 7, 10, 11, …</strong></td>
+<td>ตำแหน่งที่<strong>บิตหลัก 2</strong> เป็น 1</td>
+</tr>
+<tr>
+<td><strong>r4</strong></td>
+<td><strong>4, 5, 6, 7, 12–15, …</strong></td>
+<td>ตำแหน่งที่<strong>บิตหลัก 4</strong> เป็น 1</td>
+</tr>
+<tr>
+<td><strong>r8</strong></td>
+<td><strong>8, 9, 10, 11, 12–15, …</strong></td>
+<td>ตำแหน่งที่<strong>บิตหลัก 8</strong> เป็น 1</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(สูตร: &quot;เลือก k ตัว ข้าม k ตัว&quot; เริ่มจากตำแหน่ง k)</em></p>
+<p><strong>ตัวอย่าง: Dataword <code>1001101</code></strong> (d7=1, d6=0, d5=0, d4=1, d3=1, d2=0, d1=1)</p>
+<ol>
+<li><strong>r1</strong> = parity ของตำแหน่ง 3,5,7,9,11 = 1,0,1,0,1 → 1 สามตัว (คี่) → <strong>r1 = 1</strong></li>
+<li><strong>r2</strong> = parity ของ 3,6,7,10,11 = 1,1,1,0,1 → สี่ตัว (คู่) → <strong>r2 = 0</strong></li>
+<li><strong>r4</strong> = parity ของ 5,6,7 = 0,1,1 → สองตัว → <strong>r4 = 0</strong></li>
+<li><strong>r8</strong> = parity ของ 9,10,11 = 0,0,1 → หนึ่งตัว → <strong>r8 = 1</strong>
+→ <strong>Codeword = <code>10011100101</code></strong></li>
+</ol>
+<p><strong>แก้ One-Bit Error:</strong> ส่ง <code>10011100101</code> → <strong>รับ <code>10010100101</code></strong> (ตำแหน่ง 7 เปลี่ยน)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>บิตที่ตรวจ (รวมตัว r เอง)</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>r1</strong></td>
+<td>1,0,0,0,1,1 → สามตัว (คี่)</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>r2</strong></td>
+<td>1,0,0,1,1,0 → สามตัว (คี่)</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>r4</strong></td>
+<td>0,1,0,0 → หนึ่งตัว (คี่)</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>r8</strong></td>
+<td>1,0,0,1 → สองตัว (คู่)</td>
+<td><strong>0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>→ <strong>ตำแหน่งที่ผิด = (r8 r4 r2 r1)₂ = (0111)₂ = 7</strong> → กลับบิตตำแหน่ง 7
+💡 <strong>อ่าน syndrome จาก r8 ลงไป r1 เป็นเลขฐาน 2 → ได้ตำแหน่งบิตผิดเลย</strong> (0000 = ไม่มี error)</p>
+<h2 id="10-interleaving">10. Interleaving ⭐</h2>
+<ul>
+<li>ปกติ codeword ผิด → <strong>ทิ้งทั้ง codeword</strong> | แต่ถ้า <strong>สลับ (shuffle/interleave) ลำดับบิตก่อนส่ง</strong> การสูญเสีย codeword ทั้งก้อน (burst error) จะกลายเป็น <strong>single-bit error กระจายในหลาย codeword</strong> → <strong>แก้ได้ด้วย Hamming code</strong></li>
+<li><strong>ตัวอย่าง (packet 5 ชุด × 5 หน่วย):</strong> a. Sender สร้าง packet 1–5 (หน่วย 01–25) <strong>ส่งตามคอลัมน์แทนตามแถว</strong> → b. ส่ง <code>25 20 15 10 05</code>, <code>24 19 14 09 04</code>, <code>23 18 13 08 03</code>, … → c. ชุดกลาง (<code>23 18 13 08 03</code>) <strong>หาย</strong> → d. Receiver จัดเรียงกลับ → <strong>แต่ละ packet หายไปแค่ 1 หน่วย</strong> แทนที่จะหายทั้ง packet</li>
+</ul>
+<blockquote class="callout">
+<p>⭐ <strong>The trick is to let the burst error corrupt only 1 bit of each unit</strong></p>
+</blockquote>
+<h2 id="11-ตารางเปรียบเทียบ">11. ตารางเปรียบเทียบ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>หลักการ</th>
+<th>ตรวจจับ</th>
+<th>แก้ไขได้</th>
+<th>ใช้ที่ไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parity (1D)</strong></td>
+<td>เพิ่ม 1 บิตให้จำนวน 1 คู่/คี่</td>
+<td>single-bit ทุกกรณี, burst ที่ผิดจำนวนคี่</td>
+<td>❌</td>
+<td>ASCII serial</td>
+</tr>
+<tr>
+<td><strong>2D Parity</strong></td>
+<td>parity แถว + คอลัมน์</td>
+<td>burst และ error จำนวนคู่ได้ดีขึ้น</td>
+<td>✅ <strong>single-bit</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Checksum</strong></td>
+<td>บวก one's complement แล้วกลับบิต</td>
+<td>✅</td>
+<td>❌</td>
+<td><strong>IPv4 header, TCP/UDP</strong></td>
+</tr>
+<tr>
+<td><strong>CRC</strong></td>
+<td>หาร modulo-2 ด้วย divisor</td>
+<td>✅ <strong>ดีที่สุด โดยเฉพาะ burst</strong></td>
+<td>❌</td>
+<td><strong>Link layer (FCS)</strong> เช่น Ethernet</td>
+</tr>
+<tr>
+<td><strong>Hamming code</strong></td>
+<td>parity ที่ตำแหน่ง 2^k</td>
+<td>✅</td>
+<td>✅ <strong>single-bit</strong></td>
+<td>FEC</td>
+</tr>
+<tr>
+<td><strong>Interleaving</strong></td>
+<td>สลับลำดับบิตให้ burst → single-bit</td>
+<td>—</td>
+<td>✅ burst (ร่วมกับ Hamming)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="จุดที่มักออกสอบ">จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>สาเหตุ bit error (noise)</strong> และ <strong>single-bit vs burst</strong></li>
+<li><strong>ARQ (ส่งใหม่) vs FEC (แก้เอง)</strong></li>
+<li><strong>Block coding:</strong> n = k + r, 2^k datawords, codeword ที่ใช้ &lt; 2^n</li>
+<li><strong>Syndrome = 0 ไม่มี error</strong>; <strong>ข้อจำกัด parity: ตรวจไม่ได้เมื่อผิดจำนวนคู่</strong></li>
+<li><strong>2D parity แก้ single-bit ได้</strong> (แถว × คอลัมน์)</li>
+<li><strong>Checksum:</strong> carry วนกลับ, checksum = complement ของ sum; ผู้รับรวมทั้งหมดแล้ว complement ต้องได้ 0
+<ul>
+<li>Ex1: <code>10101001 + 00111001 = 11100010</code> → checksum <code>00011101</code></li>
+<li>Ex2: 7,11,12,0,6 → sum 36 → wrapped 6 → <strong>checksum 9</strong></li>
+</ul>
+</li>
+<li><strong>IPv4 = header อย่างเดียว / TCP-UDP = header + data / link layer ใช้ CRC</strong></li>
+<li><strong>CRC:</strong> modulo-2 (XOR), CRC <strong>น้อยกว่า divisor 1 บิต</strong>, เติม 0 ท้าย dataword, syndrome ≠ 0 → discard — <strong>ฝึกหารเอง</strong></li>
+<li><strong>Hamming:</strong> r ที่ตำแหน่ง 1,2,4,8; <strong>dataword <code>1001101</code> → codeword <code>10011100101</code></strong>; รับ <code>10010100101</code> → syndrome <code>0111</code> = <strong>ตำแหน่ง 7</strong></li>
+<li><strong>Interleaving:</strong> ส่งตามคอลัมน์ → burst ทำลายแค่ 1 บิตต่อหน่วย</li>
+</ol>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../lecture5.0-dlp-foundation/short.html"><small>← บทก่อนหน้า</small><span>Lecture 5.0 — Introduction to the Data Link Layer</span></a><a class="pg next" href="../lecture5.2-flow-control/short.html"><small>บทถัดไป →</small><span>Lecture 5.2 — Flow Control, ARQ, and HDLC</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

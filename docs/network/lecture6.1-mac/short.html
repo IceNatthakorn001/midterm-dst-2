@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 6.1 — Media Access Control Protocols · ITDS231</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#0f766e}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
+        <ol><li><a href="#1-topology-transmission-mode">1. Topology &amp;amp; Transmission Mode ⭐</a></li><li><a href="#2-multiple-access-control-collision">2. Multiple Access Control &amp;amp; Collision</a></li><li><a href="#3-ภาพรวม-3-กลุ่ม">3. ภาพรวม 3 กลุ่ม ⭐⭐</a></li><li><a href="#4-aloha">4. ALOHA ⭐</a></li><li><a href="#5-csma">5. CSMA ⭐</a></li><li><a href="#6-csmacd">6. CSMA/CD ⭐⭐</a></li><li><a href="#7-csmaca">7. CSMA/CA ⭐⭐</a></li><li><a href="#8-controlled-access">8. Controlled Access ⭐</a></li><li><a href="#9-channelization">9. Channelization ⭐</a></li><li><a href="#10-ตารางเปรียบเทียบ">10. ตารางเปรียบเทียบ</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture6.1-MAC</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 6.1 — Media Access Control Protocols</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <article class="prose"><p><em>ตอบคำถาม <strong>&quot;ใครมีสิทธิ์ส่งบนสื่อกลางที่แชร์กัน?&quot;</strong></em></p>
+<h2 id="1-topology-transmission-mode">1. Topology &amp; Transmission Mode ⭐</h2>
+<p><strong>Topology</strong> = การจัดวางและความสัมพันธ์ของอุปกรณ์เครือข่ายและการเชื่อมต่อ</p>
+<ul>
+<li><strong>Physical topology</strong> = การเชื่อมต่อ<strong>ทางกายภาพ</strong> | <strong>Logical topology</strong> = การเชื่อมต่อ<strong>เสมือน</strong> ใช้ interface และ <strong>IP addressing scheme</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โหมด</th>
+<th>ลักษณะ</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Simplex</strong></td>
+<td><strong>ทางเดียว (unidirectional)</strong></td>
+<td>TV, วิทยุ (รับ), รีโมต (ส่ง)</td>
+</tr>
+<tr>
+<td><strong>Half-duplex</strong></td>
+<td><strong>ส่งหรือรับได้ทีละฝั่ง</strong> บนสื่อที่แชร์</td>
+<td><strong>WLANs</strong>, legacy bus + <strong>Ethernet hubs</strong></td>
+</tr>
+<tr>
+<td><strong>Full-duplex</strong></td>
+<td><strong>ทั้งสองฝั่งส่งและรับพร้อมกัน</strong></td>
+<td><strong>Ethernet switches</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 Simplex = วิทยุ FM / Half-duplex = walkie-talkie / Full-duplex = โทรศัพท์</p>
+<h2 id="2-multiple-access-control-collision">2. Multiple Access Control &amp; Collision</h2>
+<ul>
+<li><strong>Multiple Access Control</strong> = <strong>ชุดขั้นตอน</strong>จำกัดการส่งบน <strong>shared channel/broadcast link</strong> เพื่อ<strong>ลดการชนกัน</strong></li>
+<li>LAN ดั้งเดิมทุกสถานีต่อกับ<strong>สื่อกลางที่แชร์</strong> (bus หรือ star ที่ใช้ <strong>hub</strong>) → หลายสถานีเข้าถึงพร้อมกัน → <strong>collision</strong></li>
+<li>⚠️ อย่าสับสน: <strong>MAC method</strong> = วิธีคุมการเข้าถึงสื่อ / <strong>MAC address</strong> = ที่อยู่ฮาร์ดแวร์</li>
+<li><strong>Collision เกิดในอากาศได้ และไม่จำเป็นต้องอยู่เครือข่ายเดียวกัน ขอแค่สัญญาณใช้ความถี่เดียวกัน</strong> → สัญญาณรวมกันมี <strong>ระดับที่อ่านไม่ได้ (undefined levels)</strong></li>
+</ul>
+<h2 id="3-ภาพรวม-3-กลุ่ม">3. ภาพรวม 3 กลุ่ม ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Random-access (Contention-based)</strong></th>
+<th><strong>Controlled-access</strong></th>
+<th><strong>Channelization</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>ไม่มี carrier sense:</em> <strong>ALOHA (MA)</strong></td>
+<td><strong>Reservation</strong></td>
+<td><strong>FDMA</strong></td>
+</tr>
+<tr>
+<td><em>มี carrier sense:</em> <strong>CSMA, CSMA/CD, CSMA/CA</strong></td>
+<td><strong>Polling</strong></td>
+<td><strong>TDMA</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Token passing</strong></td>
+<td><strong>CDMA</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><em>(CS = Carrier Sense, MA = Multiple/Media Access)</em></p>
+<p><strong>Contention-based:</strong> ดีที่สุดสำหรับ traffic <strong>bursty</strong> และโหลด<strong>เบาถึงปานกลาง</strong> | (+) <strong>implement ง่าย</strong> (−) <strong>ประสิทธิภาพแย่เมื่อ traffic หนาแน่น</strong> | ทำงาน <strong>half-duplex</strong> — <strong>CSMA/CD</strong> = legacy bus Ethernet, <strong>CSMA/CA</strong> = Wireless LANs
+<strong>Controlled access:</strong> <strong>Deterministic</strong> — แต่ละโหนดมี<strong>เวลาของตัวเอง</strong> | ใช้ใน <strong>Token Ring, ARCNET</strong> | <strong>Round Robin:</strong> Polling (<strong>Centralized</strong>), Token Passing (<strong>Decentralized</strong>) | <strong>Reservation-based:</strong> <strong>BRAP</strong> (Centralized), <strong>DQDB (IEEE 802.6), DAMA</strong> (Decentralized)</p>
+<p><strong>Access method ในเทคโนโลยีจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Fast Ethernet</th>
+<th>Gigabit Ethernet</th>
+<th>Fibre Channel</th>
+<th>Wireless LAN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data rate</td>
+<td>100 Mbps</td>
+<td>1, 10 Gbps</td>
+<td>100 Mbps–3.2 Gbps</td>
+<td>1–54 Mbps</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>UTP, STP, fiber</td>
+<td>UTP, shielded, fiber</td>
+<td>fiber, coax, STP</td>
+<td><strong>2.4-GHz, 5-GHz</strong></td>
+</tr>
+<tr>
+<td><strong>Access method</strong></td>
+<td><strong>CSMA/CD</strong></td>
+<td><strong>Switched</strong></td>
+<td><strong>Switched</strong></td>
+<td><strong>CSMA/Polling</strong></td>
+</tr>
+<tr>
+<td>Standard</td>
+<td>IEEE 802.3</td>
+<td>IEEE 802.3</td>
+<td>Fibre Channel Assoc.</td>
+<td><strong>IEEE 802.11</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="4-aloha">4. ALOHA ⭐</h2>
+<p><strong>วิธี random-access แรกสุด</strong> พัฒนา <strong>ต้นทศวรรษ 1970</strong> ออกแบบสำหรับ <strong>radio (wireless) LAN ที่ 9600 bps</strong> (มหาวิทยาลัยฮาวาย)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ลักษณะ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Multiple Access</strong></td>
+<td>สถานีใดก็ได้ <strong>ส่งทันทีเมื่อมี frame</strong></td>
+</tr>
+<tr>
+<td><strong>No Carrier Sense</strong></td>
+<td><strong>ไม่ตรวจ</strong>ว่ามีใครกำลังส่งหรือสื่อว่างไหม</td>
+</tr>
+<tr>
+<td><strong>No Checking for Collision</strong></td>
+<td>หลังส่ง<strong>ไม่ฟัง</strong>ว่าชนไหม</td>
+</tr>
+<tr>
+<td><strong>Acknowledgement</strong></td>
+<td>หลังส่ง <strong>รอ ACK</strong> — ไม่ได้ในเวลาที่กำหนด → ส่งใหม่</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>เวลารอ ACK = 2 เท่าของ maximum propagation delay</strong> | ไม่ได้ ACK → ถือว่าหาย → <strong>ส่งใหม่หลังรอเวลาสุ่ม</strong></li>
+<li><strong>Propagation time = d / propagation speed</strong></li>
+</ul>
+<p><strong>Vulnerable time ⭐</strong> = ช่วงเวลาที่มีโอกาสเกิด collision</p>
+<ul>
+<li><strong>Pure ALOHA = 2 × T_fr</strong> (ถ้า A เริ่มตั้งแต่ t − T_fr ปลายของ A ชนต้นของ B; ถ้า C เริ่มก่อน t + T_fr ปลายของ B ชนต้นของ C)</li>
+<li><strong>Slotted ALOHA = T_fr</strong> — แบ่งเวลาเป็น <strong>slot ขนาดเท่ากับ 1 frame</strong> สถานี<strong>ส่งได้เฉพาะตอนต้น slot</strong> → ชนกันเฉพาะเมื่อเริ่มใน slot เดียวกัน
+⚠️ <strong>slotted ลดโอกาสชนลงครึ่งหนึ่ง</strong></li>
+</ul>
+<h2 id="5-csma">5. CSMA ⭐</h2>
+<ul>
+<li><strong>&quot;Sense before transmit&quot;</strong> — ฟังสื่อก่อนส่ง</li>
+<li>⭐ <strong>CSMA ลดโอกาสชนได้ แต่กำจัดไม่ได้</strong> เพราะ <strong>propagation delay</strong> — สถานีอาจฟังแล้วพบว่าว่าง เพียงเพราะสัญญาณของอีกสถานี<strong>ยังเดินทางมาไม่ถึง</strong></li>
+</ul>
+<p><strong>Persistence Strategies ⭐</strong> = กำหนดว่าควรทำอะไรเมื่อฟังแล้วพบว่าช่อง <strong>busy</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>ถ้าช่อง <strong>ว่าง</strong></th>
+<th>ถ้าช่อง <strong>ไม่ว่าง</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Non-persistent</strong></td>
+<td><strong>ส่งทันที</strong></td>
+<td><strong>รอเวลาสุ่ม</strong> แล้วค่อยฟังใหม่</td>
+</tr>
+<tr>
+<td><strong>1-persistent</strong></td>
+<td><strong>ส่งทันที (ความน่าจะเป็น 1)</strong></td>
+<td><strong>ไม่รอเวลาสุ่ม</strong> ฟังต่อเนื่องจนว่างแล้วส่งเลย</td>
+</tr>
+<tr>
+<td><strong>p-persistent</strong></td>
+<td>ส่งด้วย<strong>ความน่าจะเป็น p</strong></td>
+<td>ฟังต่อจนว่าง</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง p-persistent (p = 0.2):</strong> สุ่มเลข 1–100 → <strong>น้อยกว่า 20 จึงส่ง</strong> (ไม่งั้นรอ slot ถัดไป)
+💡 <strong>Non-persistent</strong> = เห็นห้องน้ำไม่ว่าง เดินไปทำอย่างอื่นก่อน (ชนน้อย แต่เสียเวลา) / <strong>1-persistent</strong> = ยืนรอหน้าประตู ว่างปุ๊บเข้าปั๊บ (เร็ว แต่แย่งกันเข้าชน) / <strong>p-persistent</strong> = ว่างแล้วโยนเหรียญก่อน</p>
+<h2 id="6-csmacd">6. CSMA/CD ⭐⭐</h2>
+<ul>
+<li>⚠️ <strong>CSMA ไม่เคยถูกใช้จริงโดยลำพัง เพราะไม่ได้กำหนดขั้นตอนเมื่อเกิด collision</strong></li>
+<li><strong>CSMA/CD:</strong> สถานี<strong>เฝ้าดูสื่อ</strong>ว่าส่งสำเร็จไหม → <strong>มี collision</strong> → <strong>back off</strong> แล้วส่งใหม่</li>
+<li>⭐ <strong>Exponential backoff: รอสุ่มระหว่าง 0 ถึง (2^N − 1) × propagation_time</strong> (N = ครั้งที่พยายาม)</li>
+</ul>
+<p><strong>Collision of the First Bit:</strong> A เริ่มที่ t₁, C เริ่มที่ t₂ (ยังไม่ได้ยิน A) → บิตแรกชนกันกลางทาง → <strong>C ตรวจพบก่อนที่ t₃ → abort</strong> → <strong>A ตรวจพบที่ t₄ → abort</strong>
+⚠️ <strong>frame ต้องยาวพอ</strong> ที่ผู้ส่งยังส่งไม่จบตอนสัญญาณชนย้อนมาถึง ไม่งั้นตรวจจับไม่ได้ (= เหตุผลของ <strong>minimum frame size ใน Ethernet</strong>)</p>
+<p><strong>Energy Level:</strong> <strong>Idle = ศูนย์</strong> | <strong>Normal transmission = ปกติ</strong> | <strong>Collision = สูงกว่าปกติ (~2 เท่า)</strong> → ตรวจ collision ได้จาก<strong>พลังงานสูงผิดปกติ</strong></p>
+<h2 id="7-csmaca">7. CSMA/CA ⭐⭐</h2>
+<ul>
+<li>⚠️ <strong>ต่างจาก CSMA/CD: ไม่มี collision detection!</strong> (ในไร้สายตรวจจับการชนยาก เช่นปัญหา hidden terminal)</li>
+<li><strong>ขั้นตอน:</strong> 1. ใช้ <strong>persistence strategy</strong> ฟังช่อง → 2. พบว่าว่าง <strong>รอ IFG (InterFrame Gap)</strong> → 3. <strong>รอเวลาสุ่มอีกช่วง (contention window)</strong> → 4. <strong>ส่ง frame แล้วรอ ACK</strong></li>
+</ul>
+<p><strong>IFS &amp; Contention Window ⭐</strong>
+<strong>ลำดับ:</strong> Continuously sense (busy) → <strong>Found idle</strong> → รอ <strong>IFS</strong> → <strong>Contention window</strong> (แบ่งเป็น slot) → <strong>Send frame</strong> → <strong>Time-out</strong> (รอ ACK)</p>
+<ul>
+<li>⭐ <strong>IFS ใช้กำหนด priority</strong> — <strong>IFG ที่มีค่าสูงกว่า = priority ต่ำกว่า</strong></li>
+<li>⭐ <strong>ถ้าพบว่าช่องไม่ว่างระหว่าง contention window: ไม่เริ่มนับใหม่ แต่หยุด timer ไว้ แล้วนับต่อเมื่อช่องว่าง</strong></li>
+<li>จำนวน slot เปลี่ยนตาม <strong>binary exponential backoff:</strong> ครั้งแรก <strong>1 slot</strong> แล้ว<strong>เพิ่มเป็นสองเท่า</strong>ทุกครั้งที่ตรวจไม่พบช่องว่างหลัง IFS</li>
+</ul>
+<p><strong>RTS/CTS และ NAV ⭐</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ย่อ</th>
+<th>เต็ม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DCF</strong></td>
+<td>Distributed Coordination Function</td>
+</tr>
+<tr>
+<td><strong>DIFS</strong></td>
+<td>DCF Interframe Spacing</td>
+</tr>
+<tr>
+<td><strong>SIFS</strong></td>
+<td>Short Inter-Frame Space</td>
+</tr>
+<tr>
+<td><strong>NAV</strong></td>
+<td>Network Allocation Vector</td>
+</tr>
+<tr>
+<td><strong>RTS / CTS</strong></td>
+<td>Request to Send / Clear to Send</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ขั้นตอน (A → B, สถานีอื่น C, D):</strong></p>
+<ol>
+<li>A <strong>backoff</strong> แล้วรอ <strong>DIFS</strong> → 2. A ส่ง <strong>RTS</strong> → 3. B รอ <strong>SIFS</strong> ตอบ <strong>CTS</strong> → 4. <strong>C, D ได้ยิน CTS → ตั้ง NAV</strong> → 5. A รอ SIFS ส่ง <strong>Data</strong> → 6. B รอ SIFS ส่ง <strong>ACK</strong> → 7. NAV หมดเวลาหลัง ACK</li>
+</ol>
+<p><strong>NAV:</strong> เมื่อสถานีส่ง <strong>RTS จะแนบระยะเวลาที่ต้องใช้ช่อง</strong> → สถานีที่ได้รับผลกระทบสร้าง timer <strong>NAV</strong> ว่าต้องรอนานเท่าไหร่ → <strong>ก่อนฟังสื่อจริง สถานีเช็ค NAV ก่อนว่าหมดเวลาหรือยัง</strong>
+💡 NAV = ป้าย &quot;ห้องประชุมไม่ว่าง ใช้ถึง 15:00&quot; ไม่ต้องเคาะประตูถามจนกว่าจะถึงเวลา</p>
+<h2 id="8-controlled-access">8. Controlled Access ⭐</h2>
+<p><strong>หลักการ:</strong> สถานี<strong>ปรึกษากัน</strong>หาว่าใครมีสิทธิ์ส่ง — <strong>ส่งไม่ได้จนกว่าจะได้รับอนุญาต</strong></p>
+<p><strong>(1) Reservation:</strong> สถานีต้อง<strong>จองก่อน</strong> | แต่ละช่วงมี <strong>reservation frame นำหน้า data frames</strong> | <strong>N สถานี → N reservation minislots</strong> | สถานีที่ต้องการส่งจอง<strong>ใน minislot ของตัวเอง</strong> แล้วส่งหลัง reservation frame
+<em>ตัวอย่าง (5 สถานี): รอบแรก <code>0 0 0 0 1</code> → สถานี 1 จอง → ส่ง Data station 1 | รอบถัดไป <code>0 1 1 0 1</code> → สถานี 1, 3, 4 จอง → ส่ง Data station 4, 3, 1</em></p>
+<p><strong>(2) Polling:</strong> มี <strong>primary station (master) 1 เครื่อง</strong> + <strong>secondary stations (slaves)</strong> | <strong>การแลกเปลี่ยนข้อมูลทั้งหมดต้องผ่าน primary</strong> (primary คุมลิงก์, secondary ทำตามคำสั่ง)</p>
+<ul>
+<li><strong>Select</strong> = primary จะส่งข้อมูลให้ secondary | <strong>Poll</strong> = primary ถาม secondary ว่ามีข้อมูลจะส่งไหม
+💡 เหมือนครูในห้องเรียน: นักเรียนพูดได้เฉพาะตอนครูเรียกชื่อ</li>
+</ul>
+<p><strong>(3) Token Passing:</strong> สถานีจัดเป็น <strong>ring</strong> แต่ละสถานีมี <strong>successor</strong> และ <strong>predecessor</strong> | <strong>ส่งข้อมูลได้เมื่อได้รับ frame พิเศษชื่อ token</strong>
+<strong>Flowchart:</strong> รอ token → <strong>capture token</strong> → มี data frame จะส่งไหม? (Yes → ส่ง → <strong>หมดเวลาที่จัดสรรหรือยัง?</strong> No: ส่งต่อ / Yes: ไปปล่อย) → <strong>release token</strong></p>
+<ul>
+<li><strong>Physical ring</strong> = วงเดียว token วนทางเดียว | <strong>Dual ring</strong> = มี<strong>วงแหวนสำรองวนทิศตรงข้าม</strong> ถ้าวงหลักขาดใช้วงสำรองได้
+💡 Token = ไมค์ในวงประชุม</li>
+</ul>
+<h2 id="9-channelization">9. Channelization ⭐</h2>
+<p><strong>แบ่ง bandwidth ของลิงก์</strong> ให้สถานีใช้ร่วมกัน</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>ชื่อเต็ม</th>
+<th>หลักการ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FDMA</strong></td>
+<td>Frequency-Division Multiple Access</td>
+<td><strong>แต่ละสถานีได้ย่านความถี่ (band) ของตัวเอง</strong> คั่นด้วย <strong>guard bands</strong> — โปรโตคอล <strong>data link layer</strong> ที่ใช้ <strong>FDM ที่ physical layer</strong> — ใช้ใน <strong>มือถือและเครือข่ายดาวเทียม</strong></td>
+</tr>
+<tr>
+<td><strong>TDMA</strong></td>
+<td>Time-Division Multiple Access</td>
+<td><strong>bandwidth ทั้งหมดเป็นช่องเดียว แบ่งกันใช้ตามเวลา (time slots)</strong> — ใช้ <strong>TDM ที่ physical layer</strong></td>
+</tr>
+<tr>
+<td><strong>CDMA</strong></td>
+<td>Code-Division Multiple Access</td>
+<td>แบ่งด้วย<strong>รหัส</strong></td>
+</tr>
+<tr>
+<td><strong>OFDMA</strong></td>
+<td>Orthogonal Frequency Division Multiple Access</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p class="c-tip">💡 <strong>FDMA</strong> = แต่ละคู่คุยคนละห้อง / <strong>TDMA</strong> = ห้องเดียวผลัดกันคุย / <strong>CDMA</strong> = ห้องเดียวคุยพร้อมกันแต่คนละภาษา
+<em>(FDMA: ถ้า Station 3 เงียบ ย่านของมันก็ว่างเปล่า)</em></p>
+<h2 id="10-ตารางเปรียบเทียบ">10. ตารางเปรียบเทียบ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Pure ALOHA</th>
+<th>Slotted ALOHA</th>
+<th>CSMA</th>
+<th>CSMA/CD</th>
+<th>CSMA/CA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Carrier sense</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ส่งเมื่อไหร่</td>
+<td>ทันที</td>
+<td><strong>ต้น slot</strong></td>
+<td>เมื่อช่องว่าง (ตาม persistence)</td>
+<td>เมื่อช่องว่าง</td>
+<td>ว่าง → IFG → random slots</td>
+</tr>
+<tr>
+<td>จัดการ collision</td>
+<td>รอ ACK, สุ่มส่งใหม่</td>
+<td>รอ ACK</td>
+<td><strong>ไม่ได้กำหนด</strong></td>
+<td><strong>ตรวจจับ → abort → exponential backoff</strong></td>
+<td><strong>หลีกเลี่ยง</strong> (IFS, contention window, RTS/CTS, NAV + ACK)</td>
+</tr>
+<tr>
+<td><strong>Vulnerable time</strong></td>
+<td><strong>2 × T_fr</strong></td>
+<td><strong>T_fr</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ใช้ที่</td>
+<td>wireless LAN ยุคแรก</td>
+<td></td>
+<td><strong>ไม่ใช้จริง</strong></td>
+<td><strong>legacy Ethernet (802.3)</strong></td>
+<td><strong>Wi-Fi (802.11)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CSMA/CD</strong></th>
+<th><strong>CSMA/CA</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เครือข่าย</td>
+<td>LAN มีสาย (legacy Ethernet)</td>
+<td><strong>Wireless LAN (802.11)</strong></td>
+</tr>
+<tr>
+<td>แนวคิด</td>
+<td><strong>ตรวจจับ</strong>การชนแล้วแก้</td>
+<td><strong>หลีกเลี่ยง</strong>การชนก่อนเกิด</td>
+</tr>
+<tr>
+<td>Collision detection</td>
+<td>✅ (ดู energy level)</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>ACK</td>
+<td>ไม่จำเป็น</td>
+<td>✅ <strong>ต้องรอ ACK</strong></td>
+</tr>
+<tr>
+<td>Backoff</td>
+<td><strong>0 ถึง (2^N − 1) × propagation time</strong></td>
+<td><strong>contention window แบบ binary exponential</strong></td>
+</tr>
+<tr>
+<td>กลไกเสริม</td>
+<td>—</td>
+<td><strong>IFS (priority), RTS/CTS, NAV</strong></td>
+</tr>
+<tr>
+<td>Duplex</td>
+<td>half-duplex</td>
+<td>half-duplex</td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Random access</strong></th>
+<th><strong>Controlled access</strong></th>
+<th><strong>Channelization</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ลักษณะ</td>
+<td>แข่งกัน ไม่มีใครคุม</td>
+<td>ต้องได้รับอนุญาต ผลัดกัน</td>
+<td>แบ่ง bandwidth</td>
+</tr>
+<tr>
+<td><strong>Collision</strong></td>
+<td><strong>เกิดได้</strong></td>
+<td><strong>ไม่เกิด</strong></td>
+<td><strong>ไม่เกิด</strong></td>
+</tr>
+<tr>
+<td>เหมาะกับ</td>
+<td>bursty, โหลดเบา-กลาง</td>
+<td>deterministic</td>
+<td>ทรัพยากรแบ่งแน่นอน</td>
+</tr>
+<tr>
+<td>ตัวอย่าง</td>
+<td>ALOHA, CSMA/CD, CSMA/CA</td>
+<td>Reservation, Polling, Token passing</td>
+<td>FDMA, TDMA, CDMA</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="จุดที่มักออกสอบ">จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>Simplex / half-duplex (WLAN, hubs) / full-duplex (Ethernet switches)</strong></li>
+<li><strong>Collision เกิดได้แม้ต่างเครือข่ายถ้าความถี่เดียวกัน</strong></li>
+<li><strong>3 กลุ่ม</strong> และตัวอย่างแต่ละกลุ่ม</li>
+<li><strong>Access method จริง:</strong> Fast Ethernet = <strong>CSMA/CD</strong> / Gigabit Ethernet = <strong>Switched</strong> / WLAN = <strong>CSMA/Polling</strong></li>
+<li><strong>ALOHA:</strong> early 1970s, 9600 bps; no carrier sense, no collision check, <strong>ACK timeout = 2 × max propagation delay</strong></li>
+<li>⭐ <strong>Vulnerable time: pure ALOHA = 2 × T_fr, slotted ALOHA = T_fr</strong></li>
+<li><strong>CSMA ลดแต่กำจัดการชนไม่ได้ เพราะ propagation delay</strong></li>
+<li><strong>Persistence 3 แบบ</strong> (p = 0.2 → สุ่ม 1–100 น้อยกว่า 20 ส่ง)</li>
+<li><strong>CSMA/CD:</strong> exponential backoff <strong>0 ถึง (2^N − 1) × propagation time</strong>; ตรวจจาก <strong>energy level</strong>; <strong>CSMA เปล่า ๆ ไม่ใช้จริง</strong></li>
+<li><strong>CSMA/CA:</strong> ไม่มี collision detection; <strong>IFS ยาว = priority ต่ำ</strong>; contention window binary exponential; <strong>ช่องไม่ว่าง → หยุด timer ไม่ restart</strong></li>
+<li><strong>RTS/CTS/NAV:</strong> <strong>DIFS → RTS → SIFS → CTS → SIFS → Data → SIFS → ACK</strong></li>
+<li><strong>Reservation:</strong> N สถานี N minislots | <strong>Polling:</strong> ทุกการสื่อสารผ่าน primary (select &amp; poll) | <strong>Token passing:</strong> ring, ถือ token จึงส่งได้, หมดเวลาต้องปล่อย</li>
+<li><strong>Channelization:</strong> FDMA (ความถี่ + <strong>guard bands</strong>, ใช้ FDM) / TDMA (ช่องเดียวแบ่งเวลา, ใช้ TDM) / CDMA / OFDMA</li>
+</ol>
+</article>
+      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
+      <nav class="pager"><a class="pg prev" href="../lecture5.2-flow-control/short.html"><small>← บทก่อนหน้า</small><span>Lecture 5.2 — Flow Control, ARQ, and HDLC</span></a><a class="pg next" href="../lecture6.2-ethernet/short.html"><small>บทถัดไป →</small><span>Lecture 6.2 — Ethernet</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>
