@@ -52,6 +52,16 @@ SUBJECTS = [
         "order": ["Chapter00", "Chapter01", "Chapter02", "Chapter03", "Chapter04", "Chapter05",
                   "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2"],
     },
+    {
+        "slug": "systemlab",
+        "dir": YEAR / "Systemlab" / "sum by claude",
+        "code": "ITDS212",
+        "name": "Computer System Lab",
+        "th": "ปฏิบัติการระบบคอมพิวเตอร์ (Linux)",
+        "icon": "🐧",
+        "accent": "#1d4ed8",
+        "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"],
+    },
 ]
 
 md = MarkdownIt("gfm-like", {"html": True, "linkify": False, "typographer": False})

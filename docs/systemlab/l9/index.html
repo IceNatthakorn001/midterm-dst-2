@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L9 – Observability และ Environment Variables · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-observability">2. Observability</a></li><li><a href="#3-tracking-cpu-usage-และ-top">3. Tracking CPU Usage และ top</a></li><li><a href="#4-htop">4. htop</a></li><li><a href="#5-ps--ux-ps--aux">5. ps -ux / ps -aux</a></li><li><a href="#6-pgrep">6. pgrep ⭐</a></li><li><a href="#7-controlling-processes-และ-kill">7. Controlling Processes และ kill</a></li><li><a href="#8-environment-และ-variables">8. Environment และ Variables ⭐</a></li><li><a href="#9-แสดงค่าตัวแปรด้วย-echo">9. แสดงค่าตัวแปรด้วย echo</a></li><li><a href="#10-scope-global-vs-local">10. Scope: Global vs Local ⭐</a></li><li><a href="#11-คำสั่งเกี่ยวกับตัวแปรสิ่งแวดล้อม">11. คำสั่งเกี่ยวกับตัวแปรสิ่งแวดล้อม ⭐⭐</a></li><li><a href="#12-environment-variables-ที่พบบ่อย">12. Environment Variables ที่พบบ่อย ⭐</a></li><li><a href="#13-shell-variables-vs-environment-variables">13. Shell variables vs Environment variables ⭐⭐</a></li><li><a href="#14-การตั้งค่าตัวแปร">14. การตั้งค่าตัวแปร ⭐⭐</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L9</div>
+      <h1 class="lesson-title">L9 – Observability และ Environment Variables</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> (บทนี้ไม่มีไฟล์ Lab คู่กัน) ต่อจาก L8 เรื่อง process และ memory</p>
+<p>(1) <strong>Observability</strong> — การเฝ้าดูระบบ: ทำไมต้องติดตาม CPU, memory, I/O และเครื่องมือ <strong><code>top</code>, <code>htop</code>, <code>ps -ux / -aux</code>, <code>pgrep</code>, <code>kill</code></strong></p>
+<p>(2) <strong>Environment Variables</strong> — ตัวแปรสภาพแวดล้อมที่เก็บข้อมูลของ session เช่น <strong><code>$HOME</code>, <code>$SHELL</code>, <code>$PATH</code></strong>, ขอบเขต (global / local), ความต่างระหว่าง <strong>shell variable กับ environment variable</strong> และคำสั่ง <strong><code>echo</code>, <code>env</code>, <code>printenv</code>, <code>set</code> / <code>unset</code>, <code>export</code></strong> รวมถึงการตั้งค่าแบบ system-wide ใน <strong><code>/etc/environment</code></strong></p>
+<p>ตามตารางเรียนคือสัปดาห์ 9 &quot;memory และการจัดการสภาพแวดล้อม&quot; และเป็นพื้นฐานของ <strong>shell script</strong> ในสัปดาห์ 10</p>
+</blockquote>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>เกณฑ์คะแนนเหมือนเดิม · <strong>สอบกลางภาคสัปดาห์ที่ 9</strong> (25%) · ส่งแลป 23.59 น. ของวันอังคาร/วันที่เรียน · ทดสอบย่อยทุกสัปดาห์ก่อนจบคาบ</li>
+</ul>
+<hr />
+<h2 id="2-observability">2. Observability</h2>
+<ul>
+<li><strong>สำคัญมากที่ต้องเฝ้าดู (observe) ว่าเกิดอะไรขึ้นทั่วทั้ง OS ตั้งแต่ kernel ไปจนถึงโปรแกรมที่ user ใช้</strong></li>
+<li>สิ่งที่ monitor ได้: <strong>CPU usage, Memory usage, I/O traffic</strong> ฯลฯ</li>
+<li>ภาพ <strong>Linux Performance Observability Tools</strong> (brendangregg.com) แสดงเครื่องมือที่ใช้ดูแต่ละชั้นของระบบ เช่น
+<ul>
+<li>ชั้น Applications / System Libraries / System Call Interface: <code>strace</code>, <code>ltrace</code>, <code>opensnoop</code></li>
+<li>VFS / File Systems / Block Device: <code>lsof</code>, <code>iostat</code>, <code>biolatency</code>, <code>ext4slower</code></li>
+<li>Scheduler / CPU: <code>top</code>, <code>atop</code>, <code>ps</code>, <code>pidstat</code>, <code>mpstat</code>, <code>perf</code>, <code>runqlen</code></li>
+<li>Virtual Memory / DRAM: <code>vmstat</code>, <code>slabtop</code>, <code>free</code>, <code>numastat</code></li>
+<li>Network (Sockets, TCP/UDP, IP, Net Device): <code>ss</code>, <code>nstat</code>, <code>tcpdump</code>, <code>netstat</code>, <code>ip</code>, <code>nicstat</code>, <code>ethtool</code></li>
+<li>ภาพรวม: <code>sar</code>, <code>/proc</code>, <code>dmesg</code>, <code>dstat</code></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ไม่ต้องจำทุกเครื่องมือ — ที่เรียนในวิชานี้คือ <code>top</code>, <code>ps</code>, <code>free</code>, <code>vmstat</code> (L8) และ <code>htop</code>, <code>pgrep</code> (บทนี้)</p>
+</blockquote>
+<hr />
+<h2 id="3-tracking-cpu-usage-และ-top">3. Tracking CPU Usage และ <code>top</code></h2>
+<ul>
+<li><strong>CPU มักอยู่อันดับแรกของสิ่งที่ต้อง monitor</strong> เพราะเป็น &quot;powerhouse&quot; ของระบบ</li>
+<li>⭐ ถ้า CPU <strong>ทำงานเกิน 80% ตลอดเวลา</strong> แปลว่าระบบอาจ <strong>CPU ไม่พอ</strong> สำหรับ OS และโปรแกรมที่รันอยู่</li>
+<li>หรืออาจเป็นสัญญาณของ <strong>ปัญหาด้านความปลอดภัย (security incident)</strong> หรือ <strong>โปรแกรมทำงานผิดพลาด</strong></li>
+<li><strong><code>top</code></strong> = โปรแกรม monitor ที่ดู process &quot;top&quot; ของระบบแบบ <strong>real-time</strong></li>
+</ul>
+<p><strong><code>top</code></strong> — ผู้ใช้ทุกคนใช้ได้ และ<strong>เปลี่ยนการเรียงลำดับ</strong>ได้:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คีย์</th>
+<th>เรียงตาม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shift + M</strong></td>
+<td><strong>memory usage</strong></td>
+</tr>
+<tr>
+<td><strong>Shift + S</strong></td>
+<td><strong>time</strong></td>
+</tr>
+<tr>
+<td><strong>Shift + P</strong></td>
+<td><strong>CPU usage</strong> (<strong>ค่าเริ่มต้น / default display mode</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> ใน <code>top</code> รุ่นใหม่ การเรียงตามเวลาใช้ <strong>Shift+T</strong> ส่วน Shift+S คือสลับโหมดเวลาสะสม — ตอนสอบให้ตอบตามสไลด์ (Shift+S) · เรียงตาม memory จาก command line ใช้ <code>top -o %MEM</code> (L8)</p>
+</blockquote>
+<hr />
+<h2 id="4-htop">4. <code>htop</code></h2>
+<ul>
+<li><strong>htop</strong> = ตัวดูประสิทธิภาพระบบอีกตัว แสดงข้อมูลเหมือน <code>top</code> แต่ <strong>มีสีแยก (color-coded)</strong> อ่านง่ายกว่า มีกราฟแท่ง CPU / Mem / Swap ด้านบน และเมนูปุ่ม F ด้านล่าง</li>
+<li>คีย์เรียงลำดับเหมือน top: <strong>Shift+M</strong> memory · <strong>Shift+S</strong> time · <strong>Shift+P</strong> CPU (default)</li>
+</ul>
+<blockquote class="callout">
+<p><em>(อธิบายเพิ่ม)</em> ส่วนใหญ่ต้องติดตั้งเพิ่มด้วย <code>sudo apt install htop</code> (ต้องตั้ง proxy เหมือน L6)</p>
+</blockquote>
+<hr />
+<h2 id="5-ps--ux-ps--aux">5. <code>ps -ux</code> / <code>ps -aux</code></h2>
+<ul>
+<li><strong><code>ps</code></strong> แสดงข้อมูล process ที่รันอยู่และตาราง process ได้หลายรูปแบบตาม option</li>
+<li><strong><code>ps -ux</code></strong> : ดู<strong>ทุก process ที่บัญชีของเราเป็นเจ้าของ</strong> (ตัวอย่าง: process ของ khess เช่น <code>/usr/lib/systemd/…</code>, <code>(sd-pam)</code>, <code>sshd: khess@pts/0</code>, <code>-bash</code>, <code>ps -ux</code>)</li>
+<li><strong><code>ps -aux</code></strong> : แสดง<strong>ทุก process ของทุก user</strong></li>
+</ul>
+<p>คอลัมน์: USER, PID, %CPU, %MEM, VSZ, RSS, TTY, <strong>STAT</strong>, START, TIME, COMMAND <em>(STAT = สถานะ เช่น Ss, S, R+ — ตัวอักษรเดียวกับ L8)</em></p>
+<hr />
+<h2 id="6-pgrep">6. <code>pgrep</code> ⭐</h2>
+<p><strong><code>pgrep</code></strong> = <strong>พิมพ์ PID ของ process ที่ตรงเงื่อนไข</strong>ที่ระบุใน argument</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>pgrep -u korakoch</code></strong></td>
+<td>PID ของ process ที่ <strong>user korakoch</strong> เป็นคนเริ่ม (1115, 1117, 1129)</td>
+</tr>
+<tr>
+<td><strong><code>pgrep -c -u korakoch</code></strong></td>
+<td><strong>นับจำนวน</strong> process (<code>-c</code> = count) → <strong>3</strong></td>
+</tr>
+<tr>
+<td><code>pgrep emacs</code></td>
+<td>PID ของ process ชื่อ emacs → 8374</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>คำถามในสไลด์: ถ้าอยากแสดง process ที่ root รัน ใช้ argument อะไร?</strong> → <strong><code>pgrep -u root</code></strong> (และนับจำนวนด้วย <code>pgrep -c -u root</code>)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong><code>pgrep</code> vs <code>ps | grep</code></strong>: <code>ps -uax | grep emacs</code> ได้ทั้งบรรทัดของ emacs <strong>และบรรทัดของ <code>grep emacs</code> เอง</strong> (smith 9051) ส่วน <strong><code>pgrep emacs</code> ได้แค่ PID ที่ต้องการ</strong> (8374) สะอาดกว่า เอาไปใช้ต่อกับ kill ได้ทันที</p>
+</blockquote>
+<hr />
+<h2 id="7-controlling-processes-และ-kill">7. Controlling Processes และ <code>kill</code></h2>
+<ul>
+<li>เมื่อ process เริ่มทำงานแล้ว สามารถ <strong>stopped, restarted, killed และ prioritized</strong> ได้</li>
+<li>ฆ่า process ด้วย: <strong><code>kill [option] [PID]</code></strong></li>
+</ul>
+<p>ตัวอย่าง:</p>
+<pre><code>→ ps -uax | grep emacs
+smith 8374 ... emacs myfile.txt
+smith 9051 ... grep emacs
+→ pgrep emacs
+8374
+→ kill 8374
+</code></pre>
+<p>จาก <code>man kill</code> (ในภาพ): <strong>kill – send a signal to a process</strong> · <strong>สัญญาณเริ่มต้นคือ TERM</strong> · <code>kill -l</code> แสดงรายชื่อสัญญาณ · สัญญาณที่ใช้บ่อย: <strong>HUP, INT, KILL, STOP, CONT</strong> และ 0 · ระบุได้ 3 แบบ เช่น <strong><code>-9</code>, <code>-SIGKILL</code>, <code>-KILL</code></strong> · PID ติดลบหมายถึงกลุ่ม process · <strong>PID -1</strong> = ทุก process ยกเว้นตัว kill เองและ init</p>
+<blockquote class="callout">
+<p><em>(อธิบายเพิ่ม)</em> <strong>STOP</strong> = หยุดชั่วคราว (สถานะ T ใน L8) · <strong>CONT</strong> = ทำต่อ · <strong>KILL (9)</strong> = บังคับจบทันที · ทางลัด: <code>pkill emacs</code> = kill ตามชื่อ</p>
+</blockquote>
+<hr />
+<h2 id="8-environment-และ-variables">8. Environment และ Variables ⭐</h2>
+<ul>
+<li><strong>Environment</strong> = <strong>สภาพแวดล้อมการใช้งานของ user</strong> ซึ่ง<strong>กำหนดโดยค่าของตัวแปรต่าง ๆ</strong></li>
+<li><strong>Environment variable</strong> = <strong>ตัวแปรที่เก็บค่าข้อมูลของสิ่งแวดล้อมที่เกิดขึ้นเมื่อ user login เข้าระบบ</strong></li>
+<li>ตัวอย่าง: <strong><code>$HOME</code>, <code>$SHELL</code>, <code>$PATH</code></strong> — สังเกตว่ามี <strong><code>$</code> หน้าชื่อตัวแปร</strong> (เวลาอ้างถึงค่า)</li>
+<li>ความหมายเหมือน <strong>ตัวแปรในการเขียนโปรแกรม</strong> = ที่เก็บค่าข้อมูล เช่น<pre><code class="language-c">int x;
+x = 10;      // x เป็นตัวแปรเก็บตัวเลขแบบ integer มีค่า 10
+</code></pre>
+</li>
+</ul>
+<hr />
+<h2 id="9-แสดงค่าตัวแปรด้วย-echo">9. แสดงค่าตัวแปรด้วย <code>echo</code></h2>
+<p><strong>ค่าของตัวแปรแสดงได้ด้วยคำสั่ง <code>echo</code></strong></p>
+<pre><code>$ echo $HOME
+/home/sudsanguan
+$ echo $SHELL
+/bin/bash
+$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+</code></pre>
+<h3 id="ต้องมี-เมื่อใช้-echo-สไลด์-echo-shell-variables">ต้องมี <code>$</code> เมื่อใช้ echo ⭐ (สไลด์ &quot;echo shell-variables&quot;)</h3>
+<pre><code>$ echo LOGNAME      → LOGNAME          (พิมพ์คำว่า LOGNAME ตรง ๆ)
+$ echo $LOGNAME     → sudsanguan       (แสดงค่าของตัวแปร)
+$ echo SHELL        → SHELL
+$ echo $SHELL       → /bin/bash
+$ echo PATH         → PATH
+$ echo $PATH        → /usr/local/sbin:/usr/local/bin:...
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong><code>$</code> แปลว่า &quot;เอาค่าของ…&quot;</strong> ถ้าไม่มี <code>$</code> shell มองเป็นข้อความธรรมดา</p>
+</blockquote>
+<hr />
+<h2 id="10-scope-global-vs-local">10. Scope: Global vs Local ⭐</h2>
+<ul>
+<li>ผู้ใช้ติดต่อกับ environment variables <strong>ผ่าน shell</strong></li>
+<li><strong>shell ทำหน้าที่เป็น command-line interpreter</strong> รันคำสั่งที่ผู้ใช้พิมพ์</li>
+<li><strong>Environment variable มี &quot;scope&quot; (ขอบเขต):</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Global environment variables</strong></td>
+<td><strong>เข้าถึงได้จากทุกที่ภายใน environment ของ terminal ปัจจุบัน</strong> · script, โปรแกรม หรือ process ที่รันใน scope ของ terminal นั้น<strong>เข้าถึงได้</strong></td>
+</tr>
+<tr>
+<td><strong>Local environment variables</strong></td>
+<td><strong>จำกัดอยู่ใน terminal ที่สร้างมันขึ้นมาเท่านั้น</strong> เข้าถึงได้เฉพาะ terminal ที่ให้กำเนิดมัน</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="11-คำสั่งเกี่ยวกับตัวแปรสิ่งแวดล้อม">11. คำสั่งเกี่ยวกับตัวแปรสิ่งแวดล้อม ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>หน้าที่ (จากสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>env</code></strong></td>
+<td><strong>แสดงรายการ environment variables ปัจจุบัน</strong></td>
+</tr>
+<tr>
+<td><strong><code>printenv</code></strong></td>
+<td><strong>แสดงทั้งหมด หรือเฉพาะตัวที่ระบุ</strong></td>
+</tr>
+<tr>
+<td><strong><code>set</code> / <code>unset</code></strong></td>
+<td><strong>ตั้ง / ยกเลิก</strong> shell และ environment variables</td>
+</tr>
+<tr>
+<td><strong><code>export</code></strong></td>
+<td><strong>ตั้งค่า environment variables</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="ผลของ-env">ผลของ <code>env</code></h3>
+<p>แสดงเป็นบรรทัด <code>ชื่อ=ค่า</code> เช่น</p>
+<pre><code>SHELL=/bin/bash
+LANG=en_US.UTF-8
+LOGNAME=sudsanguan
+USERNAME=sudsanguan
+USER=sudsanguan
+PWD=/home/sudsanguan
+HOME=/home/sudsanguan
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LC_TIME=th_TH.UTF-8
+DISPLAY=:0
+_=/usr/bin/env
+</code></pre>
+<p>(และอื่น ๆ เช่น <code>VTE_VERSION</code>, <code>XDG_CURRENT_DESKTOP=ubuntu:GNOME</code>, <code>SHLVL=1</code>, <code>LC_*=th_TH.UTF-8</code>)</p>
+<h3 id="ผลของ-printenv">ผลของ <code>printenv</code></h3>
+<pre><code>$ printenv SHELL     → /bin/bash
+$ printenv PATH      → /usr/local/sbin:/usr/local/bin:...
+$ printenv USER      → sudsanguan
+$ printenv LOGNAME   → sudsanguan
+$ printenv HOME      → /home/sudsanguan
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>สังเกตว่า <code>printenv</code> ใส่ชื่อตัวแปร &quot;ไม่มี <code>$</code> ข้างหน้า&quot;</strong> (ต่างจาก <code>echo $HOME</code>)</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <code>env</code> = แสดงทั้งหมด · <code>printenv</code> = แสดงทั้งหมดหรือเจาะตัวเดียว · <code>set</code> (ไม่ใส่อะไร) = แสดง<strong>ทั้ง shell variables และ environment variables และฟังก์ชัน</strong> ยาวที่สุด</p>
+</blockquote>
+<hr />
+<h2 id="12-environment-variables-ที่พบบ่อย">12. Environment Variables ที่พบบ่อย ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวแปร</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>USER</strong></td>
+<td>ผู้ใช้ที่ login อยู่</td>
+</tr>
+<tr>
+<td><strong>HOME</strong></td>
+<td>home directory ของผู้ใช้ปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>SHELL</strong></td>
+<td>path ของ shell ของผู้ใช้ เช่น bash หรือ zsh</td>
+</tr>
+<tr>
+<td><strong>LOGNAME</strong></td>
+<td>ชื่อของผู้ใช้ปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>PATH</strong></td>
+<td><strong>รายการ directory ที่ระบบจะค้นหาเมื่อรันคำสั่ง</strong> — ค้น<strong>ตามลำดับ</strong> และใช้ executable <strong>ตัวแรกที่เจอ</strong></td>
+</tr>
+<tr>
+<td><strong>LANG</strong></td>
+<td>การตั้งค่า locale ปัจจุบัน (ภาษา, รูปแบบ)</td>
+</tr>
+<tr>
+<td><strong>TERM</strong></td>
+<td>terminal emulation ปัจจุบัน</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>PATH สำคัญที่สุด</strong> <em>(อธิบายเพิ่ม)</em>: ตอนพิมพ์ <code>ls</code> shell ไม่รู้ว่า ls อยู่ไหน จึงไล่หาใน <code>/usr/local/sbin</code> → <code>/usr/local/bin</code> → <code>/usr/sbin</code> → <code>/usr/bin</code> … จนเจอ <code>/usr/bin/ls</code> · ถ้าโปรแกรมอยู่ใน directory ที่ไม่อยู่ใน PATH ต้องพิมพ์ path เต็ม เช่น <code>./myscript.sh</code> · ดูว่าคำสั่งอยู่ที่ไหนด้วย <code>which ls</code></p>
+</blockquote>
+<hr />
+<h2 id="13-shell-variables-vs-environment-variables">13. Shell variables vs Environment variables ⭐⭐</h2>
+<ul>
+<li><strong>Shell variables มีอยู่เฉพาะใน shell ที่สร้างมันเท่านั้น</strong></li>
+<li><strong>Environment variables ถูกสืบทอด (inherited) ไปยัง child shells แต่ shell variables ไม่ถูกสืบทอด</strong></li>
+<li><strong>Shell variable เปลี่ยนเป็น environment variable ได้ด้วยคำสั่ง <code>export</code></strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L9-01-variable-scope.png" alt="ขอบเขตของตัวแปรและการสืบทอดไปยัง shell ลูก" /></p>
+<p>ทดลองได้ <em>(อธิบายเพิ่ม)</em>:</p>
+<pre><code>$ B=20            ← shell variable
+$ export A=10     ← environment variable
+$ bash            ← เปิด shell ลูก
+$ echo $A         → 10
+$ echo $B         → (ว่าง)
+$ exit            ← กลับ shell แม่
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ความเชื่อมโยงกับ L8 <em>(อธิบายเพิ่ม)</em>: shell ลูกคือ <strong>child process</strong> ของ bash — ได้รับสำเนา environment ของ parent ตอนถูกสร้าง · การแก้ตัวแปรใน child <strong>ไม่ย้อนกลับไปเปลี่ยน parent</strong></p>
+</blockquote>
+<hr />
+<h2 id="14-การตั้งค่าตัวแปร">14. การตั้งค่าตัวแปร ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>วิธีตั้ง</th>
+<th>ตัวอย่างในสไลด์</th>
+<th>อยู่ได้นานแค่ไหน <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System-Wide</strong></td>
+<td>แก้ไฟล์ <strong><code>sudo nano /etc/environment</code></strong></td>
+<td>เพิ่มบรรทัด <code>global_variable=1000</code> (ต่อจาก <code>PATH=&quot;/usr/local/sbin:...&quot;</code>)</td>
+<td><strong>ทุกผู้ใช้ ถาวร</strong> มีผลหลัง login ใหม่</td>
+</tr>
+<tr>
+<td><strong>Global</strong></td>
+<td><strong><code>export NAME=Value</code></strong> (หรือ <code>set NAME=Value</code> ตามสไลด์)</td>
+<td><code>export A=10</code> → <code>echo $A</code> → <strong>10</strong></td>
+<td>session ปัจจุบัน + process ลูก</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td><strong><code>NAME=Value</code></strong></td>
+<td><code>B=20</code> → <code>echo $B</code> → <strong>20</strong></td>
+<td>shell ปัจจุบันเท่านั้น</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ข้อควรระวัง</strong>:</p>
+<ul>
+<li><strong>ห้ามมีช่องว่างรอบ <code>=</code></strong> — <code>A = 10</code> ผิด (shell จะคิดว่า A เป็นคำสั่ง) ต้องเขียน <code>A=10</code> <em>(อธิบายเพิ่ม)</em></li>
+<li>สไลด์ให้ <code>set NAME=Value</code> เป็นอีกทางของ global แต่ <strong>ใน bash คำสั่งนี้ไม่ได้สร้างตัวแปร NAME</strong> (มันตั้ง positional parameter <code>$1</code> เป็นข้อความ &quot;NAME=Value&quot;) — ใช้ <code>export</code> จะถูกต้องกว่า · ตอนสอบถ้าถามตามสไลด์ให้ตอบ <code>export NAME=Value</code> หรือ <code>set NAME=Value</code> <em>(อธิบายเพิ่ม)</em></li>
+<li>ค่าที่ตั้งด้วย <code>export</code> หรือ <code>NAME=Value</code> <strong>หายไปเมื่อปิด terminal</strong> ถ้าอยากให้ถาวรเฉพาะตัวเองใส่ใน <strong><code>~/.bashrc</code></strong> (ไฟล์ซ่อนที่เห็นใน L2) หรือถาวรทั้งระบบใส่ใน <code>/etc/environment</code> <em>(อธิบายเพิ่ม)</em></li>
+<li>ยกเลิกตัวแปรด้วย <strong><code>unset NAME</code></strong></li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Observability</strong></td>
+<td>การเฝ้าดูสิ่งที่เกิดขึ้นทั่ว OS (CPU, memory, I/O)</td>
+<td>กล้องวงจรปิดของระบบ</td>
+</tr>
+<tr>
+<td><strong><code>top</code> / <code>htop</code></strong></td>
+<td>ดู process แบบ real-time / แบบมีสี</td>
+<td>Task Manager</td>
+</tr>
+<tr>
+<td><strong>Shift+M / Shift+S / Shift+P</strong></td>
+<td>เรียงตาม memory / time / CPU (default)</td>
+<td>M = Memory, P = Processor</td>
+</tr>
+<tr>
+<td><strong><code>ps -ux</code> / <code>ps -aux</code></strong></td>
+<td>process ของบัญชีเรา / ของทุก user</td>
+<td>ของฉัน / ของทุกคน</td>
+</tr>
+<tr>
+<td><strong><code>pgrep</code></strong></td>
+<td>หา PID ตามเงื่อนไข (<code>-u</code> user, <code>-c</code> นับ)</td>
+<td>grep สำหรับ process</td>
+</tr>
+<tr>
+<td><strong><code>kill [option] [PID]</code></strong></td>
+<td>ส่ง signal (default TERM) ให้ process</td>
+<td>ส่งสัญญาณ</td>
+</tr>
+<tr>
+<td><strong>Environment</strong></td>
+<td>สภาพแวดล้อมการใช้งานที่กำหนดโดยค่าตัวแปร</td>
+<td>บรรยากาศของ session</td>
+</tr>
+<tr>
+<td><strong>Environment variable</strong></td>
+<td>ตัวแปรที่เกิดเมื่อ login เก็บข้อมูลสภาพแวดล้อม</td>
+<td>การตั้งค่าที่ติดตัว</td>
+</tr>
+<tr>
+<td><strong>Shell variable</strong></td>
+<td>ตัวแปรที่อยู่แค่ใน shell ที่สร้าง ไม่สืบทอด</td>
+<td>ตัวแปรในห้อง</td>
+</tr>
+<tr>
+<td><strong>Global / Local scope</strong></td>
+<td>เข้าถึงได้ทั้ง terminal และ process ลูก / เฉพาะ terminal ที่สร้าง</td>
+<td>ทั้งบ้าน / ห้องเดียว</td>
+</tr>
+<tr>
+<td><strong><code>$</code></strong></td>
+<td>ใช้ค่าของตัวแปร (<code>echo $HOME</code>)</td>
+<td>&quot;ค่าของ…&quot;</td>
+</tr>
+<tr>
+<td><strong><code>env</code> / <code>printenv</code></strong></td>
+<td>แสดง env variables ทั้งหมด / ทั้งหมดหรือตัวที่ระบุ (ไม่ใส่ $)</td>
+<td>ดูตัวแปร</td>
+</tr>
+<tr>
+<td><strong><code>set</code> / <code>unset</code></strong></td>
+<td>ตั้ง / ลบตัวแปร</td>
+<td>ตั้ง / ลบ</td>
+</tr>
+<tr>
+<td><strong><code>export</code></strong></td>
+<td>ทำให้เป็น environment variable (สืบทอดไป child)</td>
+<td>ส่งออกให้ลูก</td>
+</tr>
+<tr>
+<td><strong><code>/etc/environment</code></strong></td>
+<td>ไฟล์ตั้งค่าตัวแปรทั้งระบบ</td>
+<td>ตั้งค่าทั้งบ้าน</td>
+</tr>
+<tr>
+<td><strong>PATH</strong></td>
+<td>directory ที่ค้นหาคำสั่ง ตามลำดับ ใช้ตัวแรกที่เจอ</td>
+<td>แผนที่หาคำสั่ง</td>
+</tr>
+<tr>
+<td><strong>USER, HOME, SHELL, LOGNAME, LANG, TERM</strong></td>
+<td>ผู้ใช้, home, shell, ชื่อผู้ใช้, locale, terminal</td>
+<td>ข้อมูลพื้นฐานของ session</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>Observability: monitor <strong>CPU, Memory, I/O traffic</strong> ตั้งแต่ kernel ถึงโปรแกรมผู้ใช้</li>
+<li>CPU เกิน <strong>80%</strong> ตลอด → CPU ไม่พอ หรืออาจเป็น security incident / software error</li>
+<li><code>top</code> / <code>htop</code>: <strong>Shift+M memory, Shift+S time, Shift+P CPU (default)</strong> · htop = top แบบมีสี</li>
+<li><strong><code>ps -ux</code></strong> = process ของเรา · <strong><code>ps -aux</code></strong> = ของทุก user</li>
+<li><strong><code>pgrep -u user</code></strong>, <strong><code>pgrep -c -u user</code></strong> (นับ) · process ของ root → <strong><code>pgrep -u root</code></strong></li>
+<li>process ถูก <strong>stopped, restarted, killed, prioritized</strong> ได้ · <strong><code>kill [option] [PID]</code></strong> default signal = <strong>TERM</strong></li>
+<li>Environment variable เกิดเมื่อ <strong>login</strong> · อ้างค่าด้วย <strong><code>$</code></strong> · <code>echo $HOME</code> → <code>/home/…</code></li>
+<li>Scope: <strong>Global</strong> (ทั้ง terminal + process ลูก) vs <strong>Local</strong> (เฉพาะ terminal ที่สร้าง)</li>
+<li>คำสั่ง: <strong>env, printenv (ไม่ใส่ $), set/unset, export</strong></li>
+<li>ตัวแปรที่พบบ่อย: <strong>USER, HOME, SHELL, LOGNAME, PATH, LANG, TERM</strong></li>
+<li><strong>Environment variables สืบทอดไป child shell · shell variables ไม่สืบทอด · ใช้ <code>export</code> เปลี่ยน</strong></li>
+<li>ตั้งค่า: <strong>System-wide = <code>/etc/environment</code></strong> · <strong>Global = <code>export NAME=Value</code></strong> · <strong>Local = <code>NAME=Value</code></strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>top</code> vs <code>htop</code></strong></td>
+<td>ข้อมูลเดียวกัน vs มีสีและกราฟ อ่านง่ายกว่า</td>
+</tr>
+<tr>
+<td><strong><code>ps -ux</code> vs <code>ps -aux</code></strong></td>
+<td>process ของเรา vs ทุก user</td>
+</tr>
+<tr>
+<td><strong><code>pgrep</code> vs <code>ps | grep</code></strong></td>
+<td>ได้แค่ PID vs ได้ทั้งบรรทัดและติดบรรทัดของ grep เองมาด้วย</td>
+</tr>
+<tr>
+<td><strong><code>echo $HOME</code> vs <code>echo HOME</code></strong></td>
+<td>แสดงค่า vs แสดงคำว่า HOME</td>
+</tr>
+<tr>
+<td><strong><code>echo $X</code> vs <code>printenv X</code></strong></td>
+<td>ต้องมี $ vs ไม่ต้องมี $</td>
+</tr>
+<tr>
+<td><strong><code>env</code> vs <code>printenv</code> vs <code>set</code></strong></td>
+<td>env vars ทั้งหมด vs ทั้งหมดหรือเจาะตัวเดียว vs ทั้ง shell + env vars</td>
+</tr>
+<tr>
+<td><strong>Shell variable vs Environment variable</strong></td>
+<td>อยู่ใน shell เดียว vs สืบทอดไป child</td>
+</tr>
+<tr>
+<td><strong>Global vs Local</strong></td>
+<td><code>export NAME=Value</code> vs <code>NAME=Value</code></td>
+</tr>
+<tr>
+<td><strong>Global vs System-wide</strong></td>
+<td>เฉพาะ session นี้ vs ทุกผู้ใช้ถาวร (<code>/etc/environment</code>)</td>
+</tr>
+<tr>
+<td><strong><code>set</code> vs <code>unset</code></strong></td>
+<td>ตั้งค่า vs ยกเลิก</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมต้อง monitor CPU</strong> → เป็น powerhouse ถ้าใช้สูงตลอดแปลว่าทรัพยากรไม่พอหรือมีบางอย่างผิดปกติ (เช่น malware หรือโปรแกรมวนลูป)</li>
+<li><strong>ทำไมพิมพ์ <code>ls</code> แล้วระบบรู้ว่าต้องรันไฟล์ไหน</strong> → shell ไล่หาใน directory ของ <code>$PATH</code> ตามลำดับและใช้ตัวแรกที่เจอ</li>
+<li><strong>ทำไมตั้ง <code>B=20</code> แล้วเปิด bash ใหม่ <code>echo $B</code> ไม่มีค่า</strong> → B เป็น shell (local) variable ไม่ถูกสืบทอด ต้อง <code>export B</code></li>
+<li><strong>ทำไม <code>pgrep</code> ดีกว่า <code>ps | grep</code> สำหรับหา PID ไป kill</strong> → ได้เฉพาะ PID ไม่มีบรรทัดของ grep ปนมา</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l8/index.html"><small>← บทก่อนหน้า</small><span>L8 – Process and Memory + Lab 8 (Process + Memory)</span></a><span></span></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

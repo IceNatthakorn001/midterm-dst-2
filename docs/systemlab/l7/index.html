@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L7 – Storage + Lab 7 (Storage) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-ขั้นตอนการ-boot-เครื่องคอมพิวเตอร์">2. ขั้นตอนการ Boot เครื่องคอมพิวเตอร์ ⭐⭐</a></li><li><a href="#3-bios-คืออะไร">3. BIOS คืออะไร ⭐</a></li><li><a href="#4-uefi-vs-bios">4. UEFI vs BIOS ⭐</a></li><li><a href="#5-boot-loader-และขั้นตอน-boot-ของ-linux">5. Boot Loader และขั้นตอน boot ของ Linux</a></li><li><a href="#6-physical-disk-organization">6. Physical Disk Organization ⭐</a></li><li><a href="#7-logical-disk-organization">7. Logical Disk Organization</a></li><li><a href="#8-mbr-master-boot-record">8. MBR (Master Boot Record) ⭐⭐</a></li><li><a href="#9-mbr-vs-gpt">9. MBR vs GPT ⭐⭐</a></li><li><a href="#10-device-name-และประเภท-device">10. Device Name และประเภท Device</a></li><li><a href="#11-คำสั่งดูอุปกรณ์และ-partition">11. คำสั่งดูอุปกรณ์และ partition ⭐</a></li><li><a href="#12-file-systems-ที่-ubuntu-รองรับ-และ-mkfs">12. File Systems ที่ Ubuntu รองรับ และ mkfs</a></li><li><a href="#13-mount-umount">13. mount / umount ⭐⭐</a></li><li><a href="#14-linux-vs-windows-โครงสร้างไดรฟ์">14. Linux vs Windows: โครงสร้างไดรฟ์ ⭐</a></li><li><a href="#15-โครงสร้างของ-linux-file-system-ext4">15. โครงสร้างของ Linux File System (ext4) ⭐⭐</a></li><li><a href="#16-directory-กับ-inode">16. Directory กับ inode ⭐</a></li><li><a href="#17-ขั้นตอน-lab-7-พร้อมเฉลย">17. ขั้นตอน Lab 7 พร้อมเฉลย</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L7</div>
+      <h1 class="lesson-title">L7 – Storage + Lab 7 (Storage)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> บทนี้ตอบคำถามว่า &quot;เปิดเครื่องแล้ว OS ถูกโหลดจากดิสก์ได้อย่างไร&quot; และ &quot;ดิสก์หนึ่งลูกถูกแบ่งและจัดระเบียบอย่างไร&quot;</p>
+<p>(1) <strong>Lecture 7</strong> ขั้นตอน <strong>boot</strong> (BIOS/UEFI → MBR → boot sector → bootloader GRUB → kernel), <strong>โครงสร้างดิสก์ทางกายภาพ (CHS)</strong> และ<strong>ทางตรรกะ (LBA, partition, MBR vs GPT)</strong>, ชื่ออุปกรณ์ <code>/dev/sda</code>, คำสั่งดูอุปกรณ์ (<code>ls -l /dev</code>, <code>lsblk</code>, <code>fdisk -l</code>), การสร้าง file system (<code>mkfs</code>), <strong>mount / umount</strong> และโครงสร้างภายในของ <strong>ext4</strong> (superblock, bitmap, <strong>inode</strong>, data block)</p>
+<p>(2) <strong>Lab 7</strong> เพิ่มดิสก์เสมือน 2 GB ให้ VM → แบ่ง partition ด้วย <code>parted</code> → สร้าง ext4 ด้วย <code>mkfs</code> → mount และตรวจชนิด file system</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 7: Storage</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 7 = <strong>การฝึกใช้คำสั่งเกี่ยวกับการจัดการ storage</strong> · เกณฑ์คะแนนเหมือนเดิม · ส่งแลป 23.59 น. · ทดสอบย่อยทุกสัปดาห์</li>
+</ul>
+<hr />
+<h2 id="2-ขั้นตอนการ-boot-เครื่องคอมพิวเตอร์">2. ขั้นตอนการ Boot เครื่องคอมพิวเตอร์ ⭐⭐</h2>
+<p><img loading="lazy" src="img/lec-p04.jpg" alt="BIOS → MBR → Active Partition → Bootloader" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ใคร</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>BIOS</strong></td>
+<td>เปิดเครื่อง → <strong>Initialize hardware</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>BIOS → MBR</strong></td>
+<td>BIOS อ่าน code ที่เก็บใน <strong>MBR ของดิสก์ที่ sector 0</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>MBR → Active Partition</strong></td>
+<td>MBR load code จาก <strong>boot sector ของ active partition</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Boot sector → Bootloader</strong></td>
+<td>boot sector <strong>load และ run bootloader จาก file system</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> เหมือน<strong>วิ่งผลัด</strong>: ผู้วิ่งแต่ละคนรู้แค่ว่าต้องส่งไม้ให้ใครต่อ BIOS ไม่รู้จัก Linux เลย รู้แค่ว่าต้องไปอ่านดิสก์ sector แรก</p>
+</blockquote>
+<hr />
+<h2 id="3-bios-คืออะไร">3. BIOS คืออะไร ⭐</h2>
+<p><strong>BIOS (Basic Input/Output System)</strong> = โปรแกรมขนาดเล็กบน <strong>Mainboard</strong> ทำหน้าที่<strong>ควบคุม ตั้งค่า และตรวจสอบ</strong>อุปกรณ์บนเมนบอร์ด ทั้ง RAM และ hard disk (SSD, HDD) ถ้าอุปกรณ์ผิดพลาดหรือเสีย BIOS จะ<strong>แจ้งทันทีตอนเปิดเครื่องด้วยเสียง Beep Code</strong></p>
+<ul>
+<li>เป็น <strong>Firmware เฉพาะ</strong></li>
+<li><strong>ไม่ขึ้นกับ OS (OS Independent)</strong></li>
+<li>มีเป้าหมายคือ <strong>find and load Boot loader</strong></li>
+<li>ต้องรู้ <strong>Bootable device</strong> (อุปกรณ์ไหน boot ได้)</li>
+</ul>
+<p><strong>Functions</strong> (จากภาพ): 1. <strong>POST</strong> 2. <strong>Bootstrap Loader</strong> 3. <strong>BIOS Driver</strong> 4. <strong>BIOS Setup</strong> · <strong>Types:</strong> 1. <strong>Legacy BIOS</strong> 2. <strong>UEFI</strong></p>
+<p>ตัวอย่างหน้าจอ BIOS: <strong>Phoenix BIOS Setup Utility</strong> (เมนู Main, Advanced, Security, Boot, Exit — ตั้งเวลา วันที่ ดูหน่วยความจำ) และ <strong>Award CMOS Setup Utility → Advanced BIOS Features</strong> (กำหนด <strong>First/Second/Third Boot Device</strong> เช่น USB-HDD, CDROM · F10 = Save)</p>
+<h3 id="ขั้นตอนการทำงานของ-bios-5-ข้อ">ขั้นตอนการทำงานของ BIOS (5 ข้อ)</h3>
+<ol>
+<li>เปิดเครื่อง → BIOS <strong>ตรวจอุปกรณ์พื้นฐาน</strong> (จอ หน่วยความจำ hard disk keyboard mouse) ถ้าผิดปกติแจ้งเป็นข้อความหรือ<strong>เสียง beep</strong> (กรณีจอเสีย) → ขั้นนี้เรียก <strong>Power-On Self-Test (POST)</strong></li>
+<li>BIOS <strong>อ่านค่าที่ตั้งไว้</strong>เกี่ยวกับอุปกรณ์ ซึ่งเก็บใน <strong>CMOS</strong> (แก้ได้ผ่านหน้าจอ BIOS)</li>
+<li>BIOS <strong>เริ่มอ่าน OS</strong> ที่ติดตั้งไว้ให้ทำงาน → ขั้นนี้เรียก <strong>Bootstrap Loader</strong></li>
+<li>เมื่อ OS ทำงานแล้ว BIOS <strong>สนับสนุน OS</strong> ในการใช้อุปกรณ์ให้ราบรื่นจนเลิกใช้งาน</li>
+<li>เมื่อปิดเครื่อง BIOS <strong>ปิดอุปกรณ์ทั้งหมด</strong> รวมถึงตัดไฟที่จ่ายให้ power supply</li>
+</ol>
+<hr />
+<h2 id="4-uefi-vs-bios">4. UEFI vs BIOS ⭐</h2>
+<p><strong>UEFI = Unified Extensible Firmware Interface</strong> — ตัวแทนสมัยใหม่ของ legacy BIOS: <strong>boot เร็วกว่า, รองรับดิสก์ใหญ่กว่า, ความปลอดภัยสูงกว่า</strong> · ทั้งคู่เป็น firmware ระดับล่างที่ initialize ฮาร์ดแวร์ก่อนโหลด OS</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>BIOS</strong></th>
+<th><strong>UEFI</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>หน้าจอ</td>
+<td><strong>Text-only</strong></td>
+<td><strong>GUI และรองรับเมาส์</strong></td>
+</tr>
+<tr>
+<td>Partition table / ขนาดดิสก์</td>
+<td>ใช้ <strong>MBR</strong> จำกัดดิสก์ <strong>2.2 TB</strong></td>
+<td>ใช้ <strong>GPT</strong> รองรับหลาย <strong>Zettabytes (10²¹)</strong></td>
+</tr>
+<tr>
+<td>การ initialize</td>
+<td><strong>ทีละอย่าง (sequentially)</strong></td>
+<td><strong>พร้อมกัน (in parallel)</strong></td>
+</tr>
+<tr>
+<td>โหมด</td>
+<td><strong>16-bit</strong></td>
+<td><strong>32-bit หรือ 64-bit</strong></td>
+</tr>
+<tr>
+<td>ความปลอดภัย</td>
+<td>ไม่มีในตัว</td>
+<td>มี <strong>Secure Boot</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-boot-loader-และขั้นตอน-boot-ของ-linux">5. Boot Loader และขั้นตอน boot ของ Linux</h2>
+<ul>
+<li>บน Linux เดิมเรียกว่า <strong>Linux Loader (LILO)</strong></li>
+<li><strong>GRUB (Grand Unified Bootloader)</strong> มาแทน LILO — หน้าที่คือ<strong>เริ่ม load kernel ของ Linux เข้า memory</strong></li>
+<li>หน้าจอ GRUB แสดงรายการให้เลือก เช่น <code>Ubuntu 8.04, kernel 2.6.24-16-generic</code>, <code>(recovery mode)</code>, <code>memtest86+</code> · ใช้ลูกศรเลือก Enter เพื่อ boot, <code>e</code> แก้คำสั่งก่อน boot, <code>c</code> เข้า command-line</li>
+</ul>
+<h3 id="ขั้นตอน-boot-ของ-linux-แผนภาพ">ขั้นตอน boot ของ Linux (แผนภาพ)</h3>
+<p><strong>POST → BIOS (อ่านค่าจาก CMOS) → MBR (512 bytes, sector แรก) → GRUB Stage 1 (442 bytes) → /boot → GRUB Stage 2 (/boot/grub/grub.conf) → Kernel initialised (/boot/vmlinuz…) → RAM disk image (/boot/initrd.img มี module เช่น driver) → <code>/</code> (ro) → init (PID=1)</strong>
+จากนั้น init อ่าน <strong>/etc/inittab</strong> → <strong>sysinit</strong> (/etc/rc.d/rc.sysinit → <code>/</code> (rw) → /etc/fstab) → /etc/rc.d/rcX.d → /etc/rc.d/rc.local → <strong>mingetty tty1-6</strong> (หน้าจอ login) → ถ้า runlevel 5 → /etc/X11/prefdm (GUI) · มีทางแยก <strong>single user mode</strong> และ <strong>emergency mode</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>init = process แรก (PID 1)</strong> ที่ kernel สร้าง แล้วเป็น &quot;บรรพบุรุษ&quot; ของทุก process — ต่อยอดใน L8 · Ubuntu รุ่นใหม่ใช้ <strong>systemd</strong> แทน init แบบเดิม</p>
+</blockquote>
+<hr />
+<h2 id="6-physical-disk-organization">6. Physical Disk Organization ⭐</h2>
+<ul>
+<li><strong>IDE hard disk</strong> ต่อกับ <strong>IDE disk controller</strong> ด้วยสายเฉพาะ · ภายใน HDD: spindle, disk, actuator, arm, read/write head, power port, data cable port (ทบทวน L1)</li>
+</ul>
+<p><strong>โครงสร้างของดิสก์ — ตำแหน่งข้อมูลระบุด้วย CHS:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>ความหมาย <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cylinder</strong></td>
+<td>ชุดของ track ตำแหน่งเดียวกันบนทุกจาน (ซ้อนกันเป็นทรงกระบอก)</td>
+</tr>
+<tr>
+<td><strong>Head</strong></td>
+<td>หัวอ่าน-เขียน (1 หัวต่อ 1 ผิวจาน)</td>
+</tr>
+<tr>
+<td><strong>Sector</strong></td>
+<td>ส่วนย่อยของ track (ปกติ 512 bytes)</td>
+</tr>
+</tbody>
+</table></div>
+<p>ส่วนประกอบในภาพ: <strong>track t, sector s, cylinder c, platter, spindle, arm, arm assembly, read-write head, rotation</strong></p>
+<ul>
+<li>⭐ <strong>Master Boot Record อยู่ที่ cylinder 0, head 0, sector 1</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์หน้า 4 บอก MBR อยู่ &quot;sector 0&quot; ส่วนหน้านี้บอก &quot;sector 1&quot; — <strong>ไม่ขัดกัน</strong> <em>(อธิบายเพิ่ม)</em>: แบบ <strong>CHS นับ sector เริ่มจาก 1</strong> ส่วนแบบ <strong>LBA นับเริ่มจาก 0</strong> จึงเป็นตำแหน่งเดียวกัน</p>
+</blockquote>
+<hr />
+<h2 id="7-logical-disk-organization">7. Logical Disk Organization</h2>
+<h3 id="chs-addressing-vs-lba-addressing">CHS Addressing vs LBA Addressing</h3>
+<ul>
+<li><strong>CHS</strong> = ระบุด้วยเลข cylinder/head/sector</li>
+<li><strong>LBA (Logical Block Addressing)</strong> = <strong>นับ block เรียงเป็นเลขเดียว 0, 1, 2, …</strong> ง่ายกว่า</li>
+<li>ตารางในสไลด์: LBA 0 = C0 H0 S0 · … · LBA 9 = C0 H0 S9 · LBA 10 = C0 H1 S0 · … · LBA 19 = C0 H1 S9 · LBA 20 = C1 H0 S0 · … · LBA 39 = C1 H1 S9 (ตัวอย่างสมมติ 2 head × 10 sector ต่อ track)</li>
+</ul>
+<h3 id="logical-structure-vs-physical-structure">Logical structure vs Physical structure</h3>
+<ul>
+<li><strong>Logical</strong>: ดิสก์ถูกแบ่งเป็น <strong>Partition 1 (FAT), 2, 3, 4 (FAT32)</strong></li>
+<li><strong>Physical</strong>: <strong>Tracks</strong> (Track 0, 1), <strong>Cylinders</strong> (Cylinder 1), <strong>Sectors</strong> (Track 0 Sector 0, 1, 2)</li>
+</ul>
+<h3 id="partition">Partition ⭐</h3>
+<ul>
+<li><strong>MBR กำหนดให้มีมากที่สุด 4 partitions</strong> · <strong>GPT กำหนดให้มีมากที่สุด 128 partitions</strong></li>
+<li>แต่ละ partition ตั้งค่า <strong>file system</strong> ของตัวเอง เช่น <strong>FAT32 (Windows), NTFS (Windows), ext4 (Linux)</strong></li>
+<li>ใต้ MBR: <strong>Primary Partition</strong> ได้หลายอัน และ <strong>Extended Partition</strong> หนึ่งอันที่ข้างในแบ่งเป็น <strong>Logical Partition</strong> ได้อีกหลายอัน</li>
+</ul>
+<p><strong>Disk Layout ตัวอย่าง (dual boot):</strong> <code>MBR (GRUB Bootloader + Partition Table)</code> | <code>Boot Sector (W2K Bootloader)</code> | <code>Partition 0 (hd0,0) = Windows 2000</code> | <code>Partition 1 (hd0,1) = Linux</code></p>
+<hr />
+<h2 id="8-mbr-master-boot-record">8. MBR (Master Boot Record) ⭐⭐</h2>
+<p><strong>MBR มีขนาด 512 bytes</strong> เก็บข้อมูลสำหรับการ boot ไว้ที่ <strong>sector แรกของดิสก์</strong> รวมถึงกำหนด<strong>โครงสร้างดิสก์</strong>ว่ามีกี่ partition และ <strong>OS ที่ใช้ boot อยู่ที่ใด</strong> เพื่อ load OS เข้า memory</p>
+<p><img loading="lazy" src="img/lec-p20.jpg" alt="โครงสร้าง MBR 512 bytes" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ขนาด</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bootstrap code area</strong></td>
+<td><strong>446 bytes</strong></td>
+<td>โค้ดเริ่ม boot</td>
+</tr>
+<tr>
+<td><strong>Partition Table</strong> (Partition Entry 1–4)</td>
+<td><strong>64 bytes</strong> (= 4 × <strong>16 bytes</strong>)</td>
+<td>ข้อมูล partition 4 อัน</td>
+</tr>
+<tr>
+<td><strong>Boot Signature</strong></td>
+<td><strong>2 bytes</strong></td>
+<td>ค่า <strong>0x55 0xAA</strong> บอกว่าเป็น MBR ที่ใช้ได้</td>
+</tr>
+</tbody>
+</table></div>
+<p>รวม 446 + 64 + 2 = <strong>512 bytes</strong></p>
+<p><strong>Partition Entry 16 bytes แต่ละอัน:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>ขนาด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Partition flag (active/boot)</td>
+<td>1 byte</td>
+</tr>
+<tr>
+<td>Start CHS Address</td>
+<td>3 bytes</td>
+</tr>
+<tr>
+<td>Partition Type</td>
+<td>1 byte</td>
+</tr>
+<tr>
+<td>End CHS Address</td>
+<td>3 bytes</td>
+</tr>
+<tr>
+<td>Start LBA</td>
+<td>4 bytes</td>
+</tr>
+<tr>
+<td>Number of Sectors</td>
+<td>4 bytes</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>ทำไม MBR มี partition ได้แค่ 4</strong> → ตารางมีที่แค่ 64 bytes = 4 entry เท่านั้น · <strong>ทำไมจำกัด 2 TB</strong> → Start LBA และ Number of Sectors ยาว 4 bytes (32 bit) → 2³² sectors × 512 bytes ≈ <strong>2.2 TB</strong></p>
+</blockquote>
+<p><strong>Windows:</strong> ดู partition table ด้วย <strong>Disk Management</strong> (Computer Management → Storage) เห็น Disk 0 แบ่งเป็น EFI System Partition 100 MB, C: NTFS, Recovery Partition, Unallocated · คลิกขวาพื้นที่ Unallocated → <strong>New Simple Volume</strong> เพื่อสร้าง partition ใหม่</p>
+<hr />
+<h2 id="9-mbr-vs-gpt">9. MBR vs GPT ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>MBR (Master Boot Record)</strong></th>
+<th><strong>GPT (GUID Partition Table)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ขนาดดิสก์สูงสุด</td>
+<td><strong>2 TB</strong></td>
+<td><strong>9.4 ZB</strong></td>
+</tr>
+<tr>
+<td>จำนวน partition</td>
+<td><strong>4 Primary</strong> (ใช้ <strong>Extended</strong> เพื่อสร้าง <strong>logical partitions</strong> เพิ่ม)</td>
+<td><strong>128 partitions</strong></td>
+</tr>
+<tr>
+<td>สถานะ</td>
+<td><strong>กำลังถูกแทนที่ด้วย GPT</strong></td>
+<td>มาแทน MBR</td>
+</tr>
+<tr>
+<td>ความสัมพันธ์</td>
+<td>ใช้กับ BIOS</td>
+<td><strong>เป็นส่วนหนึ่งของ UEFI</strong></td>
+</tr>
+<tr>
+<td>ข้อจำกัด</td>
+<td>–</td>
+<td><strong>OS รุ่นเก่าไม่รองรับ</strong>, อาจต้องใช้เครื่องมือใหม่/พิเศษ</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>GUID = Global Unique Identifier</strong> · <strong>UEFI กำลังแทนที่ BIOS</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ตัวเลขในสไลด์ต่างกันเล็กน้อย: หน้า UEFI บอก MBR จำกัด <strong>2.2 TB</strong> / GPT หลาย <strong>Zettabytes</strong> ส่วนหน้านี้บอก <strong>2 TB</strong> / <strong>9.4 ZB</strong> — ความหมายเดียวกัน (2.2 TB ≈ 2 TiB)</p>
+</blockquote>
+<hr />
+<h2 id="10-device-name-และประเภท-device">10. Device Name และประเภท Device</h2>
+<p><strong>ชื่ออุปกรณ์บน Linux:</strong> <strong><code>/dev/sda</code></strong>, <strong><code>/dev/sdb</code></strong>, … (ดิสก์ลูกที่ 1, 2, …) · partition ต่อเลขท้าย เช่น <strong><code>/dev/sda1</code></strong>, <code>/dev/sdb2</code> <em>(อธิบายเพิ่ม: SSD แบบ NVMe ใช้ชื่อ <code>/dev/nvme0n1</code>, partition <code>nvme0n1p1</code>)</em></p>
+<p><strong>ชนิดของ device 2 ประเภท</strong> (ดูจากตัวอักษรแรกของ <code>ls -l /dev</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ตัวอักษร</th>
+<th>รับส่งข้อมูล</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Character</strong></td>
+<td><strong><code>c</code></strong></td>
+<td><strong>ทีละตัวอักษร</strong></td>
+<td>keyboard, mouse (ในภาพ: tty, random, pts)</td>
+</tr>
+<tr>
+<td><strong>Block</strong></td>
+<td><strong><code>b</code></strong></td>
+<td><strong>ทีละบล็อก (หลายไบต์)</strong></td>
+<td>hard drive, DVD (ในภาพ: <code>brw-rw---- root disk … sda</code>, <code>sda1</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="11-คำสั่งดูอุปกรณ์และ-partition">11. คำสั่งดูอุปกรณ์และ partition ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>แสดงอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>ls -l /dev</code></strong></td>
+<td>รายการอุปกรณ์ทั้งหมดที่ OS รู้จัก</td>
+</tr>
+<tr>
+<td><strong><code>ls -l /dev /dev/mapper | grep '^b'</code></strong></td>
+<td>เฉพาะ <strong>block device</strong> (บรรทัดขึ้นต้น b)</td>
+</tr>
+<tr>
+<td><strong><code>lsblk</code></strong> (list block devices)</td>
+<td>ข้อมูลของ <strong>storage drive ทั้งหมดและ partition</strong> เป็นแผนผังต้นไม้</td>
+</tr>
+<tr>
+<td><strong><code>sudo fdisk -l</code></strong></td>
+<td>ข้อมูล <strong>partition table</strong> ของ storage ทั้งหมดที่เชื่อมต่อทางกายภาพ</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>คอลัมน์ของ <code>lsblk</code>:</strong></p>
+<ul>
+<li><strong>MAJ:MIN</strong> — major-minor number ของ device</li>
+<li><strong>RM</strong> — removable หรือไม่ (1 = ถอดได้)</li>
+<li><strong>SIZE</strong></li>
+<li><strong>RO</strong> — read only หรือไม่</li>
+<li><strong>TYPE</strong> — <strong>disk</strong> หรือ <strong>part</strong> (หรือ loop, crypt)</li>
+<li><strong>MOUNTPOINTS</strong> — mount อยู่ที่ไหน</li>
+</ul>
+<p>ตัวอย่างในภาพ: <code>sda 465.8G disk</code> มี <code>sda1 part</code> · <code>nvme0n1 238.5G disk</code> มี <code>nvme0n1p1 1G part /boot/efi</code> · <code>loop0–loop15</code> = snap package</p>
+<p><strong><code>sudo fdisk -l</code></strong> แสดง: <code>Disk /dev/nvme0n1: 238.47 GiB…</code> · Disk model · <strong>Units: sectors of 1 × 512 = 512 bytes</strong> · <strong>Disklabel type: gpt</strong> หรือ <strong>dos</strong> (= MBR) · ตาราง Device / Start / End / Sectors / Size / Type (เช่น EFI System, Linux filesystem)</p>
+<h3 id="เมนูของ-fdisk-โหมดโต้ตอบ-sudo-fdisk-devsdb-แล้วกด-m">เมนูของ <code>fdisk</code> (โหมดโต้ตอบ <code>sudo fdisk /dev/sdb</code> แล้วกด <code>m</code>)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>คีย์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DOS (MBR)</td>
+<td>a / b / c</td>
+<td>toggle bootable flag / edit BSD disklabel / toggle dos compatibility</td>
+</tr>
+<tr>
+<td><strong>Generic</strong></td>
+<td><strong>d</strong></td>
+<td><strong>delete a partition</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>F / l</td>
+<td>list free space / list partition types</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>n</strong></td>
+<td><strong>add a new partition</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>p</strong></td>
+<td><strong>print the partition table</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>t / v / i</td>
+<td>change partition type / verify / info</td>
+</tr>
+<tr>
+<td>Misc</td>
+<td>m / u / x</td>
+<td>menu / change units / extra (expert)</td>
+</tr>
+<tr>
+<td>Script</td>
+<td>I / O</td>
+<td>load / dump sfdisk script</td>
+</tr>
+<tr>
+<td><strong>Save &amp; Exit</strong></td>
+<td><strong>w</strong> / <strong>q</strong></td>
+<td><strong>write table to disk and exit</strong> / <strong>quit without saving</strong></td>
+</tr>
+<tr>
+<td>Create label</td>
+<td>g / G / o / s</td>
+<td>new <strong>GPT</strong> / SGI / <strong>DOS</strong> / Sun partition table</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง <code>p</code> ใน <code>/dev/sdb</code> (2.5 GiB, Disklabel type: dos): <code>/dev/sdb1 Start 1 End 2000000 976.6M Id 83 Linux</code> · <code>/dev/sdb2 2000896–2002943 1M 83 Linux</code></p>
+<hr />
+<h2 id="12-file-systems-ที่-ubuntu-รองรับ-และ-mkfs">12. File Systems ที่ Ubuntu รองรับ และ <code>mkfs</code></h2>
+<ul>
+<li>Linux filesystem types: <strong>minix, ext, ext2, ext3, ext4, Reiserfs, XFS, JFS, xia, msdos, umsdos, vfat, ntfs, proc, nfs, iso9660, hpfs, sysv, smb, ncpfs</strong></li>
+<li>ดูที่ kernel รองรับตอนนี้: <code>cd /proc</code> แล้ว <code>more filesystems</code> (บรรทัดที่มี <code>nodev</code> = file system เสมือนไม่ผูกกับดิสก์ เช่น sysfs, tmpfs, proc)</li>
+</ul>
+<p><strong>สร้าง file system บน partition:</strong> <strong><code>sudo mkfs.ext4 /dev/sdb1</code></strong>
+ผลในสไลด์: <code>Creating filesystem with 250000 4k blocks and 62592 inodes</code> · <code>Filesystem UUID: …</code> · <code>Superblock backups stored on blocks: 32768, 98304, 163840, 229376</code> · Allocating group tables / Writing inode tables / <strong>Creating journal (4096 blocks)</strong> / Writing superblocks … done</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <strong>mkfs = format</strong> — ลบข้อมูลเดิมใน partition ทั้งหมด</p>
+</blockquote>
+<hr />
+<h2 id="13-mount-umount">13. mount / umount ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>mount</strong></td>
+<td><strong>เชื่อมต่อ partition เข้ากับระบบไฟล์ของ Linux</strong></td>
+</tr>
+<tr>
+<td><strong>umount</strong></td>
+<td><strong>ตัดการเชื่อมต่อ</strong>กับระบบไฟล์ของ Linux (คล้าย <strong>safe remove USB drive</strong> บน Windows)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>จุดที่ต่อเรียกว่า <strong>mount point</strong> (เป็น directory) · ภาพ: <code>/dev/hda1</code> เป็น root มี mount point <code>/mnt/cdrom</code> ต่อกับ <code>/dev/cdrom</code>, <code>/mnt/floppy</code> ต่อกับ <code>/dev/fd0</code>, <code>/usr</code> ต่อกับ <code>/dev/sda1</code> · <code>mount(&quot;/dev/fd0&quot;, &quot;/mnt&quot;, 0)</code> ทำให้ต้นไม้ของแผ่น (b) ไปห้อยใต้ <code>/mnt</code></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวอย่าง</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>sudo mount /dev/sdb1 /media</code></strong></td>
+<td>เชื่อม partition <strong>sdb1</strong> (ของอุปกรณ์ sdb) ไปยัง directory <strong>media</strong></td>
+</tr>
+<tr>
+<td><strong><code>sudo umount /dev/sdb1</code></strong></td>
+<td>ตัดการเชื่อมต่อระหว่าง sdb1 กับ directory ที่ต่ออยู่</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ คำสั่งคือ <strong><code>umount</code></strong> (ไม่มีตัว n) ไม่ใช่ &quot;unmount&quot;</p>
+</blockquote>
+<hr />
+<h2 id="14-linux-vs-windows-โครงสร้างไดรฟ์">14. Linux vs Windows: โครงสร้างไดรฟ์ ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Windows</strong></th>
+<th><strong>Linux</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Physical representation of the drives and partitions</strong> — แต่ละไดรฟ์/partition เป็นต้นไม้แยก: <strong>C Drive</strong> (Windows, Program Files, Users…), <strong>D Drive</strong> (Video, Image, Dev…)</td>
+<td><strong>Tree structure เดียว</strong> เริ่มจาก <strong><code>/</code> (root)</strong> บนสุด · <strong>devices และ logical drives ถูก mount เข้ากับ directory</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The root Directory:</strong> <code>/bin</code> User Binaries · <code>/sbin</code> System Binaries · <code>/etc</code> Configuration Files · <code>/dev</code> Device Files · <code>/proc</code> Process Information · <code>/var</code> Variable Files · <code>/tmp</code> Temporary Files · <code>/usr</code> User Programs · <code>/home</code> Home Directories · <code>/boot</code> Boot Loader Files · <code>/lib</code> System Libraries · <code>/opt</code> Optional add-on Apps · <code>/mnt</code> Mount Directory · <code>/media</code> Removable Devices · <code>/srv</code> Service Data</p>
+<hr />
+<h2 id="15-โครงสร้างของ-linux-file-system-ext4">15. โครงสร้างของ Linux File System (ext4) ⭐⭐</h2>
+<ul>
+<li><strong>Linux file system = ชุดไฟล์ที่จัดโครงสร้างไว้บนดิสก์หรือ partition</strong> โดยทั่วไป <strong>ทุก partition มี file system หนึ่งอัน</strong></li>
+<li>ชั้น: <strong>Kernel → Virtual File System (VFS) → EXT3 / HPFS / VFAT / EXT4 / FreeBSD → Hardware</strong> <em>(อธิบายเพิ่ม: VFS ทำให้โปรแกรมใช้คำสั่งเดียวกันกับทุก file system)</em></li>
+<li><strong>Types of Linux File System</strong> (ภาพต้นไม้): Ext, Ext2, Ext3, Ext4, JFS, XFS, btrFS, ReiserFS, Swap</li>
+</ul>
+<h3 id="ext4-file-system-structure">EXT4 file system structure</h3>
+<p><img loading="lazy" src="img/lec-p36.jpg" alt="โครงสร้าง ext4: partition → block group → superblock, bitmap, inode table, data blocks" /></p>
+<p><strong>Disk</strong> → Partition 0, 1, 2 → <strong>File system</strong> ของ partition = <strong>Boot Sector + Block Group 0, 1, 2, …, N</strong> → แต่ละ <strong>Block group</strong> = <strong>Super Block | Block Group Descriptor | Block Bitmap | Inode Bitmap | Inode table | Data blocks</strong></p>
+<h3 id="ตัวอย่างดิสก์เล็ก-256-kb">ตัวอย่างดิสก์เล็ก 256 KB</h3>
+<p><img loading="lazy" src="img/lec-p37.jpg" alt="ดิสก์ 64 blocks: S, i, d, inodes, data region" /></p>
+<p>ดิสก์ <strong>256 KB</strong> แบ่ง block ละ <strong>4 KB</strong> → <strong>64 blocks</strong> (0–63)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ตำแหน่ง</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Superblock (S)</strong></td>
+<td>block 0</td>
+<td>ข้อมูลของ <strong>file system</strong> เช่น <strong>จำนวน inodes, จำนวน data blocks, ตำแหน่งตาราง inodes</strong></td>
+</tr>
+<tr>
+<td><strong>inode bitmap (i)</strong></td>
+<td>block 1</td>
+<td>ติดตามว่า <strong>inode ไหนว่าง / ใช้แล้ว</strong></td>
+</tr>
+<tr>
+<td><strong>Data bitmap (d)</strong></td>
+<td>block 2</td>
+<td>ติดตามว่า <strong>data block ไหนว่าง / ใช้แล้ว</strong></td>
+</tr>
+<tr>
+<td><strong>Inodes (I)</strong></td>
+<td>block 3–7</td>
+<td><strong>metadata</strong> เกี่ยวกับไฟล์ของ user</td>
+</tr>
+<tr>
+<td><strong>Data region (D)</strong></td>
+<td>block 8–63</td>
+<td><strong>ข้อมูลของ user</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>bitmap: <strong>0 = free, 1 = in-use</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>เปรียบเทียบห้องสมุด</strong>: data block = หนังสือบนชั้น · inode = <strong>บัตรรายการ</strong> (ขนาด เจ้าของ วันที่ และชั้นที่หนังสืออยู่) · bitmap = <strong>ป้ายว่าง/ไม่ว่าง</strong> ของแต่ละชั้น · superblock = <strong>สมุดข้อมูลของทั้งห้องสมุด</strong></p>
+</blockquote>
+<hr />
+<h2 id="16-directory-กับ-inode">16. Directory กับ inode ⭐</h2>
+<h3 id="directory-structure">Directory Structure</h3>
+<p><img loading="lazy" src="img/lec-p38.jpg" alt="directory entry → inode → data blocks" /></p>
+<ul>
+<li><strong>Directory entry</strong> = ตาราง <strong>filename → หมายเลข inode</strong> เช่น <code>foo.txt → 12345</code>, <code>code.cpp → 7689</code>, <code>data.dat → 71123</code>, <code>pic.jpg → 59982</code>, unused → 0</li>
+<li><strong>Inode #12345</strong> เก็บ <strong>size, dates, times, owner, group, type, etc.</strong> และ<strong>ตัวชี้ไปยัง data block</strong> (4762, 4763, 4788, 4794)</li>
+<li><strong>Data blocks</strong> = เนื้อหาจริงของไฟล์ (data block 1–4 ไม่จำเป็นต้องติดกัน)</li>
+</ul>
+<p><strong>Directory Structure and inode (Figure 1):</strong> Directory Entry (<strong>Name, Inode</strong>) → Inode (<strong>Accessed Time, Size, UID, GID, Blk1, Blk2, …, Indirect Blk 1</strong>) → Blk ชี้ไป <strong>File Content</strong> โดยตรง ส่วน <strong>Indirect Blk</strong> ชี้ไปยัง block ที่เก็บ <strong>Block Addresses</strong> อีกทอดหนึ่ง (สำหรับไฟล์ใหญ่)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <strong>ชื่อไฟล์ไม่ได้อยู่ใน inode</strong> แต่อยู่ใน directory entry · inode เก็บ UID/GID และเวลา — คือข้อมูลที่ <code>ls -l</code> แสดง (L2–L5)</p>
+</blockquote>
+<h3 id="inode-information-ด้วย-df--i">inode information ด้วย <code>df -i</code></h3>
+<pre><code>$ df -i | grep sd
+/dev/sda1   1310720  227605  1083115  18%  /
+/dev/sdb2       128      11      117   9%  /mnt/sdb2
+</code></pre>
+<p>คอลัมน์: <strong>Filesystem, Inodes (ทั้งหมด), IUsed, IFree, IUse%, Mounted on</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>inode หมด = สร้างไฟล์ใหม่ไม่ได้ แม้พื้นที่ยังเหลือ</strong> เช่น sdb2 ใน Lab มีแค่ 128 inodes</p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 2 — Lab 7: Storage</h1>
+<p><strong>Objectives:</strong> 1. Create a new disk on Virtual Box · 2. Create a new partition on a disk · 3. Create a new file system · 4. Mount a file system · 5. Check file system type</p>
+<p><strong>What to Submit:</strong> แคปทุกคำสั่ง <strong>พร้อมอธิบายผล</strong> รวม PDF ชื่อ <strong><code>6887xxx_lab7.pdf</code></strong> · ⚠️ ส่ง<strong>วันนี้ก่อนเที่ยงคืน</strong></p>
+<h2 id="17-ขั้นตอน-lab-7-พร้อมเฉลย">17. ขั้นตอน Lab 7 พร้อมเฉลย</h2>
+<p><img loading="lazy" src="diagrams/L7-01a-workflow-prepare.png" alt="ภาพรวมขั้นตอน Lab 7 ส่วนที่ 1" /></p>
+<p><img loading="lazy" src="diagrams/L7-01b-workflow-use.png" alt="ภาพรวมขั้นตอน Lab 7 ส่วนที่ 2" /></p>
+<h3 id="171-สร้างดิสก์ใหม่ใน-virtualbox-ปิด-vm-ก่อน">17.1 สร้างดิสก์ใหม่ใน VirtualBox (ปิด VM ก่อน)</h3>
+<ol>
+<li>เลือก VM → <strong>Settings</strong> → <strong>Storage</strong> → <strong>Add Hard disk</strong> (ไอคอนข้าง Controller: SATA)</li>
+<li><strong>Create</strong> → เลือก <strong>VMDK (Virtual Machine Disk)</strong> → Next</li>
+<li>เลือก <strong>Pre-allocate Full size</strong> → Next</li>
+<li>ปรับขนาดเป็น <strong>2 GB</strong> → <strong>Finish</strong></li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ต่างจาก L1 ที่ใช้ VDI + Dynamically allocated · <strong>Pre-allocate Full size</strong> = จองพื้นที่ 2 GB เต็มทันที</p>
+</blockquote>
+<h3 id="172-ต่อดิสก์เข้า-vm">17.2 ต่อดิสก์เข้า VM</h3>
+<ol>
+<li>Settings → Storage → Add Hard disk</li>
+<li>ดูกลุ่ม <strong>&quot;Not Attached&quot;</strong> → เลือกดิสก์ 2 GB ที่เพิ่งสร้าง (เช่น <code>ubuntu20_04_3.vmdk</code>) → <strong>Choose</strong></li>
+<li>จะเห็น <strong>SATA 2 port</strong> (ดิสก์เดิม .vdi + ดิสก์ใหม่ .vmdk) → กด <strong>Start</strong></li>
+</ol>
+<h3 id="173-ตรวจว่า-os-เห็นดิสก์">17.3 ตรวจว่า OS เห็นดิสก์</h3>
+<p><strong><code>dmesg | grep sd</code></strong> → เห็น <code>sd 2:0:0:0: [sda] 104857600 512-byte logical blocks: (53.7 GB/50.0 GiB)</code> และ <strong><code>sd 3:0:0:0: [sdb] 4194304 512-byte logical blocks: (2.15 GB/2.00 GiB)</code></strong> → <strong>ดิสก์ใหม่คือ <code>sdb</code></strong>
+<em>(อธิบายเพิ่ม: <code>dmesg</code> = ข้อความจาก kernel ตอน boot)</em></p>
+<h3 id="174-ติดตั้งเครื่องมือแบ่ง-partition">17.4 ติดตั้งเครื่องมือแบ่ง partition</h3>
+<p><strong><code>sudo apt install gparted</code></strong> — ⚠️ <strong>ต้องตั้ง proxy ใน <code>/etc/apt/apt.conf</code> ก่อน</strong> (เหมือน L6)</p>
+<h3 id="175-ดู-partition-เฉลยคำถาม">17.5 ดู partition — เฉลยคำถาม</h3>
+<p><strong><code>sudo parted -l</code></strong></p>
+<pre><code>Disk /dev/sda: 53.7GB   Partition Table: msdos
+Number  Start   End     Size    Type      File system  Flags
+ 1      1049kB  538MB   537MB   primary   fat32        boot
+ 2      539MB   53.7GB  53.1GB  extended
+ 5      539MB   53.7GB  53.1GB  logical   ext4
+
+Error: /dev/sdb: unrecognised disk label
+Disk /dev/sdb: 2147MB   Partition Table: unknown
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sda มีกี่ partition?</strong></td>
+<td><strong>3 partition</strong>: #1 primary fat32 (boot, 537 MB), #2 <strong>extended</strong>, #5 <strong>logical</strong> ext4 (53.1 GB) · <em>(ถ้านับเฉพาะที่เก็บข้อมูลจริงคือ 2 — #2 เป็นแค่กล่องที่ครอบ #5)</em></td>
+</tr>
+<tr>
+<td><strong>sdb มีปัญหาอะไร?</strong></td>
+<td><strong>ยังไม่มี partition table (disk label)</strong> — <code>unrecognised disk label</code>, <code>Partition Table: unknown</code> เพราะเป็นดิสก์ใหม่เปล่า ต้อง <code>mklabel</code> ก่อนสร้าง partition</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 logical partition เริ่มเลข <strong>5</strong> เสมอ เพราะเลข 1–4 สงวนไว้ให้ primary/extended ของ MBR</p>
+</blockquote>
+<p><strong><code>sudo fdisk -l | grep sd</code></strong> → <code>/dev/sda1 * … 512M b W95 FAT32</code> · <code>/dev/sda2 … 49.5G 5 Extended</code> · <code>/dev/sda5 … 49.5G 83 Linux</code> · <code>Disk /dev/sdb: 2 GiB</code> (ไม่มีรายการ partition)
+<strong>เทียบกับ <code>sudo fdisk -l</code> (ไม่ grep):</strong> แสดงรายละเอียดครบทุกดิสก์ รวม loop device, disk model, units, sector size, <strong>disklabel type</strong>, disk identifier · ส่วน <code>| grep sd</code> กรองเหลือเฉพาะบรรทัดที่มีคำว่า sd ให้อ่านง่าย</p>
+<h3 id="176-สร้าง-partition-ด้วย-parted">17.6 สร้าง partition ด้วย parted</h3>
+<p><strong><code>sudo parted /dev/sdb</code></strong> → ได้ prompt <strong><code>(parted)</code></strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>คำสั่ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong><code>mklabel msdos</code></strong></td>
+<td>สร้าง partition table แบบ <strong>MBR (msdos)</strong> · เตือนว่าข้อมูลเดิมจะหาย → ตอบ <strong>Y</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong><code>mkpart primary ext4 0 1024</code></strong></td>
+<td>สร้าง partition ที่ 1 ตั้งแต่ 0 ถึง 1024 MB · เตือน <code>not properly aligned for best performance</code> → ตอบ <strong>I</strong> (Ignore)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong><code>print</code></strong></td>
+<td><code>1  512B  1024MB  1024MB  primary  ext4  lba</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong><code>mkpart primary ext4 1.0GB 1.0GB</code></strong></td>
+<td>สร้าง partition ที่ 2</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong><code>print</code></strong></td>
+<td>เพิ่ม <code>2  1024MB  1026MB  1049kB  primary  ext4  lba</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong><code>quit</code></strong></td>
+<td>ออกจาก parted</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> partition 2 ได้ขนาดแค่ <strong>1049 kB (~1 MB)</strong> เพราะสั่งจุดเริ่มกับจุดจบเท่ากัน (1.0GB) parted จึงปัดให้เล็กที่สุด · คอลัมน์ &quot;ext4&quot; ใน parted เป็นแค่ป้ายชนิด <strong>ยังไม่ได้ format จริง</strong> ต้อง <code>mkfs</code> ก่อน</p>
+</blockquote>
+<p><strong>ตรวจ: <code>sudo fdisk -l | grep sd</code></strong> → <code>/dev/sdb1  1  2000000  2000000  976.6M  83 Linux</code> · <code>/dev/sdb2  2000896  2002943  2048  1M  83 Linux</code></p>
+<h3 id="177-สร้าง-file-system-ด้วย-mkfs">17.7 สร้าง file system ด้วย mkfs</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>sudo mkfs.ext4 /dev/sdb1</code></strong></td>
+<td><code>Creating filesystem with 250000 4k blocks and 62592 inodes</code> · UUID <code>a510ea07-0463-4d66-a2dd-dc878c91e41e</code> · superblock backups · <strong>journal 4096 blocks</strong> → <strong>sdb1 เป็น ext4 แล้ว</strong></td>
+</tr>
+<tr>
+<td><strong><code>sudo mkfs.ext4 /dev/sdb2</code></strong></td>
+<td><strong><code>Filesystem too small for a journal</code></strong> · <code>256 4k blocks and 128 inodes</code> (ไม่มี journal เพราะเล็กเกิน)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>WARNING!!! mkfs ลบข้อมูลในอุปกรณ์ทั้งหมด ต้องแน่ใจว่าชื่ออุปกรณ์ถูกต้อง</strong> (สั่งผิดเป็น <code>/dev/sda1</code> = ระบบพัง)</p>
+</blockquote>
+<h3 id="178-mount">17.8 Mount</h3>
+<ol>
+<li>สร้าง directory ว่างสำหรับ mount: <strong><code>sudo mkdir -p /mnt/sdb1</code></strong> และ <strong><code>sudo mkdir -p /mnt/sdb2</code></strong> (<code>-p</code> = สร้าง directory แม่ให้ด้วยถ้ายังไม่มี และไม่ error ถ้ามีอยู่แล้ว)</li>
+<li>ดู UUID: <strong><code>sudo blkid /dev/sdb1</code></strong> → <code>UUID=&quot;a510ea07-0463-4d66-a2dd-dc878c91e41e&quot; TYPE=&quot;ext4&quot; PARTUUID=&quot;52650c92-01&quot;</code> · ทำซ้ำกับ sdb2</li>
+<li>สำรอง fstab ก่อนแก้: <strong><code>sudo cp -v /etc/fstab /etc/fstab.backup</code></strong></li>
+<li>ใช้ nano เพิ่ม 2 บรรทัดใน <code>/etc/fstab</code> · รูปแบบ: <code>&lt;file system&gt; &lt;mount point&gt; &lt;type&gt; &lt;options&gt; &lt;dump&gt; &lt;pass&gt;</code> <em>(แนวคำตอบ)</em>:<pre><code>UUID=a510ea07-0463-4d66-a2dd-dc878c91e41e  /mnt/sdb1  ext4  defaults  0  2
+UUID=&lt;UUID ของ sdb2&gt;                        /mnt/sdb2  ext4  defaults  0  2
+</code></pre>
+(ในไฟล์เดิมมีตัวอย่าง: <code>UUID=9ea8b0d5-… / ext4 errors=remount-ro 0 1</code> · <code>UUID=1D68-5BDF /boot/efi vfat umask=0077 0 1</code> · <code>/swapfile none swap sw 0 0</code>)</li>
+<li>mount ทันที: <strong><code>sudo mount /dev/sdb1 /mnt/sdb1</code></strong> และ <strong><code>sudo mount /dev/sdb2 /mnt/sdb2</code></strong></li>
+</ol>
+<h3 id="เฉลย-uuid-คืออะไร-ใช้อย่างไรในการ-mount">เฉลย: UUID คืออะไร ใช้อย่างไรในการ mount</h3>
+<ul>
+<li><strong>UUID = Universally Unique Identifier</strong> — ตัวเลข <strong>128-bit</strong> เขียนเป็น <strong>36 ตัวอักษร (เลขฐานสิบหก 32 ตัว + ขีด 4 ตัว) รูปแบบ 8-4-4-4-12</strong> เช่น <code>a9e86162-d472-11e8-b36c-ccaf789d94a0</code> (ส่วนต่าง ๆ: time_low, time_mid, time_hi_and_version, clock_seq, node) · ใช้ระบุข้อมูลให้ไม่ซ้ำ เช่น ระบุแต่ละแถวในตารางฐานข้อมูล</li>
+<li><strong>ใช้ในการ mount</strong> <em>(แนวคำตอบ)</em>: <code>mkfs</code> สร้าง UUID เฉพาะให้แต่ละ file system แล้วใน <code>/etc/fstab</code> เขียน <code>UUID=…</code> แทน <code>/dev/sdb1</code> เพราะ<strong>ชื่อ /dev/sdX เปลี่ยนได้</strong>เมื่อเพิ่ม/ถอด/สลับลำดับดิสก์ แต่ <strong>UUID ไม่เปลี่ยน</strong> ตอน boot ระบบจึง mount partition ที่ถูกต้องเสมอ (ในไฟล์ fstab เองก็เขียนว่า &quot;UUID= … a more robust way to name devices that works even if disks are added and removed&quot;)</li>
+</ul>
+<h3 id="179-ตรวจชนิด-file-system">17.9 ตรวจชนิด file system</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผล</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>df -Th | grep sd</code></strong></td>
+<td><code>/dev/sda5 ext4 49G … /</code> · <code>/dev/sda1 vfat 511M … /boot/efi</code> · <code>/dev/sdb1 ext4 943M 24K 878M 1% /mnt/sdb1</code> · <code>/dev/sdb2 ext4 992K 24K 900K 3% /mnt/sdb2</code></td>
+<td><code>-T</code> แสดง<strong>ชนิด</strong> file system, <code>-h</code> ขนาดอ่านง่าย · ยืนยันว่า mount แล้ว</td>
+</tr>
+<tr>
+<td><strong><code>fsck -N /dev/sdb1</code></strong></td>
+<td><code>[/usr/sbin/fsck.ext2 (1) -- /dev/sdb1] fsck.ext2 /dev/sdb1</code></td>
+<td><code>-N</code> = <strong>แสดงว่าจะรันอะไรโดยไม่ตรวจจริง</strong> · บอกว่าจะใช้ตัวตรวจตระกูล ext (fsck.ext2 ใช้ร่วมกับ ext2/3/4)</td>
+</tr>
+<tr>
+<td><strong><code>lsblk -f | grep sd</code></strong></td>
+<td><code>sda1 vfat 1D68-5BDF 511M /boot/efi</code> · <code>sda5 ext4 9ea8… 35.2G 22% /</code> · <code>sdb1 ext4 a510ea07-… 878M 0% /mnt/sdb1</code> · <code>sdb2 ext4 a5e1bcf5-… 900K 2% /mnt/sdb2</code></td>
+<td><code>-f</code> แสดง <strong>FSTYPE, UUID, พื้นที่ว่าง, mount point</strong> ครบในที่เดียว</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>fsck</strong> (file system check) ใช้ตรวจ/ซ่อม file system — ห้ามรันซ่อมกับ partition ที่ mount อยู่ · <code>-N</code> จึงปลอดภัยเพราะไม่ทำจริง</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BIOS</strong></td>
+<td>Basic Input/Output System firmware บนเมนบอร์ด initialize hardware และหา bootloader</td>
+<td>ผู้ปลุกเครื่อง</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td>Power-On Self-Test ตรวจอุปกรณ์ตอนเปิดเครื่อง</td>
+<td>ตรวจร่างกาย</td>
+</tr>
+<tr>
+<td><strong>CMOS</strong></td>
+<td>ที่เก็บค่าตั้งของ BIOS</td>
+<td>สมุดตั้งค่า</td>
+</tr>
+<tr>
+<td><strong>Beep code</strong></td>
+<td>เสียงแจ้งข้อผิดพลาดของ BIOS</td>
+<td>เสียงเตือน</td>
+</tr>
+<tr>
+<td><strong>UEFI</strong></td>
+<td>ตัวแทน BIOS: GUI, GPT, parallel, 32/64-bit, Secure Boot</td>
+<td>BIOS รุ่นใหม่</td>
+</tr>
+<tr>
+<td><strong>Bootloader (LILO / GRUB)</strong></td>
+<td>โหลด kernel เข้า memory</td>
+<td>คนขับรถพา OS เข้าบ้าน</td>
+</tr>
+<tr>
+<td><strong>init</strong></td>
+<td>process แรก PID 1</td>
+<td>บรรพบุรุษ</td>
+</tr>
+<tr>
+<td><strong>CHS</strong></td>
+<td>Cylinder-Head-Sector ระบุตำแหน่งทางกายภาพ</td>
+<td>พิกัดสามมิติ</td>
+</tr>
+<tr>
+<td><strong>LBA</strong></td>
+<td>Logical Block Addressing นับ block เป็นเลขเดียว</td>
+<td>เลขที่บ้าน</td>
+</tr>
+<tr>
+<td><strong>Partition</strong></td>
+<td>ส่วนที่แบ่งของดิสก์ แต่ละส่วนมี file system</td>
+<td>ห้องในบ้าน</td>
+</tr>
+<tr>
+<td><strong>Primary / Extended / Logical</strong></td>
+<td>partition หลัก / กล่องครอบ / partition ย่อยในกล่อง</td>
+<td>ห้อง / ห้องโถง / ห้องย่อย</td>
+</tr>
+<tr>
+<td><strong>MBR</strong></td>
+<td>512 bytes = 446 bootstrap + 64 partition table + 2 signature (0x55AA)</td>
+<td>ป้ายหน้าบ้าน</td>
+</tr>
+<tr>
+<td><strong>GPT / GUID</strong></td>
+<td>GUID Partition Table (128 partitions, 9.4 ZB) ส่วนหนึ่งของ UEFI</td>
+<td>ตาราง partition รุ่นใหม่</td>
+</tr>
+<tr>
+<td><strong><code>/dev/sda</code>, <code>/dev/sdb1</code></strong></td>
+<td>ชื่อดิสก์ / partition บน Linux</td>
+<td>ชื่อเรียกดิสก์</td>
+</tr>
+<tr>
+<td><strong>Character / Block device</strong></td>
+<td>รับส่งทีละตัวอักษร (c) / ทีละบล็อก (b)</td>
+<td>คีย์บอร์ด / ดิสก์</td>
+</tr>
+<tr>
+<td><strong><code>lsblk</code></strong></td>
+<td>แสดง block device และ partition</td>
+<td>ผังดิสก์</td>
+</tr>
+<tr>
+<td><strong><code>fdisk -l</code> / <code>parted -l</code></strong></td>
+<td>แสดง partition table</td>
+<td>ดูตาราง partition</td>
+</tr>
+<tr>
+<td><strong><code>mkfs.ext4</code></strong></td>
+<td>สร้าง file system (format)</td>
+<td>ฟอร์แมต</td>
+</tr>
+<tr>
+<td><strong>mount / umount</strong></td>
+<td>เชื่อม / ตัด partition กับ directory</td>
+<td>เสียบ / ถอดอย่างปลอดภัย</td>
+</tr>
+<tr>
+<td><strong>Mount point</strong></td>
+<td>directory ที่ partition ถูกต่อเข้า</td>
+<td>ประตูเข้าดิสก์</td>
+</tr>
+<tr>
+<td><strong><code>/etc/fstab</code></strong></td>
+<td>รายการ file system ที่ mount อัตโนมัติตอน boot</td>
+<td>ตารางเสียบถาวร</td>
+</tr>
+<tr>
+<td><strong>UUID</strong></td>
+<td>128-bit, 8-4-4-4-12 ระบุ file system ไม่ซ้ำ</td>
+<td>เลขบัตรประชาชนของ partition</td>
+</tr>
+<tr>
+<td><strong>VFS</strong></td>
+<td>Virtual File System ชั้นกลางระหว่าง kernel กับ file system จริง</td>
+<td>ล่ามกลาง</td>
+</tr>
+<tr>
+<td><strong>Superblock</strong></td>
+<td>ข้อมูลของทั้ง file system</td>
+<td>สมุดข้อมูลห้องสมุด</td>
+</tr>
+<tr>
+<td><strong>inode</strong></td>
+<td>metadata ของไฟล์ (size, time, owner, group, type, ตัวชี้ block)</td>
+<td>บัตรรายการหนังสือ</td>
+</tr>
+<tr>
+<td><strong>Data bitmap / inode bitmap</strong></td>
+<td>ติดตามว่า block/inode ไหนว่าง (0 free, 1 in-use)</td>
+<td>ป้ายว่าง/ไม่ว่าง</td>
+</tr>
+<tr>
+<td><strong>Directory entry</strong></td>
+<td>ชื่อไฟล์ → หมายเลข inode</td>
+<td>สารบัญ</td>
+</tr>
+<tr>
+<td><strong><code>df -i</code> / <code>df -Th</code></strong></td>
+<td>ดูการใช้ inode / ชนิดและพื้นที่ file system</td>
+<td>ดูความจุ</td>
+</tr>
+<tr>
+<td><strong><code>blkid</code>, <code>dmesg</code>, <code>fsck -N</code></strong></td>
+<td>ดู UUID+type / ข้อความ kernel / ตรวจ fs แบบไม่ทำจริง</td>
+<td>เครื่องมือตรวจ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>Boot: <strong>BIOS (initialize hardware) → MBR (sector 0) → boot sector ของ active partition → bootloader จาก file system</strong></li>
+<li>BIOS: firmware, OS independent, find &amp; load bootloader, ต้องรู้ bootable device · ขั้นตอน <strong>POST → อ่านค่าจาก CMOS → Bootstrap Loader → สนับสนุน OS → ปิดอุปกรณ์</strong></li>
+<li><strong>UEFI vs BIOS</strong>: GUI vs text · GPT vs MBR (2.2 TB) · parallel vs sequential · 32/64-bit vs 16-bit · Secure Boot</li>
+<li><strong>GRUB</strong> มาแทน <strong>LILO</strong> โหลด kernel เข้า memory</li>
+<li><strong>CHS</strong> = Cylinder, Head, Sector · MBR อยู่ <strong>C0 H0 S1</strong></li>
+<li><strong>MBR = 512 bytes = 446 + 64 (4×16) + 2 (0x55AA)</strong> · <strong>4 primary</strong> (extended → logical)</li>
+<li><strong>GPT = 128 partitions, 9.4 ZB, ส่วนหนึ่งของ UEFI</strong></li>
+<li><code>/dev/sda</code>, <code>/dev/sdb</code> · device <strong>c</strong> (keyboard, mouse) vs <strong>b</strong> (hard drive, DVD)</li>
+<li><code>lsblk</code> คอลัมน์ <strong>MAJ:MIN, RM, RO, TYPE (disk/part), MOUNTPOINTS</strong></li>
+<li><code>sudo fdisk -l</code> · fdisk: <strong>n เพิ่ม, d ลบ, p แสดง, w บันทึกออก, q ออกไม่บันทึก</strong></li>
+<li><strong><code>sudo mkfs.ext4 /dev/sdb1</code></strong> · <strong><code>sudo mount /dev/sdb1 /media</code></strong> · <strong><code>sudo umount /dev/sdb1</code></strong></li>
+<li>Windows = แยกไดรฟ์ C, D · Linux = ต้นไม้เดียวจาก <code>/</code> และ <strong>mount อุปกรณ์เข้ากับ directory</strong></li>
+<li>ext4: <strong>Boot sector + Block groups</strong> → Super Block, Group Descriptor, Block Bitmap, Inode Bitmap, Inode table, Data blocks</li>
+<li>ดิสก์ 256 KB / 4 KB = <strong>64 blocks</strong> · S, i, d, inodes (3–7), Data (8–63) · <strong>0 = free, 1 = in-use</strong></li>
+<li>Lab: sdb = 2 GB VMDK · <strong>sda มี 3 partition (1 primary, 2 extended, 5 logical)</strong> · <strong>sdb ไม่มี disk label</strong> · sdb1 ≈ 976 MB, sdb2 ≈ 1 MB (<strong>too small for a journal</strong>, 128 inodes) · UUID ใน fstab · ส่ง <strong><code>6887xxx_lab7.pdf</code></strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BIOS vs UEFI</strong></td>
+<td>เก่า text MBR 16-bit vs ใหม่ GUI GPT 32/64-bit Secure Boot</td>
+</tr>
+<tr>
+<td><strong>MBR vs GPT</strong></td>
+<td>4 partitions / 2 TB vs 128 partitions / 9.4 ZB</td>
+</tr>
+<tr>
+<td><strong>LILO vs GRUB</strong></td>
+<td>bootloader เก่า vs ตัวที่มาแทน</td>
+</tr>
+<tr>
+<td><strong>CHS vs LBA</strong></td>
+<td>ระบุด้วย cylinder/head/sector vs นับ block เป็นเลขเดียว (sector CHS เริ่ม 1, LBA เริ่ม 0)</td>
+</tr>
+<tr>
+<td><strong>Primary vs Extended vs Logical</strong></td>
+<td>partition หลัก vs กล่องครอบ vs partition ในกล่อง (เลข 5 ขึ้นไป)</td>
+</tr>
+<tr>
+<td><strong>Character vs Block device</strong></td>
+<td>ทีละตัวอักษร (c) vs ทีละบล็อก (b)</td>
+</tr>
+<tr>
+<td><strong><code>fdisk</code> vs <code>parted</code></strong></td>
+<td>เมนูตัวอักษร (n, p, w) vs คำสั่งเต็ม (mklabel, mkpart, print)</td>
+</tr>
+<tr>
+<td><strong>partition vs file system</strong></td>
+<td>การแบ่งพื้นที่ vs การจัดระเบียบข้อมูลในพื้นที่นั้น (ต้อง mkfs)</td>
+</tr>
+<tr>
+<td><strong>mount vs umount</strong></td>
+<td>เชื่อมต่อ vs ตัดการเชื่อมต่อ</td>
+</tr>
+<tr>
+<td><strong><code>/dev/sdb1</code> vs UUID ใน fstab</strong></td>
+<td>ชื่อที่เปลี่ยนได้ vs ตัวระบุถาวร</td>
+</tr>
+<tr>
+<td><strong>inode vs data block</strong></td>
+<td>metadata + ตัวชี้ vs เนื้อหาจริง</td>
+</tr>
+<tr>
+<td><strong>Data bitmap vs inode bitmap</strong></td>
+<td>ติดตาม data block ว่าง vs ติดตาม inode ว่าง</td>
+</tr>
+<tr>
+<td><strong>Superblock vs inode</strong></td>
+<td>ข้อมูลทั้ง file system vs ข้อมูลไฟล์เดียว</td>
+</tr>
+<tr>
+<td><strong><code>df -h</code> vs <code>df -i</code></strong></td>
+<td>พื้นที่ vs จำนวน inode</td>
+</tr>
+<tr>
+<td><strong>VDI + Dynamic (L1) vs VMDK + Pre-allocate (L7)</strong></td>
+<td>ดิสก์ OS หลัก vs ดิสก์ทดลองเพิ่ม</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไม MBR มีได้แค่ 4 partition และ 2 TB</strong> → partition table 64 bytes = 4 entry, ที่อยู่ 32 bit × 512 bytes ≈ 2.2 TB</li>
+<li><strong>ทำไม sdb ขึ้น unrecognised disk label</strong> → ดิสก์ใหม่ยังไม่มี partition table ต้อง <code>mklabel</code> ก่อน</li>
+<li><strong>ทำไมหลังสร้าง partition แล้วยังใช้เก็บไฟล์ไม่ได้</strong> → ยังไม่มี file system ต้อง <code>mkfs</code> และยังไม่ได้ mount เข้ากับ directory</li>
+<li><strong>ทำไม fstab ควรใช้ UUID</strong> → ชื่อ /dev/sdX เปลี่ยนตามลำดับการเสียบดิสก์ UUID ไม่เปลี่ยน</li>
+<li><strong>ทำไมชื่อไฟล์ไม่อยู่ใน inode</strong> → ชื่ออยู่ใน directory entry ที่ชี้ไป inode ทำให้ไฟล์เดียวมีหลายชื่อ (link) ได้</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l6/index.html"><small>← บทก่อนหน้า</small><span>L6 – Editor (nano และ vim) + Lab 6 (Editor)</span></a><a class="pg next" href="../l8/index.html"><small>บทถัดไป →</small><span>L8 – Process and Memory + Lab 8 (Process + Memory)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

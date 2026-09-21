@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L4 – User Management + Lab 4 (User Management) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-การบริหารจัดการผู้ใช้บนระบบ-unixlinux">2. การบริหารจัดการผู้ใช้บนระบบ Unix/Linux</a></li><li><a href="#3-ประเภทของผู้ใช้">3. ประเภทของผู้ใช้</a></li><li><a href="#4-การกำหนดค่าให้กับผู้ใช้">4. การกำหนดค่าให้กับผู้ใช้ ⭐</a></li><li><a href="#5-etcpasswd">5. /etc/passwd ⭐⭐</a></li><li><a href="#6-etcshadow">6. /etc/shadow ⭐⭐</a></li><li><a href="#7-etcgroup">7. /etc/group ⭐</a></li><li><a href="#8-su-และ-sudo">8. su และ sudo ⭐</a></li><li><a href="#9-คำสั่งจัดการผู้ใช้และกลุ่ม">9. คำสั่งจัดการผู้ใช้และกลุ่ม ⭐⭐</a></li><li><a href="#10-file-information-ทบทวน">10. File Information (ทบทวน)</a></li><li><a href="#11-วัตถุประสงค์-สิ่งที่ส่ง-และคำสั่ง">11. วัตถุประสงค์ สิ่งที่ส่ง และคำสั่ง</a></li><li><a href="#12-lab-4-เฉลยช่องว่างทีละหน้า">12. Lab 4: เฉลยช่องว่างทีละหน้า</a></li><li><a href="#13-lab-4-exercise-หน้า-21-แนวคำตอบ">13. Lab 4: Exercise หน้า 21 (แนวคำตอบ)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L4</div>
+      <h1 class="lesson-title">L4 – User Management + Lab 4 (User Management)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> Linux เป็นระบบ <strong>multi-user</strong> จึงต้องมีวิธีจัดการว่าใครเป็นใคร อยู่กลุ่มไหน และมีรหัสผ่านอะไร</p>
+<p>(1) <strong>Lecture 4</strong> อธิบายประเภทผู้ใช้ (User / root) ไฟล์หลัก 3 ไฟล์ <strong><code>/etc/passwd</code> (7 ช่อง)</strong>, <strong><code>/etc/shadow</code> (8 ช่อง)</strong>, <strong><code>/etc/group</code> (4 ช่อง)</strong> ช่วงเลข UID, ชนิดของ shell และคำสั่ง <strong><code>su</code>, <code>sudo</code>, <code>useradd</code>, <code>passwd</code>, <code>usermod</code>, <code>userdel</code>, <code>groupadd</code>, <code>id</code></strong> พร้อม option</p>
+<p>(2) <strong>Lab 4</strong> อ่านไฟล์ทั้งสามจากเครื่องจริง สร้าง test1/test2 สองแบบ เปลี่ยนรหัส แก้ข้อมูล ลบผู้ใช้ และสร้างกลุ่ม</p>
+<p>บทนี้เป็นฐานของ <strong>L5 (File Permissions)</strong> ที่เอา user/group ไปกำหนดสิทธิ์ไฟล์</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 4: User Management</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 4 = <strong>การฝึกการจัดการผู้ใช้และกลุ่มผู้ใช้ของระบบ</strong> (25 August 2026)</li>
+<li>เกณฑ์คะแนนเหมือนเดิม · ส่งแลป 23.59 น. ของวันอังคาร/วันที่เรียน · ทดสอบย่อยทุกสัปดาห์</li>
+</ul>
+<hr />
+<h2 id="2-การบริหารจัดการผู้ใช้บนระบบ-unixlinux">2. การบริหารจัดการผู้ใช้บนระบบ Unix/Linux</h2>
+<ul>
+<li>UNIX ออกแบบให้<strong>ใช้งานได้หลายคนในเวลาเดียวกัน (Multi-user)</strong> และ<strong>ทำงานหลายอย่างพร้อมกัน (Multitasking)</strong></li>
+<li>จึง<strong>นิยมใช้เป็นระบบปฏิบัติการในเครื่อง server</strong></li>
+<li>ผู้ดูแลระบบจึงต้องเข้าใจ<strong>การบริหารจัดการผู้ใช้และการกำหนดสิทธิ์</strong> เพื่อให้ระบบทำงานมีประสิทธิภาพ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> เครื่อง server หนึ่งเครื่องอาจมีคนใช้พร้อมกันหลายสิบคน ถ้าไม่แยกผู้ใช้ ทุกคนจะอ่าน แก้ หรือลบไฟล์ของกันและกันได้</p>
+</blockquote>
+<hr />
+<h2 id="3-ประเภทของผู้ใช้">3. ประเภทของผู้ใช้</h2>
+<p>UNIX กำหนดสิทธิ์การเข้าถึงได้หลายระดับ แบ่งผู้ใช้เป็น <strong>2 ระดับ</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>ผู้ใช้ทั่วไป<strong>สิทธิ์จำกัด</strong> หรือ user ที่สร้างไว้ให้<strong>โปรแกรมประยุกต์</strong> เช่น <strong>Web Server</strong></td>
+</tr>
+<tr>
+<td><strong>Superuser</strong></td>
+<td>บริหารจัดการระบบ<strong>ได้ทุกอย่าง</strong>: สร้าง/กำหนดสิทธิ์ผู้ใช้, ปิด process สำคัญ (เช่น Web Server), แก้ไฟล์ระบบ · ชื่อใน UNIX คือ <strong><code>root</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-การกำหนดค่าให้กับผู้ใช้">4. การกำหนดค่าให้กับผู้ใช้ ⭐</h2>
+<ul>
+<li>ข้อมูลผู้ใช้เก็บใน <strong>3 ไฟล์ที่ใช้ร่วมกัน</strong>: <strong><code>/etc/passwd</code></strong>, <strong><code>/etc/shadow</code></strong>, <strong><code>/etc/group</code></strong> (รูปแบบต่างกัน)</li>
+<li><strong>แต่ละไฟล์มีสิทธิ์การเข้าถึงต่างกัน</strong> เพราะบางไฟล์เก็บความลับ เช่น <strong>รหัสผ่าน</strong></li>
+<li>ผู้ใช้เข้าระบบด้วย <strong>Username</strong> + <strong>รหัสผ่าน</strong></li>
+<li>ระบบระบุตัวผู้ใช้ด้วย <strong>UID (User Identifier)</strong> — <strong>ไม่ซ้ำกัน</strong></li>
+<li>ผู้ใช้เป็นสมาชิกกลุ่มได้ อ้างอิงด้วย <strong>GID (Group Identifier)</strong></li>
+</ul>
+<p>ดูไฟล์ได้ด้วย:</p>
+<pre><code>$ more /etc/passwd
+$ sudo more /etc/shadow      ← ต้องใช้ sudo
+$ more /etc/group
+</code></pre>
+<hr />
+<h2 id="5-etcpasswd">5. <code>/etc/passwd</code> ⭐⭐</h2>
+<ul>
+<li>เก็บ<strong>รายละเอียดผู้ใช้</strong> เช่น UID, GID, home directory</li>
+<li><strong>ผู้ใช้ทุกคนอ่านได้ แต่แก้ได้เฉพาะ root</strong></li>
+<li><strong>1 บรรทัด = 1 username</strong> · ช่องต่าง ๆ คั่นด้วย <strong><code>:</code></strong></li>
+</ul>
+<p><img loading="lazy" src="img/lec-p11.jpg" alt="โครงสร้าง /etc/passwd 7 ช่อง" /></p>
+<p>ตัวอย่าง: <code>oracle:x:1021:1020:Oracle user:/data/network/oracle:/bin/bash</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ช่อง</th>
+<th>ค่าตัวอย่าง</th>
+<th>ความหมาย (จากสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Username</strong></td>
+<td><code>oracle</code></td>
+<td>ชื่อที่ใช้เข้าระบบ <strong>ยาวไม่เกิน 32 ตัวอักษร</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Password</strong></td>
+<td><code>x</code></td>
+<td><strong><code>x</code></strong> = มีรหัสผ่าน (เข้ารหัสเก็บไว้ที่ <strong><code>/etc/shadow</code></strong>) · <strong><code>*</code> หรือ <code>!</code></strong> = <strong>ปิดการเข้าระบบด้วยรหัสผ่าน</strong> มักใช้กับ username ที่ติดตั้งมากับโปรแกรม</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>User ID (UID)</strong></td>
+<td><code>1021</code></td>
+<td>หมายเลขผู้ใช้ (ดูช่วงเลขด้านล่าง)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Group ID (GID)</strong></td>
+<td><code>1020</code></td>
+<td>หมายเลขกลุ่มที่ผู้ใช้อยู่ (รายละเอียดกลุ่มอยู่ที่ <code>/etc/group</code>)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>User ID Info</strong></td>
+<td><code>Oracle user</code></td>
+<td>รายละเอียดเพิ่ม เช่น <strong>ชื่อ-นามสกุล, เบอร์โทร</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Home directory</strong></td>
+<td><code>/data/network/oracle</code></td>
+<td>directory เมื่อผู้ใช้เข้าระบบ <strong>ต้องเป็น absolute path</strong> (อ้างอิงจาก <code>/</code>)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Command/shell</strong></td>
+<td><code>/bin/bash</code></td>
+<td>ตำแหน่งโปรแกรม shell ที่รับคำสั่งจากผู้ใช้ <strong>ต้องเป็น absolute path</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างจริง: <code>sudsanguan:x:1000:1000:sudsanguan,,,:/home/sudsanguan:/bin/bash</code></p>
+<h3 id="ช่วงหมายเลข-uid">ช่วงหมายเลข UID ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>UID</th>
+<th>ใช้กับ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td><strong>จองให้ Superuser (root) เท่านั้น</strong></td>
+</tr>
+<tr>
+<td><strong>1–99</strong></td>
+<td>จองให้<strong>โปรแกรมของระบบ</strong></td>
+</tr>
+<tr>
+<td><strong>100–999</strong></td>
+<td>จองให้<strong>โปรแกรมที่ผู้ดูแลระบบติดตั้ง</strong></td>
+</tr>
+<tr>
+<td><strong>1000</strong> (ขึ้นไป)</td>
+<td><strong>ผู้ใช้ทั่วไป</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จึงเห็น <code>root:x:0:0:…</code> · <code>daemon:x:1:1:…</code> · <code>systemd-network:x:100:…</code> · <code>sudsanguan:x:1000:…</code> · user ที่สร้างเพิ่มได้ 1001, 1002, …</p>
+</blockquote>
+<h3 id="ชนิดของ-commandshell">ชนิดของ Command/shell</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Shell</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bourne shell</strong></td>
+<td><code>/bin/sh</code></td>
+</tr>
+<tr>
+<td><strong>Bourne Again shell</strong></td>
+<td><code>/bin/bash</code></td>
+</tr>
+<tr>
+<td><strong>C shell</strong></td>
+<td><code>/bin/csh</code></td>
+</tr>
+<tr>
+<td><strong>K shell</strong></td>
+<td><code>/bin/ksh</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="ข้อสังเกตจาก-more-etcpasswd-สไลด์หน้า-7">ข้อสังเกตจาก <code>more /etc/passwd</code> (สไลด์หน้า 7)</h3>
+<ul>
+<li><strong><code>/usr/sbin/nologin</code></strong> = <strong>ไม่ให้ login</strong> ถ้าพยายาม login จะขึ้น <strong>&quot;This account is currently not available&quot;</strong> (เห็นใน daemon, bin, sys, games, man, mail ฯลฯ)</li>
+<li><strong><code>x</code> ใน <code>root:x:0:0:root</code></strong> = บอกว่า <strong>root มี password</strong> (เก็บใน shadow)</li>
+<li><code>sync:x:4:65534:sync:/bin:/bin/sync</code> — shell ไม่ใช่ shell ปกติ <em>(อธิบายเพิ่ม: login แล้วรันคำสั่ง sync แล้วจบ)</em> · <code>gdm:…:/bin/false</code> ก็ login ไม่ได้เช่นกัน</li>
+</ul>
+<hr />
+<h2 id="6-etcshadow">6. <code>/etc/shadow</code> ⭐⭐</h2>
+<ul>
+<li>เก็บ<strong>รหัสผ่านจริงของผู้ใช้ในรูปเข้ารหัสลับ</strong></li>
+<li>เก็บค่าคุณสมบัติของรหัสผ่าน เช่น <strong>วันหมดอายุ</strong></li>
+<li><strong>1 บรรทัด = 1 username</strong> · คั่นด้วย <code>:</code></li>
+<li>⭐ <strong>อ่าน-เขียนได้เฉพาะ root</strong> เพื่อไม่ให้ผู้ใช้เห็นรหัสผ่านของคนอื่น</li>
+</ul>
+<p>ตัวอย่าง: <code>vivek:$1$fnfffc$pGteyHdicpGOfffXX4ow#5:13064:0:99999:7:::</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ช่อง</th>
+<th>ค่าตัวอย่าง</th>
+<th>ความหมาย (จากสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Username</strong></td>
+<td><code>vivek</code></td>
+<td>ยาวไม่เกิน 32 ตัวอักษร</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Encrypted Password</strong></td>
+<td><code>$1$fnfffc$pGtey…</code></td>
+<td>รหัสผ่านจริงที่เข้ารหัสไว้</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Date of last password change</strong></td>
+<td><code>13064</code></td>
+<td>วันที่เปลี่ยนรหัสล่าสุด นับจาก <strong>1 มกราคม ค.ศ. 1970 (UTC)</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Minimum password age</strong></td>
+<td><code>0</code></td>
+<td>จำนวนวัน<strong>น้อยที่สุด</strong>ก่อนเปลี่ยนรหัสได้ · <code>0</code> หรือว่าง = ไม่มีค่าต่ำสุด</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Maximum password age</strong></td>
+<td><code>99999</code></td>
+<td>จำนวนวัน<strong>สูงสุด</strong>ที่ใช้รหัสได้ · <code>99999</code> หรือว่าง = เปลี่ยนเมื่อไรก็ได้ (แทบไม่หมดอายุ)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Password warning period</strong></td>
+<td><code>7</code></td>
+<td>เตือนล่วงหน้ากี่วันก่อนรหัสหมดอายุ (บอกจำนวนวันที่เหลือ)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Password Inactivity Period</strong></td>
+<td>ว่าง</td>
+<td>ถ้าไม่เปลี่ยนรหัสภายในกี่วัน <strong>บัญชีจะถูกปิด</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Account expiration date</strong></td>
+<td>ว่าง</td>
+<td>วันหมดอายุของบัญชี เมื่อถึงกำหนด <strong>ปิดผู้ใช้ทันที</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ข้อควรระวังในสไลด์</strong>: สไลด์เขียนว่าช่อง 3 เป็น &quot;UNIX timestamp (จำนวน<strong>วินาที</strong>ตั้งแต่ 1 ม.ค. 1970)&quot; แต่ค่าในไฟล์ shadow จริงเป็น<strong>จำนวนวัน</strong> <em>(อธิบายเพิ่ม)</em> เช่น <code>18374</code> วัน = 22 เมษายน 2020 ถ้าเป็นวินาทีจะยังไม่ถึงวันที่ 2 ม.ค. 1970</p>
+<p>⭐ <strong>เทคนิค</strong>: ถ้าไม่อยากให้ผู้ใช้เปลี่ยนรหัสผ่านเองได้ → ตั้ง <strong>Maximum ให้น้อยกว่า Minimum</strong></p>
+</blockquote>
+<p><strong>UTC Time (GMT)</strong> — สไลด์โชว์ worldtimebuddy: <strong>Bangkok = UTC+7</strong> (UTC 10:17 am = Bangkok 5:17 pm)</p>
+<h3 id="ความหมายของ-และ-ในช่องรหัสผ่าน">ความหมายของ <code>*</code> และ <code>!</code> ในช่องรหัสผ่าน</h3>
+<ul>
+<li><strong><code>*</code></strong> = <strong>ไม่มีรหัสในการเข้าถึง user นี้</strong> (เช่น <code>daemon:*:19101:…</code>)</li>
+<li><strong><code>!</code></strong> = <strong>user นี้ถูก locked ไว้ ไม่ให้เข้าถึง</strong> (เช่น <code>root:!:19654:…</code>)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> Ubuntu ล็อก root ไว้ (<code>!</code>) ตั้งแต่ติดตั้ง จึง login เป็น root ตรง ๆ ไม่ได้ ต้องใช้ <code>sudo</code> แทน · ขึ้นต้นรหัส <code>$1$</code> = MD5, <code>$6$</code> = SHA-512, <code>$y$</code> = yescrypt (Ubuntu รุ่นใหม่)</p>
+</blockquote>
+<h3 id="การดู-etcshadow">การดู <code>/etc/shadow</code></h3>
+<pre><code>$ sudo cat /etc/shadow
+$ sudo more /etc/shadow
+$ more /etc/shadow
+more: cannot open /etc/shadow: Permission denied   ← ไม่มี sudo
+</code></pre>
+<ul>
+<li><strong><code>sudo</code> (superuser do)</strong> = คำสั่งที่ทำให้ได้สิทธิ์เท่ากับ root</li>
+</ul>
+<hr />
+<h2 id="7-etcgroup">7. <code>/etc/group</code> ⭐</h2>
+<ul>
+<li>กำหนด<strong>คุณสมบัติและสมาชิกของแต่ละกลุ่ม</strong></li>
+<li><strong>ผู้ใช้อ่านได้อย่างเดียว แก้ได้เฉพาะ root</strong></li>
+<li>ในระบบใหญ่ควร<strong>สร้างกลุ่ม</strong>เพื่อจัดการสิทธิ์ง่ายขึ้น เช่น ให้กลุ่ม A แก้ไฟล์ได้เฉพาะบาง directory</li>
+</ul>
+<p>ตัวอย่าง: <code>etda:x:1000:test01,test02,test03</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ช่อง</th>
+<th>ค่า</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Group Name</strong></td>
+<td><code>etda</code></td>
+<td>ชื่อกลุ่ม</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Password</strong></td>
+<td><code>x</code></td>
+<td>ต้องใช้รหัสผ่านเข้ากลุ่มไหม · <code>x</code> = มีรหัส (เข้ารหัสเก็บแยก) · ว่าง = ไม่กำหนด</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Group ID (GID)</strong></td>
+<td><code>1000</code></td>
+<td>หมายเลขกลุ่ม</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>User List</strong></td>
+<td><code>test01,test02,test03</code></td>
+<td>สมาชิก คั่นด้วย <code>,</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียนว่ารหัสกลุ่มเก็บที่ <code>/etc/shadow</code> <em>(อธิบายเพิ่ม: ในระบบจริงรหัสกลุ่มเก็บที่ <code>/etc/gshadow</code>)</em></p>
+</blockquote>
+<p>ตัวอย่างจากเครื่อง: <code>adm:x:4:syslog,sudsanguan</code> · <code>sudsanguan:x:1000:</code> (ไม่มีสมาชิกเสริม) · <code>sambashare:x:135:sudsanguan</code> · <code>nagios:x:999:www-data</code></p>
+<hr />
+<h2 id="8-su-และ-sudo">8. <code>su</code> และ <code>sudo</code> ⭐</h2>
+<p>ผู้ใช้ทั่วไปใช้สิทธิ์ root ได้ผ่าน <code>su</code> และ <code>sudo</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ย่อมาจาก</th>
+<th>ทำอะไร</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>su</code></strong></td>
+<td><strong>Substitute User</strong></td>
+<td><strong>เปลี่ยนไปเป็นอีก user หนึ่ง</strong></td>
+<td><code>su test1</code> → ใส่รหัสของ test1 → <code>whoami</code> ได้ <code>test1</code></td>
+</tr>
+<tr>
+<td><strong><code>sudo</code></strong></td>
+<td><strong>Super user do</strong></td>
+<td><strong>รันคำสั่งเสมือน root เป็นผู้ใช้คำสั่ง</strong></td>
+<td><code>sudo useradd test3</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง sudo ในสไลด์:</p>
+<pre><code>$ useradd test3
+useradd: Permission denied.
+useradd: cannot lock /etc/passwd; try again later.
+$ sudo useradd test3
+[sudo] password for sudsanguan:        ← ใส่รหัสของตัวเอง
+$ userdel test3
+userdel: Permission denied.
+$ sudo userdel test3                   ← สำเร็จ
+</code></pre>
+<blockquote class="callout">
+<p>⭐ <strong>คำสั่งที่แก้ไฟล์ <code>/etc/passwd</code>, <code>/etc/group</code> ต้องมี <code>sudo</code> เสมอ</strong> ไม่อย่างนั้นขึ้น <code>Permission denied</code> / <code>cannot lock /etc/passwd</code></p>
+</blockquote>
+<hr />
+<h2 id="9-คำสั่งจัดการผู้ใช้และกลุ่ม">9. คำสั่งจัดการผู้ใช้และกลุ่ม ⭐⭐</h2>
+<p><strong>คำสั่งพื้นฐาน:</strong> เพิ่มผู้ใช้ (<strong><code>useradd</code></strong>) · แก้ไขผู้ใช้ (<strong><code>usermod</code></strong>) · ลบผู้ใช้ (<strong><code>userdel</code></strong>)</p>
+<h3 id="91-useradd-เพิ่มผู้ใช้">9.1 <code>useradd</code> — เพิ่มผู้ใช้</h3>
+<pre><code>useradd [-u UID] [-g GID] [-d HOME_DIR] [-s SHELL] [-m] [-c COMMENT] USER_NAME
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-u UID</code></td>
+<td>กำหนดหมายเลข <strong>UID</strong></td>
+</tr>
+<tr>
+<td><code>-g GID</code></td>
+<td>กำหนด <strong>GID หรือชื่อกลุ่ม</strong></td>
+</tr>
+<tr>
+<td><code>-d HOME_DIR</code></td>
+<td>กำหนด <strong>home directory</strong></td>
+</tr>
+<tr>
+<td><code>-s SHELL</code></td>
+<td>กำหนดโปรแกรม <strong>shell</strong></td>
+</tr>
+<tr>
+<td><strong><code>-m</code></strong></td>
+<td><strong>สร้าง home directory หากยังไม่มี</strong></td>
+</tr>
+<tr>
+<td><code>-c COMMENT</code></td>
+<td>ข้อความรายละเอียดเพิ่ม (ช่อง User ID Info)</td>
+</tr>
+<tr>
+<td><code>USER_NAME</code></td>
+<td>ชื่อที่ใช้เข้าระบบ</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างในสไลด์:</p>
+<pre><code># sudo useradd -u 777 -g test -d /home/test -s /bin/sh -m -c Sudsanguan test1
+# useradd -u 777 -g test -d /home/test1 -s /bin/sh -m -c somsak test1
+# sudo useradd -d /home/test1 -s /bin/bash -m test1
+</code></pre>
+<blockquote class="callout">
+<p>สไลด์ให้ลอง <strong><code>useradd test1</code> โดยไม่กำหนดค่าใด ๆ</strong> แล้วดูผลใน <code>/etc/passwd</code>, <code>/etc/group</code> → ดูเฉลยใน Lab หน้า 14</p>
+</blockquote>
+<h3 id="92-passwd-กำหนดเปลี่ยนรหัสผ่าน">9.2 <code>passwd</code> — กำหนด/เปลี่ยนรหัสผ่าน</h3>
+<pre><code># passwd test1
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+</code></pre>
+<ul>
+<li>ระบบให้ใส่รหัสใหม่ <strong>2 ครั้ง</strong> ถ้าตรงกันจึงบันทึก</li>
+</ul>
+<h3 id="93-usermod-แก้ไขข้อมูลผู้ใช้">9.3 <code>usermod</code> — แก้ไขข้อมูลผู้ใช้</h3>
+<pre><code>usermod [-u UID] [-g GID] [-d HOME_DIR] [-s SHELL] [-m] [-c COMMENT] [-e EXPIRE_DATE] USER_NAME
+</code></pre>
+<p>option เหมือน useradd และเพิ่ม:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-e EXPIRE_DATE</code></td>
+<td>วันหมดอายุของผู้ใช้ รูปแบบ <strong>YYYY-MM-DD</strong></td>
+</tr>
+<tr>
+<td><strong><code>-L</code></strong></td>
+<td><strong>ปิดการใช้งาน (Lock)</strong> ผู้ใช้</td>
+</tr>
+<tr>
+<td><strong><code>-U</code></strong></td>
+<td><strong>เปิดการใช้งาน (Unlock)</strong> ผู้ใช้</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง:</p>
+<pre><code># sudo usermod -d /home/test02 test1          ← เปลี่ยน home directory
+# sudo usermod -c &quot;Mr.test test02&quot; test1      ← เปลี่ยนชื่อ/รายละเอียด
+</code></pre>
+<h3 id="94-userdel-ลบผู้ใช้">9.4 <code>userdel</code> — ลบผู้ใช้</h3>
+<pre><code># userdel test1
+</code></pre>
+<p><em>(อธิบายเพิ่ม: <code>userdel -r test1</code> ลบ home directory ด้วย)</em></p>
+<h3 id="95-groupadd-สร้างกลุ่ม">9.5 <code>groupadd</code> — สร้างกลุ่ม</h3>
+<pre><code>groupadd [-g GID] GROUP_NAME
+# groupadd -g 1000 etda
+</code></pre>
+<h3 id="96-id-แสดงรายละเอียดผู้ใช้">9.6 <code>id</code> — แสดงรายละเอียดผู้ใช้</h3>
+<pre><code>$ id jezt
+uid=1000(jezt) gid=1000(jezt) groups=1000(jezt),4(adm),20(dialout),24(cdrom),33(www-data),46(plugdev),112(lpadmin),120(admin),122(sambashare)
+</code></pre>
+<ul>
+<li>แสดง <strong>username, UID, GID และทุกกลุ่มที่เป็นสมาชิก</strong></li>
+</ul>
+<hr />
+<h2 id="10-file-information-ทบทวน">10. File Information (ทบทวน)</h2>
+<p><code>ls -l</code> → <code>-rw-r--r-- 1 ittipon muict 68524 2011-12-19 07:18 foo.txt</code> = <strong>File type and Permissions / link count / Owner / Group / Size (bytes) / Modification Time/Date / File Name</strong> (เรื่อง owner/group จะใช้ต่อใน L5)</p>
+<hr />
+<h1>ส่วนที่ 2 — Lab 4: User Management</h1>
+<h2 id="11-วัตถุประสงค์-สิ่งที่ส่ง-และคำสั่ง">11. วัตถุประสงค์ สิ่งที่ส่ง และคำสั่ง</h2>
+<p><strong>Objectives:</strong> 1. Study Linux User Management · 2. Practice Linux commands for user management</p>
+<p><strong>What to Submit:</strong> แคปทุกคำสั่ง <strong>พร้อมอธิบายผลแต่ละคำสั่ง</strong> รวม PDF ส่ง MyCourses ชื่อ <strong><code>6887xxx_lab4.pdf</code></strong> · ⚠️ ส่ง <strong>Tuesday, August 25 ก่อนเที่ยงคืน</strong></p>
+<p><strong>คำสั่งที่ใช้:</strong> <code>useradd</code>, <code>usermod</code>, <code>userdel</code>, <code>passwd</code>, <code>su</code>, <code>sudo</code>, <code>groupadd</code>, <code>id</code></p>
+<hr />
+<h2 id="12-lab-4-เฉลยช่องว่างทีละหน้า">12. Lab 4: เฉลยช่องว่างทีละหน้า</h2>
+<blockquote class="callout">
+<p>คำตอบอ่านจาก screenshot ในสไลด์ (เครื่องของอาจารย์ user <code>sudsanguan</code>) ข้อที่ให้ &quot;capture จากเครื่องของตนเอง&quot; ตอนส่งต้องใช้ค่าจากเครื่องตัวเอง</p>
+</blockquote>
+<h3 id="หน้า-56-list-of-users">หน้า 5–6 — List of users</h3>
+<pre><code>$ more /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+...
+gdm:x:121:125:Gnome Display Manager:/var/lib/gdm3:/bin/false
+sudsanguan:x:1000:1000:sudsanguan,,,:/home/sudsanguan:/bin/bash
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>คำสั่งที่ใช้</td>
+<td><strong><code>more /etc/passwd</code></strong></td>
+</tr>
+<tr>
+<td>ไฟล์ที่อ่าน</td>
+<td><strong><code>/etc/passwd</code></strong></td>
+</tr>
+<tr>
+<td>UID ของ root</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>GID ของ sudsanguan</td>
+<td><strong>1000</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-7-exercise-อ่านค่าของ-user-ตัวเองใน-etcpasswd">หน้า 7 — Exercise: อ่านค่าของ user ตัวเองใน <code>/etc/passwd</code></h3>
+<p>ตัวอย่างจากบรรทัด <code>sudsanguan:x:1000:1000:sudsanguan,,,:/home/sudsanguan:/bin/bash</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>ค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Username</td>
+<td><code>sudsanguan</code></td>
+</tr>
+<tr>
+<td>Password</td>
+<td><code>x</code> (มีรหัส เก็บใน /etc/shadow)</td>
+</tr>
+<tr>
+<td>UID</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td>GID</td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td>User ID info</td>
+<td><code>sudsanguan,,,</code> (ชื่อ และช่องว่างสำหรับห้อง/เบอร์โทร)</td>
+</tr>
+<tr>
+<td>Home directory</td>
+<td><code>/home/sudsanguan</code></td>
+</tr>
+<tr>
+<td>Command/Shell</td>
+<td><code>/bin/bash</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-8-etcshadow">หน้า 8 — <code>/etc/shadow</code></h3>
+<pre><code>$ sudo more /etc/shadow
+root:!:18374:0:99999:7:::
+sudsanguan:$6$3ZRG5naN$eLo8R6Fzito.jq269Rg1thyEDiJbsZdCvOSqyc7Lc33RXzS.xnFOlBgmMcem23CuXj5pz/F7Bhi8QRTVGo31E0:18415:0:99999:7:::
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>รหัสผ่านที่เข้ารหัสแล้วของ user ตนเอง</td>
+<td>ช่องที่ 2 ของบรรทัดตัวเอง เช่น <strong><code>$6$3ZRG5naN$eLo8R6…E0</code></strong> (<code>$6$</code> = SHA-512)</td>
+</tr>
+<tr>
+<td>ตัวเลข 18374 สำหรับ root</td>
+<td><strong>Date of last password change</strong> = วันที่เปลี่ยนรหัสล่าสุด นับเป็น<strong>จำนวนวัน</strong>ตั้งแต่ 1 ม.ค. 1970 (18374 วัน ≈ 22 เม.ย. 2020)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ช่องรหัสของ root เป็น <code>!</code> = <strong>root ถูก lock</strong> ใช้ <code>sudo</code> แทน</p>
+</blockquote>
+<h3 id="หน้า-9-exercise-อ่านค่าของ-user-ตัวเองใน-etcshadow">หน้า 9 — Exercise: อ่านค่าของ user ตัวเองใน <code>/etc/shadow</code></h3>
+<p>ตัวอย่างจากบรรทัด sudsanguan: Username = <code>sudsanguan</code> · Encrypted Password = <code>$6$3ZRG…E0</code> · Date of last password change = <code>18415</code> · Minimum password age = <code>0</code> · Maximum password age = <code>99999</code></p>
+<h3 id="หน้า-1012-etcgroup-และ-id">หน้า 10–12 — <code>/etc/group</code> และ <code>id</code></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GID สำหรับ root (<code>root:x:0:</code>)</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>GID สำหรับ Sudsanguan (<code>sudsanguan:x:1000:</code>)</td>
+<td><strong>1000</strong></td>
+</tr>
+<tr>
+<td>จำนวนกลุ่มที่ Sudsanguan เป็นสมาชิก</td>
+<td><strong>9 กลุ่ม</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>จาก <code>id sudsanguan</code>:</p>
+<pre><code>uid=1000(sudsanguan) gid=1000(sudsanguan) groups=1000(sudsanguan),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),116(lpadmin),126(sambashare),999(vboxsf)
+</code></pre>
+<p>→ sudsanguan, adm, cdrom, <strong>sudo</strong>, dip, plugdev, lpadmin, sambashare, vboxsf = <strong>9</strong></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> การที่อยู่กลุ่ม <strong><code>sudo</code></strong> คือเหตุผลที่ user นี้ใช้คำสั่ง <code>sudo</code> ได้ · ใน <code>/etc/group</code> จะเห็นชื่อ sudsanguan ในช่องสมาชิกของกลุ่มเหล่านี้ เช่น <code>lpadmin:x:116:sudsanguan</code></p>
+</blockquote>
+<h3 id="หน้า-13-exercise-etcgroup-ของตัวเอง">หน้า 13 — Exercise: <code>/etc/group</code> ของตัวเอง</h3>
+<p>ตอบจากเครื่องตัวเอง: GID ของ username ตัวเอง (ปกติ <strong>1000</strong> ถ้าเป็น user แรกที่สร้างตอนติดตั้ง) และจำนวนกลุ่มที่เป็นสมาชิก (ใช้ <code>id ชื่อตัวเอง</code> หรือ <code>groups</code> นับได้ง่าย)</p>
+<h3 id="หน้า-14-เพิ่มผู้ใช้คนที่-1-ไม่ใส่-option">หน้า 14 — เพิ่มผู้ใช้คนที่ 1 (ไม่ใส่ option)</h3>
+<pre><code>$ useradd test1
+useradd: Permission denied.
+useradd: cannot lock /etc/passwd; try again later.
+$ sudo useradd test1
+$ cat /etc/passwd
+test1:x:1001:1001::/home/test1:/bin/sh
+</code></pre>
+<ul>
+<li><strong>UID ของ test1 = 1001</strong> · <strong>shell = <code>/bin/sh</code></strong></li>
+<li><em>(อธิบายเพิ่ม)</em> <code>useradd</code> แบบไม่ใส่ option ใช้<strong>ค่าเริ่มต้น</strong>: UID ถัดไป (1001), สร้างกลุ่มชื่อเดียวกัน GID 1001, home เป็น <code>/home/test1</code> <strong>แต่ไม่สร้าง directory จริง</strong> (เพราะไม่มี <code>-m</code>), shell เป็น <code>/bin/sh</code>, ช่อง info ว่าง</li>
+</ul>
+<h3 id="หน้า-15-เพิ่มผู้ใช้คนที่-2-ใส่-option">หน้า 15 — เพิ่มผู้ใช้คนที่ 2 (ใส่ option)</h3>
+<pre><code>$ sudo useradd test2 -u 2000 -d /home/test2 -s /bin/bash
+test2:x:2000:2000::/home/test2:/bin/bash
+</code></pre>
+<ul>
+<li><strong>UID ของ test2 = 2000</strong> · <strong>shell = <code>/bin/bash</code></strong></li>
+<li>กลุ่มของ test2 ได้ <strong>GID 2000</strong> ตาม UID</li>
+</ul>
+<h3 id="หน้า-16-แก้ไข-password-ผู้ใช้">หน้า 16 — แก้ไข password ผู้ใช้</h3>
+<pre><code>$ sudo passwd test1
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+</code></pre>
+<h3 id="หน้า-17-exercise-สร้าง-test1-test2-ทั้งสองแบบ">หน้า 17 — Exercise: สร้าง test1, test2 ทั้งสองแบบ</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>test1</th>
+<th>test2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UID</td>
+<td><strong>1001</strong></td>
+<td><strong>2000</strong></td>
+</tr>
+<tr>
+<td>GID</td>
+<td><strong>1001</strong></td>
+<td><strong>2000</strong></td>
+</tr>
+<tr>
+<td>จำนวนกลุ่มที่เป็นสมาชิก</td>
+<td><strong>1 กลุ่ม</strong>: <code>test1</code></td>
+<td><strong>1 กลุ่ม</strong>: <code>test2</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>ตรวจด้วย <code>id test1</code> และ <code>id test2</code> <em>(แนวคำตอบ)</em> · ภาพประกอบในสไลด์เป็นเมนูมุมขวาบน (Switch User / Log Out / Account Settings) สำหรับทดลองสลับผู้ใช้ผ่านหน้าจอ</p>
+</blockquote>
+<h3 id="หน้า-18-exercise-เปลี่ยนรหัส-test1-และทดสอบ-login">หน้า 18 — Exercise: เปลี่ยนรหัส test1 และทดสอบ login</h3>
+<pre><code>sudsanguan@…:/home$ whoami        → sudsanguan
+sudsanguan@…:/home$ su test1      → Password: (รหัสของ test1)
+test1@…:/home$ whoami             → test1
+test1@…:/home$ pwd                → /home
+test1@…:/home$ cd test1
+test1@…:~$ pwd                    → /home/test1
+test1@…:~$ cd ..
+test1@…:/home$ cd sudsanguan
+test1@…:/home/sudsanguan$ ls      → Desktop Documents Downloads examples.desktop foo Music ...
+</code></pre>
+<ul>
+<li><code>su test1</code> แล้วยัง<strong>อยู่ directory เดิม</strong> (<code>/home</code>) · <code>~</code> ของ test1 คือ <code>/home/test1</code></li>
+<li>test1 <strong>เข้าไปดูไฟล์ใน home ของ sudsanguan ได้</strong> เพราะ directory นั้นเปิดสิทธิ์ให้คนอื่นอ่านได้ (<code>drwxr-xr-x</code>) — เรื่องนี้ต่อยอดใน L5</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> ในภาพ <code>cd test1</code> ได้ แสดงว่ามี <code>/home/test1</code> อยู่แล้ว (อาจสร้างไว้ก่อนด้วย <code>-m</code> หรือสร้างเพิ่ม) ถ้าสร้างด้วย <code>useradd test1</code> เฉย ๆ จะ <code>cd</code> ไม่ได้ — ดูหน้า 21</p>
+</blockquote>
+<h3 id="หน้า-19-แก้ไขข้อมูลผู้ใช้">หน้า 19 — แก้ไขข้อมูลผู้ใช้</h3>
+<pre><code>$ sudo usermod test1 -c &quot;Dr. Thitinan&quot;
+test1:x:1001:1001:Dr. Thitinan:/home/test1:/bin/sh
+</code></pre>
+<ul>
+<li><strong>ชื่อใหม่ของผู้ใช้ test1 คือ &quot;Dr. Thitinan&quot;</strong> (ช่อง User ID Info เปลี่ยน)</li>
+</ul>
+<h3 id="หน้า-20-ลบผู้ใช้">หน้า 20 — ลบผู้ใช้</h3>
+<pre><code>$ sudo userdel test2
+</code></pre>
+<ul>
+<li><strong>ผู้ใช้ที่ถูกลบออก คือ test2</strong> (บรรทัด test2 หายจาก <code>/etc/passwd</code> เหลือ test1)</li>
+</ul>
+<h3 id="หน้า-22-เพิ่มกลุ่มผู้ใช้-exercise">หน้า 22 — เพิ่มกลุ่มผู้ใช้ (Exercise)</h3>
+<pre><code>$ groupadd -g 2000 testing
+groupadd: Permission denied.
+groupadd: cannot lock /etc/group; try again later.
+$ sudo groupadd -g 2000 testing
+testing:x:2000:
+</code></pre>
+<ul>
+<li><strong>กลุ่มที่สร้างใหม่ชื่อ <code>testing</code></strong> · <strong>GID = 2000</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 สร้าง GID 2000 ได้เพราะ test2 (ที่เคยมีกลุ่ม GID 2000) <strong>ถูกลบไปแล้ว</strong></p>
+</blockquote>
+<hr />
+<h2 id="13-lab-4-exercise-หน้า-21-แนวคำตอบ">13. Lab 4: Exercise หน้า 21 (แนวคำตอบ)</h2>
+<p><strong>โจทย์:</strong> แก้ไขชื่อของ test1 และ test2 ตามตัวอย่าง · ทดสอบว่า home directory ของ test1 และ test2 ถูกสร้างหรือไม่ · ถ้าไม่ได้ต้องทำอย่างไร</p>
+<ul>
+<li>แก้ชื่อ: <code>sudo usermod -c &quot;ชื่อใหม่&quot; test1</code> และ <code>sudo usermod -c &quot;ชื่อใหม่&quot; test2</code></li>
+<li>ตรวจ home: <code>ls /home</code> หรือ <code>ls -ld /home/test1 /home/test2</code></li>
+<li><strong>ผลที่คาด:</strong> ทั้งคู่สร้างโดย<strong>ไม่มี <code>-m</code></strong> ถ้าระบบไม่ได้ตั้งค่าให้สร้างอัตโนมัติ <strong>จะไม่มี directory <code>/home/test1</code>, <code>/home/test2</code></strong> (ขึ้น <code>No such file or directory</code> / <code>su</code> แล้วเข้า home ไม่ได้)</li>
+<li><strong>วิธีแก้</strong> (เลือกอย่างใดอย่างหนึ่ง):
+<ol>
+<li>สร้างเองแล้วโอนให้เป็นของผู้ใช้:<pre><code>sudo mkdir /home/test1
+sudo chown test1:test1 /home/test1
+</code></pre>
+</li>
+<li>ลบแล้วสร้างใหม่พร้อม <code>-m</code>: <code>sudo userdel test1</code> แล้ว <code>sudo useradd -m -s /bin/bash test1</code></li>
+</ol>
+</li>
+</ul>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Multi-user / Multitasking</strong></td>
+<td>หลายคนใช้พร้อมกัน / หลายงานพร้อมกัน</td>
+<td>เหมาะกับ server</td>
+</tr>
+<tr>
+<td><strong>User / Superuser (root)</strong></td>
+<td>ผู้ใช้ทั่วไป / ผู้ดูแลที่ทำได้ทุกอย่าง</td>
+<td>คนทั่วไป / เจ้าของบ้าน</td>
+</tr>
+<tr>
+<td><strong>UID / GID</strong></td>
+<td>หมายเลขผู้ใช้ / หมายเลขกลุ่ม</td>
+<td>เลขประจำตัว</td>
+</tr>
+<tr>
+<td><strong><code>/etc/passwd</code></strong></td>
+<td>7 ช่อง: username, x, UID, GID, info, home, shell</td>
+<td>สมุดรายชื่อ</td>
+</tr>
+<tr>
+<td><strong><code>/etc/shadow</code></strong></td>
+<td>8 ช่อง: username, encrypted pw, last change, min, max, warn, inactive, expire</td>
+<td>ตู้เซฟรหัส</td>
+</tr>
+<tr>
+<td><strong><code>/etc/group</code></strong></td>
+<td>4 ช่อง: name, password, GID, user list</td>
+<td>ทะเบียนกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>x</code> / <code>*</code> / <code>!</code></strong></td>
+<td>มีรหัส (เก็บ shadow) / ไม่มีรหัส / ถูก lock</td>
+<td>มี / ไม่มี / ล็อก</td>
+</tr>
+<tr>
+<td><strong><code>/usr/sbin/nologin</code></strong></td>
+<td>shell ที่ไม่ให้ login (&quot;This account is currently not available&quot;)</td>
+<td>ห้ามเข้า</td>
+</tr>
+<tr>
+<td><strong>sh / bash / csh / ksh</strong></td>
+<td>Bourne / Bourne Again / C / K shell</td>
+<td>ตระกูล shell</td>
+</tr>
+<tr>
+<td><strong><code>su</code></strong></td>
+<td>Substitute User — สลับเป็น user อื่น</td>
+<td>เปลี่ยนตัว</td>
+</tr>
+<tr>
+<td><strong><code>sudo</code></strong></td>
+<td>Super user do — รันคำสั่งด้วยสิทธิ์ root</td>
+<td>ยืมสิทธิ์</td>
+</tr>
+<tr>
+<td><strong><code>useradd</code></strong></td>
+<td>เพิ่มผู้ใช้ (<code>-u -g -d -s -m -c</code>)</td>
+<td>add</td>
+</tr>
+<tr>
+<td><strong><code>passwd</code></strong></td>
+<td>ตั้ง/เปลี่ยนรหัส (ใส่ 2 ครั้ง)</td>
+<td>ตั้งรหัส</td>
+</tr>
+<tr>
+<td><strong><code>usermod</code></strong></td>
+<td>แก้ผู้ใช้ (+ <code>-e</code> หมดอายุ, <code>-L</code> lock, <code>-U</code> unlock)</td>
+<td>modify</td>
+</tr>
+<tr>
+<td><strong><code>userdel</code></strong></td>
+<td>ลบผู้ใช้</td>
+<td>delete</td>
+</tr>
+<tr>
+<td><strong><code>groupadd</code></strong></td>
+<td>สร้างกลุ่ม (<code>-g GID</code>)</td>
+<td>สร้างกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>id</code></strong></td>
+<td>แสดง uid, gid, groups</td>
+<td>บัตรประชาชน</td>
+</tr>
+<tr>
+<td><strong>UTC</strong></td>
+<td>เวลาสากล · Bangkok = UTC+7</td>
+<td>เวลากลาง</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>UNIX = <strong>Multi-user + Multitasking</strong> → นิยมใช้บน server</li>
+<li>ผู้ใช้ 2 ระดับ: <strong>User</strong> / <strong>Superuser = root</strong></li>
+<li><strong><code>/etc/passwd</code> 7 ช่อง</strong> · username ≤ <strong>32 ตัวอักษร</strong> · home และ shell ต้องเป็น <strong>absolute path</strong></li>
+<li><strong>UID: 0 = root · 1–99 = ระบบ · 100–999 = โปรแกรมที่ admin ติดตั้ง · 1000+ = ผู้ใช้ทั่วไป</strong></li>
+<li><strong>Shell</strong>: <code>/bin/sh</code> (Bourne), <code>/bin/bash</code> (Bourne Again), <code>/bin/csh</code> (C), <code>/bin/ksh</code> (K)</li>
+<li><strong><code>/etc/shadow</code> 8 ช่อง</strong> · อ่าน-เขียนเฉพาะ root · ต้อง <code>sudo</code> · <code>*</code> = ไม่มีรหัส, <code>!</code> = locked</li>
+<li>max &lt; min = ผู้ใช้เปลี่ยนรหัสเองไม่ได้ · 99999 = ไม่หมดอายุ</li>
+<li><strong><code>/etc/group</code> 4 ช่อง</strong> · อ่านได้ แก้เฉพาะ root</li>
+<li><code>useradd</code> option: <strong>-u UID, -g GID, -d HOME, -s SHELL, -m สร้าง home, -c COMMENT</strong></li>
+<li><code>usermod</code> เพิ่ม <strong>-e YYYY-MM-DD, -L lock, -U unlock</strong></li>
+<li>Lab: root UID = 0, GID = 0 · sudsanguan UID/GID = 1000, อยู่ <strong>9 กลุ่ม</strong> · test1 = 1001 <code>/bin/sh</code> · test2 = 2000 <code>/bin/bash</code> · usermod -c → <strong>&quot;Dr. Thitinan&quot;</strong> · ลบ <strong>test2</strong> · กลุ่มใหม่ <strong>testing GID 2000</strong></li>
+<li>ส่งแลป <strong><code>6887xxx_lab4.pdf</code></strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>/etc/passwd</code> vs <code>/etc/shadow</code></strong></td>
+<td>7 ช่อง ใครก็อ่านได้ vs 8 ช่อง รหัสเข้ารหัส อ่านได้เฉพาะ root</td>
+</tr>
+<tr>
+<td><strong><code>x</code> vs <code>*</code> vs <code>!</code></strong></td>
+<td>มีรหัส (อยู่ shadow) vs ไม่มีรหัส vs ถูก lock</td>
+</tr>
+<tr>
+<td><strong><code>su</code> vs <code>sudo</code></strong></td>
+<td>กลายเป็น user อื่น (ใช้รหัสคนนั้น) vs รันคำสั่งเดียวแบบ root (ใช้รหัสตัวเอง)</td>
+</tr>
+<tr>
+<td><strong><code>useradd test1</code> vs <code>useradd -m -s /bin/bash test1</code></strong></td>
+<td>ค่าเริ่มต้น: ไม่สร้าง home, shell <code>/bin/sh</code> vs สร้าง home, shell bash</td>
+</tr>
+<tr>
+<td><strong><code>useradd</code> vs <code>usermod</code></strong></td>
+<td>สร้างใหม่ vs แก้ของเดิม (และมี -e, -L, -U)</td>
+</tr>
+<tr>
+<td><strong>Minimum vs Maximum password age</strong></td>
+<td>ต้องรอกี่วันถึงเปลี่ยนได้ vs ใช้ได้นานสุดกี่วัน</td>
+</tr>
+<tr>
+<td><strong>Inactivity period vs Account expiration</strong></td>
+<td>ไม่เปลี่ยนรหัสนานเกินจะถูกปิด vs ถึงวันที่กำหนดถูกปิดทันที</td>
+</tr>
+<tr>
+<td><strong><code>/bin/sh</code> vs <code>/bin/bash</code></strong></td>
+<td>Bourne shell vs Bourne Again shell (ความสามารถมากกว่า)</td>
+</tr>
+<tr>
+<td><strong><code>id</code> vs <code>groups</code> vs <code>whoami</code></strong></td>
+<td>uid+gid+กลุ่มทั้งหมด vs เฉพาะกลุ่ม vs เฉพาะชื่อ</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไม <code>useradd test1</code> ไม่มี sudo แล้ว error</strong> → ต้องเขียน <code>/etc/passwd</code> ซึ่งแก้ได้เฉพาะ root (&quot;cannot lock /etc/passwd&quot;)</li>
+<li><strong>ทำไม user ระบบหลายตัวใช้ <code>/usr/sbin/nologin</code></strong> → เป็นบัญชีของโปรแกรม ไม่ได้มีไว้ให้คน login จึงปิดเพื่อความปลอดภัย</li>
+<li><strong>ทำไม root ใน Ubuntu เป็น <code>!</code></strong> → ล็อกไว้ไม่ให้ login ตรง บังคับให้ใช้ sudo ซึ่งตรวจสอบและบันทึกได้ว่าใครทำอะไร</li>
+<li><strong>ทำไม home ของ test1 อาจไม่มีหลัง <code>useradd</code></strong> → ไม่ได้ใส่ <code>-m</code> ต้องสร้างเองหรือสร้าง user ใหม่พร้อม <code>-m</code></li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l3/index.html"><small>← บทก่อนหน้า</small><span>L3 – File Management + Lab 3 (File System Commands)</span></a><a class="pg next" href="../l5/index.html"><small>บทถัดไป →</small><span>L5 – File Permissions + Lab 5 (File Permissions)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

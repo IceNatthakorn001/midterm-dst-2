@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L8 – Process and Memory + Lab 8 (Process + Memory) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-process-คืออะไร">2. Process คืออะไร ⭐⭐</a></li><li><a href="#3-ps-และ-parent-child-process">3. ps และ Parent / Child process ⭐</a></li><li><a href="#4-ps--f-ps--aux-และคอลัมน์">4. ps -f, ps -aux และคอลัมน์ ⭐⭐</a></li><li><a href="#5-top">5. top ⭐</a></li><li><a href="#6-process-state">6. Process State ⭐⭐</a></li><li><a href="#7-foreground-background-process">7. Foreground / Background Process ⭐</a></li><li><a href="#8-process-control-block-pcb">8. Process Control Block (PCB) ⭐</a></li><li><a href="#9-การหยุด-process-ด้วย-kill">9. การหยุด process ด้วย kill ⭐</a></li><li><a href="#10-nice-renice-ปรับความสำคัญของ-process">10. nice / renice — ปรับความสำคัญของ process ⭐⭐</a></li><li><a href="#11-memory-บน-windows">11. Memory บน Windows</a></li><li><a href="#12-memory-management-ลำดับชั้นหน่วยความจำ">12. Memory Management: ลำดับชั้นหน่วยความจำ ⭐</a></li><li><a href="#13-virtual-memory-และ-mmu">13. Virtual Memory และ MMU ⭐⭐</a></li><li><a href="#14-การจัดสรรหน่วยความจำให้-process">14. การจัดสรรหน่วยความจำให้ process</a></li><li><a href="#15-คำสั่งดู-memory">15. คำสั่งดู Memory ⭐⭐</a></li><li><a href="#16-เฉลยทีละหน้า">16. เฉลยทีละหน้า</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L8</div>
+      <h1 class="lesson-title">L8 – Process and Memory + Lab 8 (Process + Memory)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> ต่อยอดจาก L2 ที่บอกว่า OS &quot;virtualize CPU และ memory&quot; บทนี้ลงมือดูของจริง</p>
+<p>(1) <strong>Lecture 8 ส่วน Process</strong>: process คืออะไร, parent/child และ process tree, คำสั่ง <strong><code>ps</code>, <code>ps -f</code>, <code>ps -aux</code>, <code>top</code></strong>, สถานะของ process (R, D, S, T, Z), foreground/background (<code>&amp;</code>, <code>fg</code>), <strong>Process Control Block</strong>, <strong><code>kill</code></strong>, และการปรับความสำคัญด้วย <strong><code>nice</code> / <code>renice</code></strong></p>
+<p>(2) <strong>Lecture 8 ส่วน Memory</strong>: <code>systeminfo</code> บน Windows, ลำดับชั้นหน่วยความจำ, <strong>virtual memory และ MMU</strong>, การจัดสรรหน่วยความจำให้ process, และคำสั่งดู memory <strong><code>top</code>, <code>free</code>, <code>vmstat</code>, <code>/proc/meminfo</code></strong></p>
+<p>(3) <strong>Lab 8</strong> ฝึกทุกคำสั่งและตอบคำถามจากผลที่ได้</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 8: Process Management</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 8 = <strong>การฝึกใช้คำสั่งเกี่ยวกับ process</strong> (สัปดาห์ 9 = memory และการจัดการสภาพแวดล้อม) · เกณฑ์คะแนนเหมือนเดิม · ส่งแลป 23.59 น. · ทดสอบย่อยทุกสัปดาห์</li>
+</ul>
+<hr />
+<h2 id="2-process-คืออะไร">2. Process คืออะไร ⭐⭐</h2>
+<blockquote class="callout">
+<p><strong>A process is a program in execution.</strong> — process คือ<strong>โปรแกรมที่กำลังทำงานอยู่</strong></p>
+</blockquote>
+<p><img loading="lazy" src="img/lec-p04.jpg" alt="Program → Process → Thread → CPU" /></p>
+<ul>
+<li><strong>Program</strong> = ชุดคำสั่ง (Instruction #1 … #N) ที่เก็บอยู่บน <strong>Disk</strong></li>
+<li>เมื่อสั่งรัน โปรแกรมถูก <strong>Instantiate</strong> (สร้างเป็นตัวจริง) ขึ้นมาใน <strong>RAM</strong> กลายเป็น <strong>Process</strong> (ใน RAM มีได้หลาย process: Process #1, #2, …, #M)</li>
+<li>แต่ละ process มี <strong>thread</strong> (Thread #1 high, #2 low, #3 med, …) พร้อม<strong>ลำดับความสำคัญ</strong></li>
+<li><strong>Scheduler (ส่วนหนึ่งของ OS)</strong> เลือก thread ไป <strong>Execute</strong> บน CPU · สลับด้วย <strong>Context Switch</strong> และแย่ง CPU คืนได้ด้วย <strong>Preemption</strong></li>
+<li>⭐ <strong>CPU สลับการทำงานระหว่าง process</strong> (Process 1–5 วนรอบ CPU)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>Program = สูตรอาหารในหนังสือ</strong> (อยู่เฉย ๆ บนดิสก์) · <strong>Process = การทำอาหารตามสูตรที่กำลังเกิดขึ้น</strong> (ใช้ครัว ใช้วัตถุดิบ ใน RAM) · เปิดโปรแกรมเดียวกัน 2 หน้าต่าง = 2 process</p>
+</blockquote>
+<hr />
+<h2 id="3-ps-และ-parent-child-process">3. <code>ps</code> และ Parent / Child process ⭐</h2>
+<p><strong><code>ps</code> (process status)</strong> ใช้ตรวจสอบสถานะของ process</p>
+<pre><code>$ ps
+  PID TTY          TIME CMD
+ 2245 pts/0    00:00:00 bash
+ 4160 pts/0    00:00:00 ps
+</code></pre>
+<ul>
+<li><strong>bash is a shell</strong> — terminal ที่เปิดอยู่คือ process <code>bash</code></li>
+<li>เมื่อพิมพ์ <code>ps</code> ใน bash → bash สร้าง process <code>ps</code> ขึ้นมา</li>
+<li><strong>Bash (PID 2245) = Parent process</strong> · <strong>ps (PID 4160) = Child process</strong></li>
+</ul>
+<h3 id="โครงสร้าง-process-tree">โครงสร้าง Process Tree</h3>
+<p>process สร้าง process ลูกต่อ ๆ กันเป็นต้นไม้ เช่น Process 12274 → 12276 → (12277, 12278) → (12279, 12280) → (12283, 12282, 12284, 12281)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ต้นสุดของต้นไม้คือ <strong>PID 1 (init / systemd)</strong> ที่ kernel สร้างตอน boot (L7) · ดูเป็นต้นไม้ได้ด้วย <code>pstree</code></p>
+</blockquote>
+<hr />
+<h2 id="4-ps--f-ps--aux-และคอลัมน์">4. <code>ps -f</code>, <code>ps -aux</code> และคอลัมน์ ⭐⭐</h2>
+<p><strong><code>ps -f</code></strong> (full format) แสดง parent &amp; child processes</p>
+<pre><code>$ ps -f
+UID        PID  PPID  C STIME TTY      TIME     CMD
+sudsang+  2245  2235  0 14:35 pts/0    00:00:00 bash
+sudsang+  5414  2245  0 21:38 pts/0    00:00:00 ls --color=auto -l
+sudsang+  5415  2245  0 21:38 pts/0    00:00:00 more
+sudsang+  5416  2245  0 21:38 pts/0    00:00:00 ps -f
+</code></pre>
+<p>→ <strong>ls (5414), more (5415), ps (5416)</strong> มี <strong>PPID = 2245</strong> จึงเป็น <strong>child processes</strong> ของ <strong>bash (2245) = parent</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คอลัมน์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UID</strong></td>
+<td>user ID (เจ้าของ process)</td>
+</tr>
+<tr>
+<td><strong>PID</strong></td>
+<td><strong>Process ID</strong></td>
+</tr>
+<tr>
+<td><strong>PPID</strong></td>
+<td><strong>Parent process ID</strong></td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td><strong>CPU utilization</strong> ของ process</td>
+</tr>
+<tr>
+<td><strong>STIME</strong></td>
+<td><strong>start process time</strong></td>
+</tr>
+<tr>
+<td><strong>TTY</strong></td>
+<td><strong>terminal type</strong> (<code>pts/0</code> = terminal, <code>?</code> = ไม่ผูกกับ terminal)</td>
+</tr>
+<tr>
+<td><strong>TIME</strong></td>
+<td><strong>CPU time</strong> ที่ใช้ไป</td>
+</tr>
+<tr>
+<td><strong>CMD</strong></td>
+<td><strong>Command</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>คำถามในสไลด์: <code>ps -f | grep bash</code> จะให้ผลอะไร?</strong> <em>(แนวคำตอบ)</em> → แสดงเฉพาะบรรทัดที่มีคำว่า bash คือบรรทัดของ process <strong>bash</strong> และบรรทัดของ <strong><code>grep bash</code> เอง</strong> (เพราะคำสั่ง grep ก็มีคำว่า bash อยู่ใน CMD)</p>
+<p><strong><code>ps -aux</code></strong> แสดง<strong>โปรเซสของผู้ใช้ทั้งหมดที่กำลังทำงาน</strong> รวมของ root และ service ของระบบ เช่น <code>/lib/systemd/systemd-resolved</code>, <code>/usr/sbin/cron -f</code>, <code>/usr/sbin/NetworkManager</code>, <code>[card0-crtc6]</code> (ชื่อใน <code>[ ]</code> = kernel thread) <em>(อธิบายเพิ่ม: a = ทุกผู้ใช้, u = แสดงชื่อผู้ใช้และ %CPU/%MEM, x = รวม process ที่ไม่มี terminal)</em></p>
+<hr />
+<h2 id="5-top">5. <code>top</code> ⭐</h2>
+<p><strong>จะรู้ได้อย่างไรว่า process ไหนใช้ทรัพยากรมากหรือน้อย?</strong> → โปรแกรม <strong><code>top</code></strong></p>
+<ul>
+<li>มีคุณสมบัติ<strong>คล้าย Task Manager</strong> บน Windows</li>
+<li>แสดง process ที่ใช้ทรัพยากร<strong>เรียงจากมากไปน้อย</strong></li>
+<li><strong>ปรับปรุงการแสดงผลต่อเนื่องทุก ๆ 3 วินาที</strong></li>
+<li><strong>บริหารจัดการทรัพยากรของ process ได้</strong> <em>(อธิบายเพิ่ม: เช่น กด k เพื่อ kill, r เพื่อ renice, q เพื่อออก)</em></li>
+</ul>
+<p>ผล <code>top</code> ในสไลด์:</p>
+<pre><code>top - 21:11:26 up 6:37, 1 user, load average: 0.14, 0.12, 0.06
+Tasks: 249 total, 1 running, 197 sleeping, 0 stopped, 7 zombie
+%Cpu(s): 5.8 us, 0.7 sy, 0.0 ni, 93.5 id, 0.0 wa, ...
+KiB Mem : 4026140 total, 917240 free, 1055332 used, 2053568 buff/cache
+KiB Swap:  969960 total, 969960 free,       0 used. 2690988 avail Mem
+  PID USER   PR  NI    VIRT    RES    SHR S %CPU %MEM   TIME+ COMMAND
+ 1803 sudsang+ 20  0 3490188 293224 100120 S 10.2 7.3 2:54.84 gnome-shell
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ความหมาย <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บรรทัดแรก</td>
+<td>เวลา, เปิดเครื่องมานานเท่าไร (up), จำนวน user, <strong>load average</strong> 1/5/15 นาที</td>
+</tr>
+<tr>
+<td><strong>Tasks</strong></td>
+<td>จำนวน process ทั้งหมด แยกตามสถานะ running / sleeping / stopped / zombie</td>
+</tr>
+<tr>
+<td><strong>%Cpu(s)</strong></td>
+<td>us = user, sy = system, ni = nice, <strong>id = idle</strong>, wa = รอ I/O</td>
+</tr>
+<tr>
+<td><strong>Mem / Swap</strong></td>
+<td>หน่วยความจำ (ดูหัวข้อ 15)</td>
+</tr>
+<tr>
+<td><strong>PR / NI</strong></td>
+<td>priority / ค่า nice (หัวข้อ 10)</td>
+</tr>
+<tr>
+<td><strong>VIRT / RES / SHR</strong></td>
+<td>หน่วยความจำเสมือน / ที่อยู่ใน RAM จริง / ที่ใช้ร่วม</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>สถานะ (R, S, I, Z, …)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-process-state">6. Process State ⭐⭐</h2>
+<p><img loading="lazy" src="img/lec-p12.jpg" alt="Process State: created → ready ⇄ running → terminated, waiting" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สถานะ</th>
+<th>ความหมาย <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>created</strong></td>
+<td>เพิ่งถูกสร้าง</td>
+</tr>
+<tr>
+<td><strong>ready</strong></td>
+<td>พร้อมรัน รอคิวได้ CPU</td>
+</tr>
+<tr>
+<td><strong>running</strong></td>
+<td>กำลังใช้ CPU</td>
+</tr>
+<tr>
+<td><strong>waiting</strong></td>
+<td>รอ I/O หรือ event</td>
+</tr>
+<tr>
+<td><strong>terminated</strong></td>
+<td>จบการทำงาน</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>การเปลี่ยนสถานะ (จากแผนภาพ):</strong></p>
+<ul>
+<li>created → <strong>admitted</strong> → ready</li>
+<li>ready → <strong>scheduler dispatch</strong> → running</li>
+<li>running → <strong>interrupt</strong> → ready (โดนแย่ง CPU)</li>
+<li>running → <strong>I/O or event wait</strong> → waiting</li>
+<li>waiting → <strong>I/O or event completion</strong> → ready</li>
+<li>running → <strong>exit</strong> → terminated</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> จาก waiting <strong>ต้องกลับไป ready ก่อน</strong> ไม่ได้ไป running ตรง เพราะต้องรอ scheduler เลือกอีกครั้ง</p>
+</blockquote>
+<h3 id="linux-process-states-ตัวอักษรในคอลัมน์-s-ของ-top-ps">Linux Process States (ตัวอักษรในคอลัมน์ S ของ <code>top</code> / <code>ps</code>)</h3>
+<p><img loading="lazy" src="img/lec-p13.jpg" alt="Linux process states" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวอักษร</th>
+<th>สถานะ</th>
+<th>เข้าสถานะนี้เมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R</strong></td>
+<td><strong>Running or Runnable</strong></td>
+<td>กำลังรันหรือพร้อมรัน (process created เข้ามาที่นี่)</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td><strong>Uninterruptible Sleep</strong></td>
+<td><strong>รอทรัพยากรและสัญญาณ</strong> (เช่น I/O ดิสก์) ปลุกด้วยสัญญาณไม่ได้ → กลับ R เมื่อ Wakes Up / Signal</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td><strong>Interruptible Sleep</strong></td>
+<td><strong>รอทรัพยากร</strong> ปลุกได้ → กลับ R เมื่อ Wakes Up</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td><strong>Stopped</strong></td>
+<td>ได้รับ <strong>SIGSTOP</strong> (เช่น กด Ctrl+Z) → กลับ R เมื่อได้ <strong>SIGCONT</strong></td>
+</tr>
+<tr>
+<td><strong>Z</strong></td>
+<td><strong>Zombie</strong></td>
+<td>เรียก <strong>exit()</strong> หรือได้สัญญาณ terminate แล้ว</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>Zombie</strong> = process ที่จบแล้วแต่ <strong>parent ยังไม่มารับค่าสถานะการจบ</strong> จึงยังเหลือชื่อในตาราง process (ไม่กินทรัพยากรนอกจากช่องในตาราง) · ใน <code>top</code> ยังมี <strong>I = idle</strong> (kernel thread ว่าง)</p>
+</blockquote>
+<hr />
+<h2 id="7-foreground-background-process">7. Foreground / Background Process ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Foreground Process</strong></td>
+<td>process ที่<strong>ติดต่อกับ user ผ่านหน้าจอและ keyboard</strong> (terminal รอจนกว่าจะจบ)</td>
+</tr>
+<tr>
+<td><strong>Background Process</strong></td>
+<td>process ที่<strong>ไม่มีการ interact กับ user</strong> (terminal ใช้ต่อได้ทันที)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="สร้าง-background-process-ด้วย">สร้าง Background Process ด้วย <code>&amp;</code></h3>
+<pre><code>$ ls -l | more &amp;
+[1] 5415                         ← [job number] PID
+$ ps -f
+... 5414 2245 ... ls --color=auto -l
+... 5415 2245 ... more
+... 5416 2245 ... ps -f
+[1]+  Stopped        ls --color=auto -l | more
+$ fg                             ← ดึงงานกลับมาเป็น foreground
+ls --color=auto -l | more
+total 1108 ...
+</code></pre>
+<ul>
+<li>ใส่ <strong><code>&amp;</code> ท้ายคำสั่ง</strong> = รันเป็น background · shell ตอบ <strong><code>[1] 5415</code></strong> = job หมายเลข 1, PID 5415</li>
+<li><code>more</code> ต้องการคุยกับหน้าจอ จึงถูก <strong>Stopped</strong> เมื่ออยู่ background · <strong><code>fg</code></strong> ดึงกลับมา foreground ให้ทำงานต่อ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> PID ที่แสดงคือ PID ของคำสั่ง<strong>สุดท้ายใน pipeline</strong> (more = 5415 ส่วน ls = 5414) · คำสั่งที่เกี่ยวข้อง: <code>jobs</code> ดูงาน background, <code>bg</code> สั่งงานที่หยุดให้ทำต่อใน background, Ctrl+Z หยุดงาน foreground</p>
+</blockquote>
+<hr />
+<h2 id="8-process-control-block-pcb">8. Process Control Block (PCB) ⭐</h2>
+<p><img loading="lazy" src="img/lec-p16.jpg" alt="Process Table และ Process Control Block" /></p>
+<ul>
+<li>OS มี <strong>Process Table</strong> — แต่ละแถวคือ <strong>PID</strong> กับตัวชี้ไปยัง <strong>PCB</strong> ของ process นั้น (PID 1, 2, …, n)</li>
+<li><strong>PCB</strong> เก็บข้อมูลของ process หนึ่งตัว:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฟิลด์ใน PCB</th>
+<th>เก็บอะไร <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Program counter</strong></td>
+<td>คำสั่งถัดไปที่จะทำ</td>
+</tr>
+<tr>
+<td><strong>Registers</strong></td>
+<td>ค่าใน register ของ CPU ตอนถูกสลับออก</td>
+</tr>
+<tr>
+<td><strong>State</strong></td>
+<td>สถานะ (ready, running, waiting, …)</td>
+</tr>
+<tr>
+<td><strong>Priority</strong></td>
+<td>ลำดับความสำคัญ</td>
+</tr>
+<tr>
+<td><strong>Address space</strong></td>
+<td>หน่วยความจำของ process</td>
+</tr>
+<tr>
+<td><strong>Open files</strong></td>
+<td>ไฟล์ที่เปิดอยู่</td>
+</tr>
+<tr>
+<td><strong>Other flags</strong></td>
+<td>ข้อมูลอื่น ๆ</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> PCB คือ <strong>&quot;ที่คั่นหนังสือ&quot;</strong> — ตอน context switch OS บันทึกสถานะลง PCB แล้วค่อยโหลดกลับมาให้ process ทำงานต่อจากจุดเดิมได้</p>
+</blockquote>
+<hr />
+<h2 id="9-การหยุด-process-ด้วย-kill">9. การหยุด process ด้วย <code>kill</code> ⭐</h2>
+<pre><code>$ nano test99 &amp;
+[1] 5685
+$ ps -f        → 5685 2245 ... nano test99
+[1]+  Stopped        nano test99
+$ kill 5685
+$ ps -f        → 5685 ยังอยู่!
+$ kill -9 5685
+[1]+  Killed         nano test99
+$ ps -f        → ไม่มี nano แล้ว
+</code></pre>
+<ul>
+<li><strong><code>kill PID</code></strong> = ส่งสัญญาณ <strong>SIGTERM</strong> (ขอให้จบอย่างสุภาพ) <em>(อธิบายเพิ่ม)</em></li>
+<li><strong><code>kill -9 PID</code></strong> = ส่ง <strong>SIGKILL</strong> บังคับจบทันที ปฏิเสธไม่ได้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> ในตัวอย่าง <code>kill 5685</code> ไม่ได้ผลเพราะ nano <strong>อยู่ในสถานะ Stopped</strong> จึงยังไม่ได้จัดการสัญญาณ SIGTERM ส่วน <code>kill -9</code> ได้ผลทันทีเสมอ</p>
+</blockquote>
+<hr />
+<h2 id="10-nice-renice-ปรับความสำคัญของ-process">10. <code>nice</code> / <code>renice</code> — ปรับความสำคัญของ process ⭐⭐</h2>
+<ul>
+<li>ผู้ใช้ปรับ<strong>ระดับความสำคัญ (priority)</strong> ของ process ได้ด้วย <strong><code>nice</code></strong> เพราะผู้ใช้รู้ว่า process ใดของตนสำคัญ</li>
+<li>ช่วงค่า <strong>-20 ถึง 19</strong> · <strong>ค่าเริ่มต้น (default nice value) = 0</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ค่า nice</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-20</strong> (ต่ำสุด)</td>
+<td><strong>ความสำคัญสูงสุด</strong> (Most likely to receive priority)</td>
+</tr>
+<tr>
+<td><strong>0</strong></td>
+<td>ค่าปกติ</td>
+</tr>
+<tr>
+<td><strong>+19</strong> (สูงสุด)</td>
+<td><strong>ความสำคัญต่ำสุด</strong> (Least likely to receive priority)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำว่า <strong>&quot;nice&quot; = ใจดีกับคนอื่น</strong> — ค่ายิ่งมาก ยิ่งยอมหลีกทางให้ process อื่น ความสำคัญของตัวเองจึงต่ำลง</p>
+</blockquote>
+<p><strong>ตัวอย่าง:</strong></p>
+<ul>
+<li><strong><code>nice -n 10 /bin/nslookup</code></strong> → process nslookup มีระดับ<strong>ต่ำกว่าปกติ</strong> (ค่าเป็นจำนวนเต็มบวก)</li>
+<li><strong><code>renice [ลำดับความเร่งด่วน] [หมายเลขโพรเซส]</code></strong> ปรับค่าของ process ที่รันอยู่แล้ว เช่น <strong><code>renice -10 2471</code></strong> → nslookup (PID 2471) มีความเร่งด่วน<strong>สูงขึ้น</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียนว่า renice -10 ทำให้ &quot;มีระดับความเร่งด่วนสูงขึ้นเป็น 10&quot; <em>(อธิบายเพิ่ม)</em>: ค่า nice ที่ได้จริงคือ <strong>-10</strong> (ความสำคัญสูงขึ้น) · และ<strong>การลดค่า nice ให้ติดลบต้องใช้ <code>sudo</code></strong> ผู้ใช้ทั่วไปเพิ่มค่าได้อย่างเดียว</p>
+</blockquote>
+<p><strong>nice vs renice:</strong> <code>nice</code> = ตั้งค่า<strong>ตอนเริ่มรัน</strong> process ใหม่ · <code>renice</code> = ปรับค่าของ process <strong>ที่รันอยู่แล้ว</strong> (ต้องรู้ PID)</p>
+<hr />
+<h1>ส่วนที่ 2 — Lecture 8: Memory Management</h1>
+<h2 id="11-memory-บน-windows">11. Memory บน Windows</h2>
+<p>ที่ command line พิมพ์ <strong><code>systeminfo</code></strong> แสดงข้อมูลระบบ (ตัวอย่างในสไลด์ Dell Latitude E7450, Intel i5-5300U, Windows 10 Enterprise, BIOS Mode UEFI):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รายการ</th>
+<th>ค่าในตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Installed Physical Memory</strong></td>
+<td><strong>12.0 GB</strong></td>
+</tr>
+<tr>
+<td><strong>Total Physical Memory</strong></td>
+<td><strong>11.9 GB</strong></td>
+</tr>
+<tr>
+<td><strong>Available Physical Memory</strong></td>
+<td><strong>3.75 GB</strong></td>
+</tr>
+<tr>
+<td><strong>Total Virtual Memory</strong></td>
+<td><strong>23.9 GB</strong></td>
+</tr>
+<tr>
+<td><strong>Available Virtual Memory</strong></td>
+<td><strong>8.15 GB</strong></td>
+</tr>
+<tr>
+<td>Page File Space / Page File</td>
+<td>12.0 GB / <code>C:\pagefile.sys</code></td>
+</tr>
+<tr>
+<td>Windows / System Directory · Boot Device</td>
+<td><code>C:\WINDOWS</code>, <code>C:\WINDOWS\system32</code> · <code>\Device\HarddiskVolume1</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>Total Virtual Memory ≈ RAM + Page File</strong> (11.9 + 12.0 ≈ 23.9 GB) · page file ของ Windows = swap ของ Linux</p>
+</blockquote>
+<hr />
+<h2 id="12-memory-management-ลำดับชั้นหน่วยความจำ">12. Memory Management: ลำดับชั้นหน่วยความจำ ⭐</h2>
+<p><strong>หน่วยความจำ (Memory)</strong> เปรียบเสมือน storage รูปแบบหนึ่ง แต่มีคุณสมบัติต่างกันไป ได้แก่ <strong>รีจิสเตอร์ (Register), แคชของ CPU (CPU cache), แรม (RAM)</strong> เป็นต้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>เวลาเข้าถึงโดยประมาณ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU Registers</strong></td>
+<td><strong>1 CPU cycle</strong></td>
+</tr>
+<tr>
+<td><strong>CPU Cache</strong></td>
+<td><strong>~3–14 CPU cycles</strong></td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td><strong>~250 CPU cycles</strong></td>
+</tr>
+<tr>
+<td><strong>Disk</strong></td>
+<td><strong>~40M CPU cycles</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>CPU ส่ง <strong>Physical Address (PA)</strong> ไปยัง <strong>Main Memory</strong> (ช่อง 0 ถึง M-1) แล้วได้ <strong>Data Word</strong> กลับมา</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบ</th>
+<th>อ้างอิง memory ได้สูงสุด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>32-bit</strong></td>
+<td><strong>4 GB</strong> (2³² addresses)</td>
+</tr>
+<tr>
+<td><strong>64-bit</strong></td>
+<td><strong>16 EB</strong> (2⁶⁴ addresses)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> จึงเป็นเหตุผลที่ Windows 32-bit ใช้ RAM เกิน 4 GB ไม่ได้ · ยิ่งเร็วยิ่งแพงและเล็ก ระบบจึงเก็บของที่ใช้บ่อยไว้ชั้นบน</p>
+</blockquote>
+<hr />
+<h2 id="13-virtual-memory-และ-mmu">13. Virtual Memory และ MMU ⭐⭐</h2>
+<p><img loading="lazy" src="img/lec-p22.jpg" alt="CPU ส่ง virtual address ไป MMU แล้ว MMU ส่ง physical address ไป memory" /></p>
+<ul>
+<li><strong>The CPU sends virtual addresses to the MMU</strong></li>
+<li><strong>MMU (Memory Management Unit)</strong> อยู่ใน CPU package ทำ <strong>translation (mapping) จาก virtual address → physical address</strong></li>
+<li><strong>The MMU sends physical addresses to the memory</strong> ผ่าน <strong>Bus</strong> (bus เชื่อม Memory และ Disk controller ด้วย)</li>
+</ul>
+<h3 id="ตัวอย่างโปรแกรม-2-ตัว-สไลด์หน้า-23">ตัวอย่างโปรแกรม 2 ตัว (สไลด์หน้า 23)</h3>
+<ul>
+<li><strong>(a)</strong> โปรแกรม 16 KB (address 0–16380) มีคำสั่ง <code>JMP 24</code> ที่ address 0</li>
+<li><strong>(b)</strong> อีกโปรแกรม 16 KB มี <code>JMP 28</code> ที่ address 0</li>
+<li><strong>(c)</strong> โหลดทั้งสองต่อกันใน memory → <strong>two processes in memory</strong> · โปรแกรมที่สองไปอยู่ที่ 16384–32764 แต่คำสั่งข้างในยังเป็น <code>JMP 28</code> (หมายถึง address 28 ของตัวเอง)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ถ้าไม่มีการแปลง address โปรแกรมที่สองจะกระโดดไป address 28 ของ<strong>โปรแกรมแรก</strong> ผิดที่ทันที นี่คือเหตุผลที่ต้องมี virtual address + MMU (ทบทวน L2 หัวข้อ &quot;Virtualizing Memory&quot;)</p>
+</blockquote>
+<h3 id="address-space-of-each-process">Address Space of Each Process</h3>
+<ul>
+<li><strong>P0 – P4</strong> แต่ละ process เหมือนมี<strong>คอมพิวเตอร์ส่วนตัว</strong> — มี address space ของตัวเอง</li>
+</ul>
+<hr />
+<h2 id="14-การจัดสรรหน่วยความจำให้-process">14. การจัดสรรหน่วยความจำให้ process</h2>
+<h3 id="memory-allocation-changes-over-time">Memory allocation changes over time</h3>
+<p><img loading="lazy" src="img/lec-p25.jpg" alt="การจัดสรรหน่วยความจำเปลี่ยนไปเมื่อ process เข้าและออก" /></p>
+<p><strong>Memory allocation changes as processes come into memory and leave it. The shaded regions are unused memory.</strong>
+(a) OS + A → (b) + B → (c) + C → (d) A ออก เหลือช่องว่าง → (e) D เข้ามาในที่ของ A → (f) B ออก → (g) A กลับเข้ามาในที่ของ B</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ช่องว่าง (สีขีด) กระจัดกระจาย เรียกว่า <strong>fragmentation</strong> อาจมีพื้นที่ว่างรวมพอแต่ไม่ต่อกันจนใส่ process ใหญ่ไม่ได้</p>
+</blockquote>
+<h3 id="four-neighbor-combinations-for-the-terminating-process-x">Four neighbor combinations for the terminating process X</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>ก่อน X จบ</th>
+<th>หลัง X จบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a)</td>
+<td>A · X · B</td>
+<td>A · <strong>ว่าง</strong> · B</td>
+</tr>
+<tr>
+<td>(b)</td>
+<td>A · X · ว่าง</td>
+<td>A · <strong>ว่างรวมเป็นช่องเดียว</strong></td>
+</tr>
+<tr>
+<td>(c)</td>
+<td>ว่าง · X · B</td>
+<td><strong>ว่างรวมเป็นช่องเดียว</strong> · B</td>
+</tr>
+<tr>
+<td>(d)</td>
+<td>ว่าง · X · ว่าง</td>
+<td><strong>ว่างทั้งหมดรวมเป็นช่องเดียว</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>→ เมื่อ process จบ OS <strong>รวมช่องว่างที่อยู่ติดกัน</strong>เป็นช่องใหญ่ช่องเดียว</p>
+<h3 id="allocating-space-for-growth">Allocating space for growth</h3>
+<ul>
+<li><strong>(a) Allocating space for a growing data segment</strong> — เผื่อ <strong>&quot;Room for growth&quot;</strong> เหนือ process A และ B (ส่วน &quot;Actually in use&quot;)</li>
+<li><strong>(b) Allocating space for a growing stack and a growing data segment</strong> — แต่ละ process: <strong>Program → Data (โตขึ้นข้างบน) … Room for growth … Stack (โตลงข้างล่าง)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> stack กับ data โตเข้าหากัน ใช้ช่องว่างตรงกลางร่วมกัน จึงไม่ต้องกำหนดขนาดแต่ละส่วนตายตัว</p>
+</blockquote>
+<hr />
+<h2 id="15-คำสั่งดู-memory">15. คำสั่งดู Memory ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ใช้ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>top</code></strong></td>
+<td>มุมมอง <strong>dynamic, real-time</strong> ของระบบ รวมถึงดู memory <strong>ต่อ process</strong></td>
+</tr>
+<tr>
+<td><strong><code>top -o %MEM</code></strong></td>
+<td>เรียงตาม <strong>%MEM used</strong> (process ที่ใช้ RAM มากสุดอยู่บนสุด)</td>
+</tr>
+<tr>
+<td><strong><code>free</code></strong></td>
+<td><strong>snapshot ทันที</strong> ของ memory ที่ว่างและใช้ ณ ขณะนั้น</td>
+</tr>
+<tr>
+<td><strong><code>free -mt</code></strong></td>
+<td>รายงาน<strong>หน่วย MB</strong> (<code>-m</code>) พร้อมบรรทัด <strong>Total</strong> (<code>-t</code> = RAM + swap)</td>
+</tr>
+<tr>
+<td><strong><code>vmstat</code></strong></td>
+<td><strong>Report virtual memory statistics</strong></td>
+</tr>
+<tr>
+<td><strong><code>vmstat -s</code></strong></td>
+<td>stats ด้าน <strong>Memory</strong> (รายการแนวตั้ง)</td>
+</tr>
+<tr>
+<td><strong><code>vmstat -D</code></strong></td>
+<td>stats ด้าน <strong>Disks</strong></td>
+</tr>
+<tr>
+<td><strong><code>cat /proc/meminfo | more</code></strong></td>
+<td><strong>virtual file</strong> ที่มีข้อมูล real-time ของระบบ</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="top-ส่วน-memory"><code>top</code> — ส่วน memory</h3>
+<ul>
+<li><strong>Total memory: free, used, buff/cache</strong> · <strong>Swap memory: free, used, avail mem</strong></li>
+</ul>
+<h3 id="free"><code>free</code></h3>
+<pre><code>$ free
+        total     used     free   shared  buff/cache  available
+Mem:  4026172  1031852  1442800    14604     1551520    2705540
+Swap:  969960        0   969960
+$ free -mt
+        total  used  free  shared  buff/cache  available
+Mem:     3931  1007  1409      14        1515       2642
+Swap:     947     0   947
+Total:   4879  1007  2356
+</code></pre>
+<ul>
+<li><strong>Total memory: free, used, shared, buff/cache</strong> · <strong>Swap: free, used, avail mem</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คอลัมน์</th>
+<th>ความหมาย <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>total</strong></td>
+<td>RAM ทั้งหมด</td>
+</tr>
+<tr>
+<td><strong>used</strong></td>
+<td>ที่โปรแกรมใช้อยู่</td>
+</tr>
+<tr>
+<td><strong>free</strong></td>
+<td>ว่างสนิท ไม่ได้ใช้อะไรเลย</td>
+</tr>
+<tr>
+<td><strong>shared</strong></td>
+<td>ใช้ร่วมระหว่าง process (tmpfs)</td>
+</tr>
+<tr>
+<td><strong>buff/cache</strong></td>
+<td>Linux ยืม RAM ว่างไปเป็นแคชไฟล์ <strong>คืนได้ทันทีเมื่อโปรแกรมต้องการ</strong></td>
+</tr>
+<tr>
+<td><strong>available</strong></td>
+<td>ที่เปิดโปรแกรมใหม่ได้จริง ≈ free + ส่วนของ buff/cache ที่คืนได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <strong>ดู <code>available</code> ไม่ใช่ <code>free</code></strong> เพื่อรู้ว่า RAM เหลือพอไหม · &quot;free น้อย&quot; บน Linux ไม่ได้แปลว่า RAM ใกล้เต็ม เพราะส่วนใหญ่ถูกยืมเป็น cache
+<strong>Swap</strong> = พื้นที่บนดิสก์ที่ใช้แทน RAM เมื่อ RAM ไม่พอ (ช้ากว่ามาก — ~40M cycles)</p>
+</blockquote>
+<h3 id="vmstat"><code>vmstat</code></h3>
+<ul>
+<li>รูปแบบ: <code>vmstat [options] [delay [count]]</code> · รายงานเรื่อง <strong>Processes, Memory, Paging, Block IO, Traps, Disks, CPU</strong></li>
+<li>options: <code>-a</code> active/inactive memory · <code>-f</code> จำนวน fork ตั้งแต่ boot · <code>-m</code> slabinfo · <code>-n</code> ไม่แสดง header ซ้ำ · <strong><code>-s</code> event counter statistics</strong> · <code>-d</code> disk statistics · <strong><code>-D</code> summarize disk statistics</strong> · <code>-p</code> partition · <code>-S</code> unit · <code>-w</code> wide · <code>-t</code> timestamp</li>
+</ul>
+<p><strong><code>vmstat -s</code></strong> (Report stats on Memory): <code>4026172 K total memory</code> · <code>1031672 K used memory</code> · <code>1381368 K active memory</code> · <code>885700 K inactive memory</code> · <code>1441764 K free memory</code> · <code>174024 K buffer memory</code> · <code>1378712 K swap cache</code> · <code>969960 K total swap</code> · <code>0 K used swap</code> · <code>969960 K free swap</code> · CPU ticks (non-nice user, nice user, system, idle, IO-wait, IRQ, softirq, stolen) · pages paged in/out · pages swapped in/out · interrupts · <strong>CPU context switches</strong> · boot time · <strong>forks</strong></p>
+<p><strong><code>vmstat -D</code></strong> (Report stats on Disks): <code>29 disks</code> · <code>3 partitions</code> · <code>68388 total reads</code> · <code>22143 merged reads</code> · <code>2777118 read sectors</code> · <code>48115 milli reading</code> · <code>16696 writes</code> · <code>17590 merged writes</code> · <code>1092876 written sectors</code> · <code>22889 milli writing</code> · <code>0 inprogress IO</code> · <code>68 milli spent IO</code></p>
+<h3 id="procmeminfo"><code>/proc/meminfo</code></h3>
+<p><strong>virtual file</strong> ที่มีข้อมูล <strong>real-time, dynamic</strong> ของระบบ รวม: <strong>MemTotal, MemFree, MemAvailable, Buffers, Cached, SwapCached, SwapTotal, SwapFree</strong> (และอื่น ๆ เช่น Active, Inactive, Dirty, Slab, KernelStack, PageTables)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <code>/proc</code> ไม่ใช่ไฟล์บนดิสก์จริง kernel สร้างเนื้อหาขึ้นทุกครั้งที่อ่าน · <strong><code>free</code> และ <code>vmstat</code> ก็อ่านข้อมูลจาก <code>/proc/meminfo</code> นี่เอง</strong></p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 3 — Lab 8: Process + Memory</h1>
+<p><strong>Objectives:</strong> 1. Learn commands about process management · 2. Learn commands about memory management
+<strong>What to Submit:</strong> แคปทุกคำสั่ง <strong>พร้อมอธิบายผล</strong> รวม PDF ชื่อ <strong><code>6887xxx_lab8.pdf</code></strong> · ⚠️ ส่ง <strong>September 15 ก่อนเที่ยงคืน</strong></p>
+<h2 id="16-เฉลยทีละหน้า">16. เฉลยทีละหน้า</h2>
+<blockquote class="callout">
+<p>ตัวเลขทั้งหมดอ่านจาก screenshot ในสไลด์ (เครื่องอาจารย์) ตอนส่งต้องใช้ผลจากเครื่องตัวเอง</p>
+</blockquote>
+<h3 id="หน้า-4-ps-และ-ps--f">หน้า 4 — <code>ps</code> และ <code>ps -f</code></h3>
+<pre><code>PID  PPID  CMD
+2245 2235  bash
+4162 2245  ps -f
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PID ของ child process</td>
+<td><strong>4162</strong> (ps -f) <em>(ตอน <code>ps</code> ธรรมดา child คือ 4160)</em></td>
+</tr>
+<tr>
+<td>PID ของ parent process</td>
+<td><strong>2245</strong> (bash)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-5-top">หน้า 5 — <code>top</code></h3>
+<p><code>Tasks: 249 total, 1 running, 197 sleeping, 0 stopped, 7 zombie</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จำนวน process ทั้งหมด</td>
+<td><strong>249</strong></td>
+</tr>
+<tr>
+<td>running</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td>sleeping</td>
+<td><strong>197</strong></td>
+</tr>
+<tr>
+<td>stopped</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>zombie</td>
+<td><strong>7</strong></td>
+</tr>
+<tr>
+<td>คำสั่งออกจาก top</td>
+<td>กด <strong><code>q</code></strong> (หรือ Ctrl+C)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> 1 + 197 + 0 + 7 = 205 ไม่ครบ 249 เพราะที่เหลือเป็น process สถานะ <strong>I (idle kernel thread)</strong> ซึ่งบรรทัด Tasks ไม่ได้แยกแสดง</p>
+</blockquote>
+<h3 id="หน้า-6-background-process">หน้า 6 — Background process</h3>
+<p><code>ls -l | more &amp;</code> → <strong><code>[1] 5415</code></strong> → <strong>PID ของ background process = 5415</strong> (job 1) · process ใน pipeline คือ ls = 5414 และ more = 5415 ทั้งคู่มี PPID = 2245 · more ถูก Stopped เพราะต้องการหน้าจอ → <code>fg</code> ดึงกลับมา</p>
+<h3 id="หน้า-7-kill">หน้า 7 — Kill</h3>
+<p><code>nano test99 &amp;</code> → <code>[1] 5685</code> · <code>kill 5685</code> แล้ว process <strong>ยังอยู่</strong> (Stopped จึงยังไม่รับ SIGTERM) · <strong><code>kill -9 5685</code></strong> → <code>[1]+ Killed nano test99</code> · <code>ps -f</code> ไม่เห็น nano แล้ว</p>
+<h3 id="หน้า-8-ps--ef-more-แนวคำอธิบาย">หน้า 8 — <code>ps -ef | more</code> <em>(แนวคำอธิบาย)</em></h3>
+<pre><code>UID  PID PPID C STIME TTY TIME     CMD
+root   1    0 0 ...    ?  00:00:10 /sbin/init splash
+root   2    0 0 ...    ?  00:00:00 [kthreadd]
+root   3    2 0 ...    ?  00:00:00 [rcu_gp]
+root   4    2 0 ...    ?  00:00:00 [rcu_par_gp]
+</code></pre>
+<ul>
+<li><code>-e</code> = <strong>ทุก process ในระบบ</strong> · <code>-f</code> = full format · <code>| more</code> = ดูทีละหน้า</li>
+<li><strong>PID 1 = <code>/sbin/init</code></strong> (process แรกของ user space, PPID 0) → บรรพบุรุษของทุก process</li>
+<li><strong>PID 2 = <code>[kthreadd]</code></strong> → ตัวสร้าง kernel thread · process ที่ <strong>PPID = 2</strong> และชื่อใน <code>[ ]</code> เช่น <code>rcu_gp</code> = <strong>kernel thread</strong></li>
+<li>TTY เป็น <strong><code>?</code></strong> = ไม่ผูกกับ terminal (เป็น process ของระบบ) และเป็นของ <strong>root</strong></li>
+</ul>
+<h3 id="หน้า-9-nice-แนวคำอธิบาย">หน้า 9 — <code>nice</code> <em>(แนวคำอธิบาย)</em></h3>
+<pre><code>$ nice                     → 0       (ค่า nice ปัจจุบันของ shell = 0)
+$ ps -l
+F S  UID  PID PPID C PRI NI ... CMD
+0 S 1000 2245 2235 0  80  0 ... bash
+0 R 1000 6142 2245 0  80  0 ... ps
+$ nice -n10 nano test99 &amp;
+[1] 6143
+$ ps -l
+0 S 1000 2245 2235 0  80  0 ... bash
+0 T 1000 6143 2245 1  90 10 ... nano
+0 R 1000 6144 2245 0  80  0 ... ps
+[1]+ Stopped     nice -n10 nano test99
+</code></pre>
+<ul>
+<li><code>nice</code> เปล่า ๆ แสดงค่า nice ปัจจุบัน = <strong>0</strong></li>
+<li><code>ps -l</code> (long format) มีคอลัมน์ <strong>PRI</strong> (priority) และ <strong>NI</strong> (nice)</li>
+<li>หลัง <code>nice -n10</code> → nano มี <strong>NI = 10</strong>, <strong>PRI = 90</strong> (= 80 + 10) → <strong>ความสำคัญต่ำกว่าปกติ</strong> (process อื่นยังเป็น NI 0, PRI 80)</li>
+<li>สถานะ <strong>T</strong> = Stopped เพราะ nano ใน background ต้องการหน้าจอ</li>
+</ul>
+<h3 id="หน้า-10-memory-บน-windows-systeminfo">หน้า 10 — Memory บน Windows (<code>systeminfo</code>)</h3>
+<p>ตอบจากเครื่องตัวเอง · ตัวอย่างจากสไลด์ lecture: <strong>Installed physical memory 12.0 GB · Total physical 11.9 GB · Available physical 3.75 GB · Total virtual 23.9 GB · Available virtual 8.15 GB</strong></p>
+<h3 id="หน้า-11-top-memory">หน้า 11 — <code>top</code> (memory)</h3>
+<pre><code>KiB Mem : 4026172 total, 1808680 free,  934612 used, 1282880 buff/cache
+KiB Swap:  969960 total,  969960 free,       0 used. 2849172 avail Mem
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total memory</td>
+<td><strong>4,026,172 KiB</strong> (≈ 3.84 GiB)</td>
+</tr>
+<tr>
+<td>Free memory</td>
+<td><strong>1,808,680 KiB</strong></td>
+</tr>
+<tr>
+<td>Used memory</td>
+<td><strong>934,612 KiB</strong></td>
+</tr>
+<tr>
+<td>Swap total memory</td>
+<td><strong>969,960 KiB</strong></td>
+</tr>
+<tr>
+<td>Swap free memory</td>
+<td><strong>969,960 KiB</strong> (swap ยังไม่ถูกใช้เลย: used = 0)</td>
+</tr>
+<tr>
+<td>Swap available memory</td>
+<td><strong>2,849,172 KiB</strong> (avail Mem)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> ค่า <strong>&quot;avail Mem&quot; อยู่บนบรรทัด Swap แต่จริง ๆ หมายถึง RAM ที่ใช้ได้</strong> (เทียบ <code>available</code> ของ <code>free</code>) ไม่ใช่ swap · ถ้าข้อสอบถามตามช่องในแลปให้ตอบ 2,849,172</p>
+</blockquote>
+<h3 id="หน้า-12-top--o-mem">หน้า 12 — <code>top -o %MEM</code></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%MEM of the top process</td>
+<td><strong>6.3 %</strong></td>
+</tr>
+<tr>
+<td>What is the top process</td>
+<td><strong><code>gnome-shell</code></strong> (PID 1817, user sudsanguan) — ตัวแสดงผลเดสก์ท็อป GNOME</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-13-free--mt">หน้า 13 — <code>free -mt</code></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ (MB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total memory</td>
+<td><strong>3931</strong></td>
+</tr>
+<tr>
+<td>Used memory</td>
+<td><strong>1007</strong></td>
+</tr>
+<tr>
+<td>Free memory</td>
+<td><strong>1409</strong></td>
+</tr>
+<tr>
+<td>Available memory</td>
+<td><strong>2642</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-14-vmstat">หน้า 14 — <code>vmstat</code></h3>
+<p>รายงาน virtual memory statistics: Processes, Memory, Paging, Block IO, Traps, Disks, CPU (ดู <code>vmstat -help</code> สำหรับ option)</p>
+<h3 id="หน้า-15-vmstat--s-เทียบกับ-free-แนวคำตอบ">หน้า 15 — <code>vmstat -s</code> เทียบกับ <code>free</code> <em>(แนวคำตอบ)</em></h3>
+<ul>
+<li><strong>ตรงกัน</strong>: total memory 4,026,172 K = <code>free</code> total · used ≈ 1,031,672 K (free: 1,031,852) · free memory 1,441,764 K ≈ free 1,442,800 · total/free swap 969,960 K เท่ากัน (ต่างเล็กน้อยเพราะรันคนละวินาที)</li>
+<li><strong><code>vmstat -s</code> ละเอียดกว่า</strong>: แยก <strong>active/inactive memory, buffer memory กับ swap cache</strong> (free รวมเป็น buff/cache) และมีสถิติ <strong>CPU ticks, paging, swapping, interrupts, context switches, forks</strong></li>
+<li><strong><code>free</code> สรุปกว่า</strong>: เป็นตารางสั้น มีคอลัมน์ <strong>available</strong> และ <strong>shared</strong> ที่ vmstat -s ไม่มี</li>
+</ul>
+<h3 id="หน้า-16-vmstat--d-ความหมายของค่า-แนวคำตอบ">หน้า 16 — <code>vmstat -D</code> ความหมายของค่า <em>(แนวคำตอบ)</em></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ค่า</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>total reads</strong></td>
+<td>จำนวนคำขออ่านดิสก์ที่ทำสำเร็จทั้งหมด (68,388)</td>
+</tr>
+<tr>
+<td><strong>merged reads</strong></td>
+<td>คำขออ่านที่ถูก<strong>รวมกัน</strong>เพราะอยู่ติดกัน เพื่อลดจำนวนครั้ง (22,143)</td>
+</tr>
+<tr>
+<td><strong>read sectors</strong></td>
+<td>จำนวน sector ที่อ่าน (2,777,118 × 512 bytes)</td>
+</tr>
+<tr>
+<td><strong>milli reading</strong></td>
+<td>เวลารวม (มิลลิวินาที) ที่ใช้อ่าน (48,115 ms)</td>
+</tr>
+<tr>
+<td><strong>writes</strong></td>
+<td>จำนวนคำขอเขียนที่สำเร็จ (16,696)</td>
+</tr>
+<tr>
+<td><strong>merged writes</strong></td>
+<td>คำขอเขียนที่ถูกรวมกัน (17,590)</td>
+</tr>
+<tr>
+<td><strong>written sectors</strong></td>
+<td>จำนวน sector ที่เขียน (1,092,876)</td>
+</tr>
+<tr>
+<td><strong>milli writing</strong></td>
+<td>เวลารวม (ms) ที่ใช้เขียน (22,889 ms)</td>
+</tr>
+<tr>
+<td>inprogress IO / milli spent IO</td>
+<td>I/O ที่กำลังทำอยู่ (0) / เวลารวมที่ทำ I/O (68 ms)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-17-procmeminfo-เทียบกับ-free-และ-vmstat-แนวคำตอบ">หน้า 17 — <code>/proc/meminfo</code> เทียบกับ <code>free</code> และ <code>vmstat</code> <em>(แนวคำตอบ)</em></h3>
+<ul>
+<li><code>MemTotal 4026172 kB</code> = total ของ free/vmstat · <code>MemFree 1439548 kB</code> ≈ free · <strong><code>MemAvailable 2707580 kB</code> ≈ available ของ free</strong> · <code>Buffers 175896 kB</code> + <code>Cached 1229708 kB</code> ≈ buff/cache · <code>SwapTotal</code>/<code>SwapFree 969960 kB</code> = swap ของทั้งสองคำสั่ง · <code>Active 1384408</code> / <code>Inactive 886152</code> ≈ active/inactive ของ vmstat -s</li>
+<li><strong>ข้อสรุป</strong>: ค่าตรงกัน เพราะ <strong><code>free</code> และ <code>vmstat</code> อ่านข้อมูลจาก <code>/proc/meminfo</code></strong> · <code>/proc/meminfo</code> ละเอียดที่สุด (มี Dirty, Writeback, AnonPages, Mapped, Slab, KernelStack, PageTables ฯลฯ) แต่อ่านยาก ส่วน free สรุปให้อ่านง่ายที่สุด</li>
+</ul>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Process</strong></td>
+<td>program in execution</td>
+<td>สูตรอาหารที่กำลังทำ</td>
+</tr>
+<tr>
+<td><strong>Thread</strong></td>
+<td>หน่วยการทำงานย่อยใน process ที่ scheduler เลือกไปรัน</td>
+<td>มือของ process</td>
+</tr>
+<tr>
+<td><strong>Scheduler / Context switch / Preemption</strong></td>
+<td>ตัวเลือกงาน / การสลับงานบน CPU / การแย่ง CPU คืน</td>
+<td>ผู้จัดคิว</td>
+</tr>
+<tr>
+<td><strong>PID / PPID</strong></td>
+<td>หมายเลข process / หมายเลข parent</td>
+<td>เลขตัว / เลขพ่อแม่</td>
+</tr>
+<tr>
+<td><strong>Parent / Child process</strong></td>
+<td>process ที่สร้าง / process ที่ถูกสร้าง</td>
+<td>พ่อแม่ / ลูก</td>
+</tr>
+<tr>
+<td><strong>Process tree</strong></td>
+<td>ความสัมพันธ์ parent-child เป็นต้นไม้ (รากคือ PID 1)</td>
+<td>แผนผังครอบครัว</td>
+</tr>
+<tr>
+<td><strong><code>ps</code> / <code>ps -f</code> / <code>ps -aux</code> / <code>ps -ef</code> / <code>ps -l</code></strong></td>
+<td>สถานะ process แบบย่อ / เต็ม / ทุกผู้ใช้ / ทุก process / มี PRI NI</td>
+<td>ดู process</td>
+</tr>
+<tr>
+<td><strong><code>top</code></strong></td>
+<td>ดู process และทรัพยากรแบบ real-time ทุก 3 วินาที</td>
+<td>Task Manager</td>
+</tr>
+<tr>
+<td><strong>R / D / S / T / Z</strong></td>
+<td>Running / Uninterruptible sleep / Interruptible sleep / Stopped / Zombie</td>
+<td>สถานะใน Linux</td>
+</tr>
+<tr>
+<td><strong>Zombie</strong></td>
+<td>จบแล้วแต่ parent ยังไม่รับสถานะ</td>
+<td>ผีที่ยังค้าง</td>
+</tr>
+<tr>
+<td><strong>Foreground / Background</strong></td>
+<td>คุยกับ user / ไม่คุยกับ user</td>
+<td>หน้าบ้าน / หลังบ้าน</td>
+</tr>
+<tr>
+<td><strong><code>&amp;</code> / <code>fg</code></strong></td>
+<td>รันใน background / ดึงกลับ foreground</td>
+<td>ส่งไปหลัง / เรียกกลับ</td>
+</tr>
+<tr>
+<td><strong>PCB</strong></td>
+<td>Process Control Block: PC, registers, state, priority, address space, open files</td>
+<td>ที่คั่นหนังสือ</td>
+</tr>
+<tr>
+<td><strong><code>kill</code> / <code>kill -9</code></strong></td>
+<td>SIGTERM ขอให้จบ / SIGKILL บังคับจบ</td>
+<td>ขอดี ๆ / บังคับ</td>
+</tr>
+<tr>
+<td><strong><code>nice</code> / <code>renice</code></strong></td>
+<td>ตั้ง priority ตอนเริ่ม / ปรับของที่รันอยู่ (-20 สำคัญสุด ถึง 19)</td>
+<td>ยิ่งใจดียิ่งหลีกทาง</td>
+</tr>
+<tr>
+<td><strong><code>systeminfo</code></strong></td>
+<td>ข้อมูลระบบและ memory บน Windows</td>
+<td>สเปกเครื่อง</td>
+</tr>
+<tr>
+<td><strong>Memory hierarchy</strong></td>
+<td>Register (1) → Cache (3–14) → RAM (~250) → Disk (~40M cycles)</td>
+<td>ยิ่งใกล้ CPU ยิ่งเร็ว</td>
+</tr>
+<tr>
+<td><strong>Virtual / Physical address</strong></td>
+<td>address ที่โปรแกรมเห็น / address จริงใน RAM</td>
+<td>ห้องในใจ / ห้องจริง</td>
+</tr>
+<tr>
+<td><strong>MMU</strong></td>
+<td>แปลง virtual → physical address</td>
+<td>ล่ามที่อยู่</td>
+</tr>
+<tr>
+<td><strong>Address space</strong></td>
+<td>พื้นที่หน่วยความจำของแต่ละ process</td>
+<td>คอมส่วนตัว</td>
+</tr>
+<tr>
+<td><strong>Swap</strong></td>
+<td>พื้นที่ดิสก์ใช้แทน RAM</td>
+<td>RAM สำรองบนดิสก์</td>
+</tr>
+<tr>
+<td><strong>buff/cache / available</strong></td>
+<td>RAM ที่ยืมเป็นแคช / RAM ที่ใช้ได้จริง</td>
+<td>ยืมไปแต่คืนได้</td>
+</tr>
+<tr>
+<td><strong><code>free -mt</code> / <code>vmstat -s</code> / <code>vmstat -D</code></strong></td>
+<td>memory เป็น MB + total / สถิติ memory / สถิติดิสก์</td>
+<td>ดู memory</td>
+</tr>
+<tr>
+<td><strong><code>/proc/meminfo</code></strong></td>
+<td>virtual file ข้อมูล memory แบบ real-time</td>
+<td>แหล่งข้อมูลต้นทาง</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>A process is a program in execution</strong> · CPU สลับการทำงานระหว่าง process</li>
+<li>bash (shell) = parent ของคำสั่งที่พิมพ์ · ดูด้วย <code>ps -f</code>: <strong>UID, PID, PPID, C, STIME, TTY, TIME, CMD</strong></li>
+<li><code>top</code>: คล้าย Task Manager, เรียงตามการใช้ทรัพยากร, <strong>อัปเดตทุก 3 วินาที</strong>, จัดการ process ได้ · ออกด้วย <strong>q</strong></li>
+<li>Process state: <strong>created → ready → running → terminated</strong>, running → waiting → ready, running → ready (interrupt)</li>
+<li>Linux states: <strong>R, D, S, T, Z</strong> · SIGSTOP → T, SIGCONT → R</li>
+<li><strong>Foreground</strong> คุยกับ user · <strong>Background</strong> ไม่คุย · สร้างด้วย <strong><code>&amp;</code></strong></li>
+<li><strong>PCB</strong>: program counter, registers, state, priority, address space, open files, other flags</li>
+<li><strong><code>kill PID</code></strong>, <strong><code>kill -9 PID</code></strong></li>
+<li><strong>nice: -20 (สำคัญสูงสุด) ถึง 19 (ต่ำสุด), default 0</strong> · <code>nice -n 10 cmd</code> · <code>renice -10 PID</code></li>
+<li>Windows: <strong><code>systeminfo</code></strong></li>
+<li>Register 1 · Cache ~3–14 · RAM ~250 · Disk ~40M cycles · <strong>32-bit = 4 GB, 64-bit = 16 EB</strong></li>
+<li><strong>MMU แปลง virtual → physical address</strong></li>
+<li>process จบ → รวมช่องว่างติดกัน · stack และ data โตเข้าหากัน</li>
+<li><strong>top, free (snapshot), vmstat (-s memory, -D disks), /proc/meminfo (virtual file)</strong></li>
+<li>Lab: top 249/1/197/0/7 · background PID <strong>5415</strong> · top process by %MEM = <strong>gnome-shell 6.3%</strong> · free -mt <strong>3931 / 1007 / 1409 / 2642 MB</strong> · ส่ง <strong><code>6887xxx_lab8.pdf</code></strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Program vs Process</strong></td>
+<td>ไฟล์บนดิสก์ vs โปรแกรมที่กำลังรันใน RAM</td>
+</tr>
+<tr>
+<td><strong>PID vs PPID</strong></td>
+<td>เลขของตัวเอง vs เลขของ parent</td>
+</tr>
+<tr>
+<td><strong><code>ps</code> vs <code>top</code></strong></td>
+<td>snapshot ครั้งเดียว vs อัปเดตต่อเนื่องทุก 3 วินาที</td>
+</tr>
+<tr>
+<td><strong><code>ps -f</code> vs <code>ps -aux</code> / <code>ps -ef</code></strong></td>
+<td>process ใน terminal นี้ vs ทุก process ในระบบ</td>
+</tr>
+<tr>
+<td><strong>ready vs waiting</strong></td>
+<td>รอ CPU vs รอ I/O หรือ event</td>
+</tr>
+<tr>
+<td><strong>S vs D</strong></td>
+<td>sleep ที่ปลุกด้วยสัญญาณได้ vs ปลุกไม่ได้ (รอ I/O)</td>
+</tr>
+<tr>
+<td><strong>Stopped (T) vs Zombie (Z)</strong></td>
+<td>หยุดชั่วคราว (SIGCONT ให้ทำต่อ) vs จบแล้วรอ parent เก็บ</td>
+</tr>
+<tr>
+<td><strong>Foreground vs Background</strong></td>
+<td>terminal รอ vs terminal ใช้ต่อได้</td>
+</tr>
+<tr>
+<td><strong><code>kill</code> vs <code>kill -9</code></strong></td>
+<td>SIGTERM ขอให้จบ vs SIGKILL บังคับ</td>
+</tr>
+<tr>
+<td><strong><code>nice</code> vs <code>renice</code></strong></td>
+<td>ตอนเริ่มรัน vs ปรับของที่รันอยู่</td>
+</tr>
+<tr>
+<td><strong>nice -20 vs +19</strong></td>
+<td>สำคัญสูงสุด vs ต่ำสุด</td>
+</tr>
+<tr>
+<td><strong>Virtual vs Physical address</strong></td>
+<td>ที่โปรแกรมเห็น vs ตำแหน่งจริงใน RAM</td>
+</tr>
+<tr>
+<td><strong>free vs available</strong></td>
+<td>ว่างสนิท vs ใช้ได้จริง (รวม cache ที่คืนได้)</td>
+</tr>
+<tr>
+<td><strong>RAM vs Swap</strong></td>
+<td>หน่วยความจำจริง เร็ว vs ดิสก์แทน RAM ช้ามาก</td>
+</tr>
+<tr>
+<td><strong><code>free</code> vs <code>vmstat -s</code> vs <code>/proc/meminfo</code></strong></td>
+<td>สรุปอ่านง่าย vs ละเอียดพร้อมสถิติ CPU/paging vs แหล่งข้อมูลต้นทางละเอียดที่สุด</td>
+</tr>
+<tr>
+<td><strong>32-bit vs 64-bit</strong></td>
+<td>4 GB vs 16 EB</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไม ls, more, ps มี PPID เดียวกัน</strong> → ทั้งหมดถูกสร้างโดย bash ตัวเดียวกัน (PID 2245)</li>
+<li><strong>ทำไม <code>kill 5685</code> ไม่ได้ผล แต่ <code>kill -9</code> ได้</strong> → nano อยู่สถานะ Stopped ยังไม่จัดการ SIGTERM ส่วน SIGKILL ถูก kernel บังคับทันที</li>
+<li><strong>ทำไมต้องมี MMU</strong> → หลายโปรแกรมใช้ address เดียวกันได้ (เช่น 0) โดย MMU แปลงไปคนละตำแหน่งจริง ไม่ทับกัน</li>
+<li><strong>ทำไม free memory น้อยแต่ระบบไม่ช้า</strong> → Linux ยืม RAM ว่างเป็น buff/cache และคืนได้ทันที ให้ดูค่า available</li>
+<li><strong>ทำไม nice ค่าติดลบต้องใช้ sudo</strong> → ถ้าใครก็ตั้งได้ ทุกคนจะตั้ง -20 เพื่อแย่ง CPU</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l7/index.html"><small>← บทก่อนหน้า</small><span>L7 – Storage + Lab 7 (Storage)</span></a><a class="pg next" href="../l9/index.html"><small>บทถัดไป →</small><span>L9 – Observability และ Environment Variables</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

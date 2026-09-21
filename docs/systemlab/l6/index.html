@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L6 – Editor (nano และ vim) + Lab 6 (Editor) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-viewing-file-content-ทบทวน">2. Viewing File Content (ทบทวน)</a></li><li><a href="#3-text-editor-คืออะไร">3. Text Editor คืออะไร</a></li><li><a href="#4-nano-เปิดไฟล์-และสัญลักษณ์-m">4. nano: เปิดไฟล์ และสัญลักษณ์ ^ / M</a></li><li><a href="#5-nano-ตารางคีย์ลัด">5. nano: ตารางคีย์ลัด ⭐⭐</a></li><li><a href="#6-nano-ตัวอย่างการใช้งาน">6. nano: ตัวอย่างการใช้งาน</a></li><li><a href="#7-การติดตั้ง-vim-editor">7. การติดตั้ง vim editor ⭐</a></li><li><a href="#8-vim-เปิดไฟล์-และ-3-modes">8. vim: เปิดไฟล์ และ 3 Modes ⭐⭐</a></li><li><a href="#9-vim-movement-command-mode">9. vim: Movement (Command Mode)</a></li><li><a href="#10-vim-screen-moving">10. vim: Screen Moving</a></li><li><a href="#11-vim-insertion">11. vim: Insertion</a></li><li><a href="#12-vim-editing-จาก-command-mode">12. vim: Editing (จาก Command Mode)</a></li><li><a href="#13-vim-copy-yank-paste-command-mode">13. vim: Copy (Yank) &amp;amp; Paste (Command Mode)</a></li><li><a href="#14-vim-search-และ-replace">14. vim: Search และ Replace ⭐</a></li><li><a href="#15-vim-save-exit">15. vim: Save &amp;amp; Exit ⭐⭐</a></li><li><a href="#16-vim-visual-mode">16. vim: Visual Mode</a></li><li><a href="#17-เฉลยช่องว่าง-nano">17. เฉลยช่องว่าง: nano</a></li><li><a href="#18-เฉลยช่องว่าง-vim">18. เฉลยช่องว่าง: vim</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L6</div>
+      <h1 class="lesson-title">L6 – Editor (nano และ vim) + Lab 6 (Editor)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> บน server Linux ส่วนใหญ่ไม่มีหน้าจอ GUI การแก้ไฟล์ตั้งค่าจึงต้องใช้ <strong>text editor ใน terminal</strong></p>
+<p>(1) <strong>Lecture 6</strong> ทบทวนคำสั่งดูไฟล์ (<code>cat</code>, <code>more</code>, <code>less</code>, <code>head</code>, <code>tail</code>) แล้วสอน <strong>nano</strong> (ใช้ง่าย คีย์ลัด Ctrl/Alt) และ <strong>vim</strong> (ทรงพลังแต่ยากกว่า มี <strong>3 modes</strong>) ครบทั้ง movement, screen moving, insert, editing, yank/paste, search, replace, save/exit, visual mode รวมถึง<strong>การติดตั้ง vim ผ่าน proxy ของมหาวิทยาลัย</strong></p>
+<p>(2) <strong>Lab 6</strong> ฝึก nano กับไฟล์ <code>test</code> แล้วติดตั้ง vim และฝึกทุกคำสั่งกับไฟล์เดียวกัน</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 6: Editor</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 6 = <strong>การฝึกใช้ nano และ vim editor</strong> · เกณฑ์คะแนนเหมือนเดิม · ส่งแลป 23.59 น. วันที่เรียน · ทดสอบย่อยทุกสัปดาห์</li>
+</ul>
+<hr />
+<h2 id="2-viewing-file-content-ทบทวน">2. Viewing File Content (ทบทวน)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>การทำงาน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cat file</code></td>
+<td>แสดง<strong>เนื้อหาทั้งหมดทีเดียว</strong></td>
+</tr>
+<tr>
+<td><code>more file</code></td>
+<td>แสดง<strong>ทีละหน้า เลื่อนไปด้านหน้าได้ทางเดียว</strong></td>
+</tr>
+<tr>
+<td><strong><code>less file</code></strong></td>
+<td>แสดง<strong>ทีละหน้า แต่เลื่อนได้สองทาง</strong> (ขึ้นและลง)</td>
+</tr>
+<tr>
+<td><code>head file</code></td>
+<td>แสดงเฉพาะ<strong>ส่วนต้น</strong>ของไฟล์</td>
+</tr>
+<tr>
+<td><code>tail file</code></td>
+<td>แสดงเฉพาะ<strong>ส่วนท้าย</strong>ของไฟล์</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>more vs less</strong>: more เดินหน้าอย่างเดียว · less ถอยกลับได้ <em>(อธิบายเพิ่ม: ใน less กด q เพื่อออก)</em></p>
+</blockquote>
+<hr />
+<h2 id="3-text-editor-คืออะไร">3. Text Editor คืออะไร</h2>
+<p><strong>Text Editor</strong> = เครื่องมือหรือ software ที่ใช้<strong>สร้างหรือแก้ไขไฟล์ข้อมูลที่เป็นตัวอักษร</strong> ทำให้จัดการไฟล์ได้ง่ายขึ้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบ</th>
+<th>Text Editor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td><strong>notepad</strong></td>
+</tr>
+<tr>
+<td>Linux</td>
+<td><strong>nano</strong>, <strong>vim (vi editor)</strong> — vim <strong>ใช้ยากกว่า nano</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-nano-เปิดไฟล์-และสัญลักษณ์-m">4. nano: เปิดไฟล์ และสัญลักษณ์ ^ / M</h2>
+<ul>
+<li><strong><code>nano</code></strong> (ไม่ใส่ชื่อ) = เปิด <strong>ไฟล์ใหม่ (New file)</strong></li>
+<li><strong><code>nano foo</code></strong> = เปิด <strong>ไฟล์ที่มีอยู่แล้ว (Existing file)</strong> (ถ้ายังไม่มีจะสร้างใหม่เมื่อบันทึก)</li>
+<li>หัวจอบอกเวอร์ชันและชื่อไฟล์ เช่น <code>GNU nano 6.2 test</code> · ถ้ามี <code>*</code> หรือคำว่า <strong>Modified</strong> = ไฟล์ถูกแก้แต่ยังไม่บันทึก</li>
+<li>แถบล่างสุดแสดงคีย์ลัดที่ใช้บ่อย: <code>^G Get Help</code>, <code>^O Write Out</code>, <code>^W Where Is</code>, <code>^K Cut Text</code>, <code>^J Justify</code>, <code>^X Exit</code>, <code>^R Read File</code>, <code>^\ Replace</code>, <code>^U Uncut Text</code>, <code>^T To Spell</code></li>
+</ul>
+<p><strong>Ctrl-G for Get Help</strong> — แสดงคำสั่งทั้งหมด (Main nano help text)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัญลักษณ์</th>
+<th>หมายถึง</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>^</code></strong></td>
+<td>กดปุ่ม <strong>Ctrl</strong></td>
+<td><code>^X</code> = <strong>Ctrl+X</strong></td>
+</tr>
+<tr>
+<td><strong><code>M</code></strong></td>
+<td>กดปุ่ม <strong>Alt</strong> (Meta)</td>
+<td><code>M-U</code> = <strong>Alt+U</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p><em>(อธิบายเพิ่ม จากหน้า help)</em> nano ออกแบบให้เลียนแบบ <strong>Pico text editor</strong> ของโปรแกรมอีเมล Pine · ปุ่ม M ใช้ Esc แทน Alt ได้</p>
+</blockquote>
+<hr />
+<h2 id="5-nano-ตารางคีย์ลัด">5. nano: ตารางคีย์ลัด ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คีย์</th>
+<th>หน้าที่ (จากสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ctrl + G</strong></td>
+<td>แสดงคำสั่งที่ใช้ได้ทั้งหมด</td>
+</tr>
+<tr>
+<td><strong>Ctrl + X</strong></td>
+<td><strong>ออกจากโปรแกรม</strong></td>
+</tr>
+<tr>
+<td><strong>Ctrl + O</strong></td>
+<td><strong>บันทึกข้อมูล</strong></td>
+</tr>
+<tr>
+<td><strong>Ctrl + R</strong></td>
+<td>เปิดไฟล์ที่มีอยู่แล้ว<strong>นำมาแทรก</strong>ในไฟล์ปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>Ctrl + W</strong></td>
+<td><strong>ค้นหาคำ</strong>ที่ต้องการ</td>
+</tr>
+<tr>
+<td><strong>Ctrl + \</strong> (backslash)</td>
+<td><strong>ค้นหาและแทนที่</strong></td>
+</tr>
+<tr>
+<td><strong>Ctrl + K</strong></td>
+<td><strong>ตัด</strong>ทั้งบรรทัดที่ cursor อยู่ไปเก็บใน<strong>บัฟเฟอร์</strong> · ถ้าใช้หลัง Ctrl + ^ = ตัดข้อความที่เลือก</td>
+</tr>
+<tr>
+<td><strong>Ctrl + U</strong></td>
+<td><strong>วาง</strong>ข้อมูลที่ตัดไว้ในบัฟเฟอร์ ณ ตำแหน่ง cursor</td>
+</tr>
+<tr>
+<td><strong>Ctrl + ^</strong></td>
+<td>กำหนดจุดเริ่มคัดลอก (mark) แล้วใช้ลูกศรเลือกขอบเขต · กดอีกครั้ง = ยกเลิก</td>
+</tr>
+<tr>
+<td><strong>Ctrl + A</strong></td>
+<td>เลื่อน cursor ไป<strong>ซ้ายสุด</strong>ของบรรทัด</td>
+</tr>
+<tr>
+<td><strong>Ctrl + E</strong></td>
+<td>เลื่อน cursor ไป<strong>ขวาสุด</strong>ของบรรทัด</td>
+</tr>
+<tr>
+<td><strong>Ctrl + Y</strong> / <strong>Ctrl + V</strong></td>
+<td>เลื่อนไปทีละหน้า (ดูหมายเหตุ)</td>
+</tr>
+<tr>
+<td><strong>Ctrl + D</strong></td>
+<td>ลบตัวอักษรที่ตำแหน่ง cursor</td>
+</tr>
+<tr>
+<td><strong>Ctrl + C</strong></td>
+<td>แสดงตำแหน่งบรรทัดที่ cursor อยู่</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>หมายเหตุ Ctrl+Y / Ctrl+V</strong>: สไลด์เขียนว่า Ctrl+Y = หน้าถัดไป และ Ctrl+V = หน้าก่อนหน้า แต่หน้า help ของ nano เอง (ในสไลด์หน้า 8) เขียนว่า <strong><code>^Y</code> = Prev Page</strong> และ <strong><code>^V</code> = Next Page</strong> <em>(ตอนสอบให้ตอบตามที่อาจารย์สอน และลองกดดูในเครื่องจริง)</em></p>
+</blockquote>
+<p>คีย์เพิ่มเติมจากหน้า help (Lab หน้า 5): <strong><code>M-U</code> = Undo</strong> (ย้อน) · <strong><code>M-E</code> = Redo</strong> · <strong><code>M-A</code> (หรือ <code>^6</code>) = Mark text</strong> · <strong><code>M-6</code> = Copy บรรทัดปัจจุบันเก็บใน cutbuffer</strong> · <code>^_</code> (M-G) = ไปบรรทัด/คอลัมน์ที่ระบุ · <code>^T</code> = spell checker</p>
+<hr />
+<h2 id="6-nano-ตัวอย่างการใช้งาน">6. nano: ตัวอย่างการใช้งาน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>สิ่งที่เกิดในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ctrl-O (Writing File)</strong></td>
+<td>ด้านล่างขึ้น <code>File Name to Write: test</code> → กด <strong>Enter</strong> เพื่อยืนยันชื่อ (ตัวเลือกเพิ่ม: M-D DOS Format, M-M Mac Format, M-A Append, M-P Prepend, M-B Backup File)</td>
+</tr>
+<tr>
+<td><strong>Ctrl-W (Searching)</strong></td>
+<td>ด้านล่างขึ้น <code>Search:</code> พิมพ์ <code>Hello</code> → cursor ไปที่คำนั้นในไฟล์ <code>first.c</code> (ตัวเลือก: M-C Case Sens, M-R Reg.exp, M-B Backwards)</td>
+</tr>
+<tr>
+<td><strong>Ctrl-R (Reading another File)</strong></td>
+<td>ขึ้น <code>File to insert [from ./]:</code> พิมพ์ <code>test</code> → เนื้อหาไฟล์ test (aaaa…gggg) <strong>ถูกแทรกเข้า</strong> first.c ที่ตำแหน่ง cursor · สถานะ <code>[ Read 7 lines ]</code></td>
+</tr>
+<tr>
+<td><strong>Ctrl-K / Ctrl-U (Cut / Paste)</strong></td>
+<td>ตัดบรรทัด cccc และ dddd ด้วย Ctrl-K แล้วย้าย cursor ไปวางด้วย Ctrl-U → สองบรรทัดนั้นย้ายไปอยู่ก่อน aaaa</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-การติดตั้ง-vim-editor">7. การติดตั้ง vim editor ⭐</h2>
+<p><strong>Ubuntu ไม่มี vim ติดตั้งไว้</strong> จึงต้องติดตั้งเอง (ถ้าสั่ง <code>sudo apt install vim</code> ทันทีจะขึ้น <code>E: Package 'vim' has no installation candidate</code> เพราะยังไม่ได้ update รายการ package)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>คำสั่ง</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. ตั้งค่า proxy</strong></td>
+<td><code>sudo nano /etc/apt/apt.conf</code> แล้วใส่ <code>Acquire::http::proxy &quot;http://muproxy-basic.mahidol:8080/&quot;;</code></td>
+<td>ให้ apt ออกอินเทอร์เน็ตผ่าน proxy ของมหาวิทยาลัย (ในภาพใช้ไฟล์ <code>/etc/apt/apt.conf.d/proxy</code> รูปแบบ <code>http://username:password@proxy-sa.mahidol:8080/</code>)</td>
+</tr>
+<tr>
+<td><strong>2. update</strong></td>
+<td><code>sudo apt update</code></td>
+<td><strong>อัปเดตรายการ package ให้ทันสมัย</strong> (ผลท้าย: <code>285 packages can be upgraded</code>)</td>
+</tr>
+<tr>
+<td><strong>3. install</strong></td>
+<td><code>sudo apt install vim</code> → ตอบ <strong>Y</strong></td>
+<td>ติดตั้ง vim (พร้อม vim-runtime)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>apt</strong> = ตัวจัดการ package ของ Ubuntu · <code>update</code> แค่โหลด &quot;รายการ&quot; ของใหม่ ไม่ได้ติดตั้งอะไร · <code>install</code> จึงค่อยดาวน์โหลดและติดตั้งจริง · ถ้าใช้เน็ตบ้านที่ไม่ผ่าน proxy ข้ามขั้นที่ 1 ได้</p>
+</blockquote>
+<hr />
+<h2 id="8-vim-เปิดไฟล์-และ-3-modes">8. vim: เปิดไฟล์ และ 3 Modes ⭐⭐</h2>
+<ul>
+<li><strong><code>vim</code></strong> = ไฟล์ใหม่ (ขึ้นหน้า &quot;VIM - Vi IMproved, version 8.0…&quot;) · <strong><code>vim nanotest</code></strong> = ไฟล์ที่มีอยู่แล้ว</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L6-01-vim-modes.png" alt="3 โหมดของ vim และปุ่มสลับโหมด" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>ใช้ทำอะไร</th>
+<th>เข้าโหมดอย่างไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Command Mode</strong></td>
+<td><strong>default mode</strong> ใช้คำสั่งต่าง ๆ เช่น save file, เลื่อน cursor</td>
+<td>กด <strong>Esc</strong> จากโหมดอื่น</td>
+</tr>
+<tr>
+<td><strong>Insert Mode</strong></td>
+<td><strong>พิมพ์ข้อความ</strong>ลงไฟล์</td>
+<td><code>i</code>, <code>a</code>, <code>I</code>, <code>A</code> (หัวข้อ 11)</td>
+</tr>
+<tr>
+<td><strong>Visual Mode</strong></td>
+<td><strong>เลือกข้อความเป็นชุดหรือหลายบรรทัด</strong></td>
+<td><code>v</code>, Shift+v, Ctrl+v (หัวข้อ 16)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⚠️ <strong>ระวังตัวพิมพ์เล็ก-ใหญ่</strong>: คำสั่งเดียวกันแต่ต่างตัวพิมพ์ทำงานต่างกัน เช่น <strong><code>i</code></strong> เริ่มพิมพ์ตรง cursor ส่วน <strong><code>I</code></strong> เริ่มพิมพ์ที่ต้นบรรทัด</li>
+<li>ปกติจะ<strong>สลับไปมาระหว่าง Command Mode กับ Insert Mode</strong> เป็นหลัก</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ถ้าพิมพ์แล้วตัวอักษรไม่ขึ้นแต่ cursor กระโดดไปมา แปลว่ายังอยู่ Command Mode · ถ้าสับสนว่าอยู่โหมดไหน ให้กด <strong>Esc</strong> ก่อนเสมอ · มุมล่างซ้ายขึ้น <code>-- INSERT --</code> เมื่ออยู่ Insert Mode</p>
+</blockquote>
+<hr />
+<h2 id="9-vim-movement-command-mode">9. vim: Movement (Command Mode)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ปุ่ม</th>
+<th>การเคลื่อนที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>h, j, k, l</strong></td>
+<td><strong>ซ้าย, ล่าง, บน, ขวา</strong> <em>(ดูหมายเหตุ)</em></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>w</strong> / <strong>W</strong></td>
+<td>ไป<strong>คำถัดไป</strong> (word) · W ไม่สนเครื่องหมายวรรคตอน เช่น <code>_</code> หรือวงเล็บ</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>e</strong> / <strong>E</strong></td>
+<td>ไป<strong>ท้ายคำ</strong> (end) · E นับเครื่องหมายวรรคตอนเป็นส่วนของคำ</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>b</strong> / <strong>B</strong></td>
+<td>ไป<strong>ต้นคำ</strong> (back) · B นับเครื่องหมายวรรคตอนเป็นส่วนของคำ</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>0</strong> / <strong>^</strong> / <strong>$</strong></td>
+<td><strong>0</strong> = ต้นบรรทัด · <strong>^</strong> = หน้าคำแรกของบรรทัด · <strong>$</strong> = ท้ายบรรทัด</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>]</strong> หรือ <strong>[</strong> + วงเล็บ</td>
+<td><code>]}</code> ไปวงเล็บปิด <code>}</code> ที่ใกล้ที่สุด · <code>[(</code> ไปวงเล็บเปิด <code>(</code> ที่ใกล้ที่สุด</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>%</strong></td>
+<td>อยู่ระหว่างวงเล็บ → ไปวงเล็บที่ใกล้ที่สุด · อยู่บนวงเล็บ → กระโดดไป<strong>คู่ของมัน</strong> (กดอีกทีกลับมา)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>t</strong> / <strong>T</strong> + ตัวอักษร</td>
+<td>ไปตัวอักษรที่ใกล้ที่สุด เช่น <code>ta</code> · <strong>t หาไปทางขวา, T หาไปทางซ้าย</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>หมายเหตุ h j k l</strong>: สไลด์เขียนลำดับ &quot;h, k, j, l = ซ้าย, ล่าง, บน, ขวา&quot; ซึ่งสลับกัน ที่ถูกต้องคือ <strong>h = ซ้าย, j = ลง, k = ขึ้น, l = ขวา</strong> <em>(อธิบายเพิ่ม: จำว่า <strong>j</strong> มีหางห้อยลง = ลง)</em></p>
+</blockquote>
+<hr />
+<h2 id="10-vim-screen-moving">10. vim: Screen Moving</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>ปุ่ม</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>เลื่อน cursor ในจอ</strong></td>
+<td><strong>H</strong> / <strong>M</strong> / <strong>L</strong></td>
+<td>ไป<strong>บนสุด / กลาง / ล่างสุด</strong>ของจอ (High, Middle, Low)</td>
+</tr>
+<tr>
+<td><strong>เลื่อนหน้าจอทีละ…</strong> (กลุ่มแรกในสไลด์)</td>
+<td><strong>Ctrl+e</strong> / <strong>Ctrl+d</strong> / <strong>Ctrl+f</strong></td>
+<td>หนึ่งบรรทัด / ครึ่งหน้า / หนึ่งหน้า</td>
+</tr>
+<tr>
+<td><strong>เลื่อนหน้าจอทีละ…</strong> (กลุ่มที่สอง)</td>
+<td><strong>Ctrl+y</strong> / <strong>Ctrl+u</strong> / <strong>Ctrl+b</strong></td>
+<td>หนึ่งบรรทัด / ครึ่งหน้า / หนึ่งหน้า</td>
+</tr>
+<tr>
+<td><strong>ไปต้น/ท้ายไฟล์</strong></td>
+<td><strong>gg</strong> / <strong>G</strong></td>
+<td>บนสุดของไฟล์ / ล่างสุดของไฟล์</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> สไลด์เรียกกลุ่มแรกว่า &quot;เลื่อนหน้าขึ้นข้างบน&quot; (เนื้อหาเลื่อนขึ้น = <strong>เดินไปทางท้ายไฟล์</strong>) และกลุ่มที่สองว่า &quot;เลื่อนหน้าลงข้างล่าง&quot; (<strong>ย้อนไปทางต้นไฟล์</strong>) · จำง่าย: <strong>d = down, f = forward</strong> / <strong>u = up, b = backward</strong></p>
+</blockquote>
+<hr />
+<h2 id="11-vim-insertion">11. vim: Insertion</h2>
+<p>ต้องเข้า <strong>Insert Mode</strong> ก่อน:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปุ่ม</th>
+<th>เริ่มพิมพ์ที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>i</strong></td>
+<td><strong>ก่อน</strong> cursor ปัจจุบัน (insert)</td>
+</tr>
+<tr>
+<td><strong>a</strong></td>
+<td><strong>หลัง</strong> cursor ปัจจุบัน (append)</td>
+</tr>
+<tr>
+<td><strong>I</strong></td>
+<td><strong>หน้าสุด</strong>ของบรรทัด</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td><strong>หลังสุด</strong>ของบรรทัด</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ภาพในสไลด์: คำว่า <code>Abcdef</code> cursor อยู่ที่ <code>d</code> → <code>I</code> ไปก่อน A, <code>i</code> ไปก่อน d, <code>a</code> ไปหลัง d, <code>A</code> ไปหลัง f</p>
+</blockquote>
+<hr />
+<h2 id="12-vim-editing-จาก-command-mode">12. vim: Editing (จาก Command Mode)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปุ่ม</th>
+<th>ผล</th>
+<th>อยู่โหมดไหนต่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>x</strong></td>
+<td>ลบ 1 ตัวอักษร<strong>ที่ cursor ทับอยู่</strong></td>
+<td>Command</td>
+</tr>
+<tr>
+<td><strong>X</strong></td>
+<td>ลบ 1 ตัวอักษร<strong>ก่อนหน้า</strong> cursor</td>
+<td>Command</td>
+</tr>
+<tr>
+<td><strong>s</strong></td>
+<td>ลบ 1 ตัวอักษรแล้วเริ่มพิมพ์ตรงนั้น</td>
+<td>Insert</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>ลบทั้งบรรทัดแล้วเริ่มพิมพ์บรรทัดนั้นใหม่</td>
+<td>Insert</td>
+</tr>
+<tr>
+<td><strong>d</strong> + movement</td>
+<td>ลบจาก cursor ถึงตำแหน่งปลายทางของ movement</td>
+<td><strong>ยังอยู่ Command</strong></td>
+</tr>
+<tr>
+<td><strong>c</strong> + movement</td>
+<td>ลบจาก cursor ถึงปลายทาง <strong>แล้วเริ่มพิมพ์</strong></td>
+<td>Insert</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>ลบจาก cursor ถึงสุดบรรทัดแล้วเริ่มพิมพ์</td>
+<td>Insert</td>
+</tr>
+<tr>
+<td><strong>dd</strong></td>
+<td><strong>ลบทั้งบรรทัด</strong></td>
+<td>Command</td>
+</tr>
+<tr>
+<td><strong>cc</strong></td>
+<td>ลบทั้งบรรทัด<strong>แล้วเข้า Insert Mode อัตโนมัติ</strong></td>
+<td>Insert</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง: cursor อยู่ต้นคำแล้วกด <strong><code>cw</code></strong> = ลบคำนั้นแล้วเข้า Insert (เพราะ <code>w</code> = ไปคำถัดไป) · <strong><code>c$</code></strong> = ลบถึงท้ายบรรทัดแล้วเข้า Insert · <em>(อธิบายเพิ่ม: <code>dw</code> = ลบหนึ่งคำ, <code>d$</code> = ลบถึงท้ายบรรทัด)</em></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>d vs c</strong>: ลบเหมือนกัน แต่ <strong>d อยู่ Command ต่อ</strong> ส่วน <strong>c เข้า Insert ทันที</strong> (&quot;c = change&quot;)</p>
+</blockquote>
+<hr />
+<h2 id="13-vim-copy-yank-paste-command-mode">13. vim: Copy (Yank) &amp; Paste (Command Mode)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปุ่ม</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>y</strong> + movement</td>
+<td><strong>yank (copy)</strong> จาก cursor ถึงปลายทาง เช่น <strong><code>yw</code></strong> = copy 1 คำ</td>
+</tr>
+<tr>
+<td><strong>yy</strong></td>
+<td>yank <strong>ทั้งบรรทัด</strong></td>
+</tr>
+<tr>
+<td><strong>p</strong></td>
+<td><strong>วาง (paste) ใต้</strong>บรรทัดนั้น</td>
+</tr>
+<tr>
+<td><strong>P</strong></td>
+<td>วาง<strong>เหนือ</strong>บรรทัดนั้น</td>
+</tr>
+<tr>
+<td><strong>d</strong> + movement แล้ว <strong>p/P</strong></td>
+<td>= <strong>cut แล้ว paste</strong> (สิ่งที่ลบด้วย d ถูกเก็บไว้วางได้)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ใส่ตัวเลขนำหน้าได้ เช่น <code>5yy</code> copy 5 บรรทัด, <code>3p</code> วาง 3 ครั้ง — ใช้ทำ Lab หน้า 16 ได้เร็ว</p>
+</blockquote>
+<hr />
+<h2 id="14-vim-search-และ-replace">14. vim: Search และ Replace ⭐</h2>
+<h3 id="search-command-mode">Search (Command Mode)</h3>
+<ul>
+<li>พิมพ์ <strong><code>/</code> ตามด้วยคำ</strong> แล้ว Enter เช่น <strong><code>/html</code></strong></li>
+<li><strong><code>n</code></strong> = ไปคำที่เจอ<strong>ถัดไป</strong> · <strong><code>N</code></strong> = คำที่เจอ<strong>ก่อนหน้า</strong></li>
+<li>ถ้าเคย search แล้วไปทำอย่างอื่น กด <strong>n / N</strong> ต่อได้เลย ไม่ต้องพิมพ์ใหม่</li>
+</ul>
+<h3 id="replace-command-mode">Replace (Command Mode)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ขอบเขต</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>:%s/คำเดิม/คำใหม่/g</code></strong></td>
+<td>Replace <strong>ทั้งไฟล์</strong></td>
+</tr>
+<tr>
+<td><strong><code>:s/คำเดิม/คำใหม่/g</code></strong></td>
+<td>Replace <strong>แค่บรรทัดที่ cursor อยู่</strong></td>
+</tr>
+<tr>
+<td><strong><code>…/gc</code></strong> (เติม c ท้าย)</td>
+<td>Replace เหมือนกัน แต่<strong>มี prompt ถามทีละจุด</strong>ว่าจะแทนไหม</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง: <code>:%s/navigation/bar/gc</code> = แทนคำว่า navigation ด้วย bar ทั้งไฟล์ แบบถามยืนยัน</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong><code>%</code></strong> = ทุกบรรทัด · <strong><code>g</code></strong> (global) = ทุกจุดในบรรทัด (ถ้าไม่ใส่จะแทนแค่จุดแรกของแต่ละบรรทัด)</p>
+</blockquote>
+<hr />
+<h2 id="15-vim-save-exit">15. vim: Save &amp; Exit ⭐⭐</h2>
+<p>ต้องอยู่ <strong>Command Mode</strong> ก่อน (กด <strong>Esc</strong> ถ้าอยู่โหมดอื่น):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>:w</code></strong></td>
+<td><strong>save</strong></td>
+</tr>
+<tr>
+<td><strong><code>:q</code></strong></td>
+<td><strong>exit</strong> (ออกได้เมื่อไม่มีการแก้ค้างอยู่)</td>
+</tr>
+<tr>
+<td><strong><code>:wq</code></strong></td>
+<td><strong>save แล้ว exit</strong></td>
+</tr>
+<tr>
+<td><strong><code>:q!</code></strong></td>
+<td><strong>exit แบบไม่ save</strong> (ทิ้งสิ่งที่แก้)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="16-vim-visual-mode">16. vim: Visual Mode</h2>
+<ul>
+<li>ใช้<strong>การลากคลุม</strong> (เหมือนคลิกเมาส์ค้างแล้วลาก) แล้วคำสั่งจะมีผลกับส่วนที่คลุมทั้งหมด</li>
+<li>เลื่อน cursor ได้เหมือน Command Mode (h, j, k, l ฯลฯ) แต่มี<strong>แถบสีบอกส่วนที่เลือก</strong></li>
+<li>กด <strong>d</strong> = ลบส่วนที่เลือก · <strong>y</strong> = yank (copy)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>ปุ่ม</th>
+<th>เลือกแบบไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Visual Mode ปกติ</strong></td>
+<td><strong>v</strong></td>
+<td>ลากแบบปกติทีละตัวอักษร</td>
+</tr>
+<tr>
+<td><strong>Visual Line Mode</strong></td>
+<td><strong>Shift + v</strong></td>
+<td>ลาก<strong>ทั้งบรรทัด</strong></td>
+</tr>
+<tr>
+<td><strong>Visual Block Mode</strong></td>
+<td><strong>Ctrl + v</strong></td>
+<td>ลากเป็น<strong>บล็อกสี่เหลี่ยม</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1>ส่วนที่ 2 — Lab 6: Editor</h1>
+<p><strong>Objectives:</strong> 1. Use text editors: nano and vim · 2. Practice nano editor · 3. Install and practice vim editor</p>
+<p><strong>What to Submit:</strong> แคปทุกคำสั่ง <strong>พร้อมอธิบายผลแต่ละคำสั่ง</strong> รวม PDF ส่ง MyCourses ชื่อ <strong><code>6887xxx_lab6.pdf</code></strong> · ⚠️ ส่ง<strong>วันนี้ก่อนเที่ยงคืน</strong></p>
+<h2 id="17-เฉลยช่องว่าง-nano">17. เฉลยช่องว่าง: nano</h2>
+<p><strong>หน้า 4</strong> — สร้างไฟล์ <code>test</code> ด้วย <code>nano test</code> พิมพ์ข้อความ &quot;Nano is a clone of the aging Pico text editor, the editor for the Pine email client that was very popular back in the early 90s, on Unix systems. Pine is now replaced by Alpine and Pico by Nano. But somethings haven't changed, like the simplicity of editing with Nano.&quot;</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หน้า</th>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td>ใช้ Ctrl+G (Get Help) · คำสั่ง <strong>M-U</strong> ต้องกดปุ่มใด</td>
+<td><strong>Alt + U</strong> (= Undo the last operation)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>คำสั่งที่ทำ copy &amp; paste (ย่อหน้าถูกทำซ้ำเป็น 2 ชุด)</td>
+<td><strong>Mark</strong> ด้วย <strong>Ctrl+^</strong> (หรือ M-A) แล้วเลื่อนลูกศรคลุมย่อหน้า → <strong>Alt+6</strong> (M-6) copy หรือ <strong>Ctrl+K</strong> cut → ย้าย cursor → <strong>Ctrl+U</strong> วาง <em>(ทางลัด: Ctrl+K ตัดทีละบรรทัดแล้ว Ctrl+U วางสองครั้ง)</em></td>
+</tr>
+<tr>
+<td>7</td>
+<td>คำสั่งค้นหาคำว่า <code>is</code> · ถ้าค้นหาหลายครั้ง</td>
+<td><strong>Ctrl+W</strong> พิมพ์ <code>is</code> แล้ว Enter · ค้นต่อด้วย <strong>Alt+W</strong> (M-W = WhereIs Next) หรือกด Ctrl+W แล้ว Enter ซ้ำ</td>
+</tr>
+<tr>
+<td>8</td>
+<td>คำสั่งแทนที่ <code>is</code> ด้วย <code>was</code> · มีทางเลือกไหม</td>
+<td><strong>Ctrl+\</strong> → ใส่คำค้น <code>is</code> → ใส่คำใหม่ <code>was</code> · <strong>มีทางเลือก</strong>: nano ถามทีละจุด ตอบ <strong>Y</strong> (แทนจุดนี้) / <strong>N</strong> (ข้าม) / <strong>A</strong> (แทนทั้งหมด) / ^C (ยกเลิก)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>คำสั่ง save file ชื่อ test</td>
+<td><strong>Ctrl+O</strong> → ขึ้น <code>File Name to Write: test</code> → <strong>Enter</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td>คำสั่ง exit ออกจาก nano</td>
+<td><strong>Ctrl+X</strong> (ถ้ายังไม่บันทึกจะถามว่า Save modified buffer? ตอบ Y/N)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ผลหลังแทนที่ (หน้า 8): &quot;Nano <strong>was</strong> a clone…&quot;, &quot;Pine <strong>was</strong> now replaced…&quot; — เห็นว่าแทนคำว่า is ทุกจุด</p>
+</blockquote>
+<p><strong>หน้า 11–13</strong> — ติดตั้ง vim 3 ขั้น (proxy → <code>sudo apt update</code> → <code>sudo apt install vim</code> ตอบ Y) ตามหัวข้อ 7</p>
+<h2 id="18-เฉลยช่องว่าง-vim">18. เฉลยช่องว่าง: vim</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หน้า</th>
+<th>คำถาม / งาน</th>
+<th>คำตอบ / แนวทาง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14</td>
+<td>เปิด <code>test</code> ด้วย vim ไฟล์มีกี่บรรทัด กี่ตัวอักษร</td>
+<td>บรรทัดล่างแสดง <strong><code>&quot;test&quot; 10L, 548C</code></strong> → <strong>10 บรรทัด, 548 ตัวอักษร</strong> (cursor อยู่ <code>1,1</code>)</td>
+</tr>
+<tr>
+<td>15</td>
+<td>ฝึก movement ข้อ 1–5 โดยเริ่มที่ <strong>line 3, column 23</strong> (ตรงช่องว่างหลัง &quot;Alpine&quot;)</td>
+<td>ลองกด h/j/k/l, w/W, e/E, b/B, 0/^/$ ทีละคำสั่ง แล้วแคปตำแหน่ง cursor (มุมล่างขวาบอก line,column)</td>
+</tr>
+<tr>
+<td>16</td>
+<td>yank &amp; paste ให้ content ยาวขึ้นเป็น 2 หน้าจอ · จำนวน line และตัวอักษร</td>
+<td>ใช้ <code>yy</code> / <code>5yy</code> แล้ว <code>p</code> ซ้ำ ๆ · <strong>ตัวเลขขึ้นกับจำนวนที่วางในเครื่องตัวเอง</strong> ดูได้จากบรรทัดล่างหลัง <code>:w</code> (เช่น &quot;xxL, yyyC written&quot;)</td>
+</tr>
+<tr>
+<td>17</td>
+<td>screen moving</td>
+<td>ลอง H, M, L, Ctrl+e/d/f, Ctrl+y/u/b, gg, G แล้วแคปผล</td>
+</tr>
+<tr>
+<td>18</td>
+<td>insert ด้วย I, i, A, a</td>
+<td>ตัวอย่างเพิ่มบรรทัด <strong>&quot;This is a test file for learning the vim editor.&quot;</strong> (จอขึ้น <code>-- INSERT --</code> ตำแหน่ง 12,49) · กด Esc เมื่อพิมพ์เสร็จ</td>
+</tr>
+<tr>
+<td>19</td>
+<td>editing ด้วย x, s, dw, dd, cc · แก้ <code>was</code> เป็น <code>is</code></td>
+<td>เช่นวาง cursor ที่ <code>w</code> ของ was → <strong><code>cw</code></strong> พิมพ์ <code>is</code> → Esc · หรือ <code>x</code> ลบ w แล้ว <code>s</code> แทน a ด้วย i (ผล: &quot;Nano i<strong>s</strong> a clone…&quot;)</td>
+</tr>
+<tr>
+<td>20</td>
+<td>คำสั่งลบข้อมูล 1 บรรทัด และตำแหน่ง cursor</td>
+<td><strong><code>dd</code></strong> · ในภาพลบบรรทัดแรกของย่อหน้าที่สอง (&quot;Nano was a clone…&quot;) cursor จึงอยู่ <strong>line 6, column 1</strong> (ต้นบรรทัด &quot;client that was…&quot; ที่เลื่อนขึ้นมาแทน) <em>(อ่านจากภาพ ตัวเลขจริงขึ้นกับบรรทัดที่ลบในเครื่องตัวเอง)</em></td>
+</tr>
+<tr>
+<td>21</td>
+<td>search คำว่า <code>is</code> และหาทั้งหมด</td>
+<td>พิมพ์ <strong><code>/is</code></strong> Enter → กด <strong><code>n</code></strong> ไปจุดถัดไป, <strong><code>N</code></strong> ย้อนกลับ (ในภาพเจอ <code>is</code> ใน &quot;Th<strong>is</strong>&quot; ก่อน)</td>
+</tr>
+<tr>
+<td>22</td>
+<td>replace <code>is</code> ด้วย <code>was</code> และแทนทั้งหมด</td>
+<td>ในภาพใช้ <strong><code>:s/is/was/g</code></strong> (บรรทัดปัจจุบันเท่านั้น) · <strong>แทนทั้งไฟล์ใช้ <code>:%s/is/was/g</code></strong></td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>:w</code> save</td>
+<td>บรรทัดล่างขึ้น <strong><code>&quot;test&quot; 13L, 600C written</code></strong></td>
+</tr>
+<tr>
+<td>24</td>
+<td>ออกจาก vim</td>
+<td><strong>ไม่ save: <code>:q!</code></strong> · <strong>save ด้วย: <code>:wq</code></strong> · <strong>ออกเท่านั้น: <code>:q</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>กับดักใน Lab หน้า 21–22</strong> <em>(อธิบายเพิ่ม)</em>: <code>is</code> ปรากฏอยู่ใน &quot;Th<strong>is</strong>&quot; ด้วย การสั่ง <code>:%s/is/was/g</code> จะได้ &quot;Thwas is a test…&quot; ถ้าอยากแทนเฉพาะคำว่า is ทั้งคำใช้ <code>:%s/\&lt;is\&gt;/was/g</code> (<code>\&lt;</code> <code>\&gt;</code> = ขอบคำ) หรือใช้ <code>/gc</code> แล้วเลือกตอบทีละจุด</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text editor</strong></td>
+<td>software สร้าง/แก้ไฟล์ตัวอักษร</td>
+<td>notepad ของ Linux</td>
+</tr>
+<tr>
+<td><strong>nano</strong></td>
+<td>editor ใช้ง่าย คีย์ลัด Ctrl/Alt (โคลนของ Pico)</td>
+<td>ง่าย</td>
+</tr>
+<tr>
+<td><strong>vim (vi editor)</strong></td>
+<td>editor ทรงพลัง ใช้ยากกว่า มีหลายโหมด</td>
+<td>เทพแต่ต้องฝึก</td>
+</tr>
+<tr>
+<td><strong><code>^</code> / <code>M</code></strong></td>
+<td>Ctrl / Alt ในคีย์ลัด nano</td>
+<td>^ = Ctrl</td>
+</tr>
+<tr>
+<td><strong>Cutbuffer</strong></td>
+<td>ที่เก็บข้อความที่ตัด/คัดลอกใน nano</td>
+<td>คลิปบอร์ด</td>
+</tr>
+<tr>
+<td><strong>less</strong></td>
+<td>ดูไฟล์ทีละหน้า เลื่อนได้สองทาง</td>
+<td>more ที่ถอยได้</td>
+</tr>
+<tr>
+<td><strong>apt / apt update / apt install</strong></td>
+<td>ตัวจัดการ package · อัปเดตรายการ · ติดตั้ง</td>
+<td>แอปสโตร์ของ Ubuntu</td>
+</tr>
+<tr>
+<td><strong>Proxy</strong></td>
+<td>เครื่องกลางที่เชื่อมเน็ตให้ (muproxy-basic.mahidol:8080)</td>
+<td>ประตูออกเน็ต</td>
+</tr>
+<tr>
+<td><strong>Command Mode</strong></td>
+<td>โหมดเริ่มต้นของ vim ใช้คำสั่ง</td>
+<td>โหมดสั่งงาน</td>
+</tr>
+<tr>
+<td><strong>Insert Mode</strong></td>
+<td>โหมดพิมพ์ข้อความ</td>
+<td>โหมดพิมพ์</td>
+</tr>
+<tr>
+<td><strong>Visual Mode</strong></td>
+<td>โหมดเลือกข้อความ (v, V, Ctrl+v)</td>
+<td>โหมดลากคลุม</td>
+</tr>
+<tr>
+<td><strong>Yank</strong></td>
+<td>copy ใน vim (<code>y</code>, <code>yy</code>)</td>
+<td>ดึงมา</td>
+</tr>
+<tr>
+<td><strong>h j k l</strong></td>
+<td>ซ้าย ลง ขึ้น ขวา</td>
+<td>ลูกศรของ vim</td>
+</tr>
+<tr>
+<td><strong>gg / G</strong></td>
+<td>ต้นไฟล์ / ท้ายไฟล์</td>
+<td>บนสุด / ล่างสุด</td>
+</tr>
+<tr>
+<td><strong><code>:%s/old/new/g</code></strong></td>
+<td>แทนที่ทั้งไฟล์</td>
+<td>search &amp; replace</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>cat ทั้งหมด · more ทีละหน้าทางเดียว · <strong>less ทีละหน้าสองทาง</strong> · head ต้น · tail ท้าย</li>
+<li>Text editor: Windows = notepad · Linux = nano, vim (vim ยากกว่า)</li>
+<li>nano: <strong>^ = Ctrl, M = Alt</strong> · <strong>Ctrl+O save, Ctrl+X exit, Ctrl+W search, Ctrl+\ replace, Ctrl+K cut, Ctrl+U paste, Ctrl+R แทรกไฟล์, Ctrl+G help, Ctrl+^ mark, Ctrl+A/E ต้น/ท้ายบรรทัด, Ctrl+C ตำแหน่ง cursor, Ctrl+D ลบตัวอักษร</strong> · M-U undo</li>
+<li>ติดตั้ง vim: <strong>proxy ใน /etc/apt/apt.conf → sudo apt update → sudo apt install vim (Y)</strong></li>
+<li>vim <strong>3 modes</strong>: Command (default, Esc) · Insert (i a I A) · Visual (v, Shift+v, Ctrl+v)</li>
+<li>Movement: h j k l, w/W, e/E, b/B, 0 ^ $, ]} [(, %, t/T · Screen: H M L, Ctrl+e/d/f, Ctrl+y/u/b, gg G</li>
+<li>Editing: x X s S d c C dd cc · Yank: y yw yy p P</li>
+<li>Search <code>/คำ</code> + n/N · Replace <code>:%s/a/b/g</code> ทั้งไฟล์, <code>:s/a/b/g</code> บรรทัดเดียว, <code>gc</code> ถามยืนยัน</li>
+<li>Save/Exit: <strong>:w, :q, :wq, :q!</strong></li>
+<li>Lab: <code>test</code> เปิดใน vim = <strong>10L, 548C</strong> · หลังแก้ = <strong>13L, 600C</strong> · ส่ง <strong><code>6887xxx_lab6.pdf</code></strong></li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>more vs less</strong></td>
+<td>เลื่อนหน้าได้ทางเดียว vs สองทาง</td>
+</tr>
+<tr>
+<td><strong>nano vs vim</strong></td>
+<td>ใช้ง่าย คีย์ลัด Ctrl vs มีโหมด ใช้ยากแต่ทรงพลัง</td>
+</tr>
+<tr>
+<td><strong>Ctrl+O vs Ctrl+X (nano)</strong></td>
+<td>บันทึก vs ออก</td>
+</tr>
+<tr>
+<td><strong>Ctrl+W vs Ctrl+\ (nano)</strong></td>
+<td>ค้นหา vs ค้นหาและแทนที่</td>
+</tr>
+<tr>
+<td><strong>Ctrl+K vs Ctrl+U (nano)</strong></td>
+<td>ตัด vs วาง</td>
+</tr>
+<tr>
+<td><strong>i vs a vs I vs A</strong></td>
+<td>ก่อน cursor vs หลัง cursor vs ต้นบรรทัด vs ท้ายบรรทัด</td>
+</tr>
+<tr>
+<td><strong>x vs X</strong></td>
+<td>ลบตัวที่ cursor ทับ vs ลบตัวก่อนหน้า</td>
+</tr>
+<tr>
+<td><strong>d vs c</strong></td>
+<td>ลบแล้วอยู่ Command vs ลบแล้วเข้า Insert</td>
+</tr>
+<tr>
+<td><strong>dd vs cc</strong></td>
+<td>ลบบรรทัด vs ลบบรรทัดแล้วเริ่มพิมพ์</td>
+</tr>
+<tr>
+<td><strong>p vs P</strong></td>
+<td>วางใต้บรรทัด vs วางเหนือบรรทัด</td>
+</tr>
+<tr>
+<td><strong>n vs N</strong></td>
+<td>ผลค้นหาถัดไป vs ก่อนหน้า</td>
+</tr>
+<tr>
+<td><strong><code>:%s</code> vs <code>:s</code></strong></td>
+<td>ทั้งไฟล์ vs บรรทัดเดียว</td>
+</tr>
+<tr>
+<td><strong><code>:q</code> vs <code>:q!</code> vs <code>:wq</code></strong></td>
+<td>ออก (ต้องไม่มีงานค้าง) vs ออกทิ้งงาน vs บันทึกแล้วออก</td>
+</tr>
+<tr>
+<td><strong>v vs Shift+v vs Ctrl+v</strong></td>
+<td>เลือกตัวอักษร vs ทั้งบรรทัด vs บล็อกสี่เหลี่ยม</td>
+</tr>
+<tr>
+<td><strong>0 vs ^ vs $</strong></td>
+<td>ต้นบรรทัด vs คำแรกของบรรทัด vs ท้ายบรรทัด</td>
+</tr>
+<tr>
+<td><strong>gg vs G</strong></td>
+<td>ต้นไฟล์ vs ท้ายไฟล์</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมต้องรู้ editor ใน terminal</strong> → server ส่วนใหญ่ไม่มี GUI การแก้ไฟล์ตั้งค่า (เช่น <code>/etc/apt/apt.conf</code>) ต้องทำใน terminal</li>
+<li><strong>ทำไม <code>sudo apt install vim</code> ครั้งแรกอาจไม่ได้</strong> → ยังไม่ได้ <code>apt update</code> รายการ package หรือยังไม่ได้ตั้ง proxy ให้ออกเน็ตได้</li>
+<li><strong>ทำไมพิมพ์ใน vim แล้วไม่มีตัวอักษรขึ้น</strong> → อยู่ Command Mode ต้องกด i ก่อน</li>
+<li><strong>ทำไม <code>:q</code> ออกไม่ได้</strong> → มีการแก้ที่ยังไม่บันทึก ต้อง <code>:wq</code> หรือ <code>:q!</code></li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l5/index.html"><small>← บทก่อนหน้า</small><span>L5 – File Permissions + Lab 5 (File Permissions)</span></a><a class="pg next" href="../l7/index.html"><small>บทถัดไป →</small><span>L7 – Storage + Lab 7 (Storage)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

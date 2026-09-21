@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L5 – File Permissions + Lab 5 (File Permissions) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-ประเภทของผู้ใช้-user-management-on-unixlinux">2. ประเภทของผู้ใช้ (User Management on Unix/Linux)</a></li><li><a href="#3-ไฟล์ที่เก็บข้อมูลผู้ใช้">3. ไฟล์ที่เก็บข้อมูลผู้ใช้ ⭐</a></li><li><a href="#4-คำสั่งจัดการผู้ใช้-และ-sudo-su">4. คำสั่งจัดการผู้ใช้ และ sudo / su</a></li><li><a href="#5-สิทธิ์ไฟล์-3-กลุ่มผู้ใช้-3-สิทธิ์">5. สิทธิ์ไฟล์: 3 กลุ่มผู้ใช้ × 3 สิทธิ์ ⭐⭐</a></li><li><a href="#6-อ่านผล-ls--l">6. อ่านผล ls -l ⭐⭐</a></li><li><a href="#7-chmod-แบบตัวเลข-octal">7. chmod แบบตัวเลข (octal) ⭐⭐</a></li><li><a href="#8-chmod-แบบตัวอักษร-symbolic">8. chmod แบบตัวอักษร (symbolic)</a></li><li><a href="#9-chown-และ-chgrp">9. chown และ chgrp</a></li><li><a href="#10-วัตถุประสงค์-สิ่งที่ส่ง-และคำสั่งที่ใช้">10. วัตถุประสงค์ สิ่งที่ส่ง และคำสั่งที่ใช้</a></li><li><a href="#11-lab-5-เฉลยช่องว่างทีละหน้า">11. Lab 5: เฉลยช่องว่างทีละหน้า</a></li><li><a href="#12-lab-5-exercise-ท้ายแลป-แนวคำตอบ">12. Lab 5: Exercise ท้ายแลป (แนวคำตอบ)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L5</div>
+      <h1 class="lesson-title">L5 – File Permissions + Lab 5 (File Permissions)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> ต่อจาก L4 (User Management) ที่สร้าง user และ group แล้ว บทนี้ตอบคำถามว่า <strong>&quot;ใครทำอะไรกับไฟล์ไหนได้บ้าง&quot;</strong></p>
+<p>(1) <strong>Lecture 5</strong> ทบทวนไฟล์เก็บข้อมูลผู้ใช้ (<code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>), <code>sudo</code> / <code>su</code> แล้วเข้าเรื่องสิทธิ์ไฟล์: อ่าน <code>ls -l</code>, สิทธิ์ <strong>r w x</strong> ของ <strong>user / group / other</strong>, คำสั่ง <strong><code>chmod</code></strong> (แบบตัวเลขและตัวอักษร), <strong><code>chown</code></strong>, <strong><code>chgrp</code></strong></p>
+<p>(2) <strong>Lab 5</strong> ลงมือสร้าง user 3 คน group 2 กลุ่ม แล้วทดลองเปลี่ยนสิทธิ์ home directory ดูว่าใครเข้าได้ ใครโดน <code>Permission denied</code></p>
+<p>เรื่องนี้สำคัญมากในการดูแลระบบ Linux เพราะเป็นกลไกหลักที่กันไม่ให้ผู้ใช้คนหนึ่งอ่านหรือแก้ไฟล์ของคนอื่น</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 5: File Permission</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 5 ตามตาราง = <strong>การเรียนรู้เรื่องสิทธิ์ของผู้ใช้</strong> (ต่อจากสัปดาห์ 4 การจัดการผู้ใช้และกลุ่มผู้ใช้)</li>
+<li>เกณฑ์คะแนนเหมือนเดิม: เข้าเรียน 80% · รายงานแลป 25 · ทดสอบย่อย 25 · กลางภาค 25 (สัปดาห์ 9) · ปลายภาค 25 (สัปดาห์ 17)</li>
+<li>⚠️ ส่งรายงานแลป <strong>ภายใน 23.59 น. ของวันอังคาร หรือวันที่มีการเรียน</strong> · มี <strong>ทดสอบย่อยทุกสัปดาห์ก่อนจบคาบ</strong></li>
+</ul>
+<hr />
+<h2 id="2-ประเภทของผู้ใช้-user-management-on-unixlinux">2. ประเภทของผู้ใช้ (User Management on Unix/Linux)</h2>
+<p>UNIX ออกแบบให้<strong>กำหนดสิทธิ์การเข้าถึงได้หลายระดับ</strong> เพื่อจำกัดว่าผู้ใช้แต่ละระดับใช้ทรัพยากรของระบบได้แค่ไหน แบ่งผู้ใช้เป็น <strong>2 ระดับ</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความหมาย</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>ผู้ใช้ทั่วไป <strong>สิทธิ์จำกัด</strong> หรือ user ที่สร้างไว้ให้<strong>โปรแกรมประยุกต์</strong>ใช้</td>
+<td>ผู้ใช้ทั่วไป, user ของ <strong>Web Server</strong></td>
+</tr>
+<tr>
+<td><strong>Superuser</strong></td>
+<td>มีสิทธิ์<strong>บริหารจัดการระบบทุกอย่าง</strong> เช่น สร้าง user / กำหนดสิทธิ์ให้ผู้ใช้, ปิด process สำคัญ (เช่น Web Server), แก้ไฟล์ของระบบ</td>
+<td>ใน UNIX ชื่อ <strong><code>root</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ที่แยก user ให้โปรแกรมอย่าง Web Server ก็เพราะถ้าโปรแกรมโดนแฮ็ก ผู้บุกรุกจะได้แค่สิทธิ์จำกัดของ user นั้น ไม่ได้สิทธิ์ root ทั้งระบบ</p>
+</blockquote>
+<hr />
+<h2 id="3-ไฟล์ที่เก็บข้อมูลผู้ใช้">3. ไฟล์ที่เก็บข้อมูลผู้ใช้ ⭐</h2>
+<ul>
+<li>ข้อมูลผู้ใช้กระจายอยู่ใน <strong>3 ไฟล์</strong> ที่ใช้ร่วมกัน: <strong><code>/etc/passwd</code></strong>, <strong><code>/etc/shadow</code></strong>, <strong><code>/etc/group</code></strong> เก็บในรูปแบบต่างกัน</li>
+<li><strong>แต่ละไฟล์มีสิทธิ์การเข้าถึงไม่เหมือนกัน</strong> เพราะบางไฟล์เก็บความลับ เช่น <strong>รหัสผ่าน</strong> ที่ไม่ต้องการให้ผู้ใช้อื่นเห็น</li>
+<li>ผู้ใช้เข้าระบบด้วยชื่อที่เรียกว่า <strong>Username</strong> และมี<strong>รหัสผ่าน</strong>ของแต่ละ username</li>
+<li>ระบบระบุตัวผู้ใช้ด้วยหมายเลข <strong>UID (User Identifier)</strong> — <strong>แต่ละคนมี UID ไม่ซ้ำกัน</strong></li>
+<li>ผู้ใช้เป็นสมาชิกของกลุ่มได้ โดยกลุ่มอ้างอิงด้วยหมายเลข <strong>GID (Group Identifier)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ระบบจริง ๆ ดูที่ <strong>ตัวเลข UID/GID</strong> ไม่ได้ดูชื่อ ชื่อมีไว้ให้คนอ่าน</p>
+</blockquote>
+<h3 id="31-etcpasswd-ข้อมูลบัญชีผู้ใช้-7-ช่อง-คั่นด้วย">3.1 <code>/etc/passwd</code> — ข้อมูลบัญชีผู้ใช้ (7 ช่อง คั่นด้วย <code>:</code>)</h3>
+<p><img loading="lazy" src="img/lec-p06.jpg" alt="โครงสร้าง /etc/passwd และ /etc/shadow จากสไลด์" /></p>
+<p>ตัวอย่างในสไลด์: <code>oracle:x:1021:1020:Oracle user:/data/network/oracle:/bin/bash</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>ค่าในตัวอย่าง</th>
+<th>ความหมาย <em>(ชื่อช่องอธิบายเพิ่ม เพราะสไลด์มีแค่เลข 1–7)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>oracle</code></td>
+<td><strong>username</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>x</code></td>
+<td>รหัสผ่าน — <code>x</code> แปลว่า<strong>รหัสจริงเก็บอยู่ใน <code>/etc/shadow</code></strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>1021</code></td>
+<td><strong>UID</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>1020</code></td>
+<td><strong>GID</strong> ของกลุ่มหลัก (primary group)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>Oracle user</code></td>
+<td>คำอธิบาย / ชื่อเต็ม (comment, GECOS)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>/data/network/oracle</code></td>
+<td><strong>home directory</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>/bin/bash</code></td>
+<td><strong>login shell</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างจริงในเครื่องอาจารย์: <code>sudsanguan:x:1000:1000:sudsanguan,,,:/home/sudsanguan:/bin/bash</code></p>
+<blockquote class="callout">
+<p class="c-tip">💡 ใน Lab จะเห็นบรรทัดอย่าง <code>vboxadd:x:999:1::/var/run/vboxadd:/bin/false</code> และ <code>sshd:x:122:65534::/run/sshd:/usr/sbin/nologin</code> <em>(อธิบายเพิ่ม)</em> พวกนี้คือ <strong>user ของระบบ/โปรแกรม</strong> ที่ shell เป็น <code>/bin/false</code> หรือ <code>nologin</code> = <strong>login เข้ามาใช้งานไม่ได้</strong></p>
+</blockquote>
+<h3 id="32-etcshadow-รหัสผ่านที่เข้ารหัสแล้ว">3.2 <code>/etc/shadow</code> — รหัสผ่านที่เข้ารหัสแล้ว</h3>
+<p>ตัวอย่างในสไลด์: <code>vivek:$1$fnfffc$pGteyHdicpGOfffXX4ow#5:13064:0:99999:7:::</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>ค่าในตัวอย่าง</th>
+<th>ความหมาย <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>vivek</code></td>
+<td>username</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>$1$fnfffc$pGtey…</code></td>
+<td><strong>รหัสผ่านที่เข้ารหัส (hash)</strong> — <code>$1$</code> = MD5, ตัวอย่างของอาจารย์ขึ้นต้น <code>$6$</code> = SHA-512</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>13064</code></td>
+<td>วันที่เปลี่ยนรหัสล่าสุด (นับเป็นจำนวนวันตั้งแต่ 1 ม.ค. 1970)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>0</code></td>
+<td>จำนวนวันขั้นต่ำก่อนเปลี่ยนรหัสได้อีก</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>99999</code></td>
+<td>จำนวนวันสูงสุดที่รหัสใช้ได้ (99999 = แทบไม่หมดอายุ)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>7</code></td>
+<td>เตือนล่วงหน้ากี่วันก่อนรหัสหมดอายุ</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างจริง: <code>sudsanguan:$6$3ZRG5naN$eLo8R6Fzlto…:18415:0:99999:7:::</code></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ผู้ใช้ทั่วไป<strong>อ่าน <code>/etc/shadow</code> ไม่ได้</strong> ต้องใช้ <code>sudo</code> (ดูหัวข้อ 4) ส่วน <code>/etc/passwd</code> ใครก็อ่านได้ นี่คือเหตุผลที่แยกรหัสผ่านออกมาไว้คนละไฟล์</p>
+</blockquote>
+<h3 id="33-etcgroup-ข้อมูลกลุ่ม">3.3 <code>/etc/group</code> — ข้อมูลกลุ่ม</h3>
+<p><img loading="lazy" src="img/lec-p08.jpg" alt="โครงสร้าง /etc/group" /></p>
+<ul>
+<li>เป็นไฟล์กำหนด<strong>คุณสมบัติและสมาชิกของแต่ละกลุ่ม</strong></li>
+<li><strong>ผู้ใช้ทั่วไปอ่านได้อย่างเดียว คนที่แก้ไขได้มีเพียง root</strong></li>
+<li>ในระบบใหญ่ ควร<strong>สร้างกลุ่ม</strong>เพื่อให้จัดการสิทธิ์ง่าย เช่น ให้กลุ่ม A แก้ไฟล์ได้เฉพาะบาง directory</li>
+</ul>
+<p>ตัวอย่าง: <code>etda:x:1000:test01,test02,test03</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>ค่า</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>etda</code></td>
+<td>ชื่อกลุ่ม</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>x</code></td>
+<td>รหัสผ่านกลุ่ม (ไม่ค่อยใช้)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>1000</code></td>
+<td><strong>GID</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>test01,test02,test03</code></td>
+<td><strong>รายชื่อสมาชิก</strong> คั่นด้วยจุลภาค (ว่างได้ เช่น <code>sudsanguan:x:1000:</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-คำสั่งจัดการผู้ใช้-และ-sudo-su">4. คำสั่งจัดการผู้ใช้ และ <code>sudo</code> / <code>su</code></h2>
+<p><strong>คำสั่งพื้นฐานบริหารผู้ใช้:</strong></p>
+<ul>
+<li><strong><code>useradd</code></strong> — เพิ่มผู้ใช้</li>
+<li><strong><code>usermod</code></strong> — แก้ไขข้อมูลผู้ใช้ (เช่น เพิ่มเข้า group)</li>
+<li><strong><code>userdel</code></strong> — ลบผู้ใช้</li>
+</ul>
+<p><strong>ยืมสิทธิ์ / สลับผู้ใช้:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ทำอะไร</th>
+<th>ตัวอย่างในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>sudo</code></strong></td>
+<td>ผู้ใช้ทั่วไป<strong>รันคำสั่งเสมือนเป็น root</strong> (ทีละคำสั่ง)</td>
+<td><code>sudo more /etc/shadow</code></td>
+</tr>
+<tr>
+<td><strong><code>su</code></strong></td>
+<td><strong>login เป็นผู้ใช้คนอื่น</strong> (ต้องใส่รหัสผ่านของคนนั้น)</td>
+<td><code>su test1</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่าง <code>su</code> ในสไลด์:</p>
+<pre><code>sudsanguan@Sudsanguan-Ju:~$ whoami
+sudsanguan
+sudsanguan@Sudsanguan-Ju:~$ su test1
+Password:
+test1@Sudsanguan-Ju:/home/sudsanguan$ whoami
+test1
+</code></pre>
+<ul>
+<li><strong><code>whoami</code></strong> บอกว่าตอนนี้เป็นใคร · หลัง <code>su test1</code> prompt เปลี่ยนเป็น <code>test1@…</code> แต่ยัง<strong>อยู่ directory เดิม</strong> (<code>/home/sudsanguan</code>)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>sudo vs su</strong>: <code>sudo</code> ใส่รหัสผ่าน<strong>ของตัวเอง</strong> แล้วได้สิทธิ์ root เฉพาะคำสั่งนั้น · <code>su ชื่อ</code> ใส่รหัสผ่าน<strong>ของคนนั้น</strong> แล้วกลายเป็นคนนั้นจนกว่าจะพิมพ์ <code>exit</code></p>
+</blockquote>
+<hr />
+<h2 id="5-สิทธิ์ไฟล์-3-กลุ่มผู้ใช้-3-สิทธิ์">5. สิทธิ์ไฟล์: 3 กลุ่มผู้ใช้ × 3 สิทธิ์ ⭐⭐</h2>
+<p><strong>คำสั่งพื้นฐานจัดการสิทธิ์ไฟล์:</strong></p>
+<ul>
+<li><strong><code>chmod</code></strong> — ปรับเปลี่ยนสิทธิ์</li>
+<li><strong><code>chown</code></strong> — เปลี่ยนเจ้าของไฟล์</li>
+<li><strong><code>chgrp</code></strong> — เปลี่ยนกลุ่มของไฟล์</li>
+</ul>
+<h3 id="3-กลุ่มผู้ใช้">3 กลุ่มผู้ใช้</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>ตัวย่อ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>เจ้าของ (Owner หรือ User)</strong></td>
+<td><strong>u</strong></td>
+<td>ผู้สร้างไฟล์หรือโฟลเดอร์</td>
+</tr>
+<tr>
+<td><strong>กลุ่ม (Group)</strong></td>
+<td><strong>g</strong></td>
+<td>ผู้ใช้ที่อยู่กลุ่มเดียวกับไฟล์ ใช้ไฟล์ของเพื่อนร่วมกลุ่มได้ หรือมีสิทธิ์ต่างจากคนนอกกลุ่ม</td>
+</tr>
+<tr>
+<td><strong>ผู้อื่น (Other)</strong></td>
+<td><strong>o</strong></td>
+<td>ผู้ใช้ทั่วไปที่<strong>ไม่ใช่ owner และไม่ใช่ group</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียนว่า Other คือ &quot;ไม่ใช่ Owner หรือ Other&quot; ซึ่งน่าจะพิมพ์ผิด ที่ถูกคือ <strong>ไม่ใช่ Owner และไม่ใช่ Group</strong></p>
+</blockquote>
+<h3 id="3-ประเภทสิทธิ์">3 ประเภทสิทธิ์</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สิทธิ์</th>
+<th>ตัวอักษร</th>
+<th>กับ<strong>ไฟล์</strong> (จากสไลด์)</th>
+<th>กับ <strong>directory</strong> <em>(อธิบายเพิ่ม — สำคัญมากใน Lab)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Read</strong></td>
+<td><strong>r</strong></td>
+<td>อ่านข้อมูลในไฟล์</td>
+<td>ดูรายชื่อไฟล์ข้างใน (<code>ls</code>)</td>
+</tr>
+<tr>
+<td><strong>Write</strong></td>
+<td><strong>w</strong></td>
+<td><strong>แก้ไข</strong>ข้อมูลในไฟล์ (<strong>ไม่ใช่สิทธิ์ลบไฟล์</strong>)</td>
+<td>สร้าง / ลบ / เปลี่ยนชื่อไฟล์ข้างใน</td>
+</tr>
+<tr>
+<td><strong>Execute</strong></td>
+<td><strong>x</strong></td>
+<td><strong>เรียกใช้งาน (รัน)</strong> ไฟล์</td>
+<td><strong>เข้าไปใน directory</strong> (<code>cd</code>) และเข้าถึงไฟล์ข้างใน</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไม w ของไฟล์ไม่ใช่สิทธิ์ลบ?</strong> <em>(อธิบายเพิ่ม)</em> การลบไฟล์คือการเอาชื่อออกจาก directory จึงขึ้นกับสิทธิ์ <strong>w ของ directory</strong> ที่ไฟล์อยู่ ไม่ใช่ของตัวไฟล์</p>
+<p class="c-tip">💡 ถ้า directory <strong>ไม่มี x</strong> ต่อให้มี r ก็เข้าไป (<code>cd</code>) ไม่ได้ และเปิดไฟล์ข้างในไม่ได้ Lab 5 ทดลองเรื่องนี้ทั้งหมด</p>
+</blockquote>
+<h3 id="linux-ตัดสินว่าใช้สิทธิ์ชุดไหน-อธิบายเพิ่ม">Linux ตัดสินว่าใช้สิทธิ์ชุดไหน <em>(อธิบายเพิ่ม)</em></h3>
+<p><img loading="lazy" src="diagrams/L5-01-permission-check.png" alt="ลำดับการตรวจสิทธิ์: owner → group → other" /></p>
+<p>ระบบเช็ก<strong>ทีละขั้นแล้วหยุดที่ขั้นแรกที่ตรง</strong>: เป็น owner ไหม → อยู่ใน group ของไฟล์ไหม → ถ้าไม่ใช่ทั้งคู่ใช้สิทธิ์ other · <strong>root ข้ามการตรวจนี้ได้</strong> จึงต้องใช้ <code>sudo</code> ในการเปลี่ยนสิทธิ์ไฟล์ของคนอื่น</p>
+<hr />
+<h2 id="6-อ่านผล-ls--l">6. อ่านผล <code>ls -l</code> ⭐⭐</h2>
+<p><img loading="lazy" src="img/lec-p14.jpg" alt="ส่วนต่าง ๆ ของผล ls -l" /></p>
+<p>ตัวอย่าง: <code>-rw-r--r--  1  ittipon  muict  68524  2011-12-19 07:18  foo.txt</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ค่า</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>-rw-r--r--</code></td>
+<td><strong>File type and Permissions</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>1</code></td>
+<td><strong>&quot;link count&quot;</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>ittipon</code></td>
+<td><strong>Owner</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>muict</code></td>
+<td><strong>Group</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>68524</code></td>
+<td><strong>Size (in bytes)</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>2011-12-19 07:18</code></td>
+<td><strong>Modification Time/Date</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>foo.txt</code></td>
+<td><strong>File Name</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="แยก-10-ตัวอักษรแรก">แยก 10 ตัวอักษรแรก</h3>
+<p><img loading="lazy" src="img/lec-p16.jpg" alt="rwxrwxrwx = User (u), Group (g), Other (o)" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตำแหน่ง</th>
+<th>ตัวอย่าง <code>drwxr-xr-x</code></th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ตัวที่ 1</td>
+<td><code>d</code></td>
+<td>ชนิดไฟล์: <strong><code>d</code> = directory</strong>, <strong><code>-</code> = ไฟล์ธรรมดา</strong> <em>(อธิบายเพิ่ม: <code>l</code> = symbolic link)</em></td>
+</tr>
+<tr>
+<td>ตัวที่ 2–4</td>
+<td><code>rwx</code></td>
+<td>สิทธิ์ของ <strong>User (u)</strong></td>
+</tr>
+<tr>
+<td>ตัวที่ 5–7</td>
+<td><code>r-x</code></td>
+<td>สิทธิ์ของ <strong>Group (g)</strong></td>
+</tr>
+<tr>
+<td>ตัวที่ 8–10</td>
+<td><code>r-x</code></td>
+<td>สิทธิ์ของ <strong>Other (o)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>-</code> ในตำแหน่งสิทธิ์ = <strong>ไม่มีสิทธิ์นั้น</strong></li>
+</ul>
+<p>ตัวอย่างในสไลด์ (ใน <code>/home</code>):</p>
+<pre><code>drwxr-xr-x 20 sudsanguan sudsanguan 4096 ก.ย.  5 17:56 sudsanguan
+drwxr--r-- 14 test3      group1     4096 ส.ค. 30 11:36 test1
+drwxr-x---  3 test2      group2     4096 ก.ย.  6 01:00 test2
+drwxr-xr-x  3 test3      test3      4096 ก.ย.  5 21:23 test3
+</code></pre>
+<p>อ่านบรรทัด <code>test2</code>: directory · owner <code>test2</code> ได้ rwx · สมาชิก <code>group2</code> ได้ r-x (ดูและเข้าได้แต่สร้าง/ลบไม่ได้) · คนอื่น <code>---</code> (ทำอะไรไม่ได้เลย)</p>
+<hr />
+<h2 id="7-chmod-แบบตัวเลข-octal">7. <code>chmod</code> แบบตัวเลข (octal) ⭐⭐</h2>
+<p>แต่ละสิทธิ์มีค่า <strong>r = 4, w = 2, x = 1</strong> แล้ว<strong>บวกกัน</strong>ได้เลข 0–7 ต่อ 1 กลุ่ม</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เลข</th>
+<th>เท่ากับ</th>
+<th>เลขฐานสอง</th>
+<th>สิทธิ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>0+0+0</td>
+<td>000</td>
+<td><code>---</code></td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>0+0+1</td>
+<td>001</td>
+<td><code>--x</code></td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>0+2+0</td>
+<td>010</td>
+<td><code>-w-</code></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>0+2+1</td>
+<td>011</td>
+<td><code>-wx</code></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>4+0+0</td>
+<td>100</td>
+<td><code>r--</code></td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>4+0+1</td>
+<td>101</td>
+<td><code>r-x</code></td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>4+2+0</td>
+<td>110</td>
+<td><code>rw-</code></td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>4+2+1</td>
+<td>111</td>
+<td><code>rwx</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ใส่เลข 3 หลักเรียง <strong>user–group–other</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผลลัพธ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chmod 777 แฟ้มA.txt</code></td>
+<td><code>-rwxrwxrwx</code></td>
+</tr>
+<tr>
+<td><code>chmod 754 แฟ้มB.txt</code></td>
+<td><code>-rwxr-xr--</code></td>
+</tr>
+<tr>
+<td><code>chmod 500 แฟ้มC.txt</code></td>
+<td><code>-r-x------</code></td>
+</tr>
+<tr>
+<td><code>chmod 000 แฟ้มD.txt</code></td>
+<td><code>----------</code></td>
+</tr>
+<tr>
+<td><code>chmod 124 แฟ้มE.txt</code></td>
+<td><code>---x-w-r--</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างในเครื่อง:</p>
+<pre><code>$ ls -l foo
+-rw-r--r-- 1 sudsanguan sudsanguan 6 เม.ย. 23 10:32 foo
+$ chmod 755 foo
+$ ls -l foo
+-rwxr-xr-x 1 sudsanguan sudsanguan 6 เม.ย. 23 10:32 foo
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>วิธีคิดเร็ว</strong> <em>(อธิบายเพิ่ม)</em>: เลข 3 หลักคือ user/group/other แต่ละหลักถามตัวเองว่า &quot;อยากให้ <strong>r(4) w(2) x(1)</strong> ตัวไหนบ้าง&quot; แล้วบวกกัน · เลขที่ควรจำ: <strong>755</strong> (โปรแกรม/โฟลเดอร์ทั่วไป), <strong>644</strong> (ไฟล์ทั่วไป), <strong>700</strong> / <strong>600</strong> (ส่วนตัว เจ้าของคนเดียว)</p>
+</blockquote>
+<hr />
+<h2 id="8-chmod-แบบตัวอักษร-symbolic">8. <code>chmod</code> แบบตัวอักษร (symbolic)</h2>
+<p>รูปแบบ: <strong><code>chmod [u/g/o] &lt;+/-&gt; &lt;r/w/x&gt; filename</code></strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chmod g+w sample.txt</code></td>
+<td><strong>เพิ่ม</strong>สิทธิ์เขียนให้ group</td>
+</tr>
+<tr>
+<td><code>chmod o-r sample.txt</code></td>
+<td><strong>ลบ</strong>สิทธิ์อ่านของ other</td>
+</tr>
+<tr>
+<td><code>chmod +x sample.txt</code></td>
+<td>เพิ่มสิทธิ์รัน (ไม่ระบุกลุ่ม = ทุกกลุ่ม)</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตัวอย่างในเครื่อง:</p>
+<pre><code>$ ls -l foo
+-rw-r--r-- 1 sudsanguan sudsanguan 6 เม.ย. 23 10:32 foo
+$ chmod g+x foo
+$ ls -l foo
+-rw-r-xr-- 1 sudsanguan sudsanguan 6 เม.ย. 23 10:32 foo
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ตัวเลข vs ตัวอักษร</strong>: แบบตัวเลข<strong>กำหนดสิทธิ์ใหม่ทั้งหมด</strong> ส่วนแบบตัวอักษร<strong>แก้เฉพาะส่วนที่ระบุ</strong> ที่เหลือคงเดิม <em>(อธิบายเพิ่ม: ยังมี <code>a</code> = ทุกกลุ่ม และ <code>=</code> = กำหนดให้เท่ากับ เช่น <code>chmod u=rw file</code>)</em></p>
+</blockquote>
+<hr />
+<h2 id="9-chown-และ-chgrp">9. <code>chown</code> และ <code>chgrp</code></h2>
+<h3 id="chown-เปลี่ยนเจ้าของไฟล์"><code>chown</code> — เปลี่ยนเจ้าของไฟล์</h3>
+<p>รูปแบบ: <strong><code>chown ชื่อผู้ใช้:ชื่อกลุ่ม ชื่อไฟล์</code></strong> (ใส่แค่ส่วนใดส่วนหนึ่งได้)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ก่อน</th>
+<th>หลัง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chown games test</code></td>
+<td><code>-rwx------ 1 root root … test</code></td>
+<td><code>-rwx------ 1 **games** root … test</code> (เปลี่ยนแค่ owner)</td>
+</tr>
+<tr>
+<td><code>chown :staff test</code></td>
+<td><code>-rwx------ 1 games root … test</code></td>
+<td><code>-rwx------ 1 games **staff** … test</code> (ขึ้นต้น <code>:</code> = เปลี่ยนแค่ group)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="chgrp-เปลี่ยนกลุ่มของไฟล์"><code>chgrp</code> — เปลี่ยนกลุ่มของไฟล์</h3>
+<p>รูปแบบ: <strong><code>chgrp ชื่อกลุ่ม ชื่อไฟล์</code></strong></p>
+<ul>
+<li>ตัวอย่างเปลี่ยนกลุ่มของโฟลเดอร์: <code>sudo chgrp geeksforgeeks GFG</code> → โฟลเดอร์ <code>GFG</code> เปลี่ยนกลุ่มจาก <code>kcvirtual</code> เป็น <code>geeksforgeeks</code></li>
+</ul>
+<h3 id="ตัวอย่างรวม-chown-chgrp-สไลด์-23">ตัวอย่างรวม chown + chgrp (สไลด์ 23)</h3>
+<pre><code>$ ls -l foo
+-rw-r-xr-- 1 sudsanguan sudsanguan 6 เม.ย. 23 10:32 foo
+$ sudo cp foo /home/test3
+$ cd ../test3
+$ ls -l foo
+-rw-r-xr-- 1 root root 6 ก.ย. 6 01:56 foo
+$ sudo chown test3 foo
+$ ls -l foo
+-rw-r-xr-- 1 test3 root 6 ก.ย. 6 01:56 foo
+$ sudo chgrp group2 foo
+$ ls -l foo
+-rw-r-xr-- 1 test3 group2 6 ก.ย. 6 01:56 foo
+</code></pre>
+<ul>
+<li>⭐ ไฟล์ที่ copy ด้วย <code>sudo cp</code> จะเป็นของ <strong>root root</strong> เพราะ root เป็นคนสร้างสำเนา จึงต้อง <code>chown</code>/<code>chgrp</code> ให้เจ้าของที่ถูกต้อง</li>
+<li><code>chown</code> และ <code>chgrp</code> <strong>ไม่เปลี่ยนสิทธิ์ rwx</strong> เปลี่ยนแค่ว่าใครเป็น owner / group</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> การเปลี่ยนเจ้าของไฟล์ให้คนอื่นต้องใช้ <strong><code>sudo</code></strong> เสมอ ไม่อย่างนั้นใครก็โยนไฟล์ให้คนอื่นได้</p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 2 — Lab 5: File Permissions</h1>
+<h2 id="10-วัตถุประสงค์-สิ่งที่ส่ง-และคำสั่งที่ใช้">10. วัตถุประสงค์ สิ่งที่ส่ง และคำสั่งที่ใช้</h2>
+<p><strong>Objectives:</strong> 1. Study File Permissions on Linux · 2. Practice Linux commands for File Permissions</p>
+<p><strong>What to Submit:</strong></p>
+<ul>
+<li><strong>แคปหน้าจอทุกคำสั่งที่ฝึก</strong> และ<strong>เขียนอธิบายผลลัพธ์ของแต่ละคำสั่ง</strong></li>
+<li>รวมเป็น PDF ไฟล์เดียว ส่งบน MyCourses ชื่อ <strong><code>6887xxx_lab5.pdf</code></strong></li>
+<li>⚠️ ส่ง<strong>วันนี้ (September 1) ก่อนเที่ยงคืน</strong></li>
+</ul>
+<p><strong>คำสั่งที่ใช้ในแลป:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จัดการผู้ใช้/กลุ่ม</th>
+<th>จัดการสิทธิ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>useradd</code>, <code>usermod</code>, <code>userdel</code>, <code>passwd</code>, <code>su</code>, <code>sudo</code>, <code>groupadd</code></td>
+<td><code>chmod</code>, <code>chown</code>, <code>chgrp</code>, <code>groups</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>โจทย์หลัก:</strong> สร้าง <strong>user 3 คน</strong> และ <strong>2 กลุ่ม</strong> ที่มีสมาชิกตามรูป</p>
+<p><img loading="lazy" src="img/lab-p05.jpg" alt="user 3 คน และ group 2 กลุ่ม" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>สมาชิก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>group1</strong></td>
+<td>test1, test2</td>
+</tr>
+<tr>
+<td><strong>group2</strong></td>
+<td>test2, test3</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>test2 อยู่ทั้งสองกลุ่ม</strong> — ใช้ทดสอบว่าคนที่อยู่หลายกลุ่มได้สิทธิ์อย่างไร</p>
+</blockquote>
+<hr />
+<h2 id="11-lab-5-เฉลยช่องว่างทีละหน้า">11. Lab 5: เฉลยช่องว่างทีละหน้า</h2>
+<blockquote class="callout">
+<p>คำตอบในหัวข้อนี้ผมอ่านจาก screenshot ในสไลด์แลป ส่วนคำสั่งที่สไลด์ไม่ได้แสดง (หน้า 11–13) เป็น<strong>แนวคำตอบ</strong> ตอนทำจริงให้แคปผลจากเครื่องตัวเองประกอบ</p>
+</blockquote>
+<h3 id="หน้า-6-ข้อมูลนี้อยู่ในไฟล์ชื่ออะไร">หน้า 6 — ข้อมูลนี้อยู่ในไฟล์ชื่ออะไร</h3>
+<pre><code>sudsanguan:x:1000:1000:sudsanguan,,,:/home/sudsanguan:/bin/bash
+vboxadd:x:999:1::/var/run/vboxadd:/bin/false
+sshd:x:122:65534::/run/sshd:/usr/sbin/nologin
+</code></pre>
+<p><strong>→ <code>/etc/passwd</code></strong> (7 ช่อง มี UID, GID, home, shell)</p>
+<pre><code>sudsanguan:x:1000:
+sambashare:x:126:sudsanguan
+vboxsf:x:999:sudsanguan
+testing:x:2000:
+</code></pre>
+<p><strong>→ <code>/etc/group</code></strong> (4 ช่อง: ชื่อกลุ่ม, x, GID, สมาชิก)</p>
+<h3 id="หน้า-710-จากผล-pwd-และ-ls--l-ใน-home">หน้า 7–10 — จากผล <code>pwd</code> และ <code>ls -l</code> ใน home</h3>
+<pre><code>sudsanguan@Sudsanguan-Ju:~$ pwd
+/home/sudsanguan
+-rw-r--r-- 1 sudsanguan sudsanguan    6 เม.ย. 23 10:32 foo
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Home directory ที่แสดงอยู่ชื่อ</td>
+<td><strong><code>/home/sudsanguan</code></strong></td>
+</tr>
+<tr>
+<td>ผู้ใช้ที่เป็น user หรือ owner คือ</td>
+<td><strong><code>sudsanguan</code></strong></td>
+</tr>
+<tr>
+<td>สิทธิ์ของ owner สำหรับไฟล์ <code>foo</code></td>
+<td><strong><code>rw-</code></strong> (อ่านและเขียน)</td>
+</tr>
+<tr>
+<td>สิทธิ์ของ group สำหรับไฟล์ <code>foo</code></td>
+<td><strong><code>r--</code></strong> (อ่านอย่างเดียว)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-11-สร้าง-user-test1-ด้วยคำสั่งเดียว">หน้า 11 — สร้าง user <code>test1</code> ด้วยคำสั่งเดียว</h3>
+<p>ผลที่ต้องได้ใน <code>/etc/passwd</code>: <code>test1:x:1001:1001:Mr. Test1:/home/test1:/bin/bash</code></p>
+<ul>
+<li><strong>คำสั่ง (แนวคำตอบ):</strong> <code>sudo useradd -m -c &quot;Mr. Test1&quot; -s /bin/bash test1</code>
+<ul>
+<li><code>-m</code> สร้าง home directory <code>/home/test1</code> · <code>-c</code> ใส่ comment &quot;Mr. Test1&quot; · <code>-s</code> กำหนด shell <code>/bin/bash</code></li>
+</ul>
+</li>
+<li><strong>UID ของ test1 = <code>1001</code></strong></li>
+</ul>
+<h3 id="หน้า-12-สร้าง-test2-และ-test3">หน้า 12 — สร้าง <code>test2</code> และ <code>test3</code></h3>
+<pre><code>test2:x:1002:1002:Mr. Test2:/home/test2:/bin/bash
+test3:x:1003:1003:Mr. Test3:/home/test3:/bin/bash
+</code></pre>
+<ul>
+<li><strong>คำสั่ง (แนวคำตอบ):</strong> <code>sudo useradd -m -c &quot;Mr. Test2&quot; -s /bin/bash test2</code> และ <code>sudo useradd -m -c &quot;Mr. Test3&quot; -s /bin/bash test3</code></li>
+<li><strong>UID ของ test2 = <code>1002</code></strong>, <strong>UID ของ test3 = <code>1003</code></strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 UID ได้เลขต่อจาก user ล่าสุด (sudsanguan = 1000) อัตโนมัติ</p>
+</blockquote>
+<h3 id="หน้า-13-แสดงข้อมูลกลุ่ม">หน้า 13 — แสดงข้อมูลกลุ่ม</h3>
+<pre><code>test1:x:1001:
+test2:x:1002:
+test3:x:1003:
+</code></pre>
+<ul>
+<li><strong>คำสั่งที่ใช้แสดงผล:</strong> <code>cat /etc/group</code> (หรือ <code>more</code> / <code>tail /etc/group</code>)</li>
+<li><strong>GID ของ test1 = <code>1001</code></strong>, <strong>test2 = <code>1002</code></strong>, <strong>test3 = <code>1003</code></strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <code>useradd</code> สร้าง<strong>กลุ่มส่วนตัวชื่อเดียวกับ user</strong> ให้อัตโนมัติ (user private group) GID จึงเท่ากับ UID</p>
+</blockquote>
+<h3 id="หน้า-14-สรุปผล-ls--l-test1-ls--l-test2-ls--l-test3">หน้า 14 — สรุปผล <code>ls -l test1</code>, <code>ls -l test2</code>, <code>ls -l test3</code></h3>
+<ul>
+<li><strong>ข้อสรุป:</strong> home directory ของ user ใหม่ถูกสร้างจริง และไฟล์ข้างในเป็นของ user นั้นกับกลุ่มของตัวเอง (<code>test1 test1</code>, <code>test2 test2</code>, <code>test3 test3</code>)</li>
+<li><code>test2</code> และ <code>test3</code> มีแค่ <code>examples.desktop</code> ที่ระบบคัดลอกมาให้ตอนสร้าง user ส่วน <code>test1</code> มีโฟลเดอร์ Desktop, Documents, Downloads, Music ฯลฯ <em>(อธิบายเพิ่ม: โฟลเดอร์เหล่านี้ถูกสร้างเมื่อ user นั้นเคย login ผ่านหน้าจอ GUI)</em></li>
+</ul>
+<h3 id="หน้า-15-ผลของ-sudo-passwd-test1test2test3">หน้า 15 — ผลของ <code>sudo passwd test1/test2/test3</code></h3>
+<ul>
+<li><strong>ตั้งรหัสผ่านให้ user ใหม่ทั้ง 3 คน</strong> — ใส่รหัส 2 รอบ แล้วขึ้น <code>passwd: password updated successfully</code></li>
+<li>ต้องมี <code>sudo</code> เพราะเป็นการเปลี่ยนรหัสของคนอื่น · ถ้าไม่ตั้งรหัส จะ <code>su test1</code> เข้าไม่ได้</li>
+</ul>
+<h3 id="หน้า-16-สร้าง-group1-และ-group2">หน้า 16 — สร้าง group1 และ group2</h3>
+<pre><code>sudo groupadd -g 2001 group1
+sudo groupadd -g 2002 group2
+</code></pre>
+<ul>
+<li><code>-g</code> = กำหนด GID เอง</li>
+<li><strong>GID ของ group1 = <code>2001</code></strong>, <strong>GID ของ group2 = <code>2002</code></strong></li>
+</ul>
+<h3 id="หน้า-17-เพิ่มสมาชิกเข้ากลุ่ม">หน้า 17 — เพิ่มสมาชิกเข้ากลุ่ม</h3>
+<pre><code>sudo usermod -a -G group1 test1
+sudo usermod -a -G group1 test2
+sudo usermod -a -G group2 test2
+sudo usermod -a -G group2 test3
+</code></pre>
+<ul>
+<li><strong><code>-G</code></strong> = กำหนดกลุ่มเสริม (supplementary group) · <strong><code>-a</code></strong> = <strong>append</strong> เพิ่มต่อท้าย ไม่ลบกลุ่มเดิม</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> ถ้าลืม <code>-a</code> แล้วสั่ง <code>usermod -G group2 test2</code> → test2 จะ<strong>หลุดจาก group1</strong> เพราะ <code>-G</code> อย่างเดียวคือ &quot;แทนที่&quot; รายการกลุ่มทั้งหมด</p>
+</blockquote>
+<h3 id="หน้า-18-สรุปผลลัพธ์">หน้า 18 — สรุปผลลัพธ์</h3>
+<pre><code>group1:x:2001:test1,test2
+group2:x:2002:test2,test3
+
+$ groups test1   →  test1 : test1 group1
+$ groups test2   →  test2 : test2 group1 group2
+$ groups test3   →  test3 : test3 group2
+</code></pre>
+<ul>
+<li><strong>สรุป:</strong> สมาชิกของแต่ละกลุ่ม<strong>ตรงกับแผนภาพโจทย์</strong> — group1 มี test1, test2 · group2 มี test2, test3 · test2 อยู่ 2 กลุ่ม</li>
+<li>คำสั่ง <strong><code>groups ชื่อผู้ใช้</code></strong> แสดงทุกกลุ่มของ user นั้น (กลุ่มแรกคือกลุ่มหลักของตัวเอง)</li>
+</ul>
+<h3 id="หน้า-19-rwx-bits-ของ-directory-test2">หน้า 19 — rwx bits ของ directory test2</h3>
+<pre><code>drwxr-xr-x  2 test2  test2  4096 Sep  5 19:53 test2
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rwx bits ของ <strong>user</strong></td>
+<td><strong><code>rwx</code></strong> — test2 ดูรายชื่อ, สร้าง/ลบไฟล์ และเข้าโฟลเดอร์ได้</td>
+</tr>
+<tr>
+<td>rwx bits ของ <strong>group</strong></td>
+<td><strong><code>r-x</code></strong> — กลุ่ม test2 ดูรายชื่อและเข้าได้ แต่สร้าง/ลบไฟล์ไม่ได้</td>
+</tr>
+<tr>
+<td>rwx bits ของ <strong>others</strong></td>
+<td><strong><code>r-x</code></strong> — คนอื่นดูรายชื่อและเข้าได้ แต่สร้าง/ลบไฟล์ไม่ได้</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-20-sudo-chmod-700-test2">หน้า 20 — <code>sudo chmod 700 test2</code></h3>
+<pre><code>$ ls -l test2                 ← ก่อน: ดูได้ (others มี r-x)
+-rw-r--r-- 1 test2 test2 8980 เม.ย. 16 2018 examples.desktop
+$ sudo chmod 700 test2
+$ ls -l test2
+ls: cannot open directory 'test2': Permission denied
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> 700 = <code>rwx------</code> เหลือสิทธิ์แค่ owner (test2) · <code>sudsanguan</code> เป็น <strong>others</strong> ซึ่งตอนนี้เป็น <code>---</code> จึงเปิด directory ไม่ได้ → <strong>Permission denied</strong></li>
+</ul>
+<h3 id="หน้า-21-su-test2-แล้ว-ls--l-test2">หน้า 21 — <code>su test2</code> แล้ว <code>ls -l test2</code></h3>
+<pre><code>$ su test2
+test2@Sudsanguan-Ju:/home$ whoami
+test2
+test2@Sudsanguan-Ju:/home$ ls -l test2
+-rw-r--r-- 1 test2 test2 8980 เม.ย. 16 2018 examples.desktop
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> พอสลับเป็น <strong>test2 ซึ่งเป็น owner</strong> ที่มี <code>rwx</code> ก็ดูข้างในได้ปกติ · ยืนยันว่า 700 = &quot;เจ้าของคนเดียวเท่านั้น&quot;</li>
+</ul>
+<h3 id="หน้า-22-sudo-chgrp-group2-test2">หน้า 22 — <code>sudo chgrp group2 test2</code></h3>
+<pre><code>drwx------  3 test2  test2   … test2     ← ก่อน
+drwx------  3 test2  group2  … test2     ← หลัง
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> กลุ่มของ directory test2 เปลี่ยนจาก <code>test2</code> เป็น <strong><code>group2</code></strong> ส่วนสิทธิ์ยังเป็น <code>rwx------</code> เหมือนเดิม (chgrp ไม่แตะสิทธิ์) — ตอนนี้สมาชิก group2 ยังเข้าไม่ได้ เพราะ group ยังเป็น <code>---</code></li>
+</ul>
+<h3 id="หน้า-23-sudo-chmod-750-test2">หน้า 23 — <code>sudo chmod 750 test2</code></h3>
+<pre><code>drwxr-x---  3 test2  group2  … test2
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> 750 = <code>rwxr-x---</code> → เปิดให้<strong>สมาชิก group2</strong> ดูรายชื่อและเข้าโฟลเดอร์ได้</li>
+<li><strong>rwx bits ของ group = <code>r-x</code></strong> · <strong>rwx bits ของ others = <code>---</code></strong></li>
+</ul>
+<h3 id="หน้า-24-ทดสอบด้วย-test1-และ-test3">หน้า 24 — ทดสอบด้วย test1 และ test3</h3>
+<pre><code>$ su test1
+test1@…:/home$ ls -l test2
+ls: cannot open directory 'test2': Permission denied
+test1@…:/home$ exit
+$ su test3
+test3@…:/home$ ls -l test2
+-rw-r--r-- 1 test2 test2 8980 เม.ย. 16 2018 examples.desktop
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong>
+<ul>
+<li><strong>test1</strong> อยู่ group1 <strong>ไม่ได้อยู่ group2</strong> → ถูกนับเป็น <strong>others (<code>---</code>)</strong> → <strong>Permission denied</strong></li>
+<li><strong>test3</strong> <strong>อยู่ใน group2</strong> → ได้สิทธิ์ <strong>group (<code>r-x</code>)</strong> → ดูรายชื่อไฟล์ได้</li>
+</ul>
+</li>
+<li>⭐ หน้านี้คือหัวใจของแลป: <strong>สิทธิ์ที่ได้ขึ้นกับว่าเราอยู่กลุ่มไหน</strong> ไม่ใช่ขึ้นกับชื่อ</li>
+</ul>
+<h3 id="หน้า-25-sudo-chown-test3-test1">หน้า 25 — <code>sudo chown test3 test1</code></h3>
+<pre><code>drwxr-xr-x 14 test1  test1  … test1     ← ก่อน
+drwxr-xr-x 14 test3  test1  … test1     ← หลัง
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> <strong>owner</strong> ของ directory test1 เปลี่ยนเป็น <strong>test3</strong> ส่วน group ยังเป็น test1 และสิทธิ์ยัง <code>rwxr-xr-x</code></li>
+</ul>
+<h3 id="หน้า-26-sudo-chgrp-group1-test1">หน้า 26 — <code>sudo chgrp group1 test1</code></h3>
+<pre><code>drwxr-xr-x 14 test3  group1  … test1
+</code></pre>
+<ul>
+<li><strong>อธิบาย:</strong> <strong>group</strong> ของ directory test1 เปลี่ยนเป็น <strong>group1</strong> → ตอนนี้ test3 เป็น owner, สมาชิก group1 (test1, test2) ใช้สิทธิ์ group <code>r-x</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ผลที่ได้ค่อนข้างแปลก: <strong>test1 ไม่ได้เป็นเจ้าของ home ของตัวเองแล้ว</strong> (เจ้าของคือ test3) Exercise ถัดไปจะใช้สถานะนี้ต่อ</p>
+</blockquote>
+<hr />
+<h2 id="12-lab-5-exercise-ท้ายแลป-แนวคำตอบ">12. Lab 5: Exercise ท้ายแลป (แนวคำตอบ)</h2>
+<blockquote class="callout">
+<p>สไลด์ให้แค่คำสั่ง ไม่มีผลลัพธ์ ด้านล่างเป็น<strong>ผลที่ควรได้</strong> โดยสมมติว่าเริ่มจากสถานะหลังหน้า 26 คือ <code>drwxr-xr-x test3 group1 test1</code> ตอนทำจริงให้แคปผลจากเครื่องตัวเองแล้วอธิบาย</p>
+</blockquote>
+<h3 id="exercise-1">Exercise 1</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>คำสั่ง</th>
+<th>ผลที่ควรได้ของ test1</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>ls -l</code></td>
+<td><code>drwxr-xr-x test3 group1 test1</code></td>
+<td>สถานะตั้งต้น</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>sudo chmod o-x test1</code></td>
+<td>–</td>
+<td>เอา x ออกจาก <strong>others</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>ls -l</code></td>
+<td><code>drwxr-xr--</code></td>
+<td>others เหลือ <code>r--</code>: เห็นรายชื่อแต่ <strong><code>cd</code> เข้าไม่ได้</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>sudo chmod g-x test1</code></td>
+<td>–</td>
+<td>เอา x ออกจาก <strong>group</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>ls -l</code></td>
+<td><code>drwxr--r--</code></td>
+<td>group ก็เหลือ <code>r--</code> (ตรงกับผลที่เห็นในสไลด์ lecture หน้า 16)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>su test1</code></td>
+<td>login เป็น test1 ได้</td>
+<td>test1 <strong>ไม่ใช่ owner</strong> (owner คือ test3) แต่อยู่ <strong>group1</strong> จึงได้สิทธิ์ group <code>r--</code> → <strong>เข้า (<code>cd</code>) home ของตัวเองไม่ได้</strong> และเปิดไฟล์ข้างในไม่ได้ (ถ้าใช้ <code>su - test1</code> จะขึ้นเตือนว่าเข้า home directory ไม่ได้)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="exercise-2">Exercise 2</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>คำสั่ง</th>
+<th>ผลที่ควรได้</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>ls -l</code></td>
+<td><code>drwxr--r--</code> (ต่อจาก Exercise 1)</td>
+<td>สถานะตั้งต้น</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>sudo chmod 755 test1</code></td>
+<td>–</td>
+<td>7=rwx, 5=r-x, 5=r-x</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>ls -l</code></td>
+<td><code>drwxr-xr-x</code></td>
+<td>ทุกคนเข้าและดูได้ มีแต่ owner ที่สร้าง/ลบได้</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>sudo chmod 644 test1</code></td>
+<td>–</td>
+<td>6=rw-, 4=r--, 4=r--</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>ls -l</code></td>
+<td><code>drw-r--r--</code></td>
+<td><strong>ไม่มี x เลยสักกลุ่ม</strong> → ไม่มีใคร (นอกจาก root) <code>cd</code> เข้าไปได้ แม้แต่ owner</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>sudo chmod 600 test1</code></td>
+<td>–</td>
+<td>6=rw-, 0=---, 0=---</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>ls -l</code></td>
+<td><code>drw-------</code></td>
+<td>เหลือแค่ owner ที่มี r, w แต่ยังไม่มี x</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>su test1</code></td>
+<td>login ได้</td>
+<td>test1 อยู่ group1 ซึ่งตอนนี้เป็น <code>---</code> → <strong>ดูรายชื่อและเข้า home ของตัวเองไม่ได้เลย</strong> (Permission denied)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>บทเรียนจาก Exercise</strong> <em>(อธิบายเพิ่ม)</em>: เลข <strong>644 / 600 เหมาะกับไฟล์ แต่ไม่เหมาะกับ directory</strong> เพราะ directory ที่ไม่มี x จะเข้าไม่ได้ · directory ควรใช้ <strong>755</strong> (ให้คนอื่นดูได้) หรือ <strong>700</strong> (ส่วนตัว)</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>ผู้ใช้ทั่วไป สิทธิ์จำกัด</td>
+<td>คนทั่วไป</td>
+</tr>
+<tr>
+<td><strong>Superuser / root</strong></td>
+<td>ผู้ใช้ที่ทำได้ทุกอย่างในระบบ</td>
+<td>ผู้ดูแลระบบ</td>
+</tr>
+<tr>
+<td><strong>UID</strong></td>
+<td>User Identifier หมายเลขประจำผู้ใช้ (ไม่ซ้ำกัน)</td>
+<td>เลขบัตรประชาชน</td>
+</tr>
+<tr>
+<td><strong>GID</strong></td>
+<td>Group Identifier หมายเลขประจำกลุ่ม</td>
+<td>เลขกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>/etc/passwd</code></strong></td>
+<td>ข้อมูลบัญชี 7 ช่อง (username, x, UID, GID, comment, home, shell) ใครก็อ่านได้</td>
+<td>สมุดรายชื่อ</td>
+</tr>
+<tr>
+<td><strong><code>/etc/shadow</code></strong></td>
+<td>รหัสผ่านที่เข้ารหัส + อายุรหัส อ่านได้เฉพาะ root</td>
+<td>ตู้เซฟรหัส</td>
+</tr>
+<tr>
+<td><strong><code>/etc/group</code></strong></td>
+<td>ชื่อกลุ่ม, x, GID, สมาชิก แก้ได้เฉพาะ root</td>
+<td>ทะเบียนกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>useradd</code> / <code>usermod</code> / <code>userdel</code></strong></td>
+<td>เพิ่ม / แก้ / ลบ ผู้ใช้</td>
+<td>add / mod / del</td>
+</tr>
+<tr>
+<td><strong><code>passwd</code></strong></td>
+<td>ตั้งหรือเปลี่ยนรหัสผ่าน</td>
+<td>ตั้งรหัส</td>
+</tr>
+<tr>
+<td><strong><code>groupadd</code></strong></td>
+<td>สร้างกลุ่ม (<code>-g</code> กำหนด GID)</td>
+<td>สร้างกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>groups</code></strong></td>
+<td>แสดงว่าผู้ใช้อยู่กลุ่มไหนบ้าง</td>
+<td>ดูกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>sudo</code></strong></td>
+<td>รันคำสั่งด้วยสิทธิ์ root (ใช้รหัสตัวเอง)</td>
+<td>ยืมสิทธิ์ root</td>
+</tr>
+<tr>
+<td><strong><code>su</code></strong></td>
+<td>สลับไปเป็นผู้ใช้อื่น (ใช้รหัสของคนนั้น)</td>
+<td>เปลี่ยนตัว</td>
+</tr>
+<tr>
+<td><strong><code>whoami</code></strong></td>
+<td>แสดงชื่อผู้ใช้ปัจจุบัน</td>
+<td>ฉันคือใคร</td>
+</tr>
+<tr>
+<td><strong>Owner / Group / Other (u/g/o)</strong></td>
+<td>3 กลุ่มผู้ใช้ที่กำหนดสิทธิ์แยกกัน</td>
+<td>เจ้าของ / เพื่อนกลุ่ม / คนนอก</td>
+</tr>
+<tr>
+<td><strong>r / w / x</strong></td>
+<td>อ่าน / แก้ไข / รัน (กับ directory: ดูรายชื่อ / สร้าง-ลบ / เข้า)</td>
+<td>4 / 2 / 1</td>
+</tr>
+<tr>
+<td><strong><code>chmod</code></strong></td>
+<td>เปลี่ยนสิทธิ์ แบบตัวเลข (755) หรือตัวอักษร (g+w)</td>
+<td>change mode</td>
+</tr>
+<tr>
+<td><strong><code>chown</code></strong></td>
+<td>เปลี่ยนเจ้าของ (<code>user:group</code>)</td>
+<td>change owner</td>
+</tr>
+<tr>
+<td><strong><code>chgrp</code></strong></td>
+<td>เปลี่ยนกลุ่ม</td>
+<td>change group</td>
+</tr>
+<tr>
+<td><strong>link count</strong></td>
+<td>ช่องที่ 2 ของ <code>ls -l</code></td>
+<td>จำนวนลิงก์</td>
+</tr>
+<tr>
+<td><strong>Permission denied</strong></td>
+<td>ข้อความเมื่อสิทธิ์ไม่พอ</td>
+<td>โดนปฏิเสธ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>ผู้ใช้ 2 ระดับ: <strong>User</strong> (จำกัด) / <strong>Superuser = root</strong> (ทำได้ทุกอย่าง)</li>
+<li>3 ไฟล์: <strong><code>/etc/passwd</code></strong> (7 ช่อง, รหัสเป็น <code>x</code>), <strong><code>/etc/shadow</code></strong> (รหัสจริง เข้ารหัส อ่านได้เฉพาะ root), <strong><code>/etc/group</code></strong> (4 ช่อง, แก้ได้เฉพาะ root)</li>
+<li><strong>UID</strong> แต่ละคนไม่ซ้ำ · <strong>GID</strong> อ้างอิงกลุ่ม</li>
+<li><code>sudo</code> = ทำแทน root ทีละคำสั่ง · <code>su ชื่อ</code> = สลับเป็นคนนั้น</li>
+<li><code>ls -l</code> 7 ส่วน: <strong>type+permissions, link count, owner, group, size, modification time, name</strong></li>
+<li>10 ตัวอักษร: ตัวแรก <code>d</code>/<code>-</code> + <strong>rwx ของ u, g, o</strong></li>
+<li><strong>r = 4, w = 2, x = 1</strong> · 755 = <code>rwxr-xr-x</code>, 644 = <code>rw-r--r--</code>, 700 = <code>rwx------</code>, 750 = <code>rwxr-x---</code>, 600 = <code>rw-------</code></li>
+<li>write ของ<strong>ไฟล์ = แก้ไข ไม่ใช่ลบ</strong></li>
+<li><code>chmod [u/g/o] &lt;+/-&gt; &lt;r/w/x&gt; file</code> · <code>chown user:group file</code> · <code>chown :group file</code> · <code>chgrp group file</code></li>
+<li>Lab: test1–3 ได้ UID/GID <strong>1001–1003</strong> · group1 = <strong>2001</strong> (test1, test2) · group2 = <strong>2002</strong> (test2, test3)</li>
+<li><code>usermod -a -G กลุ่ม user</code> = เพิ่มเข้ากลุ่มโดยไม่ลบกลุ่มเดิม</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>/etc/passwd</code> vs <code>/etc/shadow</code></strong></td>
+<td>ข้อมูลบัญชี ใครก็อ่านได้ vs รหัสผ่านเข้ารหัส อ่านได้เฉพาะ root</td>
+</tr>
+<tr>
+<td><strong>UID vs GID</strong></td>
+<td>เลขประจำผู้ใช้ vs เลขประจำกลุ่ม</td>
+</tr>
+<tr>
+<td><strong><code>sudo</code> vs <code>su</code></strong></td>
+<td>ยืมสิทธิ์ root ทีละคำสั่ง (รหัสตัวเอง) vs กลายเป็นอีกคน (รหัสคนนั้น)</td>
+</tr>
+<tr>
+<td><strong><code>chmod</code> vs <code>chown</code> vs <code>chgrp</code></strong></td>
+<td>เปลี่ยนสิทธิ์ rwx vs เปลี่ยน owner vs เปลี่ยน group</td>
+</tr>
+<tr>
+<td><strong>chmod ตัวเลข vs ตัวอักษร</strong></td>
+<td>กำหนดใหม่ทั้งหมด vs แก้เฉพาะส่วน (+/-)</td>
+</tr>
+<tr>
+<td><strong>x ของไฟล์ vs x ของ directory</strong></td>
+<td>รันไฟล์ vs เข้าไปใน directory</td>
+</tr>
+<tr>
+<td><strong>w ของไฟล์ vs w ของ directory</strong></td>
+<td>แก้เนื้อหาไฟล์ vs สร้าง/ลบไฟล์ข้างใน</td>
+</tr>
+<tr>
+<td><strong><code>usermod -a -G</code> vs <code>usermod -G</code></strong></td>
+<td>เพิ่มกลุ่มต่อท้าย vs แทนที่กลุ่มเสริมทั้งหมด</td>
+</tr>
+<tr>
+<td><strong>Group vs Other</strong></td>
+<td>อยู่ในกลุ่มของไฟล์ vs ไม่ใช่ทั้ง owner และ group</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมแยก <code>/etc/shadow</code> ออกจาก <code>/etc/passwd</code></strong> → passwd ต้องให้ทุกโปรแกรมอ่านได้ (เช่นแปลง UID เป็นชื่อ) จึงเอารหัสผ่านไปเก็บในไฟล์ที่อ่านได้เฉพาะ root</li>
+<li><strong>ทำไมหลัง <code>chmod 700 test2</code> แล้ว sudsanguan ดูไม่ได้ แต่ test2 ดูได้</strong> → sudsanguan เป็น others (<code>---</code>) ส่วน test2 เป็น owner (<code>rwx</code>)</li>
+<li><strong>ทำไมหลัง <code>chmod 750</code> + <code>chgrp group2</code> test3 ดูได้ แต่ test1 ดูไม่ได้</strong> → test3 อยู่ group2 ได้สิทธิ์ <code>r-x</code> ส่วน test1 ไม่อยู่ group2 จึงเป็น others <code>---</code></li>
+<li><strong>ทำไม directory ที่ตั้ง 644 เข้าไม่ได้แม้แต่เจ้าของ</strong> → ไม่มี x ซึ่งเป็นสิทธิ์ &quot;เข้า&quot; directory</li>
+<li><strong>แปลงเลข ↔ rwx:</strong> แยกทีละหลัก แล้วบวก 4/2/1 หรือแตกกลับเป็น r/w/x</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l4/index.html"><small>← บทก่อนหน้า</small><span>L4 – User Management + Lab 4 (User Management)</span></a><a class="pg next" href="../l6/index.html"><small>บทถัดไป →</small><span>L6 – Editor (nano และ vim) + Lab 6 (Editor)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

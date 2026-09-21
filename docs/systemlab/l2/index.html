@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L2 – OS Introduction + Lab 2 (Basic Unix Commands) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-computer-architecture">2. Computer Architecture</a></li><li><a href="#3-os-as-an-interface-to-the-hardware">3. OS as an Interface to the Hardware ⭐</a></li><li><a href="#4-virtual-machines">4. Virtual Machines</a></li><li><a href="#5-windows-architecture-vs-linux-architecture">5. Windows Architecture vs Linux Architecture</a></li><li><a href="#6-windows-file-system">6. Windows File System</a></li><li><a href="#7-linux-file-system">7. Linux File System ⭐</a></li><li><a href="#8-linux-vs-windows-file-systems">8. Linux vs Windows File Systems</a></li><li><a href="#9-file-information-และ-file-permission">9. File Information และ File Permission</a></li><li><a href="#10-วัตถุประสงค์และสิ่งที่ส่ง">10. วัตถุประสงค์และสิ่งที่ส่ง</a></li><li><a href="#11-command-line-ใน-windows">11. Command Line ใน Windows</a></li><li><a href="#12-คำสั่ง-linux-พื้นฐาน">12. คำสั่ง Linux พื้นฐาน ⭐⭐</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L2</div>
+      <h1 class="lesson-title">L2 – OS Introduction + Lab 2 (Basic Unix Commands)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> ต่อจาก L1 ที่ติดตั้ง Ubuntu ใน VM แล้ว</p>
+<p>(1) <strong>Lecture 2</strong> อธิบายว่า OS คือ <strong>&quot;interface ระหว่างโปรแกรมกับฮาร์ดแวร์&quot;</strong> ทำงานโดย <strong>virtualize CPU และ memory</strong> ให้แต่ละโปรแกรม เปรียบเทียบสถาปัตยกรรม <strong>Windows vs Linux</strong> และ <strong>โครงสร้าง file system</strong> ของทั้งสอง ปิดท้ายด้วยข้อมูลไฟล์ (<code>ls -l</code>) และสิทธิ์ไฟล์เบื้องต้น</p>
+<p>(2) <strong>Lab 2</strong> ฝึก command line ครั้งแรก: <code>cmd</code> / <code>dir</code> บน Windows และคำสั่งพื้นฐาน Linux 13 คำสั่ง (<code>pwd</code>, <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>rmdir</code>, <code>echo</code>, <code>grep</code>, <code>nano</code>, <code>cat</code>, <code>more</code>, <code>cp</code>, <code>rm</code>, <code>tail</code>) พร้อม redirect <code>&gt;</code> และ pipe <code>|</code></p>
+<p>คำสั่งเหล่านี้คือพื้นฐานที่ต้องใช้ทุกแลปหลังจากนี้</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 2: OS Introduction</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 2 = <strong>แนะนำโครงสร้างของระบบปฏิบัติการ Linux และเรียนรู้คำสั่ง Linux เบื้องต้น</strong> (วันที่ 11 August 2026)</li>
+<li>เกณฑ์คะแนนเหมือน L1: เข้าเรียน 80% · รายงานแลป 25 · ทดสอบย่อย 25 · กลางภาค 25 · ปลายภาค 25</li>
+<li>⚠️ ส่งรายงานแลป <strong>ภายใน 23.59 น. ของวันอังคารหรือวันที่เรียน</strong> · ทดสอบย่อยทุกสัปดาห์ก่อนจบคาบ</li>
+</ul>
+<hr />
+<h2 id="2-computer-architecture">2. Computer Architecture</h2>
+<p><img loading="lazy" src="img/lec-p04.jpg" alt="CPU, Memory, I/O controllers และ I/O devices" /></p>
+<p>A computer system consists of <strong>CPU, Memory (RAM), I/O devices</strong> (disk storage, USB drive, VGA card, network card) — เหมือน L1 แต่รอบนี้แผนภาพละเอียดขึ้น:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ข้างในมีอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU</strong></td>
+<td><strong>Registers</strong>, <strong>Arithmetic &amp; Logic Unit (ALU)</strong>, <strong>Control Unit</strong></td>
+</tr>
+<tr>
+<td><strong>Memory</strong></td>
+<td>RAM หลายแผง</td>
+</tr>
+<tr>
+<td><strong>Input / Output Controllers</strong></td>
+<td>ตัวกลางเชื่อม CPU/Memory กับอุปกรณ์</td>
+</tr>
+<tr>
+<td><strong>I/O Devices</strong></td>
+<td>Hard Disk Drive, Floppy Disk Drive, CD Rom Player, Tape Unit · Mouse, Keyboard, Monitor, Printer · Network, Modem · Robots, Instrumentation</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>ALU</strong> คำนวณเลขและตรรกะ · <strong>Control Unit</strong> ควบคุมลำดับการทำงานตามคำสั่ง · <strong>Registers</strong> คือหน่วยความจำเล็กที่เร็วที่สุด อยู่ใน CPU เอง</p>
+</blockquote>
+<hr />
+<h2 id="3-os-as-an-interface-to-the-hardware">3. OS as an Interface to the Hardware ⭐</h2>
+<p><img loading="lazy" src="img/lec-p05.jpg" alt="OS เป็น interface: beautiful interface ด้านบน, ugly interface ด้านล่าง" /></p>
+<p>แผนภาพแบ่งเป็นชั้น: <strong>Application programs → Operating system → Hardware</strong></p>
+<ul>
+<li>ระหว่าง application กับ OS = <strong>&quot;Beautiful interface&quot;</strong> (ภาพปราสาท นกยูง)</li>
+<li>ระหว่าง OS กับ hardware = <strong>&quot;Ugly interface&quot;</strong> (ภาพหน้าตาน่ากลัว)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ความหมาย</strong> <em>(อธิบายเพิ่ม)</em>: ฮาร์ดแวร์คุมยากมาก (ต้องสั่งผ่าน register, จัดการ interrupt, จำรายละเอียดของอุปกรณ์แต่ละรุ่น) OS รับหน้าที่คุยกับส่วนที่ &quot;น่าเกลียด&quot; นี้แทน แล้วเสนอสิ่งที่ &quot;สวยงาม&quot; ใช้ง่ายให้โปรแกรม เช่น แค่สั่ง &quot;เปิดไฟล์&quot; ไม่ต้องรู้ว่าข้อมูลอยู่ sector ไหนของดิสก์</p>
+</blockquote>
+<hr />
+<h2 id="4-virtual-machines">4. Virtual Machines</h2>
+<h3 id="41-ทบทวน-host-vm-guest">4.1 ทบทวน: Host / VM / Guest</h3>
+<ul>
+<li><strong>Host OS = Windows 10</strong> · <strong>Virtual Machine = Oracle VM</strong> · <strong>Guest OS = Ubuntu</strong> (รายละเอียดใน L1)</li>
+</ul>
+<h3 id="42-virtualization-of-hardware">4.2 Virtualization of Hardware</h3>
+<ul>
+<li>OS สร้าง <strong>&quot;Extended Machine&quot;</strong> คั่นระหว่าง <strong>Hardware</strong> กับโปรแกรม</li>
+<li><strong>Program 1–4</strong> ต่างได้ <strong>Resources</strong> ของตัวเอง เหมือนแต่ละโปรแกรมมีเครื่องเป็นของตัวเอง</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> คำว่า &quot;virtual machine&quot; ในบริบทนี้กว้างกว่า VirtualBox: <strong>OS ทุกตัวก็ทำให้แต่ละโปรแกรมเห็น &quot;เครื่องเสมือน&quot; ของตัวเอง</strong> โดยแบ่งทรัพยากรจริงให้</p>
+</blockquote>
+<h3 id="43-virtualizing-cpu">4.3 Virtualizing CPU</h3>
+<ul>
+<li>OS <strong>สลับระหว่างโปรแกรม (switching between programs)</strong> · CPU <strong>รันทีละ instruction</strong> (run one instruction at a time)</li>
+<li>คำถามที่ OS ต้องตอบ:
+<ul>
+<li><strong>สลับระหว่างโปรแกรม (processes) อย่างไร?</strong></li>
+<li><strong>โปรแกรมไหนควรได้ CPU ก่อน?</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> CPU 1 ตัวทำได้ทีละงาน แต่ OS สลับเร็วมาก (หลายร้อยครั้งต่อวินาที) จนดูเหมือนทุกโปรแกรมรันพร้อมกัน คำถาม &quot;ใครได้ก่อน&quot; คือเรื่อง <strong>CPU scheduling</strong> (เรียนใน L8 เรื่อง process)</p>
+</blockquote>
+<h3 id="44-virtualizing-memory">4.4 Virtualizing Memory</h3>
+<ul>
+<li><strong>แต่ละโปรแกรมมี address space ของตัวเอง</strong> — ทุกโปรแกรมเห็น <strong>virtual address เริ่มที่ 0x00000</strong> เหมือนกัน แต่ถูกวางไว้คนละที่ใน <strong>physical memory</strong> (เช่น Program 1 อยู่ที่ physical address 0x32000)</li>
+<li>คำถามที่ OS ต้องตอบ:
+<ul>
+<li><strong>จะ map program address (virtual) ไปเป็น physical address อย่างไร?</strong></li>
+<li><strong>จะจัดสรร memory ให้โปรแกรมอย่างไร?</strong></li>
+<li><strong>ถ้า physical memory ไม่พอ จะทำอย่างไร?</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>เปรียบเทียบ</strong>: ทุกคนในโรงแรมคิดว่าตัวเองอยู่ &quot;ห้อง 1&quot; แต่พนักงานต้อนรับ (OS) รู้ว่าห้อง 1 ของแต่ละคนคือห้องจริงเบอร์อะไร · ถ้า RAM ไม่พอ OS ย้ายข้อมูลบางส่วนไปพักบนดิสก์ (swap) — เห็นไฟล์ <code>swapfile</code> ใน <code>/</code> ของ Ubuntu ด้วย</p>
+</blockquote>
+<hr />
+<h2 id="5-windows-architecture-vs-linux-architecture">5. Windows Architecture vs Linux Architecture</h2>
+<h3 id="windows-architecture">Windows Architecture</h3>
+<p><img loading="lazy" src="img/lec-p10.jpg" alt="Windows architecture" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ส่วนประกอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User Mode</strong></td>
+<td><strong>Applications</strong>, <strong>Windows API</strong>, <strong>User-Mode Drivers</strong></td>
+</tr>
+<tr>
+<td><strong>Kernel Mode</strong> (อยู่ใต้เส้นประ)</td>
+<td><strong>Exported Driver Support Routines</strong> + <strong>Operating System Kernel</strong>, <strong>Other Kernel-Mode Drivers</strong>, <strong>File System Drivers</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Hardware Abstraction Layer (HAL)</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Hardware</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="linux-architecture">Linux Architecture</h3>
+<p><img loading="lazy" src="img/lec-p11.jpg" alt="Linux architecture" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ส่วนประกอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>บนสุด</td>
+<td><strong>System Softwares</strong>, <strong>User Process</strong>, <strong>User Utility</strong>, <strong>Compilers</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>System Libraries</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Kernel</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Kernel Modules</strong></td>
+</tr>
+<tr>
+<td>ล่างสุด</td>
+<td><strong>Hardware</strong>: CPU, RAM, I/O</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>จุดร่วมของทั้งสอง</strong> <em>(อธิบายเพิ่ม)</em>: โปรแกรมไม่เคยคุยกับฮาร์ดแวร์ตรง ๆ ต้องผ่าน API/library → kernel ก่อนเสมอ · Windows แยก <strong>user mode / kernel mode</strong> ชัดในภาพ (Linux ก็มีการแยกแบบเดียวกัน) · Windows มี <strong>HAL</strong> ซ่อนความต่างของฮาร์ดแวร์ ส่วน Linux ใช้ <strong>kernel modules</strong> โหลด driver เพิ่มได้</p>
+</blockquote>
+<hr />
+<h2 id="6-windows-file-system">6. Windows File System</h2>
+<ul>
+<li>โครงสร้างเริ่มที่<strong>ไดรฟ์ <code>C:\</code></strong> แตกเป็น <code>Program Files</code> (→ Common Files, Microsoft Office, Microsoft.NET), <code>Windows</code> (→ system32, assembly, Web), <code>temp</code></li>
+<li><strong>เข้า Command Prompt</strong> แล้วใช้ <code>cd \</code> ไปที่ root ของไดรฟ์ และ <code>dir</code> ดูรายการ (เห็น <code>&lt;DIR&gt;</code> = โฟลเดอร์, บรรทัดท้ายบอกจำนวนไฟล์/โฟลเดอร์และพื้นที่ว่าง)</li>
+</ul>
+<hr />
+<h2 id="7-linux-file-system">7. Linux File System ⭐</h2>
+<p><img loading="lazy" src="img/lec-p13.jpg" alt="โครงสร้าง directory ของ Linux" /></p>
+<ul>
+<li>ทุกอย่างเริ่มจาก <strong>root <code>/</code></strong> (ไม่มีไดรฟ์ C: D:)</li>
+<li>ระดับแรกใต้ <code>/</code>: <strong><code>/bin/</code>, <code>/boot/</code>, <code>/dev/</code>, <code>/etc/</code>, <code>/home/</code>, <code>/lib/</code>, <code>/media/</code>, <code>/mnt/</code>, <code>/opt/</code>, <code>/root/</code>, <code>/sbin/</code>, <code>/srv/</code>, <code>/tmp/</code>, <code>/usr/</code>, <code>/var/</code></strong></li>
+<li><strong><code>/usr/</code></strong> มี <code>/bin/</code>, <code>/include/</code>, <code>/lib/</code>, <code>/sbin/</code> · <strong><code>/var/</code></strong> มี <code>/cache/</code>, <code>/log/</code>, <code>/spool/</code>, <code>/tmp/</code></li>
+</ul>
+<p><strong>หน้าที่ของแต่ละ directory</strong> <em>(อธิบายเพิ่ม — สไลด์มีแค่ชื่อ)</em>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/bin</code></td>
+<td>คำสั่งพื้นฐานที่ทุกคนใช้ เช่น <code>ls</code>, <code>cp</code></td>
+</tr>
+<tr>
+<td><code>/sbin</code></td>
+<td>คำสั่งดูแลระบบ (system binaries)</td>
+</tr>
+<tr>
+<td><code>/boot</code></td>
+<td>ไฟล์สำหรับบูต เช่น kernel (<code>vmlinuz</code>), <code>initrd.img</code></td>
+</tr>
+<tr>
+<td><code>/dev</code></td>
+<td>ไฟล์แทนอุปกรณ์ (devices) เช่น ดิสก์</td>
+</tr>
+<tr>
+<td><code>/etc</code></td>
+<td>ไฟล์ตั้งค่าระบบ เช่น <code>/etc/passwd</code> (L4–L5)</td>
+</tr>
+<tr>
+<td><code>/home</code></td>
+<td>home directory ของผู้ใช้แต่ละคน เช่น <code>/home/itcso</code></td>
+</tr>
+<tr>
+<td><code>/root</code></td>
+<td>home ของผู้ใช้ root</td>
+</tr>
+<tr>
+<td><code>/lib</code></td>
+<td>library ที่โปรแกรมใช้ร่วมกัน</td>
+</tr>
+<tr>
+<td><code>/media</code>, <code>/mnt</code></td>
+<td>จุด mount อุปกรณ์ถอดได้ / mount ชั่วคราว (L7)</td>
+</tr>
+<tr>
+<td><code>/opt</code></td>
+<td>โปรแกรมเสริมที่ติดตั้งเพิ่ม</td>
+</tr>
+<tr>
+<td><code>/srv</code></td>
+<td>ข้อมูลของ service ที่เครื่องให้บริการ</td>
+</tr>
+<tr>
+<td><code>/tmp</code></td>
+<td>ไฟล์ชั่วคราว</td>
+</tr>
+<tr>
+<td><code>/usr</code></td>
+<td>โปรแกรมและ library ของผู้ใช้ส่วนใหญ่</td>
+</tr>
+<tr>
+<td><code>/var</code></td>
+<td>ข้อมูลที่เปลี่ยนบ่อย เช่น log (<code>/var/log</code>), cache</td>
+</tr>
+<tr>
+<td><code>/proc</code>, <code>/sys</code></td>
+<td>ข้อมูลของ kernel และ process (ขนาด 0 ใน <code>ls -l</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>สไลด์แสดงผลจริงใน Ubuntu:</p>
+<ul>
+<li><code>cd /</code> แล้ว <code>ls</code> → เห็น bin, boot, cdrom, dev, etc, home, initrd.img, lib, lib64, lost+found, media, mnt, opt, proc, root, run, sbin, snap, srv, swapfile, sys, tmp, usr, var, vmlinuz</li>
+<li><code>ls -l | more</code> → ทุก directory เป็นของ <strong>root root</strong> · <code>initrd.img -&gt; boot/initrd.img-5.3.0-59-generic</code> ขึ้นต้นด้วย <strong><code>l</code></strong> = <strong>symbolic link</strong> · <code>/tmp</code> มีสิทธิ์ <code>drwxrwxrwt</code> (ทุกคนเขียนได้)</li>
+</ul>
+<hr />
+<h2 id="8-linux-vs-windows-file-systems">8. Linux vs Windows File Systems</h2>
+<p><img loading="lazy" src="img/lec-p16.jpg" alt="เปรียบเทียบโครงสร้างไฟล์ Linux กับ Windows" /></p>
+<p>ตัวอย่าง: ติดตั้ง Firefox</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Linux</strong></th>
+<th><strong>Windows</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จุดเริ่ม</td>
+<td><strong><code>/</code></strong></td>
+<td><strong><code>C:</code></strong></td>
+</tr>
+<tr>
+<td>ระดับแรก</td>
+<td>bin, etc, home, lib, usr, var</td>
+<td>Windows, Program files, Documents and settings</td>
+</tr>
+<tr>
+<td>ไฟล์ของ Firefox</td>
+<td><strong>กระจายตามประเภท</strong>: <code>/usr/bin/Firefox.sh</code> (ตัวรัน), <code>/usr/lib/Firefox/plugin-container</code> (library), <code>/usr/share/icons/Firefox.png</code> (ไอคอน)</td>
+<td><strong>รวมในโฟลเดอร์ของโปรแกรม</strong>: <code>Program files\Firefox\</code> มี <code>Firefox.exe</code>, <code>plugin-container</code>, <code>mozicon</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ต่างกันที่แนวคิด</strong>: Linux <strong>แยกไฟล์ตามชนิด</strong> (ตัวรันไว้ bin, library ไว้ lib, ไอคอนไว้ share) ส่วน Windows <strong>แยกตามโปรแกรม</strong> (ทุกอย่างของโปรแกรมอยู่โฟลเดอร์เดียว) <em>(อธิบายเพิ่ม: Linux ยัง<strong>แยกตัวพิมพ์เล็กใหญ่</strong> และใช้ <code>/</code> คั่น path ส่วน Windows ใช้ <code>\</code>)</em></p>
+</blockquote>
+<hr />
+<h2 id="9-file-information-และ-file-permission">9. File Information และ File Permission</h2>
+<h3 id="file-information-ผล-ls--l">File Information — ผล <code>ls -l</code></h3>
+<p>ตัวอย่าง: <code>-rw-r--r--  1  ittipon  muict  68524  2011-12-19 07:18  foo.txt</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-rw-r--r--</code></td>
+<td><strong>File type and Permissions</strong></td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td><strong>&quot;link count&quot;</strong></td>
+</tr>
+<tr>
+<td><code>ittipon</code></td>
+<td><strong>Owner</strong></td>
+</tr>
+<tr>
+<td><code>muict</code></td>
+<td><strong>Group</strong></td>
+</tr>
+<tr>
+<td><code>68524</code></td>
+<td><strong>Size (in bytes)</strong></td>
+</tr>
+<tr>
+<td><code>2011-12-19 07:18</code></td>
+<td><strong>Modification Time/Date</strong></td>
+</tr>
+<tr>
+<td><code>foo.txt</code></td>
+<td><strong>File Name</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="file-permission">File Permission</h3>
+<ul>
+<li>ไฟล์มีสิทธิ์สำหรับ <strong>user, group, other (u, g, o)</strong> — ในภาพเรียก Self / Group / Public</li>
+<li>สิทธิ์มี <strong>read, write, execute (r, w, x)</strong></li>
+<li>⭐ <strong>เจ้าของไฟล์ (owner) เปลี่ยนสิทธิ์ไฟล์ของตัวเองได้เสมอ</strong></li>
+</ul>
+<blockquote class="callout">
+<p>รายละเอียดเต็มของเรื่องสิทธิ์ (chmod, chown, chgrp) อยู่ใน <strong>L5</strong></p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 2 — Lab 2: Basic Unix Commands</h1>
+<h2 id="10-วัตถุประสงค์และสิ่งที่ส่ง">10. วัตถุประสงค์และสิ่งที่ส่ง</h2>
+<p><strong>Objectives:</strong></p>
+<ol>
+<li>Review on Virtual Machines</li>
+<li>Learn about Windows and Linux operating systems</li>
+<li>Study file systems of Windows and Linux</li>
+<li>Basic commands of Linux Ubuntu</li>
+</ol>
+<p><strong>What to Submit:</strong> แคปหน้าจอทุกคำสั่งที่ฝึก รวมเป็น PDF ไฟล์เดียว ส่ง MyCourses ชื่อ <strong><code>6887xxx_lab2.pdf</code></strong> · ⚠️ ส่ง<strong>วันนี้ (August 11) ก่อนเที่ยงคืน</strong></p>
+<hr />
+<h2 id="11-command-line-ใน-windows">11. Command Line ใน Windows</h2>
+<ol>
+<li>กดปุ่ม <strong>search</strong> → พิมพ์ <strong><code>cmd</code></strong> → Enter → เปิด <strong>Command Prompt</strong> (prompt เช่น <code>C:\Users\Sudsanguan&gt;</code>)</li>
+<li>พิมพ์ <strong><code>dir</code></strong> → แสดงไฟล์และโฟลเดอร์ใน directory ปัจจุบัน (โฟลเดอร์มีป้าย <code>&lt;DIR&gt;</code>)</li>
+<li>พิมพ์ <strong><code>exit</code></strong> → ปิดหน้าต่าง Command Prompt</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <code>dir</code> ของ Windows ≈ <code>ls</code> ของ Linux <em>(อธิบายเพิ่ม)</em></p>
+</blockquote>
+<hr />
+<h2 id="12-คำสั่ง-linux-พื้นฐาน">12. คำสั่ง Linux พื้นฐาน ⭐⭐</h2>
+<p><strong>คำสั่งที่ใช้ในแลป:</strong> <code>pwd</code>, <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>rmdir</code>, <code>echo</code>, <code>grep</code>, <code>nano</code>, <code>cat</code>, <code>more</code>, <code>cp</code>, <code>rm</code>, <code>tail</code></p>
+<h3 id="ตารางสรุปคำสั่ง">ตารางสรุปคำสั่ง</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ใช้ทำอะไร (จากสไลด์)</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>pwd</code></strong></td>
+<td>แสดง directory หรือ path ที่อยู่ปัจจุบัน</td>
+<td><code>pwd</code> → <code>/home/itcso</code></td>
+</tr>
+<tr>
+<td><strong><code>ls</code></strong></td>
+<td>แสดงข้อมูลภายใน directory</td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td><strong><code>ls -l</code></strong></td>
+<td>แสดงแบบ<strong>รายละเอียด</strong> ทั้งชื่อไฟล์/directory, ขนาด, เวลา</td>
+<td><code>ls -l</code></td>
+</tr>
+<tr>
+<td><strong><code>ls -a</code></strong></td>
+<td>แสดง<strong>ไฟล์ที่ถูกซ่อนไว้</strong></td>
+<td><code>ls -a</code></td>
+</tr>
+<tr>
+<td><strong><code>ls -la</code></strong></td>
+<td>รายละเอียด <strong>และ</strong> ไฟล์ซ่อน</td>
+<td><code>ls -la</code></td>
+</tr>
+<tr>
+<td><strong><code>cd</code></strong></td>
+<td>เปลี่ยน directory</td>
+<td><code>cd /</code>, <code>cd ..</code>, <code>cd</code></td>
+</tr>
+<tr>
+<td><strong><code>mkdir</code></strong></td>
+<td>สร้าง directory</td>
+<td><code>mkdir testdirectory</code></td>
+</tr>
+<tr>
+<td><strong><code>rmdir</code></strong></td>
+<td>ลบ directory</td>
+<td><code>rmdir testdirectory</code></td>
+</tr>
+<tr>
+<td><strong><code>echo</code></strong></td>
+<td>แสดงผล (ใช้คู่ <code>&gt;</code> เพื่อเขียนลงไฟล์)</td>
+<td><code>echo &quot;ict mahido test&quot; &gt; testfile</code></td>
+</tr>
+<tr>
+<td><strong><code>grep</code></strong></td>
+<td>ค้นหาข้อความในไฟล์</td>
+<td><code>grep ict myfile</code></td>
+</tr>
+<tr>
+<td><strong><code>nano</code></strong></td>
+<td>editor สร้างหรือแก้ไฟล์</td>
+<td><code>nano myfile</code></td>
+</tr>
+<tr>
+<td><strong><code>cat</code></strong></td>
+<td>ดูเนื้อหาทั้งหมดของไฟล์</td>
+<td><code>cat myfile</code></td>
+</tr>
+<tr>
+<td><strong><code>more</code></strong></td>
+<td>ดูเนื้อหาไฟล์ทีละหน้า</td>
+<td><code>more myfile</code></td>
+</tr>
+<tr>
+<td><strong><code>tail</code></strong></td>
+<td>ดูเนื้อหาส่วนท้ายของไฟล์</td>
+<td><code>tail myfile</code></td>
+</tr>
+<tr>
+<td><strong><code>cp</code></strong></td>
+<td>copy ไฟล์</td>
+<td><code>cp myfile file1</code></td>
+</tr>
+<tr>
+<td><strong><code>rm</code></strong></td>
+<td>ลบไฟล์</td>
+<td><code>rm file1</code></td>
+</tr>
+<tr>
+<td><strong><code>rm -i</code></strong></td>
+<td>ลบไฟล์ แต่<strong>ถามยืนยันอีกครั้ง</strong></td>
+<td><code>rm -i file2</code></td>
+</tr>
+<tr>
+<td><code>mv</code> <em>(มีในภาพ)</em></td>
+<td>เปลี่ยนชื่อ / ย้ายไฟล์</td>
+<td><code>mv testfile myfile</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="121-pwd-ls-และตัวเลือก">12.1 <code>pwd</code>, <code>ls</code> และตัวเลือก</h3>
+<ul>
+<li><code>ls</code> ธรรมดาใน home เห็น: Desktop, Documents, Downloads, Music, Pictures, Public, snap, Templates, Videos</li>
+<li><code>ls -a</code> เห็นเพิ่ม: <code>.</code>, <code>..</code>, <code>.bash_history</code>, <code>.bash_logout</code>, <code>.bashrc</code>, <code>.cache</code>, <code>.config</code>, <code>.gnupg</code>, <code>.local</code>, <code>.profile</code>, <code>.ssh</code></li>
+<li><code>ls -la</code> → <code>total 80</code> และเห็นสิทธิ์/เจ้าของ/ขนาดของทั้งไฟล์ปกติและไฟล์ซ่อน</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>ไฟล์ที่ชื่อขึ้นต้นด้วย <code>.</code> คือไฟล์ซ่อน</strong> มักเป็นไฟล์ตั้งค่า เช่น <code>.bashrc</code> · <strong><code>.</code></strong> = directory ปัจจุบัน · <strong><code>..</code></strong> = directory แม่</p>
+</blockquote>
+<h3 id="122-cd-การเดินใน-directory">12.2 <code>cd</code> — การเดินใน directory</h3>
+<p>ลำดับในสไลด์:</p>
+<pre><code>$ pwd        → /home/itcso
+$ cd /       → ไปที่ root
+$ pwd        → /
+$ ls         → bin boot cdrom dev etc home lib ... usr var
+$ cd         → cd เปล่า ๆ = กลับ home
+$ pwd        → /home/itcso
+$ cd ..      → ขึ้นไป directory แม่
+$ pwd        → /home
+$ cd         → กลับ home อีกครั้ง
+$ pwd        → /home/itcso
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รูปแบบ</th>
+<th>ไปที่ไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cd /</code></td>
+<td>root ของระบบ</td>
+</tr>
+<tr>
+<td><code>cd</code> (ไม่ใส่อะไร)</td>
+<td><strong>home directory ของตัวเอง</strong></td>
+</tr>
+<tr>
+<td><code>cd ..</code></td>
+<td>directory แม่ (ขึ้นไป 1 ชั้น)</td>
+</tr>
+<tr>
+<td><code>cd ชื่อ</code></td>
+<td>directory ย่อยชื่อนั้น</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 prompt บอกตำแหน่งด้วย: <code>~</code> = home, <code>/home</code> เมื่ออยู่ <code>/home</code>, <code>~/testdir</code> เมื่ออยู่ใน testdir</p>
+</blockquote>
+<h3 id="123-mkdir-rmdir">12.3 <code>mkdir</code> / <code>rmdir</code></h3>
+<pre><code>$ mkdir testdirectory     → ls เห็น testdirectory เพิ่ม
+$ cd testdirectory/
+$ pwd                     → /home/itcso/testdirectory
+$ cd ..
+$ rmdir testdirectory     → ls ไม่เห็นแล้ว
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <code>rmdir</code> ลบได้เฉพาะ <strong>directory ว่าง</strong> ถ้ามีไฟล์ข้างในต้องลบไฟล์ก่อน</p>
+</blockquote>
+<h3 id="124-echo-redirect-mv-grep">12.4 <code>echo</code>, redirect <code>&gt;</code>, <code>mv</code>, <code>grep</code></h3>
+<pre><code>$ echo &quot;ict mahido test&quot; &gt; testfile    → สร้างไฟล์ testfile ที่มีข้อความนี้
+$ ls                                    → testfile
+$ mv testfile myfile                    → เปลี่ยนชื่อเป็น myfile
+$ grep ict myfile                       → ict mahido test   (คำที่เจอถูกไฮไลต์)
+</code></pre>
+<ul>
+<li><strong><code>&gt;</code> คือการ redirect output</strong> — ส่งผลลัพธ์ที่ปกติขึ้นจอไป<strong>เขียนลงไฟล์ใหม่</strong>แทน (รูปแบบ: <code>echo &quot;test&quot; &gt; test1</code>)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <strong><code>&gt;</code> เขียนทับ</strong>ไฟล์เดิมทั้งหมด ถ้าอยากต่อท้ายใช้ <strong><code>&gt;&gt;</code></strong></p>
+</blockquote>
+<h3 id="125-nano-สร้างหรือแก้ไขไฟล์">12.5 <code>nano</code> — สร้างหรือแก้ไขไฟล์</h3>
+<ul>
+<li><code>nano myfile</code> เปิดไฟล์ใน editor (GNU nano 6.2) แล้วพิมพ์แก้ได้เลย (ในสไลด์เพิ่มบรรทัดจนเป็น ict / mahidol university / test / day1)</li>
+<li><strong><code>Ctrl + O</code> = Write Out (บันทึก)</strong> → ถาม <code>File Name to Write: myfile</code> กด Enter</li>
+<li><strong><code>Ctrl + X</code> = Exit (ออก)</strong></li>
+<li>แถบล่างแสดงคีย์ลัด (<code>^</code> = Ctrl): ^G Help, ^O Write Out, ^W Where Is, ^K Cut, ^T Execute, ^X Exit, ^R Read File, ^\ Replace, ^U Paste, ^J Justify</li>
+</ul>
+<blockquote class="callout">
+<p>nano และ vim จะเรียนละเอียดใน <strong>L6</strong></p>
+</blockquote>
+<h3 id="126-grep-cat-tail-more">12.6 <code>grep</code>, <code>cat</code>, <code>tail</code>, <code>more</code></h3>
+<p>หลังแก้ไฟล์ myfile แล้ว:</p>
+<pre><code>$ grep university myfile   → mahidol university
+$ cat myfile               → ict / mahidol university / test / day1 (ทั้งไฟล์)
+$ tail myfile              → ส่วนท้ายของไฟล์ (ไฟล์สั้นจึงเห็นทั้งหมด)
+$ more myfile              → ดูทีละหน้า (ไฟล์สั้นจึงเห็นทั้งหมด)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ต่างกันที่ <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cat</code></td>
+<td>พ่นทั้งไฟล์ในครั้งเดียว เหมาะกับไฟล์สั้น</td>
+</tr>
+<tr>
+<td><code>more</code></td>
+<td>หยุดทีละหน้าจอ กด Space ไปหน้าถัดไป, q ออก เหมาะกับไฟล์ยาว</td>
+</tr>
+<tr>
+<td><code>tail</code></td>
+<td>แสดง <strong>10 บรรทัดสุดท้าย</strong> โดยค่าเริ่มต้น เหมาะกับดู log ล่าสุด</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="127-cp">12.7 <code>cp</code></h3>
+<pre><code>$ cp myfile file1      → ls เห็น file1 myfile
+$ cat file1            → เนื้อหาเหมือน myfile ทุกบรรทัด
+$ grep da file1        → day1   (grep หาข้อความบางส่วนของคำได้)
+</code></pre>
+<h3 id="128-redirect-กับ-pipe">12.8 Redirect <code>&gt;</code> กับ pipe <code>|</code></h3>
+<pre><code>$ ls -l
+-rw-rw-r-- 1 itcso itcso 36 ... file1
+-rw-rw-r-- 1 itcso itcso 36 ... myfile
+$ ls -l | cat &gt; file2
+$ cat file2
+total 8
+-rw-rw-r-- 1 itcso itcso 36 ... file1
+-rw-rw-r-- 1 itcso itcso  0 ... file2
+-rw-rw-r-- 1 itcso itcso 36 ... myfile
+</code></pre>
+<ul>
+<li><strong><code>&gt;</code> หมายถึงการ redirect output ไปยังไฟล์ใหม่</strong> — ผลของ <code>ls -l</code> ถูกเก็บในไฟล์ <code>file2</code> แทนการขึ้นจอ</li>
+<li><em>(อธิบายเพิ่ม)</em> <strong><code>|</code> (pipe)</strong> ส่งผลลัพธ์ของคำสั่งซ้ายไปเป็น input ของคำสั่งขวา (ในสไลด์ <code>ls -l | more</code> ก็ใช้ pipe เพื่อดูทีละหน้า)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไม file2 ในรายการมีขนาด 0?</strong> <em>(อธิบายเพิ่ม)</em> shell <strong>สร้างไฟล์ file2 เปล่าก่อน</strong> แล้วค่อยรัน <code>ls -l</code> ดังนั้น ls จึงเห็น file2 ที่ยังว่างอยู่</p>
+</blockquote>
+<h3 id="129-wildcard-และ-rm">12.9 Wildcard <code>*</code> และ <code>rm</code></h3>
+<pre><code>$ ls                 → file1 file2 myfile
+$ ls file*           → file1 file2
+$ grep ict *         → file1:ict   myfile:ict
+$ rm file1
+$ ls                 → file2 myfile
+</code></pre>
+<ul>
+<li><strong><code>*</code></strong> <em>(อธิบายเพิ่ม)</em> = wildcard แทนตัวอักษรอะไรก็ได้กี่ตัวก็ได้ · <code>file*</code> = ทุกไฟล์ที่ขึ้นต้นด้วย file · <code>grep ict *</code> = หาในทุกไฟล์ และบอกชื่อไฟล์ที่เจอหน้าบรรทัด</li>
+<li><strong><code>rm</code></strong> ลบไฟล์ · <strong><code>rm -i</code></strong> ถามยืนยันก่อนลบ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(อธิบายเพิ่ม)</em> <strong>Linux ไม่มีถังขยะสำหรับ <code>rm</code></strong> ลบแล้วหายเลย จึงควรใช้ <code>rm -i</code> ถ้าไม่แน่ใจ และระวัง <code>rm *</code></p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Registers / ALU / Control Unit</strong></td>
+<td>ส่วนประกอบของ CPU: หน่วยความจำในตัว / คำนวณ / ควบคุม</td>
+<td>ส่วนของสมอง</td>
+</tr>
+<tr>
+<td><strong>I/O Controller</strong></td>
+<td>ตัวกลางเชื่อม CPU กับอุปกรณ์</td>
+<td>ล่าม</td>
+</tr>
+<tr>
+<td><strong>OS as an interface</strong></td>
+<td>OS ซ่อน &quot;ugly interface&quot; ของฮาร์ดแวร์ แล้วให้ &quot;beautiful interface&quot; กับโปรแกรม</td>
+<td>ตัวแปลงของยากเป็นของง่าย</td>
+</tr>
+<tr>
+<td><strong>Extended machine</strong></td>
+<td>เครื่องเสมือนที่ OS สร้างให้แต่ละโปรแกรม</td>
+<td>เครื่องส่วนตัวของโปรแกรม</td>
+</tr>
+<tr>
+<td><strong>Virtualizing CPU</strong></td>
+<td>สลับโปรแกรมให้ใช้ CPU ผลัดกัน</td>
+<td>ผลัดกันใช้</td>
+</tr>
+<tr>
+<td><strong>Virtualizing memory / address space</strong></td>
+<td>แต่ละโปรแกรมมี virtual address ของตัวเอง OS map ไป physical address</td>
+<td>ห้อง 1 ของใครของมัน</td>
+</tr>
+<tr>
+<td><strong>User mode / Kernel mode</strong></td>
+<td>โหมดโปรแกรมทั่วไป / โหมดของ kernel ที่เข้าถึงฮาร์ดแวร์ได้</td>
+<td>ห้องลูกค้า / ห้องครัว</td>
+</tr>
+<tr>
+<td><strong>HAL</strong></td>
+<td>Hardware Abstraction Layer ของ Windows</td>
+<td>ซ่อนความต่างของฮาร์ดแวร์</td>
+</tr>
+<tr>
+<td><strong>Kernel modules</strong></td>
+<td>ส่วนเสริมของ Linux kernel ที่โหลดเพิ่มได้</td>
+<td>ปลั๊กอิน kernel</td>
+</tr>
+<tr>
+<td><strong>root directory <code>/</code></strong></td>
+<td>จุดเริ่มต้นของ file system Linux</td>
+<td>รากต้นไม้</td>
+</tr>
+<tr>
+<td><strong>Home directory</strong></td>
+<td>ที่เก็บไฟล์ของผู้ใช้ <code>/home/ชื่อ</code> (<code>~</code>)</td>
+<td>บ้าน</td>
+</tr>
+<tr>
+<td><strong>Hidden file</strong></td>
+<td>ไฟล์ที่ชื่อขึ้นต้นด้วย <code>.</code> เห็นด้วย <code>ls -a</code></td>
+<td>ไฟล์ซ่อน</td>
+</tr>
+<tr>
+<td><strong><code>.</code> / <code>..</code></strong></td>
+<td>directory ปัจจุบัน / directory แม่</td>
+<td>ที่นี่ / ข้างบน</td>
+</tr>
+<tr>
+<td><strong>Redirect <code>&gt;</code></strong></td>
+<td>ส่ง output ไปเขียนลงไฟล์ (ทับของเดิม)</td>
+<td>เทใส่ไฟล์</td>
+</tr>
+<tr>
+<td><strong>Pipe <code>|</code></strong></td>
+<td>ส่ง output ของคำสั่งหนึ่งเป็น input ของอีกคำสั่ง</td>
+<td>ท่อต่อคำสั่ง</td>
+</tr>
+<tr>
+<td><strong>Wildcard <code>*</code></strong></td>
+<td>แทนตัวอักษรใดก็ได้</td>
+<td>ไพ่ joker</td>
+</tr>
+<tr>
+<td><strong>Symbolic link</strong></td>
+<td>ไฟล์ที่ชี้ไปยังไฟล์อื่น ขึ้นต้น <code>l</code> ใน <code>ls -l</code></td>
+<td>ทางลัด</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>CPU = <strong>Registers + ALU + Control Unit</strong> · I/O ผ่าน <strong>I/O Controllers</strong></li>
+<li><strong>OS = interface</strong>: ด้านบน beautiful (ให้โปรแกรม) ด้านล่าง ugly (ฮาร์ดแวร์)</li>
+<li><strong>Virtualizing CPU</strong>: สลับโปรแกรม, ใครได้ CPU ก่อน · <strong>Virtualizing Memory</strong>: map virtual → physical, จัดสรร, ถ้า RAM ไม่พอ</li>
+<li><strong>Windows arch</strong>: Applications/Windows API/User-Mode Drivers (user mode) → Kernel, drivers, File System Drivers (kernel mode) → <strong>HAL</strong> → Hardware</li>
+<li><strong>Linux arch</strong>: System software/User process/Utility/Compilers → <strong>System Libraries</strong> → <strong>Kernel</strong> → <strong>Kernel Modules</strong> → Hardware</li>
+<li>Linux เริ่มที่ <strong><code>/</code></strong> แยกไฟล์ตามชนิด · Windows เริ่มที่ <strong><code>C:\</code></strong> แยกตามโปรแกรม</li>
+<li>ส่งแลป <strong><code>6887xxx_lab2.pdf</code></strong></li>
+<li><strong>คำสั่ง 13 ตัว</strong>: pwd, ls, cd, mkdir, rmdir, echo, grep, nano, cat, more, cp, rm, tail</li>
+<li><code>ls -l</code> รายละเอียด · <code>ls -a</code> ไฟล์ซ่อน · <code>ls -la</code> ทั้งคู่</li>
+<li><code>cd /</code> root · <code>cd</code> home · <code>cd ..</code> ขึ้นหนึ่งชั้น</li>
+<li>nano: <strong>Ctrl+O บันทึก</strong>, <strong>Ctrl+X ออก</strong></li>
+<li><strong><code>&gt;</code> = redirect output ไปไฟล์ใหม่</strong> · <code>rm -i</code> = ถามก่อนลบ</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Beautiful vs Ugly interface</strong></td>
+<td>OS↔โปรแกรม (ใช้ง่าย) vs OS↔ฮาร์ดแวร์ (ซับซ้อน)</td>
+</tr>
+<tr>
+<td><strong>Virtual address vs Physical address</strong></td>
+<td>ที่อยู่ที่โปรแกรมเห็น (เริ่ม 0 ทุกโปรแกรม) vs ที่อยู่จริงใน RAM</td>
+</tr>
+<tr>
+<td><strong><code>dir</code> vs <code>ls</code></strong></td>
+<td>คำสั่งดูไฟล์ของ Windows vs Linux</td>
+</tr>
+<tr>
+<td><strong><code>ls -l</code> vs <code>ls -a</code></strong></td>
+<td>แสดงรายละเอียด vs แสดงไฟล์ซ่อน</td>
+</tr>
+<tr>
+<td><strong><code>cd</code> vs <code>cd ..</code> vs <code>cd /</code></strong></td>
+<td>กลับ home vs ขึ้นหนึ่งชั้น vs ไป root</td>
+</tr>
+<tr>
+<td><strong><code>mkdir</code> vs <code>rmdir</code></strong></td>
+<td>สร้าง vs ลบ directory (ว่าง)</td>
+</tr>
+<tr>
+<td><strong><code>cat</code> vs <code>more</code> vs <code>tail</code></strong></td>
+<td>ทั้งไฟล์ vs ทีละหน้า vs ส่วนท้าย</td>
+</tr>
+<tr>
+<td><strong><code>rm</code> vs <code>rm -i</code></strong></td>
+<td>ลบเลย vs ถามยืนยัน</td>
+</tr>
+<tr>
+<td><strong><code>rm</code> vs <code>rmdir</code></strong></td>
+<td>ลบไฟล์ vs ลบ directory</td>
+</tr>
+<tr>
+<td><strong><code>&gt;</code> vs <code>|</code></strong></td>
+<td>ส่ง output ลงไฟล์ vs ส่ง output ให้คำสั่งถัดไป</td>
+</tr>
+<tr>
+<td><strong><code>cp</code> vs <code>mv</code></strong></td>
+<td>คัดลอก (ของเดิมยังอยู่) vs ย้าย/เปลี่ยนชื่อ (ของเดิมหายไป)</td>
+</tr>
+<tr>
+<td><strong>Linux vs Windows file system</strong></td>
+<td><code>/</code> แยกตามชนิดไฟล์ vs <code>C:\</code> แยกตามโปรแกรม</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไม OS ต้อง virtualize CPU</strong> → CPU ทำทีละคำสั่ง ถ้าไม่สลับ โปรแกรมเดียวจะยึด CPU ไว้</li>
+<li><strong>ทำไมทุกโปรแกรมเห็น address 0x00000 ได้พร้อมกัน</strong> → เป็น virtual address ของแต่ละโปรแกรม OS map ไปคนละตำแหน่งใน physical memory</li>
+<li><strong>ทำไม Firefox บน Linux ไฟล์กระจายหลายที่</strong> → Linux จัดไฟล์ตามชนิด ตัวรันอยู่ bin, library อยู่ lib, ไอคอนอยู่ share</li>
+<li><strong>ผลของ <code>ls -l | cat &gt; file2</code></strong> → ผลของ <code>ls -l</code> ไม่ขึ้นจอแต่ถูกเขียนลง file2 และ file2 ในรายการมีขนาด 0 เพราะถูกสร้างก่อน ls ทำงาน</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l1/index.html"><small>← บทก่อนหน้า</small><span>L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu)</span></a><a class="pg next" href="../l3/index.html"><small>บทถัดไป →</small><span>L3 – File Management + Lab 3 (File System Commands)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

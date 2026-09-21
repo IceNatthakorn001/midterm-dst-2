@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L3 – File Management + Lab 3 (File System Commands) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</a></li><li><a href="#2-file-system-คืออะไร">2. File System คืออะไร ⭐</a></li><li><a href="#3-ประเภทของ-file-system">3. ประเภทของ File System ⭐⭐</a></li><li><a href="#4-windows-file-system">4. Windows File System</a></li><li><a href="#5-linux-file-system-และ-linux-vs-windows">5. Linux File System และ Linux vs Windows</a></li><li><a href="#6-วัตถุประสงค์และสิ่งที่ส่ง">6. วัตถุประสงค์และสิ่งที่ส่ง</a></li><li><a href="#7-คำสั่ง-windows">7. คำสั่ง Windows</a></li><li><a href="#8-คำสั่ง-linux-pwd-ls-และโครงสร้าง-directory">8. คำสั่ง Linux: pwd / ls และโครงสร้าง directory</a></li><li><a href="#9-cd-relative-path-vs-absolute-path">9. cd, Relative Path vs Absolute Path ⭐⭐</a></li><li><a href="#10-exercise-สร้าง-directory-และดาวน์โหลดไฟล์">10. Exercise: สร้าง directory และดาวน์โหลดไฟล์</a></li><li><a href="#11-ดูเนื้อหาไฟล์-cat-more-head-tail">11. ดูเนื้อหาไฟล์: cat, more, head, tail ⭐⭐</a></li><li><a href="#12-file-touch-echo-nano-และ-ascii">12. file, touch, echo, nano และ ASCII</a></li><li><a href="#13-cp-mv-rm-grep">13. cp, mv, rm, grep</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L3</div>
+      <h1 class="lesson-title">L3 – File Management + Lab 3 (File System Commands)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> ต่อจาก L2 ที่รู้จักคำสั่งพื้นฐานแล้ว บทนี้ลงลึกเรื่อง <strong>ระบบไฟล์ (file system)</strong></p>
+<p>(1) <strong>Lecture 3</strong> นิยามของ file system, <strong>ประเภทของ file system</strong> (FAT/FAT32/NTFS ของ Windows, Ext2/3/4 ของ Linux, HFS ของ macOS) และทบทวนโครงสร้างไฟล์ของ Windows กับ Linux</p>
+<p>(2) <strong>Lab 3</strong> ฝึกคำสั่งไฟล์บน Windows (<code>dir</code>, <code>dir /p</code>, <code>cd</code>) และบน Linux เน้น <strong>การเดินใน directory แบบ relative path vs absolute path</strong> และคำสั่งจัดการไฟล์ครบชุด: <code>cat</code>, <code>more</code>, <code>head</code>, <code>tail</code>, <code>file</code>, <code>touch</code>, <code>echo &gt;</code>, <code>nano</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>, <code>grep</code> พร้อม wildcard <code>*</code> และ <code>?</code></p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 3: File Management</h1>
+<h2 id="1-ข้อมูลรายวิชา-ย่อ">1. ข้อมูลรายวิชา (ย่อ)</h2>
+<ul>
+<li>สัปดาห์ที่ 3 = <strong>การฝึกการจัดการแฟ้มข้อมูล</strong> (18 August 2026)</li>
+<li>เกณฑ์คะแนนเหมือนเดิม · ส่งแลป 23.59 น. ของวันอังคาร/วันที่เรียน · ทดสอบย่อยทุกสัปดาห์ก่อนจบคาบ</li>
+</ul>
+<hr />
+<h2 id="2-file-system-คืออะไร">2. File System คืออะไร ⭐</h2>
+<p><strong>ระบบแฟ้มข้อมูล หรือระบบไฟล์ (File System)</strong> = <strong>เทคนิคในการจัดเก็บข้อมูลให้เป็นระเบียบ อ่านได้ง่ายและสะดวกโดยมนุษย์</strong></p>
+<ul>
+<li><strong>หน่วยพื้นฐานของระบบไฟล์ เรียกว่า &quot;ไฟล์&quot;</strong></li>
+<li>ระบบไฟล์ใช้จัดเก็บไฟล์ใน<strong>อุปกรณ์จัดเก็บข้อมูล</strong>ส่วนใหญ่ เช่น <strong>hard disk, CD, USB drive</strong></li>
+<li>ระบบไฟล์ช่วยให้อุปกรณ์<strong>รักษาตำแหน่งทางกายภาพของไฟล์</strong> (รู้ว่าไฟล์อยู่ตรงไหนของดิสก์)</li>
+<li>ระบบไฟล์<strong>อนุญาตให้เข้าถึงไฟล์จากเครือข่ายได้</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>เปรียบเทียบห้องสมุด</strong>: ดิสก์คือชั้นหนังสือ ไฟล์คือหนังสือ ส่วน file system คือ<strong>ระบบบัตรรายการ</strong>ที่บอกว่าหนังสือเล่มไหนอยู่ชั้นไหน ถ้าไม่มี ข้อมูลก็ยังอยู่บนดิสก์ แต่หาไม่เจอ</p>
+</blockquote>
+<hr />
+<h2 id="3-ประเภทของ-file-system">3. ประเภทของ File System ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบปฏิบัติการ</th>
+<th>File system</th>
+<th>ชื่อเต็ม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Microsoft Windows</strong></td>
+<td><strong>FAT</strong>, <strong>FAT32</strong></td>
+<td>File Allocation Table / File Allocation Table 32-bit version</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>NTFS</strong></td>
+<td>New Technology File System</td>
+</tr>
+<tr>
+<td><strong>Linux</strong></td>
+<td><strong>Ext</strong> → <strong>Ext2, Ext3, Ext4</strong></td>
+<td>Extended file system (ปรับปรุงแล้วเติมเลขต่อท้าย)</td>
+</tr>
+<tr>
+<td><strong>macOS</strong></td>
+<td><strong>HFS</strong></td>
+<td>Hierarchical File System</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>FAT32</strong> เก่าแต่เข้ากันได้กับแทบทุกอุปกรณ์ (มักใช้กับ USB drive) แต่เก็บไฟล์ใหญ่เกิน 4 GB ไม่ได้ · <strong>NTFS</strong> เป็นมาตรฐานของ Windows ปัจจุบัน รองรับสิทธิ์ไฟล์และไฟล์ใหญ่ · <strong>Ext4</strong> เป็นค่าเริ่มต้นของ Ubuntu ที่เราติดตั้งใน L1 (macOS รุ่นใหม่ใช้ APFS แทน HFS แล้ว)</p>
+</blockquote>
+<hr />
+<h2 id="4-windows-file-system">4. Windows File System</h2>
+<ul>
+<li>⭐ <strong>Directory = Folder</strong> (คำเดียวกัน Windows นิยมเรียก folder, Linux นิยมเรียก directory)</li>
+<li>ตัวอย่างบน Desktop: ไอคอน Word = <strong>ไฟล์ (a word file)</strong> · ไอคอนแฟ้มเหลือง = <strong>folder/directory</strong></li>
+<li>โครงสร้างเริ่มที่ <strong><code>C:\</code></strong> → <code>Program Files</code> (Common Files, Microsoft Office, Microsoft.NET), <code>Windows</code> (system32, assembly, Web), <code>temp</code></li>
+<li>ดูใน Command Prompt ด้วย <code>cd \</code> แล้ว <code>dir</code></li>
+</ul>
+<hr />
+<h2 id="5-linux-file-system-และ-linux-vs-windows">5. Linux File System และ Linux vs Windows</h2>
+<p><img loading="lazy" src="img/lec-p09.jpg" alt="โครงสร้าง directory ของ Linux" /></p>
+<ul>
+<li>เริ่มที่ <strong>root <code>/</code></strong> แตกเป็น <code>/bin/ /boot/ /dev/ /etc/ /home/ /lib/ /media/ /mnt/ /opt/ /root/ /sbin/ /srv/ /tmp/ /usr/ /var/</code> · <code>/usr/</code> มี bin, include, lib, sbin · <code>/var/</code> มี cache, log, spool, tmp</li>
+<li>ผล <code>ls</code> และ <code>ls -l | more</code> ที่ <code>/</code> เหมือน L2 (ทุก directory เป็นของ root root, มี symbolic link <code>initrd.img -&gt;</code>)</li>
+<li><strong>Linux vs Windows</strong>: Linux แยกไฟล์ตาม<strong>ชนิด</strong> (<code>/usr/bin/Firefox.sh</code>, <code>/usr/lib/Firefox/plugin-container</code>, <code>/usr/share/icons/Firefox.png</code>) · Windows แยกตาม<strong>โปรแกรม</strong> (<code>C:\Program files\Firefox\Firefox.exe</code>, plugin-container, mozicon)</li>
+</ul>
+<blockquote class="callout">
+<p>หน้าที่ของแต่ละ directory และการเปรียบเทียบแบบละเอียด ดู <strong>สรุป L2 หัวข้อ 7–8</strong></p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 2 — Lab 3: File System Commands</h1>
+<h2 id="6-วัตถุประสงค์และสิ่งที่ส่ง">6. วัตถุประสงค์และสิ่งที่ส่ง</h2>
+<p><strong>Objectives:</strong> 1. Study Windows file systems · 2. Study Linux file systems · 3. File system commands of Windows · 4. File system commands of Linux</p>
+<p><strong>What to Submit:</strong> แคปหน้าจอทุกคำสั่ง <strong>พร้อมเขียนอธิบายผลของแต่ละคำสั่ง</strong> รวม PDF ไฟล์เดียว ส่ง MyCourses ชื่อ <strong><code>6887xxx_lab3.pdf</code></strong> · ⚠️ ส่ง<strong>วันนี้ (August 18) ก่อนเที่ยงคืน</strong></p>
+<hr />
+<h2 id="7-คำสั่ง-windows">7. คำสั่ง Windows</h2>
+<p><strong>คำสั่ง Windows ที่ใช้ในแลป</strong> พร้อมคำสั่ง Linux ที่ทำงานเหมือนกัน <em>(คอลัมน์ Linux อธิบายเพิ่ม)</em>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Windows</th>
+<th>ทำอะไร (จากสไลด์)</th>
+<th>Linux ที่เทียบได้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>dir</code></strong></td>
+<td>list directory/file</td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td><strong><code>cd</code></strong></td>
+<td>change directory</td>
+<td><code>cd</code></td>
+</tr>
+<tr>
+<td><strong><code>mkdir</code></strong></td>
+<td>make directory</td>
+<td><code>mkdir</code></td>
+</tr>
+<tr>
+<td><strong><code>rmdir</code></strong></td>
+<td>remove directory</td>
+<td><code>rmdir</code></td>
+</tr>
+<tr>
+<td><strong><code>echo</code></strong></td>
+<td>แสดงข้อความ</td>
+<td><code>echo</code></td>
+</tr>
+<tr>
+<td><strong><code>del</code></strong></td>
+<td>delete file</td>
+<td><code>rm</code></td>
+</tr>
+<tr>
+<td><strong><code>copy</code></strong></td>
+<td>copy file to another file</td>
+<td><code>cp</code></td>
+</tr>
+<tr>
+<td><strong><code>ren</code></strong></td>
+<td>rename a file</td>
+<td><code>mv</code></td>
+</tr>
+<tr>
+<td><strong><code>type</code></strong></td>
+<td>see contents of a file</td>
+<td><code>cat</code></td>
+</tr>
+<tr>
+<td><strong><code>exit</code></strong></td>
+<td>ออกจาก Command Prompt</td>
+<td><code>exit</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="เฉลยช่องว่างฝั่ง-windows">เฉลยช่องว่างฝั่ง Windows</h3>
+<blockquote class="callout">
+<p>คำถามบางข้อให้ตอบ &quot;จากเครื่องของตนเอง&quot; ด้านล่างใช้ตัวเลขจาก screenshot ในสไลด์เป็นตัวอย่าง ตอนส่งแลปให้ใช้ของเครื่องตัวเอง</p>
+</blockquote>
+<p><strong>หน้า 6 — ผล <code>dir</code> ใน <code>C:\Users\Sudsanguan</code></strong> (บรรทัดท้าย: <code>3 File(s) 728,356 bytes</code> · <code>27 Dir(s) 264,628,350,976 bytes free</code>)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ (จากตัวอย่าง)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จำนวนไฟล์</td>
+<td><strong>3 ไฟล์</strong></td>
+</tr>
+<tr>
+<td>มีไฟล์ชื่ออะไรบ้าง</td>
+<td><strong><code>.condarc</code></strong>, <strong><code>.packettracer</code></strong>, <strong><code>MUDigitalID_sudsanguan_nga.zip</code></strong> (บรรทัดที่ไม่มี <code>&lt;DIR&gt;</code>)</td>
+</tr>
+<tr>
+<td>แต่ละไฟล์ขนาดเท่าไหร่</td>
+<td><code>.condarc</code> = <strong>43 bytes</strong>, <code>.packettracer</code> = <strong>186 bytes</strong>, <code>.zip</code> = <strong>728,127 bytes</strong> (รวม 728,356 bytes)</td>
+</tr>
+<tr>
+<td>จำนวน directory</td>
+<td><strong>27</strong> (บรรทัดที่มี <code>&lt;DIR&gt;</code> รวม <code>.</code> และ <code>..</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 วิธีอ่าน: บรรทัดที่มี <strong><code>&lt;DIR&gt;</code></strong> = directory · บรรทัดที่มีตัวเลขขนาดแทน = ไฟล์ · สรุปจำนวนดูได้จาก 2 บรรทัดสุดท้าย</p>
+</blockquote>
+<p><strong>หน้า 7 — ผลที่หยุดทีละหน้า</strong> (หัวหน้าต่าง &quot;Command Prompt - dir /p&quot;, ท้ายจอขึ้น <code>Press any key to continue . . .</code>)</p>
+<ul>
+<li><strong>คำสั่งที่ใช้: <code>dir /p</code></strong> (<code>/p</code> = pause ทีละหน้าจอ)</li>
+<li><strong>ต้องการดูหน้าถัดไป: กดปุ่มใดก็ได้ (press any key)</strong></li>
+</ul>
+<p><strong>หน้า 8 — <code>cd Desktop</code></strong> (prompt เปลี่ยนจาก <code>C:\Users\Sudsanguan&gt;</code> เป็น <code>C:\Users\Sudsanguan\Desktop&gt;</code>)</p>
+<ul>
+<li><strong>คำสั่ง cd คือ</strong> การเปลี่ยน directory (change directory)</li>
+<li><strong>Desktop คือ</strong> directory (folder) ย่อยใน home ของผู้ใช้ ที่เก็บไฟล์ที่เห็นบนหน้าจอ Desktop</li>
+</ul>
+<p><strong>หน้า 9 — <code>cd /</code></strong> (prompt เปลี่ยนเป็น <code>C:\&gt;</code> แล้ว <code>dir</code> แสดง Dell, Intel, Program Files, Users, Windows, xampp ฯลฯ)</p>
+<ul>
+<li><strong>คำสั่ง cd / คือ</strong> การย้ายไป <strong>root directory ของไดรฟ์</strong> (ใน Windows มาตรฐานคือ <code>cd \</code> แต่ <code>cd /</code> ก็ใช้ได้)</li>
+<li><strong>C:\ คือ</strong> <strong>root directory ของไดรฟ์ C</strong> — prompt <code>C:\&gt;</code> เรียกว่า <strong>C Prompt</strong></li>
+</ul>
+<hr />
+<h2 id="8-คำสั่ง-linux-pwd-ls-และโครงสร้าง-directory">8. คำสั่ง Linux: pwd / ls และโครงสร้าง directory</h2>
+<p><strong>คำสั่ง Linux ที่ใช้ในแลป:</strong> <code>pwd</code>, <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>rmdir</code>, <code>echo</code>, <code>grep</code>, <strong><code>file</code></strong>, <code>nano</code>, <code>cat</code>, <code>more</code>, <code>cp</code>, <code>rm</code>, <code>tail</code>, <strong><code>head</code></strong>, <strong><code>touch</code></strong> (ตัวหนา = ใหม่จาก Lab 2)</p>
+<p><strong>หน้า 11 — ตอบจากเครื่องตัวเอง</strong> (ตัวอย่างจาก screenshot):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ (ตัวอย่าง)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Path ปัจจุบัน</td>
+<td><strong><code>/home/itcso</code></strong></td>
+</tr>
+<tr>
+<td>จำนวน file</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>จำนวน directory</td>
+<td><strong>9</strong> (Desktop, Documents, Downloads, Music, Pictures, Public, snap, Templates, Videos)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <code>ls</code> ธรรมดาแยก file/directory ด้วย<strong>สี</strong> (directory สีน้ำเงิน) ถ้าอยากชัวร์ใช้ <code>ls -l</code> แล้วดูตัวอักษรแรก <code>d</code> = directory, <code>-</code> = file</p>
+</blockquote>
+<h3 id="โครงสร้าง-directory-และตำแหน่ง-here">โครงสร้าง directory และตำแหน่ง &quot;here&quot;</h3>
+<p><img loading="lazy" src="img/lab-p13.jpg" alt="โครงสร้าง directory และตำแหน่งปัจจุบัน" /></p>
+<ul>
+<li><strong>Root directory = <code>/</code></strong> → ใต้ลงมา bin, etc, home, lib, usr, var, …</li>
+<li><code>home</code> มี <code>itcso</code> (home ของผู้ใช้) · <code>usr</code> มี <code>bin</code>, <code>lib</code></li>
+<li>เมื่อเปิด terminal จะอยู่ที่ <strong><code>/home/itcso</code></strong> (prompt แสดง <code>~</code>)</li>
+</ul>
+<p><strong>หน้า 18 — แต่ละ directory มีไฟล์ประเภทไหน</strong> <em>(แนวคำตอบ)</em>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>มีไฟล์ประเภท</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>bin</code></strong></td>
+<td><strong>ไฟล์โปรแกรม/คำสั่งที่รันได้ (executable binaries)</strong> เช่น <code>ls</code>, <code>cp</code>, <code>cat</code></td>
+</tr>
+<tr>
+<td><strong><code>home</code></strong></td>
+<td><strong>home directory ของผู้ใช้แต่ละคน</strong> และไฟล์ส่วนตัว เช่น Documents, Music</td>
+</tr>
+<tr>
+<td><strong><code>etc</code></strong></td>
+<td><strong>ไฟล์ตั้งค่า (configuration files)</strong> ของระบบ เช่น <code>/etc/passwd</code></td>
+</tr>
+<tr>
+<td><strong><code>var</code></strong></td>
+<td><strong>ข้อมูลที่เปลี่ยนแปลงบ่อย (variable data)</strong> เช่น log, cache, spool, ไฟล์ชั่วคราว</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-cd-relative-path-vs-absolute-path">9. <code>cd</code>, Relative Path vs Absolute Path ⭐⭐</h2>
+<h3 id="ทบทวน-cd-หน้า-14">ทบทวน cd (หน้า 14)</h3>
+<p><code>pwd</code> → <code>/home/itcso</code> · <code>cd /</code> → <code>/</code> · <code>cd</code> → <code>/home/itcso</code> · <code>cd ..</code> → <code>/home</code> · <code>cd</code> → <code>/home/itcso</code></p>
+<h3 id="ตัวอย่างการเดินด้วย-relative-path">ตัวอย่างการเดินด้วย relative path</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จาก</th>
+<th>คำสั่ง</th>
+<th>ไปถึง</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/home/itcso</code></td>
+<td><code>cd Music</code></td>
+<td><code>/home/itcso/Music</code></td>
+<td>ลงไป directory ลูก</td>
+</tr>
+<tr>
+<td><code>/home/itcso</code></td>
+<td><code>cd ../../usr</code></td>
+<td><code>/usr</code></td>
+<td>ขึ้น 2 ชั้น (<code>itcso</code> → <code>home</code> → <code>/</code>) แล้วลงไป <code>usr</code></td>
+</tr>
+<tr>
+<td><code>/home/itcso</code></td>
+<td><code>cd ../../usr/bin</code></td>
+<td><code>/usr/bin</code></td>
+<td>ขึ้น 2 ชั้นแล้วลงไป <code>usr/bin</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="หน้า-19-เฉลย-ตอนนี้อยู่ที่-bin-usrbin-จะไป-music-อย่างไร">หน้า 19 — เฉลย: ตอนนี้อยู่ที่ <code>bin</code> (<code>/usr/bin</code>) จะไป <code>Music</code> อย่างไร</h3>
+<ul>
+<li><strong>A: relative path</strong> → <code>cd ../../home/itcso/Music/</code></li>
+<li><strong>B: absolute path</strong> → <code>cd /home/itcso/Music/</code></li>
+<li>ทั้งสองแบบได้ <code>pwd</code> = <strong><code>/home/itcso/Music</code></strong> (prompt เป็น <code>~/Music</code>)</li>
+<li><em>(อธิบายเพิ่ม)</em> ทางลัดอีกแบบ: <code>cd ~/Music</code> (<code>~</code> = home ของตัวเอง)</li>
+</ul>
+<p><img loading="lazy" src="img/lab-p20.jpg" alt="ตัวอย่าง A (relative) และ B (absolute)" /></p>
+<blockquote class="callout">
+<p>สไลด์ยังโชว์ <code>cd ../../../usr/bin</code> จาก <code>~/Music</code> (ขึ้น 3 ชั้น Music → itcso → home → <code>/</code>) ได้ <code>/usr/bin</code></p>
+</blockquote>
+<h3 id="relative-path-vs-absolute-path">Relative Path vs Absolute Path</h3>
+<p><img loading="lazy" src="img/lab-p21.jpg" alt="Relative path vs absolute path" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Absolute path</strong></th>
+<th><strong>Relative path</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เริ่มจาก</td>
+<td><strong>root <code>/</code></strong> เสมอ</td>
+<td><strong>ตำแหน่งปัจจุบัน</strong></td>
+</tr>
+<tr>
+<td>หน้าตา</td>
+<td>ขึ้นต้นด้วย <code>/</code> เช่น <code>/home/prakash</code></td>
+<td>ไม่ขึ้นต้นด้วย <code>/</code> ใช้ <code>..</code> หรือชื่อลูก เช่น <code>../prakash</code></td>
+</tr>
+<tr>
+<td>ผลลัพธ์</td>
+<td>ไปที่เดิมเสมอ ไม่ว่าจะอยู่ตรงไหน</td>
+<td>ขึ้นกับว่าตอนนี้อยู่ที่ไหน</td>
+</tr>
+<tr>
+<td>ตัวอย่างในภาพ</td>
+<td>อยู่ที่ <code>/home/abhishek</code> อยากไป <code>/home/prakash</code> → <code>cd /home/prakash</code></td>
+<td>→ <code>cd ../prakash</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>จำง่าย</strong> <em>(อธิบายเพิ่ม)</em>: absolute = <strong>ที่อยู่เต็มบนซองจดหมาย</strong> (ส่งจากไหนก็ถึง) · relative = <strong>บอกทางจากจุดที่ยืนอยู่</strong> (&quot;เดินขึ้นไปชั้นหนึ่งแล้วเลี้ยวซ้าย&quot;)</p>
+</blockquote>
+<h3 id="หน้า-22-เฉลย-อยู่ที่-home-itcso-homeitcso">หน้า 22 — เฉลย: อยู่ที่ home <code>itcso</code> (<code>/home/itcso</code>)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>Current directory หลังใช้คำสั่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cd ..</code></td>
+<td><strong><code>/home</code></strong></td>
+</tr>
+<tr>
+<td><code>cd ../..</code></td>
+<td><strong><code>/</code></strong> (root)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-exercise-สร้าง-directory-และดาวน์โหลดไฟล์">10. Exercise: สร้าง directory และดาวน์โหลดไฟล์</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โจทย์</th>
+<th>คำสั่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Show current directory</td>
+<td><strong><code>pwd</code></strong></td>
+</tr>
+<tr>
+<td>ไป home directory</td>
+<td><strong><code>cd</code></strong> (หรือ <code>cd ~</code>)</td>
+</tr>
+<tr>
+<td>สร้าง directory &quot;ict&quot; ใน home</td>
+<td><strong><code>mkdir ict</code></strong></td>
+</tr>
+<tr>
+<td>เข้า directory &quot;ict&quot;</td>
+<td><strong><code>cd ict</code></strong></td>
+</tr>
+<tr>
+<td>ดาวน์โหลดไฟล์ historyofict.txt</td>
+<td><strong><code>wget http://www.ict.mahidol.ac.th/historyofict.txt</code></strong> (สไลด์ให้ URL สำรอง <code>wget http://10.34.14.182/ict.txt</code>)</td>
+</tr>
+<tr>
+<td>แสดงไฟล์ใน directory &quot;ict&quot;</td>
+<td><strong><code>ls</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>ผลในสไลด์ (หน้า 25): <code>wget</code> ต่อเซิร์ฟเวอร์ → <code>HTTP request sent… 302 Found</code> (ถูก redirect ไป https) → <code>200 OK</code> → <code>Length: 3754 (3.7K) [text/plain]</code> → <code>'historyofict.txt' saved [3754/3754]</code> → <code>ls</code> เห็น <code>historyofict.txt</code></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong><code>wget</code></strong> = ดาวน์โหลดไฟล์จากเว็บผ่าน command line · <strong>302 Found</strong> = เว็บบอกให้ไปอีกที่ (http → https) · <strong>200 OK</strong> = สำเร็จ</p>
+</blockquote>
+<hr />
+<h2 id="11-ดูเนื้อหาไฟล์-cat-more-head-tail">11. ดูเนื้อหาไฟล์: cat, more, head, tail ⭐⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>รูปแบบ</th>
+<th>ตัวอย่างในสไลด์</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>cat</code></strong></td>
+<td><code>$cat [option] &lt;file name&gt;</code></td>
+<td><code>cat historyofict.txt</code></td>
+<td>แสดง<strong>ทั้งไฟล์</strong>ต่อเนื่องจนจบ</td>
+</tr>
+<tr>
+<td><strong><code>more</code></strong></td>
+<td><code>$more [option] &lt;file name&gt;</code></td>
+<td><code>more historyofict.txt</code></td>
+<td>แสดง<strong>ทีละหน้าจอ</strong> ท้ายจอขึ้น <code>--More--(24%)</code> บอกว่าอ่านไปกี่ %</td>
+</tr>
+<tr>
+<td><strong><code>head</code></strong></td>
+<td><code>$head [option] &lt;file name&gt;</code></td>
+<td><code>head historyofict.txt</code> / <code>head -3 historyofict.txt</code></td>
+<td>แสดง<strong>ส่วนต้น</strong> ค่าเริ่มต้น <strong>10 บรรทัด</strong> · <code>-3</code> = 3 บรรทัดแรก</td>
+</tr>
+<tr>
+<td><strong><code>tail</code></strong></td>
+<td><code>$tail [option] &lt;file name&gt;</code></td>
+<td><code>tail historyofict.txt</code> / <code>tail -2 historyofict.txt</code></td>
+<td>แสดง<strong>ส่วนท้าย</strong> ค่าเริ่มต้น <strong>10 บรรทัด</strong> · <code>-2</code> = 2 บรรทัดสุดท้าย</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="exercise-หน้า-30-เปรียบเทียบความแตกต่าง-แนวคำตอบ">Exercise หน้า 30 — เปรียบเทียบความแตกต่าง (แนวคำตอบ)</h3>
+<ul>
+<li><strong><code>cat</code></strong> — พ่นทั้งไฟล์ในครั้งเดียว ไฟล์ยาวจะเลื่อนผ่านจนเห็นแค่ส่วนท้าย เหมาะกับไฟล์สั้น</li>
+<li><strong><code>more</code></strong> — หยุดทีละหน้าจอ กด <strong>Space</strong> ไปหน้าถัดไป, <strong>Enter</strong> ทีละบรรทัด, <strong>q</strong> ออก เหมาะกับไฟล์ยาว</li>
+<li><strong><code>head</code></strong> — ดูเฉพาะ<strong>ต้นไฟล์</strong> (10 บรรทัดหรือตามที่ระบุ <code>-n</code>) เช่น ดูหัวข้อไฟล์</li>
+<li><strong><code>tail</code></strong> — ดูเฉพาะ<strong>ท้ายไฟล์</strong> (10 บรรทัดหรือตามที่ระบุ) เช่น ดู log ล่าสุด</li>
+</ul>
+<hr />
+<h2 id="12-file-touch-echo-nano-และ-ascii">12. file, touch, echo, nano และ ASCII</h2>
+<h3 id="file-บอกชนิดของไฟล์"><code>file</code> — บอกชนิดของไฟล์</h3>
+<p>รูปแบบ: <code>$file &lt;file name&gt;</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ผล</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file historyofict.txt</code></td>
+<td><code>Unicode text, UTF-8 text</code></td>
+<td>ไฟล์ข้อความแบบ UTF-8</td>
+</tr>
+<tr>
+<td><code>file /usr/bin/ls</code></td>
+<td><code>ELF 64-bit LSB pie executable, x86-64, … dynamically linked …</code></td>
+<td><strong>โปรแกรมที่รันได้</strong> (ELF = รูปแบบไฟล์โปรแกรมของ Linux)</td>
+</tr>
+<tr>
+<td><code>file ../Music/</code></td>
+<td><code>directory</code></td>
+<td>เป็น directory</td>
+</tr>
+<tr>
+<td><code>file test1</code></td>
+<td><code>empty</code></td>
+<td>ไฟล์ว่าง</td>
+</tr>
+<tr>
+<td><code>file test4</code></td>
+<td><code>ASCII text</code></td>
+<td>ไฟล์ข้อความ ASCII</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> Linux <strong>ไม่ได้ดูนามสกุลไฟล์</strong> เพื่อบอกชนิด <code>file</code> อ่าน<strong>เนื้อหาข้างใน</strong>แล้วเดา · <code>historyofict.txt</code> เป็น UTF-8 เพราะมีอักขระที่นอกเหนือ ASCII (เช่น เครื่องหมายคำพูดแบบโค้ง) ส่วน test4 มีแต่ตัวอักษรอังกฤษธรรมดาจึงเป็น ASCII</p>
+</blockquote>
+<h3 id="touch-สร้างไฟล์ว่าง"><code>touch</code> — สร้างไฟล์ว่าง</h3>
+<p>รูปแบบ: <code>$touch &lt;file name&gt;</code></p>
+<p>สไลด์แสดง 3 วิธีสร้างไฟล์ว่าง ผลของ <code>file</code> บอก <code>empty</code> ทั้งหมด:</p>
+<pre><code>$ &gt; test1              → file test1: empty
+$ touch test2          → file test2: empty
+$ echo -n &gt; test3      → file test3: empty   (-n = ไม่ขึ้นบรรทัดใหม่ จึงไม่มีอะไรเลย)
+$ ls  → historyofict.txt test1 test2 test3
+</code></pre>
+<p><strong>คำถาม: ถ้ามีไฟล์ <code>test</code> อยู่แล้ว <code>touch test</code> มีผลอย่างไร?</strong>
+→ <strong>เนื้อหาไฟล์ไม่เปลี่ยน แต่เวลาแก้ไขล่าสุด (modification/access time) ถูกอัปเดตเป็นเวลาปัจจุบัน</strong> <em>(แนวคำตอบ ตรวจได้ด้วย <code>ls -l</code> ก่อนและหลัง)</em></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ต่างจาก <code>&gt; test</code></strong> ซึ่ง<strong>ล้างเนื้อหาไฟล์เดิมทิ้ง</strong>จนว่าง</p>
+</blockquote>
+<h3 id="echo-และ-nano-สร้างไฟล์ที่มีเนื้อหา"><code>echo</code> และ <code>nano</code> — สร้างไฟล์ที่มีเนื้อหา</h3>
+<pre><code>$ echo &quot;Computer System LAB&quot; &gt; test4
+$ file test4          → test4: ASCII text
+$ nano test5          → พิมพ์ &quot;test file for Computer System LAB&quot; แล้ว Ctrl+O, Ctrl+X
+</code></pre>
+<ul>
+<li><code>echo &quot;test&quot; &gt; test1</code> — <strong><code>&gt;</code> คือการ redirect output</strong> ลงไฟล์</li>
+</ul>
+<h3 id="ascii-table">ASCII Table</h3>
+<ul>
+<li>สไลด์แสดงตาราง <strong>ASCII</strong> รหัส <strong>0–127</strong> ในรูป <strong>Decimal / Hex / Char</strong> เช่น 65 (0x41) = <code>A</code>, 97 (0x61) = <code>a</code>, 48 (0x30) = <code>0</code>, 32 (0x20) = space · รหัส 0–31 เป็นอักขระควบคุม เช่น 10 = LINE FEED, 13 = CARRIAGE RETURN, 127 = DEL</li>
+<li><em>(อธิบายเพิ่ม)</em> ไฟล์ &quot;ASCII text&quot; คือไฟล์ที่ทุกไบต์อยู่ในตารางนี้ · UTF-8 ใช้รหัสเดียวกันสำหรับ 0–127 และเพิ่มหลายไบต์สำหรับภาษาอื่น เช่น ภาษาไทย</li>
+</ul>
+<hr />
+<h2 id="13-cp-mv-rm-grep">13. cp, mv, rm, grep</h2>
+<h3 id="cp-copy"><code>cp</code> — copy</h3>
+<p>รูปแบบ: <code>$cp &lt;source file name&gt; &lt;destination file name&gt;</code></p>
+<ul>
+<li><code>cp test4 myfile4</code> → ได้ <code>myfile4</code> เพิ่ม ส่วน <code>test4</code> ยังอยู่</li>
+</ul>
+<h3 id="mv-เปลี่ยนชื่อ-rename"><code>mv</code> — เปลี่ยนชื่อ (rename)</h3>
+<p>รูปแบบ: <code>$mv &lt;source file name&gt; &lt;destination file name&gt;</code></p>
+<ul>
+<li><code>mv test5 myfile5</code> → <code>test5</code> หายไป กลายเป็น <code>myfile5</code></li>
+</ul>
+<h3 id="rm-ลบไฟล์"><code>rm</code> — ลบไฟล์</h3>
+<p>รูปแบบ: <code>$rm &lt;file name&gt;</code> · ทดสอบ <code>$rm -i &lt;filename&gt;</code> (ถามยืนยันก่อนลบ)</p>
+<pre><code>$ ls   → historyofict.txt myfile4 myfile5 test1 test2 test3 test4
+$ rm test3
+$ ls   → historyofict.txt myfile4 myfile5 test1 test2 test4
+$ rm test?
+$ ls   → historyofict.txt myfile4 myfile5
+</code></pre>
+<ul>
+<li>⭐ <strong><code>?</code></strong> = wildcard แทน<strong>ตัวอักษร 1 ตัว</strong> → <code>test?</code> ตรงกับ test1, test2, test4 จึงลบทั้งสามไฟล์ <em>(ต่างจาก <code>*</code> ที่แทนกี่ตัวก็ได้)</em></li>
+</ul>
+<h3 id="grep-ค้นหาข้อความในไฟล์"><code>grep</code> — ค้นหาข้อความในไฟล์</h3>
+<p>รูปแบบ: <code>$grep &quot;text&quot; &lt;file name&gt;</code></p>
+<pre><code>$ grep one historyofict.txt   → &quot;ONE ICT: Go forward together as one&quot;
+$ grep lab myfile4            → (ไม่เจอ)
+$ grep Lab myfile4            → (ไม่เจอ)
+$ grep LAB myfile4            → Computer System LAB
+$ grep LAB myfile?            → myfile4:Computer System LAB
+                                 myfile5:test file for Computer System LAB
+$ grep Computer *             → historyofict.txt:stems from the Department of Computer Science under
+                                 historyofict.txt:Computers are available in several computer labs to support
+                                 myfile4:Computer System LAB
+                                 myfile5:test file for Computer System LAB
+</code></pre>
+<ul>
+<li>⭐ <strong><code>grep</code> แยกตัวพิมพ์เล็ก-ใหญ่ (case-sensitive)</strong> — <code>lab</code>, <code>Lab</code> ไม่เจอ มีแต่ <code>LAB</code> ที่เจอ</li>
+<li><code>grep</code> เจอ <strong>คำที่เป็นส่วนหนึ่งของคำอื่น</strong>ด้วย (<code>Computer</code> เจอใน <code>Computers</code>) และบรรทัดแรกเจอ <code>one</code> ท้ายประโยคแต่ไม่นับ <code>ONE</code> ตัวใหญ่</li>
+<li>ค้นหลายไฟล์ (<code>myfile?</code>, <code>*</code>) → ผลจะมี <strong>ชื่อไฟล์:</strong> นำหน้าแต่ละบรรทัด</li>
+<li><em>(อธิบายเพิ่ม)</em> ถ้าอยากค้นแบบไม่สนตัวพิมพ์ใช้ <code>grep -i lab myfile4</code></li>
+</ul>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File system</strong></td>
+<td>เทคนิคจัดเก็บข้อมูลให้เป็นระเบียบ อ่านง่ายสำหรับมนุษย์</td>
+<td>บัตรรายการห้องสมุด</td>
+</tr>
+<tr>
+<td><strong>File</strong></td>
+<td>หน่วยพื้นฐานของระบบไฟล์</td>
+<td>หนังสือหนึ่งเล่ม</td>
+</tr>
+<tr>
+<td><strong>Directory = Folder</strong></td>
+<td>ที่รวมไฟล์</td>
+<td>แฟ้ม</td>
+</tr>
+<tr>
+<td><strong>FAT / FAT32</strong></td>
+<td>File Allocation Table (Windows รุ่นเก่า, USB)</td>
+<td>เก่าแต่เข้ากันได้ทุกที่</td>
+</tr>
+<tr>
+<td><strong>NTFS</strong></td>
+<td>New Technology File System (Windows)</td>
+<td>มาตรฐาน Windows</td>
+</tr>
+<tr>
+<td><strong>Ext2 / Ext3 / Ext4</strong></td>
+<td>Extended file system (Linux)</td>
+<td>ของ Linux</td>
+</tr>
+<tr>
+<td><strong>HFS</strong></td>
+<td>Hierarchical File System (macOS)</td>
+<td>ของ Mac</td>
+</tr>
+<tr>
+<td><strong>C Prompt</strong></td>
+<td>prompt <code>C:\&gt;</code> ที่ root ของไดรฟ์ C</td>
+<td>รากไดรฟ์ C</td>
+</tr>
+<tr>
+<td><strong>Root directory <code>/</code></strong></td>
+<td>จุดเริ่มต้นของ file system Linux</td>
+<td>ราก</td>
+</tr>
+<tr>
+<td><strong>Absolute path</strong></td>
+<td>path เริ่มจาก <code>/</code></td>
+<td>ที่อยู่เต็ม</td>
+</tr>
+<tr>
+<td><strong>Relative path</strong></td>
+<td>path เริ่มจากตำแหน่งปัจจุบัน ใช้ <code>..</code></td>
+<td>บอกทางจากจุดที่ยืน</td>
+</tr>
+<tr>
+<td><strong><code>..</code> / <code>~</code></strong></td>
+<td>directory แม่ / home ของตัวเอง</td>
+<td>ข้างบน / บ้าน</td>
+</tr>
+<tr>
+<td><strong><code>dir /p</code></strong></td>
+<td>dir แบบหยุดทีละหน้า</td>
+<td>pause</td>
+</tr>
+<tr>
+<td><strong><code>wget</code></strong></td>
+<td>ดาวน์โหลดไฟล์จากเว็บ</td>
+<td>web get</td>
+</tr>
+<tr>
+<td><strong><code>head</code> / <code>tail</code></strong></td>
+<td>ดูต้น / ท้ายไฟล์ (ค่าเริ่มต้น 10 บรรทัด)</td>
+<td>หัว / หาง</td>
+</tr>
+<tr>
+<td><strong><code>file</code></strong></td>
+<td>บอกชนิดไฟล์จากเนื้อหา</td>
+<td>ตรวจชนิด</td>
+</tr>
+<tr>
+<td><strong><code>touch</code></strong></td>
+<td>สร้างไฟล์ว่าง หรืออัปเดตเวลาไฟล์เดิม</td>
+<td>แตะ</td>
+</tr>
+<tr>
+<td><strong>ASCII</strong></td>
+<td>ตารางรหัสอักขระ 0–127</td>
+<td>รหัสตัวอักษร</td>
+</tr>
+<tr>
+<td><strong>ELF</strong></td>
+<td>รูปแบบไฟล์โปรแกรมที่รันได้ของ Linux</td>
+<td>ไฟล์ .exe ของ Linux</td>
+</tr>
+<tr>
+<td><strong>Wildcard <code>*</code> / <code>?</code></strong></td>
+<td>แทนกี่ตัวก็ได้ / แทน 1 ตัว</td>
+<td>joker</td>
+</tr>
+<tr>
+<td><strong>Case-sensitive</strong></td>
+<td>แยกตัวพิมพ์เล็ก-ใหญ่</td>
+<td>LAB ≠ lab</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li>File system: หน่วยพื้นฐานคือ<strong>ไฟล์</strong>, ใช้กับ hard disk/CD/USB, รักษา<strong>ตำแหน่งทางกายภาพ</strong>ของไฟล์, เข้าถึงผ่าน<strong>เครือข่าย</strong>ได้</li>
+<li><strong>Windows: FAT, FAT32, NTFS</strong> · <strong>Linux: Ext, Ext2, Ext3, Ext4</strong> · <strong>macOS: HFS</strong></li>
+<li><strong>Directory = Folder</strong></li>
+<li>Windows: <code>dir</code> (list), <code>dir /p</code> (ทีละหน้า, กดปุ่มใดก็ได้เพื่อไปต่อ), <code>cd</code>, <code>mkdir</code>, <code>rmdir</code>, <code>echo</code>, <code>del</code>, <code>copy</code>, <code>ren</code>, <code>type</code>, <code>exit</code> · <code>C:\&gt;</code> = <strong>C Prompt</strong></li>
+<li>ส่งแลป <strong><code>6887xxx_lab3.pdf</code></strong> พร้อมคำอธิบายผลแต่ละคำสั่ง</li>
+<li>จาก <code>/home/itcso</code>: <code>cd ..</code> → <code>/home</code>, <code>cd ../..</code> → <code>/</code></li>
+<li>จาก <code>/usr/bin</code> ไป Music: <code>cd ../../home/itcso/Music/</code> (relative) หรือ <code>cd /home/itcso/Music/</code> (absolute)</li>
+<li><code>head</code>/<code>tail</code> ค่าเริ่มต้น <strong>10 บรรทัด</strong> · <code>-n</code> กำหนดจำนวน เช่น <code>head -3</code>, <code>tail -2</code></li>
+<li><code>touch</code> ไฟล์ที่มีอยู่แล้ว = <strong>อัปเดตเวลา ไม่แก้เนื้อหา</strong></li>
+<li>สร้างไฟล์ว่าง 3 วิธี: <code>&gt; file</code>, <code>touch file</code>, <code>echo -n &gt; file</code></li>
+<li><code>grep</code> <strong>case-sensitive</strong> · <code>?</code> แทน 1 ตัว · <code>*</code> แทนกี่ตัวก็ได้</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Absolute vs Relative path</strong></td>
+<td>เริ่มจาก <code>/</code> ไปที่เดิมเสมอ vs เริ่มจากตำแหน่งปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>FAT32 vs NTFS vs Ext4</strong></td>
+<td>Windows เก่า/USB vs Windows ปัจจุบัน vs Linux</td>
+</tr>
+<tr>
+<td><strong><code>cat</code> vs <code>more</code></strong></td>
+<td>ทั้งไฟล์รวดเดียว vs ทีละหน้า</td>
+</tr>
+<tr>
+<td><strong><code>head</code> vs <code>tail</code></strong></td>
+<td>ต้นไฟล์ vs ท้ายไฟล์</td>
+</tr>
+<tr>
+<td><strong><code>touch</code> vs <code>&gt; file</code></strong></td>
+<td>สร้างไฟล์ว่าง/อัปเดตเวลา (ไม่ลบเนื้อหา) vs สร้างไฟล์ว่าง/ล้างเนื้อหาเดิม</td>
+</tr>
+<tr>
+<td><strong><code>cp</code> vs <code>mv</code></strong></td>
+<td>คัดลอก (ต้นฉบับยังอยู่) vs เปลี่ยนชื่อ/ย้าย (ต้นฉบับหาย)</td>
+</tr>
+<tr>
+<td><strong><code>*</code> vs <code>?</code></strong></td>
+<td>แทนกี่ตัวก็ได้ vs แทน 1 ตัวพอดี</td>
+</tr>
+<tr>
+<td><strong><code>dir</code> vs <code>ls</code></strong>, <strong><code>type</code> vs <code>cat</code></strong>, <strong><code>del</code> vs <code>rm</code></strong>, <strong><code>copy</code> vs <code>cp</code></strong>, <strong><code>ren</code> vs <code>mv</code></strong></td>
+<td>Windows vs Linux</td>
+</tr>
+<tr>
+<td><strong><code>cd</code> (Linux) vs <code>cd</code> (Windows)</strong></td>
+<td><code>cd</code> เปล่า ๆ = กลับ home vs แสดง directory ปัจจุบัน <em>(อธิบายเพิ่ม)</em></td>
+</tr>
+<tr>
+<td><strong>UTF-8 text vs ASCII text</strong></td>
+<td>มีอักขระนอก 0–127 vs มีแต่อักขระในตาราง ASCII</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมต้องมี file system</strong> → ข้อมูลบนดิสก์เป็นแค่บิต file system ทำให้รู้ว่าไฟล์ไหนอยู่ตรงไหนและจัดเป็นระเบียบให้คนใช้ได้</li>
+<li><strong>เมื่อไรใช้ absolute path เมื่อไรใช้ relative</strong> → absolute เมื่ออยากได้ path ที่แน่นอนไม่ขึ้นกับตำแหน่ง (เช่นในสคริปต์) · relative เมื่อไปที่ใกล้ ๆ พิมพ์สั้นกว่า</li>
+<li><strong>ทำไม <code>grep lab myfile4</code> ไม่เจอ แต่ <code>grep LAB</code> เจอ</strong> → grep แยกตัวพิมพ์เล็ก-ใหญ่</li>
+<li><strong>ทำไม <code>rm test?</code> ลบ test1, test2, test4 แต่ไม่ลบ myfile4</strong> → <code>?</code> แทนตัวอักษร 1 ตัวต่อจาก &quot;test&quot; เท่านั้น</li>
+</ul>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l2/index.html"><small>← บทก่อนหน้า</small><span>L2 – OS Introduction + Lab 2 (Basic Unix Commands)</span></a><a class="pg next" href="../l4/index.html"><small>บทถัดไป →</small><span>L4 – User Management + Lab 4 (User Management)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

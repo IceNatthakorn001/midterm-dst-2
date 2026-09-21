@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#1d4ed8}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS212 ทุกบท</a>
+        <ol><li><a href="#1-ข้อมูลรายวิชา">1. ข้อมูลรายวิชา</a></li><li><a href="#2-computer-systems-องค์ประกอบของคอมพิวเตอร์">2. Computer Systems: องค์ประกอบของคอมพิวเตอร์</a></li><li><a href="#3-mainboard-cpu-memory">3. Mainboard, CPU, Memory</a></li><li><a href="#4-disk-interfaces-และ-storage">4. Disk Interfaces และ Storage</a></li><li><a href="#5-io-interfaces-และ-usb">5. I/O Interfaces และ USB</a></li><li><a href="#6-operating-systems">6. Operating Systems</a></li><li><a href="#7-history-of-unix-และ-linux">7. History of Unix และ Linux</a></li><li><a href="#8-linux-family-tree">8. Linux Family Tree</a></li><li><a href="#9-linux-architecture">9. Linux Architecture ⭐</a></li><li><a href="#10-virtual-machines">10. Virtual Machines ⭐⭐</a></li><li><a href="#11-วัตถุประสงค์และสิ่งที่ต้องส่ง">11. วัตถุประสงค์และสิ่งที่ต้องส่ง</a></li><li><a href="#12-ติดตั้ง-ถอน-virtualbox">12. ติดตั้ง / ถอน VirtualBox</a></li><li><a href="#13-สร้าง-vm-creating-a-vm">13. สร้าง VM (Creating a VM) ⭐</a></li><li><a href="#14-ติดตั้ง-ubuntu-2204">14. ติดตั้ง Ubuntu 22.04</a></li><li><a href="#15-login-terminal-ls-shutdown">15. Login, Terminal, ls, Shutdown</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🐧 ITDS212</a> / L1</div>
+      <h1 class="lesson-title">L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu)</h1>
+      <div class="lesson-actions"></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> สัปดาห์แรกของวิชา ITDS212 Computer System Lab มี 2 ส่วนที่ต่อกัน</p>
+<p>(1) <strong>Lecture 1</strong> ทบทวนว่าคอมพิวเตอร์ประกอบด้วยอะไร (CPU, RAM, I/O, storage) รู้จักระบบปฏิบัติการ ประวัติ Unix/Linux สถาปัตยกรรม Linux และแนวคิด <strong>virtual machine</strong></p>
+<p>(2) <strong>Lab 1</strong> ลงมือติดตั้ง <strong>VirtualBox</strong> แล้วสร้าง VM ที่ติดตั้ง <strong>Ubuntu 22.04</strong> ซึ่งเป็นเครื่องที่จะใช้ฝึกคำสั่ง Linux ไปตลอดทั้งเทอม</p>
+<p>ถ้าเข้าใจว่า host OS / VM / guest OS คืออะไร และจำค่าที่ต้องตั้งตอนสร้าง VM ได้ ก็พร้อมสำหรับ Lab 2 เป็นต้นไป</p>
+</blockquote>
+<h1>ส่วนที่ 1 — Lecture 1: Computer Systems</h1>
+<h2 id="1-ข้อมูลรายวิชา">1. ข้อมูลรายวิชา</h2>
+<p><strong>ITDS212 Computer System Lab</strong> · ผู้สอน: รศ.ดร.สุดสงวน งามสุริยโรจน์ และ ดร. วรรณรัช สันติอมรทัต · Faculty of ICT, Mahidol University · เริ่ม 4 August 2026</p>
+<h3 id="tentative-schedule-15-สัปดาห์">Tentative Schedule (15 สัปดาห์)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ระบบเครื่องคอมพิวเตอร์ + ติดตั้ง virtual machine และ Ubuntu OS</td>
+<td>9</td>
+<td>คำสั่งเกี่ยวกับ memory และการจัดการสภาพแวดล้อม</td>
+</tr>
+<tr>
+<td>2</td>
+<td>โครงสร้างระบบปฏิบัติการ Linux + คำสั่ง Linux เบื้องต้น</td>
+<td>10</td>
+<td>เขียน shell script</td>
+</tr>
+<tr>
+<td>3</td>
+<td>การจัดการแฟ้มข้อมูล (file)</td>
+<td>11</td>
+<td>เขียนโปรแกรมจัดการ process และ thread</td>
+</tr>
+<tr>
+<td>4</td>
+<td>การจัดการผู้ใช้และกลุ่มผู้ใช้</td>
+<td>12</td>
+<td>ติดตั้ง Apache server, MySQL, PHP</td>
+</tr>
+<tr>
+<td>5</td>
+<td>สิทธิ์ของผู้ใช้ (permission)</td>
+<td>13</td>
+<td>ตรวจสอบระบบ (System monitoring)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>nano และ vim editor</td>
+<td>14</td>
+<td>บริหารจัดการระบบปฏิบัติการ Linux</td>
+</tr>
+<tr>
+<td>7</td>
+<td>คำสั่งจัดการ storage</td>
+<td>15</td>
+<td>โครงสร้างและการบริหารจัดการ Windows</td>
+</tr>
+<tr>
+<td>8</td>
+<td>คำสั่งเกี่ยวกับ process</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตว่าเกือบทั้งเทอมทำบน <strong>Linux (Ubuntu)</strong> ที่ติดตั้งใน Lab 1 ถ้า VM พังหรือลืมรหัสผ่าน จะทำแลปต่อไม่ได้</p>
+</blockquote>
+<h3 id="evaluation-and-grading-criteria">Evaluation and Grading Criteria</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธีการวัดผล</th>
+<th>น้ำหนัก (%)</th>
+<th>สัปดาห์ที่ประเมิน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>การเข้าเรียน</td>
+<td>ต้องเข้า <strong>80%</strong> (attendance)</td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>รายงานผลแลป</td>
+<td><strong>25</strong></td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>การทดสอบย่อย</td>
+<td><strong>25</strong></td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>การสอบกลางภาค</td>
+<td><strong>25</strong></td>
+<td>9</td>
+</tr>
+<tr>
+<td>การสอบปลายภาค</td>
+<td><strong>25</strong></td>
+<td>17</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⚠️ <strong>ส่งรายงานแลปภายใน 23.59 น. ของวันที่เรียน</strong> (ส่งวันเดียวกัน)</li>
+<li>⚠️ <strong>มีทดสอบย่อยทุกสัปดาห์ก่อนจบคาบ</strong></li>
+</ul>
+<hr />
+<h2 id="2-computer-systems-องค์ประกอบของคอมพิวเตอร์">2. Computer Systems: องค์ประกอบของคอมพิวเตอร์</h2>
+<p><img loading="lazy" src="img/lec-p04.jpg" alt="องค์ประกอบของ computer system และ bus" /></p>
+<p><strong>A computer system consists of:</strong></p>
+<ul>
+<li><strong>CPU (Central Processing Unit)</strong> — หน่วยประมวลผล ทำงานตามคำสั่งของโปรแกรม</li>
+<li><strong>Memory หรือ RAM</strong> — ที่เก็บข้อมูลและโปรแกรมที่กำลังทำงาน (หายเมื่อปิดเครื่อง)</li>
+<li><strong>I/O devices</strong> — อุปกรณ์รับส่งข้อมูล:
+<ul>
+<li><strong>Disk storage</strong> — เก็บข้อมูลถาวร</li>
+<li><strong>USB drive</strong></li>
+<li><strong>VGA card</strong> — การ์ดแสดงผล</li>
+<li><strong>Network card</strong> — การ์ดเครือข่าย</li>
+</ul>
+</li>
+</ul>
+<h3 id="bus-ถนนที่เชื่อมทุกชิ้นเข้าด้วยกัน">Bus: ถนนที่เชื่อมทุกชิ้นเข้าด้วยกัน</h3>
+<p>แผนภาพในสไลด์แสดง bus 3 ระดับ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bus</th>
+<th>เชื่อมอะไร</th>
+<th>ตัวอย่างในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Memory Bus</strong> (proprietary)</td>
+<td>CPU ↔ Memory</td>
+<td>เฉพาะของผู้ผลิต</td>
+</tr>
+<tr>
+<td><strong>General I/O Bus</strong></td>
+<td>อุปกรณ์ความเร็วสูง เช่น Graphics</td>
+<td><strong>PCI</strong></td>
+</tr>
+<tr>
+<td><strong>Peripheral I/O Bus</strong></td>
+<td>อุปกรณ์ต่อพ่วงและดิสก์</td>
+<td><strong>SCSI, SATA, USB</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไมต้องแยก bus หลายระดับ?</strong> <em>(อธิบายเพิ่ม)</em> CPU กับ RAM คุยกันถี่และต้องเร็วที่สุด จึงมี bus ของตัวเอง ส่วนอุปกรณ์ช้ากว่า (ดิสก์, USB) อยู่ bus ที่ไกลออกไป ถ้าให้ทุกอย่างใช้ bus เดียว อุปกรณ์ช้าจะถ่วงทั้งระบบ</p>
+</blockquote>
+<hr />
+<h2 id="3-mainboard-cpu-memory">3. Mainboard, CPU, Memory</h2>
+<h3 id="sample-mainboard-เมนบอร์ด">Sample Mainboard (เมนบอร์ด)</h3>
+<p><img loading="lazy" src="img/lec-p05.jpg" alt="ส่วนต่าง ๆ ของ mainboard" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ใช้ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU Slot</strong></td>
+<td>ที่ใส่ CPU</td>
+</tr>
+<tr>
+<td><strong>RAM (Memory) slots</strong></td>
+<td>ที่ใส่แรม</td>
+</tr>
+<tr>
+<td><strong>Back Panel</strong></td>
+<td>ช่องต่ออุปกรณ์ต่อพ่วงและ USB memory</td>
+</tr>
+<tr>
+<td><strong>Connection to Power Supply</strong></td>
+<td>ต่อไฟจาก power supply</td>
+</tr>
+<tr>
+<td><strong>Graphics Card Slots</strong></td>
+<td>ใส่การ์ดจอ</td>
+</tr>
+<tr>
+<td><strong>PCI Slot</strong></td>
+<td>ใส่การ์ดเพิ่ม เช่น sound card, graphics card</td>
+</tr>
+<tr>
+<td><strong>Slots for Hard Disc Drives and DVD-ROMs</strong></td>
+<td>ต่อสายดิสก์และไดรฟ์</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>สไลด์ระบุว่า <strong>&quot;Motherboard has a Bus Network&quot;</strong> = ชุดสายไฟที่ทำให้ชิ้นส่วนต่าง ๆ สื่อสารกันได้ (เมนบอร์ดคือที่อยู่ของ bus ในหัวข้อ 2)</p>
+</blockquote>
+<h3 id="sample-processor-cpu">Sample Processor (CPU)</h3>
+<p><img loading="lazy" src="img/lec-p07.jpg" alt="ตัวอย่าง CPU: Intel Core, Apple M1 Max, ARM" /></p>
+<ul>
+<li>ตัวอย่างในสไลด์: <strong>Intel Core</strong>, <strong>Apple M1 Max</strong> และ <strong>ARM (Cortex CPU)</strong></li>
+<li>สเปก M1 Max ในสไลด์: <strong>57 billion transistors</strong>, <strong>10-core CPU</strong>, <strong>32-core GPU</strong>, <strong>16-core Neural Engine</strong>, <strong>64GB unified memory</strong>, <strong>400GB/s memory bandwidth</strong>, <strong>5 nm process</strong></li>
+<li>⭐ <strong>ARM processors ใช้มากในมือถือ โดยเฉพาะ Android OS</strong> (ประหยัดพลังงาน)</li>
+</ul>
+<h3 id="sample-memory">Sample Memory</h3>
+<ul>
+<li>หน่วยความจำแบบ <strong>DDR SDRAM</strong> = <strong>&quot;Double Data Rate Synchronous Dynamic Random-Access Memory&quot;</strong></li>
+<li>รุ่นต่าง ๆ: <strong>DDR → DDR2 → DDR3 → DDR4 → DDR5 SDRAM</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>Double Data Rate</strong> = ส่งข้อมูล 2 ครั้งต่อ 1 จังหวะ clock จึงเร็วกว่า SDRAM ธรรมดาเท่าตัว · แต่ละรุ่นเสียบสลับกันไม่ได้ เพราะร่องบากบนแผงต่างกัน</p>
+</blockquote>
+<hr />
+<h2 id="4-disk-interfaces-และ-storage">4. Disk Interfaces และ Storage</h2>
+<h3 id="variety-of-disk-interfaces">Variety of Disk Interfaces</h3>
+<p>&quot;interface&quot; = รูปแบบสายและขั้วต่อที่ใช้เชื่อมดิสก์กับเครื่อง</p>
+<p><img loading="lazy" src="img/lec-p09.jpg" alt="ตัวอย่าง disk interface: PATA, SCSI, SATA, mSATA" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>จากสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parallel ATA (PATA / IDE)</strong></td>
+<td>Several Parallel ATA hard disk drives</td>
+</tr>
+<tr>
+<td><strong>SCSI</strong></td>
+<td>SCSI Disk + Assorted Parallel SCSI connectors (ขั้วต่อหลายแบบ)</td>
+</tr>
+<tr>
+<td><strong>SATA</strong></td>
+<td>SATA Disk</td>
+</tr>
+<tr>
+<td><strong>mSATA</strong></td>
+<td>An mSATA SSD on top of a 2.5-inch SATA drive (SSD ขนาดเล็กเทียบกับดิสก์ 2.5 นิ้ว)</td>
+</tr>
+<tr>
+<td><strong>ST-506</strong></td>
+<td>ดิสก์รุ่นเก่า ต่อกับ <strong>controller card</strong> ด้วย <strong>data cable (บน)</strong> และ <strong>control cable (ล่าง)</strong></td>
+</tr>
+<tr>
+<td><strong>IDE</strong></td>
+<td>IDE hard disk ต่อกับ <strong>IDE disk controller</strong> ด้วยสายเฉพาะ</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ ประเด็นที่สไลด์ ST-506 และ IDE ต้องการชี้: <strong>ดิสก์ต้องทำงานคู่กับ disk controller</strong> ซึ่งเป็นตัวกลางระหว่างดิสก์กับเครื่อง</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>Parallel</strong> (PATA, Parallel SCSI) = ส่งหลายบิตพร้อมกันผ่านสายแพกว้าง ๆ · <strong>Serial</strong> (SATA) = ส่งทีละบิตแต่เร็วมาก สายเล็ก ปัจจุบันเครื่องทั่วไปใช้ SATA และ NVMe แทน IDE แล้ว</p>
+</blockquote>
+<h3 id="tape-storage">Tape Storage</h3>
+<ul>
+<li><strong>เทป</strong> (reel, cassette, cartridge) เป็นสื่อเก็บข้อมูลแบบเก่า <em>(อธิบายเพิ่ม: ยังใช้สำรองข้อมูลปริมาณมากในองค์กรเพราะราคาถูกต่อ GB แต่อ่านแบบเรียงลำดับ จึงช้า)</em></li>
+</ul>
+<h3 id="disk-storage-3-แบบ">Disk Storage — 3 แบบ</h3>
+<p><img loading="lazy" src="img/lec-p13.jpg" alt="HDD vs SSD" /></p>
+<ul>
+<li><strong>Magnetic disks</strong> — ฮาร์ดดิสก์ (HDD) เก็บข้อมูลด้วยแม่เหล็ก</li>
+<li><strong>Optical disks</strong> — <strong>DVDs และ Blu-rays</strong> อ่านด้วยแสงเลเซอร์</li>
+<li><strong>Solid-state drive (SSD)</strong> — เก็บใน <strong>NAND flash memory</strong> ไม่มีชิ้นส่วนเคลื่อนไหว</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>HDD 3.5&quot;</strong></th>
+<th><strong>SSD 2.5&quot;</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ส่วนประกอบ</td>
+<td><strong>Platters, Spindle, R/W Head, Actuator Arm, Actuator Axis, Actuator</strong></td>
+<td><strong>Cache, Controller, NAND Flash Memory</strong></td>
+</tr>
+<tr>
+<td>ทนแรงกระแทก</td>
+<td><strong>55g ขณะทำงาน / 350g ขณะไม่ทำงาน</strong></td>
+<td><strong>1500g ทั้งขณะทำงานและไม่ทำงาน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ส่วนประกอบของ hard drive (Britannica):</strong> spindle, disk, saved file, actuator, arm, <strong>read/write head</strong>, power port, data cable port, drive configuration port, circuit board</p>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> <strong>ทำไม SSD ทนกว่า?</strong> HDD มีหัวอ่านลอยอยู่เหนือจานที่หมุน ถ้ากระแทกตอนทำงาน หัวอาจขูดจาน ส่วน SSD เป็นชิปล้วน ไม่มีอะไรขยับ</p>
+</blockquote>
+<hr />
+<h2 id="5-io-interfaces-และ-usb">5. I/O Interfaces และ USB</h2>
+<h3 id="io-interfaces">I/O Interfaces</h3>
+<ul>
+<li><strong>VGA card</strong> (<strong>Video Graphics Adapter</strong>) — การ์ดแสดงผล</li>
+<li><strong>Network card</strong> — การ์ดเครือข่าย มีช่อง LAN (RJ-45)</li>
+</ul>
+<h3 id="usb-interfaces-universal-serial-bus">USB Interfaces (Universal Serial Bus)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Standard</th>
+<th>ปี</th>
+<th>Maximum transfer rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>USB 1.0</strong></td>
+<td>1996</td>
+<td><strong>12 Mbps</strong></td>
+</tr>
+<tr>
+<td>USB 1.1</td>
+<td>1998</td>
+<td>12 Mbps</td>
+</tr>
+<tr>
+<td><strong>USB 2.0</strong></td>
+<td>2001</td>
+<td><strong>480 Mbps</strong></td>
+</tr>
+<tr>
+<td>USB 2.0 Revised</td>
+<td>–</td>
+<td>480 Mbps</td>
+</tr>
+<tr>
+<td><strong>USB 3.0</strong></td>
+<td>2008</td>
+<td><strong>5 Gbps</strong></td>
+</tr>
+<tr>
+<td>USB 3.1</td>
+<td>2013</td>
+<td>10 Gbps</td>
+</tr>
+<tr>
+<td>USB 3.2</td>
+<td>2017</td>
+<td>20 Gbps</td>
+</tr>
+<tr>
+<td><strong>USB4</strong></td>
+<td>2019</td>
+<td><strong>40 Gbps</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ขั้วต่อ (connector):</strong></p>
+<ul>
+<li><strong>Type A</strong> — ใช้ตั้งแต่ USB 1.0 ถึง 3.x (3.0 เป็นแบบ SuperSpeed) · <strong>Deprecated</strong> ใน USB 3.2 / USB4</li>
+<li><strong>Type B</strong> — ใช้ถึง 3.x · <strong>Deprecated</strong> ใน USB 3.2 / USB4</li>
+<li><strong>Type C</strong> — ไม่มีใน USB 1.x · ใช้ได้ตั้งแต่ USB 2.0 revised ขึ้นไป และเป็น<strong>แบบเดียวที่ใช้ใน USB 3.2 และ USB4</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Mbps กับ Gbps</strong> ต่างกัน 1,000 เท่า: USB 2.0 = 480 <strong>M</strong>bps ส่วน USB 3.0 = 5 <strong>G</strong>bps (≈ 10 เท่าของ 2.0)</p>
+</blockquote>
+<hr />
+<h2 id="6-operating-systems">6. Operating Systems</h2>
+<h3 id="ตัวอย่าง-os-ในสไลด์">ตัวอย่าง OS ในสไลด์</h3>
+<p><strong>Windows, Linux, Mac OS, VMS, Apple (iOS/macOS), Android, Ubuntu, UNIX, IBM</strong></p>
+<blockquote class="callout">
+<p><em>(อธิบายเพิ่ม)</em> OS คือซอฟต์แวร์ที่จัดการฮาร์ดแวร์ทั้งหมดในหัวข้อ 2–5 และให้บริการโปรแกรมอื่น เช่น จัดสรร CPU ให้ process, จัดการหน่วยความจำ, จัดการไฟล์บนดิสก์</p>
+</blockquote>
+<h3 id="history-of-microsoft-windows">History of Microsoft Windows</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เวอร์ชัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1985–1994</td>
+<td>Windows 1.x–3.x</td>
+</tr>
+<tr>
+<td>1995</td>
+<td>Windows 95</td>
+</tr>
+<tr>
+<td>1998</td>
+<td>Windows 98</td>
+</tr>
+<tr>
+<td>2000</td>
+<td>Windows 2000</td>
+</tr>
+<tr>
+<td>2001</td>
+<td>Windows XP</td>
+</tr>
+<tr>
+<td>2006</td>
+<td>Windows Vista</td>
+</tr>
+<tr>
+<td>2009</td>
+<td>Windows 7</td>
+</tr>
+<tr>
+<td>2012</td>
+<td>Windows 8</td>
+</tr>
+<tr>
+<td>2015</td>
+<td>Windows 10</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-history-of-unix-และ-linux">7. History of Unix และ Linux</h2>
+<h3 id="history-of-unix-for-40-years">History of Unix — for 40+ years</h3>
+<p><img loading="lazy" src="img/lec-p19.jpg" alt="แผนผังประวัติ Unix" /></p>
+<p>แผนผังในสไลด์ไล่ตั้งแต่ <strong>1969 (Unnamed PDP-7 operating system)</strong> → Unix Version 1–7 → แตกเป็นสาย <strong>BSD</strong> (FreeBSD, NetBSD, OpenBSD, <strong>Darwin/macOS</strong>), สาย <strong>System V / commercial Unix</strong> (SunOS/<strong>Solaris</strong>, <strong>AIX</strong>, <strong>HP-UX</strong>, Xenix, OpenServer) และสาย <strong>Unix-like</strong> (<strong>Minix</strong>, <strong>Linux</strong>)</p>
+<ul>
+<li>ใช้สีแบ่ง: <strong>เขียว = Open Source</strong>, <strong>ส้ม = Mixed/Shared Source</strong>, <strong>แดง = Closed Source</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำภาพรวม: <strong>Unix เกิดปี 1969</strong> แล้วแตกออกเป็นหลายตระกูล <strong>Linux ไม่ได้มาจากโค้ด Unix โดยตรง แต่เป็น Unix-like</strong> (ทำงานเหมือน Unix) และเป็น open source</p>
+</blockquote>
+<h3 id="history-of-linux-timeline">History of Linux (timeline)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปี</th>
+<th>เหตุการณ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1991</strong></td>
+<td><strong>First Linux code released</strong> (Linus Torvalds)</td>
+</tr>
+<tr>
+<td>1992</td>
+<td><strong>Linus licenses Linux under the GPL</strong> — การตัดสินใจสำคัญที่ทำให้ Linux ประสบความสำเร็จ</td>
+</tr>
+<tr>
+<td>1993</td>
+<td><strong>Slackware</strong> เป็น distribution แรกที่คนใช้กันแพร่หลาย</td>
+</tr>
+<tr>
+<td>1996</td>
+<td>Linus ไปเที่ยวพิพิธภัณฑ์สัตว์น้ำแล้วโดนเพนกวินกัด จึงเลือก<strong>เพนกวิน (Tux) เป็นมาสคอต</strong></td>
+</tr>
+<tr>
+<td>1998</td>
+<td>บริษัทยักษ์ใหญ่ (tech giants) เริ่มประกาศรองรับ Linux</td>
+</tr>
+<tr>
+<td>1999</td>
+<td><strong>Red Hat</strong> เข้าตลาดหุ้น (goes public)</td>
+</tr>
+<tr>
+<td>2003</td>
+<td>IBM ลงโฆษณา Linux ช่วง Super Bowl</td>
+</tr>
+<tr>
+<td>2005</td>
+<td>Linux ขึ้นปก Business Week</td>
+</tr>
+<tr>
+<td>2007</td>
+<td>ก่อตั้ง <strong>The Linux Foundation</strong> เพื่อส่งเสริมและทำมาตรฐาน Linux</td>
+</tr>
+<tr>
+<td>2010</td>
+<td><strong>Android</strong> (ที่ใช้ Linux) ขายแซง smartphone OS อื่นในสหรัฐฯ</td>
+</tr>
+<tr>
+<td>2011</td>
+<td><strong>Linux ครบ 20 ปี</strong> และเป็นหัวใจของ supercomputer, มือถือ, ATM ทั่วโลก</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>GPL (GNU General Public License)</strong> <em>(อธิบายเพิ่ม)</em> = สัญญาอนุญาตที่ให้ใครก็ใช้ แก้ และแจกจ่ายได้ แต่ถ้าแจกต่อต้องเปิดซอร์สด้วย นี่คือเหตุผลที่ Linux เติบโตจากชุมชนได้</p>
+</blockquote>
+<hr />
+<h2 id="8-linux-family-tree">8. Linux Family Tree</h2>
+<p><img loading="lazy" src="img/lec-p21.jpg" alt="Linux family tree" /></p>
+<p><strong>Distribution (distro)</strong> = Linux ที่รวม kernel กับโปรแกรมต่าง ๆ พร้อมใช้ แต่ละตระกูลแตกสาขาออกไป:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตระกูล</th>
+<th>distro ลูก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Debian</strong></td>
+<td><strong>Ubuntu</strong> (→ <strong>Mint</strong>), <strong>Knoppix</strong> (→ Damn Small Linux), <strong>Chrome OS</strong>, Mepis</td>
+</tr>
+<tr>
+<td><strong>Red Hat</strong></td>
+<td><strong>Fedora</strong>, <strong>CentOS</strong>, Mandriva (→ PC Linux, Mageia)</td>
+</tr>
+<tr>
+<td><strong>Slackware</strong></td>
+<td><strong>SuSE</strong></td>
+</tr>
+<tr>
+<td><strong>Other</strong></td>
+<td><strong>Gentoo</strong>, Puppy, <strong>Arch Linux</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>สไลด์วาด <strong>Mac OS</strong> และ <strong>Android</strong> ไว้ใต้ Linux ด้วย</li>
+<li>⭐ <strong>Ubuntu ที่ใช้ในวิชานี้อยู่ในตระกูล Debian</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <em>(ข้อสังเกต ไม่ได้มาจากสไลด์)</em> ในความจริง <strong>Android ใช้ Linux kernel</strong> แต่ <strong>Mac OS ไม่ใช่ Linux</strong> (macOS มาจาก Darwin/BSD ในแผนผัง Unix หัวข้อ 7) ถ้าข้อสอบถามตามสไลด์ให้ตอบตามสไลด์ แต่ควรรู้ข้อเท็จจริงนี้ไว้</p>
+</blockquote>
+<hr />
+<h2 id="9-linux-architecture">9. Linux Architecture ⭐</h2>
+<p><img loading="lazy" src="img/lec-p22.jpg" alt="Linux architecture: Hardware, Kernel, Shell, Applications" /></p>
+<p>Linux จัดเป็น<strong>ชั้นวงกลมซ้อนกัน</strong> จากในสุดออกนอก:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>หน้าที่</th>
+<th>ตัวอย่าง <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hardware</strong> (แกนกลาง)</td>
+<td>อุปกรณ์จริง ต่อออกไปยัง <strong>Terminals, Printers, Disks</strong></td>
+<td>CPU, RAM, ดิสก์</td>
+</tr>
+<tr>
+<td><strong>Kernel</strong></td>
+<td>หัวใจของ OS คุมฮาร์ดแวร์โดยตรง จัดการ process, memory, file, device</td>
+<td>Linux kernel</td>
+</tr>
+<tr>
+<td><strong>Shell</strong></td>
+<td>ตัวแปลคำสั่งจากผู้ใช้ส่งไปให้ kernel</td>
+<td><strong>bash</strong> (ที่พิมพ์ใน Terminal)</td>
+</tr>
+<tr>
+<td><strong>Applications / Utilities</strong> (ชั้นนอก)</td>
+<td>โปรแกรมที่ผู้ใช้ใช้งาน</td>
+<td><code>ls</code>, <code>cp</code>, Firefox, text editor</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>เปรียบเทียบร้านอาหาร</strong> <em>(อธิบายเพิ่ม)</em>: ลูกค้า (ผู้ใช้/application) สั่งอาหารกับพนักงานรับออเดอร์ (<strong>shell</strong>) พนักงานส่งต่อให้เชฟ (<strong>kernel</strong>) ซึ่งเป็นคนเดียวที่ใช้เตาและวัตถุดิบ (<strong>hardware</strong>) ได้โดยตรง</p>
+<p>⭐ ใน Lab 1 ตอนเปิด <strong>Terminal</strong> แล้วพิมพ์ <code>ls</code> คือการคุยกับ <strong>shell</strong> ซึ่งเรียก utility <code>ls</code> ให้ kernel อ่านรายชื่อไฟล์จากดิสก์</p>
+</blockquote>
+<hr />
+<h2 id="10-virtual-machines">10. Virtual Machines ⭐⭐</h2>
+<p><img loading="lazy" src="img/lec-p23.jpg" alt="Physical machine, host OS, virtual machine, guest OS" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำ</th>
+<th>ความหมาย</th>
+<th>ในห้องเรียนนี้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Physical Machine</strong></td>
+<td>เครื่องจริง</td>
+<td>คอมพิวเตอร์ในแลป / โน้ตบุ๊ก</td>
+</tr>
+<tr>
+<td><strong>Host OS</strong></td>
+<td>OS ที่ติดตั้งบนเครื่องจริง</td>
+<td><strong>Windows 10</strong></td>
+</tr>
+<tr>
+<td><strong>Virtual Machine (software)</strong></td>
+<td>โปรแกรมจำลองเครื่องคอมพิวเตอร์ขึ้นมาอีกเครื่อง</td>
+<td><strong>Oracle VM (VirtualBox)</strong>, <strong>VMware Workstation</strong>, <strong>KVM</strong></td>
+</tr>
+<tr>
+<td><strong>Guest OS</strong></td>
+<td>OS ที่ติดตั้งใน VM</td>
+<td><strong>Ubuntu</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ในแผนภาพ: บน <strong>host OS</strong> มี <strong>Application</strong> ทั่วไปหลายตัว และมี <strong>Virtual Machine</strong> อีกตัว ซึ่งข้างในมี <strong>Guest OS</strong> และ <strong>Virtual Application</strong> ของมันเอง</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>ทำไมเรียนผ่าน VM?</strong> <em>(อธิบายเพิ่ม)</em> ได้ใช้ Linux จริงโดยไม่ต้องลบ Windows · ถ้าพิมพ์คำสั่งผิดจนระบบพัง ก็พังแค่ VM ไม่กระทบเครื่องจริง · ย้ายหรือสร้างใหม่ได้ง่าย</p>
+<p class="c-warn">⚠️ <strong>host vs guest</strong> สลับกันบ่อย: <strong>host = เจ้าบ้าน (เครื่องจริง, Windows)</strong> / <strong>guest = แขก (อยู่ใน VM, Ubuntu)</strong></p>
+</blockquote>
+<hr />
+<h1>ส่วนที่ 2 — Lab 1: VirtualBox and Ubuntu</h1>
+<h2 id="11-วัตถุประสงค์และสิ่งที่ต้องส่ง">11. วัตถุประสงค์และสิ่งที่ต้องส่ง</h2>
+<h3 id="objectives">Objectives</h3>
+<ol>
+<li><strong>Install VirtualBox</strong></li>
+<li><strong>Install Virtual Machine with Ubuntu</strong> (one of Linux flavors = distro หนึ่งของ Linux)</li>
+<li><strong>Setting up parameters during installation</strong></li>
+<li><strong>Login/Logout to Ubuntu VM</strong></li>
+<li><strong>Exit and Shutdown Ubuntu VM</strong></li>
+</ol>
+<h3 id="what-to-submit">What to Submit</h3>
+<ul>
+<li><strong>แคปหน้าจอทุกขั้นตอน</strong>ตั้งแต่ติดตั้ง VirtualBox และ Ubuntu จนจบแลป (ใช้ <strong>Snipping Tool</strong> ได้)</li>
+<li>รวมเป็น <strong>PDF ไฟล์เดียว</strong> ส่งที่ลิงก์บน <strong>MyCourses</strong></li>
+<li>ชื่อไฟล์: <strong><code>6887xxx_lab1.pdf</code></strong></li>
+<li>⚠️ <strong>กำหนดส่ง: วันเดียวกัน (Tuesday, August 4) ก่อนเที่ยงคืน</strong></li>
+<li>⚠️ <strong>Quiz แรกทำวันเดียวกัน ตอนท้ายคาบ</strong></li>
+</ul>
+<hr />
+<h2 id="12-ติดตั้ง-ถอน-virtualbox">12. ติดตั้ง / ถอน VirtualBox</h2>
+<h3 id="ตรวจก่อนว่ามีอยู่แล้วไหม">ตรวจก่อนว่ามีอยู่แล้วไหม</h3>
+<ul>
+<li>เปิด <strong>Control Panel → Programs and Features</strong> ดูรายชื่อโปรแกรม</li>
+<li><strong>ถ้ามี Oracle VM VirtualBox อยู่แล้ว ข้ามขั้นติดตั้งได้</strong></li>
+<li><strong>ถอนการติดตั้ง (Uninstalling a Program):</strong> เลือกโปรแกรมใน Programs and Features → กด <strong>Uninstall</strong> → ยืนยัน <strong>Yes</strong></li>
+</ul>
+<h3 id="ติดตั้ง-virtualbox">ติดตั้ง VirtualBox</h3>
+<ol>
+<li>ดาวน์โหลดที่ <strong>https://www.virtualbox.org/wiki/Downloads</strong> → เลือก <strong>Windows hosts</strong> (เพราะ host OS เป็น Windows) · ⭐ <strong>ขอให้ใช้ version ล่าสุด</strong> (ในภาพเป็น 6.1.36)</li>
+<li>เปิดไฟล์ <code>.exe</code> → <strong>Welcome to the Setup Wizard</strong> → Next</li>
+<li><strong>Custom Setup</strong> → ใช้ค่าเริ่มต้น (VirtualBox Application, USB Support, Networking, Python) → Next</li>
+<li><strong>Warning: Network Interfaces</strong> — การติดตั้งจะ<strong>รีเซ็ตการเชื่อมต่อเครือข่ายและตัดเน็ตชั่วคราว</strong> → กด <strong>Yes</strong></li>
+<li>รอแถบติดตั้ง → <strong>installation is complete</strong> → กด <strong>Finish</strong> (ติ๊ก Start VirtualBox after installation ไว้)</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> ที่เน็ตหลุดตอนติดตั้ง เพราะ VirtualBox สร้าง network adapter เสมือนขึ้นมา เพื่อให้ VM ออกอินเทอร์เน็ตผ่านเครื่อง host ได้</p>
+</blockquote>
+<h3 id="ดาวน์โหลด-ubuntu">ดาวน์โหลด Ubuntu</h3>
+<ul>
+<li>ดาวน์โหลดจาก <strong>ubuntu.com/download/desktop</strong> (หน้าเว็บตอนนี้แสดง Ubuntu 24.04 LTS)</li>
+<li>⭐ <strong>วิชานี้ใช้ Ubuntu 22.04</strong> — ในแลป<strong>อาจมีไฟล์ Ubuntu 22 อยู่แล้วใน Drive C: หรือ D:</strong></li>
+<li>ไฟล์ที่ได้คือ <strong><code>.iso</code></strong> (disk image) เช่น <code>ubuntu-22.04-desktop-amd64.iso</code></li>
+</ul>
+<hr />
+<h2 id="13-สร้าง-vm-creating-a-vm">13. สร้าง VM (Creating a VM) ⭐</h2>
+<p>เปิด VirtualBox → กด <strong>New</strong> เพื่อสร้าง VM แล้วตั้งค่าตามตาราง:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>หน้าจอ</th>
+<th>ตั้งค่าเป็น</th>
+<th>เหตุผล <em>(อธิบายเพิ่ม)</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Name and Operating System</td>
+<td><strong>ชื่อ VM: <code>ITDS212-Ubuntu22.04</code></strong> (Type: Linux, Version: Ubuntu 64-bit)</td>
+<td>ชื่อบอกว่าเป็น VM ของวิชาไหน</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Hardware</td>
+<td><strong>Base Memory = 8 GB (8192 MB)</strong></td>
+<td>RAM ที่แบ่งจากเครื่องจริงให้ VM</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Hard disk</td>
+<td><strong>Create a virtual hard disk now</strong></td>
+<td>VM ต้องมีดิสก์ไว้ติดตั้ง Ubuntu</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Hard disk file type</td>
+<td><strong>VDI (VirtualBox Disk Image)</strong></td>
+<td>รูปแบบไฟล์ดิสก์ของ VirtualBox เอง (ตัวเลือกอื่น: VHD, VMDK)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Storage on physical hard disk</td>
+<td><strong>Dynamically allocated</strong></td>
+<td>ไฟล์ดิสก์โตขึ้นตามข้อมูลจริง ไม่จองพื้นที่เต็มตั้งแต่แรก</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Virtual Hard disk size</td>
+<td><strong>อย่างน้อย 10 GB</strong></td>
+<td>พื้นที่สูงสุดที่ดิสก์เสมือนโตได้</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Summary</td>
+<td>ตรวจ configuration → <strong>Finish</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Dynamically allocated vs Fixed size</strong> (จากคำอธิบายในหน้าจอ):</p>
+<ul>
+<li><strong>Dynamically allocated</strong> = ใช้พื้นที่จริงเท่าที่ใช้ โตได้ถึงขนาดสูงสุด <strong>แต่จะไม่หดกลับ</strong>เองเมื่อลบไฟล์</li>
+<li><strong>Fixed size</strong> = จองพื้นที่เต็มตั้งแต่สร้าง อาจสร้างนานกว่า แต่บางระบบ<strong>ใช้งานเร็วกว่า</strong></li>
+</ul>
+<p class="c-tip">💡 <strong>VDI / dynamically allocated / 8 GB RAM / ≥10 GB disk</strong> คือค่าที่ควรจำไว้ตอบข้อสอบ</p>
+</blockquote>
+<hr />
+<h2 id="14-ติดตั้ง-ubuntu-2204">14. ติดตั้ง Ubuntu 22.04</h2>
+<h3 id="ใส่ไฟล์-iso-ให้-vm">ใส่ไฟล์ ISO ให้ VM</h3>
+<ol>
+<li>เลือก VM → <strong>Settings → Storage</strong></li>
+<li>ที่ <strong>Controller: IDE</strong> เลือกช่อง <strong>Empty</strong> (optical drive)</li>
+<li>กดไอคอนแผ่นดิสก์ → <strong>Choose a disk file…</strong> → เลือก <strong>ไฟล์ iso Ubuntu ที่ดาวน์โหลดไว้</strong></li>
+<li>OK → เลือก VM แล้วกด <strong>Start</strong></li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <em>(อธิบายเพิ่ม)</em> การใส่ ISO เหมือน<strong>เสียบแผ่นติดตั้งเข้าไดรฟ์ DVD ของเครื่องเสมือน</strong> พอเปิดเครื่อง VM จะบูตจากแผ่นนี้</p>
+</blockquote>
+<h3 id="ขั้นตอนตัวติดตั้ง">ขั้นตอนตัวติดตั้ง</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>หน้าจอ</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>GRUB boot menu</td>
+<td>เลือก <strong>Try or Install Ubuntu</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Welcome</td>
+<td>เลือกภาษา English → กด <strong>Install Ubuntu</strong> (อีกปุ่ม Try Ubuntu = ลองใช้โดยไม่ติดตั้ง)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Keyboard layout</td>
+<td>เลือก <strong>English (US)</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Updates and other software</td>
+<td>เลือก <strong>Normal installation</strong> (web browser, office, games, media players)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Installation type</td>
+<td>เลือก <strong>Erase disk and install Ubuntu</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Write the changes to disks?</td>
+<td>กด <strong>Continue</strong> เพื่อยืนยันการเปลี่ยน disk</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Where are you?</td>
+<td>เลือกเวลาประเทศไทย <strong>&quot;Bangkok&quot;</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Who are you?</td>
+<td>ตั้ง <strong>your name, computer's name, username</strong> และ <strong>password</strong> → Continue · ⚠️ <strong>ต้องจำ account และ password ให้ได้</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Welcome to Ubuntu</td>
+<td>รอติดตั้ง (กำลังคัดลอกไฟล์)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Installation Complete</td>
+<td>กด <strong>Restart Now</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>&quot;Erase disk&quot; ลบเฉพาะดิสก์เสมือน (VDI) ใน VM</strong> ไม่ได้ลบข้อมูลใน Windows เครื่องจริง <em>(อธิบายเพิ่ม)</em> จึงเลือกได้อย่างปลอดภัย</p>
+<p class="c-warn">⚠️ <strong>ถ้าดิสก์เล็กเกินไป</strong> หน้า &quot;Updates and other software&quot; จะขึ้นว่า <strong>&quot;You need at least 8.6 GB disk space to install Ubuntu. This computer has only 16.0 MB.&quot;</strong> และกด Continue ไม่ได้ → <strong>ต้องสร้าง Disk ใหม่</strong> ให้ใหญ่พอ (จึงต้องตั้ง ≥10 GB ในหัวข้อ 13)</p>
+<p class="c-tip">💡 ในภาพ Who are you? ตัวอย่างใช้ชื่อเป็น <strong>รหัสนักศึกษา</strong> (Your-Student-ID, yourstudentid-VirtualBox, your-student-id) และเลือก <strong>Require my password to log in</strong></p>
+</blockquote>
+<hr />
+<h2 id="15-login-terminal-ls-shutdown">15. Login, Terminal, <code>ls</code>, Shutdown</h2>
+<ol>
+<li>หลัง restart จะขึ้น<strong>หน้าจอ login</strong> → เลือกชื่อบัญชี แล้ว <strong>log in ด้วยรหัสผ่านที่ตั้งไว้</strong></li>
+<li><strong>Ubuntu Screen After Logged In</strong> — เดสก์ท็อปมีแถบ dock ด้านซ้าย (Firefox, Files, App Center, Help ฯลฯ)</li>
+<li><strong>Open a Terminal</strong> — กดไอคอน Terminal บน dock จะเห็น prompt รูปแบบ <code>username@hostname:~$</code> เช่น <code>dst@dst-vm:~$</code></li>
+<li><strong>Using &quot;ls&quot; Command</strong> — พิมพ์ <code>ls</code> เพื่อแสดงรายชื่อไฟล์และโฟลเดอร์ใน home directory (ในภาพเห็น Desktop, Documents, Downloads, Music, Pictures, Public, Templates, Videos ฯลฯ)</li>
+<li><strong>Shutting Down Ubuntu</strong> — กดมุมขวาบน (ไอคอนเสียง/แบตเตอรี่) → <strong>Power Off / Log Out</strong> → เลือก <strong>Power Off…</strong> (เมนูเดียวกันมี Suspend, Restart…, Log Out, Switch User…)</li>
+</ol>
+<h3 id="อ่าน-prompt-ให้เป็น-อธิบายเพิ่ม">อ่าน prompt ให้เป็น <em>(อธิบายเพิ่ม)</em></h3>
+<p>ตัวอย่าง prompt: <code>dst@dst-vm:~$</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dst</code></td>
+<td>username</td>
+</tr>
+<tr>
+<td><code>@dst-vm</code></td>
+<td>ชื่อเครื่อง (computer's name ที่ตั้งตอนติดตั้ง)</td>
+</tr>
+<tr>
+<td><code>:~</code></td>
+<td>ตำแหน่งปัจจุบัน <code>~</code> = home directory ของผู้ใช้</td>
+</tr>
+<tr>
+<td><code>$</code></td>
+<td>ผู้ใช้ธรรมดา (ถ้าเป็น <code>#</code> = root / ผู้ดูแลระบบ)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Log Out ≠ Power Off ≠ Suspend</strong>: Log Out = ออกจากบัญชีแต่เครื่องยังเปิด · Power Off = ปิดเครื่อง VM · Suspend = พักเครื่องไว้ (ไม่ได้ปิด) · Objective ข้อ 4–5 ของแลปคือทำได้ทั้ง login/logout และ shutdown</p>
+<p class="c-tip">💡 ควรปิด Ubuntu จากเมนูข้างในก่อนปิดหน้าต่าง VirtualBox เหมือนปิดคอมจริง ไม่ใช่ถอดปลั๊ก เพื่อไม่ให้ไฟล์ในดิสก์เสมือนเสีย</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU</strong></td>
+<td>หน่วยประมวลผลกลาง</td>
+<td>สมอง</td>
+</tr>
+<tr>
+<td><strong>RAM / DDR SDRAM</strong></td>
+<td>หน่วยความจำหลัก Double Data Rate Synchronous Dynamic RAM (DDR–DDR5)</td>
+<td>โต๊ะทำงาน</td>
+</tr>
+<tr>
+<td><strong>Bus</strong></td>
+<td>ชุดสายที่เชื่อมอุปกรณ์ให้สื่อสารกัน (memory bus, I/O bus เช่น PCI, peripheral bus เช่น SCSI/SATA/USB)</td>
+<td>ถนน</td>
+</tr>
+<tr>
+<td><strong>Mainboard / Motherboard</strong></td>
+<td>แผงวงจรหลักที่มี slot สำหรับ CPU, RAM, การ์ด และมี bus network</td>
+<td>บ้านของทุกชิ้น</td>
+</tr>
+<tr>
+<td><strong>PCI slot</strong></td>
+<td>ช่องใส่การ์ดเสริม (sound, graphics)</td>
+<td>ช่องเสียบการ์ด</td>
+</tr>
+<tr>
+<td><strong>IDE / PATA, SCSI, SATA, mSATA, ST-506</strong></td>
+<td>รูปแบบ interface เชื่อมดิสก์</td>
+<td>ขั้วต่อดิสก์</td>
+</tr>
+<tr>
+<td><strong>Disk controller</strong></td>
+<td>ตัวกลางควบคุมดิสก์</td>
+<td>ผู้คุมดิสก์</td>
+</tr>
+<tr>
+<td><strong>HDD / SSD</strong></td>
+<td>ดิสก์แม่เหล็กมีจานหมุน / ดิสก์ NAND flash ไม่มีชิ้นส่วนขยับ</td>
+<td>จานหมุน / ชิป</td>
+</tr>
+<tr>
+<td><strong>Optical disk</strong></td>
+<td>DVD, Blu-ray</td>
+<td>แผ่นอ่านด้วยแสง</td>
+</tr>
+<tr>
+<td><strong>VGA</strong></td>
+<td>Video Graphics Adapter การ์ดแสดงผล</td>
+<td>การ์ดจอ</td>
+</tr>
+<tr>
+<td><strong>USB</strong></td>
+<td>Universal Serial Bus (1.0 = 12 Mbps → USB4 = 40 Gbps)</td>
+<td>ช่องต่อสากล</td>
+</tr>
+<tr>
+<td><strong>Operating System</strong></td>
+<td>ซอฟต์แวร์จัดการฮาร์ดแวร์และให้บริการโปรแกรม</td>
+<td>ผู้จัดการเครื่อง</td>
+</tr>
+<tr>
+<td><strong>Unix</strong></td>
+<td>OS ที่เกิดปี 1969 และแตกเป็นหลายตระกูล</td>
+<td>ต้นตระกูล</td>
+</tr>
+<tr>
+<td><strong>Linux</strong></td>
+<td>Unix-like OS แบบ open source เริ่มปี 1991 ใช้ GPL</td>
+<td>เพนกวิน</td>
+</tr>
+<tr>
+<td><strong>GPL</strong></td>
+<td>สัญญาอนุญาต open source ที่ Linux ใช้</td>
+<td>แจกต่อต้องเปิดซอร์ส</td>
+</tr>
+<tr>
+<td><strong>Distribution (distro / flavor)</strong></td>
+<td>Linux ที่ประกอบพร้อมใช้ เช่น Ubuntu, Fedora</td>
+<td>ยี่ห้อ Linux</td>
+</tr>
+<tr>
+<td><strong>Debian / Red Hat / Slackware</strong></td>
+<td>ตระกูลหลักของ distro (Ubuntu อยู่ในตระกูล Debian)</td>
+<td>ตระกูล</td>
+</tr>
+<tr>
+<td><strong>Kernel</strong></td>
+<td>แกนกลาง OS ที่คุมฮาร์ดแวร์โดยตรง</td>
+<td>เชฟ</td>
+</tr>
+<tr>
+<td><strong>Shell</strong></td>
+<td>ตัวแปลคำสั่งผู้ใช้ส่งให้ kernel</td>
+<td>พนักงานรับออเดอร์</td>
+</tr>
+<tr>
+<td><strong>Terminal</strong></td>
+<td>หน้าต่างสำหรับพิมพ์คำสั่งเข้า shell</td>
+<td>หน้าต่างพิมพ์คำสั่ง</td>
+</tr>
+<tr>
+<td><strong>Physical machine</strong></td>
+<td>เครื่องจริง</td>
+<td>ตัวเครื่อง</td>
+</tr>
+<tr>
+<td><strong>Host OS</strong></td>
+<td>OS บนเครื่องจริง (Windows 10)</td>
+<td>เจ้าบ้าน</td>
+</tr>
+<tr>
+<td><strong>Virtual machine</strong></td>
+<td>เครื่องคอมพิวเตอร์จำลอง (VirtualBox, VMware Workstation, KVM)</td>
+<td>คอมในคอม</td>
+</tr>
+<tr>
+<td><strong>Guest OS</strong></td>
+<td>OS ที่อยู่ใน VM (Ubuntu)</td>
+<td>แขก</td>
+</tr>
+<tr>
+<td><strong>ISO</strong></td>
+<td>ไฟล์ image ของแผ่นติดตั้ง</td>
+<td>แผ่นติดตั้งแบบไฟล์</td>
+</tr>
+<tr>
+<td><strong>VDI</strong></td>
+<td>VirtualBox Disk Image ไฟล์ดิสก์เสมือน</td>
+<td>ดิสก์ของ VM</td>
+</tr>
+<tr>
+<td><strong>Dynamically allocated</strong></td>
+<td>ดิสก์เสมือนโตตามข้อมูลจริง (ไม่หดกลับ)</td>
+<td>โตตามใช้</td>
+</tr>
+<tr>
+<td><strong>Fixed size</strong></td>
+<td>ดิสก์เสมือนจองเต็มตั้งแต่แรก</td>
+<td>จองเต็ม</td>
+</tr>
+<tr>
+<td><strong><code>ls</code></strong></td>
+<td>คำสั่งแสดงรายชื่อไฟล์ในโฟลเดอร์</td>
+<td>list</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<p><strong>เรื่องที่ต้องจำ</strong></p>
+<ul>
+<li><strong>คะแนน:</strong> lab report 25, quiz 25, midterm 25 (สัปดาห์ 9), final 25 (สัปดาห์ 17), เข้าเรียน 80% · ส่งแลป 23.59 วันที่เรียน · quiz ทุกสัปดาห์ก่อนจบคาบ</li>
+<li><strong>Computer system = CPU + Memory (RAM) + I/O devices</strong> (disk, USB, VGA, network card)</li>
+<li><strong>Bus 3 ระดับ:</strong> memory bus / general I/O bus (PCI) / peripheral I/O bus (SCSI, SATA, USB)</li>
+<li><strong>ARM ใช้ในมือถือ โดยเฉพาะ Android</strong> · RAM = <strong>DDR SDRAM</strong> (DDR ถึง DDR5)</li>
+<li><strong>Disk interface:</strong> PATA/IDE, SCSI, SATA, mSATA, ST-506 · ดิสก์ต้องมี <strong>disk controller</strong></li>
+<li><strong>Disk storage 3 แบบ:</strong> magnetic, optical (DVD, Blu-ray), SSD · SSD ทน <strong>1500g</strong> vs HDD <strong>55g/350g</strong></li>
+<li><strong>USB:</strong> 1.0 = 12 Mbps, 2.0 = 480 Mbps, 3.0 = 5 Gbps, 3.1 = 10, 3.2 = 20, USB4 = 40 Gbps · USB 3.2/USB4 ใช้ <strong>Type C</strong> เท่านั้น</li>
+<li><strong>Linux:</strong> 1991 โค้ดแรก · 1992 ใช้ <strong>GPL</strong> · 1996 มาสคอตเพนกวิน · Ubuntu อยู่ตระกูล <strong>Debian</strong></li>
+<li><strong>Linux architecture:</strong> Hardware → <strong>Kernel</strong> → <strong>Shell</strong> → Applications/Utilities</li>
+<li><strong>VM:</strong> host OS = Windows 10 · VM software = Oracle VM VirtualBox / VMware Workstation / KVM · guest OS = Ubuntu</li>
+<li><strong>ค่าตอนสร้าง VM:</strong> ชื่อ <code>ITDS212-Ubuntu22.04</code>, RAM <strong>8 GB</strong>, <strong>VDI</strong>, <strong>Dynamically allocated</strong>, disk <strong>≥10 GB</strong></li>
+<li><strong>ติดตั้ง Ubuntu 22.04:</strong> Install Ubuntu → English → <strong>Normal installation</strong> → <strong>Erase disk and install</strong> → Continue → <strong>Bangkok</strong> → ตั้ง account/password (ต้องจำ) → Restart Now</li>
+<li>ส่ง <strong><code>6887xxx_lab1.pdf</code></strong> ที่รวมภาพแคปทุกขั้น</li>
+</ul>
+<p><strong>คู่ที่มักสับสน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Host OS vs Guest OS</strong></td>
+<td>OS บนเครื่องจริง (Windows) vs OS ใน VM (Ubuntu)</td>
+</tr>
+<tr>
+<td><strong>Kernel vs Shell</strong></td>
+<td>คุมฮาร์ดแวร์โดยตรง vs รับคำสั่งผู้ใช้ส่งให้ kernel</td>
+</tr>
+<tr>
+<td><strong>Unix vs Linux</strong></td>
+<td>OS ต้นตระกูลปี 1969 vs Unix-like open source ปี 1991</td>
+</tr>
+<tr>
+<td><strong>Linux vs Ubuntu</strong></td>
+<td>ตัว OS/kernel vs distribution หนึ่งของ Linux (ตระกูล Debian)</td>
+</tr>
+<tr>
+<td><strong>HDD vs SSD</strong></td>
+<td>จานแม่เหล็กหมุน มีหัวอ่าน vs NAND flash ไม่มีชิ้นส่วนขยับ ทนกว่า</td>
+</tr>
+<tr>
+<td><strong>PATA vs SATA</strong></td>
+<td>ส่งแบบขนาน สายแพกว้าง vs ส่งแบบอนุกรม สายเล็ก</td>
+</tr>
+<tr>
+<td><strong>Mbps vs Gbps</strong></td>
+<td>ต่างกัน 1,000 เท่า (USB 2.0 = 480 Mbps, USB 3.0 = 5 Gbps)</td>
+</tr>
+<tr>
+<td><strong>Dynamically allocated vs Fixed size</strong></td>
+<td>โตตามใช้ (ไม่หด) vs จองเต็มตั้งแต่แรก (อาจเร็วกว่า)</td>
+</tr>
+<tr>
+<td><strong>VDI vs ISO</strong></td>
+<td>ไฟล์ดิสก์เสมือนที่ติดตั้ง OS ลงไป vs ไฟล์แผ่นติดตั้งที่ใช้บูต</td>
+</tr>
+<tr>
+<td><strong>Try Ubuntu vs Install Ubuntu</strong></td>
+<td>ลองใช้โดยไม่ติดตั้ง vs ติดตั้งลงดิสก์</td>
+</tr>
+<tr>
+<td><strong>Log Out vs Power Off vs Suspend</strong></td>
+<td>ออกจากบัญชี vs ปิดเครื่อง vs พักเครื่อง</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แนวคิดที่ต้องอธิบายได้</strong></p>
+<ul>
+<li><strong>ทำไมใช้ VM เรียน Linux</strong> → ใช้ Linux ได้โดยไม่ลบ Windows และถ้าระบบพังก็พังแค่ใน VM</li>
+<li><strong>ทำไมต้องตั้งดิสก์อย่างน้อย 10 GB</strong> → Ubuntu ต้องการอย่างน้อย 8.6 GB ถ้าดิสก์เล็กกว่านี้ตัวติดตั้งไปต่อไม่ได้ ต้องสร้างดิสก์ใหม่</li>
+<li><strong>ทำไมเลือก Erase disk ได้โดยไม่เสียข้อมูล</strong> → ลบแค่ดิสก์เสมือน (VDI) ของ VM</li>
+<li><strong>ตอนพิมพ์ <code>ls</code> ใน Terminal เกิดอะไรขึ้นตามสถาปัตยกรรม Linux</strong> → shell รับคำสั่ง เรียก utility <code>ls</code> ซึ่งขอให้ kernel อ่านรายชื่อไฟล์จาก disk (hardware) แล้วแสดงผลกลับมา</li>
+<li><strong>ทำไม Linux โตจากชุมชนได้</strong> → ใช้สัญญา GPL ให้ทุกคนใช้ แก้ และแจกจ่ายต่อได้</li>
+</ul>
+</article>
+      
+      <nav class="pager"><span></span><a class="pg next" href="../l2/index.html"><small>บทถัดไป →</small><span>L2 – OS Introduction + Lab 2 (Basic Unix Commands)</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>
