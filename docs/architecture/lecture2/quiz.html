@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
-<title>Quiz: Lecture 2 - Process</title>
+<title>Quiz: Lecture 2 — Process</title>
 <style>
   body {
     font-family: "Segoe UI", "Tahoma", sans-serif;
@@ -130,7 +130,7 @@
 <a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
 </div>
 
-<h1>Quiz: Lecture 2 - Process</h1>
+<h1>Quiz: Lecture 2 — Process</h1>
 <div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
 
 <div class="jumpgrid" id="jumpGrid"></div>
@@ -140,484 +140,514 @@
 const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
 
 const questions = [
-  // ===== ความจำ (Recall) 12 ข้อ =====
   {
-    type: "recall",
-    q: "Process API มีกี่หมวดหลักตามที่กล่าวในเลกเชอร์นี้?",
-    choices: [
-      "3 อย่าง (Create, Destroy, Wait)",
-      "5 อย่าง (Create, Destroy, Wait, Control, Status)",
-      "4 อย่าง (Create, Destroy, Wait, Status)",
-      "6 อย่าง (รวม Schedule เข้าไปด้วย)"
+    "type": "recall",
+    "q": "ตามสไลด์ process คืออะไร?",
+    "choices": [
+      "ลำดับคำสั่งพร้อมข้อมูลที่เก็บอยู่บน disk",
+      "โปรแกรมที่กำลังรัน (a running program)",
+      "ส่วนของ OS ที่เลือกว่าใครได้ CPU",
+      "พื้นที่ memory ที่ระบบจองไว้ให้ kernel"
     ],
-    correct: 1,
-    explain: [
-      "ขาด Miscellaneous Control และ Status ไป",
-      "ถูก — สไลด์ระบุ 5 หมวด: Create, Destroy, Wait, Miscellaneous Control, Status",
-      "ขาด Miscellaneous Control ไป",
-      "Schedule ไม่ได้ถูกจัดเป็นหนึ่งในหมวดของ Process API ในสไลด์นี้"
+    "correct": 1,
+    "explain": [
+      "ผิด — นั่นคือคำจำกัดความของ program ที่ยังอยู่นิ่ง ๆ",
+      "ถูก — process คือโปรแกรมที่กำลังรัน และเป็น abstraction ที่พื้นฐานที่สุดที่ OS ให้",
+      "ผิด — ส่วนนั้นคือ scheduler",
+      "ผิด — นั่นคือ kernel space ไม่ใช่ process"
     ]
   },
   {
-    type: "recall",
-    q: "Address space ของ process แบ่งออกเป็นกี่ส่วนหลักตามสไลด์?",
-    choices: [
-      "3 ส่วน (code, heap, stack)",
-      "2 ส่วน (code, data)",
-      "5 ส่วน (รวม registers เข้าไปด้วย)",
-      "4 ส่วน (code, global variables, heap, stack)"
+    "type": "recall",
+    "q": "ในอุปมาการอบขนมของสไลด์ “เตาอบ (Oven)” เทียบได้กับอะไรในคอมพิวเตอร์?",
+    "choices": [
+      "Program",
+      "Process",
+      "Input",
+      "Resources"
     ],
-    correct: 3,
-    explain: [
-      "ขาด global variables ไปหนึ่งส่วน",
-      "แบ่งหยาบเกินไป ไม่ตรงกับที่สไลด์แจกแจง",
-      "registers ไม่ได้อยู่ใน address space แต่เป็นส่วนหนึ่งของ machine state",
-      "ถูก — สไลด์แบ่งเป็น code, global variables, heap, stack"
+    "correct": 3,
+    "explain": [
+      "ผิด — program เทียบกับสูตร (recipe)",
+      "ผิด — process เทียบกับการอบ (baking)",
+      "ผิด — input เทียบกับวัตถุดิบ (ingredient)",
+      "ถูก — เตาอบคือทรัพยากรที่ใช้ในการทำงาน ส่วนคนอบ (baker) คือ OS"
     ]
   },
   {
-    type: "recall",
-    q: "ในขั้นตอน Process Creation ขั้นที่ 2 ตามสไลด์ OS ทำอะไร?",
-    choices: [
-      "ตั้งค่า default I/O (stdin, stdout, stderr)",
-      "โหลดโค้ดและข้อมูลจากดิสก์เข้า memory",
-      "กำหนดคำสั่งแรกเป็น main()",
-      "โอน control ของ CPU ให้ process"
+    "type": "recall",
+    "q": "address space ของ process เรียงจาก address ต่ำไปสูงเป็นลำดับใด?",
+    "choices": [
+      "text → data → heap → stack",
+      "stack → heap → data → text",
+      "data → text → stack → heap",
+      "heap → stack → text → data"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — ขั้นที่ 2 คือการตั้งค่า default I/O ได้แก่ standard input/output/error",
-      "เป็นขั้นที่ 1 ไม่ใช่ขั้นที่ 2",
-      "เป็นขั้นที่ 3 ไม่ใช่ขั้นที่ 2",
-      "เป็นขั้นที่ 4 ไม่ใช่ขั้นที่ 2"
+    "correct": 0,
+    "explain": [
+      "ถูก — จำว่า T-D-H-S: text (code) อยู่ล่างสุด แล้ว data (global), heap โตขึ้นบน และ stack อยู่บนสุดโตลงล่าง",
+      "ผิด — เรียงกลับด้าน stack อยู่บนสุดไม่ใช่ล่างสุด",
+      "ผิด — text ต้องอยู่ล่างสุดที่ address ต่ำ",
+      "ผิด — ลำดับไม่ตรงกับภาพ address space ในสไลด์"
     ]
   },
   {
-    type: "recall",
-    q: "Process มีกี่สถานะหลักตามที่กล่าวในเลกเชอร์นี้?",
-    choices: [
-      "2 สถานะ (Running, Ready)",
-      "4 สถานะ (รวม Terminated)",
-      "3 สถานะ (Running, Ready, Blocked)",
-      "5 สถานะ (รวมสถานะอื่นเพิ่มเติม)"
+    "type": "recall",
+    "q": "ส่วน stack ของ address space เก็บข้อมูลอะไร?",
+    "choices": [
+      "instructions ของโปรแกรม",
+      "global variables ของโปรแกรม",
+      "return address, parameter ของ function และ local variables",
+      "memory ที่จองแบบ dynamic ด้วย malloc"
     ],
-    correct: 2,
-    explain: [
-      "ขาด Blocked ไป",
-      "สไลด์นี้ไม่ได้แจกแจง Terminated เป็นสถานะหลักเพิ่มเติม",
-      "ถูก — สไลด์ระบุ 3 สถานะหลักคือ Running, Ready, Blocked",
-      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
+    "correct": 2,
+    "explain": [
+      "ผิด — instructions อยู่ในส่วน text",
+      "ผิด — global variables อยู่ในส่วน data",
+      "ถูก — stack เก็บข้อมูลชั่วคราวของการเรียก function",
+      "ผิด — memory ที่จอง dynamic อยู่ใน heap"
     ]
   },
   {
-    type: "recall",
-    q: "PCB ย่อมาจากอะไร?",
-    choices: [
-      "Program Counter Block",
-      "Process Control Block",
-      "Process Creation Block",
-      "Processor Control Buffer"
+    "type": "recall",
+    "q": "ขั้นตอนการสร้าง process กำหนดให้ OS ตั้งค่า I/O เริ่มต้น 3 ตัวใน Unix คืออะไร?",
+    "choices": [
+      "stdio, stdlib, stderr",
+      "standard input, standard output, standard error",
+      "keyboard, monitor, printer",
+      "text, data, stack"
     ],
-    correct: 1,
-    explain: [
-      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
-      "ถูก — ตรงตามที่สไลด์ระบุ",
-      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ",
-      "เป็นคำที่แต่งขึ้นให้ดูคล้ายกัน แต่ไม่ตรงกับที่สไลด์ระบุ"
+    "correct": 1,
+    "explain": [
+      "ผิด — stdio และ stdlib เป็นชื่อไลบรารี ไม่ใช่ช่อง I/O",
+      "ถูก — stdin, stdout และ stderr คือ I/O เริ่มต้นสามตัวที่ OS ตั้งให้ตอนสร้าง process",
+      "ผิด — เป็นอุปกรณ์จริง ไม่ใช่ช่อง I/O เริ่มต้น",
+      "ผิด — เป็นส่วนของ address space"
     ]
   },
   {
-    type: "recall",
-    q: "fork() คืนค่าอะไรให้กับ process แม่ (parent)?",
-    choices: ["PID ของ process ลูก", "ค่า 0 (ไม่ใช่ PID ของใคร)", "PID ของตัวเอง", "-1 เสมอ"],
-    correct: 0,
-    explain: [
-      "ถูก — สไลด์ระบุว่า fork() คืน PID ของ child ให้กับ parent",
-      "0 คือค่าที่คืนให้ child ไม่ใช่ parent",
-      "ไม่ตรงกับที่สไลด์ระบุ",
-      "-1 มักหมายถึง error ไม่ใช่ค่าปกติที่ parent ได้รับ"
-    ]
-  },
-  {
-    type: "recall",
-    q: "fork() คืนค่าอะไรให้กับ process ลูก (child)?",
-    choices: ["PID ของ parent", "PID ของตัวเอง", "ค่า errno", "ค่า 0 (ไม่ใช่ PID ของใคร)"],
-    correct: 3,
-    explain: [
-      "ไม่ตรงกับที่สไลด์ระบุ",
-      "ไม่ตรงกับที่สไลด์ระบุ ค่าที่ child ได้รับคือ 0",
-      "ไม่ตรงกับที่สไลด์ระบุ",
-      "ถูก — สไลด์ระบุว่า fork() คืนค่า 0 ให้กับ child"
-    ]
-  },
-  {
-    type: "recall",
-    q: "exec() system call ทำอะไรกับ process ที่เรียกมัน?",
-    choices: [
-      "สร้าง process ใหม่",
-      "หยุด process ไว้ชั่วคราว",
-      "เปลี่ยนเป็นโปรแกรมอื่นทั้งหมด",
-      "ลบ process ทิ้งโดยไม่ทำอะไรต่อ"
+    "type": "recall",
+    "q": "`fork()` คืนค่าอะไรให้ child process?",
+    "choices": [
+      "คืนค่า 0",
+      "คืน PID ของ child",
+      "คืน PID ของ parent",
+      "คืนค่า -1"
     ],
-    correct: 2,
-    explain: [
-      "สไลด์ระบุชัดว่า exec() ไม่สร้าง process ใหม่",
-      "ไม่ตรงกับนิยามของ exec()",
-      "ถูก — exec() แปลง process ปัจจุบันให้กลายเป็นโปรแกรมอื่นทั้งหมด",
-      "ไม่ตรงกับนิยามของ exec() ซึ่งเปลี่ยนเป็นโปรแกรมใหม่ ไม่ใช่ลบทิ้งเฉย ๆ"
+    "correct": 0,
+    "explain": [
+      "ถูก — child ได้ค่า 0 ส่วน parent ได้ PID ของ child",
+      "ผิด — PID ของ child เป็นค่าที่คืนให้ parent",
+      "ผิด — ถ้าอยาก PID ของ parent ต้องเรียก getppid()",
+      "ผิด — ค่าติดลบหมายถึง fork ล้มเหลว"
     ]
   },
   {
-    type: "recall",
-    q: "มี exec() กี่รูปแบบตามที่สไลด์ระบุ?",
-    choices: ["4 รูปแบบ", "6 รูปแบบ", "5 รูปแบบ", "8 รูปแบบ"],
-    correct: 1,
-    explain: [
-      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
-      "ถูก — สไลด์ระบุ 6 รูปแบบ: execl, execv, execlp, execvp, execle, execvpe",
-      "ไม่ตรงกับจำนวนที่สไลด์ระบุ",
-      "ไม่ตรงกับจำนวนที่สไลด์ระบุ"
-    ]
-  },
-  {
-    type: "recall",
-    q: "OS ทำงานในโหมดใดได้บ้างตาม Dual mode Approach?",
-    choices: [
-      "User mode และ Kernel mode",
-      "Safe mode และ Recovery mode",
-      "Sleep mode และ Wake mode",
-      "Boot mode และ Run mode"
+    "type": "recall",
+    "q": "สาม state ของ process ตามสไลด์คืออะไร?",
+    "choices": [
+      "New, Running, Terminated",
+      "Ready, Waiting, Zombie",
+      "Running, Sleeping, Stopped",
+      "Running, Ready, Blocked"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — สไลด์ระบุ User mode (สิทธิ์จำกัด) และ Kernel mode (สิทธิ์เต็ม)",
-      "ไม่ใช่คำที่สไลด์ใช้",
-      "ไม่ใช่คำที่สไลด์ใช้",
-      "ไม่ใช่คำที่สไลด์ใช้ในบริบทนี้"
+    "correct": 3,
+    "explain": [
+      "ผิด — ไม่ใช่สามสถานะที่สไลด์ใช้",
+      "ผิด — Zombie เป็นสถานะใน xv6 ที่ละเอียดกว่าสามสถานะหลัก",
+      "ผิด — เป็นสถานะที่เห็นในคำสั่ง top ของ Linux",
+      "ถูก — Running = กำลังรัน, Ready = พร้อมแต่ยังไม่ถูกเลือก, Blocked = รอ event เช่น I/O"
     ]
   },
   {
-    type: "recall",
-    q: "อะไรคือ \"Trap\" ตามนิยามในสไลด์?",
-    choices: [
-      "ข้อผิดพลาดของฮาร์ดแวร์ที่แก้ไขไม่ได้เลย",
-      "ไวรัสคอมพิวเตอร์ที่แฝงตัวอยู่ในโปรแกรม",
-      "คำสั่งพิเศษที่ใช้ลบ process ทิ้งทันที",
-      "สัญญาณซอฟต์แวร์ที่สลับ CPU จาก user mode ไป kernel mode"
+    "type": "recall",
+    "q": "Process Control Block (PCB) เก็บข้อมูลอะไรของ process?",
+    "choices": [
+      "เฉพาะโค้ดและข้อมูล static ของโปรแกรม",
+      "เฉพาะรายชื่อไฟล์ที่ process เปิดอยู่",
+      "program counter, registers, state, priority, address space และ open files",
+      "ตารางที่ mapping virtual address ทุกตัวไปเป็น physical address"
     ],
-    correct: 3,
-    explain: [
-      "Trap ไม่ใช่ข้อผิดพลาดของฮาร์ดแวร์ แต่เป็นสัญญาณที่ตั้งใจส่ง",
-      "ไม่เกี่ยวกับไวรัส",
-      "ไม่เกี่ยวกับการลบ process",
-      "ถูก — สไลด์นิยาม trap ว่าเป็นสัญญาณซอฟต์แวร์ที่ user program ตั้งใจส่งเพื่อสลับโหมด"
+    "correct": 2,
+    "explain": [
+      "ผิด — โค้ดและข้อมูลอยู่ใน address space ส่วน PCB เก็บข้อมูลควบคุม",
+      "ผิด — open files เป็นเพียงหนึ่งในหลายฟิลด์ของ PCB",
+      "ถูก — PCB เป็น struct ที่ OS ใช้ติดตามข้อมูลของแต่ละ process และ process table ชี้ไปยัง PCB ผ่าน PID",
+      "ผิด — นั่นคือ page table ที่เรียนในหัวข้อ memory management"
     ]
   },
   {
-    type: "recall",
-    q: "อะไรคือกลไกที่ทำให้ OS \"ได้ CPU คืน\" อย่างปลอดภัย แม้ process จะรันลูปไม่รู้จบ?",
-    choices: ["fork() system call", "wait() system call", "Timer interrupt (การขัดจังหวะเวลา)", "exec() system call"],
-    correct: 2,
-    explain: [
-      "fork() ใช้สร้าง process ลูก ไม่เกี่ยวกับการคืน CPU",
-      "wait() ใช้ให้ parent รอ child ไม่เกี่ยวกับกรณีลูปไม่รู้จบ",
-      "ถูก — timer interrupt ทำให้ฮาร์ดแวร์ขัดจังหวะเป็นระยะ OS จึงได้ CPU คืนเสมอ",
-      "exec() ใช้เปลี่ยนโปรแกรม ไม่เกี่ยวกับการคืน CPU"
-    ]
-  },
-
-  // ===== ความเข้าใจ (Understanding) 12 ข้อ =====
-  {
-    type: "understand",
-    q: "ทำไม Process จึงถูกเรียกว่าเป็น abstraction ที่สำคัญที่สุดของ OS?",
-    choices: [
-      "เพราะทำให้รันหลายโปรแกรมได้โดยไม่ต้องกังวลเรื่อง CPU",
-      "เพราะทำให้โปรแกรมรันเร็วขึ้นกว่าเดิมเสมอ",
-      "เพราะช่วยลดขนาดไฟล์ของโปรแกรมลง",
-      "เพราะทำให้ไม่ต้องใช้หน่วยความจำเลย"
+    "type": "recall",
+    "q": "ใน xv6 สถานะ ZOMBIE หมายถึงอะไร?",
+    "choices": [
+      "process ที่ยังไม่ถูกใช้งาน (ช่องว่างในตาราง)",
+      "process ที่จบการทำงานแล้วแต่ parent ยังไม่เก็บผล",
+      "process ที่รอ I/O อยู่",
+      "process ที่กำลังถูกสร้างขึ้น"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — สไลด์ระบุว่า process ทำให้ผู้ใช้รันโปรแกรมได้โดยไม่ต้องสนใจว่า CPU กำลังว่างหรือไม่",
-      "ไม่เกี่ยวกับความเร็วโดยตรง",
-      "ไม่เกี่ยวกับขนาดไฟล์",
-      "process ยังต้องใช้หน่วยความจำผ่าน address space อยู่ดี"
+    "correct": 1,
+    "explain": [
+      "ผิด — ช่องว่างในตารางคือ UNUSED",
+      "ถูก — ZOMBIE คือจบแล้วแต่ parent ยังไม่มาเก็บผลลัพธ์",
+      "ผิด — การรอ I/O ตรงกับ SLEEPING",
+      "ผิด — กำลังถูกสร้างคือ EMBRYO"
     ]
   },
   {
-    type: "understand",
-    q: "ความแตกต่างระหว่าง Program กับ Process คือข้อใด?",
-    choices: [
-      "Program กับ Process เหมือนกันทุกประการ ใช้แทนกันได้เสมอ",
-      "Program คือไฟล์นิ่งบนดิสก์ ส่วน Process คือตอนที่มันถูกรันจริง",
-      "Program ต้องมี process แต่ process ไม่จำเป็นต้องมี program",
-      "Program ทำงานได้เฉพาะใน kernel mode เท่านั้น"
+    "type": "recall",
+    "q": "ใน dual mode approach ค่า mode bit ของแต่ละโหมดเป็นอย่างไร?",
+    "choices": [
+      "Kernel mode = 0 และ User mode = 1",
+      "Kernel mode = 1 และ User mode = 0",
+      "ทั้งสองโหมดใช้ mode bit = 1",
+      "mode bit ใช้บอกจำนวน process ที่รันอยู่"
     ],
-    correct: 1,
-    explain: [
-      "สองคำนี้มีความหมายต่างกันชัดเจนตามสไลด์",
-      "ถูก — ตรงกับนิยามในสไลด์ (เปรียบเหมือนสูตรอาหารกับตอนอบขนมจริง)",
-      "ไม่สมเหตุสมผล เพราะ process คือโปรแกรมที่กำลังถูกรัน จึงต้องมี program อยู่เบื้องหลังเสมอ",
-      "ไม่เกี่ยวข้องกับโหมดการทำงานเลย"
+    "correct": 0,
+    "explain": [
+      "ถูก — kernel mode (bit 0) ทำ privileged operation ได้ ส่วน user mode (bit 1) ถูกจำกัดสิทธิ์",
+      "ผิด — สลับค่ากัน",
+      "ผิด — ต้องต่างกันจึงจะแยกสิทธิ์ได้",
+      "ผิด — mode bit บอกระดับสิทธิ์ ไม่ใช่จำนวน process"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใด Stack จึงถูกใช้เก็บข้อมูลอย่าง return address และตัวแปร local?",
-    choices: [
-      "เพราะ stack มีขนาดใหญ่ที่สุดใน address space เสมอ",
-      "เพราะข้อมูลเหล่านี้ต้องอยู่ถาวรตลอดการทำงานของโปรแกรม",
-      "เพราะ heap เต็มแล้วจึงต้องย้ายมาไว้ที่ stack",
-      "เพราะข้อมูลเหล่านี้ชั่วคราว เกิดและหายไปตามการเรียกฟังก์ชัน"
+    "type": "recall",
+    "q": "Trap table ถูกตั้งค่าเมื่อใด และเก็บอะไร?",
+    "choices": [
+      "ตอนสร้าง process ใหม่ เก็บ PID ของทุก process",
+      "ตอนเกิด system call เก็บค่า register ของผู้เรียก",
+      "ตอน context switch เก็บ context ของ process ที่ถูกสลับ",
+      "ตอน boot เก็บ address ของ trap handler ของแต่ละ event"
     ],
-    correct: 3,
-    explain: [
-      "ขนาดของ stack ไม่ได้เป็นเหตุผลที่สไลด์กล่าวถึง",
-      "ข้อมูลใน stack เป็นข้อมูลชั่วคราว ไม่ใช่ข้อมูลถาวร (ข้อมูลถาวรกว่าจะอยู่ที่ global variables)",
-      "ไม่เกี่ยวข้องกับพื้นที่ของ heap เต็มหรือไม่",
-      "ถูก — return address และตัวแปร local มีอายุแค่ช่วงที่ฟังก์ชันนั้นทำงานอยู่ ตรงกับลักษณะของ stack"
+    "correct": 3,
+    "explain": [
+      "ผิด — ตารางที่เก็บ PID คือ process table",
+      "ผิด — การเก็บ register ของผู้เรียกใช้ kernel stack",
+      "ผิด — context ของ process ถูกเก็บใน PCB",
+      "ถูก — ตอน boot OS ตั้ง trap table ให้ hardware รู้ว่า handler ของ system call หรือ interrupt แต่ละแบบอยู่ที่ไหน"
     ]
   },
   {
-    type: "understand",
-    q: "ทำไม process ลูกหลัง fork() จึงต้องมี address space และ PCB เป็นของตัวเอง แยกจาก parent?",
-    choices: [
-      "เพื่อประหยัดหน่วยความจำของระบบ",
-      "เพราะ parent กับ child ต้องใช้ address space เดียวกันเสมอ",
-      "เพื่อให้ child เป็นอิสระ ทำงานแยกจาก parent ไม่ชนกัน",
-      "เพราะ fork() ไม่อนุญาตให้มี PCB"
+    "type": "recall",
+    "q": "ข้อใดเป็น system call ไม่ใช่ library call?",
+    "choices": [
+      "fopen",
+      "printf",
+      "write",
+      "fseek"
     ],
-    correct: 2,
-    explain: [
-      "การแยก address space ไม่ได้ช่วยประหยัดหน่วยความจำ แต่เพื่อความเป็นอิสระและความปลอดภัย",
-      "ตรงข้ามกับสไลด์ ซึ่งระบุว่า child มี address space แยกต่างหาก",
-      "ถูก — สไลด์ระบุว่า child มี address space และ PCB ของตัวเอง เพื่อให้ทำงานเป็นอิสระจาก parent",
-      "ทุก process รวมถึง child ต้องมี PCB เพื่อให้ OS ติดตามสถานะได้"
+    "correct": 2,
+    "explain": [
+      "ผิด — fopen เป็น library call ที่ข้างในเรียก open",
+      "ผิด — printf เป็น library call ที่ข้างในเรียก write",
+      "ถูก — write เป็น system call ส่วน printf, fwrite, puts เป็น library call ที่เรียก write",
+      "ผิด — fseek เป็น library call ที่คู่กับ system call lseek"
     ]
   },
   {
-    type: "understand",
-    q: "เพราะเหตุใด wait() จึงมีประโยชน์เมื่อ parent process ต้องการให้ child ทำงานเสร็จก่อน?",
-    choices: [
-      "เพราะ wait() บังคับให้ parent รอจน child จบงานก่อน",
-      "เพราะ wait() ทำให้ child ทำงานเร็วขึ้นกว่าเดิม",
-      "เพราะ wait() ลบ child ทิ้งทันทีที่ถูกเรียก",
-      "เพราะ wait() เปลี่ยน child ให้กลายเป็น parent แทน"
+    "type": "understand",
+    "q": "Program กับ Process ต่างกันอย่างไร?",
+    "choices": [
+      "Program อยู่ใน RAM ส่วน process อยู่บน disk",
+      "Program เป็นสิ่งที่อยู่นิ่ง (static) ส่วน process คือการทำงานที่กำลังเกิดขึ้น (dynamic)",
+      "Program หนึ่งตัวสร้าง process ได้เพียงตัวเดียวเสมอ",
+      "Process ไม่จำเป็นต้องมีโค้ด เพราะ OS สร้างคำสั่งให้เอง"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — wait() ทำให้ parent หยุดรอจน child เสร็จ จึงจัดลำดับการทำงานให้แน่นอนได้ เช่น ให้ child พิมพ์ก่อนเสมอ",
-      "wait() ไม่มีผลต่อความเร็วของ child",
-      "wait() ไม่ได้ลบ child แต่รอให้ child จบตามธรรมชาติ",
-      "ไม่มีการสลับบทบาท parent/child จากการเรียก wait()"
+    "correct": 1,
+    "explain": [
+      "ผิด — สลับกัน program เก็บอยู่บน disk ส่วน process ถูก instantiate ใน RAM",
+      "ถูก — เทียบได้กับสูตรขนม (program) กับการอบที่กำลังเกิดขึ้น (process)",
+      "ผิด — โปรแกรมเดียวรันได้หลาย process เช่น เปิด Chrome หลายหน้าต่าง",
+      "ผิด — process รันโค้ดที่โหลดมาจากโปรแกรม"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใด exec() จึง \"ไม่ return กลับมา\" เมื่อเรียกสำเร็จ?",
-    choices: [
-      "เพราะการเรียก exec() เกิด error เสมอ",
-      "เพราะ exec() รันในอีก process หนึ่งแยกต่างหากจาก process เดิม",
-      "เพราะ OS ลบ process ทิ้งทันทีหลังเรียก exec()",
-      "เพราะโค้ดเดิมถูกแทนที่ด้วยโปรแกรมใหม่ทั้งหมดแล้ว"
+    "type": "understand",
+    "q": "สถานะ Ready ต่างจาก Blocked อย่างไร?",
+    "choices": [
+      "Ready คือพร้อมรันแต่ OS ยังไม่เลือก ส่วน Blocked คือรอ event เช่น I/O ให้เสร็จ",
+      "Ready คือรอ I/O ส่วน Blocked คือรอ CPU",
+      "Ready ใช้ CPU อยู่บางส่วน ส่วน Blocked ไม่ใช้เลย",
+      "Ready เกิดกับ parent เท่านั้น ส่วน Blocked เกิดกับ child เท่านั้น"
     ],
-    correct: 3,
-    explain: [
-      "การไม่ return ไม่ได้แปลว่า error สไลด์ระบุว่านี่คือพฤติกรรมปกติเมื่อสำเร็จ",
-      "exec() ทำงานบน process เดิม ไม่ได้สร้างหรือย้ายไปอีก process หนึ่ง",
-      "process ยังอยู่ (PID เดิม) เพียงแต่เนื้อโปรแกรมข้างในถูกแทนที่",
-      "ถูก — เมื่อ exec() สำเร็จ โค้ดเดิมของ process ถูกแทนที่ด้วยโปรแกรมใหม่ทั้งหมด จึงไม่มีทางกลับไปทำงานต่อจากจุดเดิม"
+    "correct": 0,
+    "explain": [
+      "ถูก — ตัวหนึ่งรอเพียงให้ scheduler เลือก อีกตัวรอเหตุการณ์ภายนอกจึงยังรันไม่ได้แม้ CPU ว่าง",
+      "ผิด — สลับความหมายกัน",
+      "ผิด — มีเพียงสถานะ Running ที่ใช้ CPU",
+      "ผิด — ทุก process เข้าสองสถานะนี้ได้ ไม่เกี่ยวกับ parent หรือ child"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใด OS จึงต้องมี Dual mode (user mode / kernel mode) แทนที่จะให้ทุกโปรแกรมมีสิทธิ์เท่ากันหมด?",
-    choices: [
-      "เพื่อให้โปรแกรมทำงานได้เร็วขึ้นกว่าเดิมเสมอ",
-      "เพื่อป้องกันโปรแกรมทั่วไปไม่ให้เข้าถึงทรัพยากรระบบโดยตรง",
-      "เพื่อลดจำนวน system call ที่ต้องมีในระบบ",
-      "เพราะฮาร์ดแวร์รุ่นใหม่ไม่รองรับการทำงานแบบโหมดเดียวอีกต่อไป"
+    "type": "understand",
+    "q": "ทำไม process ที่อยู่สถานะ Blocked จึงไปเป็น Running ตรง ๆ ไม่ได้?",
+    "choices": [
+      "เพราะข้อมูลใน PCB ถูกลบไปแล้วตอน block",
+      "เพราะต้องรอ parent เรียก wait() ให้ก่อน",
+      "เพราะเมื่อ event เสร็จมันจะกลับไปเป็น Ready แล้วต้องรอ OS schedule ก่อนจึงได้ CPU",
+      "เพราะ CPU ไม่รองรับการกลับเข้ามาทำงานซ้ำของ process เดิม"
     ],
-    correct: 1,
-    explain: [
-      "ไม่เกี่ยวกับความเร็วโดยตรง เป็นเรื่องของความปลอดภัยมากกว่า",
-      "ถูก — Dual mode มีไว้เพื่อความปลอดภัย จำกัดไม่ให้โปรแกรมทั่วไปทำ privileged operation ได้เอง",
-      "Dual mode ไม่ได้ลดจำนวน system call แต่เป็นกลไกที่ทำให้ system call ทำงานได้อย่างปลอดภัย",
-      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่เหตุผลหลักของ Dual mode"
+    "correct": 2,
+    "explain": [
+      "ผิด — PCB ยังอยู่ครบระหว่าง blocked",
+      "ผิด — การกลับมา Ready เกิดจาก I/O เสร็จ ไม่ใช่จาก wait()",
+      "ถูก — เส้นทางคือ Blocked → Ready (I/O done) → Running (scheduled) เพราะการให้ CPU เป็นการตัดสินใจของ OS",
+      "ผิด — CPU กลับมารัน process เดิมได้ตามปกติผ่าน context switch"
     ]
   },
   {
-    type: "understand",
-    q: "ถ้าไม่มี Timer interrupt เกิดขึ้นเลยในระบบ จะเกิดปัญหาอะไรตามมา?",
-    choices: [
-      "ระบบจะทำงานเร็วขึ้นเพราะไม่มีการขัดจังหวะเลย",
-      "ไม่มีผลกระทบใด ๆ เพราะ OS มีวิธีอื่นที่ใช้แทนกันได้เสมอ",
-      "OS จะไม่มีทางได้ CPU คืน ถ้า process หนึ่งรันลูปไม่รู้จบ",
-      "process ทุกตัวจะถูกลบทิ้งโดยอัตโนมัติ"
+    "type": "understand",
+    "q": "ทำไม OS จึงต้องมี timer interrupt?",
+    "choices": [
+      "เพื่อวัดว่าโปรแกรมใดใช้ memory มากที่สุด",
+      "เพื่อให้ system call ทำงานได้เร็วขึ้น",
+      "เพื่อซิงก์เวลาของเครื่องกับเซิร์ฟเวอร์เวลา",
+      "เพื่อให้ OS ได้ CPU คืนแม้ process จะไม่ yield ไม่ block และไม่จบ เช่น วน infinite loop"
     ],
-    correct: 2,
-    explain: [
-      "การไม่มี interrupt เลยกลับเป็นความเสี่ยง ไม่ใช่ข้อดี เพราะ OS อาจไม่ได้ CPU คืนเลย",
-      "timer interrupt เป็นกลไกสำคัญที่สไลด์เน้นว่าจำเป็น ไม่ใช่สิ่งที่ทดแทนได้ง่าย ๆ",
-      "ถูก — สไลด์ระบุว่า timer interrupt คือทางที่ปลอดภัยที่ OS ใช้ได้ CPU คืน แม้ process จะรันลูปไม่รู้จบ",
-      "ไม่มีข้อมูลนี้ในสไลด์ และไม่ใช่ผลลัพธ์ที่สมเหตุสมผล"
+    "correct": 3,
+    "explain": [
+      "ผิด — การวัดการใช้ memory ไม่ต้องใช้ timer interrupt",
+      "ผิด — ความเร็วของ system call ไม่เกี่ยวกับ timer",
+      "ผิด — ไม่ใช่จุดประสงค์ที่สไลด์กล่าวถึง",
+      "ถูก — timer สร้าง interrupt ทุกไม่กี่มิลลิวินาที ทำให้ OS ได้สิทธิ์ควบคุมกลับมาอย่างปลอดภัย"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใด Context Switching จึงต้อง \"save\" register ของ process เดิมก่อนจะ \"restore\" register ของ process ใหม่?",
-    choices: [
-      "เพื่อให้ process เดิมถูกลบทิ้งไปเลยหลังสลับ",
-      "เพราะ register มีจำนวนจำกัดจึงต้องสุ่มแจกจ่ายใหม่ทุกครั้ง",
-      "เพื่อเพิ่มความเร็วของ CPU โดยตรง",
-      "เพื่อให้ process เดิมสามารถกลับมาทำงานต่อจากจุดเดิมได้ในภายหลัง"
+    "type": "understand",
+    "q": "ทำไมระบบต้องแยก user mode กับ kernel mode?",
+    "choices": [
+      "เพราะถ้า user process แตะ hardware ได้ตรง ๆ มันอาจทำลายข้อมูลหรือ process อื่นได้",
+      "เพราะ CPU รันคำสั่งของ OS ได้เร็วกว่าคำสั่งของผู้ใช้",
+      "เพราะแต่ละโหมดใช้ address space ชุดเดียวกันจึงต้องสลับกันใช้",
+      "เพราะ compiler สร้างโค้ดได้เพียงโหมดเดียวเท่านั้น"
     ],
-    correct: 3,
-    explain: [
-      "process เดิมไม่ได้ถูกลบ เพียงแค่ถูกสลับออกจาก CPU ชั่วคราว",
-      "การ save/restore ไม่ใช่การสุ่ม แต่เป็นการเก็บค่าที่แน่นอนของแต่ละ process",
-      "ไม่เกี่ยวกับความเร็ว CPU โดยตรง เป็นเรื่องความถูกต้องของการสลับงาน",
-      "ถูก — การ save context ไว้ทำให้เมื่อ OS สลับกลับมาที่ process เดิม มันจะทำงานต่อได้ราวกับไม่เคยถูกขัดจังหวะ"
+    "correct": 0,
+    "explain": [
+      "ถูก — การจำกัดสิทธิ์คือหัวใจของ limited direct execution และเป้าหมาย protection",
+      "ผิด — ความเร็วไม่ใช่เหตุผลของการแยกโหมด",
+      "ผิด — kernel space และ user space ถูกแยกจากกัน",
+      "ผิด — compiler ไม่ได้เป็นข้อจำกัดในเรื่องนี้"
     ]
   },
   {
-    type: "understand",
-    q: "ข้อใดอธิบายความแตกต่างระหว่างสถานะ \"Ready\" กับ \"Blocked\" ของ process ได้ถูกต้อง?",
-    choices: [
-      "Ready คือพร้อมแต่ยังไม่ถูกเลือก ส่วน Blocked คือกำลังรอเหตุการณ์อยู่",
-      "ทั้งสองสถานะมีความหมายเหมือนกันทุกประการ",
-      "Ready คือกำลังใช้ CPU อยู่ ส่วน Blocked คือพร้อมใช้ CPU",
-      "Blocked หมายถึง process ถูกลบออกจากระบบไปแล้ว"
+    "type": "understand",
+    "q": "`fork()` กับ `exec()` ต่างกันอย่างไร?",
+    "choices": [
+      "fork เปลี่ยนโปรแกรมใน process เดิม ส่วน exec สร้าง process ใหม่",
+      "fork สร้าง process ใหม่ที่เป็นสำเนาของ parent ส่วน exec แทนที่โปรแกรมใน process เดิมโดยไม่สร้างใหม่",
+      "ทั้งสองสร้าง process ใหม่ ต่างกันแค่จำนวน argument",
+      "fork ใช้ได้เฉพาะใน kernel mode ส่วน exec ใช้ได้เฉพาะใน user mode"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — ตรงกับนิยามในสไลด์ทั้งสองสถานะ",
-      "สองสถานะนี้ต่างกันชัดเจนตามที่สไลด์อธิบาย",
-      "สลับความหมายกับ Running และ Ready ผิด",
-      "Blocked ไม่ใช่การถูกลบ เพียงแค่ยังทำงานต่อไม่ได้จนกว่าเหตุการณ์ที่รอจะเกิดขึ้น"
+    "correct": 1,
+    "explain": [
+      "ผิด — สลับหน้าที่กัน",
+      "ถูก — fork ให้ child ที่เหมือน parent ทุกประการ ส่วน exec คง PID เดิมแต่เปลี่ยนเนื้อในเป็นโปรแกรมใหม่",
+      "ผิด — exec ไม่ได้สร้าง process ใหม่",
+      "ผิด — ทั้งสองเป็น system call ที่โปรแกรมผู้ใช้เรียกได้"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใดโปรแกรมทั่วไป (user mode) จึงไม่สามารถเข้าถึงทรัพยากรระบบ (เช่น เขียนดิสก์) ได้โดยตรง ต้องผ่าน system call เท่านั้น?",
-    choices: [
-      "เพราะโปรแกรมทั่วไปไม่รู้วิธีเขียนโค้ดสำหรับเข้าถึงฮาร์ดแวร์",
-      "เพราะ system call ทำงานเร็วกว่าการเข้าถึงโดยตรงเสมอ",
-      "เพื่อความปลอดภัย ป้องกันโปรแกรมทำอันตรายต่อระบบ",
-      "เพราะฮาร์ดแวร์ไม่รองรับการเข้าถึงโดยตรงในทุกกรณี"
+    "type": "understand",
+    "q": "ทำไม child ที่แก้ค่าตัวแปร x แล้ว parent ยังเห็นค่าเดิม?",
+    "choices": [
+      "เพราะ parent อ่านค่า x จาก disk ใหม่ทุกครั้ง",
+      "เพราะ wait() คืนค่าตัวแปรกลับไปเป็นค่าเดิมก่อน",
+      "เพราะ child มี address space และ PCB เป็นของตัวเองแยกจาก parent",
+      "เพราะตัวแปร local จะถูกล้างค่าเมื่อเกิด context switch"
     ],
-    correct: 2,
-    explain: [
-      "ไม่เกี่ยวกับความสามารถในการเขียนโค้ด แต่เป็นเรื่องของสิทธิ์การเข้าถึง",
-      "ความเร็วไม่ใช่เหตุผลหลักที่สไลด์กล่าวถึง เป็นเรื่องความปลอดภัยมากกว่า",
-      "ถูก — Dual mode และ system call มีไว้เพื่อความปลอดภัยของระบบและโปรแกรมอื่น ไม่ใช่เพราะข้อจำกัดทางเทคนิคอย่างเดียว",
-      "ไม่ตรงกับเหตุผลที่สไลด์อธิบาย ซึ่งเน้นเรื่องการป้องกันมากกว่าข้อจำกัดฮาร์ดแวร์"
+    "correct": 2,
+    "explain": [
+      "ผิด — ค่าตัวแปรอยู่ใน memory ไม่ได้อ่านซ้ำจาก disk",
+      "ผิด — wait() แค่รอ child จบ ไม่ยุ่งกับค่าตัวแปร",
+      "ถูก — เมื่อ fork แล้ว stack, heap, data และ text ของ child แยกจาก parent การแก้ค่าฝั่งหนึ่งจึงไม่กระทบอีกฝั่ง",
+      "ผิด — context switch เก็บและคืนค่า register ไม่ใช่ล้างตัวแปร"
     ]
   },
   {
-    type: "understand",
-    q: "เหตุใด PCB จึงจำเป็นสำหรับ OS ในการทำ scheduling?",
-    choices: [
-      "เพราะ PCB ทำให้โปรแกรมรันเร็วขึ้นโดยตรง",
-      "เพราะ PCB เก็บสถานะแต่ละ process ทำให้ OS รู้ว่าจะเลือกตัวไหนมารันต่อ",
-      "เพราะ PCB คือ address space ของ process",
-      "เพราะ PCB ใช้แทน system call ได้ทั้งหมด"
+    "type": "understand",
+    "q": "ทำไมบรรทัดที่อยู่หลัง `execlp()` ที่เรียกสำเร็จจึงไม่ถูกรัน?",
+    "choices": [
+      "เพราะ execlp ทำให้ process ถูก kill ทันที",
+      "เพราะ compiler ตัดโค้ดหลัง exec ออกตอนแปลโปรแกรม",
+      "เพราะบรรทัดนั้นอยู่ในฝั่ง parent ไม่ใช่ child",
+      "เพราะโค้ดของ process ถูกแทนที่ด้วยโปรแกรมใหม่ทั้งหมด จึงไม่มีอะไรให้กลับมารันต่อ"
     ],
-    correct: 1,
-    explain: [
-      "PCB ไม่ได้ทำให้โปรแกรมรันเร็วขึ้น เป็นแค่โครงสร้างเก็บข้อมูล",
-      "ถูก — สไลด์ระบุว่า OS ต้องรู้สถานะของแต่ละ process (ผ่าน PCB) เพื่อ schedule ได้อย่างถูกต้อง",
-      "PCB กับ address space เป็นคนละส่วนกัน PCB เก็บข้อมูลเกี่ยวกับ process ไม่ใช่หน่วยความจำที่ process ใช้รัน",
-      "PCB กับ system call เป็นแนวคิดคนละเรื่องกัน ใช้แทนกันไม่ได้"
+    "correct": 3,
+    "explain": [
+      "ผิด — process ยังอยู่ (PID เดิม) เพียงแต่เนื้อในเปลี่ยน",
+      "ผิด — compiler ไม่ได้ตัดโค้ดส่วนนั้นออก",
+      "ผิด — ในตัวอย่างบรรทัดนั้นอยู่ในฝั่ง child เหมือนกัน",
+      "ถูก — exec ที่สำเร็จจะไม่ return เพราะภาพของโปรแกรมเดิมถูกเขียนทับไปแล้ว"
     ]
   },
-
-  // ===== การนำไปใช้ (Application) 6 ข้อ =====
   {
-    type: "apply",
-    q: "โปรแกรมหนึ่งเรียก fork() แล้วเช็คค่า return value ได้เป็น 0 โค้ดส่วนที่ทำงานภายใต้เงื่อนไขนี้ควรถือว่าเป็นฝั่งใด?",
-    choices: [
-      "Child process (ฝั่งลูก)",
-      "Parent process (ฝั่งแม่)",
-      "ทั้ง parent และ child พร้อมกัน",
-      "ไม่มี process ใดเลย (0 ไม่ใช่ error)"
+    "type": "understand",
+    "q": "`printf()` เกี่ยวข้องกับ system call `write()` อย่างไร?",
+    "choices": [
+      "printf เป็น library call ที่ข้างในเรียก system call write ให้",
+      "printf เป็น system call ที่ทำงานแทน write ได้เลย",
+      "printf ทำงานใน kernel mode ตลอดเวลาจึงไม่ต้องใช้ write",
+      "printf และ write เป็นชื่อเรียกของฟังก์ชันเดียวกันในไลบรารีต่างเวอร์ชัน"
     ],
-    correct: 0,
-    explain: [
-      "ถูก — fork() คืนค่า 0 ให้กับ child เท่านั้น",
-      "parent จะได้ค่า PID ของ child ไม่ใช่ 0",
-      "ค่าที่ fork() คืนกลับมาต่างกันระหว่าง parent กับ child จึงใช้แยกเงื่อนไขได้ชัดเจน",
-      "0 ในที่นี้ไม่ใช่ error แต่เป็นค่าปกติที่บอกว่ากำลังอยู่ในฝั่ง child"
+    "correct": 0,
+    "explain": [
+      "ถูก — standard library ห่อ system call ไว้ให้เรียกเหมือน procedure call ธรรมดา",
+      "ผิด — printf ไม่ใช่ system call",
+      "ผิด — โค้ดผู้ใช้รันใน user mode และต้อง trap เข้า kernel เมื่อจะเขียนข้อมูลจริง",
+      "ผิด — เป็นฟังก์ชันคนละระดับกัน"
     ]
   },
   {
-    type: "apply",
-    q: "ต้องการเขียนโปรแกรมที่ให้ process ลูกรันโปรแกรมอื่น (เช่น ls) แทนที่ตัวเองหลัง fork() สำเร็จ ควรใช้ system call ใดต่อในฝั่ง child?",
-    choices: ["wait() system call", "fork() ซ้ำอีกครั้ง", "kill() system call", "exec() system call"],
-    correct: 3,
-    explain: [
-      "wait() ใช้ให้ parent รอ child ไม่ใช่ใช้เปลี่ยนโปรแกรมของ child",
-      "การ fork() ซ้ำจะสร้าง process หลานเพิ่ม ไม่ใช่การเปลี่ยนโปรแกรมของ child เอง",
-      "kill() ใช้หยุด/ฆ่า process ไม่ใช่เปลี่ยนโปรแกรม",
-      "ถูก — exec() ใช้เปลี่ยน process ปัจจุบัน (child) ให้กลายเป็นโปรแกรมใหม่ทั้งหมด"
-    ]
-  },
-  {
-    type: "apply",
-    q: "parent process ต้องการรอให้ child process พิมพ์ผลลัพธ์เสร็จก่อน แล้วค่อยพิมพ์ผลลัพธ์ของตัวเอง ควรใช้ system call ใดในฝั่ง parent?",
-    choices: ["exec() system call", "fork() system call", "wait() system call", "getpid() system call"],
-    correct: 2,
-    explain: [
-      "exec() ใช้เปลี่ยนโปรแกรม ไม่ได้ทำให้ parent รอ child",
-      "fork() ใช้สร้าง child ไม่ใช่ใช้รอให้ child ทำงานเสร็จ",
-      "ถูก — wait() ทำให้ parent หยุดรอจนกว่า child จะทำงานเสร็จก่อน",
-      "getpid() แค่คืนค่า PID ของตัวเอง ไม่เกี่ยวกับการรอ"
-    ]
-  },
-  {
-    type: "apply",
-    q: "โปรแกรม user ต้องการอ่านไฟล์จากดิสก์ ซึ่งเป็นการทำงานที่ต้องมีสิทธิ์ระดับ kernel เหตุการณ์ใดเกิดขึ้นเพื่อสลับจาก user mode ไป kernel mode?",
-    choices: [
-      "ผู้ใช้กด Ctrl+C",
-      "เกิด Trap ผ่านการเรียก system call เช่น read()",
-      "เครื่องรีสตาร์ทใหม่",
-      "โปรแกรมเปลี่ยนภาษาที่ใช้เขียน"
+    "type": "understand",
+    "q": "ทำไมวิธีรันโปรแกรมของ OS จึงเรียกว่า “Limited Direct Execution”?",
+    "choices": [
+      "เพราะรันได้เฉพาะโปรแกรมที่มีขนาดจำกัดเท่านั้น",
+      "เพราะให้โปรแกรมรันตรงบน CPU เพื่อความเร็ว แต่ถูกจำกัดสิทธิ์ไม่ให้แตะทรัพยากรระบบโดยตรง",
+      "เพราะโปรแกรมรันได้เพียงช่วงเวลาที่ timer กำหนดไว้แล้วต้องปิดตัวเอง",
+      "เพราะ OS ต้องแปลคำสั่งของโปรแกรมทีละคำสั่งก่อนส่งให้ CPU"
     ],
-    correct: 1,
-    explain: [
-      "Ctrl+C เป็นสัญญาณยกเลิกโปรแกรม ไม่ใช่กลไกสลับโหมดเพื่อทำ system call",
-      "ถูก — การเรียก system call เช่น read() จะก่อให้เกิด trap ที่สลับ CPU จาก user mode ไป kernel mode",
-      "ไม่เกี่ยวข้องกับการอ่านไฟล์ในสถานการณ์นี้เลย",
-      "ภาษาที่ใช้เขียนโปรแกรมไม่เกี่ยวกับกลไกการสลับโหมดของ CPU"
+    "correct": 1,
+    "explain": [
+      "ผิด — ไม่เกี่ยวกับขนาดของโปรแกรม",
+      "ถูก — direct execution ให้ความเร็ว ส่วนคำว่า limited มาจากการที่ต้องขอผ่าน system call เมื่อต้องการทรัพยากร",
+      "ผิด — เมื่อหมดเวลา process จะถูก deschedule ไม่ใช่ปิดตัว",
+      "ผิด — ถ้า OS ต้องแปลทีละคำสั่งก็ไม่ใช่การรันตรงบน CPU แล้ว"
     ]
   },
   {
-    type: "apply",
-    q: "process A กำลังรันอยู่ (Running) แล้วต้องรอผลลัพธ์จากการอ่านไฟล์ (I/O) จะเปลี่ยนไปอยู่สถานะใด?",
-    choices: ["Blocked (กำลังรอเหตุการณ์)", "Ready (พร้อมแต่ยังไม่ได้ใช้ CPU)", "Running ต่อไปเหมือนเดิม", "Terminated (จบการทำงานแล้ว)"],
-    correct: 0,
-    explain: [
-      "ถูก — เมื่อ process ต้องรอเหตุการณ์ เช่น I/O จะเปลี่ยนเป็นสถานะ Blocked ตามนิยามในสไลด์",
-      "Ready หมายถึงพร้อมทำงานแต่ยังไม่ถูกเลือก ไม่ตรงกับกรณีที่กำลังรอ I/O",
-      "process ไม่สามารถ Running ต่อได้ในขณะที่กำลังรอ I/O ที่ยังไม่เสร็จ",
-      "การรอ I/O ไม่ใช่การจบการทำงานของ process"
-    ]
-  },
-  {
-    type: "apply",
-    q: "ถ้าต้องออกแบบระบบที่ไม่ให้ process หนึ่งครอบครอง CPU ตลอดไปแม้จะเขียนโค้ดเป็นลูปไม่รู้จบ ควรอาศัยกลไกใดจากที่เรียนมา?",
-    choices: [
-      "fork() system call อย่างเดียว",
-      "exec() system call อย่างเดียว",
-      "PCB (Process Control Block) อย่างเดียว",
-      "Timer interrupt ร่วมกับ Context switching"
+    "type": "understand",
+    "q": "ในการ context switch มีการเก็บค่า register สองครั้ง ครั้งใดเก็บที่ไหน?",
+    "choices": [
+      "OS เก็บลง kernel stack ทั้งสองครั้ง",
+      "hardware เก็บลง PCB ทั้งสองครั้ง",
+      "hardware เก็บลง kernel stack ตอน interrupt และ OS (switch routine) เก็บลง PCB ตอนตัดสินใจสลับ",
+      "ครั้งแรกเก็บลง disk ครั้งที่สองเก็บลง heap ของ process"
     ],
-    correct: 3,
-    explain: [
-      "fork() ใช้สร้าง process ใหม่ ไม่เกี่ยวกับการควบคุมเวลาการใช้ CPU ของ process ที่มีอยู่",
-      "exec() ใช้เปลี่ยนโปรแกรมของ process เดิม ไม่เกี่ยวกับการแย่งคืน CPU",
-      "PCB เก็บข้อมูลของ process แต่ไม่ใช่กลไกที่ทำให้ OS ได้ CPU คืนมาเอง",
-      "ถูก — timer interrupt ทำให้ OS ได้ CPU คืนเป็นระยะ แล้ว context switching จะสลับไปรัน process อื่นได้อย่างปลอดภัย"
+    "correct": 2,
+    "explain": [
+      "ผิด — ครั้งที่สอง OS เก็บลงโครงสร้าง proc_t ซึ่งก็คือ PCB",
+      "ผิด — ครั้งแรกเป็นงานของ hardware ที่เก็บลง kernel stack",
+      "ถูก — แยกหน้าที่ชัดเจน: hardware เก็บเพื่อกลับเข้า process เดิมได้ ส่วน OS เก็บเพื่อสลับไป process อื่น",
+      "ผิด — ไม่มีการเขียน register ลง disk หรือ heap ในขั้นนี้"
+    ]
+  },
+  {
+    "type": "understand",
+    "q": "การเรียก `wait()` ในฝั่ง parent ช่วยเรื่องใด?",
+    "choices": [
+      "ทำให้ child รันเร็วขึ้นเพราะได้ priority สูงกว่า",
+      "ทำให้ child ใช้ address space ร่วมกับ parent ได้",
+      "ทำให้ child ไม่ถูก timer interrupt ขัดจังหวะ",
+      "ทำให้ลำดับการทำงานแน่นอนขึ้น เช่น บังคับให้ child จบหรือพิมพ์ก่อน parent"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — wait ไม่ได้เปลี่ยน priority ของ child",
+      "ผิด — address space ยังแยกกันเหมือนเดิม",
+      "ผิด — timer interrupt ยังเกิดกับทุก process",
+      "ถูก — ถ้าไม่ wait ลำดับ output จะขึ้นกับว่า scheduler เลือกใครก่อน"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "process A เรียก `read()` เพื่ออ่านไฟล์จาก disk สถานะของ A เปลี่ยนอย่างไร?",
+    "choices": [
+      "Running → Blocked ตอนเริ่ม I/O แล้ว Blocked → Ready เมื่อ I/O เสร็จ",
+      "Running → Ready ตอนเริ่ม I/O แล้ว Ready → Running เมื่อ I/O เสร็จ",
+      "Running → Blocked ตอนเริ่ม I/O แล้ว Blocked → Running ทันทีเมื่อ I/O เสร็จ",
+      "อยู่ใน Running ตลอด เพราะ I/O ทำงานขนานกับ CPU"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — I/O: initiate ทำให้ blocked และ I/O: done ส่งกลับไป Ready เพื่อรอ scheduler",
+      "ผิด — การรอ I/O ทำให้เข้าสถานะ Blocked ไม่ใช่ Ready",
+      "ผิด — จาก Blocked ต้องผ่าน Ready ก่อนเสมอ",
+      "ผิด — process ที่รอ I/O ไม่ได้ครอง CPU ต่อ"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "โปรแกรมเรียก `fork()` หนึ่งครั้งก่อนเข้าลูป แล้วเรียก `fork()` อีกสองครั้งภายในลูป สุดท้ายจะมี process ทั้งหมดกี่ตัว?",
+    "choices": [
+      "3 ตัว",
+      "4 ตัว",
+      "8 ตัว",
+      "16 ตัว"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — การนับจำนวนครั้งที่เรียก fork ไม่ใช่จำนวน process",
+      "ผิด — ทุก fork ทำให้จำนวน process เป็นสองเท่า ไม่ใช่เพิ่มทีละหนึ่ง",
+      "ถูก — fork สามครั้งทำให้จำนวนเป็น 2 × 2 × 2 = 8 เพราะ child ที่เกิดใหม่รันโค้ดส่วนที่เหลือต่อด้วย",
+      "ผิด — 16 ตัวต้องเรียก fork สี่ครั้ง"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "process หนึ่งวน infinite loop โดยไม่เรียก system call และไม่จบ OS จะได้ CPU คืนด้วยวิธีใด?",
+    "choices": [
+      "รอให้ process ยอม yield เอง",
+      "ให้ scheduler เรียก wait() ที่ process นั้น",
+      "ปล่อยให้ process รันจนหมด quota ของ heap",
+      "อาศัย timer interrupt ที่ตั้งไว้ตอน boot แล้วเข้าสู่ interrupt handler ของ OS"
+    ],
+    "correct": 3,
+    "explain": [
+      "ผิด — process ที่วนไม่จบจะไม่ yield ให้",
+      "ผิด — wait() เป็น system call ที่ process เรียกเอง ไม่ใช่สิ่งที่ scheduler สั่งได้",
+      "ผิด — การวนลูปไม่ได้ทำให้ heap หมด",
+      "ถูก — timer สร้าง interrupt ทุกไม่กี่มิลลิวินาที OS จึงได้สิทธิ์ควบคุมกลับมาและ deschedule process นั้นได้"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "เมื่อพิมพ์คำสั่งใน shell แล้ว shell รันคำสั่งนั้นให้ ลำดับการใช้ system call ที่ตรงที่สุดคือข้อใด?",
+    "choices": [
+      "shell เรียก exec เปลี่ยนตัวเองเป็นคำสั่งนั้นทันที",
+      "shell เรียก fork สร้าง child แล้ว child เรียก exec เป็นคำสั่งนั้น ส่วน shell เรียก wait รอ",
+      "shell เรียก fork สองครั้งเพื่อให้มีทั้ง parent และ child รันคำสั่งเดียวกัน",
+      "shell เรียก wait ก่อนแล้วจึง fork เมื่อคำสั่งจบ"
+    ],
+    "correct": 1,
+    "explain": [
+      "ผิด — ถ้า shell exec ตัวเอง shell จะหายไปเพราะโค้ดเดิมถูกแทนที่",
+      "ถูก — รูปแบบ fork + exec + wait ทำให้ shell ยังอยู่ ส่วน child กลายเป็นโปรแกรมที่ผู้ใช้สั่ง",
+      "ผิด — ไม่จำเป็นต้อง fork สองครั้ง และจะได้ผลซ้ำซ้อน",
+      "ผิด — wait ต้องเรียกหลังจากมี child แล้ว"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ในโค้ด `pid = fork(); if (pid > 0) { ... }` บล็อกในเงื่อนไขนี้ทำงานที่ฝั่งใด?",
+    "choices": [
+      "ฝั่ง parent เพราะ parent ได้รับ PID ของ child ซึ่งมากกว่า 0",
+      "ฝั่ง child เพราะ child ได้รับค่า PID ของตัวเอง",
+      "ทั้งสองฝั่ง เพราะ fork คืนค่าเดียวกันให้ทั้งคู่",
+      "ไม่มีฝั่งใดทำงาน เพราะ fork คืน 0 ให้ทุก process"
+    ],
+    "correct": 0,
+    "explain": [
+      "ถูก — parent ได้ PID ของ child (ค่ามากกว่า 0) ส่วน child ได้ 0 จึงเข้าฝั่ง else",
+      "ผิด — child ได้ค่า 0 ถ้าอยากรู้ PID ตัวเองต้องเรียก getpid()",
+      "ผิด — ค่าที่คืนต่างกัน นี่คือกลไกที่ทำให้แยกฝั่งได้",
+      "ผิด — ค่า 0 คืนให้เฉพาะ child"
+    ]
+  },
+  {
+    "type": "apply",
+    "q": "ต้องการให้ข้อความของ child ถูกพิมพ์ก่อนข้อความของ parent เสมอ ควรทำอย่างไร?",
+    "choices": [
+      "เพิ่ม exec() ในฝั่ง child ก่อนพิมพ์",
+      "ย้ายคำสั่ง fork() ไปไว้ท้ายโปรแกรม",
+      "ใส่ wait(NULL) ในฝั่ง parent ก่อนบรรทัดที่พิมพ์",
+      "เรียก getppid() ในฝั่ง child ก่อนพิมพ์"
+    ],
+    "correct": 2,
+    "explain": [
+      "ผิด — exec จะแทนที่โปรแกรมของ child ทำให้ข้อความไม่ถูกพิมพ์เลย",
+      "ผิด — ตำแหน่งของ fork ไม่ได้กำหนดลำดับการพิมพ์ระหว่างสอง process",
+      "ถูก — wait() ทำให้ parent หยุดรอจนกว่า child จะจบ ลำดับจึงแน่นอนแทนที่จะขึ้นกับ scheduler",
+      "ผิด — getppid() เพียงคืนค่า PID ไม่ได้ควบคุมลำดับ"
     ]
   }
 ];

@@ -139,6 +139,28 @@ def find_lessons(subj):
     return lessons
 
 
+def find_reviews(subj):
+    """standalone exam-review pages: <sum by claude>/Review-*/<page>.html"""
+    reviews = []
+    for f in sorted(p for p in subj["dir"].iterdir() if p.is_dir() and p.name.startswith("Review-")):
+        pages = sorted(f.glob("*.html"))
+        if not pages:
+            continue
+        text = pages[0].read_text(encoding="utf-8")
+        m = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S)
+        title = re.sub(r"<[^>]+>", "", m.group(1)).strip() if m else f.name
+        heads = [re.sub(r"<[^>]+>", "", h).strip() for h in re.findall(r"<h2[^>]*>(.*?)</h2>", text, re.S)]
+        reviews.append({"slug": slug_path(f.name), "label": f.name, "title": title, "html": text, "heads": heads})
+    return reviews
+
+
+REVIEW_BAR = """<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← {subject}</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>"""
+
+
 def copy_image(src: Path, dst: Path):
     dst.parent.mkdir(parents=True, exist_ok=True)
     if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
@@ -259,7 +281,25 @@ def build():
             search_index.append({"s": subj["code"], "t": les["title"], "u": f"{subj['slug']}/{les['slug']}/index.html",
                                  "h": [t for _, t in toc]})
 
+        reviews = find_reviews(subj)
+        for rv in reviews:
+            rdir = sdir / rv["slug"]
+            rdir.mkdir(parents=True, exist_ok=True)
+            bar = REVIEW_BAR.format(subject=esc(f"{subj['icon']} {subj['code']}"))
+            rh = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, rv["html"], count=1)
+            (rdir / "index.html").write_text(rh, encoding="utf-8")
+            search_index.append({"s": subj["code"], "t": rv["title"], "u": f"{subj['slug']}/{rv['slug']}/index.html",
+                                 "h": rv["heads"]})
+
         # subject page
+        review_rows = "".join(
+            f'<li class="lesson-row"><span class="num">⭐</span>'
+            f'<a class="lesson-link" href="{rv["slug"]}/index.html"><small>{esc(rv["label"])}</small>'
+            f'<span>{esc(rv["title"])}</span></a>'
+            f'<div class="row-actions"><a class="chip chip-quiz" href="{rv["slug"]}/index.html">🎯 รีวิว + โจทย์</a></div></li>'
+            for rv in reviews)
+        review_block = (f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>'
+                        f'<h2 style="margin:24px 0 8px">📖 สรุปรายบท</h2>' if reviews else "")
         rows = ""
         for n, les in enumerate(lessons, 1):
             qlink = (f'<a class="chip chip-quiz" href="{les["slug"]}/quiz.html">📝 Quiz</a>' if les["quiz"] else "")
@@ -279,7 +319,7 @@ def build():
       <p>{esc(subj['th'])} · {len(lessons)} บทสรุป · {nq} แบบทดสอบ</p>
     </div>
   </section>
-  <ol class="lesson-list">{rows}</ol>
+  {review_block}<ol class="lesson-list">{rows}</ol>
 </main>"""
         (sdir / "index.html").write_text(page(f"{subj['code']} {subj['name']}", sbody, 1, subj["accent"]),
                                          encoding="utf-8")
