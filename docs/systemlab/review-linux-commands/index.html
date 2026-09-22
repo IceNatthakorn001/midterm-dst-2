@@ -1,0 +1,662 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ITDS212 Linux Commands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#ffffff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--warn:#b4471c;--warn-soft:#fdeee6;--ok:#1e7a4c;--ok-soft:#e5f5ec;--star:#b8860b;--code:#f0efe9;--extra:#7a5bc0;--extra-soft:#f1ecff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--warn:#ff9d6e;--warn-soft:#3a2419;--ok:#6fd6a0;--ok-soft:#173327;--star:#e6c25a;--code:#26282f;--extra:#b9a2ff;--extra-soft:#2a2440}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--warn:#ff9d6e;--warn-soft:#3a2419;--ok:#6fd6a0;--ok-soft:#173327;--star:#e6c25a;--code:#26282f;--extra:#b9a2ff;--extra-soft:#2a2440}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Sarabun","Leelawadee UI",system-ui,sans-serif;line-height:1.7;font-size:16px}
+nav.top{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:8px 16px}
+nav.top .links{overflow-x:auto;white-space:nowrap}
+nav.top a{color:var(--muted);text-decoration:none;font-size:14px;margin-right:14px;padding:4px 0}
+nav.top a:hover{color:var(--accent)}
+#q{width:100%;max-width:980px;display:block;margin:0 auto 6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+header.hero h1{font-size:28px;line-height:1.3;margin:8px 0 4px}
+header.hero p{color:var(--muted);margin:0 0 6px}
+h2{font-size:23px;margin:48px 0 12px;padding-top:8px;border-top:2px solid var(--line)}
+h2 .tag{font-size:13px;font-weight:600;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:99px;vertical-align:middle;margin-left:6px}
+h3{font-size:18px;margin:26px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft);white-space:nowrap}
+table.cmd td:first-child{white-space:nowrap}
+table.cmd td:last-child{white-space:nowrap;color:var(--muted);font-size:13px}
+code,pre{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+td pre,.card pre{margin:0;background:var(--code);padding:6px 8px;border-radius:6px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.star{color:var(--star);font-weight:700}
+.ex{font-size:12px;font-weight:600;color:var(--extra);background:var(--extra-soft);padding:0 6px;border-radius:99px;white-space:nowrap}
+.tip,.warn,.ok{border-radius:8px;padding:10px 14px;margin:12px 0}
+.tip{background:var(--accent-soft)}
+.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+.ok{background:var(--ok-soft);border-left:4px solid var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chips code{font-size:13px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.idx td:first-child{white-space:nowrap;font-weight:600}
+#nores{display:none;color:var(--muted);margin:30px 0;text-align:center}
+.hide{display:none!important}
+@media (max-width:640px){
+table.cmd thead{display:none}
+table.cmd,table.cmd tbody{display:block;border:none;background:none}
+table.cmd tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:10px;margin:0 0 10px;padding:8px 12px}
+table.cmd td{display:block;border:none;padding:3px 0}
+table.cmd td:first-child{white-space:normal;font-size:16px}
+table.cmd td:last-child{text-align:right}
+}
+</style></head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<nav class="top">
+<input id="q" type="search" placeholder="🔍 ค้นหาคำสั่งหรือความหมาย เช่น chmod, สิทธิ์, mount, PID …" autocomplete="off">
+<div class="links">
+<a href="#idx">ตามบท</a><a href="#s1">ไดเรกทอรี</a><a href="#s2">ไฟล์</a><a href="#s3">ดู/ค้นไฟล์</a><a href="#s4">สัญลักษณ์</a><a href="#s5">ผู้ใช้</a><a href="#s6">สิทธิ์</a><a href="#s7">nano/vim</a><a href="#s8">Storage</a><a href="#s9">Process</a><a href="#s10">Memory</a><a href="#s11">ตัวแปร</a><a href="#s12">Windows</a><a href="#s13">คู่สับสน</a>
+</div>
+</nav>
+
+<main>
+<header class="hero">
+<h1>รวมคำสั่ง Linux ทั้งหมด — ITDS212 Computer System Lab</h1>
+<p>ทุกคำสั่งจาก Lecture + Lab สัปดาห์ L1–L9 จัดกลุ่มตามหน้าที่ พร้อมความหมายและตัวอย่างการใช้ (ผลลัพธ์ในตัวอย่างมาจากสไลด์/แลป)</p>
+<p><span class="star">⭐</span> = ออกสอบบ่อย · <span class="ex">เพิ่ม</span> = ไม่ได้อยู่ในสไลด์ แต่เกี่ยวข้องและใช้จริงบ่อย · คอลัมน์ขวาสุด = บทที่เรียน</p>
+</header>
+
+<div class="card">
+<b>รูปแบบคำสั่ง:</b> <code>คำสั่ง [option] [argument]</code> เช่น <code>ls -l /home</code> · option ขึ้นต้นด้วย <code>-</code> และรวมกันได้ (<code>ls -la</code> = <code>ls -l -a</code>)<br>
+<b>อ่าน prompt:</b> <code>dst@dst-vm:~$</code> = user <code>dst</code> @ เครื่อง <code>dst-vm</code> : อยู่ที่ <code>~</code> (home) · <code>$</code> = ผู้ใช้ธรรมดา, <code>#</code> = root<br>
+<b>ในตัวอย่าง:</b> บรรทัดที่ขึ้นต้น <code>$</code> คือสิ่งที่พิมพ์ ส่วน <code>→</code> คือผลลัพธ์
+</div>
+
+<!-- ================= INDEX ================= -->
+<h2 id="idx">คำสั่งแยกตามบท <span class="tag">ภาพรวม</span></h2>
+<div class="tw"><table class="idx">
+<thead><tr><th>บท</th><th>หัวข้อ</th><th>คำสั่งที่เรียน</th></tr></thead>
+<tbody>
+<tr><td>L1</td><td>VirtualBox + Ubuntu</td><td><code>ls</code></td></tr>
+<tr><td>L2</td><td>คำสั่งพื้นฐาน</td><td><code>pwd</code> <code>ls -l/-a/-la</code> <code>cd</code> <code>mkdir</code> <code>rmdir</code> <code>echo</code> <code>&gt;</code> <code>|</code> <code>mv</code> <code>grep</code> <code>nano</code> <code>cat</code> <code>more</code> <code>tail</code> <code>cp</code> <code>rm</code> <code>rm -i</code> <code>*</code> · Windows: <code>cmd</code> <code>dir</code> <code>exit</code></td></tr>
+<tr><td>L3</td><td>File Management</td><td><code>wget</code> <code>head</code> <code>tail -n</code> <code>file</code> <code>touch</code> <code>echo -n</code> <code>?</code> · relative/absolute path · Windows: <code>dir /p</code> <code>cd \</code> <code>del</code> <code>copy</code> <code>ren</code> <code>type</code></td></tr>
+<tr><td>L4</td><td>User Management</td><td><code>su</code> <code>sudo</code> <code>whoami</code> <code>useradd</code> <code>passwd</code> <code>usermod</code> <code>userdel</code> <code>groupadd</code> <code>id</code> · ไฟล์ <code>/etc/passwd</code> <code>/etc/shadow</code> <code>/etc/group</code></td></tr>
+<tr><td>L5</td><td>File Permissions</td><td><code>chmod</code> (ตัวเลข/ตัวอักษร) <code>chown</code> <code>chgrp</code> <code>groups</code> <code>usermod -a -G</code></td></tr>
+<tr><td>L6</td><td>nano + vim</td><td><code>less</code> <code>nano</code> (คีย์ลัด) <code>vim</code> (3 modes) <code>sudo apt update</code> <code>sudo apt install</code></td></tr>
+<tr><td>L7</td><td>Storage</td><td><code>ls -l /dev</code> <code>lsblk</code> <code>fdisk</code> <code>parted</code> <code>mkfs.ext4</code> <code>mount</code> <code>umount</code> <code>blkid</code> <code>df -Th</code> <code>df -i</code> <code>fsck -N</code> <code>dmesg</code> <code>mkdir -p</code> <code>cp -v</code></td></tr>
+<tr><td>L8</td><td>Process + Memory</td><td><code>ps</code> <code>ps -f/-ef/-aux/-l</code> <code>top</code> <code>top -o %MEM</code> <code>&amp;</code> <code>fg</code> <code>kill</code> <code>kill -9</code> <code>nice</code> <code>renice</code> <code>free -mt</code> <code>vmstat -s/-D</code> <code>/proc/meminfo</code> · Windows: <code>systeminfo</code></td></tr>
+<tr><td>L9</td><td>Observability + Env vars</td><td><code>htop</code> <code>ps -ux</code> <code>pgrep</code> <code>kill -l</code> <code>echo $VAR</code> <code>env</code> <code>printenv</code> <code>set</code> <code>unset</code> <code>export</code> <code>/etc/environment</code></td></tr>
+</tbody></table></div>
+
+<!-- ================= S1 ================= -->
+<section>
+<h2 id="s1">1. การเดินใน directory <span class="tag">L2–L3</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>pwd</code> <span class="star">⭐</span></td><td><b>print working directory</b> แสดง path ของ directory ที่อยู่ตอนนี้</td><td><pre>$ pwd
+→ /home/itcso</pre></td><td>L2</td></tr>
+<tr><td><code>ls</code></td><td><b>list</b> แสดงชื่อไฟล์และ directory ใน directory ปัจจุบัน (หรือที่ระบุ) · directory แสดงเป็นสีน้ำเงิน</td><td><pre>$ ls
+→ Desktop Documents Downloads Music Pictures Public snap Templates Videos
+$ ls /
+→ bin boot dev etc home lib ... usr var</pre></td><td>L1–L2</td></tr>
+<tr><td><code>ls -l</code> <span class="star">⭐</span></td><td>แสดงแบบ<b>รายละเอียด</b> 7 ส่วน: type+permission · link count · owner · group · size (bytes) · modification time · name</td><td><pre>$ ls -l foo.txt
+→ -rw-r--r-- 1 ittipon muict 68524 2011-12-19 07:18 foo.txt</pre>ตัวแรก <code>-</code> ไฟล์ · <code>d</code> directory · <code>l</code> symbolic link</td><td>L2, L5</td></tr>
+<tr><td><code>ls -a</code></td><td>แสดง<b>ไฟล์ซ่อน</b>ด้วย (ชื่อขึ้นต้นด้วย <code>.</code>)</td><td><pre>$ ls -a
+→ .  ..  .bash_history  .bashrc  .cache  .profile  Desktop ...</pre></td><td>L2</td></tr>
+<tr><td><code>ls -la</code></td><td>รายละเอียด <b>+</b> ไฟล์ซ่อน</td><td><pre>$ ls -la
+→ total 80
+  drwxr-xr-x 15 itcso itcso 4096 ... .</pre></td><td>L2</td></tr>
+<tr><td><code>ls -ld ชื่อdir</code> <span class="ex">เพิ่ม</span></td><td>ดูข้อมูล/สิทธิ์ของ <b>ตัว directory เอง</b> (ไม่ใช่ของข้างใน)</td><td><pre>$ ls -ld /home/test1
+→ drwxr-xr-x 2 test1 test1 4096 ... /home/test1</pre></td><td>L4</td></tr>
+<tr><td><code>ls file*</code></td><td>ใช้ wildcard เลือกเฉพาะชื่อที่ตรง</td><td><pre>$ ls file*
+→ file1 file2</pre></td><td>L2</td></tr>
+<tr><td><code>cd ชื่อ</code></td><td><b>change directory</b> เข้า directory ลูก</td><td><pre>$ cd Music      → /home/itcso/Music</pre></td><td>L2–L3</td></tr>
+<tr><td><code>cd</code> / <code>cd ~</code> <span class="star">⭐</span></td><td>กลับ <b>home directory</b> ของตัวเอง</td><td><pre>$ cd
+$ pwd  → /home/itcso</pre></td><td>L2</td></tr>
+<tr><td><code>cd ..</code> <span class="star">⭐</span></td><td>ขึ้นไป directory แม่ 1 ชั้น</td><td><pre>(อยู่ /home/itcso) $ cd ..     → /home
+(อยู่ /home/itcso) $ cd ../..  → /</pre></td><td>L2–L3</td></tr>
+<tr><td><code>cd /</code></td><td>ไปที่ <b>root directory</b> (จุดเริ่มต้นของทั้งระบบ)</td><td><pre>$ cd /
+$ pwd  → /</pre></td><td>L2</td></tr>
+<tr><td><code>cd</code> + <b>relative path</b> <span class="star">⭐</span></td><td>path ที่เริ่มจาก<b>ตำแหน่งปัจจุบัน</b> (ไม่ขึ้นต้นด้วย <code>/</code> ใช้ <code>..</code>)</td><td><pre>(อยู่ /usr/bin)
+$ cd ../../home/itcso/Music/
+(อยู่ /home/itcso)
+$ cd ../../usr/bin      → /usr/bin</pre></td><td>L3</td></tr>
+<tr><td><code>cd</code> + <b>absolute path</b> <span class="star">⭐</span></td><td>path ที่เริ่มจาก <b>root <code>/</code></b> เสมอ ไปที่เดิมไม่ว่าอยู่ที่ไหน</td><td><pre>$ cd /home/itcso/Music/
+$ pwd  → /home/itcso/Music</pre></td><td>L3</td></tr>
+<tr><td><code>mkdir ชื่อ</code></td><td><b>make directory</b> สร้าง directory ใหม่</td><td><pre>$ mkdir testdirectory
+$ mkdir ict</pre></td><td>L2–L3</td></tr>
+<tr><td><code>mkdir -p path</code></td><td>สร้างพร้อม directory แม่ที่ยังไม่มี และไม่ error ถ้ามีอยู่แล้ว</td><td><pre>$ sudo mkdir -p /mnt/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>rmdir ชื่อ</code></td><td><b>remove directory</b> ลบ directory — <b>ต้องว่างเท่านั้น</b></td><td><pre>$ rmdir testdirectory</pre></td><td>L2</td></tr>
+</tbody></table></div>
+<div class="tip">💡 <b>Absolute vs Relative:</b> absolute = ที่อยู่เต็มบนซองจดหมาย (<code>/home/prakash</code>) · relative = บอกทางจากจุดที่ยืน (<code>../prakash</code>) · <code>.</code> = ที่นี่, <code>..</code> = ข้างบน, <code>~</code> = home</div>
+</section>
+
+<!-- ================= S2 ================= -->
+<section>
+<h2 id="s2">2. สร้าง / คัดลอก / ย้าย / ลบไฟล์ <span class="tag">L2–L3</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>touch ไฟล์</code> <span class="star">⭐</span></td><td>สร้าง<b>ไฟล์ว่าง</b> · ถ้าไฟล์มีอยู่แล้ว <b>เนื้อหาไม่เปลี่ยน แต่อัปเดตเวลาแก้ไข</b>เป็นเวลาปัจจุบัน</td><td><pre>$ touch test2
+$ file test2  → test2: empty</pre></td><td>L3</td></tr>
+<tr><td><code>&gt; ไฟล์</code></td><td>สร้างไฟล์ว่าง — ถ้ามีอยู่แล้วจะ<b>ล้างเนื้อหาทิ้ง</b></td><td><pre>$ &gt; test1
+$ file test1  → test1: empty</pre></td><td>L3</td></tr>
+<tr><td><code>echo "ข้อความ"</code></td><td>แสดงข้อความออกจอ</td><td><pre>$ echo "hello"  → hello</pre></td><td>L2</td></tr>
+<tr><td><code>echo "…" &gt; ไฟล์</code> <span class="star">⭐</span></td><td>เขียนข้อความลงไฟล์ (redirect output) — <b>เขียนทับ</b>ของเดิม</td><td><pre>$ echo "ict mahido test" &gt; testfile
+$ echo "Computer System LAB" &gt; test4
+$ file test4  → test4: ASCII text</pre></td><td>L2–L3</td></tr>
+<tr><td><code>echo -n &gt; ไฟล์</code></td><td><code>-n</code> = ไม่ขึ้นบรรทัดใหม่ → ได้ไฟล์ว่างสนิท (วิธีที่ 3 ของการสร้างไฟล์ว่าง)</td><td><pre>$ echo -n &gt; test3
+$ file test3  → test3: empty</pre></td><td>L3</td></tr>
+<tr><td><code>cp ต้นทาง ปลายทาง</code> <span class="star">⭐</span></td><td><b>copy</b> คัดลอกไฟล์ (ต้นฉบับยังอยู่)</td><td><pre>$ cp myfile file1
+$ cp test4 myfile4
+$ sudo cp foo /home/test3   → สำเนาเป็นของ root root</pre></td><td>L2–L3, L5</td></tr>
+<tr><td><code>cp -v</code></td><td>verbose แสดงว่าคัดลอกอะไรไปไหน (ใช้สำรองไฟล์ก่อนแก้)</td><td><pre>$ sudo cp -v /etc/fstab /etc/fstab.backup
+→ '/etc/fstab' -&gt; '/etc/fstab.backup'</pre></td><td>L7</td></tr>
+<tr><td><code>mv ต้นทาง ปลายทาง</code> <span class="star">⭐</span></td><td><b>move</b> เปลี่ยนชื่อ หรือย้ายไฟล์ (ต้นฉบับหายไป)</td><td><pre>$ mv testfile myfile
+$ mv test5 myfile5</pre></td><td>L2–L3</td></tr>
+<tr><td><code>rm ไฟล์</code></td><td><b>remove</b> ลบไฟล์ — <b>ไม่มีถังขยะ</b> ลบแล้วหายเลย</td><td><pre>$ rm file1
+$ rm test?   → ลบ test1 test2 test4</pre></td><td>L2–L3</td></tr>
+<tr><td><code>rm -i ไฟล์</code></td><td>ลบแต่<b>ถามยืนยันก่อน</b></td><td><pre>$ rm -i file2
+→ rm: remove regular file 'file2'? y</pre></td><td>L2–L3</td></tr>
+<tr><td><code>rm -r dir</code> <span class="ex">เพิ่ม</span></td><td>ลบ directory ที่<b>ไม่ว่าง</b>พร้อมของข้างใน (rmdir ทำไม่ได้)</td><td><pre>$ rm -r olddir</pre></td><td>–</td></tr>
+<tr><td><code>file ไฟล์</code></td><td>บอก<b>ชนิดไฟล์จากเนื้อหาข้างใน</b> (ไม่ดูนามสกุล)</td><td><pre>$ file historyofict.txt → Unicode text, UTF-8 text
+$ file /usr/bin/ls      → ELF 64-bit LSB pie executable ...
+$ file ../Music/        → directory
+$ file test1            → empty
+$ file test4            → ASCII text</pre></td><td>L3</td></tr>
+<tr><td><code>wget URL</code></td><td><b>web get</b> ดาวน์โหลดไฟล์จากเว็บผ่าน command line</td><td><pre>$ wget http://www.ict.mahidol.ac.th/historyofict.txt
+→ 302 Found → 200 OK
+→ 'historyofict.txt' saved [3754/3754]</pre></td><td>L3</td></tr>
+</tbody></table></div>
+<div class="warn">⚠️ <b>สร้างไฟล์ว่างได้ 3 วิธี:</b> <code>&gt; file</code> · <code>touch file</code> · <code>echo -n &gt; file</code> — แต่กับไฟล์ที่มีอยู่แล้ว <code>touch</code> แค่อัปเดตเวลา ส่วน <code>&gt;</code> ล้างเนื้อหาทิ้ง</div>
+</section>
+
+<!-- ================= S3 ================= -->
+<section>
+<h2 id="s3">3. ดูเนื้อหาไฟล์ และค้นหาข้อความ <span class="tag">L2, L3, L6</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>cat ไฟล์</code> <span class="star">⭐</span></td><td>แสดง<b>ทั้งไฟล์รวดเดียว</b> เหมาะกับไฟล์สั้น</td><td><pre>$ cat myfile
+→ ict
+  mahidol university
+  test
+  day1</pre></td><td>L2–L3</td></tr>
+<tr><td><code>more ไฟล์</code></td><td>แสดง<b>ทีละหน้า เดินหน้าได้ทางเดียว</b> · Space = หน้าถัดไป, Enter = ทีละบรรทัด, q = ออก</td><td><pre>$ more historyofict.txt
+→ ... --More--(24%)</pre></td><td>L2–L3</td></tr>
+<tr><td><code>less ไฟล์</code></td><td>แสดงทีละหน้า แต่<b>เลื่อนได้สองทาง</b> (ขึ้น-ลง) · q = ออก</td><td><pre>$ less historyofict.txt</pre></td><td>L6</td></tr>
+<tr><td><code>head ไฟล์</code></td><td>แสดง<b>ส่วนต้น</b> ค่าเริ่มต้น <b>10 บรรทัด</b> · <code>-n</code> กำหนดจำนวน</td><td><pre>$ head historyofict.txt      → 10 บรรทัดแรก
+$ head -3 historyofict.txt   → 3 บรรทัดแรก</pre></td><td>L3</td></tr>
+<tr><td><code>tail ไฟล์</code></td><td>แสดง<b>ส่วนท้าย</b> ค่าเริ่มต้น <b>10 บรรทัด</b> (เหมาะดู log ล่าสุด)</td><td><pre>$ tail myfile
+$ tail -2 historyofict.txt   → 2 บรรทัดสุดท้าย</pre></td><td>L2–L3</td></tr>
+<tr><td><code>grep "คำ" ไฟล์</code> <span class="star">⭐</span></td><td>ค้นหาข้อความในไฟล์ แสดงบรรทัดที่เจอ · <b>case-sensitive</b> (แยกตัวพิมพ์เล็ก-ใหญ่) · เจอคำที่เป็นส่วนของคำอื่นด้วย</td><td><pre>$ grep ict myfile        → ict mahido test
+$ grep lab myfile4       → (ไม่เจอ)
+$ grep LAB myfile4       → Computer System LAB
+$ grep da file1          → day1</pre></td><td>L2–L3</td></tr>
+<tr><td><code>grep คำ ไฟล์หลายไฟล์</code></td><td>ค้นหลายไฟล์ด้วย wildcard → มี <b><code>ชื่อไฟล์:</code></b> นำหน้าบรรทัด</td><td><pre>$ grep LAB myfile?
+→ myfile4:Computer System LAB
+  myfile5:test file for Computer System LAB
+$ grep ict *
+→ file1:ict
+  myfile:ict</pre></td><td>L2–L3</td></tr>
+<tr><td><code>grep -i</code> <span class="ex">เพิ่ม</span></td><td>ค้นแบบ<b>ไม่สน</b>ตัวพิมพ์เล็ก-ใหญ่</td><td><pre>$ grep -i lab myfile4    → Computer System LAB</pre></td><td>–</td></tr>
+<tr><td><code>คำสั่ง | grep คำ</code> <span class="star">⭐</span></td><td>กรองผลของคำสั่งอื่นให้เหลือเฉพาะบรรทัดที่มีคำนั้น (ใช้บ่อยมาก)</td><td><pre>$ ps -f | grep bash
+$ sudo fdisk -l | grep sd
+$ df -Th | grep sd</pre></td><td>L7–L8</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= S4 ================= -->
+<section>
+<h2 id="s4">4. สัญลักษณ์พิเศษ: redirect, pipe, wildcard <span class="tag">L2–L3, L8–L9</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>สัญลักษณ์</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>&gt;</code> <span class="star">⭐</span></td><td><b>redirect output</b> ส่งผลลัพธ์ที่ปกติขึ้นจอไป<b>เขียนลงไฟล์ (ทับของเดิม)</b></td><td><pre>$ echo "test" &gt; test1
+$ ls -l | cat &gt; file2</pre></td><td>L2</td></tr>
+<tr><td><code>&gt;&gt;</code> <span class="ex">เพิ่ม</span></td><td>redirect แบบ<b>ต่อท้าย</b>ไฟล์ ไม่ลบของเดิม</td><td><pre>$ echo "day2" &gt;&gt; myfile</pre></td><td>–</td></tr>
+<tr><td><code>|</code> <span class="star">⭐</span></td><td><b>pipe</b> ส่งผลลัพธ์ของคำสั่งซ้ายไปเป็น input ของคำสั่งขวา</td><td><pre>$ ls -l | more
+$ cat /proc/meminfo | more</pre></td><td>L2</td></tr>
+<tr><td><code>*</code></td><td>wildcard แทนตัวอักษร<b>อะไรก็ได้ กี่ตัวก็ได้</b></td><td><pre>$ ls file*     → file1 file2
+$ grep ict *   → ค้นทุกไฟล์</pre></td><td>L2</td></tr>
+<tr><td><code>?</code></td><td>wildcard แทนตัวอักษร<b>1 ตัวพอดี</b></td><td><pre>$ rm test?     → ลบ test1 test2 test4 (ไม่ลบ myfile4)</pre></td><td>L3</td></tr>
+<tr><td><code>.</code> / <code>..</code></td><td>directory ปัจจุบัน / directory แม่</td><td><pre>$ cd ..</pre></td><td>L2</td></tr>
+<tr><td><code>~</code></td><td>home directory ของตัวเอง</td><td><pre>$ cd ~/Music</pre></td><td>L2–L3</td></tr>
+<tr><td><code>/</code></td><td>root directory และตัวคั่น path (Windows ใช้ <code>\</code>)</td><td><pre>/home/itcso/Music</pre></td><td>L2</td></tr>
+<tr><td><code>&amp;</code> <span class="star">⭐</span></td><td>ต่อท้ายคำสั่ง = รันเป็น <b>background process</b> · ตอบกลับ <code>[job] PID</code></td><td><pre>$ ls -l | more &amp;
+→ [1] 5415</pre></td><td>L8</td></tr>
+<tr><td><code>$ชื่อ</code></td><td>ดึง<b>ค่า</b>ของตัวแปร</td><td><pre>$ echo $HOME  → /home/sudsanguan</pre></td><td>L9</td></tr>
+</tbody></table></div>
+<div class="tip">💡 <b>ทำไม <code>ls -l | cat &gt; file2</code> แล้วใน file2 เห็น file2 ขนาด 0?</b> — shell สร้างไฟล์ file2 เปล่าก่อน แล้วค่อยรัน <code>ls -l</code></div>
+</section>
+
+<!-- ================= S5 ================= -->
+<section>
+<h2 id="s5">5. จัดการผู้ใช้และกลุ่ม <span class="tag">L4–L5</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>whoami</code></td><td>แสดงชื่อผู้ใช้ปัจจุบัน</td><td><pre>$ whoami  → sudsanguan</pre></td><td>L4–L5</td></tr>
+<tr><td><code>id ชื่อ</code> <span class="star">⭐</span></td><td>แสดง <b>uid, gid และทุกกลุ่ม</b>ที่เป็นสมาชิก</td><td><pre>$ id sudsanguan
+→ uid=1000(sudsanguan) gid=1000(sudsanguan)
+  groups=1000(sudsanguan),4(adm),24(cdrom),27(sudo),...</pre></td><td>L4</td></tr>
+<tr><td><code>groups ชื่อ</code></td><td>แสดงเฉพาะรายชื่อกลุ่มของ user</td><td><pre>$ groups test2  → test2 : test2 group1 group2</pre></td><td>L5</td></tr>
+<tr><td><code>su ชื่อ</code> <span class="star">⭐</span></td><td><b>Substitute User</b> สลับไปเป็น user อื่น — ใส่<b>รหัสของคนนั้น</b> · ยังอยู่ directory เดิม · <code>exit</code> เพื่อกลับ</td><td><pre>$ su test1
+Password:
+test1@...:/home$ whoami  → test1
+test1@...:/home$ exit</pre></td><td>L4–L5</td></tr>
+<tr><td><code>sudo คำสั่ง</code> <span class="star">⭐</span></td><td><b>Super user do</b> รันคำสั่งเดียวด้วยสิทธิ์ root — ใส่<b>รหัสของตัวเอง</b> (ต้องอยู่กลุ่ม sudo)</td><td><pre>$ useradd test3
+→ useradd: Permission denied.
+  useradd: cannot lock /etc/passwd; try again later.
+$ sudo useradd test3
+[sudo] password for sudsanguan:</pre></td><td>L4–L5</td></tr>
+<tr><td><code>useradd</code> <span class="star">⭐</span></td><td>เพิ่มผู้ใช้ · option: <code>-u</code> UID · <code>-g</code> GID/ชื่อกลุ่ม · <code>-d</code> home · <code>-s</code> shell · <code>-m</code> <b>สร้าง home directory</b> · <code>-c</code> comment<br>ไม่ใส่ option: UID ถัดไป (1001), shell <code>/bin/sh</code>, <b>ไม่สร้าง home จริง</b></td><td><pre>$ sudo useradd test1
+→ test1:x:1001:1001::/home/test1:/bin/sh
+$ sudo useradd test2 -u 2000 -d /home/test2 -s /bin/bash
+→ test2:x:2000:2000::/home/test2:/bin/bash
+$ sudo useradd -m -c "Mr. Test1" -s /bin/bash test1</pre></td><td>L4–L5</td></tr>
+<tr><td><code>passwd ชื่อ</code></td><td>ตั้ง/เปลี่ยนรหัสผ่าน (ใส่ 2 ครั้ง) · เปลี่ยนของคนอื่นต้อง sudo</td><td><pre>$ sudo passwd test1
+Enter new UNIX password:
+Retype new UNIX password:
+→ passwd: password updated successfully</pre></td><td>L4–L5</td></tr>
+<tr><td><code>usermod</code> <span class="star">⭐</span></td><td>แก้ไขผู้ใช้ · option เหมือน useradd + <code>-e YYYY-MM-DD</code> วันหมดอายุ · <code>-L</code> lock · <code>-U</code> unlock</td><td><pre>$ sudo usermod -c "Dr. Thitinan" test1
+→ test1:x:1001:1001:Dr. Thitinan:/home/test1:/bin/sh
+$ sudo usermod -d /home/test02 test1</pre></td><td>L4</td></tr>
+<tr><td><code>usermod -a -G กลุ่ม ชื่อ</code> <span class="star">⭐</span></td><td>เพิ่ม user เข้ากลุ่มเสริม · <code>-a</code> = append (ไม่ลบกลุ่มเดิม) · ถ้าลืม <code>-a</code> จะหลุดจากกลุ่มเสริมเดิมทั้งหมด</td><td><pre>$ sudo usermod -a -G group1 test1
+$ sudo usermod -a -G group2 test2
+→ group2:x:2002:test2,test3</pre></td><td>L5</td></tr>
+<tr><td><code>userdel ชื่อ</code></td><td>ลบผู้ใช้ · <code>-r</code> <span class="ex">เพิ่ม</span> ลบ home directory ด้วย</td><td><pre>$ sudo userdel test2</pre></td><td>L4</td></tr>
+<tr><td><code>groupadd -g GID ชื่อ</code></td><td>สร้างกลุ่มใหม่ (<code>-g</code> กำหนด GID เอง)</td><td><pre>$ sudo groupadd -g 2000 testing
+→ testing:x:2000:
+$ sudo groupadd -g 2001 group1</pre></td><td>L4–L5</td></tr>
+<tr><td><code>more /etc/passwd</code></td><td>ดูรายชื่อผู้ใช้ (ใครก็อ่านได้)</td><td><pre>$ more /etc/passwd
+→ root:x:0:0:root:/root:/bin/bash</pre></td><td>L4</td></tr>
+<tr><td><code>sudo more /etc/shadow</code></td><td>ดูรหัสผ่านที่เข้ารหัส — <b>ต้อง sudo</b></td><td><pre>$ more /etc/shadow
+→ more: cannot open /etc/shadow: Permission denied
+$ sudo more /etc/shadow
+→ root:!:18374:0:99999:7:::</pre></td><td>L4</td></tr>
+<tr><td><code>more /etc/group</code></td><td>ดูรายชื่อกลุ่มและสมาชิก</td><td><pre>$ more /etc/group
+→ adm:x:4:syslog,sudsanguan</pre></td><td>L4–L5</td></tr>
+</tbody></table></div>
+<div class="grid2">
+<div class="card"><b>/etc/passwd — 7 ช่อง</b><pre>oracle:x:1021:1020:Oracle user:/data/network/oracle:/bin/bash
+username:pw:UID:GID:info:home:shell</pre><code>x</code> = รหัสอยู่ใน shadow · UID 0 = root, 1–99 ระบบ, 100–999 โปรแกรม, 1000+ ผู้ใช้</div>
+<div class="card"><b>/etc/shadow — 8 ช่อง</b><pre>vivek:$1$fnf...:13064:0:99999:7:::
+user:encrypted:last change:min:max:warn:inactive:expire</pre><code>*</code> = ไม่มีรหัส · <code>!</code> = ถูก lock</div>
+<div class="card"><b>/etc/group — 4 ช่อง</b><pre>etda:x:1000:test01,test02,test03
+name:pw:GID:user list</pre></div>
+</div>
+</section>
+
+<!-- ================= S6 ================= -->
+<section>
+<h2 id="s6">6. สิทธิ์ไฟล์ (Permission) <span class="tag">L5</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>chmod เลข ไฟล์</code> <span class="star">⭐</span></td><td><b>change mode</b> แบบตัวเลข — <b>r=4 w=2 x=1</b> บวกกัน 3 หลักเรียง <b>user–group–other</b> · กำหนดสิทธิ์ใหม่ทั้งหมด</td><td><pre>$ chmod 755 foo
+$ ls -l foo  → -rwxr-xr-x ... foo
+$ sudo chmod 700 test2   → drwx------
+$ sudo chmod 750 test2   → drwxr-x---</pre></td><td>L5</td></tr>
+<tr><td><code>chmod u/g/o ± r/w/x</code> <span class="star">⭐</span></td><td>แบบตัวอักษร — <b>แก้เฉพาะส่วนที่ระบุ</b> · <code>u</code> owner, <code>g</code> group, <code>o</code> other (<span class="ex">เพิ่ม</span> <code>a</code> ทุกกลุ่ม, <code>=</code> กำหนดให้เท่ากับ)</td><td><pre>$ chmod g+w sample.txt   → เพิ่ม write ให้ group
+$ chmod o-r sample.txt   → ลบ read ของ other
+$ chmod +x sample.txt    → เพิ่ม execute ทุกกลุ่ม
+$ chmod g+x foo  → -rw-r-xr-- ... foo</pre></td><td>L5</td></tr>
+<tr><td><code>chown user ไฟล์</code> <span class="star">⭐</span></td><td><b>change owner</b> เปลี่ยนเจ้าของ · <code>user:group</code> เปลี่ยนทั้งคู่ · <code>:group</code> เปลี่ยนแค่กลุ่ม · ต้อง sudo</td><td><pre>$ sudo chown test3 foo   → -rw-r-xr-- 1 test3 root ...
+$ chown games test       → owner = games
+$ chown :staff test      → group = staff
+$ sudo chown test1:test1 /home/test1</pre></td><td>L4–L5</td></tr>
+<tr><td><code>chgrp group ไฟล์</code></td><td><b>change group</b> เปลี่ยนกลุ่มของไฟล์/directory (ไม่แตะสิทธิ์ rwx)</td><td><pre>$ sudo chgrp group2 test2
+→ drwx------ 3 test2 group2 ... test2</pre></td><td>L5</td></tr>
+</tbody></table></div>
+<div class="grid2">
+<div class="card"><b>เลข ↔ สิทธิ์</b>
+<pre>0 ---   1 --x   2 -w-   3 -wx
+4 r--   5 r-x   6 rw-   7 rwx
+
+777 rwxrwxrwx   755 rwxr-xr-x
+754 rwxr-xr--   750 rwxr-x---
+700 rwx------   644 rw-r--r--
+600 rw-------   500 r-x------
+124 --x-w-r--   000 ---------</pre></div>
+<div class="card"><b>r / w / x กับไฟล์ vs directory</b>
+<table><tr><th></th><th>ไฟล์</th><th>directory</th></tr>
+<tr><td>r</td><td>อ่านเนื้อหา</td><td>ดูรายชื่อ (<code>ls</code>)</td></tr>
+<tr><td>w</td><td>แก้ไข (ไม่ใช่ลบ)</td><td>สร้าง/ลบ/เปลี่ยนชื่อไฟล์ข้างใน</td></tr>
+<tr><td>x</td><td>รันไฟล์</td><td>เข้าไปได้ (<code>cd</code>)</td></tr></table>
+ระบบเช็ก owner → group → other แล้วหยุดที่ขั้นแรกที่ตรง</div>
+</div>
+<div class="warn">⚠️ directory ที่ตั้ง <code>644</code> / <code>600</code> ไม่มี x → <b>ไม่มีใครเข้าได้แม้แต่เจ้าของ</b> (ยกเว้น root) · directory ควรใช้ 755 หรือ 700</div>
+</section>
+
+<!-- ================= S7 ================= -->
+<section>
+<h2 id="s7">7. Text editor (nano, vim) และติดตั้งโปรแกรม (apt) <span class="tag">L2, L6</span></h2>
+
+<h3>7.1 ติดตั้งโปรแกรมด้วย apt</h3>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>sudo nano /etc/apt/apt.conf</code></td><td>ตั้งค่า <b>proxy</b> ให้ apt ออกเน็ตผ่านมหาวิทยาลัยได้ (ขั้นที่ 1)</td><td><pre>Acquire::http::proxy "http://muproxy-basic.mahidol:8080/";</pre></td><td>L6</td></tr>
+<tr><td><code>sudo apt update</code> <span class="star">⭐</span></td><td>อัปเดต<b>รายการ</b> package ให้ทันสมัย (ยังไม่ติดตั้งอะไร) (ขั้นที่ 2)</td><td><pre>$ sudo apt update
+→ ... 285 packages can be upgraded</pre></td><td>L6</td></tr>
+<tr><td><code>sudo apt install ชื่อ</code> <span class="star">⭐</span></td><td>ดาวน์โหลดและติดตั้ง package (ขั้นที่ 3) ตอบ <b>Y</b></td><td><pre>$ sudo apt install vim
+$ sudo apt install gparted
+$ sudo apt install htop</pre></td><td>L6–L7, L9</td></tr>
+</tbody></table></div>
+<div class="warn">⚠️ ถ้าสั่ง <code>sudo apt install vim</code> ก่อน update จะขึ้น <code>E: Package 'vim' has no installation candidate</code></div>
+
+<h3>7.2 nano</h3>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง / คีย์</th><th>ความหมาย</th><th>หมายเหตุ</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>nano</code> / <code>nano ไฟล์</code></td><td>เปิดไฟล์ใหม่ / เปิดไฟล์ที่มีอยู่ (ถ้าไม่มีจะสร้างเมื่อบันทึก)</td><td><code>^</code> = Ctrl · <code>M</code> = Alt</td><td>L2, L6</td></tr>
+<tr><td><code>Ctrl+O</code> <span class="star">⭐</span></td><td><b>บันทึก</b> (Write Out) → ขึ้น <code>File Name to Write:</code> กด Enter</td><td></td><td>L2, L6</td></tr>
+<tr><td><code>Ctrl+X</code> <span class="star">⭐</span></td><td><b>ออก</b> (ถ้ายังไม่บันทึกจะถาม Y/N)</td><td></td><td>L2, L6</td></tr>
+<tr><td><code>Ctrl+G</code></td><td>Get Help แสดงคำสั่งทั้งหมด</td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+W</code></td><td><b>ค้นหา</b>คำ · ค้นต่อด้วย <code>Alt+W</code></td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+\</code></td><td><b>ค้นหาและแทนที่</b> · ตอบ Y (จุดนี้) / N (ข้าม) / A (ทั้งหมด)</td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+K</code> / <code>Ctrl+U</code></td><td><b>ตัด</b>ทั้งบรรทัดเก็บในบัฟเฟอร์ / <b>วาง</b></td><td>ใช้ย้ายบรรทัด</td><td>L6</td></tr>
+<tr><td><code>Ctrl+^</code> (M-A)</td><td>mark จุดเริ่มเลือกข้อความ แล้วใช้ลูกศรเลือก</td><td><code>Alt+6</code> = copy</td><td>L6</td></tr>
+<tr><td><code>Ctrl+R</code></td><td>อ่านไฟล์อื่นมา<b>แทรก</b>ที่ตำแหน่ง cursor</td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+A</code> / <code>Ctrl+E</code></td><td>ไปต้นบรรทัด / ท้ายบรรทัด</td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+Y</code> / <code>Ctrl+V</code></td><td>เลื่อนทีละหน้า (หน้า help: Y = Prev, V = Next)</td><td></td><td>L6</td></tr>
+<tr><td><code>Ctrl+D</code> · <code>Ctrl+C</code></td><td>ลบตัวอักษรที่ cursor · แสดงตำแหน่งบรรทัด</td><td></td><td>L6</td></tr>
+<tr><td><code>Alt+U</code> / <code>Alt+E</code></td><td>Undo / Redo</td><td></td><td>L6</td></tr>
+</tbody></table></div>
+
+<h3>7.3 vim — 3 modes: Command (default, กด Esc) · Insert · Visual</h3>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คีย์</th><th>ความหมาย</th><th>กลุ่ม</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>vim</code> / <code>vim ไฟล์</code></td><td>เปิดไฟล์ใหม่ / ไฟล์ที่มีอยู่ · บรรทัดล่างบอก เช่น <code>"test" 10L, 548C</code></td><td>เปิด</td><td>L6</td></tr>
+<tr><td><code>Esc</code></td><td>กลับ <b>Command Mode</b> (สับสนเมื่อไรให้กด Esc)</td><td>mode</td><td>L6</td></tr>
+<tr><td><code>i</code> <code>a</code> <code>I</code> <code>A</code> <span class="star">⭐</span></td><td>เข้า Insert: ก่อน cursor · หลัง cursor · ต้นบรรทัด · ท้ายบรรทัด</td><td>insert</td><td>L6</td></tr>
+<tr><td><code>h</code> <code>j</code> <code>k</code> <code>l</code></td><td>ซ้าย · ลง · ขึ้น · ขวา</td><td>movement</td><td>L6</td></tr>
+<tr><td><code>w</code>/<code>W</code> · <code>e</code>/<code>E</code> · <code>b</code>/<code>B</code></td><td>คำถัดไป · ท้ายคำ · ต้นคำ (ตัวใหญ่ = นับเครื่องหมายเป็นส่วนของคำ)</td><td>movement</td><td>L6</td></tr>
+<tr><td><code>0</code> · <code>^</code> · <code>$</code></td><td>ต้นบรรทัด · คำแรกของบรรทัด · ท้ายบรรทัด</td><td>movement</td><td>L6</td></tr>
+<tr><td><code>%</code> · <code>]}</code> · <code>[(</code> · <code>t</code>/<code>T</code>+ตัวอักษร</td><td>กระโดดไปวงเล็บคู่ · วงเล็บปิด } ถัดไป · วงเล็บเปิด ( ก่อนหน้า · ไปหาตัวอักษรทางขวา/ซ้าย</td><td>movement</td><td>L6</td></tr>
+<tr><td><code>H</code> <code>M</code> <code>L</code></td><td>cursor ไปบนสุด / กลาง / ล่างสุดของจอ</td><td>screen</td><td>L6</td></tr>
+<tr><td><code>Ctrl+e/d/f</code> · <code>Ctrl+y/u/b</code></td><td>เลื่อนไปทางท้ายไฟล์ 1 บรรทัด/ครึ่งหน้า/1 หน้า · ย้อนทางต้นไฟล์</td><td>screen</td><td>L6</td></tr>
+<tr><td><code>gg</code> / <code>G</code></td><td>ต้นไฟล์ / ท้ายไฟล์</td><td>screen</td><td>L6</td></tr>
+<tr><td><code>x</code> / <code>X</code></td><td>ลบตัวที่ cursor ทับ / ตัวก่อนหน้า</td><td>edit</td><td>L6</td></tr>
+<tr><td><code>s</code> / <code>S</code></td><td>ลบ 1 ตัว / ทั้งบรรทัด แล้วเข้า Insert</td><td>edit</td><td>L6</td></tr>
+<tr><td><code>dd</code> <span class="star">⭐</span> · <code>dw</code> · <code>d$</code></td><td>ลบทั้งบรรทัด · ลบ 1 คำ · ลบถึงท้ายบรรทัด (ยังอยู่ Command)</td><td>edit</td><td>L6</td></tr>
+<tr><td><code>cc</code> · <code>cw</code> · <code>c$</code> · <code>C</code></td><td>เหมือน d แต่<b>เข้า Insert ทันที</b> (c = change)</td><td>edit</td><td>L6</td></tr>
+<tr><td><code>yy</code> · <code>yw</code> · <code>5yy</code></td><td>yank (copy) ทั้งบรรทัด · 1 คำ · 5 บรรทัด</td><td>copy</td><td>L6</td></tr>
+<tr><td><code>p</code> / <code>P</code></td><td>วางใต้บรรทัด / เหนือบรรทัด (d แล้ว p = cut-paste)</td><td>paste</td><td>L6</td></tr>
+<tr><td><code>/คำ</code> + <code>n</code>/<code>N</code> <span class="star">⭐</span></td><td>ค้นหา แล้วไปจุดถัดไป / ก่อนหน้า</td><td>search</td><td>L6</td></tr>
+<tr><td><code>:%s/เดิม/ใหม่/g</code> <span class="star">⭐</span></td><td>แทนที่<b>ทั้งไฟล์</b> · <code>:s/…/g</code> = บรรทัดปัจจุบัน · ท้าย <code>gc</code> = ถามทีละจุด</td><td>replace</td><td>L6</td></tr>
+<tr><td><code>:w</code> · <code>:q</code> · <code>:wq</code> · <code>:q!</code> <span class="star">⭐</span></td><td>save · ออก · save แล้วออก · <b>ออกไม่ save</b></td><td>save/exit</td><td>L6</td></tr>
+<tr><td><code>v</code> · <code>Shift+v</code> · <code>Ctrl+v</code></td><td>Visual Mode: ทีละตัวอักษร · ทั้งบรรทัด · บล็อกสี่เหลี่ยม (แล้วกด d ลบ / y copy)</td><td>visual</td><td>L6</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= S8 ================= -->
+<section>
+<h2 id="s8">8. Storage: ดิสก์ partition file system mount <span class="tag">L7</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>dmesg | grep sd</code></td><td>ดูข้อความจาก kernel ตอน boot → เช็กว่า OS เห็นดิสก์ใหม่</td><td><pre>$ dmesg | grep sd
+→ sd 3:0:0:0: [sdb] 4194304 512-byte logical blocks: (2.15 GB/2.00 GiB)</pre></td><td>L7</td></tr>
+<tr><td><code>ls -l /dev</code></td><td>รายการอุปกรณ์ทั้งหมด · ตัวแรก <code>c</code> = character device, <code>b</code> = block device</td><td><pre>$ ls -l /dev /dev/mapper | grep '^b'
+→ brw-rw---- 1 root disk 8, 0 ... sda</pre></td><td>L7</td></tr>
+<tr><td><code>lsblk</code> <span class="star">⭐</span></td><td><b>list block devices</b> แสดงดิสก์และ partition เป็นต้นไม้ · คอลัมน์ MAJ:MIN, RM, SIZE, RO, TYPE (disk/part), MOUNTPOINTS</td><td><pre>$ lsblk
+→ sda       465.8G disk
+  └─sda1          part</pre></td><td>L7</td></tr>
+<tr><td><code>lsblk -f</code></td><td>เพิ่ม <b>FSTYPE, UUID</b>, พื้นที่ว่าง, mount point</td><td><pre>$ lsblk -f | grep sd
+→ sdb1 ext4 a510ea07-... 878M 0% /mnt/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>sudo fdisk -l</code> <span class="star">⭐</span></td><td>แสดง <b>partition table</b> ของทุกดิสก์ · Disklabel type: <code>gpt</code> หรือ <code>dos</code> (= MBR)</td><td><pre>$ sudo fdisk -l | grep sd
+→ /dev/sda1 * ... 512M b W95 FAT32
+  /dev/sda2 ... 49.5G 5 Extended
+  /dev/sda5 ... 49.5G 83 Linux</pre></td><td>L7</td></tr>
+<tr><td><code>sudo fdisk /dev/sdb</code></td><td>โหมดโต้ตอบแก้ partition · <code>m</code> เมนู · <code>n</code> เพิ่ม · <code>d</code> ลบ · <code>p</code> แสดง · <code>w</code> บันทึกแล้วออก · <code>q</code> ออกไม่บันทึก · <code>g</code> GPT ใหม่ · <code>o</code> DOS ใหม่</td><td><pre>Command (m for help): p
+→ /dev/sdb1  1  2000000 ... 976.6M 83 Linux</pre></td><td>L7</td></tr>
+<tr><td><code>sudo parted -l</code></td><td>แสดง partition ของทุกดิสก์ (ดิสก์ใหม่จะขึ้น unrecognised disk label)</td><td><pre>$ sudo parted -l
+→ Error: /dev/sdb: unrecognised disk label
+  Partition Table: unknown</pre></td><td>L7</td></tr>
+<tr><td><code>sudo parted /dev/sdb</code> <span class="star">⭐</span></td><td>เข้า prompt <code>(parted)</code> เพื่อแบ่ง partition:<br><code>mklabel msdos</code> สร้าง partition table แบบ MBR · <code>mkpart</code> สร้าง partition · <code>print</code> แสดง · <code>quit</code> ออก</td><td><pre>(parted) mklabel msdos
+(parted) mkpart primary ext4 0 1024
+(parted) mkpart primary ext4 1.0GB 1.0GB
+(parted) print
+(parted) quit</pre></td><td>L7</td></tr>
+<tr><td><code>sudo mkfs.ext4 /dev/sdb1</code> <span class="star">⭐</span></td><td><b>make file system</b> (= format) สร้าง ext4 บน partition — <b>ลบข้อมูลเดิมทั้งหมด</b></td><td><pre>$ sudo mkfs.ext4 /dev/sdb1
+→ Creating filesystem with 250000 4k blocks and 62592 inodes
+  Creating journal (4096 blocks): done
+$ sudo mkfs.ext4 /dev/sdb2
+→ Filesystem too small for a journal</pre></td><td>L7</td></tr>
+<tr><td><code>sudo blkid /dev/sdb1</code></td><td>แสดง <b>UUID</b> และ TYPE ของ partition</td><td><pre>→ /dev/sdb1: UUID="a510ea07-0463-..." TYPE="ext4" PARTUUID="52650c92-01"</pre></td><td>L7</td></tr>
+<tr><td><code>sudo mount dev dir</code> <span class="star">⭐</span></td><td><b>เชื่อม</b> partition เข้ากับ directory (mount point)</td><td><pre>$ sudo mount /dev/sdb1 /media
+$ sudo mount /dev/sdb1 /mnt/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>sudo umount dev</code> <span class="star">⭐</span></td><td><b>ตัดการเชื่อมต่อ</b> (คล้าย safe remove USB) — สะกด <b>umount</b> ไม่มี n</td><td><pre>$ sudo umount /dev/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>/etc/fstab</code></td><td>ไฟล์รายการ partition ที่ <b>mount อัตโนมัติตอน boot</b> · ใช้ UUID เพราะชื่อ /dev/sdX เปลี่ยนได้</td><td><pre>$ sudo nano /etc/fstab
+UUID=a510ea07-...  /mnt/sdb1  ext4  defaults  0  2</pre></td><td>L7</td></tr>
+<tr><td><code>df -Th</code></td><td><b>disk free</b> พื้นที่ของ file system ที่ mount อยู่ · <code>-T</code> ชนิด · <code>-h</code> หน่วยอ่านง่าย</td><td><pre>$ df -Th | grep sd
+→ /dev/sdb1 ext4 943M 24K 878M 1% /mnt/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>df -i</code></td><td>ดูการใช้ <b>inode</b> (Inodes, IUsed, IFree, IUse%)</td><td><pre>$ df -i | grep sd
+→ /dev/sdb2  128  11  117  9% /mnt/sdb2</pre></td><td>L7</td></tr>
+<tr><td><code>fsck -N /dev/sdb1</code></td><td><b>file system check</b> · <code>-N</code> = แสดงว่าจะรันอะไร<b>โดยไม่ตรวจจริง</b></td><td><pre>→ [/usr/sbin/fsck.ext2 (1) -- /dev/sdb1] fsck.ext2 /dev/sdb1</pre></td><td>L7</td></tr>
+<tr><td><code>more /proc/filesystems</code></td><td>ดู file system ที่ kernel รองรับตอนนี้ (<code>nodev</code> = เสมือน)</td><td><pre>$ cd /proc
+$ more filesystems</pre></td><td>L7</td></tr>
+</tbody></table></div>
+<div class="ok">✅ <b>ลำดับ Lab 7:</b> เพิ่มดิสก์ใน VirtualBox → <code>dmesg | grep sd</code> → <code>parted</code> (mklabel → mkpart) → <code>mkfs.ext4</code> → <code>mkdir -p /mnt/sdb1</code> → <code>blkid</code> → แก้ <code>/etc/fstab</code> → <code>mount</code> → ตรวจด้วย <code>df -Th</code>, <code>fsck -N</code>, <code>lsblk -f</code></div>
+</section>
+
+<!-- ================= S9 ================= -->
+<section>
+<h2 id="s9">9. Process <span class="tag">L8–L9</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>ps</code> <span class="star">⭐</span></td><td><b>process status</b> แสดง process ใน terminal นี้ (bash = parent, ps = child)</td><td><pre>$ ps
+→  PID TTY   TIME     CMD
+  2245 pts/0 00:00:00 bash
+  4160 pts/0 00:00:00 ps</pre></td><td>L8</td></tr>
+<tr><td><code>ps -f</code> <span class="star">⭐</span></td><td><b>full format</b> มีคอลัมน์ UID, PID, <b>PPID</b>, C, STIME, TTY, TIME, CMD → ดู parent/child ได้</td><td><pre>$ ps -f
+→ sudsang+ 2245 2235 ... bash
+  sudsang+ 5416 2245 ... ps -f</pre></td><td>L8</td></tr>
+<tr><td><code>ps -ef</code></td><td><b>ทุก process ในระบบ</b> แบบ full (PID 1 = /sbin/init, PID 2 = kthreadd)</td><td><pre>$ ps -ef | more
+→ root 1 0 ... /sbin/init splash
+  root 2 0 ... [kthreadd]</pre></td><td>L8</td></tr>
+<tr><td><code>ps -aux</code></td><td>process ของ<b>ทุก user</b> พร้อม %CPU, %MEM, STAT</td><td><pre>$ ps -aux</pre></td><td>L8–L9</td></tr>
+<tr><td><code>ps -ux</code></td><td>เฉพาะ process ที่<b>บัญชีเรา</b>เป็นเจ้าของ</td><td><pre>$ ps -ux</pre></td><td>L9</td></tr>
+<tr><td><code>ps -l</code></td><td>long format มีคอลัมน์ <b>PRI</b> (priority) และ <b>NI</b> (nice)</td><td><pre>$ ps -l
+→ 0 T 1000 6143 2245 1 90 10 ... nano</pre></td><td>L8</td></tr>
+<tr><td><code>top</code> <span class="star">⭐</span></td><td>ดู process แบบ <b>real-time อัปเดตทุก 3 วินาที</b> เรียงตามการใช้ทรัพยากร (คล้าย Task Manager) · <code>q</code> ออก · <code>Shift+M</code> เรียงตาม memory · <code>Shift+S</code> time · <code>Shift+P</code> CPU (default)</td><td><pre>$ top
+→ Tasks: 249 total, 1 running, 197 sleeping,
+         0 stopped, 7 zombie</pre></td><td>L8–L9</td></tr>
+<tr><td><code>top -o %MEM</code></td><td>เรียงตาม %MEM ตั้งแต่เปิด</td><td><pre>$ top -o %MEM
+→ gnome-shell 6.3%</pre></td><td>L8</td></tr>
+<tr><td><code>htop</code></td><td>เหมือน top แต่<b>มีสีและกราฟ</b> อ่านง่ายกว่า (ต้อง apt install)</td><td><pre>$ htop</pre></td><td>L9</td></tr>
+<tr><td><code>pgrep</code> <span class="star">⭐</span></td><td>พิมพ์ <b>PID</b> ของ process ที่ตรงเงื่อนไข · <code>-u</code> ตาม user · <code>-c</code> นับจำนวน</td><td><pre>$ pgrep emacs              → 8374
+$ pgrep -u korakoch        → 1115 1117 1129
+$ pgrep -c -u korakoch     → 3
+$ pgrep -u root</pre></td><td>L9</td></tr>
+<tr><td><code>คำสั่ง &amp;</code></td><td>รันเป็น <b>background</b> · ได้ <code>[job] PID</code></td><td><pre>$ nano test99 &amp;
+→ [1] 5685</pre></td><td>L8</td></tr>
+<tr><td><code>fg</code></td><td>ดึงงาน background กลับมาเป็น <b>foreground</b></td><td><pre>$ fg
+→ ls --color=auto -l | more</pre></td><td>L8</td></tr>
+<tr><td><code>jobs</code> · <code>bg</code> · <code>Ctrl+Z</code> <span class="ex">เพิ่ม</span></td><td>ดูงาน background · ให้งานที่หยุดทำต่อใน background · หยุดงาน foreground (สถานะ T)</td><td><pre>$ jobs
+→ [1]+ Stopped  nano test99</pre></td><td>–</td></tr>
+<tr><td><code>kill PID</code> <span class="star">⭐</span></td><td>ส่งสัญญาณ <b>TERM</b> (default) ขอให้ process จบ</td><td><pre>$ kill 8374</pre></td><td>L8–L9</td></tr>
+<tr><td><code>kill -9 PID</code> <span class="star">⭐</span></td><td>ส่ง <b>SIGKILL</b> บังคับจบทันที (= <code>-SIGKILL</code>, <code>-KILL</code>)</td><td><pre>$ kill -9 5685
+→ [1]+ Killed  nano test99</pre></td><td>L8</td></tr>
+<tr><td><code>kill -l</code></td><td>แสดงรายชื่อสัญญาณทั้งหมด (HUP, INT, KILL, STOP, CONT …)</td><td><pre>$ kill -l</pre></td><td>L9</td></tr>
+<tr><td><code>pkill ชื่อ</code> <span class="ex">เพิ่ม</span></td><td>kill ตามชื่อ process</td><td><pre>$ pkill emacs</pre></td><td>–</td></tr>
+<tr><td><code>nice</code></td><td>ไม่ใส่อะไร = แสดงค่า nice ปัจจุบัน (0)</td><td><pre>$ nice  → 0</pre></td><td>L8</td></tr>
+<tr><td><code>nice -n ค่า คำสั่ง</code> <span class="star">⭐</span></td><td>ตั้ง priority <b>ตอนเริ่มรัน</b> · ช่วง <b>-20 (สำคัญสุด) ถึง 19 (ต่ำสุด)</b>, default 0</td><td><pre>$ nice -n 10 /bin/nslookup
+$ nice -n10 nano test99 &amp;   → NI=10, PRI=90</pre></td><td>L8</td></tr>
+<tr><td><code>renice ค่า PID</code> <span class="star">⭐</span></td><td>ปรับ priority ของ process <b>ที่รันอยู่แล้ว</b> · ค่าติดลบต้อง sudo</td><td><pre>$ sudo renice -10 2471</pre></td><td>L8</td></tr>
+<tr><td><code>man คำสั่ง</code></td><td>เปิดคู่มือของคำสั่ง (สไลด์โชว์ <code>man kill</code>)</td><td><pre>$ man kill
+→ kill - send a signal to a process</pre></td><td>L9</td></tr>
+</tbody></table></div>
+<div class="tip">💡 สถานะในคอลัมน์ S/STAT: <b>R</b> running · <b>S</b> interruptible sleep · <b>D</b> uninterruptible sleep · <b>T</b> stopped · <b>Z</b> zombie · <b>I</b> idle · <code>ps | grep</code> ติดบรรทัดของ grep เองมาด้วย แต่ <code>pgrep</code> ได้แค่ PID</div>
+</section>
+
+<!-- ================= S10 ================= -->
+<section>
+<h2 id="s10">10. Memory <span class="tag">L8</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>free</code> <span class="star">⭐</span></td><td><b>snapshot</b> ของ memory ขณะนั้น: total, used, free, shared, buff/cache, <b>available</b> + Swap</td><td><pre>$ free
+→       total    used    free  shared buff/cache available
+  Mem: 4026172 1031852 1442800  14604  1551520   2705540
+  Swap: 969960       0  969960</pre></td><td>L8</td></tr>
+<tr><td><code>free -mt</code></td><td><code>-m</code> หน่วย MB · <code>-t</code> เพิ่มบรรทัด Total (RAM + swap)</td><td><pre>$ free -mt
+→ Mem:   3931 1007 1409 ... 2642
+  Total: 4879 1007 2356</pre></td><td>L8</td></tr>
+<tr><td><code>vmstat</code></td><td>Report <b>virtual memory statistics</b> (processes, memory, paging, block IO, traps, CPU)</td><td><pre>$ vmstat</pre></td><td>L8</td></tr>
+<tr><td><code>vmstat -s</code></td><td>สถิติ <b>memory</b> เป็นรายการแนวตั้ง (active/inactive, buffer, swap, CPU ticks, forks …)</td><td><pre>$ vmstat -s
+→ 4026172 K total memory
+  1031672 K used memory ...</pre></td><td>L8</td></tr>
+<tr><td><code>vmstat -D</code></td><td>สถิติ <b>disk</b> (total reads, merged reads, read sectors, writes …)</td><td><pre>$ vmstat -D
+→ 68388 total reads
+  22143 merged reads ...</pre></td><td>L8</td></tr>
+<tr><td><code>cat /proc/meminfo</code></td><td><b>virtual file</b> ข้อมูล memory แบบ real-time (MemTotal, MemFree, MemAvailable, Buffers, Cached, SwapTotal …) — free/vmstat อ่านจากที่นี่</td><td><pre>$ cat /proc/meminfo | more
+→ MemTotal: 4026172 kB
+  MemAvailable: 2707580 kB</pre></td><td>L8</td></tr>
+<tr><td><code>top</code> (ส่วนบน)</td><td>บรรทัด Mem / Swap: total, free, used, buff/cache, avail Mem</td><td><pre>KiB Mem : 4026172 total, 1808680 free, 934612 used ...</pre></td><td>L8</td></tr>
+</tbody></table></div>
+<div class="warn">⚠️ ดู <b>available</b> ไม่ใช่ <b>free</b> เพื่อรู้ว่า RAM เหลือพอไหม เพราะ Linux ยืม RAM ว่างไปเป็น buff/cache แล้วคืนได้ทันที</div>
+</section>
+
+<!-- ================= S11 ================= -->
+<section>
+<h2 id="s11">11. Environment variables <span class="tag">L9</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คำสั่ง</th><th>ความหมาย</th><th>ตัวอย่าง</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>echo $ชื่อ</code> <span class="star">⭐</span></td><td>แสดงค่าของตัวแปร — <b>ต้องมี <code>$</code></b> ไม่อย่างนั้นแสดงแค่ชื่อ</td><td><pre>$ echo $HOME     → /home/sudsanguan
+$ echo $SHELL    → /bin/bash
+$ echo LOGNAME   → LOGNAME
+$ echo $LOGNAME  → sudsanguan</pre></td><td>L9</td></tr>
+<tr><td><code>env</code></td><td>แสดงรายการ environment variables ปัจจุบันทั้งหมด (รูปแบบ <code>ชื่อ=ค่า</code>)</td><td><pre>$ env
+→ SHELL=/bin/bash
+  USER=sudsanguan
+  HOME=/home/sudsanguan ...</pre></td><td>L9</td></tr>
+<tr><td><code>printenv [ชื่อ]</code></td><td>แสดงทั้งหมด หรือเฉพาะตัวที่ระบุ — <b>ไม่ใส่ <code>$</code></b></td><td><pre>$ printenv HOME  → /home/sudsanguan
+$ printenv USER  → sudsanguan</pre></td><td>L9</td></tr>
+<tr><td><code>NAME=Value</code></td><td>สร้าง <b>local / shell variable</b> (อยู่ใน shell นี้เท่านั้น) — <b>ห้ามเว้นวรรครอบ =</b></td><td><pre>$ B=20
+$ echo $B  → 20</pre></td><td>L9</td></tr>
+<tr><td><code>export NAME=Value</code> <span class="star">⭐</span></td><td>สร้าง <b>global / environment variable</b> → <b>สืบทอดไป child shell/process</b></td><td><pre>$ export A=10
+$ echo $A  → 10</pre></td><td>L9</td></tr>
+<tr><td><code>set</code> / <code>unset ชื่อ</code></td><td>set = ตั้งค่า (ไม่ใส่อะไร = แสดงทั้ง shell + env vars) · unset = ยกเลิกตัวแปร</td><td><pre>$ unset A
+$ echo $A  → (ว่าง)</pre></td><td>L9</td></tr>
+<tr><td><code>bash</code> + <code>exit</code></td><td>เปิด shell ลูก เพื่อทดสอบการสืบทอด แล้ว exit กลับ</td><td><pre>$ B=20; export A=10
+$ bash
+$ echo $A  → 10
+$ echo $B  → (ว่าง)
+$ exit</pre></td><td>L9</td></tr>
+<tr><td><code>sudo nano /etc/environment</code></td><td>ตั้งตัวแปร <b>system-wide</b> (ทุกผู้ใช้ ถาวร หลัง login ใหม่)</td><td><pre>global_variable=1000</pre></td><td>L9</td></tr>
+<tr><td><code>which คำสั่ง</code> <span class="ex">เพิ่ม</span></td><td>บอกว่าคำสั่งอยู่ที่ไหนใน <code>$PATH</code></td><td><pre>$ which ls  → /usr/bin/ls</pre></td><td>–</td></tr>
+</tbody></table></div>
+<div class="tw"><table>
+<thead><tr><th>ตัวแปร</th><th>ความหมาย</th></tr></thead>
+<tbody>
+<tr><td><code>USER</code> / <code>LOGNAME</code></td><td>ผู้ใช้ที่ login อยู่ / ชื่อผู้ใช้ปัจจุบัน</td></tr>
+<tr><td><code>HOME</code></td><td>home directory ของผู้ใช้</td></tr>
+<tr><td><code>SHELL</code></td><td>path ของ shell เช่น <code>/bin/bash</code></td></tr>
+<tr><td><code>PATH</code> <span class="star">⭐</span></td><td>รายการ directory ที่ค้นหาคำสั่ง <b>ตามลำดับ ใช้ตัวแรกที่เจอ</b></td></tr>
+<tr><td><code>LANG</code> · <code>TERM</code></td><td>locale (ภาษา/รูปแบบ) · terminal emulation</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= S12 ================= -->
+<section>
+<h2 id="s12">12. คำสั่ง Windows (Command Prompt) เทียบ Linux <span class="tag">L2, L3, L8</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>Windows</th><th>ความหมาย</th><th>Linux ที่เทียบได้</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>cmd</code></td><td>พิมพ์ในช่อง search เพื่อเปิด Command Prompt</td><td>เปิด Terminal</td><td>L2</td></tr>
+<tr><td><code>dir</code></td><td>แสดงไฟล์และโฟลเดอร์ (<code>&lt;DIR&gt;</code> = โฟลเดอร์ · 2 บรรทัดท้ายสรุปจำนวน)</td><td><code>ls</code></td><td>L2–L3</td></tr>
+<tr><td><code>dir /p</code></td><td>แสดงทีละหน้า (<code>/p</code> = pause) · กดปุ่มใดก็ได้ไปหน้าถัดไป</td><td><code>ls | more</code></td><td>L3</td></tr>
+<tr><td><code>cd Desktop</code> · <code>cd \</code></td><td>เปลี่ยน directory · ไป root ของไดรฟ์ (<code>C:\&gt;</code> = C Prompt)</td><td><code>cd</code> · <code>cd /</code></td><td>L2–L3</td></tr>
+<tr><td><code>mkdir</code> / <code>rmdir</code></td><td>สร้าง / ลบ directory</td><td><code>mkdir</code> / <code>rmdir</code></td><td>L3</td></tr>
+<tr><td><code>echo</code></td><td>แสดงข้อความ</td><td><code>echo</code></td><td>L3</td></tr>
+<tr><td><code>del</code></td><td>ลบไฟล์</td><td><code>rm</code></td><td>L3</td></tr>
+<tr><td><code>copy</code></td><td>คัดลอกไฟล์</td><td><code>cp</code></td><td>L3</td></tr>
+<tr><td><code>ren</code></td><td>เปลี่ยนชื่อไฟล์</td><td><code>mv</code></td><td>L3</td></tr>
+<tr><td><code>type</code></td><td>ดูเนื้อหาไฟล์</td><td><code>cat</code></td><td>L3</td></tr>
+<tr><td><code>exit</code></td><td>ปิด Command Prompt</td><td><code>exit</code></td><td>L2</td></tr>
+<tr><td><code>systeminfo</code></td><td>ข้อมูลระบบและ memory (Installed/Total/Available Physical, Total/Available Virtual Memory)</td><td><code>free</code>, <code>/proc/meminfo</code></td><td>L8</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= S13 ================= -->
+<section>
+<h2 id="s13">13. คู่คำสั่งที่มักสับสน <span class="tag">ทบทวน</span></h2>
+<div class="tw"><table class="cmd">
+<thead><tr><th>คู่</th><th>ต่างกันที่</th><th>จำง่าย ๆ</th><th>บท</th></tr></thead>
+<tbody>
+<tr><td><code>cd</code> vs <code>cd ..</code> vs <code>cd /</code></td><td>กลับ home vs ขึ้น 1 ชั้น vs ไป root</td><td>บ้าน / ข้างบน / ราก</td><td>L2</td></tr>
+<tr><td><code>ls -l</code> vs <code>ls -a</code></td><td>รายละเอียด vs ไฟล์ซ่อน</td><td>long / all</td><td>L2</td></tr>
+<tr><td><code>rm</code> vs <code>rmdir</code></td><td>ลบไฟล์ vs ลบ directory ว่าง</td><td></td><td>L2</td></tr>
+<tr><td><code>cp</code> vs <code>mv</code></td><td>ต้นฉบับยังอยู่ vs ต้นฉบับหาย (ย้าย/เปลี่ยนชื่อ)</td><td>copy / move</td><td>L2–L3</td></tr>
+<tr><td><code>touch</code> vs <code>&gt; file</code></td><td>อัปเดตเวลา ไม่แตะเนื้อหา vs ล้างเนื้อหา</td><td></td><td>L3</td></tr>
+<tr><td><code>cat</code> vs <code>more</code> vs <code>less</code></td><td>ทั้งไฟล์ vs ทีละหน้าทางเดียว vs ทีละหน้าสองทาง</td><td>less is more</td><td>L2, L6</td></tr>
+<tr><td><code>head</code> vs <code>tail</code></td><td>10 บรรทัดแรก vs 10 บรรทัดสุดท้าย</td><td>หัว / หาง</td><td>L3</td></tr>
+<tr><td><code>*</code> vs <code>?</code></td><td>กี่ตัวก็ได้ vs 1 ตัวพอดี</td><td></td><td>L2–L3</td></tr>
+<tr><td><code>&gt;</code> vs <code>|</code></td><td>ส่ง output ลงไฟล์ vs ส่งให้คำสั่งถัดไป</td><td>เทใส่ไฟล์ / ท่อ</td><td>L2</td></tr>
+<tr><td><code>su</code> vs <code>sudo</code></td><td>กลายเป็นคนอื่น (รหัสคนนั้น) vs รันคำสั่งเดียวแบบ root (รหัสตัวเอง)</td><td>เปลี่ยนตัว / ยืมสิทธิ์</td><td>L4–L5</td></tr>
+<tr><td><code>useradd</code> vs <code>usermod</code></td><td>สร้างใหม่ vs แก้ของเดิม (+ -e, -L, -U, -a -G)</td><td>add / modify</td><td>L4</td></tr>
+<tr><td><code>usermod -a -G</code> vs <code>-G</code></td><td>เพิ่มกลุ่มต่อท้าย vs แทนที่กลุ่มเสริมทั้งหมด</td><td>a = append</td><td>L5</td></tr>
+<tr><td><code>id</code> vs <code>groups</code> vs <code>whoami</code></td><td>uid+gid+กลุ่ม vs เฉพาะกลุ่ม vs เฉพาะชื่อ</td><td></td><td>L4</td></tr>
+<tr><td><code>chmod</code> vs <code>chown</code> vs <code>chgrp</code></td><td>เปลี่ยนสิทธิ์ vs เปลี่ยน owner vs เปลี่ยน group</td><td>mode / owner / group</td><td>L5</td></tr>
+<tr><td>chmod ตัวเลข vs ตัวอักษร</td><td>กำหนดใหม่ทั้งหมด vs แก้เฉพาะส่วน</td><td>755 / g+w</td><td>L5</td></tr>
+<tr><td>nano <code>Ctrl+O</code> vs <code>Ctrl+X</code></td><td>บันทึก vs ออก</td><td>O = Output</td><td>L6</td></tr>
+<tr><td>nano <code>Ctrl+W</code> vs <code>Ctrl+\</code></td><td>ค้นหา vs ค้นหา+แทนที่</td><td>W = Where is</td><td>L6</td></tr>
+<tr><td>vim <code>d</code> vs <code>c</code></td><td>ลบแล้วอยู่ Command vs ลบแล้วเข้า Insert</td><td>c = change</td><td>L6</td></tr>
+<tr><td>vim <code>:q</code> vs <code>:q!</code> vs <code>:wq</code></td><td>ออก (ต้องไม่มีงานค้าง) vs ออกทิ้งงาน vs บันทึกแล้วออก</td><td>! = บังคับ</td><td>L6</td></tr>
+<tr><td>vim <code>:%s</code> vs <code>:s</code></td><td>แทนที่ทั้งไฟล์ vs บรรทัดเดียว</td><td>% = ทุกบรรทัด</td><td>L6</td></tr>
+<tr><td><code>fdisk</code> vs <code>parted</code></td><td>เมนูตัวอักษร (n, p, w) vs คำสั่งเต็ม (mklabel, mkpart, print)</td><td></td><td>L7</td></tr>
+<tr><td><code>mount</code> vs <code>umount</code></td><td>เชื่อม vs ตัดการเชื่อมต่อ</td><td>ไม่มี n</td><td>L7</td></tr>
+<tr><td><code>df -h</code> vs <code>df -i</code></td><td>พื้นที่ vs จำนวน inode</td><td></td><td>L7</td></tr>
+<tr><td><code>ps</code> vs <code>top</code></td><td>snapshot ครั้งเดียว vs อัปเดตทุก 3 วินาที</td><td></td><td>L8</td></tr>
+<tr><td><code>ps -ux</code> vs <code>ps -aux</code></td><td>process ของเรา vs ของทุก user</td><td>a = all users</td><td>L9</td></tr>
+<tr><td><code>kill</code> vs <code>kill -9</code></td><td>SIGTERM ขอให้จบ vs SIGKILL บังคับ</td><td></td><td>L8</td></tr>
+<tr><td><code>nice</code> vs <code>renice</code></td><td>ตั้งตอนเริ่มรัน vs ปรับของที่รันอยู่ (ต้องรู้ PID)</td><td>-20 สำคัญสุด</td><td>L8</td></tr>
+<tr><td><code>pgrep</code> vs <code>ps | grep</code></td><td>ได้แค่ PID vs ได้ทั้งบรรทัด + บรรทัดของ grep เอง</td><td></td><td>L9</td></tr>
+<tr><td><code>echo $X</code> vs <code>printenv X</code></td><td>ต้องมี $ vs ไม่ต้องมี $</td><td></td><td>L9</td></tr>
+<tr><td><code>X=1</code> vs <code>export X=1</code></td><td>local (ไม่สืบทอด) vs global (สืบทอดไป child)</td><td>export = ส่งออกให้ลูก</td><td>L9</td></tr>
+</tbody></table></div>
+</section>
+
+<p id="nores">ไม่พบคำสั่งที่ตรงกับคำค้น</p>
+</main>
+
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var sections=[].slice.call(document.querySelectorAll('main section'));
+  var nores=document.getElementById('nores');
+  q.addEventListener('input',function(){
+    var t=q.value.trim().toLowerCase(), any=false;
+    sections.forEach(function(sec){
+      var rows=[].slice.call(sec.querySelectorAll('table.cmd tbody tr')), hit=0;
+      rows.forEach(function(r){
+        var ok=!t||r.textContent.toLowerCase().indexOf(t)>-1;
+        r.classList.toggle('hide',!ok); if(ok)hit++;
+      });
+      var extras=[].slice.call(sec.querySelectorAll('.card,.tip,.warn,.ok,.grid2,h3,table:not(.cmd)'));
+      extras.forEach(function(e){e.classList.toggle('hide',!!t)});
+      sec.classList.toggle('hide',!!t&&hit===0); if(hit)any=true;
+    });
+    document.querySelectorAll('.idx,.hero+.card').forEach(function(e){e.classList.toggle('hide',!!t)});
+    var ih=document.getElementById('idx'); if(ih) ih.classList.toggle('hide',!!t);
+    nores.style.display=(t&&!any)?'block':'none';
+  });
+})();
+</script>
+</body></html>
