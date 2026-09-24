@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 3 — CPU Scheduling</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 3 — CPU Scheduling</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+  // ---------- recall ----------
+  {
+    type: "recall",
+    q: "FIFO scheduling มีอีกชื่อหนึ่งว่าอะไร?",
+    choices: ["Shortest Job First (SJF)", "First Come, First Served (FCFS)", "Round Robin (RR)", "Last In, First Out (LIFO)"],
+    correct: 1,
+    explain: [
+      "SJF เลือกงานที่สั้นที่สุดก่อน ไม่สนว่าใครมาก่อน",
+      "ถูก — สไลด์บอกว่า FIFO บางครั้งเรียกว่า First Come, First Served ใครมาก่อนได้ก่อน",
+      "RR วนให้แต่ละงานรันคนละ quantum เป็นอีกอัลกอริทึมหนึ่ง",
+      "LIFO คือเข้าทีหลังออกก่อน (แบบ stack) ตรงข้ามกับ FIFO"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Convoy Effect หมายถึงอะไร?",
+    choices: ["process หลายตัวแย่ง I/O device เดียวกัน", "process priority ต่ำไม่ได้รันเลย", "process สั้นต้องรอต่อหลัง process ยาว", "context switch บ่อยจนเสียเวลามาก"],
+    correct: 2,
+    explain: [
+      "เป็นปัญหาการแย่งอุปกรณ์ ไม่ใช่ convoy effect ที่สไลด์พูดถึง",
+      "นี่คือ starvation ซึ่งเป็นปัญหาของ Priority scheduling",
+      "ถูก — สไลด์เปรียบว่าเหมือนต่อแถวจ่ายเงินในซูเปอร์มาร์เก็ต งานสั้นติดหลังงานยาวใน FIFO",
+      "เป็นปัญหาของ RR ที่ quantum เล็กเกินไป (context switch overhead)"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Response time ตามนิยามในสไลด์ คือเวลาใด?",
+    choices: ["จากตอนมาถึงจนได้รันครั้งแรก", "จากตอนมาถึงจนทำงานเสร็จ", "เวลารวมที่รออยู่ใน ready queue", "เวลาที่ CPU ใช้ประมวลผลจริง"],
+    correct: 0,
+    explain: [
+      "ถูก — Response time = Time first run − Time arrived นับแค่ถึงการตอบสนองครั้งแรก ไม่ใช่ output ทั้งหมด",
+      "นี่คือ turnaround time",
+      "นี่คือ waiting time",
+      "นี่คือ CPU (burst) time ของ process"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตามสไลด์ Turnaround time เท่ากับอะไร?",
+    choices: ["CPU time − waiting time", "response time + waiting time", "CPU time × จำนวน process", "CPU time + waiting time"],
+    correct: 3,
+    explain: [
+      "ต้องบวก waiting time ไม่ใช่ลบ",
+      "response time เป็นส่วนหนึ่งของ waiting อยู่แล้ว สูตรนี้ไม่ถูก",
+      "ไม่มีสูตรนี้ในสไลด์ turnaround คิดต่อ process",
+      "ถูก — Turnaround time = CPU time + waiting time (หรือ T_completion − T_arrival)"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ใน Priority scheduling ของสไลด์ ตัวเลข priority แบบไหนสำคัญที่สุด?",
+    choices: ["เลขมากที่สุด", "เลขน้อยที่สุด", "เลขคู่", "เลขที่ใกล้ burst time ที่สุด"],
+    correct: 1,
+    explain: [
+      "กลับกัน — ในสไลด์ Priority เลขมากคือ priority ต่ำ (ต่างจาก Windows ที่เลขมาก = สูง)",
+      "ถูก — สไลด์เขียนว่า smaller integer = higher priority",
+      "ความเป็นเลขคู่ไม่มีผลใด ๆ",
+      "priority ไม่เกี่ยวกับ burst time — สไลด์บอกว่าใช้ priority แทนการดู burst time"
+    ]
+  },
+  {
+    type: "recall",
+    q: "อัลกอริทึมคู่ใดที่สไลด์จัดเป็น non-preemptive?",
+    choices: ["STCF และ RR", "RR และ MLFQ", "FIFO และ SJF", "SJF และ STCF"],
+    correct: 2,
+    explain: [
+      "ทั้งสองแย่ง CPU ได้ (preemptive)",
+      "ทั้งสองมีการสลับเมื่อหมด time slice จึงเป็น preemptive",
+      "ถูก — สไลด์ 22 ยก FIFO และ SJF เป็นตัวอย่าง non-preemptive: ได้ CPU แล้วถือไว้จนจบหรือเข้า waiting",
+      "SJF เป็น non-preemptive แต่ STCF คือ SJF ที่ preempt ได้"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Multi-level Feedback Queue (MLFQ) เป็นอัลกอริทึมที่มีชื่อเสียงของใคร?",
+    choices: ["Corbato et al.", "Dijkstra et al.", "Linus Torvalds", "Tanenbaum et al."],
+    correct: 0,
+    explain: [
+      "ถูก — สไลด์ 36 ระบุว่า MLFQ is a well-known algorithm by Corbato et al.",
+      "Dijkstra มีชื่อเสียงเรื่อง semaphore และ shortest path ไม่ใช่ MLFQ",
+      "Linus Torvalds สร้าง Linux kernel ไม่ใช่ผู้คิด MLFQ",
+      "Tanenbaum เขียนตำรา OS แต่สไลด์ไม่ได้อ้างว่าเป็นผู้คิด MLFQ"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ตาม MLFQ Rule 3 งานใหม่ที่เข้าระบบจะถูกวางไว้ที่ใด?",
+    choices: ["คิวล่างสุด", "คิวตรงกลาง", "คิวตามความยาวงานที่แจ้งมา", "คิวบนสุด (priority สูงสุด)"],
+    correct: 3,
+    explain: [
+      "ถ้าวางล่างสุด งานสั้น/interactive จะตอบสนองช้า ขัดกับเป้าหมายของ MLFQ",
+      "ไม่มีกฎให้วางคิวกลาง",
+      "MLFQ ไม่รู้ความยาวงานล่วงหน้า นั่นคือเหตุผลที่ต้องมี MLFQ",
+      "ถูก — Rule 3: งานใหม่อยู่ priority สูงสุดก่อน (สมมติว่าเป็นงานสั้น) แล้วค่อยลดชั้นถ้าใช้ CPU นาน"
+    ]
+  },
+  {
+    type: "recall",
+    q: "nice value ของ Linux มีช่วงเท่าใด และค่าใดคือ priority สูงสุด?",
+    choices: ["0 ถึง 31, ค่า 31 สูงสุด", "−20 ถึง +19, ค่า −20 สูงสุด", "−20 ถึง +19, ค่า +19 สูงสุด", "1 ถึง 15, ค่า 1 สูงสุด"],
+    correct: 1,
+    explain: [
+      "0–31 เป็นระดับ priority ของ Windows ไม่ใช่ nice",
+      "ถูก — nice อยู่ระหว่าง −20 (highest priority) ถึง +19 (lowest priority)",
+      "ช่วงถูก แต่ทิศผิด: nice มาก = ใจดียอมคนอื่น = priority ต่ำ",
+      "1–15 คือ variable class ของ Windows"
+    ]
+  },
+  {
+    type: "recall",
+    q: "CFS ของ Linux ใช้โครงสร้างข้อมูลใดเพื่อให้เลือก task ได้อย่างมีประสิทธิภาพ?",
+    choices: ["Hash table", "Linked list เรียงตามเวลามาถึง", "Red-Black Tree", "Circular queue"],
+    correct: 2,
+    explain: [
+      "hash table ไม่เรียงลำดับ หาค่า vruntime ต่ำสุดได้ไม่ดี",
+      "CFS เรียงตาม vruntime ไม่ใช่เวลามาถึง และ linked list ช้าเมื่อต้องแทรก",
+      "ถูก — สไลด์ 45: Use RBTree for efficiency (Red Black Tree)",
+      "circular queue เหมาะกับ RR ธรรมดา ไม่ใช่ CFS"
+    ]
+  },
+  {
+    type: "recall",
+    q: "ใน Windows ระดับ priority ของ real-time class อยู่ในช่วงใด?",
+    choices: ["16–31", "1–15", "0–15", "0 เท่านั้น"],
+    correct: 0,
+    explain: [
+      "ถูก — Windows มี 32 ระดับ: variable class 1–15, real-time class 16–31",
+      "1–15 คือ variable class",
+      "ช่วงนี้รวม priority 0 ซึ่งสงวนไว้ให้ memory-management thread",
+      "priority 0 คือ memory-management thread"
+    ]
+  },
+  {
+    type: "recall",
+    q: "Windows ให้หน้าต่างที่อยู่ด้านหน้า (foreground window) ได้ priority boost เท่าใด?",
+    choices: ["2 เท่า", "เพิ่มขึ้น 16 ระดับ", "ไม่ได้ boost", "3 เท่า"],
+    correct: 3,
+    explain: [
+      "สไลด์ไม่ได้บอก 2 เท่า",
+      "ถ้าเพิ่ม 16 ระดับจะข้ามไปเป็น real-time class ซึ่งไม่ใช่สิ่งที่สไลด์บอก",
+      "สไลด์ 48 บอกว่ามีการ boost ให้ foreground window",
+      "ถูก — Foreground window given 3x priority boost เพื่อให้โปรแกรมที่ผู้ใช้กำลังใช้ตอบสนองเร็ว"
+    ]
+  },
+  // ---------- understand ----------
+  {
+    type: "understand",
+    q: "ทำไม OS จึงสลับไปให้ process อื่นรันเมื่อ process ปัจจุบันเข้าสู่ I/O burst?",
+    choices: ["เพื่อให้ I/O ทำงานเร็วขึ้น", "เพื่อไม่ให้ CPU ว่างเปล่าระหว่างรอ I/O", "เพื่อลดจำนวน context switch", "เพื่อให้ process เดิมจบเร็วขึ้น"],
+    correct: 1,
+    explain: [
+      "การสลับ process ไม่ได้ทำให้อุปกรณ์ I/O เร็วขึ้น",
+      "ถูก — ระหว่าง I/O burst CPU idle (BAD) จึงสลับให้ process อื่นใช้ CPU (GOOD) เพื่อเพิ่ม CPU utilization",
+      "การสลับทำให้มี context switch เพิ่มขึ้น ไม่ใช่ลดลง",
+      "process เดิมยังต้องรอ I/O เท่าเดิม การสลับไม่ได้ช่วยให้มันจบเร็วขึ้น"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดอธิบาย I/O-bound process ได้ถูกต้อง?",
+    choices: ["มี CPU burst น้อยครั้งแต่ยาวมาก", "ไม่มี CPU burst เลย", "มี CPU burst สั้นหลายครั้ง สลับกับการรอ I/O", "ใช้ CPU burst ยาวเท่ากับ I/O burst เสมอ"],
+    correct: 2,
+    explain: [
+      "นี่คือลักษณะของ CPU-bound process",
+      "ทุก process ต้องใช้ CPU บ้าง อย่างน้อยเพื่อสั่ง I/O",
+      "ถูก — I/O-bound ใช้เวลากับ I/O มากกว่าคำนวณ จึงมี CPU burst สั้น ๆ ถี่ ๆ",
+      "ไม่มีกฎว่าต้องเท่ากัน สไลด์เน้นว่า I/O-bound ใช้เวลากับ I/O มากกว่า"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ถ้าตั้ง quantum (q) ของ Round Robin ใหญ่มากจนทุกงานจบก่อนหมด q จะเกิดอะไรขึ้น?",
+    choices: ["กลายเป็น SJF", "context switch overhead สูงขึ้นมาก", "กลายเป็น FIFO", "response time ดีขึ้นกว่าเดิม"],
+    correct: 2,
+    explain: [
+      "RR ไม่ได้เรียงตามความยาวงาน จึงไม่กลายเป็น SJF",
+      "overhead สูงเกิดเมื่อ q เล็กเกินไป ไม่ใช่ใหญ่เกินไป",
+      "ถูก — q is too large ⇒ reduced to FIFO เพราะทุกงานรันจนจบตามลำดับที่มาถึง",
+      "response time จะแย่ลง เพราะงานหลัง ๆ ต้องรองานข้างหน้ารันจนจบ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "SJF แบบ late arrival ได้ average turnaround 103.3 วิธีแก้ที่สไลด์เสนอคืออะไร?",
+    choices: ["ใช้ FIFO แทน", "เพิ่มจำนวน CPU", "ลดขนาด quantum", "ยอมให้ preempt process ที่กำลังรัน (STCF)"],
+    correct: 3,
+    explain: [
+      "FIFO ก็ได้ผลเดียวกันคือ A ยาวรันจนจบ งานสั้นยังต้องรอ",
+      "สไลด์ไม่ได้แก้ด้วย hardware แต่แก้ที่ scheduling policy",
+      "SJF ไม่มี quantum การลด quantum เป็นเรื่องของ RR",
+      "ถูก — ต้อง preempt: STCF แย่ง CPU ให้ B, C ที่เหลือเวลาน้อยกว่า ได้ average turnaround 50"
+    ]
+  },
+  {
+    type: "understand",
+    q: "จากตัวอย่าง A, B, C (คนละ 5s) เมื่อเทียบ RR (q=1) กับ SJF ข้อใดถูก?",
+    choices: ["RR ดีกว่าทั้ง response และ turnaround", "RR ดีกว่าด้าน response แต่แย่กว่าด้าน turnaround", "SJF ดีกว่าทั้ง response และ turnaround", "ทั้งสองได้ค่าเท่ากันทุก metric"],
+    correct: 1,
+    explain: [
+      "RR turnaround = 14 แย่กว่า SJF ที่ได้ 10",
+      "ถูก — RR: response 1, turnaround 14 / SJF: response 5, turnaround 10 → เป็น trade-off",
+      "SJF แย่กว่าด้าน response (5 vs 1)",
+      "ค่าต่างกันชัดเจนทั้ง response และ turnaround"
+    ]
+  },
+  {
+    type: "understand",
+    q: "MLFQ Rule 4 (นับ time allotment รวมต่อคิว) ออกแบบมาเพื่อแก้ปัญหาใด?",
+    choices: ["process โกง scheduler โดยปล่อย CPU ก่อนหมด slice", "งานใหม่ไม่รู้ว่าจะอยู่คิวไหน", "context switch เกิดบ่อยเกินไป", "คิวล่างสุดใช้ FCFS"],
+    correct: 0,
+    explain: [
+      "ถูก — Rule 4 นับเวลาสะสม ไม่ว่าจะปล่อย CPU กี่ครั้ง จึงป้องกัน process ที่ gaming the scheduler (Cheater!) ให้คง priority สูง",
+      "Rule 3 จัดการเรื่องงานใหม่แล้ว (วางที่คิวบนสุด)",
+      "Rule 4 ไม่ได้เกี่ยวกับจำนวน context switch",
+      "การใช้ FCFS ในคิวล่างเป็นแค่ configuration หนึ่ง ไม่ใช่ปัญหาที่ Rule 4 แก้"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ข้อใดเป็นประโยชน์ของ Priority Boost (MLFQ Rule 5)?",
+    choices: ["ทำให้งานใหม่รู้ความยาวของตัวเอง", "ลดจำนวนคิวในระบบ", "ป้องกัน starvation และรับมือ process ที่เปลี่ยนพฤติกรรม", "ทำให้งานยาวอยู่คิวล่างตลอดไป"],
+    correct: 2,
+    explain: [
+      "MLFQ ยังไม่รู้ความยาวงานเหมือนเดิม boost ไม่ได้ทำให้รู้",
+      "จำนวนคิวคงเดิม แค่ย้ายงานขึ้นไปคิวบน",
+      "ถูก — reset priority เป็นระยะ ทำให้งานยาวได้รันบ้าง (กัน starvation) และประเมินใหม่ได้เมื่อพฤติกรรมเปลี่ยน",
+      "ตรงกันข้าม boost ทำให้งานยาวได้ขึ้นมารันที่คิวบนเป็นระยะ"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ทำไมจึงไม่ใช้ SJF/STCF ตรง ๆ ใน OS ทั่วไป แต่หันไปใช้ MLFQ?",
+    choices: ["SJF ใช้ memory มากเกินไป", "OS ทั่วไปไม่รู้ run time ของงานล่วงหน้า", "SJF ไม่สามารถลด turnaround time ได้", "SJF ใช้ได้กับ real-time system เท่านั้น"],
+    correct: 1,
+    explain: [
+      "สไลด์ไม่ได้พูดถึงปัญหา memory ของ SJF",
+      "ถูก — Motivation ของ MLFQ: SJF/STCF optimize turnaround แต่ OS generally do not know the run time",
+      "SJF/STCF optimize turnaround time ได้ดีที่สุด ปัญหาคือต้องรู้ความยาวงาน",
+      "ไม่มีข้อจำกัดนี้ในสไลด์"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ปัญหาหลักของ Priority scheduling ที่สไลด์เตือนไว้คืออะไร?",
+    choices: ["Convoy effect", "Context switch overhead สูง", "Gaming the scheduler", "Starvation ของ process priority ต่ำ"],
+    correct: 3,
+    explain: [
+      "convoy effect เป็นปัญหาหลักของ FIFO",
+      "overhead สูงเป็นปัญหาของ RR ที่ q เล็ก",
+      "gaming เป็นประเด็นของ MLFQ ที่ Rule 4 แก้",
+      "ถูก — Priority can cause starvation problem to lower priority processes"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ในตัวอย่าง STCF + I/O ทำไม average turnaround ลดจาก 115 เหลือ 95?",
+    choices: ["CPU ทำงานให้ B ขณะที่ A รอ disk (overlap)", "A ไม่ต้องทำ I/O อีกแล้ว", "disk เร็วขึ้นเป็นสองเท่า", "B ถูกจัดให้รันก่อน A ทั้งหมด"],
+    correct: 0,
+    explain: [
+      "ถูก — มอง A เป็น sub-job 10ms, ระหว่าง A ใช้ disk B ได้ใช้ CPU แทนที่ CPU จะว่าง จึง B เสร็จที่ 100 แทน 140",
+      "A ยังทำ I/O ทุก 10ms เหมือนเดิม",
+      "เวลา disk เท่าเดิม ต่างกันแค่การจัดลำดับ",
+      "A ได้ CPU ก่อน (sub-job 10ms สั้นกว่า B) และ B ถูก preempt เมื่อ A พร้อม"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ใน Windows เมื่อ thread ใช้ quantum หมด priority จะเป็นอย่างไร?",
+    choices: ["ถูก boost ขึ้น 3 เท่า", "ถูกลดลงได้จนถึง 0", "ถูกลดลง แต่ไม่ต่ำกว่า base priority", "คงเดิมเสมอ"],
+    correct: 2,
+    explain: [
+      "boost 3 เท่าเป็นของ foreground window",
+      "priority 0 สงวนไว้ให้ memory-management thread และมีขอบล่างคือ base",
+      "ถูก — If quantum expires, priority lowered, but never below base",
+      "Windows ปรับ priority แบบไดนามิก ทั้งลดเมื่อหมด quantum และ boost เมื่อ wait"
+    ]
+  },
+  {
+    type: "understand",
+    q: "ระบบแบบ interactive ให้ความสำคัญกับเป้าหมายใดมากที่สุดตามสไลด์?",
+    choices: ["Throughput และ CPU utilization", "Meeting deadlines และ predictability", "Turnaround time", "Response time และ proportionality"],
+    correct: 3,
+    explain: [
+      "เป็นเป้าหมายของ batch systems",
+      "เป็นเป้าหมายของ real-time systems",
+      "เป็นเป้าหมายของ batch systems",
+      "ถูก — Interactive systems: response time (ตอบเร็ว) และ proportionality (ตรงกับความคาดหวังผู้ใช้)"
+    ]
+  },
+  // ---------- apply ----------
+  {
+    type: "apply",
+    q: "P1=8, P2=4, P3=2 (หน่วยเวลา) มาถึงพร้อมกันที่ T=0 ใช้ SJF ได้ average turnaround เท่าใด?",
+    choices: ["11.33", "7.33", "4.67", "14"],
+    correct: 1,
+    explain: [
+      "นี่คือผลของ FIFO ลำดับ P1,P2,P3: (8+12+14)/3",
+      "ถูก — SJF รัน P3(0–2), P2(2–6), P1(6–14) → (2+6+14)/3 = 22/3 ≈ 7.33",
+      "นี่คือค่าเฉลี่ย waiting time ของ FIFO (0+8+12)/3 ไม่ใช่ turnaround ของ SJF",
+      "14 คือเวลาที่งานสุดท้ายเสร็จ ไม่ใช่ค่าเฉลี่ย"
+    ]
+  },
+  {
+    type: "apply",
+    q: "A ใช้ 50 มาถึง T=0, B ใช้ 10 มาถึง T=5 ใช้ STCF ได้ average turnaround เท่าใด?",
+    choices: ["35", "52.5", "37.5", "60"],
+    correct: 0,
+    explain: [
+      "ถูก — A รัน 0–5 (เหลือ 45), B แย่ง CPU รัน 5–15 (TAT 10), A รันต่อ 15–60 (TAT 60) → (60+10)/2 = 35",
+      "นี่คือผลแบบ non-preemptive (SJF/FIFO): A 0–50, B 50–60 → (50+55)/2 = 52.5 — STCF ต้องแย่ง CPU ให้ B",
+      "ลืมลบเวลามาถึงของ B: (60+15)/2 = 37.5 — turnaround ของ B ต้องเป็น 15 − 5 = 10",
+      "60 คือเวลาที่ A เสร็จ ไม่ใช่ค่าเฉลี่ยของทั้งสอง process"
+    ]
+  },
+  {
+    type: "apply",
+    q: "A และ B มาถึงที่ T=0 ใช้คนละ 4 ใช้ RR q=2 ได้ average response และ average turnaround เท่าใด?",
+    choices: ["response 0, turnaround 6", "response 2, turnaround 8", "response 1, turnaround 6", "response 1, turnaround 7"],
+    correct: 3,
+    explain: [
+      "B ต้องรอ A รันก่อน 2 หน่วย response ของ B จึงเป็น 2 ไม่ใช่ 0",
+      "ใช้ค่าของ B อย่างเดียว ไม่ได้หาค่าเฉลี่ย",
+      "turnaround ผิด: A เสร็จที่ 6, B เสร็จที่ 8 → เฉลี่ย 7",
+      "ถูก — A 0–2, B 2–4, A 4–6, B 6–8 → response (0+2)/2 = 1, turnaround (6+8)/2 = 7"
+    ]
+  },
+  {
+    type: "apply",
+    q: "MLFQ แบบ Q0 (RR 8ms) → Q1 (RR 16ms) → Q2 (FCFS) งานที่ต้องใช้ CPU 30ms จะรันเสร็จที่คิวใด?",
+    choices: ["Q0", "Q1", "Q2 หลังได้เวลาจาก Q0 และ Q1 รวม 24ms", "ไม่มีทางเสร็จ เพราะถูกย้ายวนไปเรื่อย ๆ"],
+    correct: 2,
+    explain: [
+      "Q0 ให้แค่ 8ms ยังเหลืออีก 22ms",
+      "Q1 ให้อีก 16ms รวม 24ms ยังเหลือ 6ms",
+      "ถูก — ได้ 8ms ใน Q0 + 16ms ใน Q1 = 24ms ยังไม่เสร็จจึงลง Q2 และรันส่วนที่เหลือ 6ms แบบ FCFS",
+      "Q2 เป็น FCFS ที่รันจนจบ งานจึงเสร็จแน่นอนเมื่อได้ CPU"
+    ]
+  },
+  {
+    type: "apply",
+    q: "ใน Windows thread ที่มี relative priority “highest” อยู่ใน process class “above normal” จะได้ priority เท่าใด?",
+    choices: ["10", "12", "15", "26"],
+    correct: 1,
+    explain: [
+      "10 คือ highest ใน class normal",
+      "ถูก — จากตาราง Windows Priority Classes: แถว highest × คอลัมน์ above normal = 12",
+      "15 คือ time-critical ของ class ที่ไม่ใช่ real-time",
+      "26 คือ highest ใน class real-time"
+    ]
+  },
+  {
+    type: "apply",
+    q: "บน Linux CFS task X มี nice −5 และ task Y มี nice +10 รันพร้อมกัน ผลเป็นอย่างไร?",
+    choices: ["X ได้ CPU มากกว่า เพราะ vruntime ของ X โตช้ากว่า", "Y ได้ CPU มากกว่า เพราะ nice มากกว่า", "ได้ CPU เท่ากัน เพราะ CFS fair เสมอ", "Y ไม่ได้รันเลยจนกว่า X จะจบ"],
+    correct: 0,
+    explain: [
+      "ถูก — nice ต่ำ: physical runtime > virtual runtime (vruntime โตช้า) CFS เลือก vruntime ต่ำสุด X จึงถูกเลือกบ่อยกว่า",
+      "nice มาก = priority ต่ำ ได้ CPU น้อยกว่า",
+      "fair ในความหมายถ่วงน้ำหนักตาม nice ไม่ใช่เท่ากันเป๊ะ",
+      "CFS เป็น time slice ทุก task ยังได้รัน ไม่ใช่รอจนอีกตัวจบ"
+    ]
+  }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + String.fromCharCode(3585+i) + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
