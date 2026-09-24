@@ -50,7 +50,7 @@ SUBJECTS = [
         "icon": "🖥️",
         "accent": "#c2410c",
         "order": ["Chapter00", "Chapter01", "Chapter02", "Chapter03", "Chapter04", "Chapter05",
-                  "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2"],
+                  "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2", "Lecture3"],
     },
     {
         "slug": "systemlab",

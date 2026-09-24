@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 3 — CPU (Process) Scheduling · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+        <ol><li><a href="#0-class-schedule-สไลด์-2">0. Class Schedule (สไลด์ 2)</a></li><li><a href="#1-introduction-to-cpu-scheduling">1. Introduction to CPU Scheduling</a></li><li><a href="#2-cpu-process-scheduling-เมื่อไหร่ต้องตัดสินใจ-สไลด์-810">2. CPU (Process) Scheduling — เมื่อไหร่ต้องตัดสินใจ? (สไลด์ 8–10)</a></li><li><a href="#3-goal-of-scheduling-และ-metrics">3. Goal of Scheduling และ Metrics</a></li><li><a href="#4-scheduling-algorithms-สไลด์-1629">4. Scheduling Algorithms (สไลด์ 16–29)</a></li><li><a href="#5-incorporating-io-สไลด์-3033">5. Incorporating I/O (สไลด์ 30–33)</a></li><li><a href="#6-multi-level-feedback-queue-mlfq-สไลด์-3442">6. Multi-level Feedback Queue (MLFQ) (สไลด์ 34–42)</a></li><li><a href="#7-scheduler-ใน-os-จริง-สไลด์-4348">7. Scheduler ใน OS จริง (สไลด์ 43–48)</a></li><li><a href="#8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</a></li><li><a href="#9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Lecture3</div>
+      <h1 class="lesson-title">Lecture 3 — CPU (Process) Scheduling</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้</strong> Lecture 2 สอนว่า OS สลับ process ได้อย่างไร (context switch, timer interrupt) บทนี้ตอบคำถามต่อว่า <strong>&quot;สลับแล้วจะเลือก process ไหนมารันต่อ?&quot;</strong> ซึ่งเป็นหน้าที่ของ <strong>scheduler</strong> ตาม <strong>scheduling policy</strong></p>
+<p>เรียน: CPU burst / I/O burst, CPU-bound vs I/O-bound, เป้าหมายและ <strong>metric</strong> ที่ใช้วัด (turnaround, waiting, response time ฯลฯ), อัลกอริทึม <strong>FIFO, SJF, STCF, Priority, Round Robin</strong>, การคิดเรื่อง <strong>I/O</strong>, <strong>Multi-level Feedback Queue (MLFQ)</strong> และตัวอย่าง scheduler จริงใน <strong>Linux (CFS)</strong> และ <strong>Windows</strong></p>
+<p>บทนี้ <strong>มีโจทย์คำนวณเยอะ</strong> — ต้องวาด Gantt chart และหาค่าเฉลี่ย turnaround / response time ให้เป็น</p>
+</blockquote>
+<h2 id="สารบัญ">สารบัญ</h2>
+<ol start="0">
+<li>Class Schedule</li>
+<li>Introduction to CPU Scheduling (CPU burst, CPU-bound vs I/O-bound, Multiprogramming)</li>
+<li>เมื่อไหร่ที่ OS ต้อง schedule</li>
+<li>Goal of Scheduling และ Scheduling Metrics</li>
+<li>Scheduling Algorithms: FIFO → SJF → STCF → Priority → Round Robin</li>
+<li>Incorporating I/O</li>
+<li>Multi-level Feedback Queue (MLFQ)</li>
+<li>Scheduler ใน OS จริง: Linux และ Windows</li>
+<li>คำศัพท์สำคัญ</li>
+<li>สรุปท้ายบท / จุดที่มักออกสอบ</li>
+</ol>
+<hr />
+<h2 id="0-class-schedule-สไลด์-2">0. Class Schedule (สไลด์ 2)</h2>
+<p><img loading="lazy" src="img/l3-p002.jpg" alt="ตารางเรียน OS ทั้ง 2 section" /></p>
+<ul>
+<li>ตารางคาบเรียนส่วน OS ของ ITDS211 (สอนโดย รศ.ดร.สุดสงวน งามสุริยโรจน์) มี 7 คาบ (OS#1–OS#7) หลายคาบเป็นคาบชดเชย (Make up)</li>
+<li>คาบที่เป็นตัวแดง: <strong>OS#7</strong> — Section 1 วันอังคาร 24 พ.ย. 10–12 น. ห้อง IT311 / Section 2 วันพฤหัส 26 พ.ย. 14–16 น. ห้อง IT323</li>
+<li>Section 2 เปลี่ยนห้องหลายคาบเป็น IT323/IT324 (ดูตารางในรูป)</li>
+</ul>
+<hr />
+<h2 id="1-introduction-to-cpu-scheduling">1. Introduction to CPU Scheduling</h2>
+<h3 id="11-maximizing-cpu-utilization-สไลด์-5">1.1 Maximizing CPU Utilization (สไลด์ 5)</h3>
+<p><img loading="lazy" src="img/l3-p005.jpg" alt="วงจร CPU burst สลับ I/O burst" /></p>
+<ul>
+<li>การทำงานของ process คือ <strong>วงจรสลับกันระหว่าง CPU burst กับ I/O burst</strong>
+<ul>
+<li><strong>CPU burst</strong> = ช่วงที่ process ใช้ CPU คำนวณ (เช่น load, store, add)</li>
+<li><strong>I/O burst</strong> = ช่วงที่ process รอ I/O (เช่น อ่าน/เขียนไฟล์ — &quot;wait for I/O&quot;)</li>
+</ul>
+</li>
+<li>ระหว่าง I/O burst <strong>CPU ว่างเปล่า (idle) → ไม่ดี (BAD)</strong> เพราะเสียเวลา CPU ไปเปล่า ๆ</li>
+<li>OS จึง <strong>สลับ (switch) ไปให้ process อื่นที่ต้องการ CPU → ดี (GOOD)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เหมือนพ่อครัวที่ระหว่างรอน้ำเดือด (I/O) ก็ไปหั่นผักของอีกเมนู (process อื่น) แทนที่จะยืนรอเฉย ๆ</p>
+</blockquote>
+<h3 id="12-cpu-bound-vs-io-bound-สไลด์-6">1.2 CPU-bound vs I/O-bound (สไลด์ 6)</h3>
+<p><img loading="lazy" src="img/l3-p006.jpg" alt="CPU-bound (a) มี burst ยาว, I/O-bound (b) มี burst สั้นถี่ ๆ" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CPU-bound process</strong> (a)</th>
+<th><strong>I/O-bound process</strong> (b)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ใช้เวลาส่วนใหญ่กับ</td>
+<td><strong>การคำนวณ</strong></td>
+<td><strong>การทำ I/O</strong></td>
+</tr>
+<tr>
+<td>ลักษณะ CPU burst</td>
+<td><strong>น้อยครั้ง แต่ยาวมาก</strong></td>
+<td><strong>หลายครั้ง แต่สั้น</strong></td>
+</tr>
+<tr>
+<td>ตัวอย่าง (เสริม)</td>
+<td>render วิดีโอ, คำนวณทางวิทยาศาสตร์</td>
+<td>text editor, web browser รอผู้ใช้/เครือข่าย</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="13-multiprogramming-สไลด์-7">1.3 Multiprogramming (สไลด์ 7)</h3>
+<p><img loading="lazy" src="img/l3-p007.jpg" alt="Running ↔ Ready ↔ Blocked" /></p>
+<ul>
+<li>เพื่อสร้าง <strong>ภาพลวงว่ามี CPU (เสมือน) หลายตัว</strong> OS สลับ process โดย
+<ul>
+<li><strong>Descheduling</strong> — เอา process ที่กำลังรัน <strong>ออก</strong> จาก CPU (Running → Ready)</li>
+<li><strong>Scheduling</strong> — เอา process อื่นที่ <strong>พร้อม (Ready)</strong> เข้ามารันบน CPU (Ready → Running)</li>
+</ul>
+</li>
+<li>(ทบทวนจาก Lecture 2) Running → Blocked เมื่อเริ่ม I/O (I/O: initiate) และ Blocked → Ready เมื่อ I/O เสร็จ (I/O: done)</li>
+</ul>
+<hr />
+<h2 id="2-cpu-process-scheduling-เมื่อไหร่ต้องตัดสินใจ-สไลด์-810">2. CPU (Process) Scheduling — เมื่อไหร่ต้องตัดสินใจ? (สไลด์ 8–10)</h2>
+<p><strong>มีหลายเหตุการณ์ที่ OS ต้องตัดสินใจว่า CPU จะรัน process ไหนต่อ:</strong></p>
+<ol>
+<li>process <strong>yield</strong> (สละ CPU เอง)</li>
+<li>process ถูก <strong>block</strong> (เพราะรอ I/O)</li>
+<li>process <strong>สร้าง child process</strong> แล้วรอให้ child จบ (<code>wait()</code>)</li>
+<li>process <strong>จบการทำงาน (terminated)</strong></li>
+<li>process ถูกขัดจังหวะด้วย <strong>timer interrupt</strong></li>
+</ol>
+<p><img loading="lazy" src="img/l3-p009.jpg" alt="Queueing diagram: ready queue, I/O queue และเหตุที่ process ออกจาก CPU" /></p>
+<p><strong>อ่านแผนภาพ (สไลด์ 9):</strong> process เข้า <strong>ready queue</strong> → ได้ <strong>CPU</strong> → ออกจาก CPU ได้ 4 ทาง แล้ววนกลับ ready queue:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ออกจาก CPU เพราะ</th>
+<th>ไปที่ไหนต่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>I/O request</strong></td>
+<td>เข้า <strong>I/O queue</strong> → ทำ I/O → กลับ ready queue</td>
+</tr>
+<tr>
+<td><strong>time slice expired</strong> (หมดเวลา)</td>
+<td>กลับ <strong>ready queue</strong> ทันที</td>
+</tr>
+<tr>
+<td><strong>fork a child</strong></td>
+<td>รอ <strong>child executes</strong> → กลับ ready queue</td>
+</tr>
+<tr>
+<td><strong>wait for an interrupt</strong></td>
+<td>รอ <strong>interrupt occurs</strong> → กลับ ready queue</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ในเหตุการณ์เหล่านี้ OS ใช้ <strong>scheduling policy</strong> เลือก process ถัดไป</li>
+<li>คำถามที่ตามมา: (1) <strong>อัลกอริทึมพื้นฐานของ policy มีอะไรบ้าง?</strong> (2) <strong>ใช้ metric อะไรเปรียบเทียบอัลกอริทึม?</strong></li>
+</ul>
+<hr />
+<h2 id="3-goal-of-scheduling-และ-metrics">3. Goal of Scheduling และ Metrics</h2>
+<h3 id="31-goal-of-scheduling-สไลด์-1112-เป้าหมายขึ้นกับชนิดของระบบ">3.1 Goal of Scheduling (สไลด์ 11–12) — เป้าหมายขึ้นกับชนิดของระบบ</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบ</th>
+<th>เป้าหมาย</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ทุกระบบ (All systems)</strong></td>
+<td><strong>Fairness</strong></td>
+<td>ให้แต่ละ process ได้ CPU อย่างยุติธรรม</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Policy enforcement</strong></td>
+<td>ทำให้ policy ที่กำหนดถูกปฏิบัติจริง</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Balance</strong></td>
+<td>ให้ทุกส่วนของระบบ (CPU, I/O) ทำงานยุ่งตลอด</td>
+</tr>
+<tr>
+<td><strong>Batch systems</strong> (งานประมวลผลเป็นชุด ไม่มีคนรอหน้าจอ)</td>
+<td><strong>Throughput</strong></td>
+<td>จำนวนงานที่เสร็จต่อชั่วโมง <strong>มากที่สุด</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Turnaround time</strong></td>
+<td>เวลาตั้งแต่ส่งงานจนงานจบ <strong>น้อยที่สุด</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>CPU utilization</strong></td>
+<td>ให้ CPU ทำงานตลอดเวลา</td>
+</tr>
+<tr>
+<td><strong>Interactive systems</strong> (มีผู้ใช้โต้ตอบ)</td>
+<td><strong>Response time</strong></td>
+<td>ตอบสนองคำขอให้เร็ว</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Proportionality</strong></td>
+<td>ตรงกับความคาดหวังของผู้ใช้ (งานง่ายควรเร็ว)</td>
+</tr>
+<tr>
+<td><strong>Real-time systems</strong></td>
+<td><strong>Meeting deadlines</strong></td>
+<td>ทันเส้นตาย เพื่อไม่ให้ข้อมูลสูญหาย</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Predictability</strong></td>
+<td>คาดเดาได้ เพื่อไม่ให้คุณภาพลดลง (เช่น เสียง/วิดีโอกระตุก)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-scheduling-metrics-สไลด์-13">3.2 Scheduling Metrics (สไลด์ 13) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>นิยาม</th>
+<th>ยิ่ง...ยิ่งดี</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU utilization</strong></td>
+<td>เวลาที่ CPU ทำงาน (ไม่ว่าง)</td>
+<td>มาก</td>
+</tr>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>จำนวน process ที่ทำเสร็จต่อหน่วยเวลา</td>
+<td>มาก</td>
+</tr>
+<tr>
+<td><strong>Turnaround time</strong></td>
+<td>เวลาทั้งหมดในการทำ process หนึ่งให้เสร็จ</td>
+<td>น้อย</td>
+</tr>
+<tr>
+<td><strong>Waiting time</strong></td>
+<td>เวลาที่ process <strong>รออยู่ใน ready queue</strong></td>
+<td>น้อย</td>
+</tr>
+<tr>
+<td><strong>Response time</strong></td>
+<td>เวลาตั้งแต่ส่งคำขอ จน <strong>ได้ตอบสนองครั้งแรก (ได้รันครั้งแรก)</strong> — ไม่ใช่จนได้ผลลัพธ์ทั้งหมด</td>
+<td>น้อย</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>สูตรที่ต้องจำ:</strong></p>
+<ul>
+<li><strong>Turnaround time = CPU time + waiting time</strong> (สไลด์) ซึ่งเท่ากับ <strong>T_completion − T_arrival</strong> (ใช้ในตัวอย่าง SJF/STCF)</li>
+<li><strong>Response time = T_first run − T_arrival</strong> (สไลด์ 26)</li>
+<li>(เสริม) Waiting time = Turnaround time − burst time (ถ้าไม่มี I/O)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Turnaround vs Response:</strong> turnaround นับจนงาน <strong>เสร็จ</strong> / response นับแค่จน <strong>ได้เริ่มรันครั้งแรก</strong></p>
+</blockquote>
+<h3 id="33-examples-สไลด์-14">3.3 Examples (สไลด์ 14)</h3>
+<p>สมมติทุก process มาถึงที่ T = 0 และรันตามลำดับ P1 → P2 → P3</p>
+<ul>
+<li><strong>P1</strong>: waiting time = 0, turnaround time = 24 → P1 ใช้ CPU 24</li>
+<li><strong>P2</strong>: waiting time = 24, turnaround time = 27 → P2 ใช้ CPU 3</li>
+<li><strong>P3</strong>: waiting time = …?, turnaround time = ? (สไลด์ให้คิดเอง)</li>
+</ul>
+<blockquote class="callout">
+<p>(เสริม) สไลด์ไม่ได้บอก burst ของ P3 — ถ้าใช้โจทย์มาตรฐานจากตำรา (P1=24, P2=3, P3=3): <strong>P3 waiting = 24+3 = 27, turnaround = 27+3 = 30</strong> → average waiting = (0+24+27)/3 = <strong>17</strong>, average turnaround = (24+27+30)/3 = <strong>27</strong></p>
+<p>หลักคิด: waiting ของตัวถัดไป = turnaround ของตัวก่อนหน้า (เมื่อทุกตัวมาพร้อมกันและรันต่อกัน)</p>
+</blockquote>
+<h3 id="34-good-scheduling-algorithms-สไลด์-15">3.4 Good Scheduling Algorithms (สไลด์ 15)</h3>
+<p>อัลกอริทึมที่ดีควร:</p>
+<ul>
+<li><strong>Max</strong> CPU utilization</li>
+<li><strong>Max</strong> throughput</li>
+<li><strong>Min</strong> turnaround time</li>
+<li><strong>Min</strong> waiting time</li>
+<li><strong>Min</strong> response time</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำง่าย: 2 ตัวแรก (utilization, throughput) = &quot;ยิ่งมากยิ่งดี&quot; ส่วนที่ลงท้ายด้วย <strong>time</strong> ทั้งหมด = &quot;ยิ่งน้อยยิ่งดี&quot;</p>
+</blockquote>
+<hr />
+<h2 id="4-scheduling-algorithms-สไลด์-1629">4. Scheduling Algorithms (สไลด์ 16–29)</h2>
+<p>รายการอัลกอริทึม (สไลด์ 17): <strong>FIFO, SJF, STCF, Priority, Round Robin (RR), MLFQ</strong></p>
+<h3 id="41-first-in-first-out-fifo-สไลด์-18">4.1 First In, First Out (FIFO) (สไลด์ 18)</h3>
+<ul>
+<li>เรียกอีกชื่อว่า <strong>First Come, First Served (FCFS)</strong> — ใครมาก่อนได้ก่อน</li>
+<li>ตัวอย่าง: A, B, C มาถึงที่ T=0 ใช้เวลาคนละ 10s</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p018.jpg" alt="FIFO: A B C คนละ 10s" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>เสร็จที่</th>
+<th>Turnaround</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>10</td>
+<td>10</td>
+</tr>
+<tr>
+<td>B</td>
+<td>20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>C</td>
+<td>30</td>
+<td>30</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Average Turnaround Time = (10 + 20 + 30) / 3 = 20</strong></p>
+<h3 id="42-ทำไม-fifo-ไม่ดี-convoy-effect-สไลด์-19">4.2 ทำไม FIFO ไม่ดี — Convoy Effect (สไลด์ 19)</h3>
+<ul>
+<li>ถ้า <strong>A ใช้ 100s</strong> แต่ B, C ใช้แค่ 10s และ A มาก่อน</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p019.jpg" alt="FIFO: A ยาว 100s มาก่อน B C" /></p>
+<p><strong>Average Turnaround Time = (100 + 110 + 120) / 3 = 110</strong> (แย่ลงมาก)</p>
+<ul>
+<li>เรียกว่า <strong>Convoy Effect</strong>: <strong>process สั้นติดอยู่หลัง process ยาว</strong> เหมือนต่อแถวจ่ายเงินในซูเปอร์มาร์เก็ต แล้วคนหน้าเข็นรถเต็มคัน ขณะที่เราถือของชิ้นเดียว</li>
+</ul>
+<h3 id="43-shortest-job-first-sjf-สไลด์-20">4.3 Shortest Job First (SJF) (สไลด์ 20)</h3>
+<ul>
+<li><strong>เลือกงานที่สั้นที่สุดก่อน</strong> — แก้ convoy effect</li>
+<li>ตัวอย่างเดิม (A=100s, B=C=10s มาพร้อมกันที่ T=0) → รัน B, C, A</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p020.jpg" alt="SJF: B C ก่อน แล้วค่อย A" /></p>
+<p><strong>Average Turnaround Time = (10 + 20 + 120) / 3 = 50</strong> (จาก 110 เหลือ 50)</p>
+<h3 id="44-sjf-late-arrival-สไลด์-21">4.4 SJF: Late Arrival (สไลด์ 21)</h3>
+<ul>
+<li>ถ้า <strong>B และ C มาถึงที่ T = 10</strong> (A มาถึง T=0 และได้ CPU ไปแล้ว)</li>
+<li>SJF เป็น <strong>non-preemptive</strong> → A ต้องรันจนจบ B, C ต้องรอ → convoy effect กลับมา</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p021.jpg" alt="SJF เมื่อ B C มาทีหลัง" /></p>
+<p><strong>Average turnaround = (100 + (110−10) + (120−10)) / 3 = 310/3 = 103.3</strong></p>
+<ul>
+<li>(สังเกต: turnaround = เวลาเสร็จ − <strong>เวลามาถึง</strong> จึงต้องลบ 10)</li>
+<li>วิธีแก้: ต้อง <strong>preempt (แย่ง CPU คืน)</strong> จาก process ที่กำลังรัน</li>
+</ul>
+<h3 id="45-non-preemptive-vs-preemptive-สไลด์-22">4.5 Non-preemptive vs Preemptive (สไลด์ 22) ⭐</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Non-preemptive</strong></th>
+<th><strong>Preemptive</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>หลักการ</td>
+<td>process ที่ได้ CPU แล้ว <strong>ถือไว้จนกว่าจะปล่อยเอง</strong> — จบ (terminate) หรือเข้าสู่ waiting state</td>
+<td>process ที่กำลังรัน <strong>ถูกแย่ง CPU ได้</strong> โดย process อื่น หรือเหตุการณ์ เช่น <strong>clock (timer)</strong> หรือ <strong>มี process priority สูงกว่าเข้ามา</strong></td>
+</tr>
+<tr>
+<td>อัลกอริทึม</td>
+<td><strong>FIFO, SJF</strong></td>
+<td><strong>STCF, RR</strong> (Priority ทำได้ทั้งสองแบบ — เสริม)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 Non-preemptive = ได้คิวแล้วไม่มีใครแซง / Preemptive = มีคนแซงคิวได้ถ้ามีสิทธิ์กว่า</p>
+</blockquote>
+<h3 id="46-shortest-time-to-completion-first-stcf-สไลด์-23">4.6 Shortest Time-to-Completion First (STCF) (สไลด์ 23)</h3>
+<ul>
+<li>= <strong>SJF แบบ preemptive</strong> (ตำราอื่นเรียก SRTF — Shortest Remaining Time First, เสริม)</li>
+<li>ทุกครั้งที่มี process ใหม่เข้ามา → เลือกตัวที่ <strong>เหลือเวลาน้อยที่สุด</strong></li>
+<li>ตัวอย่าง: A (100s) มาที่ 0; B, C (10s) มาที่ 10 → ที่ T=10 A เหลือ 90 แต่ B เหลือ 10 → <strong>แย่ง CPU ให้ B</strong> แล้วต่อด้วย C แล้ว A ค่อยรันต่อ</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p023.jpg" alt="STCF: A ถูก preempt เมื่อ B C มาถึง" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>มาถึง</th>
+<th>เสร็จ</th>
+<th>Turnaround</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>0</td>
+<td>120</td>
+<td>120</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>20</td>
+<td>10</td>
+</tr>
+<tr>
+<td>C</td>
+<td>10</td>
+<td>30</td>
+<td>20</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Average Turnaround = ((120−0) + (20−10) + (30−10)) / 3 = 150/3 = 50</strong> (จาก 103.3 เหลือ 50)</p>
+<h3 id="47-priority-สไลด์-2425">4.7 Priority (สไลด์ 24–25)</h3>
+<ul>
+<li>แทนที่จะดูจาก burst time ให้ใช้ <strong>priority (ลำดับความสำคัญ)</strong> ของ process</li>
+<li><strong>ตัวเลขน้อย = priority สูง</strong></li>
+<li>ปัญหา: <strong>starvation (อดตาย)</strong> — process priority ต่ำอาจไม่ได้รันเลย ถ้ามีงาน priority สูงเข้ามาเรื่อย ๆ</li>
+</ul>
+<p><strong>แบบฝึก (สไลด์ 25):</strong> ทุก process มาที่ T=0</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>Burst Time</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>10</td>
+<td>3</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>5</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<p>Average Turnaround time = …?</p>
+<blockquote class="callout">
+<p>(เฉลย — ทำเอง) เรียงตาม priority 1→5: <strong>P2 → P5 → P1 → P3 → P4</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ลำดับ</th>
+<th>P2</th>
+<th>P5</th>
+<th>P1</th>
+<th>P3</th>
+<th>P4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ช่วงเวลา</td>
+<td>0–1</td>
+<td>1–6</td>
+<td>6–16</td>
+<td>16–18</td>
+<td>18–19</td>
+</tr>
+<tr>
+<td>Turnaround</td>
+<td>1</td>
+<td>6</td>
+<td>16</td>
+<td>18</td>
+<td>19</td>
+</tr>
+<tr>
+<td>Waiting</td>
+<td>0</td>
+<td>1</td>
+<td>6</td>
+<td>16</td>
+<td>18</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Average turnaround = (1+6+16+18+19)/5 = 60/5 = 12</strong> / Average waiting = 41/5 = 8.2</p>
+</blockquote>
+<h3 id="48-round-robin-rr-สไลด์-26">4.8 Round Robin (RR) (สไลด์ 26)</h3>
+<ul>
+<li>รันงานหนึ่งเป็นเวลา <strong>1 time slice</strong> (เรียกว่า <strong>scheduling quantum, q</strong>) แล้ว <strong>สลับไปงานถัดไป</strong> วนเป็นวงกลม</li>
+<li><strong>ผลของขนาด q:</strong>
+<ul>
+<li><strong>q ใหญ่เกินไป ⇒ กลายเป็น FIFO</strong> (งานจบก่อนหมด q ทุกครั้ง)</li>
+<li><strong>q เล็กเกินไป ⇒ overhead จาก context switch สูง</strong></li>
+</ul>
+</li>
+<li><strong>ดีต่อ response time</strong> — Response time = Time first run − Time arrived</li>
+<li><strong>แย่ต่อ turnaround time</strong> แต่ <strong>fairness ยอดเยี่ยม</strong></li>
+</ul>
+<h3 id="49-rr-example-สไลด์-27-และเทียบกับ-sjf-สไลด์-28">4.9 RR: Example (สไลด์ 27) และเทียบกับ SJF (สไลด์ 28)</h3>
+<ul>
+<li>A, B, C มาพร้อมกัน, q = 1s</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p027.jpg" alt="RR q=1: ABCABC..." /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียนว่า &quot;each needs <strong>15s</strong>&quot; แต่ในกราฟ <strong>แต่ละตัวใช้ 5s</strong> (รวม 15s) — ตัวเลขในการคำนวณก็ใช้ 5s ต่อตัว</p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>เฉลี่ย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RR: first run</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td><strong>Response = (0+1+2)/3 = 1</strong></td>
+</tr>
+<tr>
+<td>RR: เสร็จ</td>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td><strong>Turnaround = (13+14+15)/3 = 14</strong></td>
+</tr>
+<tr>
+<td>SJF: first run</td>
+<td>0</td>
+<td>5</td>
+<td>10</td>
+<td><strong>Response = (0+5+10)/3 = 5</strong></td>
+</tr>
+<tr>
+<td>SJF: เสร็จ</td>
+<td>5</td>
+<td>10</td>
+<td>15</td>
+<td><strong>Turnaround = (5+10+15)/3 = 10</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l3-p028.jpg" alt="SJF กับงานเดียวกัน" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>Trade-off สำคัญ:</strong> RR ชนะด้าน <strong>response time</strong> (1 vs 5) / SJF ชนะด้าน <strong>turnaround time</strong> (10 vs 14) — ไม่มีอัลกอริทึมไหนดีที่สุดทุก metric</p>
+</blockquote>
+<h3 id="410-context-switching-overhead-สไลด์-29">4.10 Context Switching Overhead (สไลด์ 29)</h3>
+<ul>
+<li><strong>q ควรใหญ่กว่าเวลาที่ใช้ context switch มาก ๆ</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l3-p029.jpg" alt="process time 10: q=12 → 0 switch, q=6 → 1, q=1 → 9" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>process time = 10, quantum</th>
+<th>จำนวน context switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td>0</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>9</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ตัวอย่าง: time slice = 10 ms, context switch = 1 ms → เสียเวลาไปกับการสลับประมาณ <strong>10%</strong> (เวลาที่สูญเปล่า)</li>
+</ul>
+<hr />
+<h2 id="5-incorporating-io-สไลด์-3033">5. Incorporating I/O (สไลด์ 30–33)</h2>
+<h3 id="51-แนวคิด-สไลด์-31">5.1 แนวคิด (สไลด์ 31)</h3>
+<ul>
+<li>เมื่อ process ถูก <strong>block</strong> (รอ I/O) → scheduler <strong>เลือก process อื่นมารัน</strong> ได้</li>
+<li>เมื่อ <strong>I/O เสร็จ</strong> → scheduler อาจตัดสินใจให้ process ที่ขอ I/O นั้น <strong>รันทันที</strong></li>
+<li>แนวคิดคือ <strong>ทับซ้อน (overlap)</strong> การทำงานของ CPU กับ I/O ให้เกิดขึ้นพร้อมกัน</li>
+</ul>
+<h3 id="52-bad-example-ไม่ทับซ้อน-สไลด์-32">5.2 Bad Example: ไม่ทับซ้อน (สไลด์ 32)</h3>
+<ul>
+<li>A และ B มาพร้อมกัน ต้องใช้ CPU คนละ 50 (สไลด์เขียน 50s แต่กราฟใช้หน่วย ms)</li>
+<li><strong>A:</strong> ทุก ๆ 10ms ของ CPU ต้องใช้ disk (I/O) อีก 10ms / <strong>B:</strong> ใช้ CPU ล้วน</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p032.jpg" alt="ไม่ overlap: CPU ว่างขณะ A ใช้ disk" /></p>
+<ul>
+<li>ขณะ A รอ disk <strong>CPU ว่างเปล่า</strong> → A เสร็จที่ 90, B เริ่มที่ 90 เสร็จที่ 140</li>
+<li><strong>Average turnaround = (90 + 140) / 2 = 115</strong></li>
+</ul>
+<h3 id="53-stcf-example-ทับซ้อน-สไลด์-33">5.3 STCF Example: ทับซ้อน (สไลด์ 33)</h3>
+<ul>
+<li>มอง A เป็น <strong>sub-job ย่อย ๆ ละ 10ms</strong> (เวลาที่คาดว่าจะรันก่อนทำ I/O) → แต่ละ sub-job สั้นกว่า B ⇒ STCF เลือก A ก่อน</li>
+<li>ขณะ A ทำ I/O → <strong>B ได้รัน</strong>; เมื่อ A พร้อม (กลับจาก blocked) → <strong>B ถูก preempt</strong> ให้ A รัน</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p033.jpg" alt="overlap: ABABAB... CPU ไม่ว่างเลย" /></p>
+<ul>
+<li>A เสร็จที่ 90, B เสร็จที่ 100 → <strong>Average turnaround = (90 + 100) / 2 = 95</strong> (ดีกว่า 115)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ข้อคิด: มอง CPU burst แต่ละช่วงของ process I/O-bound เป็น &quot;งานสั้น&quot; → ได้ priority สูงเสมอ → ระบบตอบสนองดีและ CPU ไม่ว่าง</p>
+</blockquote>
+<hr />
+<h2 id="6-multi-level-feedback-queue-mlfq-สไลด์-3442">6. Multi-level Feedback Queue (MLFQ) (สไลด์ 34–42)</h2>
+<h3 id="61-motivation-สไลด์-35">6.1 Motivation (สไลด์ 35)</h3>
+<ul>
+<li><strong>SJF/STCF</strong> ดีที่สุดสำหรับ <strong>turnaround time</strong> → แต่ <strong>OS มักไม่รู้ว่างานจะใช้เวลาเท่าไร!</strong></li>
+<li><strong>RR</strong> ดีที่สุดสำหรับ <strong>response time</strong> → แต่ <strong>แย่มากเรื่อง turnaround time</strong></li>
+<li>โจทย์: สร้าง scheduler ที่
+<ul>
+<li><strong>ลด response time</strong> ให้ interactive process</li>
+<li><strong>ลด turnaround time</strong> โดย <strong>ไม่ต้องรู้ความยาวงานล่วงหน้า</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="62-แนวคิดพื้นฐาน-สไลด์-36">6.2 แนวคิดพื้นฐาน (สไลด์ 36)</h3>
+<ul>
+<li>MLFQ เป็นอัลกอริทึมที่มีชื่อเสียง โดย <strong>Corbato et al.</strong></li>
+<li>มี <strong>หลายคิว แต่ละคิว priority ต่างกัน</strong></li>
+<li><strong>แต่ละคิวใช้ RR</strong> ภายในคิว</li>
+<li>process <strong>เริ่มที่ priority สูงสุด</strong> และ <strong>ถูกลดลงมาเรื่อย ๆ เมื่อใช้ time slice หมด</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l3-p036.jpg" alt="คิว Q8 (สูง) ถึง Q1 (ต่ำ): A,B อยู่ Q8, C อยู่ Q4, D อยู่ Q1" /></p>
+<ul>
+<li>ในรูป: A, B อยู่คิวบนสุด (Q8) → ได้รันสลับกันแบบ RR, C (Q4) และ D (Q1) ต้องรอจนคิวบนว่าง</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 &quot;Feedback&quot; = ใช้ <strong>พฤติกรรมที่ผ่านมา</strong> ของ process มาปรับ priority — งานไหนกิน CPU นานก็ถูกลดชั้น งานไหนปล่อย CPU เร็ว (interactive) ก็อยู่ชั้นบน</p>
+</blockquote>
+<h3 id="63-mlfq-rules-สไลด์-37-ต้องจำทั้ง-5-ข้อ">6.3 MLFQ Rules (สไลด์ 37) ⭐ ต้องจำทั้ง 5 ข้อ</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>เนื้อหา</th>
+<th>ทำไม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>ถ้า Priority(A) &gt; Priority(B) → <strong>A รัน (B ไม่รัน)</strong></td>
+<td>คิวบนได้ก่อนเสมอ</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>ถ้า Priority(A) = Priority(B) → A กับ B <strong>รันแบบ RR</strong> ด้วย time slice ของคิวนั้น</td>
+<td>คิวเดียวกันแบ่งกันยุติธรรม</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>งานใหม่เข้าระบบ → วางที่ <strong>priority สูงสุด (คิวบนสุด)</strong></td>
+<td>สมมติไว้ก่อนว่าเป็นงานสั้น</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>เมื่องานใช้ <strong>time allotment ของชั้นนั้นหมด</strong> (ไม่ว่าจะเคยปล่อย CPU กี่ครั้ง) → <strong>ลด priority ลง 1 คิว</strong></td>
+<td>ป้องกันการโกง (gaming)</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>ทุก ๆ ช่วงเวลา <strong>S</strong> → <strong>ย้ายทุกงานกลับขึ้นคิวบนสุด</strong> (priority boost)</td>
+<td>ป้องกัน starvation + ปรับตามพฤติกรรมที่เปลี่ยน</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="64-mlfq-simple-example-สไลด์-38">6.4 MLFQ Simple Example (สไลด์ 38)</h3>
+<ul>
+<li><strong>ดำ:</strong> งานยาว / <strong>เทา:</strong> งานสั้น มาถึงที่ T = 100</li>
+<li>สมมติว่า <strong>งานใหม่ทุกงานเป็นงานสั้น (priority สูงสุด)</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l3-p038.jpg" alt="งานยาวลงไปอยู่ Q0 งานสั้นเข้ามาที่ Q2 แล้วเสร็จเร็ว" /></p>
+<ul>
+<li>งานยาว (ดำ) เริ่มที่ Q2 → ใช้ slice หมดตกไป Q1 → ตกไป Q0 แล้วรันยาว</li>
+<li>ที่ T=100 งานสั้น (เทา) เข้ามาที่ Q2 → <strong>แย่ง CPU ได้ทันที</strong> (Rule 1) → ลงมา Q1 แล้วก็เสร็จก่อนถึง Q0 → งานยาวรันต่อ</li>
+<li>ผลคือ MLFQ <strong>ประมาณ SJF ได้โดยไม่ต้องรู้ความยาวงาน</strong>: ถ้าเป็นงานสั้นจะเสร็จเร็ว ถ้ายาวก็ค่อย ๆ ลงไปคิวล่าง</li>
+</ul>
+<h3 id="65-mlfq-intensive-io-example-สไลด์-39">6.5 MLFQ Intensive I/O Example (สไลด์ 39)</h3>
+<ul>
+<li><strong>ดำ:</strong> งานยาว / <strong>เทา:</strong> งาน interactive (ทำ I/O ถี่มาก)</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p039.jpg" alt="งาน I/O ถี่อยู่ Q2 ตลอด งานยาวอยู่ Q0" /></p>
+<ul>
+<li>งาน interactive ใช้ CPU แป๊บเดียวแล้วก็ปล่อยไปทำ I/O → ไม่ใช้ slice หมด → <strong>อยู่ priority สูงตลอด</strong> → response ดี</li>
+<li><strong>ประมาณ priority (ความเป็น interactive) จากความยาวของงาน (burst)</strong></li>
+</ul>
+<h3 id="66-mlfq-accounting-rule-4-สไลด์-40">6.6 MLFQ Accounting — Rule 4 (สไลด์ 40)</h3>
+<ul>
+<li><strong>ทุก process มีเวลาจำกัด (fixed amount) ในแต่ละคิว</strong> (ยกเว้นคิวล่างสุด)</li>
+<li>เพื่อ <strong>ป้องกันการโกง scheduler (gaming)</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l3-p040.jpg" alt="ซ้าย: ไม่มีกันโกง (Cheater!) / ขวา: มีกันโกง" /></p>
+<ul>
+<li><strong>ซ้าย (ไม่มี accounting):</strong> process เจ้าเล่ห์ (<strong>Cheater!</strong>) ทำ I/O ก่อนหมด slice นิดเดียว → ไม่ถูกลดคิว → ครอบครอง CPU อยู่ Q2 ตลอด งานยาวแทบไม่ได้รัน</li>
+<li><strong>ขวา (มี accounting):</strong> นับเวลาที่ใช้ <strong>สะสม</strong> ในคิวนั้น — ครบ allotment เมื่อไหร่ก็ถูกลดคิว แม้จะปล่อย CPU บ่อย → cheater ตกลงมา Q1, Q0 และแบ่ง CPU กับงานยาวอย่างยุติธรรม</li>
+</ul>
+<h3 id="67-mlfq-priority-boost-rule-5-สไลด์-41">6.7 MLFQ Priority Boost — Rule 5 (สไลด์ 41)</h3>
+<ul>
+<li><strong>รีเซ็ต priority ของทุก process เป็นระยะ ๆ</strong>
+<ul>
+<li><strong>ป้องกัน starvation</strong> — งานยาวที่ตกไปคิวล่าง จะได้กลับขึ้นมารันบ้าง</li>
+<li><strong>ประมาณได้ดีขึ้น</strong> เมื่อ process <strong>เปลี่ยนพฤติกรรม</strong> (เช่น เคยเป็น CPU-bound แล้วกลายเป็น interactive)</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="img/l3-p041.jpg" alt="ซ้าย: ไม่มี boost งานยาวอด / ขวา: มี boost งานยาวได้รันเป็นระยะ" /></p>
+<ul>
+<li><strong>ซ้าย:</strong> เมื่องาน interactive 2 ตัวเข้ามาใน Q2 งานยาว (ดำ) ใน Q0 <strong>ไม่ได้รันเลย (starve)</strong></li>
+<li><strong>ขวา:</strong> ทุก ๆ ช่วงเวลา งานยาวถูก <strong>boost ขึ้น Q2</strong> → ได้รันเป็นระยะ</li>
+</ul>
+<h3 id="68-example-of-a-different-configuration-สไลด์-42">6.8 Example of a different Configuration (สไลด์ 42)</h3>
+<p><strong>3 คิว:</strong></p>
+<ul>
+<li><strong>Q0</strong> — RR, quantum <strong>8 ms</strong></li>
+<li><strong>Q1</strong> — RR, quantum <strong>16 ms</strong></li>
+<li><strong>Q2</strong> — <strong>FCFS</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l3-p042.jpg" alt="3 คิว: quantum 8 → quantum 16 → FCFS" /></p>
+<p><strong>การ schedule:</strong></p>
+<ol>
+<li>งานใหม่เข้า <strong>Q0</strong> (RR q=8ms) → ได้ CPU <strong>8 ms</strong></li>
+<li>ถ้า <strong>ไม่เสร็จใน 8 ms</strong> → ย้ายลง <strong>Q1</strong></li>
+<li>ที่ Q1 ได้ RR อีก <strong>16 ms</strong> (เพิ่มเติม)</li>
+<li>ถ้ายัง <strong>ไม่เสร็จอีก</strong> → ถูก preempt และย้ายลง <strong>Q2</strong> (FCFS)</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 (เสริม) งานที่ใช้ CPU ≤ 8 ms จะเสร็จใน Q0 (เร็วสุด), ≤ 24 ms (8+16) เสร็จใน Q1, ยาวกว่านั้นไปรันแบบ FCFS ที่ Q2 ตอนคิวบนว่าง</p>
+</blockquote>
+<hr />
+<h2 id="7-scheduler-ใน-os-จริง-สไลด์-4348">7. Scheduler ใน OS จริง (สไลด์ 43–48)</h2>
+<h3 id="71-linux-26-สไลด์-44">7.1 Linux 2.6+ (สไลด์ 44)</h3>
+<ul>
+<li>มี <strong>2 กลุ่ม policy:</strong>
+<ul>
+<li><strong>Real-time:</strong> <code>SCHED_FIFO</code>, <code>SCHED_RR</code></li>
+<li><strong>Normal:</strong> <code>SCHED_OTHER</code>, <code>SCHED_BATCH</code></li>
+</ul>
+</li>
+<li>Real-time policies ใช้ <strong>preemptive priority scheduler</strong> และมี <strong>priority สูงกว่า</strong> กลุ่ม Normal</li>
+<li>Normal policies ใช้ <strong>&quot;Completely Fair Scheduler&quot; (CFS)</strong></li>
+</ul>
+<h3 id="72-linux-cfs-และ-nice-values-สไลด์-45">7.2 Linux: CFS และ Nice values (สไลด์ 45)</h3>
+<ul>
+<li>CFS เก็บ <strong>virtual runtime (vruntime)</strong> ของแต่ละ task</li>
+<li>CFS <strong>เลือก task ที่ virtual runtime ต่ำที่สุด</strong> มารันต่อ (ตัวที่ &quot;ได้ CPU ไปน้อยที่สุด&quot;)</li>
+<li>รัน task หนึ่ง time slice แล้ว <strong>ใส่กลับเข้า runqueue</strong></li>
+<li>แต่ละ task (thread) มี <strong>nice value</strong> จาก <strong>−20 (priority สูงสุด)</strong> ถึง <strong>+19 (priority ต่ำสุด)</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>nice value</th>
+<th>ความสัมพันธ์</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>physical runtime <strong>=</strong> virtual runtime</td>
+<td>ปกติ</td>
+</tr>
+<tr>
+<td><strong>ต่ำ (ติดลบ)</strong></td>
+<td>physical runtime <strong>&gt;</strong> virtual runtime</td>
+<td>vruntime โตช้า → ถูกเลือกบ่อย → ได้ CPU มาก</td>
+</tr>
+<tr>
+<td><strong>สูง (บวก)</strong></td>
+<td>physical runtime <strong>&lt;</strong> virtual runtime</td>
+<td>vruntime โตเร็ว → ได้ CPU น้อย</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใช้ <strong>Red-Black Tree (RBTree)</strong> เก็บ task เรียงตาม vruntime เพื่อประสิทธิภาพ (หาตัวน้อยสุดได้เร็ว)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 &quot;nice&quot; = ใจดีกับคนอื่น → nice สูง = ยอมให้คนอื่นก่อน = priority ต่ำ</p>
+</blockquote>
+<h3 id="73-windows-scheduling-สไลด์-46">7.3 Windows Scheduling (สไลด์ 46)</h3>
+<ul>
+<li>ใช้ <strong>priority-based preemptive scheduling</strong></li>
+<li><strong>thread priority สูงสุดได้รันก่อน</strong></li>
+<li>thread รันจนกว่า (1) <strong>block</strong> (2) <strong>ใช้ time slice หมด</strong> (3) <strong>ถูก preempt โดย thread priority สูงกว่า</strong></li>
+<li>thread แบบ <strong>real-time preempt thread ที่ไม่ใช่ real-time ได้</strong></li>
+<li><strong>ระบบ priority 32 ระดับ (0–31):</strong>
+<ul>
+<li><strong>Variable class: 1–15</strong></li>
+<li><strong>Real-time class: 16–31</strong></li>
+<li><strong>Priority 0 = memory-management thread</strong></li>
+</ul>
+</li>
+<li>มี <strong>คิวแยกสำหรับแต่ละ priority</strong></li>
+</ul>
+<h3 id="74-windows-priority-classes-สไลด์-47">7.4 Windows Priority Classes (สไลด์ 47)</h3>
+<p>priority จริงของ thread = <strong>priority class ของ process (คอลัมน์)</strong> × <strong>relative priority ของ thread (แถว)</strong></p>
+<p><img loading="lazy" src="img/l3-p047.jpg" alt="ตาราง priority ของ Windows" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>thread \ process class</th>
+<th>real-time</th>
+<th>high</th>
+<th>above normal</th>
+<th>normal</th>
+<th>below normal</th>
+<th>idle priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>time-critical</td>
+<td>31</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+</tr>
+<tr>
+<td>highest</td>
+<td>26</td>
+<td>15</td>
+<td>12</td>
+<td>10</td>
+<td>8</td>
+<td>6</td>
+</tr>
+<tr>
+<td>above normal</td>
+<td>25</td>
+<td>14</td>
+<td>11</td>
+<td>9</td>
+<td>7</td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>normal</strong> (base)</td>
+<td>24</td>
+<td>13</td>
+<td>10</td>
+<td>8</td>
+<td>6</td>
+<td>4</td>
+</tr>
+<tr>
+<td>below normal</td>
+<td>23</td>
+<td>12</td>
+<td>9</td>
+<td>7</td>
+<td>5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>lowest</td>
+<td>22</td>
+<td>11</td>
+<td>8</td>
+<td>6</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>idle</td>
+<td>16</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>สังเกต: คอลัมน์ real-time อยู่ช่วง <strong>16–31</strong> ส่วนคลาสอื่นอยู่ใน <strong>1–15</strong> (ตรงกับ variable class)</li>
+</ul>
+<h3 id="75-windows-การปรับ-priority-แบบไดนามิก-สไลด์-48">7.5 Windows: การปรับ priority แบบไดนามิก (สไลด์ 48)</h3>
+<ul>
+<li>ถ้า <strong>quantum หมด</strong> → <strong>priority ถูกลด</strong> แต่ <strong>ไม่ต่ำกว่า base</strong></li>
+<li>ถ้าเกิด <strong>wait</strong> (รอ I/O ฯลฯ) → <strong>priority ถูก boost</strong> ขึ้นตามสิ่งที่รอ (เช่น รอคีย์บอร์ดได้ boost มากกว่ารอ disk — เสริม)</li>
+<li><strong>หน้าต่างที่อยู่ด้านหน้า (foreground window)</strong> ได้ <strong>priority boost 3 เท่า</strong> → โปรแกรมที่ผู้ใช้กำลังใช้ตอบสนองเร็ว</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 Windows ทำคล้าย MLFQ: ใช้ CPU หมด slice → ลด priority / ไปรอ I/O → เพิ่ม priority</p>
+</blockquote>
+<hr />
+<h2 id="8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU burst / I/O burst</strong></td>
+<td>ช่วงที่ process ใช้ CPU / รอ I/O สลับกัน</td>
+<td>คิด / รอ</td>
+</tr>
+<tr>
+<td><strong>CPU-bound</strong></td>
+<td>process ที่คำนวณมาก burst ยาว น้อยครั้ง</td>
+<td>งานหนักสมอง</td>
+</tr>
+<tr>
+<td><strong>I/O-bound</strong></td>
+<td>process ที่ทำ I/O มาก burst สั้น ถี่</td>
+<td>งานรอของ</td>
+</tr>
+<tr>
+<td><strong>Scheduling / Descheduling</strong></td>
+<td>เอา process เข้า / ออกจาก CPU</td>
+<td>ขึ้นเวที / ลงเวที</td>
+</tr>
+<tr>
+<td><strong>Scheduling policy</strong></td>
+<td>กฎที่ OS ใช้เลือก process ถัดไป</td>
+<td>กติกาคิว</td>
+</tr>
+<tr>
+<td><strong>Turnaround time</strong></td>
+<td>เวลาเสร็จ − เวลามาถึง</td>
+<td>ทั้งงาน</td>
+</tr>
+<tr>
+<td><strong>Waiting time</strong></td>
+<td>เวลารอใน ready queue</td>
+<td>นั่งรอคิว</td>
+</tr>
+<tr>
+<td><strong>Response time</strong></td>
+<td>เวลาได้รันครั้งแรก − เวลามาถึง</td>
+<td>ได้ตอบครั้งแรก</td>
+</tr>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>จำนวนงานเสร็จต่อหน่วยเวลา</td>
+<td>ผลผลิต</td>
+</tr>
+<tr>
+<td><strong>FIFO / FCFS</strong></td>
+<td>มาก่อนได้ก่อน (non-preemptive)</td>
+<td>แถวธรรมดา</td>
+</tr>
+<tr>
+<td><strong>Convoy effect</strong></td>
+<td>งานสั้นติดหลังงานยาว</td>
+<td>รถเข็นเต็มคันข้างหน้า</td>
+</tr>
+<tr>
+<td><strong>SJF</strong></td>
+<td>งานสั้นสุดก่อน (non-preemptive)</td>
+<td>ช่องด่วน ≤ 10 ชิ้น</td>
+</tr>
+<tr>
+<td><strong>STCF</strong></td>
+<td>งานที่ <strong>เหลือเวลา</strong> น้อยสุดก่อน (preemptive)</td>
+<td>SJF ที่แซงได้</td>
+</tr>
+<tr>
+<td><strong>Preemptive</strong></td>
+<td>แย่ง CPU คืนจาก process ที่กำลังรันได้</td>
+<td>แซงคิวได้</td>
+</tr>
+<tr>
+<td><strong>Priority scheduling</strong></td>
+<td>เลือกตาม priority (เลขน้อย = สูง)</td>
+<td>บัตร VIP</td>
+</tr>
+<tr>
+<td><strong>Starvation</strong></td>
+<td>process priority ต่ำไม่ได้รันเลย</td>
+<td>อดตาย</td>
+</tr>
+<tr>
+<td><strong>Round Robin (RR)</strong></td>
+<td>วนให้คนละ q</td>
+<td>ผลัดกันเล่น</td>
+</tr>
+<tr>
+<td><strong>Quantum (q) / time slice</strong></td>
+<td>ระยะเวลาที่ได้ต่อรอบใน RR</td>
+<td>เวลาต่อตา</td>
+</tr>
+<tr>
+<td><strong>Context switch overhead</strong></td>
+<td>เวลาที่เสียไปกับการสลับ process</td>
+<td>ค่าผ่านทาง</td>
+</tr>
+<tr>
+<td><strong>MLFQ</strong></td>
+<td>หลายคิวหลาย priority, ปรับ priority ตามพฤติกรรม</td>
+<td>ลดชั้นถ้ากิน CPU นาน</td>
+</tr>
+<tr>
+<td><strong>Time allotment</strong></td>
+<td>เวลารวมที่ process อยู่ได้ในแต่ละคิว</td>
+<td>โควตาต่อชั้น</td>
+</tr>
+<tr>
+<td><strong>Gaming the scheduler</strong></td>
+<td>โกงโดยปล่อย CPU ก่อนหมด slice เพื่อคง priority</td>
+<td>Cheater</td>
+</tr>
+<tr>
+<td><strong>Priority boost</strong></td>
+<td>ยก process ทั้งหมดขึ้นคิวบนเป็นระยะ</td>
+<td>นิรโทษกรรม</td>
+</tr>
+<tr>
+<td><strong>CFS</strong></td>
+<td>Completely Fair Scheduler ของ Linux เลือก vruntime ต่ำสุด</td>
+<td>ใครได้น้อยได้ก่อน</td>
+</tr>
+<tr>
+<td><strong>vruntime</strong></td>
+<td>virtual runtime ที่ปรับตาม nice</td>
+<td>เวลาถ่วงน้ำหนัก</td>
+</tr>
+<tr>
+<td><strong>nice value</strong></td>
+<td>−20 (สูงสุด) ถึง +19 (ต่ำสุด)</td>
+<td>nice มาก = ยอมคนอื่น</td>
+</tr>
+<tr>
+<td><strong>RBTree</strong></td>
+<td>Red-Black Tree โครงสร้างที่ CFS ใช้</td>
+<td>ต้นไม้สมดุล</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>สูตร:</strong> Turnaround = T_completion − T_arrival (= CPU time + waiting time), Response = T_first run − T_arrival</li>
+<li>⭐ <strong>ตัวเลขตัวอย่างที่ควรคำนวณได้:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สถานการณ์</th>
+<th>อัลกอริทึม</th>
+<th>Avg Turnaround</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A,B,C = 10s มาพร้อมกัน</td>
+<td>FIFO</td>
+<td>20</td>
+</tr>
+<tr>
+<td>A=100, B=C=10 มาพร้อมกัน</td>
+<td>FIFO</td>
+<td>110 (convoy)</td>
+</tr>
+<tr>
+<td>เหมือนบน</td>
+<td>SJF</td>
+<td>50</td>
+</tr>
+<tr>
+<td>A มา 0, B,C มา 10</td>
+<td>SJF</td>
+<td>103.3</td>
+</tr>
+<tr>
+<td>เหมือนบน</td>
+<td>STCF</td>
+<td>50</td>
+</tr>
+<tr>
+<td>A,B,C = 5s, q=1</td>
+<td>RR</td>
+<td>14 (response 1)</td>
+</tr>
+<tr>
+<td>เหมือนบน</td>
+<td>SJF</td>
+<td>10 (response 5)</td>
+</tr>
+<tr>
+<td>A มี I/O, B CPU ล้วน (50 ต่อตัว)</td>
+<td>ไม่ overlap</td>
+<td>115</td>
+</tr>
+<tr>
+<td>เหมือนบน</td>
+<td>STCF + overlap</td>
+<td>95</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ <strong>Non-preemptive:</strong> FIFO, SJF / <strong>Preemptive:</strong> STCF, RR</li>
+<li>⭐ <strong>RR:</strong> q ใหญ่ไป → FIFO, q เล็กไป → context switch overhead สูง / ดีต่อ response + fairness แย่ต่อ turnaround</li>
+<li>⭐ <strong>MLFQ 5 rules</strong> — โดยเฉพาะ Rule 4 (กันโกง) และ Rule 5 (priority boost กัน starvation)</li>
+<li>⭐ <strong>Linux:</strong> Real-time (SCHED_FIFO, SCHED_RR) &gt; Normal (SCHED_OTHER, SCHED_BATCH → CFS); nice −20 ถึง +19; vruntime ต่ำสุดได้รัน; ใช้ RBTree</li>
+<li>⭐ <strong>Windows:</strong> 32 ระดับ, variable 1–15, real-time 16–31, 0 = memory-management thread; quantum หมด → ลด (ไม่ต่ำกว่า base), wait → boost, foreground ×3</li>
+</ul>
+<p><strong>คู่ที่มักสับสน:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SJF vs STCF</td>
+<td>SJF ไม่แย่ง CPU / STCF แย่งได้เมื่อมีงานที่ <strong>เหลือเวลา</strong> น้อยกว่า</td>
+</tr>
+<tr>
+<td>Turnaround vs Response</td>
+<td>จนเสร็จ vs จนได้รันครั้งแรก</td>
+</tr>
+<tr>
+<td>Waiting vs Response</td>
+<td>รวมเวลารอทั้งหมดในคิว vs รอแค่จนได้รันครั้งแรก</td>
+</tr>
+<tr>
+<td>Priority: เลขน้อย vs เลขมาก</td>
+<td>ในสไลด์ Priority: <strong>เลขน้อย = สูง</strong> / Linux nice: <strong>−20 = สูง</strong> / แต่ <strong>Windows: เลขมาก = สูง</strong> (31 สูงสุด) และ MLFQ: คิวบน = สูง</td>
+</tr>
+<tr>
+<td>Starvation แก้ด้วย</td>
+<td>MLFQ: priority boost (Rule 5) / (เสริม) Priority ทั่วไป: aging</td>
+</tr>
+<tr>
+<td>Nice ต่ำ vs สูง</td>
+<td>nice ต่ำ → physical &gt; virtual → ได้ CPU มาก / nice สูง → ได้ CPU น้อย</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../lecture2/index.html"><small>← บทก่อนหน้า</small><span>Lecture 2 — Process</span></a><span></span></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

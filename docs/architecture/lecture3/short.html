@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 3 — CPU (Process) Scheduling · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#c2410c}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
+        <ol><li><a href="#1-พื้นฐาน">1. พื้นฐาน</a></li><li><a href="#2-เป้าหมาย-metrics">2. เป้าหมาย &amp;amp; Metrics ⭐</a></li><li><a href="#3-อัลกอริทึม">3. อัลกอริทึม ⭐</a></li><li><a href="#4-incorporating-io">4. Incorporating I/O</a></li><li><a href="#5-mlfq">5. MLFQ ⭐</a></li><li><a href="#6-os-จริง">6. OS จริง</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Lecture3</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 3 — CPU (Process) Scheduling</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a></div>
+      <article class="prose"><p><strong>คำถามหลักของบท:</strong> เมื่อ OS สลับ process แล้ว จะเลือก process ไหนมารันต่อ → <strong>scheduling policy</strong></p>
+<h2 id="1-พื้นฐาน">1. พื้นฐาน</h2>
+<ul>
+<li>Process ทำงานเป็นวงจร <strong>CPU burst ↔ I/O burst</strong>; ขณะ I/O CPU ว่าง = BAD → switch ไป process อื่น = GOOD</li>
+<li><strong>CPU-bound:</strong> คำนวณมาก burst <strong>น้อยครั้งแต่ยาว</strong> / <strong>I/O-bound:</strong> I/O มาก burst <strong>สั้นแต่ถี่</strong></li>
+<li><strong>Multiprogramming:</strong> Descheduling (Running→Ready) + Scheduling (Ready→Running) → ภาพลวงว่ามี CPU หลายตัว</li>
+<li><strong>ต้อง schedule เมื่อ:</strong> yield, block (I/O), สร้าง child แล้วรอ, terminate, timer interrupt</li>
+<li>Queueing diagram: ready queue → CPU → ออกเพราะ I/O request (I/O queue) / time slice expired / fork a child / wait for an interrupt → กลับ ready queue</li>
+</ul>
+<h2 id="2-เป้าหมาย-metrics">2. เป้าหมาย &amp; Metrics ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระบบ</th>
+<th>เป้าหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ทุกระบบ</td>
+<td>Fairness, Policy enforcement, Balance</td>
+</tr>
+<tr>
+<td>Batch</td>
+<td>Throughput, Turnaround time, CPU utilization</td>
+</tr>
+<tr>
+<td>Interactive</td>
+<td>Response time, Proportionality</td>
+</tr>
+<tr>
+<td>Real-time</td>
+<td>Meeting deadlines (ไม่เสียข้อมูล), Predictability (ไม่เสียคุณภาพ)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Turnaround = T_completion − T_arrival = CPU time + waiting time</strong></li>
+<li><strong>Waiting</strong> = เวลารอใน ready queue</li>
+<li><strong>Response = T_first run − T_arrival</strong> (แค่ได้รันครั้งแรก ไม่ใช่ output ทั้งหมด)</li>
+<li>อัลกอริทึมที่ดี: <strong>Max</strong> utilization, throughput / <strong>Min</strong> turnaround, waiting, response</li>
+<li>ตัวอย่างสไลด์ 14: P1 wait 0 TAT 24, P2 wait 24 TAT 27, P3 = ? (ถ้า P3=3 → wait 27, TAT 30)</li>
+</ul>
+<h2 id="3-อัลกอริทึม">3. อัลกอริทึม ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>อัลกอริทึม</th>
+<th>หลัก</th>
+<th>Preempt?</th>
+<th>จุดเด่น/ปัญหา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FIFO/FCFS</strong></td>
+<td>มาก่อนได้ก่อน</td>
+<td>❌</td>
+<td><strong>Convoy effect</strong> (งานสั้นติดหลังงานยาว)</td>
+</tr>
+<tr>
+<td><strong>SJF</strong></td>
+<td>งานสั้นสุดก่อน</td>
+<td>❌</td>
+<td>ดีต่อ turnaround แต่แย่ถ้างานสั้นมาทีหลัง</td>
+</tr>
+<tr>
+<td><strong>STCF</strong></td>
+<td><strong>เหลือเวลา</strong> น้อยสุดก่อน</td>
+<td>✅</td>
+<td>แก้ late arrival ของ SJF</td>
+</tr>
+<tr>
+<td><strong>Priority</strong></td>
+<td>เลขน้อย = priority สูง</td>
+<td>–</td>
+<td><strong>Starvation</strong></td>
+</tr>
+<tr>
+<td><strong>RR</strong></td>
+<td>วนคนละ q</td>
+<td>✅</td>
+<td>response ดี + fairness ดีเยี่ยม / turnaround แย่</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Non-preemptive</strong> = ถือ CPU จนจบหรือเข้า waiting (FIFO, SJF) / <strong>Preemptive</strong> = ถูกแย่งได้โดย clock หรือ process priority สูงกว่า</li>
+<li><strong>RR:</strong> q ใหญ่ไป ⇒ กลายเป็น FIFO / q เล็กไป ⇒ context switch overhead สูง / q ควรใหญ่กว่าเวลา context switch มาก (slice 10ms + switch 1ms ≈ เสีย 10%)</li>
+<li>process time 10: q=12 → 0 switch, q=6 → 1, q=1 → 9</li>
+</ul>
+<p><strong>ตัวเลขตัวอย่าง (Avg Turnaround):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สถานการณ์</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FIFO A,B,C=10</td>
+<td>(10+20+30)/3 = <strong>20</strong></td>
+</tr>
+<tr>
+<td>FIFO A=100,B=C=10</td>
+<td>(100+110+120)/3 = <strong>110</strong></td>
+</tr>
+<tr>
+<td>SJF เดียวกัน</td>
+<td>(10+20+120)/3 = <strong>50</strong></td>
+</tr>
+<tr>
+<td>SJF, B,C มาที่ 10</td>
+<td>(100+100+110)/3 = <strong>103.3</strong></td>
+</tr>
+<tr>
+<td>STCF, B,C มาที่ 10</td>
+<td>(120+10+20)/3 = <strong>50</strong></td>
+</tr>
+<tr>
+<td>RR q=1, A,B,C=5 (สไลด์พิมพ์ 15s ผิด)</td>
+<td>response (0+1+2)/3=<strong>1</strong>, TAT (13+14+15)/3=<strong>14</strong></td>
+</tr>
+<tr>
+<td>SJF เดียวกัน</td>
+<td>response (0+5+10)/3=<strong>5</strong>, TAT (5+10+15)/3=<strong>10</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>แบบฝึก Priority (มาที่ 0):</strong> P1(10,3) P2(1,1) P3(2,4) P4(1,5) P5(5,2) → ลำดับ P2,P5,P1,P3,P4 → TAT 1,6,16,18,19 → avg <strong>12</strong> (waiting avg 8.2)</p>
+<h2 id="4-incorporating-io">4. Incorporating I/O</h2>
+<ul>
+<li>process ถูก block → รันตัวอื่น; I/O เสร็จ → อาจรันตัวที่ขอ I/O ทันที → <strong>overlap CPU กับ I/O</strong></li>
+<li>A,B ใช้ CPU 50; A ใช้ disk 10ms ทุก 10ms
+<ul>
+<li>ไม่ overlap: (90+140)/2 = <strong>115</strong></li>
+<li>STCF มอง A เป็น sub-job 10ms, B ถูก preempt เมื่อ A พร้อม: (90+100)/2 = <strong>95</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="5-mlfq">5. MLFQ ⭐</h2>
+<ul>
+<li><strong>Motivation:</strong> SJF/STCF ดีต่อ turnaround แต่ OS ไม่รู้ความยาวงาน; RR ดีต่อ response แต่ turnaround แย่ → ต้องการทั้งสองอย่างโดยไม่รู้ความยาวงาน</li>
+<li>โดย <strong>Corbato et al.</strong>; หลายคิวหลาย priority, <strong>แต่ละคิวใช้ RR</strong>, เริ่มที่คิวบนสุด ลดลงเมื่อใช้ slice หมด</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>สาระ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Priority(A) &gt; Priority(B) → A รัน</td>
+</tr>
+<tr>
+<td>2</td>
+<td>เท่ากัน → RR ด้วย quantum ของคิวนั้น</td>
+</tr>
+<tr>
+<td>3</td>
+<td>งานใหม่ → คิวบนสุด</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ใช้ <strong>time allotment</strong> ของชั้นหมด (ไม่ว่าจะปล่อย CPU กี่ครั้ง) → ลด 1 คิว — <strong>กันโกง (gaming)</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>ทุกช่วง <strong>S</strong> → ทุกงานกลับคิวบนสุด (<strong>priority boost</strong>) — <strong>กัน starvation</strong> + รับมือพฤติกรรมเปลี่ยน</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Simple example: งานยาวตกไป Q0; งานสั้นมาที่ T=100 เข้า Q2 แย่ง CPU แล้วเสร็จเร็ว → เลียนแบบ SJF</li>
+<li>Intensive I/O: งาน interactive ปล่อย CPU ก่อนหมด slice → อยู่ Q บนตลอด (ประมาณ priority จากความยาว burst)</li>
+<li>Config ตัวอย่าง: <strong>Q0 RR q=8ms → Q1 RR q=16ms → Q2 FCFS</strong> (ไม่เสร็จใน 8 → ลง Q1 ได้อีก 16 → ไม่เสร็จ → ลง Q2)</li>
+</ul>
+<h2 id="6-os-จริง">6. OS จริง</h2>
+<p><strong>Linux 2.6+</strong></p>
+<ul>
+<li>Real-time: <code>SCHED_FIFO</code>, <code>SCHED_RR</code> (preemptive priority, สูงกว่า Normal) / Normal: <code>SCHED_OTHER</code>, <code>SCHED_BATCH</code> → <strong>CFS</strong></li>
+<li>CFS: เลือก task <strong>vruntime ต่ำสุด</strong>, รัน 1 slice แล้วใส่กลับ runqueue, ใช้ <strong>Red-Black Tree</strong></li>
+<li><strong>nice −20 (สูงสุด) ถึง +19 (ต่ำสุด)</strong>; nice 0: physical = virtual; nice ต่ำ: physical &gt; virtual; nice สูง: physical &lt; virtual</li>
+</ul>
+<p><strong>Windows</strong></p>
+<ul>
+<li>priority-based <strong>preemptive</strong>; รันจน block / หมด slice / ถูก thread priority สูงกว่าแย่ง; real-time preempt non-real-time ได้</li>
+<li><strong>32 ระดับ:</strong> variable 1–15, real-time 16–31, <strong>0 = memory-management thread</strong>; มีคิวต่อ priority</li>
+<li>ตาราง class × relative: เช่น real-time/normal = 24, normal/normal = 8, high/normal = 13, idle/normal = 4, time-critical = 31 (real-time) หรือ 15 (คลาสอื่น), idle = 16 (real-time) หรือ 1</li>
+<li>quantum หมด → ลด priority (ไม่ต่ำกว่า base); wait → boost ตามสิ่งที่รอ; <strong>foreground window ×3</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คู่</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SJF vs STCF</td>
+<td>ไม่แย่ง vs แย่งได้ (ดูเวลา <strong>ที่เหลือ</strong>)</td>
+</tr>
+<tr>
+<td>Turnaround vs Response</td>
+<td>จนเสร็จ vs จนได้รันครั้งแรก</td>
+</tr>
+<tr>
+<td>ทิศของ priority</td>
+<td>สไลด์ Priority &amp; nice: เลขน้อย = สูง / Windows: เลขมาก = สูง</td>
+</tr>
+<tr>
+<td>Rule 4 vs Rule 5</td>
+<td>กันโกง vs กัน starvation</td>
+</tr>
+<tr>
+<td>q ใหญ่ vs เล็ก</td>
+<td>→ FIFO vs → overhead สูง</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../lecture2/short.html"><small>← บทก่อนหน้า</small><span>Lecture 2 — Process</span></a><span></span></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>
