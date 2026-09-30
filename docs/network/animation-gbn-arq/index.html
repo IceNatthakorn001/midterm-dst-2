@@ -1,0 +1,434 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Go-Back-N ARQ Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:8px;border-top:2px solid var(--line)}
+code{font-family:"JetBrains Mono",Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.ctl button,.ctl select{font:inherit;font-size:15px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.ctl button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.desc h3{margin:0 0 4px;font-size:19px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.2em;margin:10px 0 4px;padding:8px 12px;border-radius:8px;background:var(--accent-soft)}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+#stage{position:relative;height:380px;margin:6px 0;overflow:hidden;user-select:none;touch-action:manipulation}
+.slot{position:absolute;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--slot);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-weight:600;font-size:16px;line-height:1;transition:background .2s,border-color .2s}
+.slot small{font-size:9px;font-weight:400;color:var(--muted);margin-top:3px;font-family:"IBM Plex Sans Thai",sans-serif}
+.slot.acked,.slot.recv{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.slot.sent{background:var(--wait-soft);border-color:var(--wait);color:var(--wait)}
+.slot.ready{border-color:var(--accent);color:var(--accent)}
+.slot.idle{opacity:.55}
+.slot.expect{border:2px solid var(--accent);color:var(--accent)}
+.win{position:absolute;border:2px dashed var(--accent);border-radius:10px;pointer-events:none;transition:left .25s,width .25s}
+.lbl{position:absolute;font-size:13px;color:var(--muted);white-space:nowrap}
+.lbl.r{text-align:right}
+.lbl b{color:var(--accent)}
+.ptr{position:absolute;font-size:11px;font-weight:700;color:var(--accent);transform:translateX(-50%);transition:left .25s;white-space:nowrap}
+.timer{position:absolute;height:6px;border-radius:3px;background:var(--wait)}
+.timer.low{background:var(--bad)}
+.pk{position:absolute;transform:translate(-50%,-50%);padding:2px 7px;border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid;z-index:3}
+.pk.D{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.pk.A{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.pk.R{background:var(--rej-soft);border-color:var(--rej);color:var(--rej)}
+.pk.corrupt{background:var(--wait-soft);border-color:var(--wait);color:var(--wait)}
+.pk.lost{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.pk.slow{border-style:dashed}
+.stats{font-size:14px;color:var(--muted);margin:4px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+#log{max-height:230px;overflow-y:auto;font-size:14px;margin:0;padding:0;list-style:none}
+#log li{padding:3px 0;border-bottom:1px solid var(--line)}
+#log li .t{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:12px;margin-right:6px}
+#log li.bad{color:var(--bad)} #log li.good{color:var(--ok)} #log li.warn{color:var(--wait)} #log li.rej{color:var(--rej)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--accent-soft);border-radius:8px;padding:10px 14px;margin:12px 0}
+</style></head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<main>
+<h1>Go-Back-N ARQ Animation</h1>
+<p class="lead">ดูการทำงานของ Go-Back-N ทุกกรณีที่เกิดได้ — เฟรมหาย, เฟรมเสีย, ACK หาย, ACK มาช้า, หายซ้ำ, REJ และขนาดหน้าต่างผิด (Lecture 5.2)</p>
+
+<div class="card">
+  <div class="cases" id="cases"></div>
+  <div class="desc" id="desc"></div>
+  <div class="ctl">
+    <button id="play" class="primary">▶ เล่น</button>
+    <button id="step">⏭ ทีละเหตุการณ์</button>
+    <button id="reset">↺ เริ่มใหม่</button>
+    <select id="speed" aria-label="ความเร็ว">
+      <option value="0.5">ช้า</option><option value="1" selected>ปกติ</option><option value="2">เร็ว</option>
+    </select>
+  </div>
+  <div class="cap" id="cap">กด ▶ เล่น เพื่อเริ่ม</div>
+  <div id="stage"></div>
+  <div class="stats" id="stats"></div>
+  <div class="legend">
+    <span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>ได้ ACK แล้ว / รับแล้ว</span>
+    <span><i style="background:var(--wait-soft);border-color:var(--wait)"></i>ส่งแล้ว รอ ACK (outstanding)</span>
+    <span><i style="border-color:var(--accent)"></i>ในหน้าต่าง ยังไม่ส่ง</span>
+    <span><i style="background:var(--bad-soft);border-color:var(--bad)"></i>หาย</span>
+    <span><i style="background:var(--wait-soft);border-color:var(--wait)"></i>⚡ เสีย (CRC ผิด)</span>
+    <span><i style="background:var(--rej-soft);border-color:var(--rej)"></i>REJ (NAK)</span>
+    <span><i style="border-style:dashed;border-color:var(--muted)"></i>กรอบเส้นประ = ช้า</span>
+  </div>
+  <p class="stats">💡 แตะเฟรมหรือ ACK ที่กำลังวิ่งอยู่ เพื่อทำให้มันหายเองได้ทุกกรณี (ลองในโหมด “ทดลองเอง”)</p>
+</div>
+
+<div class="card">
+  <strong>บันทึกเหตุการณ์</strong>
+  <ul id="log"></ul>
+</div>
+
+<h2>กติกาของ Go-Back-N ที่ใช้ในแอนิเมชัน</h2>
+<div class="card">
+<ul>
+  <li><b>Sequence number m บิต</b> → เลข 0 ถึง 2<sup>m</sup> − 1 แล้ววนซ้ำ (m = 3 → 0–7, 0, 1, …)</li>
+  <li><b>Send window ≤ 2<sup>m</sup> − 1</b> ส่งได้หลายเฟรมโดยไม่ต้องรอ ACK · ตัวชี้ <code>S_f</code> = เฟรมเก่าสุดที่ยังไม่ได้ ACK, <code>S_n</code> = เฟรมถัดไปที่จะส่ง</li>
+  <li><b>Receive window = 1</b> ผู้รับรับเฉพาะเฟรม <code>R_n</code> ที่คาดหวัง เฟรมที่มาผิดลำดับถูก<b>ทิ้ง</b></li>
+  <li><b>Cumulative ACK:</b> ACK n = รับทุกเฟรมก่อน n แล้ว และรอเฟรม n → ACK ตัวหลังยืนยันแทนตัวที่หายได้</li>
+  <li><b>Timer ตัวเดียว</b> สำหรับเฟรมเก่าสุด (<code>S_f</code>) เริ่มใหม่ทุกครั้งที่หน้าต่างเลื่อน · หมดเวลา → <b>ส่งใหม่ตั้งแต่ S_f ทุกเฟรมที่ค้าง</b> (go back N)</li>
+  <li>ผู้ส่ง<b>ทิ้ง ACK ที่ซ้ำหรือเก่า</b> (ไม่อยู่ในช่วง S_f+1 ถึง S_n)</li>
+  <li><b>REJ</b> (กรณี 9): ผู้รับบอกทันทีว่าต้องการเฟรมไหน ผู้ส่งไม่ต้องรอ timeout (HDLC S-frame code 10)</li>
+</ul>
+<div class="tip">⚠️ <i>(อธิบายเพิ่ม)</i> ตามสไลด์ ผู้รับ ACK เฉพาะเฟรมที่มาถูกลำดับ และเงียบเมื่อได้เฟรมที่มาก่อนเวลา (ช่วงหลังเฟรมหาย) · แต่ถ้าได้<b>เฟรมซ้ำที่เคยรับแล้ว</b> (ผู้ส่งส่งซ้ำเพราะ ACK หาย) ผู้รับต้องส่ง <b>ACK R_n ซ้ำ</b> ไม่อย่างนั้นผู้ส่งจะไม่มีวันรู้ว่าเฟรมไปถึงแล้ว · บางตำรา (Kurose) ส่ง ACK ซ้ำทุกครั้งที่ได้เฟรมผิดลำดับ</div>
+</div>
+
+<h2>สรุปทุกกรณี</h2>
+<div class="tw"><table>
+<thead><tr><th>กรณี</th><th>เกิดอะไรขึ้น</th><th>ผลลัพธ์</th></tr></thead>
+<tbody id="sumtbl"></tbody>
+</table></div>
+<div class="tip">จำง่าย ๆ: <b>ถ้ามี ACK ตัวหลังมาทันก่อน timeout → ไม่ต้องส่งใหม่</b> · <b>ถ้าไม่มี → หมดเวลาแล้วย้อนส่งใหม่ตั้งแต่ S_f ทั้งชุด</b> · เฟรมเสีย (CRC ผิด) ผลเหมือนเฟรมหาย · REJ ช่วยให้ไม่ต้องรอ timeout · หน้าต่างต้อง &lt; 2<sup>m</sup> ไม่งั้นผู้รับแยกเฟรมเก่ากับเฟรมใหม่ไม่ออก</div>
+</main>
+
+<script>
+(() => {
+const PROP = 2.5, GAP = 0.7, TIMEOUT = 7;
+const lostAcks = n => Object.fromEntries([...Array(n).keys()].map(i => ['A' + i + '#1', 'lost']));
+const CASES = [
+  { title: '1. ปกติ', m: 3, N: 4, total: 10, rules: {},
+    desc: 'ไม่มีอะไรหาย ผู้ส่งส่งได้ทีละไม่เกิน 4 เฟรม ทุก ACK ที่มาถึงเลื่อนหน้าต่าง ส่ง 10 เฟรมเพื่อให้เห็นเลขวนรอบ (m = 3 → 0–7, 0, 1)',
+    result: 'หน้าต่างเลื่อนต่อเนื่อง ไม่มีการส่งซ้ำ' },
+  { title: '2. เฟรมข้อมูลหาย', m: 3, N: 4, total: 8, rules: { 'D2#1': 'lost' },
+    desc: 'เฟรม 2 หาย ผู้รับได้เฟรม 3, 4, 5 ที่มาทีหลังแต่ต้องทิ้ง (ไม่อยู่ใน receive window) พอ timer หมด ผู้ส่งย้อนส่ง 2–5 ใหม่ทั้งหมด',
+    result: 'timeout → ส่งใหม่ตั้งแต่เฟรมที่หาย และทุกเฟรมหลังจากนั้น' },
+  { title: '3. เฟรมเสีย (CRC ผิด)', m: 3, N: 4, total: 8, rules: { 'D2#1': 'corrupt' },
+    desc: 'เฟรม 2 ไปถึงแต่ข้อมูลเสีย ผู้รับตรวจ CRC ไม่ผ่านจึงทิ้งเงียบ ๆ ผลเหมือนเฟรมหาย',
+    result: 'เหมือนกรณี 2: timeout แล้วส่ง 2 เป็นต้นไปใหม่' },
+  { title: '4. ACK หาย แต่ ACK ถัดไปมาทัน', m: 3, N: 4, total: 8, rules: { 'A1#1': 'lost' },
+    desc: 'ACK 2 หาย แต่ ACK 3 มาถึงก่อน timeout → cumulative ACK ยืนยันเฟรม 0–2 แทน',
+    result: 'ไม่ต้องส่งใหม่เลย หน้าต่างกระโดดข้ามไป' },
+  { title: '5. ACK หายทั้งหน้าต่าง', m: 3, N: 4, total: 8, rules: lostAcks(4),
+    desc: 'ผู้รับได้เฟรม 0–3 ครบ แต่ ACK ทั้ง 4 ตัวหาย ผู้ส่งไม่รู้เลย timer หมด → ส่ง 0–3 ซ้ำ ผู้รับทิ้งเฟรมซ้ำแล้วส่ง ACK 4 ซ้ำ',
+    result: 'ส่งซ้ำโดยไม่จำเป็น 4 เฟรม แต่ข้อมูลไม่เสียหาย' },
+  { title: '6. ACK มาช้า', m: 3, N: 4, total: 8, rules: Object.fromEntries([0, 1, 2, 3].map(i => ['A' + i + '#1', { delay: 6 }])),
+    desc: 'ACK ของเฟรม 0–3 เดินทางช้ามาก มาถึงหลัง timeout → ผู้ส่งส่งซ้ำไปก่อน แล้ว ACK ที่มาช้าค่อยมาเลื่อนหน้าต่าง ส่วน ACK ซ้ำภายหลังถูกทิ้ง',
+    result: 'ส่งซ้ำโดยไม่จำเป็น ผู้รับทิ้งเฟรมซ้ำ ผู้ส่งทิ้ง ACK เก่า' },
+  { title: '7. เฟรมหายหลายเฟรม', m: 3, N: 4, total: 8, rules: { 'D1#1': 'lost', 'D5#1': 'lost' },
+    desc: 'เฟรม 1 และเฟรม 5 หาย (ห่างกันคนละรอบ) ต้อง timeout 2 ครั้ง',
+    result: 'go back 2 รอบ แต่ละรอบส่งใหม่ทั้งชุดที่ค้าง' },
+  { title: '8. เฟรมที่ส่งซ้ำหายอีก', m: 3, N: 4, total: 8, rules: { 'D2#1': 'lost', 'D2#2': 'lost' },
+    desc: 'เฟรม 2 หาย ส่งใหม่แล้วก็ยังหายอีก → timeout ครั้งที่ 2 แล้วส่งใหม่อีกรอบ',
+    result: 'ผู้ส่งพยายามซ้ำจนกว่าจะสำเร็จ เสียเวลา timeout 2 รอบ' },
+  { title: '9. REJ (NAK) ไม่ต้องรอ timeout', m: 3, N: 4, total: 8, rej: true, rules: { 'D2#1': 'lost' },
+    desc: 'เหมือนกรณี 2 แต่ผู้รับส่ง REJ 2 ทันทีที่เห็นเฟรม 3 มาผิดลำดับ ผู้ส่งย้อนกลับไปส่ง 2 เลยโดยไม่รอ timer',
+    result: 'แก้ความเสียหายเร็วกว่ากรณี 2 (HDLC ใช้ REJ กับ Go-Back-N)' },
+  { title: '10. หน้าต่าง = 2^m ❌', m: 2, N: 4, total: 8, rules: lostAcks(4),
+    desc: 'm = 2 (เลข 0–3) แต่ตั้งหน้าต่าง = 4 · ACK ทั้งหมดหาย ผู้ส่งส่งเฟรม 0 เก่าซ้ำ ขณะที่ผู้รับกำลังรอเฟรม 0 ของรอบใหม่พอดี',
+    result: 'Erroneously accepted — ผู้รับรับเฟรมเก่าเป็นเฟรมใหม่ ข้อมูลผิด!' },
+  { title: '11. หน้าต่าง = 2^m − 1 ✅', m: 2, N: 3, total: 8, rules: lostAcks(3),
+    desc: 'm = 2 เหมือนเดิม แต่หน้าต่าง = 3 · ACK ทั้งหมดหาย ผู้ส่งส่งเฟรม 0 ซ้ำ แต่ผู้รับรอเฟรม 3 อยู่ จึงรู้ว่าเป็นของซ้ำ',
+    result: 'Correctly discarded — ทิ้งถูกต้อง และส่ง ACK 3 ซ้ำให้ผู้ส่งไปต่อได้' },
+  { title: '🎮 ทดลองเอง', m: 3, N: 4, total: 10, rules: {}, free: true,
+    desc: 'ไม่มีอะไรหายเอง ลองแตะเฟรมหรือ ACK ที่กำลังวิ่งเพื่อทำให้หาย แล้วดูว่า Go-Back-N จัดการอย่างไร',
+    result: 'แล้วแต่ว่าคุณทำอะไรหาย' },
+];
+
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+let C, S, playing = false, speed = 1, pkEls = new Map(), statics = null;
+
+function newState(c) {
+  return { t: 0, Sf: 0, Sn: 0, next: 0, M: 2 ** c.m, timer: null, nextSendAt: 0, att: Array(c.total).fill(0),
+    rn: 0, rejSent: false, pk: [], id: 0, log: [], done: false, error: false, sends: 0, resends: 0, acks: 0, timeouts: 0 };
+}
+function log(text, cls = '') { S.log.push({ t: S.t, text, cls }); }
+
+function fateOf(key) { return C.rules[key]; }
+function launch(kind, idx, seq, att, dir) {
+  const key = (kind === 'D' ? 'D' : 'A') + idx + '#' + att;
+  const f = fateOf(key);
+  const delay = f && f.delay ? f.delay : 0;
+  const p = { id: S.id++, kind, idx, seq, att, dir, t0: S.t, t1: S.t + PROP + delay, slow: delay > 0,
+    fate: f === 'lost' ? 'lost' : f === 'corrupt' ? 'corrupt' : 'ok', lostAt: 0.5, lostT: null, arrived: false };
+  S.pk.push(p);
+  return p;
+}
+
+function trySend() {
+  if (S.done || S.error || S.t < S.nextSendAt) return;
+  if (S.next >= S.Sf + C.N || S.next >= C.total) return;
+  const i = S.next, seq = i % S.M;
+  const resend = i < S.Sn;
+  if (!resend) S.Sn = i + 1;
+  S.att[i]++; S.sends++; if (resend) S.resends++;
+  launch('D', i, seq, S.att[i], 'down');
+  if (S.timer === null) S.timer = S.t;
+  log(resend ? `ส่งเฟรม ${seq} ซ้ำ (เฟรมที่ ${i}, ครั้งที่ ${S.att[i]})` : `ส่งเฟรม ${seq}` + (C.total > S.M ? ` (เฟรมที่ ${i})` : ''), resend ? 'warn' : '');
+  S.next++; S.nextSendAt = S.t + GAP;
+}
+
+function findIn(lo, hi, seq) { for (let k = lo; k <= hi; k++) if (k % S.M === seq) return k; return -1; }
+
+function recvData(p) {
+  if (p.fate === 'corrupt') {
+    log(`ผู้รับได้เฟรม ${p.seq} แต่ CRC ผิด → ทิ้ง`, 'warn');
+    if (C.rej) sendRej();
+    return;
+  }
+  const want = S.rn % S.M;
+  if (p.seq === want) {
+    if (p.idx !== S.rn) {
+      S.error = true;
+      log(`❌ ผู้รับรอเฟรม ${want} ของรอบใหม่ แต่ที่มาถึงคือเฟรม ${p.seq} เก่าที่ส่งซ้ำ → รับผิด (Erroneously accepted)!`, 'bad');
+      return;
+    }
+    S.rn++; S.rejSent = false;
+    log(`ผู้รับรับเฟรม ${p.seq} ✓ → ส่ง ACK ${S.rn % S.M}`, 'good');
+    launch('A', p.idx, S.rn % S.M, p.att, 'up'); S.acks++;
+  } else if (p.idx < S.rn) {
+    log(`ผู้รับได้เฟรม ${p.seq} ซ้ำ (เคยรับแล้ว) → ทิ้ง และส่ง ACK ${want} ซ้ำ`, 'warn');
+    launch('A', p.idx, want, p.att, 'up'); S.acks++;
+  } else {
+    log(`ผู้รับได้เฟรม ${p.seq} แต่รอเฟรม ${want} อยู่ → ทิ้ง (ไม่อยู่ใน receive window)`, 'warn');
+    if (C.rej) sendRej();
+  }
+}
+function sendRej() {
+  if (S.rejSent) return;
+  S.rejSent = true;
+  log(`ผู้รับส่ง REJ ${S.rn % S.M} ขอเฟรม ${S.rn % S.M} ใหม่ทันที`, 'rej');
+  const p = launch('R', S.rn, S.rn % S.M, 1, 'up'); p.kind = 'R'; S.acks++;
+}
+
+function recvAck(p) {
+  if (p.kind === 'R') {
+    const k = findIn(S.Sf, S.Sn - 1, p.seq);
+    if (k < 0) { log(`ผู้ส่งได้ REJ ${p.seq} ที่เก่าแล้ว → ทิ้ง`, 'warn'); return; }
+    S.Sf = k; S.next = k; S.timer = null;
+    log(`ผู้ส่งได้ REJ ${p.seq} → ย้อนไปส่งตั้งแต่เฟรม ${p.seq} ทันที (ไม่ต้องรอ timeout)`, 'rej');
+    return;
+  }
+  const k = findIn(S.Sf + 1, S.Sn, p.seq);
+  if (k < 0) { log(`ผู้ส่งได้ ACK ${p.seq} ซ้ำ/เก่า → ทิ้ง`, 'warn'); return; }
+  const jump = k - S.Sf;
+  S.Sf = k; if (S.next < S.Sf) S.next = S.Sf;
+  S.timer = S.Sf < S.Sn ? S.t : null;
+  log(`ผู้ส่งได้ ACK ${p.seq} → เลื่อนหน้าต่าง ${jump} ช่อง` + (jump > 1 ? ' (cumulative ACK ยืนยันหลายเฟรม)' : '') +
+      (S.timer !== null ? ' เริ่ม timer ใหม่' : ' หยุด timer'), 'good');
+  if (S.Sf >= C.total) { S.done = true; log('✅ ส่งครบทุกเฟรมแล้ว', 'good'); }
+}
+
+function tick(h) {
+  S.t += h;
+  for (const p of S.pk) {
+    if (p.arrived) continue;
+    const prog = (S.t - p.t0) / (p.t1 - p.t0);
+    if (p.fate === 'lost') {
+      if (p.lostT === null && prog >= p.lostAt) {
+        p.lostT = S.t;
+        const name = p.kind === 'D' ? `เฟรม ${p.seq}` : p.kind === 'R' ? `REJ ${p.seq}` : `ACK ${p.seq}`;
+        log(`✕ ${name} หายระหว่างทาง`, 'bad');
+      }
+      if (p.lostT !== null && S.t - p.lostT > 1) p.arrived = true;
+      continue;
+    }
+    if (prog >= 1) { p.arrived = true; if (p.kind === 'D') recvData(p); else recvAck(p); if (S.error || S.done) return; }
+  }
+  if (S.timer !== null && S.t - S.timer >= TIMEOUT && !S.done) {
+    S.timeouts++;
+    log(`⏰ Timeout ของเฟรม ${S.Sf % S.M} → go back: ส่งใหม่ตั้งแต่เฟรม ${S.Sf % S.M} ถึง ${(S.Sn - 1) % S.M}`, 'bad');
+    S.next = S.Sf; S.timer = null; S.nextSendAt = S.t;
+  }
+  trySend();
+  S.pk = S.pk.filter(p => !p.arrived || (p.fate === 'lost' && S.t - p.lostT < 1.2));
+}
+
+function advance(dt) {
+  const n = Math.ceil(dt / 0.02);
+  for (let i = 0; i < n && !S.done && !S.error && S.t < 150; i++) tick(dt / n);
+}
+
+// ---------- rendering ----------
+function geom() {
+  const W = stage.clientWidth, n = C.total;
+  const pad = 8, sw = Math.min(62, (W - pad * 2) / n), gap = Math.max(3, sw * 0.12);
+  const left = (W - sw * n) / 2;
+  return { W, sw, bw: sw - gap, left, xs: i => left + i * sw + gap / 2, cx: i => left + i * sw + sw / 2, sy: 46, ry: 300 };
+}
+function el(cls, parent = stage) { const d = document.createElement('div'); d.className = cls; parent.appendChild(d); return d; }
+
+function buildStatic() {
+  stage.innerHTML = ''; pkEls.clear();
+  const g = geom();
+  const st = { g, sSlots: [], rSlots: [] };
+  st.sLbl = el('lbl'); st.sLbl.style.left = g.xs(0) + 'px'; st.sLbl.style.top = (g.sy - 40) + 'px'; st.sLbl.textContent = 'ผู้ส่ง';
+  st.wLbl = el('lbl'); st.wLbl.style.top = (g.sy - 40) + 'px';
+  st.wLbl.innerHTML = `<b>หน้าต่างส่ง N = ${C.N}</b> · m = ${C.m} (เลข 0–${2 ** C.m - 1})`;
+  st.win = el('win'); st.rwin = el('win');
+  st.timer = el('timer'); st.tLbl = el('lbl');
+  st.pf = el('ptr'); st.pf.textContent = 'S_f'; st.pn = el('ptr'); st.pn.textContent = 'S_n';
+  for (let i = 0; i < C.total; i++) {
+    const s = el('slot'); s.style.left = g.xs(i) + 'px'; s.style.top = g.sy + 'px'; s.style.width = g.bw + 'px';
+    s.innerHTML = `${i % (2 ** C.m)}` + (C.total > 2 ** C.m ? `<small>#${i}</small>` : ''); st.sSlots.push(s);
+    const r = el('slot'); r.style.left = g.xs(i) + 'px'; r.style.top = g.ry + 'px'; r.style.width = g.bw + 'px';
+    r.innerHTML = s.innerHTML; st.rSlots.push(r);
+  }
+  st.rLbl = el('lbl'); st.rLbl.style.left = g.xs(0) + 'px'; st.rLbl.style.top = (g.ry + 48) + 'px'; st.rLbl.textContent = 'ผู้รับ';
+  st.rnLbl = el('lbl'); st.rnLbl.style.top = (g.ry + 48) + 'px';
+  statics = st;
+}
+
+function render() {
+  const st = statics, g = st.g;
+  for (let i = 0; i < C.total; i++) {
+    const s = st.sSlots[i];
+    s.className = 'slot ' + (i < S.Sf ? 'acked' : i < S.Sn ? 'sent' : i < S.Sf + C.N ? 'ready' : 'idle');
+    st.rSlots[i].className = 'slot ' + (i < S.rn ? 'recv' : i === S.rn ? 'expect' : 'idle');
+  }
+  const wl = Math.min(S.Sf, C.total), wr = Math.min(S.Sf + C.N, C.total);
+  if (wl < C.total) {
+    st.win.style.display = '';
+    st.win.style.left = (g.xs(wl) - 4) + 'px'; st.win.style.top = (g.sy - 4) + 'px';
+    st.win.style.width = (g.sw * (wr - wl) - (g.sw - g.bw) + 8) + 'px'; st.win.style.height = '48px';
+  } else st.win.style.display = 'none';
+  const wx = g.xs(Math.min(wl, C.total - 1));
+  st.wLbl.style.left = Math.max(g.xs(0) + 44, Math.min(wx, g.W - 230)) + 'px';
+  st.pf.style.left = g.cx(Math.min(S.Sf, C.total - 1)) + 'px'; st.pf.style.top = (g.sy + 45) + 'px';
+  st.pf.style.display = S.Sf < C.total ? '' : 'none';
+  st.pn.style.left = (S.Sn < C.total ? g.cx(S.Sn) : g.xs(C.total - 1) + g.bw + 10) + 'px'; st.pn.style.top = (g.sy + 45) + 'px';
+  st.pn.style.display = S.Sn !== S.Sf || S.Sf < C.total ? '' : 'none';
+  if (S.Sn === S.Sf) st.pn.textContent = 'S_f = S_n'; else st.pn.textContent = 'S_n';
+  st.pf.style.visibility = S.Sn === S.Sf ? 'hidden' : 'visible';
+  if (S.timer !== null) {
+    const rem = Math.max(0, 1 - (S.t - S.timer) / TIMEOUT), full = g.sw * C.N - (g.sw - g.bw);
+    st.timer.style.display = ''; st.tLbl.style.display = '';
+    st.timer.style.left = g.xs(S.Sf) + 'px'; st.timer.style.top = (g.sy + 62) + 'px'; st.timer.style.width = (full * rem) + 'px';
+    st.timer.classList.toggle('low', rem < 0.25);
+    st.tLbl.style.left = g.xs(S.Sf) + 'px'; st.tLbl.style.top = (g.sy + 68) + 'px';
+    st.tLbl.textContent = `⏱ timer ของเฟรม ${S.Sf % S.M}`;
+  } else { st.timer.style.display = 'none'; st.tLbl.style.display = 'none'; }
+  const rnc = Math.min(S.rn, C.total - 1);
+  st.rwin.style.left = (g.xs(rnc) - 4) + 'px'; st.rwin.style.top = (g.ry - 4) + 'px';
+  st.rwin.style.width = (g.bw + 8) + 'px'; st.rwin.style.height = '48px'; st.rwin.style.display = S.rn < C.total ? '' : 'none';
+  st.rnLbl.textContent = S.rn < C.total ? `R_n → รอเฟรม ${S.rn % S.M}` : 'รับครบแล้ว';
+  st.rnLbl.style.left = Math.min(Math.max(g.xs(rnc), g.xs(0) + 50), g.W - 130) + 'px';
+
+  const alive = new Set();
+  for (const p of S.pk) {
+    alive.add(p.id);
+    let e = pkEls.get(p.id);
+    if (!e) {
+      e = el('pk'); e.dataset.id = p.id;
+      e.textContent = p.kind === 'D' ? 'F' + p.seq : p.kind === 'R' ? 'REJ ' + p.seq : 'ACK ' + p.seq;
+      e.addEventListener('pointerdown', ev => { ev.preventDefault(); killPacket(p); });
+      pkEls.set(p.id, e);
+    }
+    let prog = (S.t - p.t0) / (p.t1 - p.t0);
+    if (p.lostT !== null) prog = p.lostAt;
+    prog = Math.min(1, Math.max(0, prog));
+    const y0 = g.sy + 104, y1 = g.ry - 14;
+    const y = p.dir === 'down' ? y0 + (y1 - y0) * prog : y1 - (y1 - y0) * prog;
+    const x = g.cx(Math.min(p.idx, C.total - 1)) + (p.dir === 'down' ? -g.sw * 0.18 : g.sw * 0.18);
+    e.style.left = x + 'px'; e.style.top = y + 'px';
+    e.className = 'pk ' + p.kind + (p.fate === 'corrupt' ? ' corrupt' : '') + (p.lostT !== null ? ' lost' : '') + (p.slow ? ' slow' : '');
+    if (p.fate === 'corrupt' && p.kind === 'D') e.textContent = '⚡F' + p.seq;
+    if (p.lostT !== null) { e.textContent = e.textContent.replace(/^✕ ?/, ''); e.textContent = '✕ ' + e.textContent; e.style.opacity = Math.max(0, 1 - (S.t - p.lostT)); }
+  }
+  for (const [id, e] of pkEls) if (!alive.has(id)) { e.remove(); pkEls.delete(id); }
+
+  $('stats').textContent = `เวลา ${S.t.toFixed(1)} · ส่งเฟรม ${S.sends} ครั้ง (ส่งซ้ำ ${S.resends}) · ACK/REJ ${S.acks} · timeout ${S.timeouts} ครั้ง`;
+  const cap = $('cap'), last = S.log[S.log.length - 1];
+  cap.className = 'cap' + (S.error ? ' bad' : S.done ? ' good' : '');
+  if (S.error) cap.textContent = last.text;
+  else if (S.done) cap.textContent = '✅ จบ: ' + C.result;
+  else if (last) cap.textContent = last.text;
+  renderLog();
+}
+let shownLog = 0;
+function renderLog() {
+  if (S.log.length === shownLog) return;
+  const ul = $('log');
+  for (; shownLog < S.log.length; shownLog++) {
+    const L = S.log[shownLog], li = document.createElement('li');
+    li.className = L.cls; li.innerHTML = `<span class="t">${L.t.toFixed(1)}</span>`;
+    li.appendChild(document.createTextNode(L.text)); ul.prepend(li);
+  }
+}
+function killPacket(p) {
+  if (p.arrived || p.lostT !== null || S.done || S.error) return;
+  const prog = (S.t - p.t0) / (p.t1 - p.t0);
+  p.fate = 'lost'; p.lostAt = Math.max(0, Math.min(0.99, prog));
+  if (!playing) { tick(0.001); render(); }
+}
+
+// ---------- controls ----------
+function load(i) {
+  C = CASES[i]; S = newState(C); shownLog = 0; $('log').innerHTML = '';
+  document.querySelectorAll('#cases button').forEach((b, j) => b.classList.toggle('on', j === i));
+  $('desc').innerHTML = `<h3>${C.title}</h3><p>${C.desc}</p><p><b>ผลที่ควรเห็น:</b> ${C.result}</p>`;
+  setPlaying(false); buildStatic(); trySend(); render();
+  $('cap').textContent = 'กด ▶ เล่น เพื่อเริ่ม';
+}
+function setPlaying(v) { playing = v; $('play').textContent = v ? '⏸ หยุด' : '▶ เล่น'; }
+const casesBox = $('cases');
+CASES.forEach((c, i) => { const b = document.createElement('button'); b.textContent = c.title; b.onclick = () => load(i); casesBox.appendChild(b); });
+$('sumtbl').innerHTML = CASES.filter(c => !c.free).map(c => `<tr><td><b>${c.title}</b></td><td>${c.desc}</td><td>${c.result}</td></tr>`).join('');
+$('play').onclick = () => { if (S.done || S.error) load(CASES.indexOf(C)); setPlaying(!playing); };
+$('reset').onclick = () => load(CASES.indexOf(C));
+$('speed').onchange = e => speed = +e.target.value;
+$('step').onclick = () => {
+  setPlaying(false);
+  const n = S.log.length;
+  for (let i = 0; i < 4000 && S.log.length === n && !S.done && !S.error; i++) tick(0.02);
+  render();
+};
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (playing && !S.done && !S.error) { advance(dt * speed); if (S.done || S.error) setPlaying(false); }
+  render();
+  requestAnimationFrame(frame);
+}
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { buildStatic(); render(); }, 150); });
+load(1);
+requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

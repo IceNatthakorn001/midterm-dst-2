@@ -153,10 +153,10 @@ def find_lessons(subj):
     return lessons
 
 
-def find_reviews(subj):
-    """standalone exam-review pages: <sum by claude>/Review-*/<page>.html"""
+def find_reviews(subj, prefix="Review-"):
+    """standalone pages: <sum by claude>/Review-*/<page>.html (also Animation-*)"""
     reviews = []
-    for f in sorted(p for p in subj["dir"].iterdir() if p.is_dir() and p.name.startswith("Review-")):
+    for f in sorted(p for p in subj["dir"].iterdir() if p.is_dir() and p.name.startswith(prefix)):
         pages = sorted(f.glob("*.html"))
         if not pages:
             continue
@@ -309,7 +309,8 @@ def build():
                                  "h": [t for _, t in full_toc]})
 
         reviews = find_reviews(subj)
-        for rv in reviews:
+        anims = find_reviews(subj, "Animation-")
+        for rv in reviews + anims:
             rdir = sdir / rv["slug"]
             rdir.mkdir(parents=True, exist_ok=True)
             bar = REVIEW_BAR.format(subject=esc(f"{subj['icon']} {subj['code']}"))
@@ -325,8 +326,15 @@ def build():
             f'<span>{esc(rv["title"])}</span></a>'
             f'<div class="row-actions"><a class="chip chip-quiz" href="{rv["slug"]}/index.html">🎯 รีวิว + โจทย์</a></div></li>'
             for rv in reviews)
-        review_block = (f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>'
-                        f'<h2 style="margin:24px 0 8px">📖 สรุปรายบท</h2>' if reviews else "")
+        anim_rows = "".join(
+            f'<li class="lesson-row"><span class="num">🎬</span>'
+            f'<a class="lesson-link" href="{rv["slug"]}/index.html"><small>{esc(rv["label"])}</small>'
+            f'<span>{esc(rv["title"])}</span></a>'
+            f'<div class="row-actions"><a class="chip chip-quiz" href="{rv["slug"]}/index.html">▶ ดูแอนิเมชัน</a></div></li>'
+            for rv in anims)
+        review_block = ((f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>' if reviews else "")
+                        + (f'<h2 style="margin:24px 0 8px">🎬 Animation</h2><ol class="lesson-list">{anim_rows}</ol>' if anims else "")
+                        + (f'<h2 style="margin:24px 0 8px">📖 สรุปรายบท</h2>' if reviews or anims else ""))
         rows = ""
         for n, les in enumerate(lessons, 1):
             qlink = (f'<a class="chip chip-quiz" href="{les["slug"]}/quiz.html">📝 Quiz</a>' if les["quiz"] else "")
