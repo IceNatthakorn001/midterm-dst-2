@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L2 – OS Introduction + Lab 2 (Basic Unix Commands)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L2 – OS Introduction + Lab 2 (Basic Unix Commands)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ภายใน CPU ตามแผนภาพ Computer Architecture ประกอบด้วยอะไร?",
+  "choices": [
+   "Registers, ALU และ Control Unit",
+   "RAM, ROM และ Cache",
+   "Kernel, Shell และ Utilities",
+   "I/O Controller, Bus และ Disk"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — CPU มี Registers (หน่วยความจำเร็วสุด), ALU (คำนวณ), Control Unit (ควบคุม)",
+   "RAM อยู่นอก CPU เป็น Memory",
+   "เป็นชั้นซอฟต์แวร์ ไม่ใช่ส่วนของ CPU",
+   "I/O Controller อยู่นอก CPU"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในแผนภาพ OS as an interface ส่วนที่อยู่ระหว่าง OS กับ Hardware ถูกเรียกว่าอะไร?",
+  "choices": [
+   "Beautiful interface",
+   "Ugly interface",
+   "User interface",
+   "Extended interface"
+  ],
+  "correct": 1,
+  "explain": [
+   "Beautiful อยู่ระหว่าง application กับ OS",
+   "ถูก — ฮาร์ดแวร์คุมยาก จึงเป็น “ugly interface” ที่ OS รับหน้าที่คุยแทน",
+   "ไม่ใช่คำในแผนภาพ",
+   "ไม่ใช่คำในแผนภาพ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในเรื่อง Virtualizing Memory ทุกโปรแกรมเห็น virtual address เริ่มที่เท่าใด?",
+  "choices": [
+   "0x32000",
+   "0xFFFFF",
+   "0x00000",
+   "แล้วแต่ขนาดโปรแกรม"
+  ],
+  "correct": 2,
+  "explain": [
+   "0x32000 คือ physical address ตัวอย่างของ Program 1",
+   "ไม่ใช่ค่าในสไลด์",
+   "ถูก — ทุกโปรแกรมเห็นเริ่มที่ 0x00000 เหมือนกัน แต่ OS วางไว้คนละที่",
+   "virtual address เริ่มเหมือนกันทุกโปรแกรม"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ชั้นใดใน Windows architecture ทำหน้าที่ซ่อนความต่างของฮาร์ดแวร์?",
+  "choices": [
+   "Windows API",
+   "User-Mode Drivers",
+   "File System Drivers",
+   "Hardware Abstraction Layer (HAL)"
+  ],
+  "correct": 3,
+  "explain": [
+   "Windows API อยู่ user mode ให้โปรแกรมเรียกใช้",
+   "อยู่ user mode",
+   "เป็น driver ด้าน file system ใน kernel mode",
+   "ถูก — HAL อยู่ติดกับ Hardware ซ่อนความต่างของฮาร์ดแวร์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน Linux architecture ชั้นใดอยู่ระหว่าง Kernel กับ Hardware?",
+  "choices": [
+   "Kernel Modules",
+   "System Libraries",
+   "Compilers",
+   "User Utility"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ลำดับคือ ... → System Libraries → Kernel → Kernel Modules → Hardware",
+   "System Libraries อยู่เหนือ Kernel",
+   "Compilers อยู่ชั้นบนสุด",
+   "User Utility อยู่ชั้นบนสุด"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน Linux ไฟล์ตั้งค่าระบบ เช่น passwd มักอยู่ใน directory ใด?",
+  "choices": [
+   "/bin",
+   "/etc",
+   "/var",
+   "/tmp"
+  ],
+  "correct": 1,
+  "explain": [
+   "/bin เก็บคำสั่งพื้นฐาน",
+   "ถูก — /etc เก็บไฟล์ตั้งค่า เช่น /etc/passwd",
+   "/var เก็บข้อมูลที่เปลี่ยนบ่อย เช่น log",
+   "/tmp เก็บไฟล์ชั่วคราว"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในผล `ls -l` ตัวเลข `68524` ของ `-rw-r--r-- 1 ittipon muict 68524 ... foo.txt` คืออะไร?",
+  "choices": [
+   "Link count",
+   "User ID ของเจ้าของ",
+   "Size (in bytes)",
+   "จำนวนบรรทัด"
+  ],
+  "correct": 2,
+  "explain": [
+   "link count คือเลข 1",
+   "ls -l แสดงชื่อ owner ไม่ใช่ UID",
+   "ถูก — คอลัมน์นี้คือขนาดไฟล์เป็น byte",
+   "ls -l ไม่ได้แสดงจำนวนบรรทัด"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดแสดงไฟล์ที่ถูกซ่อนไว้ใน directory?",
+  "choices": [
+   "ls -l",
+   "ls -h",
+   "pwd -a",
+   "ls -a"
+  ],
+  "correct": 3,
+  "explain": [
+   "-l แสดงรายละเอียด แต่ไม่แสดงไฟล์ซ่อน",
+   "-h ไม่ใช่ตัวเลือกที่สอนสำหรับไฟล์ซ่อน",
+   "pwd ใช้แสดง path ปัจจุบัน",
+   "ถูก — ls -a แสดงไฟล์ที่ขึ้นต้นด้วย . ด้วย"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน nano คีย์ใดใช้บันทึกไฟล์ (Write Out)?",
+  "choices": [
+   "Ctrl + O",
+   "Ctrl + X",
+   "Ctrl + S",
+   "Ctrl + W"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ^O Write Out แล้วกด Enter ยืนยันชื่อไฟล์",
+   "Ctrl+X คือ Exit",
+   "Ctrl+S ไม่ใช่คีย์ที่สอนใน nano",
+   "Ctrl+W คือ Where Is (ค้นหา)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดใน Windows Command Prompt ทำหน้าที่คล้าย `ls` ของ Linux?",
+  "choices": [
+   "cls",
+   "dir",
+   "list",
+   "show"
+  ],
+  "correct": 1,
+  "explain": [
+   "cls ใช้ล้างหน้าจอ",
+   "ถูก — dir แสดงไฟล์และโฟลเดอร์ (โฟลเดอร์มีป้าย &lt;DIR&gt;)",
+   "ไม่ใช่คำสั่งของ cmd",
+   "ไม่ใช่คำสั่งของ cmd"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดลบไฟล์โดยถามยืนยันก่อน?",
+  "choices": [
+   "rmdir file2",
+   "rm -f file2",
+   "rm -i file2",
+   "del file2"
+  ],
+  "correct": 2,
+  "explain": [
+   "rmdir ใช้ลบ directory ว่าง",
+   "-f บังคับลบโดยไม่ถาม",
+   "ถูก — -i = interactive ถามยืนยันก่อนลบ",
+   "del เป็นคำสั่งของ Windows"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โดยค่าเริ่มต้น `tail myfile` แสดงเนื้อหาส่วนใดของไฟล์?",
+  "choices": [
+   "10 บรรทัดแรก",
+   "ทีละหน้าจอ",
+   "ทั้งไฟล์ในครั้งเดียว",
+   "10 บรรทัดสุดท้าย"
+  ],
+  "correct": 3,
+  "explain": [
+   "10 บรรทัดแรกคือ head",
+   "ทีละหน้าคือ more",
+   "ทั้งไฟล์คือ cat",
+   "ถูก — tail แสดงส่วนท้าย 10 บรรทัด เหมาะกับดู log ล่าสุด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม OS จึงถูกมองว่าเป็น “interface” ระหว่างโปรแกรมกับฮาร์ดแวร์?",
+  "choices": [
+   "เพราะ OS ซ่อนความยุ่งยากของฮาร์ดแวร์และให้บริการที่ใช้ง่ายแก่โปรแกรม",
+   "เพราะ OS ทำให้ฮาร์ดแวร์ทำงานเร็วขึ้นเสมอ",
+   "เพราะ OS คือหน้าจอ GUI ที่ผู้ใช้เห็น",
+   "เพราะโปรแกรมต้องคุยกับฮาร์ดแวร์เองโดยตรง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น โปรแกรมสั่งแค่ “เปิดไฟล์” ไม่ต้องรู้ว่าข้อมูลอยู่ sector ไหน",
+   "OS ไม่ได้เพิ่มความเร็วฮาร์ดแวร์",
+   "interface ในที่นี้ไม่ได้หมายถึง GUI",
+   "ตรงข้าม — OS ทำให้โปรแกรมไม่ต้องคุยเอง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม OS ต้อง virtualize CPU?",
+  "choices": [
+   "เพื่อให้ CPU รันหลายคำสั่งพร้อมกันในรอบเดียว",
+   "เพราะ CPU ทำทีละคำสั่ง ถ้าไม่สลับ โปรแกรมเดียวจะยึด CPU ไว้",
+   "เพื่อเพิ่มจำนวน core ของ CPU",
+   "เพื่อย้ายโปรแกรมไปรันบนดิสก์"
+  ],
+  "correct": 1,
+  "explain": [
+   "CPU ยังรันทีละ instruction เหมือนเดิม",
+   "ถูก — OS สลับโปรแกรมเร็วมากจนดูเหมือนรันพร้อมกัน",
+   "virtualization ไม่ได้เพิ่ม core จริง",
+   "โปรแกรมไม่ได้รันบนดิสก์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมหลายโปรแกรมเห็น address 0x00000 พร้อมกันได้โดยไม่ชนกัน?",
+  "choices": [
+   "เพราะแต่ละโปรแกรมใช้ RAM คนละแผง",
+   "เพราะโปรแกรมรันไม่พร้อมกันเลย",
+   "เพราะเป็น virtual address ที่ OS map ไปคนละตำแหน่งใน physical memory",
+   "เพราะ CPU มี register ชื่อ 0x00000 หลายตัว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ได้แยกตามแผง RAM",
+   "โปรแกรมหลายตัวอยู่ใน memory พร้อมกันได้",
+   "ถูก — OS ทำการ map virtual → physical ให้แต่ละโปรแกรม",
+   "register ไม่เกี่ยวกับ address space"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้า physical memory ไม่พอ OS แก้ปัญหาอย่างไร (ตามคำอธิบายในบท)?",
+  "choices": [
+   "ปิดโปรแกรมทุกตัวทันที",
+   "ลด virtual address ของทุกโปรแกรมเป็น 0",
+   "ขอยืม RAM จากเครื่อง host เสมอ",
+   "ย้ายข้อมูลบางส่วนไปพักบนดิสก์ (swap) เช่น swapfile"
+  ],
+  "correct": 3,
+  "explain": [
+   "OS ไม่ได้ปิดทุกโปรแกรม",
+   "ไม่ได้ทำให้มีพื้นที่เพิ่ม",
+   "ไม่ใช่กลไกทั่วไปของ OS",
+   "ถูก — เห็นไฟล์ swapfile ใน / ของ Ubuntu"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การติดตั้ง Firefox บน Linux ต่างจาก Windows อย่างไร?",
+  "choices": [
+   "Linux กระจายไฟล์ตามชนิด (bin, lib, share) Windows รวมไว้โฟลเดอร์ของโปรแกรม",
+   "Linux รวมทุกไฟล์ไว้ /Firefox Windows กระจายตามชนิด",
+   "ทั้งสองระบบเก็บไฟล์แบบเดียวกัน",
+   "Linux เก็บทุกอย่างไว้ใน /home"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น /usr/bin/Firefox.sh, /usr/lib/Firefox/, /usr/share/icons/ vs Program files\\Firefox\\",
+   "สลับกัน",
+   "แนวคิดต่างกันชัดเจน",
+   "/home เก็บไฟล์ผู้ใช้ ไม่ใช่โปรแกรม"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดเป็นจุดร่วมของ Windows และ Linux architecture?",
+  "choices": [
+   "ทั้งสองใช้ HAL เหมือนกัน",
+   "โปรแกรมไม่คุยกับฮาร์ดแวร์ตรง ๆ ต้องผ่าน API/library และ kernel",
+   "ทั้งสองไม่มีการแยก user mode กับ kernel mode",
+   "ทั้งสองให้ application เรียก hardware ได้ตรง"
+  ],
+  "correct": 1,
+  "explain": [
+   "HAL เป็นของ Windows; Linux ใช้ kernel modules",
+   "ถูก — ทั้งสองต้องผ่าน kernel เสมอ",
+   "ทั้งสองมีการแยกโหมด",
+   "ตรงข้ามกับหลักการ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`cd`, `cd ..` และ `cd /` ต่างกันอย่างไร?",
+  "choices": [
+   "ไป root / กลับ home / ขึ้นหนึ่งชั้น",
+   "ขึ้นหนึ่งชั้น / ไป root / กลับ home",
+   "กลับ home / ขึ้นหนึ่งชั้น / ไป root",
+   "ทั้งสามพาไปที่เดียวกัน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ลำดับสลับกัน",
+   "ลำดับสลับกัน",
+   "ถูก — cd เปล่า = home, cd .. = directory แม่, cd / = root",
+   "แต่ละแบบไปคนละที่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`&gt;` กับ `|` ต่างกันอย่างไร?",
+  "choices": [
+   "`&gt;` ต่อท้ายไฟล์ `|` เขียนทับไฟล์",
+   "ทั้งสองเขียนผลลงไฟล์เหมือนกัน",
+   "`|` ใช้ได้เฉพาะกับ grep",
+   "`&gt;` ส่ง output ลงไฟล์ `|` ส่ง output เป็น input ของคำสั่งถัดไป"
+  ],
+  "correct": 3,
+  "explain": [
+   "ต่อท้ายไฟล์คือ &gt;&gt; ส่วน | ไม่ได้เขียนไฟล์",
+   "| ไม่ได้เขียนลงไฟล์",
+   "| ใช้กับคำสั่งใดก็ได้ เช่น ls -l | more",
+   "ถูก — redirect vs pipe"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`rm` กับ `rmdir` ต่างกันอย่างไร?",
+  "choices": [
+   "rm ลบไฟล์ rmdir ลบ directory ที่ว่าง",
+   "rm ลบ directory rmdir ลบไฟล์",
+   "rmdir ลบได้ทั้ง directory ที่มีไฟล์ข้างใน",
+   "ทั้งสองย้ายไฟล์ไปถังขยะ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — rmdir ลบได้เฉพาะ directory ว่าง",
+   "สลับกัน",
+   "rmdir ลบไม่ได้ถ้ามีไฟล์อยู่",
+   "Linux ไม่มีถังขยะสำหรับ rm ลบแล้วหายเลย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมหลังรัน `ls -l | cat &gt; file2` ในรายการที่บันทึกไว้ file2 มีขนาด 0?",
+  "choices": [
+   "เพราะ cat ลบเนื้อหาไฟล์ทิ้ง",
+   "เพราะ shell สร้าง file2 เปล่าก่อน แล้วค่อยรัน ls -l",
+   "เพราะ pipe ไม่ส่งข้อมูลอะไรเลย",
+   "เพราะ file2 เป็นไฟล์ซ่อน"
+  ],
+  "correct": 1,
+  "explain": [
+   "cat แค่ส่งต่อข้อมูล",
+   "ถูก — ตอน ls ทำงาน file2 ยังว่างอยู่",
+   "pipe ส่งข้อมูล ls -l ไปให้ cat จริง",
+   "ชื่อ file2 ไม่ได้ขึ้นต้นด้วย ."
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`cp` กับ `mv` ต่างกันอย่างไร?",
+  "choices": [
+   "cp ย้ายไฟล์ mv คัดลอกไฟล์",
+   "ทั้งสองลบไฟล์ต้นฉบับ",
+   "cp คัดลอก (ของเดิมยังอยู่) mv ย้าย/เปลี่ยนชื่อ (ของเดิมหายไป)",
+   "mv ใช้ได้เฉพาะ directory"
+  ],
+  "correct": 2,
+  "explain": [
+   "สลับกัน",
+   "cp ไม่ลบต้นฉบับ",
+   "ถูก — เช่น mv testfile myfile คือเปลี่ยนชื่อ",
+   "mv ใช้กับไฟล์ได้ (ในแลปใช้เปลี่ยนชื่อไฟล์)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเราจึงเห็นไฟล์ .bashrc เมื่อใช้ ls -a แต่ไม่เห็นเมื่อใช้ ls ธรรมดา?",
+  "choices": [
+   "เพราะ .bashrc เป็น directory",
+   "เพราะชื่อขึ้นต้นด้วย . จึงเป็นไฟล์ซ่อน ต้องใช้ -a",
+   "เพราะ .bashrc เป็นของ root",
+   "เพราะ ls ธรรมดาแสดงเฉพาะไฟล์ที่แก้ไขวันนี้"
+  ],
+  "correct": 1,
+  "explain": [
+   ".bashrc เป็นไฟล์ตั้งค่า ไม่ใช่ directory",
+   "ถูก — ไฟล์ที่ขึ้นต้นด้วย . คือไฟล์ซ่อน มักเป็นไฟล์ตั้งค่า",
+   "อยู่ใน home และเป็นของผู้ใช้เอง",
+   "ls ไม่ได้กรองตามวันที่"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "อยากดูรายละเอียดของไฟล์ทั้งหมดรวมถึงไฟล์ซ่อนอย่าง .bashrc ควรใช้คำสั่งใด?",
+  "choices": [
+   "ls",
+   "ls -l",
+   "ls -a",
+   "ls -la"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่แสดงรายละเอียดและไฟล์ซ่อน",
+   "แสดงรายละเอียดแต่ไม่เห็นไฟล์ซ่อน",
+   "เห็นไฟล์ซ่อนแต่ไม่มีรายละเอียด",
+   "ถูก — -l รายละเอียด + -a ไฟล์ซ่อน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "อยู่ที่ /home/itcso/testdir แล้วพิมพ์ `cd ..` แล้ว `pwd` จะได้ผลอะไร?",
+  "choices": [
+   "/home/itcso",
+   "/",
+   "/home",
+   "/home/itcso/testdir"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — cd .. ขึ้นไป directory แม่ 1 ชั้น",
+   "/ ต้องใช้ cd /",
+   "ต้องขึ้น 2 ชั้นถึงจะเป็น /home",
+   "cd .. ย้ายตำแหน่งแล้ว"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "มีไฟล์ file1 file2 myfile ต้องการหาคำว่า ict ในทุกไฟล์พร้อมรู้ว่าเจอในไฟล์ไหน ใช้คำสั่งใด?",
+  "choices": [
+   "cat ict *",
+   "grep ict *",
+   "ls ict*",
+   "echo ict &gt; *"
+  ],
+  "correct": 1,
+  "explain": [
+   "cat ไม่ได้ค้นหา จะพยายามเปิดไฟล์ชื่อ ict",
+   "ถูก — grep กับหลายไฟล์จะแสดง ชื่อไฟล์:บรรทัด",
+   "ls ict* หาไฟล์ที่ชื่อขึ้นต้นด้วย ict ไม่ได้ค้นเนื้อหา",
+   "เป็นการเขียนข้อความ ไม่ใช่ค้นหา"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการอ่านไฟล์ log ยาวหลายพันบรรทัดทีละหน้าจอ ควรใช้คำสั่งใด?",
+  "choices": [
+   "cat log.txt",
+   "tail log.txt",
+   "more log.txt",
+   "echo log.txt"
+  ],
+  "correct": 2,
+  "explain": [
+   "cat พ่นทั้งไฟล์ อ่านไม่ทัน",
+   "tail เห็นแค่ท้ายไฟล์",
+   "ถูก — more หยุดทีละหน้า กด Space ไปต่อ q ออก",
+   "echo แค่พิมพ์คำว่า log.txt"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "`rmdir project` ขึ้น error เพราะมีไฟล์อยู่ข้างใน ควรทำอย่างไรตามบทเรียน?",
+  "choices": [
+   "ใช้ mkdir project ซ้ำ",
+   "ใช้ cd project แทน",
+   "ใช้ rm -i project",
+   "ลบไฟล์ข้างในให้หมดก่อน แล้วค่อย rmdir"
+  ],
+  "correct": 3,
+  "explain": [
+   "mkdir สร้าง ไม่ได้ลบ",
+   "cd แค่เข้าไป",
+   "rm ธรรมดาใช้ลบไฟล์ ไม่ใช่ directory",
+   "ถูก — rmdir ลบได้เฉพาะ directory ว่าง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการบันทึกผลของ `ls -l` ลงไฟล์ชื่อ list.txt แทนการแสดงบนจอ ใช้คำสั่งใด?",
+  "choices": [
+   "ls -l &gt; list.txt",
+   "ls -l | list.txt",
+   "cat list.txt &gt; ls -l",
+   "grep ls -l list.txt"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — &gt; redirect output ไปเขียนลงไฟล์",
+   "| ต้องต่อกับคำสั่ง ไม่ใช่ชื่อไฟล์",
+   "ทิศทางผิด",
+   "grep ใช้ค้นหา ไม่ได้บันทึกผล ls"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

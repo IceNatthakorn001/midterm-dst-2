@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L5 – File Permissions + Lab 5 (File Permissions)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L5 – File Permissions + Lab 5 (File Permissions)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "คำสั่งใดใช้เปลี่ยนสิทธิ์ rwx ของไฟล์?",
+  "choices": [
+   "chown",
+   "chgrp",
+   "chmod",
+   "usermod"
+  ],
+  "correct": 2,
+  "explain": [
+   "chown เปลี่ยนเจ้าของ",
+   "chgrp เปลี่ยนกลุ่ม",
+   "ถูก — chmod = change mode ปรับสิทธิ์",
+   "usermod แก้ข้อมูลผู้ใช้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตัวย่อ u, g, o ในเรื่องสิทธิ์ไฟล์หมายถึงอะไร?",
+  "choices": [
+   "User (Owner), Group, Other",
+   "Upload, Get, Open",
+   "Unix, GNU, Oracle",
+   "Update, Grant, Own"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เจ้าของ / กลุ่ม / ผู้อื่น",
+   "ไม่เกี่ยวกับการรับส่งไฟล์",
+   "ไม่ใช่ความหมายของตัวย่อ",
+   "ไม่ใช่ความหมายของตัวย่อ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในการคิดสิทธิ์แบบตัวเลข r, w, x มีค่าเท่าใดตามลำดับ?",
+  "choices": [
+   "1, 2, 4",
+   "4, 2, 1",
+   "3, 2, 1",
+   "4, 1, 2"
+  ],
+  "correct": 1,
+  "explain": [
+   "กลับด้าน",
+   "ถูก — r=4, w=2, x=1 แล้วบวกกัน",
+   "ไม่ใช่ค่าที่ใช้",
+   "w กับ x สลับกัน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "`chmod 754 fileB` ให้ผลเป็นสิทธิ์ใด?",
+  "choices": [
+   "-rwxr-xr-x",
+   "-rwxrw-r--",
+   "-rw-r-xr--",
+   "-rwxr-xr--"
+  ],
+  "correct": 3,
+  "explain": [
+   "นั่นคือ 755",
+   "6 ของ group จะเป็น rw- แต่ 5 คือ r-x",
+   "user 7 ต้องเป็น rwx",
+   "ถูก — 7=rwx, 5=r-x, 4=r--"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในผล ls -l ตัวอักษรแรก `d` หมายถึงอะไร?",
+  "choices": [
+   "ไฟล์ถูกลบ (deleted)",
+   "เป็น directory",
+   "ไฟล์ปิดการใช้งาน (disabled)",
+   "ไฟล์ของ daemon"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไม่มีความหมายนี้",
+   "ถูก — d = directory, - = ไฟล์ธรรมดา, l = symbolic link",
+   "ไม่มีความหมายนี้",
+   "ไม่มีความหมายนี้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน `-rw-r--r-- 1 ittipon muict 68524 ... foo.txt` ช่อง `muict` คืออะไร?",
+  "choices": [
+   "Group",
+   "Owner",
+   "Link count",
+   "ชื่อเครื่อง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ลำดับคือ permissions, link count, owner, group, size, time, name",
+   "owner คือ ittipon",
+   "link count คือ 1",
+   "ls -l ไม่แสดงชื่อเครื่อง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "สิทธิ์ Write (w) ของ “ไฟล์” หมายถึงอะไรตามสไลด์?",
+  "choices": [
+   "ลบไฟล์",
+   "รันไฟล์",
+   "แก้ไขข้อมูลในไฟล์ (ไม่ใช่สิทธิ์ลบ)",
+   "เปลี่ยนเจ้าของไฟล์"
+  ],
+  "correct": 2,
+  "explain": [
+   "การลบขึ้นกับ w ของ directory",
+   "รันคือ x",
+   "ถูก — w ของไฟล์ = แก้ไขเนื้อหา",
+   "เปลี่ยนเจ้าของใช้ chown (ต้อง sudo)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "`chown :staff test` มีผลอย่างไร?",
+  "choices": [
+   "เปลี่ยนเจ้าของเป็น staff",
+   "ลบกลุ่ม staff",
+   "เพิ่มสิทธิ์ให้ staff",
+   "เปลี่ยนเฉพาะกลุ่มของไฟล์เป็น staff"
+  ],
+  "correct": 3,
+  "explain": [
+   "เปลี่ยนเจ้าของต้องใส่ชื่อก่อน :",
+   "chown ไม่ลบกลุ่ม",
+   "chown ไม่แก้สิทธิ์ rwx",
+   "ถูก — ขึ้นต้นด้วย : = เปลี่ยนแค่ group"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน Lab 5 สมาชิกของ group2 คือใคร?",
+  "choices": [
+   "test1, test2",
+   "test2, test3",
+   "test1, test3",
+   "test1, test2, test3"
+  ],
+  "correct": 1,
+  "explain": [
+   "นั่นคือ group1",
+   "ถูก — group2 (GID 2002) มี test2, test3",
+   "ไม่ตรงกับโจทย์",
+   "ไม่มีกลุ่มที่มีครบทั้ง 3 คน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "option `-a` ใน `usermod -a -G group1 test1` หมายถึงอะไร?",
+  "choices": [
+   "append เพิ่มกลุ่มต่อท้ายโดยไม่ลบกลุ่มเดิม",
+   "all ใส่ทุกกลุ่ม",
+   "admin ให้สิทธิ์ผู้ดูแล",
+   "account สร้างบัญชีใหม่"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ถ้าไม่มี -a จะแทนที่กลุ่มเสริมทั้งหมด",
+   "ไม่ใช่ความหมาย",
+   "ไม่ใช่ความหมาย",
+   "usermod ไม่ได้สร้างบัญชี"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดแสดงว่าผู้ใช้คนหนึ่งอยู่กลุ่มใดบ้าง เช่น `test2 : test2 group1 group2`?",
+  "choices": [
+   "whoami test2",
+   "chgrp test2",
+   "groups test2",
+   "passwd test2"
+  ],
+  "correct": 2,
+  "explain": [
+   "whoami แสดงแค่ชื่อผู้ใช้ปัจจุบัน",
+   "chgrp เปลี่ยนกลุ่มของไฟล์",
+   "ถูก — groups แสดงทุกกลุ่มของผู้ใช้",
+   "passwd ตั้งรหัสผ่าน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "`chmod 124 fileE` ให้ผลเป็นสิทธิ์ใด?",
+  "choices": [
+   "-rw-r--r--",
+   "---x-w-r--",
+   "-r---w---x",
+   "--wx-w-r--"
+  ],
+  "correct": 1,
+  "explain": [
+   "นั่นคือ 644",
+   "ถูก — 1=--x, 2=-w-, 4=r--",
+   "กลับด้านลำดับ",
+   "3 จึงจะเป็น -wx"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สิทธิ์ x ของ directory หมายถึงอะไร?",
+  "choices": [
+   "รัน directory เป็นโปรแกรม",
+   "ลบ directory ได้",
+   "ดูรายชื่อไฟล์ข้างใน",
+   "เข้าไปใน directory (cd) และเข้าถึงไฟล์ข้างใน"
+  ],
+  "correct": 3,
+  "explain": [
+   "directory รันไม่ได้",
+   "การลบขึ้นกับ w ของ directory แม่",
+   "ดูรายชื่อคือ r",
+   "ถูก — ไม่มี x ต่อให้มี r ก็ cd เข้าไม่ได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การลบไฟล์ขึ้นกับสิทธิ์ใดเป็นหลัก?",
+  "choices": [
+   "w ของ directory ที่ไฟล์นั้นอยู่",
+   "w ของตัวไฟล์",
+   "x ของตัวไฟล์",
+   "r ของตัวไฟล์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — การลบคือเอาชื่อออกจาก directory",
+   "w ของไฟล์คือแก้เนื้อหา",
+   "x คือรัน",
+   "r คืออ่าน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Linux เลือกใช้สิทธิ์ชุดไหนกับผู้ใช้คนหนึ่ง?",
+  "choices": [
+   "รวมสิทธิ์ของทั้ง 3 ชุดเข้าด้วยกัน",
+   "ใช้ชุดที่ให้สิทธิ์มากที่สุด",
+   "เช็ก owner → group → other แล้วหยุดที่ขั้นแรกที่ตรง",
+   "ใช้ชุด other กับทุกคน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ได้รวม",
+   "ไม่ได้เลือกชุดที่มากสุด",
+   "ถูก — เป็น owner ใช้ชุด u, อยู่ group ใช้ชุด g, ไม่งั้นใช้ o",
+   "owner และ group มีชุดของตัวเอง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "chmod แบบตัวเลขต่างจากแบบตัวอักษรอย่างไร?",
+  "choices": [
+   "ตัวเลขแก้เฉพาะส่วน ตัวอักษรกำหนดใหม่ทั้งหมด",
+   "ตัวเลขกำหนดสิทธิ์ใหม่ทั้งหมด ตัวอักษร (+/-) แก้เฉพาะส่วนที่ระบุ",
+   "ตัวอักษรใช้ได้เฉพาะ root",
+   "ทั้งสองให้ผลต่างกันเสมอแม้ตั้งเหมือนกัน"
+  ],
+  "correct": 1,
+  "explain": [
+   "สลับกัน",
+   "ถูก — เช่น chmod g+w แก้แค่ group เขียนได้ ที่เหลือคงเดิม",
+   "ผู้ใช้ทั่วไปใช้กับไฟล์ของตัวเองได้",
+   "ตั้งให้ตรงกันก็ได้ผลเดียวกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`chown` และ `chgrp` มีผลต่อสิทธิ์ rwx อย่างไร?",
+  "choices": [
+   "รีเซ็ตสิทธิ์เป็น 755",
+   "ลบสิทธิ์ของ other ทั้งหมด",
+   "เพิ่มสิทธิ์ x ให้เจ้าของใหม่",
+   "ไม่เปลี่ยน rwx เปลี่ยนแค่ว่าใครเป็น owner/group"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ได้รีเซ็ต",
+   "ไม่แตะสิทธิ์ของ other",
+   "ไม่ได้เพิ่มสิทธิ์",
+   "ถูก — เช่น chgrp group2 test2 สิทธิ์ยัง rwx------"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมไฟล์ที่ copy ด้วย `sudo cp foo /home/test3` จึงกลายเป็นของ root root?",
+  "choices": [
+   "เพราะ root เป็นผู้สร้างไฟล์สำเนา",
+   "เพราะ /home/test3 เป็นของ root",
+   "เพราะ cp ลบเจ้าของเดิม",
+   "เพราะ foo เดิมเป็นของ root"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — จึงต้อง chown/chgrp ให้เจ้าของที่ถูกต้อง",
+   "/home/test3 เป็นของ test3",
+   "cp ไม่ลบเจ้าของ แต่ไฟล์ใหม่เป็นของผู้สร้าง",
+   "foo เดิมเป็นของ sudsanguan"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "หลัง `sudo chmod 700 test2` ทำไม sudsanguan ดู directory test2 ไม่ได้แต่ test2 ดูได้?",
+  "choices": [
+   "เพราะ sudsanguan ไม่มีรหัสผ่าน",
+   "เพราะ 700 ลบไฟล์ข้างในทั้งหมด",
+   "เพราะ sudsanguan เป็น others (---) ส่วน test2 เป็น owner (rwx)",
+   "เพราะ test2 เป็น root"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่เกี่ยวกับรหัสผ่าน",
+   "chmod ไม่ลบไฟล์",
+   "ถูก — 700 = rwx------ มีแต่เจ้าของที่เข้าได้",
+   "test2 เป็นผู้ใช้ธรรมดา"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "directory test2 เป็น `drwxr-x--- test2 group2` ทำไม test3 ดูได้แต่ test1 ดูไม่ได้?",
+  "choices": [
+   "test3 มี UID สูงกว่า",
+   "test3 อยู่ group2 ได้สิทธิ์ r-x ส่วน test1 ไม่อยู่ group2 จึงเป็น others ---",
+   "test1 ถูก lock",
+   "test3 เป็น owner"
+  ],
+  "correct": 1,
+  "explain": [
+   "UID ไม่ได้ตัดสินสิทธิ์แบบนั้น",
+   "ถูก — สิทธิ์ขึ้นกับว่าอยู่กลุ่มไหน",
+   "test1 login ได้ปกติ",
+   "owner คือ test2"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม directory ที่ตั้งสิทธิ์ 644 จึงเข้าไม่ได้แม้แต่เจ้าของ?",
+  "choices": [
+   "เพราะ 644 ไม่มีสิทธิ์ r",
+   "เพราะ 644 ใช้ได้เฉพาะ root",
+   "เพราะ 644 ทำให้ owner กลายเป็น other",
+   "เพราะไม่มี x ซึ่งเป็นสิทธิ์ “เข้า” directory"
+  ],
+  "correct": 3,
+  "explain": [
+   "644 มี r ทุกกลุ่ม",
+   "ไม่มีข้อจำกัดแบบนั้น",
+   "owner ยังเป็น owner",
+   "ถูก — 644 = rw-r--r-- ไม่มี x เลย เหมาะกับไฟล์ ไม่เหมาะกับ directory"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้าสั่ง `usermod -G group2 test2` โดยลืม -a จะเกิดอะไรขึ้น?",
+  "choices": [
+   "test2 จะหลุดจาก group1 เพราะ -G อย่างเดียวคือแทนที่รายการกลุ่มเสริม",
+   "test2 จะอยู่ทั้ง group1 และ group2",
+   "คำสั่ง error ทันที",
+   "test2 จะถูกลบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ต้องใช้ -a -G เพื่อเพิ่มต่อท้าย",
+   "นั่นคือผลของ -a -G",
+   "คำสั่งทำงานได้แต่ผลไม่ตรงที่ต้องการ",
+   "usermod ไม่ลบผู้ใช้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมจึงแยก user ให้โปรแกรมอย่าง Web Server แทนที่จะให้รันด้วย root?",
+  "choices": [
+   "เพราะ root รันโปรแกรมไม่ได้",
+   "เพื่อให้ Web Server เร็วขึ้น",
+   "ถ้าโปรแกรมถูกแฮ็ก ผู้บุกรุกจะได้แค่สิทธิ์จำกัดของ user นั้น ไม่ใช่ root ทั้งระบบ",
+   "เพราะ Web Server ต้องใช้ UID 0"
+  ],
+  "correct": 2,
+  "explain": [
+   "root รันได้ทุกอย่าง",
+   "ไม่เกี่ยวกับความเร็ว",
+   "ถูก — จำกัดความเสียหาย",
+   "UID 0 คือ root ซึ่งเป็นสิ่งที่ต้องหลีกเลี่ยง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ไฟล์ `-rwx------ games root test` หลังรัน `chown games test` ข้อใดถูก?",
+  "choices": [
+   "ทั้ง owner และ group เปลี่ยนเป็น games",
+   "สิทธิ์เปลี่ยนเป็น rwxrwxrwx",
+   "ไม่มีอะไรเปลี่ยน",
+   "เปลี่ยนเฉพาะ owner เป็น games group ยังเป็น root"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ได้ใส่ :group จึงเปลี่ยนแค่ owner",
+   "chown ไม่แตะสิทธิ์",
+   "owner เปลี่ยน",
+   "ถูก — ตามตัวอย่างในสไลด์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการให้ไฟล์ report.txt เจ้าของอ่าน-เขียนได้ คนอื่นทั้งหมดอ่านได้อย่างเดียว ใช้คำสั่งใด?",
+  "choices": [
+   "chmod 755 report.txt",
+   "chmod 600 report.txt",
+   "chmod 644 report.txt",
+   "chmod 444 report.txt"
+  ],
+  "correct": 2,
+  "explain": [
+   "755 ให้ x ด้วยซึ่งไม่จำเป็น",
+   "600 คนอื่นอ่านไม่ได้",
+   "ถูก — rw-r--r--",
+   "444 เจ้าของเขียนไม่ได้"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการเพิ่มสิทธิ์เขียนให้ group ของ sample.txt โดยไม่แตะสิทธิ์อื่น ใช้คำสั่งใด?",
+  "choices": [
+   "chmod 020 sample.txt",
+   "chmod g+w sample.txt",
+   "chmod o+w sample.txt",
+   "chgrp w sample.txt"
+  ],
+  "correct": 1,
+  "explain": [
+   "ตัวเลขจะกำหนดใหม่ทั้งหมด ทำให้สิทธิ์อื่นหาย",
+   "ถูก — แบบตัวอักษรแก้เฉพาะส่วน",
+   "o คือ other ไม่ใช่ group",
+   "chgrp เปลี่ยนกลุ่ม ไม่ได้เพิ่มสิทธิ์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการให้โฟลเดอร์โปรเจกต์เข้าได้เฉพาะเจ้าของกับสมาชิกกลุ่ม (กลุ่มอ่าน/เข้าได้แต่สร้างไฟล์ไม่ได้) คนอื่นห้ามเข้า ควรตั้งเลขใด?",
+  "choices": [
+   "777",
+   "700",
+   "755",
+   "750"
+  ],
+  "correct": 3,
+  "explain": [
+   "ทุกคนทำได้ทุกอย่าง",
+   "กลุ่มเข้าไม่ได้",
+   "other เข้าได้ด้วย",
+   "ถูก — rwxr-x--- เหมือนที่ทำกับ test2 ใน Lab"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการเปลี่ยนเจ้าของเป็น test3 และกลุ่มเป็น group2 ของไฟล์ foo ในคำสั่งเดียว ใช้คำสั่งใด?",
+  "choices": [
+   "sudo chown test3:group2 foo",
+   "sudo chgrp test3:group2 foo",
+   "sudo chmod test3:group2 foo",
+   "sudo chown group2:test3 foo"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — รูปแบบ chown user:group file",
+   "chgrp เปลี่ยนได้แค่กลุ่ม",
+   "chmod เปลี่ยนสิทธิ์ ไม่ใช่เจ้าของ",
+   "ลำดับผิด ต้อง user ก่อน group"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ไฟล์ `-rw-r--r-- alice staff notes.txt` ถ้า bob อยู่กลุ่ม staff bob ทำอะไรกับไฟล์ได้?",
+  "choices": [
+   "อ่านและแก้ไขได้",
+   "อ่านได้อย่างเดียว",
+   "ทำอะไรไม่ได้เลย",
+   "อ่าน แก้ไข และรันได้"
+  ],
+  "correct": 1,
+  "explain": [
+   "w มีเฉพาะ owner (alice)",
+   "ถูก — bob ได้สิทธิ์ group = r--",
+   "group มี r",
+   "ไม่มี x ในกลุ่มไหนเลย"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "สร้างสคริปต์ run.sh แล้วรันไม่ได้เพราะไม่มีสิทธิ์รัน วิธีแก้ที่ง่ายที่สุดคือข้อใด?",
+  "choices": [
+   "chown root run.sh",
+   "chgrp sudo run.sh",
+   "chmod +x run.sh",
+   "chmod 000 run.sh"
+  ],
+  "correct": 2,
+  "explain": [
+   "เปลี่ยนเจ้าของไม่ได้เพิ่มสิทธิ์รัน",
+   "เปลี่ยนกลุ่มไม่ได้เพิ่ม x",
+   "ถูก — +x เพิ่มสิทธิ์รันให้ทุกกลุ่ม",
+   "000 ลบสิทธิ์ทั้งหมด"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

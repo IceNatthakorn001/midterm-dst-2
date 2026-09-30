@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L8 – Process and Memory + Lab 8 (Process + Memory)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L8 – Process and Memory + Lab 8 (Process + Memory)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "นิยามของ process ตามสไลด์คือข้อใด?",
+  "choices": [
+   "ไฟล์โปรแกรมที่เก็บบนดิสก์",
+   "A program in execution — โปรแกรมที่กำลังทำงานอยู่",
+   "ส่วนหนึ่งของ CPU",
+   "ไฟล์ตั้งค่าใน /etc"
+  ],
+  "correct": 1,
+  "explain": [
+   "นั่นคือ program ที่ยังไม่ได้รัน",
+   "ถูก — โปรแกรมถูก instantiate ขึ้นใน RAM",
+   "process ไม่ใช่ฮาร์ดแวร์",
+   "ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในผล `ps -f` คอลัมน์ PPID หมายถึงอะไร?",
+  "choices": [
+   "Process priority ID",
+   "Previous process ID",
+   "Parent process ID",
+   "Physical page ID"
+  ],
+  "correct": 2,
+  "explain": [
+   "priority อยู่คอลัมน์ PRI/NI ใน ps -l",
+   "ไม่ใช่ความหมาย",
+   "ถูก — หมายเลขของ process ที่สร้าง process นี้",
+   "ไม่ใช่ความหมาย"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โปรแกรม top ปรับปรุงการแสดงผลทุก ๆ กี่วินาทีโดยค่าเริ่มต้น?",
+  "choices": [
+   "1 วินาที",
+   "5 วินาที",
+   "10 วินาที",
+   "3 วินาที"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ใช่ค่าในสไลด์",
+   "ไม่ใช่ค่าในสไลด์",
+   "ไม่ใช่ค่าในสไลด์",
+   "ถูก — top อัปเดตต่อเนื่องทุก 3 วินาที"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน Linux process states ตัวอักษร Z หมายถึงอะไร?",
+  "choices": [
+   "Zombie — เรียก exit() แล้วแต่ยังค้างในตาราง process",
+   "Zero priority",
+   "Zipped process",
+   "Zone sleep"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — จบแล้วแต่ parent ยังไม่รับสถานะ",
+   "ไม่ใช่ความหมาย",
+   "ไม่ใช่ความหมาย",
+   "sleep คือ S หรือ D"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "process ที่ได้รับ SIGSTOP (เช่นกด Ctrl+Z) จะอยู่สถานะใด?",
+  "choices": [
+   "S — Interruptible Sleep",
+   "Z — Zombie",
+   "T — Stopped",
+   "D — Uninterruptible Sleep"
+  ],
+  "correct": 2,
+  "explain": [
+   "S คือรอทรัพยากรที่ปลุกได้",
+   "Z คือจบแล้ว",
+   "ถูก — T กลับเป็น R เมื่อได้ SIGCONT",
+   "D คือรอ I/O ที่ปลุกไม่ได้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "สัญลักษณ์ใดใส่ท้ายคำสั่งเพื่อรันเป็น background process?",
+  "choices": [
+   "|",
+   "&amp;",
+   "&gt;",
+   "$"
+  ],
+  "correct": 1,
+  "explain": [
+   "| คือ pipe",
+   "ถูก — เช่น ls -l | more &amp; ได้ [1] 5415",
+   "&gt; คือ redirect",
+   "$ เป็นส่วนของ prompt"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่วงค่า nice ของ process คือเท่าใด และค่าเริ่มต้นคือเท่าใด?",
+  "choices": [
+   "0 ถึง 100 ค่าเริ่มต้น 50",
+   "-19 ถึง 20 ค่าเริ่มต้น 1",
+   "1 ถึง 10 ค่าเริ่มต้น 5",
+   "-20 ถึง 19 ค่าเริ่มต้น 0"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ใช่ช่วงของ nice",
+   "ช่วงเลื่อนผิด",
+   "ไม่ใช่ช่วงของ nice",
+   "ถูก — -20 สำคัญสูงสุด 19 ต่ำสุด"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่ง `kill -9 PID` ส่งสัญญาณใด?",
+  "choices": [
+   "SIGKILL — บังคับจบทันที",
+   "SIGTERM — ขอให้จบอย่างสุภาพ",
+   "SIGSTOP — หยุดชั่วคราว",
+   "SIGCONT — ให้ทำงานต่อ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — process ปฏิเสธไม่ได้",
+   "SIGTERM คือ kill ธรรมดา (ไม่ใส่ -9)",
+   "SIGSTOP ทำให้เป็น T",
+   "SIGCONT ปลุก T กลับเป็น R"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดบน Windows แสดง Installed/Total/Available Physical Memory?",
+  "choices": [
+   "tasklist",
+   "meminfo",
+   "systeminfo",
+   "free"
+  ],
+  "correct": 2,
+  "explain": [
+   "tasklist แสดงรายการ process",
+   "ไม่ใช่คำสั่งของ Windows",
+   "ถูก — แสดงข้อมูลระบบรวม virtual memory และ page file",
+   "free เป็นคำสั่งของ Linux"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตามลำดับชั้นหน่วยความจำ RAM ใช้เวลาเข้าถึงประมาณกี่ CPU cycles?",
+  "choices": [
+   "1 cycle",
+   "~250 cycles",
+   "~3–14 cycles",
+   "~40M cycles"
+  ],
+  "correct": 1,
+  "explain": [
+   "1 cycle คือ register",
+   "ถูก — RAM ~250 cycles",
+   "3–14 คือ CPU cache",
+   "40M คือ disk"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ส่วนใดทำหน้าที่แปลง virtual address เป็น physical address?",
+  "choices": [
+   "Scheduler",
+   "PCB",
+   "Disk controller",
+   "MMU (Memory Management Unit)"
+  ],
+  "correct": 3,
+  "explain": [
+   "scheduler เลือกว่า thread ไหนได้ CPU",
+   "PCB เก็บข้อมูลของ process",
+   "disk controller คุมดิสก์",
+   "ถูก — CPU ส่ง virtual address ให้ MMU แล้ว MMU ส่ง physical address ไป memory"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดแสดง memory เป็นหน่วย MB พร้อมบรรทัด Total (RAM + swap)?",
+  "choices": [
+   "free -mt",
+   "vmstat -D",
+   "top -o %MEM",
+   "df -h"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — -m หน่วย MB, -t แสดงบรรทัด Total",
+   "vmstat -D เป็นสถิติดิสก์",
+   "top -o %MEM เรียง process ตามการใช้ RAM",
+   "df -h แสดงพื้นที่ดิสก์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Program กับ Process ต่างกันอย่างไร?",
+  "choices": [
+   "Program อยู่ใน RAM, Process อยู่บนดิสก์",
+   "Program คือชุดคำสั่งบนดิสก์ Process คือโปรแกรมที่ถูกรันอยู่ใน RAM",
+   "ทั้งสองคือสิ่งเดียวกัน",
+   "Process ใหญ่กว่า program เสมอ"
+  ],
+  "correct": 1,
+  "explain": [
+   "สลับกัน",
+   "ถูก — เปิดโปรแกรมเดียวกัน 2 หน้าต่าง = 2 process",
+   "ต่างกัน: หนึ่งอยู่เฉย ๆ อีกหนึ่งกำลังทำงาน",
+   "ไม่ใช่นิยามที่ใช้แยก"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม ls, more และ ps -f ใน `ps -f` จึงมี PPID เดียวกัน (2245)?",
+  "choices": [
+   "เพราะเป็นคำสั่งประเภทเดียวกัน",
+   "เพราะรันพร้อมกันในวินาทีเดียว",
+   "เพราะทั้งหมดถูกสร้างโดย bash ตัวเดียวกัน (PID 2245)",
+   "เพราะ PPID ของทุก process เท่ากันเสมอ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ประเภทคำสั่งไม่เกี่ยว",
+   "เวลาไม่ได้กำหนด PPID",
+   "ถูก — bash เป็น parent ของคำสั่งที่พิมพ์",
+   "แต่ละ process มี PPID ตาม parent ของตัวเอง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ตาม process state diagram process ที่อยู่ waiting เมื่อ I/O เสร็จแล้วจะไปสถานะใด?",
+  "choices": [
+   "running ทันที",
+   "terminated",
+   "created",
+   "ready — รอ scheduler เลือกอีกครั้ง"
+  ],
+  "correct": 3,
+  "explain": [
+   "ต้องผ่าน ready ก่อน",
+   "ยังไม่จบการทำงาน",
+   "created คือเพิ่งถูกสร้าง",
+   "ถูก — I/O or event completion → ready"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สถานะ S กับ D ของ Linux ต่างกันอย่างไร?",
+  "choices": [
+   "S = sleep ที่ปลุกด้วยสัญญาณได้, D = sleep ที่ปลุกไม่ได้ (เช่นรอ I/O ดิสก์)",
+   "S = stopped, D = dead",
+   "S = system, D = daemon",
+   "ไม่ต่างกัน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Interruptible vs Uninterruptible Sleep",
+   "stopped คือ T และไม่มีสถานะ dead ในตาราง",
+   "ไม่ใช่ความหมาย",
+   "ต่างกันที่ปลุกด้วยสัญญาณได้หรือไม่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Process Control Block (PCB) มีไว้เพื่ออะไร?",
+  "choices": [
+   "เก็บไฟล์โปรแกรมบนดิสก์",
+   "เก็บข้อมูลของ process (PC, registers, state ฯลฯ) เพื่อให้กลับมาทำงานต่อจากจุดเดิมหลัง context switch",
+   "ควบคุมความเร็วพัดลม CPU",
+   "เก็บรหัสผ่านผู้ใช้"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไฟล์โปรแกรมอยู่บนดิสก์ ไม่ใช่ใน PCB",
+   "ถูก — เหมือนที่คั่นหนังสือ",
+   "ไม่เกี่ยว",
+   "รหัสผ่านอยู่ใน /etc/shadow"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `kill 5685` ไม่ทำให้ nano ที่อยู่ background จบ แต่ `kill -9 5685` ได้ผล?",
+  "choices": [
+   "เพราะ kill ใช้ได้เฉพาะ root",
+   "เพราะ PID ผิด",
+   "เพราะ nano อยู่สถานะ Stopped ยังไม่จัดการ SIGTERM ส่วน SIGKILL ถูกบังคับทันที",
+   "เพราะ -9 คือการ restart"
+  ],
+  "correct": 2,
+  "explain": [
+   "เจ้าของ process ส่ง kill ได้",
+   "PID เดียวกันแต่ผลต่าง",
+   "ถูก — SIGKILL ปฏิเสธไม่ได้",
+   "-9 คือ SIGKILL ไม่ใช่ restart"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`nice` ต่างจาก `renice` อย่างไร?",
+  "choices": [
+   "nice ใช้กับ root renice ใช้กับผู้ใช้ทั่วไป",
+   "nice เพิ่มความสำคัญเสมอ renice ลดเสมอ",
+   "ทั้งสองใช้ได้เฉพาะตอนเริ่มรัน",
+   "nice ตั้งค่าตอนเริ่มรัน process ใหม่ renice ปรับค่าของ process ที่รันอยู่แล้ว (ใช้ PID)"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ได้แบ่งตามผู้ใช้",
+   "ทิศทางขึ้นกับค่าที่ใส่",
+   "renice ใช้กับ process ที่รันอยู่",
+   "ถูก — เช่น nice -n 10 cmd / renice -10 2471"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมการตั้งค่า nice ให้ติดลบจึงต้องใช้ sudo?",
+  "choices": [
+   "เพราะถ้าใครก็ตั้งได้ ทุกคนจะตั้ง -20 เพื่อแย่ง CPU",
+   "เพราะค่าติดลบทำให้ process ช้าลง",
+   "เพราะ nice ติดลบจะลบไฟล์",
+   "เพราะค่าติดลบใช้ได้เฉพาะ Windows"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ผู้ใช้ทั่วไปเพิ่มค่า (ลดความสำคัญ) ได้อย่างเดียว",
+   "ค่าติดลบทำให้สำคัญขึ้น ไม่ใช่ช้าลง",
+   "nice ไม่ลบไฟล์",
+   "nice เป็นแนวคิดของ Linux/Unix"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมบน Linux ค่า free memory น้อยแต่ระบบไม่ได้ช้า?",
+  "choices": [
+   "เพราะ Linux ไม่ใช้ RAM",
+   "เพราะ Linux ยืม RAM ว่างไปเป็น buff/cache ซึ่งคืนได้ทันที ควรดูค่า available",
+   "เพราะ swap เร็วกว่า RAM",
+   "เพราะค่า free ถูกคำนวณผิดเสมอ"
+  ],
+  "correct": 1,
+  "explain": [
+   "Linux ใช้ RAM ตามปกติ",
+   "ถูก — available ≈ free + cache ที่คืนได้",
+   "swap อยู่บนดิสก์ ช้ากว่ามาก",
+   "ค่า free ถูกต้อง แต่ความหมายคือว่างสนิท"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ความสัมพันธ์ระหว่าง free, vmstat และ /proc/meminfo คือข้อใด?",
+  "choices": [
+   "free และ vmstat อ่านข้อมูลมาจาก /proc/meminfo ซึ่งเป็น virtual file ที่ kernel สร้าง",
+   "/proc/meminfo อ่านข้อมูลจาก free",
+   "ทั้งสามวัดค่าคนละแหล่งจึงไม่ตรงกัน",
+   "/proc/meminfo เป็นไฟล์จริงบนดิสก์ที่บันทึกทุกชั่วโมง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ค่าจึงตรงกัน meminfo ละเอียดที่สุด",
+   "ทิศทางกลับกัน",
+   "ค่าตรงกัน (ต่างเล็กน้อยเพราะรันคนละวินาที)",
+   "/proc ไม่ใช่ไฟล์บนดิสก์จริง สร้างใหม่ทุกครั้งที่อ่าน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Foreground process กับ Background process ต่างกันอย่างไร?",
+  "choices": [
+   "Foreground รันเร็วกว่าเสมอ",
+   "Background ต้องใช้ sudo",
+   "Foreground ติดต่อกับ user ผ่านหน้าจอและ keyboard (terminal รอ) Background ไม่ interact กับ user",
+   "ทั้งสองต้อง interact กับ user"
+  ],
+  "correct": 2,
+  "explain": [
+   "ความเร็วไม่ได้ขึ้นกับตรงนี้",
+   "ผู้ใช้ทั่วไปรัน background ได้",
+   "ถูก — background ทำให้ terminal ใช้ต่อได้ทันที",
+   "background ไม่ interact กับ user"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เมื่อ process X จบ และข้าง ๆ เป็นพื้นที่ว่างทั้งสองด้าน OS จัดการหน่วยความจำอย่างไร?",
+  "choices": [
+   "รวมพื้นที่ว่างทั้งหมดที่ติดกันเป็นช่องเดียว",
+   "ปล่อยไว้เป็น 3 ช่องแยกกัน",
+   "ย้าย process อื่นมาทันที",
+   "ส่งพื้นที่นั้นไปเป็น swap"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — กรณี (d) ของ four neighbor combinations",
+   "OS รวมช่องที่ติดกัน",
+   "ไม่จำเป็นต้องย้ายทันที",
+   "swap อยู่บนดิสก์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการดูว่า process ใดใช้ RAM มากที่สุดแบบ real-time ใช้คำสั่งใด?",
+  "choices": [
+   "free -mt",
+   "ps",
+   "top -o %MEM",
+   "vmstat -D"
+  ],
+  "correct": 2,
+  "explain": [
+   "free แสดงภาพรวม ไม่แยกตาม process",
+   "ps เป็น snapshot และไม่ได้เรียงตาม memory",
+   "ถูก — เรียงตาม %MEM (ใน Lab คือ gnome-shell 6.3%)",
+   "vmstat -D เป็นสถิติดิสก์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการรันงาน backup.sh ให้มีความสำคัญต่ำกว่าปกติ เพื่อไม่แย่ง CPU งานอื่น ใช้คำสั่งใด?",
+  "choices": [
+   "nice -n -20 ./backup.sh",
+   "renice 19",
+   "kill -9 ./backup.sh",
+   "nice -n 10 ./backup.sh"
+  ],
+  "correct": 3,
+  "explain": [
+   "-20 ทำให้สำคัญสูงสุด ตรงข้าม",
+   "renice ต้องระบุ PID ของ process ที่รันอยู่",
+   "kill ใช้หยุด process และต้องใช้ PID",
+   "ถูก — ค่าบวกทำให้ความสำคัญต่ำลง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "รันคำสั่งเป็น background แล้วมันถูก Stopped เพราะต้องใช้หน้าจอ จะดึงกลับมาทำงานต่อด้านหน้าอย่างไร?",
+  "choices": [
+   "พิมพ์ fg",
+   "พิมพ์ kill -9",
+   "พิมพ์ ps -f",
+   "พิมพ์ nice"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — fg ดึงงานกลับมาเป็น foreground",
+   "kill -9 จะบังคับจบ",
+   "ps -f แค่แสดงสถานะ",
+   "nice แสดง/ตั้งค่า priority"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ในบรรทัด `0 T 1000 6143 2245 1 90 10 ... nano` ของ ps -l ข้อใดสรุปถูกต้อง?",
+  "choices": [
+   "nano กำลังรัน ความสำคัญสูงกว่าปกติ",
+   "nano ถูก Stopped มีค่า nice 10 ความสำคัญต่ำกว่าปกติ และ parent คือ PID 2245",
+   "nano เป็น zombie",
+   "nano มี PID 2245"
+  ],
+  "correct": 1,
+  "explain": [
+   "T = Stopped และ NI 10 = ความสำคัญต่ำกว่าปกติ",
+   "ถูก — PRI 90 = 80 + 10, PPID = 2245",
+   "zombie ใช้ Z",
+   "2245 คือ PPID (bash)"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบ 32-bit เครื่องหนึ่งติด RAM 8 GB แต่ใช้ได้ไม่ถึง เพราะเหตุใด?",
+  "choices": [
+   "เพราะ RAM เสียครึ่งหนึ่ง",
+   "เพราะ swap กินพื้นที่ RAM",
+   "เพราะระบบ 32-bit อ้างอิง memory ได้สูงสุด 4 GB (2³² addresses)",
+   "เพราะ MMU ปิดอยู่"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ใช่สาเหตุตามบทเรียน",
+   "swap อยู่บนดิสก์",
+   "ถูก — 64-bit อ้างอิงได้ถึง 16 EB",
+   "MMU ไม่ได้ถูกปิดโดยทั่วไป"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ใน `top` บรรทัด Tasks ขึ้นว่ามี zombie หลายตัว ข้อใดอธิบายได้ถูกต้อง?",
+  "choices": [
+   "มี process กำลังใช้ CPU 100%",
+   "มี process ที่จบแล้วแต่ parent ยังไม่มารับสถานะการจบ",
+   "มี process ถูก Stopped ด้วย Ctrl+Z",
+   "RAM เต็มแล้ว"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไม่เกี่ยวกับ CPU",
+   "ถูก — zombie ค้างแค่ช่องในตาราง process",
+   "Stopped คือสถานะ T",
+   "zombie แทบไม่ใช้ RAM"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

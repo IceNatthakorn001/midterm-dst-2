@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L9 – Observability และ Environment Variables</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L9 – Observability และ Environment Variables</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "สิ่งที่ Observability ต้องเฝ้าดูตามสไลด์ ได้แก่อะไร?",
+  "choices": [
+   "CPU usage, Memory usage และ I/O traffic",
+   "เฉพาะจำนวนผู้ใช้ที่ login",
+   "เฉพาะขนาดไฟล์ใน /home",
+   "รหัสผ่านของผู้ใช้"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เฝ้าดูตั้งแต่ kernel ถึงโปรแกรมของ user",
+   "เป็นแค่ส่วนเล็ก ไม่ใช่หัวใจของ observability",
+   "ไม่ใช่ประเด็นหลัก",
+   "ไม่ใช่สิ่งที่ monitor"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ถ้า CPU ทำงานเกินกี่เปอร์เซ็นต์ตลอดเวลา สไลด์บอกว่าอาจมี CPU ไม่พอ?",
+  "choices": [
+   "20%",
+   "50%",
+   "80%",
+   "100% เท่านั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ต่ำเกินไป",
+   "ไม่ใช่ตัวเลขในสไลด์",
+   "ถูก — เกิน 80% ตลอด = CPU อาจไม่พอ หรือเป็น security incident / software error",
+   "สไลด์ใช้เกณฑ์ 80%"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน top/htop คีย์ใดเรียงลำดับตาม memory usage?",
+  "choices": [
+   "Shift + P",
+   "Shift + M",
+   "Shift + S",
+   "Shift + T"
+  ],
+  "correct": 1,
+  "explain": [
+   "Shift+P เรียงตาม CPU (default)",
+   "ถูก — M = Memory",
+   "Shift+S เรียงตาม time (ตามสไลด์)",
+   "ไม่ใช่คีย์ในสไลด์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โหมดการเรียงลำดับเริ่มต้น (default) ของ top คือเรียงตามอะไร?",
+  "choices": [
+   "Memory usage",
+   "ชื่อ process",
+   "PID",
+   "CPU usage"
+  ],
+  "correct": 3,
+  "explain": [
+   "ต้องกด Shift+M",
+   "ไม่ใช่ค่าเริ่มต้น",
+   "ไม่ใช่ค่าเริ่มต้น",
+   "ถูก — Shift+P = CPU เป็น default display mode"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่ง `pgrep -c -u korakoch` ให้ผลอะไร?",
+  "choices": [
+   "ลบ process ของ korakoch",
+   "แสดง PID ทุกตัวของ korakoch",
+   "นับจำนวน process ที่ user korakoch เป็นคนเริ่ม",
+   "เปลี่ยนเจ้าของ process เป็น korakoch"
+  ],
+  "correct": 2,
+  "explain": [
+   "pgrep ไม่ลบ process",
+   "ไม่มี -c จะแสดง PID",
+   "ถูก — -c = count ได้ 3",
+   "pgrep ไม่เปลี่ยนเจ้าของ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตาม man kill สัญญาณเริ่มต้น (default) ของคำสั่ง kill คืออะไร?",
+  "choices": [
+   "TERM",
+   "KILL",
+   "STOP",
+   "HUP"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — kill ไม่ใส่ option ส่ง TERM",
+   "KILL ต้องระบุ -9 / -KILL",
+   "STOP หยุดชั่วคราว ต้องระบุเอง",
+   "HUP ต้องระบุเอง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Environment variable คืออะไรตามสไลด์?",
+  "choices": [
+   "ตัวแปรที่อยู่ในไฟล์ C เท่านั้น",
+   "ตัวแปรที่เก็บค่าข้อมูลสิ่งแวดล้อมที่เกิดขึ้นเมื่อ user login เข้าระบบ",
+   "ตัวแปรที่ใช้เก็บรหัสผ่าน",
+   "ไฟล์ตั้งค่าของ BIOS"
+  ],
+  "correct": 1,
+  "explain": [
+   "แค่ใช้ตัวแปร C เป็นตัวเปรียบเทียบ",
+   "ถูก — เช่น $HOME, $SHELL, $PATH",
+   "รหัสผ่านอยู่ใน /etc/shadow",
+   "BIOS เก็บค่าใน CMOS"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดใช้ตั้งค่า environment variable ให้สืบทอดไปยัง process ลูก?",
+  "choices": [
+   "unset",
+   "printenv",
+   "env",
+   "export"
+  ],
+  "correct": 3,
+  "explain": [
+   "unset ใช้ยกเลิกตัวแปร",
+   "printenv ใช้แสดงค่า",
+   "env แสดงรายการตัวแปร",
+   "ถูก — export NAME=Value"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตัวแปร PATH เก็บอะไร?",
+  "choices": [
+   "รายการ directory ที่ระบบค้นหาเมื่อรันคำสั่ง ตามลำดับ",
+   "path ของ home directory",
+   "ตำแหน่งปัจจุบันใน terminal",
+   "ชื่อ shell ที่ใช้"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ใช้ executable ตัวแรกที่เจอ",
+   "home คือ HOME",
+   "ตำแหน่งปัจจุบันคือ PWD",
+   "shell คือ SHELL"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ไฟล์ใดใช้ตั้งค่าตัวแปรแบบ system-wide (ทุกผู้ใช้ ถาวร)?",
+  "choices": [
+   "~/.bashrc",
+   "/etc/passwd",
+   "/etc/environment",
+   "/etc/fstab"
+  ],
+  "correct": 2,
+  "explain": [
+   "~/.bashrc มีผลเฉพาะผู้ใช้คนนั้น",
+   "/etc/passwd เก็บข้อมูลบัญชี",
+   "ถูก — sudo nano /etc/environment",
+   "/etc/fstab เก็บรายการ mount"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่ง `ps -ux` แสดง process ใด?",
+  "choices": [
+   "ทุก process ของทุก user",
+   "เฉพาะ process ของ root",
+   "ทุก process ที่บัญชีของเราเป็นเจ้าของ",
+   "เฉพาะ kernel thread"
+  ],
+  "correct": 2,
+  "explain": [
+   "นั่นคือ ps -aux",
+   "ไม่ได้กรองเฉพาะ root",
+   "ถูก — ไม่มี a จึงเห็นแค่ของเรา",
+   "ไม่ได้กรองเฉพาะ kernel thread"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดใช้ยกเลิก (ลบ) ตัวแปร?",
+  "choices": [
+   "export -d NAME",
+   "unset NAME",
+   "rm NAME",
+   "kill NAME"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไม่ใช่รูปแบบที่สอน",
+   "ถูก — set ตั้ง / unset ยกเลิก",
+   "rm ลบไฟล์",
+   "kill ส่งสัญญาณให้ process"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`echo HOME` กับ `echo $HOME` ต่างกันอย่างไร?",
+  "choices": [
+   "ได้ผลเหมือนกัน",
+   "echo HOME แสดงค่าตัวแปร echo $HOME แสดงคำว่า HOME",
+   "echo HOME แสดงคำว่า HOME ส่วน echo $HOME แสดงค่า เช่น /home/sudsanguan",
+   "echo $HOME ใช้ได้เฉพาะ root"
+  ],
+  "correct": 2,
+  "explain": [
+   "ต่างกัน",
+   "สลับกัน",
+   "ถูก — $ แปลว่า “เอาค่าของ…”",
+   "ผู้ใช้ทุกคนใช้ได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Shell variable ต่างจาก environment variable อย่างไร?",
+  "choices": [
+   "Shell variable ถูกสืบทอดไป child shell แต่ environment variable ไม่ถูกสืบทอด",
+   "Environment variable ถูกสืบทอดไป child shell แต่ shell variable ไม่ถูกสืบทอด",
+   "ทั้งสองถูกสืบทอดเหมือนกัน",
+   "ทั้งสองไม่ถูกสืบทอดเลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "สลับกัน",
+   "ถูก — เปลี่ยน shell variable เป็น env variable ด้วย export",
+   "shell variable ไม่ถูกสืบทอด",
+   "env variable ถูกสืบทอด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Global environment variable ต่างจาก local อย่างไร?",
+  "choices": [
+   "Global เข้าถึงได้ทั่ว terminal และ process ลูก Local จำกัดเฉพาะ terminal ที่สร้าง",
+   "Global มีผลเฉพาะ root Local มีผลเฉพาะผู้ใช้ทั่วไป",
+   "Global หายเมื่อสร้างเสร็จ Local อยู่ถาวร",
+   "ไม่ต่างกัน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตามสไลด์เรื่อง scope",
+   "ไม่ได้แบ่งตามผู้ใช้",
+   "ไม่ใช่ความหมาย",
+   "ต่างกันที่ขอบเขต"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `pgrep emacs` จึงเหมาะกับการหา PID ไป kill มากกว่า `ps -uax | grep emacs`?",
+  "choices": [
+   "เพราะ pgrep เร็วกว่า 10 เท่าเสมอ",
+   "เพราะ ps ไม่แสดง PID",
+   "เพราะ pgrep ฆ่า process ให้อัตโนมัติ",
+   "เพราะ pgrep ได้เฉพาะ PID ไม่มีบรรทัดของ grep ปนมา"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ใช่ประเด็นในสไลด์",
+   "ps แสดง PID แต่ได้ทั้งบรรทัด",
+   "pgrep แค่แสดง PID (kill ตามชื่อคือ pkill)",
+   "ถูก — ps | grep ติดบรรทัด grep emacs (smith 9051) มาด้วย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เมื่อพิมพ์ `ls` shell รู้ได้อย่างไรว่าต้องรันไฟล์ไหน?",
+  "choices": [
+   "ถามผู้ใช้ทุกครั้ง",
+   "ไล่หาใน directory ที่ระบุใน $PATH ตามลำดับ แล้วใช้ตัวแรกที่เจอ",
+   "ค้นทั้งดิสก์ทุกครั้ง",
+   "ใช้ไฟล์ใน home directory เท่านั้น"
+  ],
+  "correct": 1,
+  "explain": [
+   "shell ไม่ถาม",
+   "ถูก — เช่นเจอ /usr/bin/ls",
+   "ไม่ได้ค้นทั้งดิสก์",
+   "ไม่ได้ดูเฉพาะ home"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`echo $X` กับ `printenv X` ต่างกันที่การเขียนชื่อตัวแปรอย่างไร?",
+  "choices": [
+   "ทั้งสองต้องมี $",
+   "ทั้งสองห้ามมี $",
+   "echo ต้องมี $ ส่วน printenv ใส่ชื่อโดยไม่ต้องมี $",
+   "printenv ต้องมี $ ส่วน echo ไม่ต้อง"
+  ],
+  "correct": 2,
+  "explain": [
+   "printenv ไม่ต้องมี $",
+   "echo ต้องมี $ ถึงจะได้ค่า",
+   "ถูก — เช่น printenv HOME",
+   "สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมหลังตั้ง `B=20` แล้วเปิด bash ใหม่ `echo $B` จึงว่างเปล่า?",
+  "choices": [
+   "เพราะ B เป็น shell (local) variable จึงไม่ถูกสืบทอดไป child shell",
+   "เพราะชื่อ B สั้นเกินไป",
+   "เพราะ bash ลบตัวแปรทุกตัวเมื่อเปิด",
+   "เพราะต้องใช้ printenv แทน echo"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ต้อง export B ก่อน",
+   "ความยาวชื่อไม่เกี่ยว",
+   "ตัวแปรที่ export แล้วยังอยู่ใน child",
+   "printenv ก็หาไม่เจอเพราะไม่ใช่ env variable"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้าแก้ค่า environment variable ใน child shell แล้ว exit ค่าใน parent shell จะเป็นอย่างไร?",
+  "choices": [
+   "เปลี่ยนตามค่าใน child",
+   "ถูกลบทิ้ง",
+   "กลายเป็น shell variable",
+   "ไม่เปลี่ยน เพราะ child ได้แค่สำเนาของ environment"
+  ],
+  "correct": 3,
+  "explain": [
+   "การแก้ใน child ไม่ย้อนกลับไป parent",
+   "ค่าเดิมยังอยู่",
+   "ประเภทตัวแปรไม่เปลี่ยน",
+   "ถูก — child ได้รับสำเนาตอนถูกสร้าง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`env`, `printenv` และ `set` ต่างกันอย่างไรเมื่อรันแบบไม่ใส่อะไร?",
+  "choices": [
+   "ทั้งสามแสดงผลเหมือนกันทุกบรรทัด",
+   "env ตั้งค่าตัวแปร printenv ลบตัวแปร set แสดงไฟล์",
+   "env/printenv แสดง environment variables ส่วน set แสดงทั้ง shell + environment variables (ยาวที่สุด)",
+   "set แสดงเฉพาะ PATH"
+  ],
+  "correct": 2,
+  "explain": [
+   "set แสดงมากกว่า",
+   "ไม่ใช่หน้าที่ของคำสั่งเหล่านี้",
+   "ถูก — printenv ยังเจาะดูตัวเดียวได้",
+   "set แสดงทั้งหมด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `A = 10` (มีช่องว่างรอบ =) จึงตั้งตัวแปรไม่สำเร็จ?",
+  "choices": [
+   "เพราะ shell คิดว่า A เป็นชื่อคำสั่ง ต้องเขียน A=10 ติดกัน",
+   "เพราะ A เป็นชื่อสงวน",
+   "เพราะต้องมี $ หน้า A",
+   "เพราะค่าต้องเป็นตัวอักษร"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ห้ามมีช่องว่างรอบ =",
+   "A ไม่ใช่ชื่อสงวน",
+   "$ ใช้ตอนอ้างค่า ไม่ใช่ตอนตั้ง",
+   "ค่าตัวเลขตั้งได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม CPU จึงมักเป็นสิ่งแรกที่ต้อง monitor?",
+  "choices": [
+   "เพราะ CPU เป็นส่วนเดียวที่เสียได้",
+   "เพราะ CPU เป็น powerhouse ถ้าใช้สูงตลอดแปลว่าทรัพยากรไม่พอหรือมีสิ่งผิดปกติ",
+   "เพราะ CPU เก็บข้อมูลผู้ใช้",
+   "เพราะ top แสดงได้แค่ CPU"
+  ],
+  "correct": 1,
+  "explain": [
+   "อุปกรณ์อื่นก็เสียได้",
+   "ถูก — เช่น malware หรือโปรแกรมวนลูป",
+   "ข้อมูลผู้ใช้อยู่ในดิสก์",
+   "top แสดง memory ด้วย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "htop ต่างจาก top อย่างไร?",
+  "choices": [
+   "htop แสดงเฉพาะ memory",
+   "htop ใช้ได้เฉพาะ Windows",
+   "htop แก้ไฟล์ได้",
+   "htop แสดงข้อมูลคล้าย top แต่มีสีแยกและกราฟแท่ง อ่านง่ายกว่า"
+  ],
+  "correct": 3,
+  "explain": [
+   "htop แสดง CPU/Mem/Swap และ process",
+   "htop เป็นโปรแกรมของ Linux",
+   "htop เป็นตัว monitor ไม่ใช่ editor",
+   "ถูก — color-coded และมีเมนูปุ่ม F"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการดูเฉพาะ PID ของ process ทั้งหมดที่ root รัน ใช้คำสั่งใด?",
+  "choices": [
+   "pgrep -u root",
+   "pgrep -c root",
+   "ps -ux root",
+   "kill -u root"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — -u ระบุ user",
+   "-c นับจำนวน และต้องมี -u",
+   "ps -ux แสดง process ของเราเอง",
+   "kill ใช้ส่งสัญญาณ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการสร้างตัวแปร A=10 ให้ script ที่รันจาก terminal นี้อ่านค่าได้ ใช้คำสั่งใด?",
+  "choices": [
+   "A = 10",
+   "export A=10",
+   "echo A=10",
+   "printenv A=10"
+  ],
+  "correct": 1,
+  "explain": [
+   "มีช่องว่างรอบ = shell จะคิดว่า A เป็นคำสั่ง",
+   "ถูก — export ทำให้สืบทอดไป process ลูก",
+   "echo แค่พิมพ์ข้อความ",
+   "printenv ใช้แสดงค่า ไม่ได้ตั้งค่า"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการให้ตัวแปร COMPANY=ICT มีผลกับผู้ใช้ทุกคนในเครื่องอย่างถาวร ควรทำอย่างไร?",
+  "choices": [
+   "พิมพ์ COMPANY=ICT ใน terminal",
+   "พิมพ์ export COMPANY=ICT",
+   "เพิ่มบรรทัด COMPANY=ICT ใน /etc/environment ด้วย sudo",
+   "พิมพ์ set COMPANY"
+  ],
+  "correct": 2,
+  "explain": [
+   "เป็น local หายเมื่อปิด terminal",
+   "มีผลแค่ session นี้",
+   "ถูก — system-wide มีผลหลัง login ใหม่",
+   "ไม่ได้ตั้งค่าแบบถาวรทั้งระบบ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เซิร์ฟเวอร์ช้า ต้องการหาว่า process ไหนกิน CPU มากที่สุดแบบ real-time ควรทำอย่างไร?",
+  "choices": [
+   "รัน printenv",
+   "รัน pgrep -c",
+   "รัน free -mt",
+   "รัน top (เรียงตาม CPU เป็นค่าเริ่มต้น หรือกด Shift+P)"
+  ],
+  "correct": 3,
+  "explain": [
+   "printenv แสดงตัวแปร",
+   "pgrep -c ต้องใช้กับเงื่อนไข และแค่นับจำนวน",
+   "free ดูภาพรวม memory ไม่แยก process",
+   "ถูก — top เรียงตาม CPU เป็น default"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ได้ PID ของ emacs เป็น 8374 แล้ว แต่ `kill 8374` ไม่ทำให้มันจบ ควรใช้คำสั่งใดต่อ?",
+  "choices": [
+   "kill -9 8374",
+   "kill -CONT 8374",
+   "pgrep 8374",
+   "unset 8374"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ส่ง KILL (เขียนเป็น -SIGKILL หรือ -KILL ก็ได้) บังคับจบ",
+   "CONT ให้ process ทำต่อ",
+   "pgrep ใช้หา PID",
+   "unset ใช้ลบตัวแปร"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "สร้างไฟล์ myscript.sh ใน home แล้วพิมพ์ `myscript.sh` ขึ้น command not found เพราะเหตุใดและแก้อย่างไร?",
+  "choices": [
+   "ไฟล์เสีย ต้องสร้างใหม่",
+   "home ไม่อยู่ใน $PATH จึงต้องรันด้วย ./myscript.sh",
+   "ต้องใช้ echo myscript.sh",
+   "ต้อง unset PATH ก่อน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไฟล์ไม่ได้เสีย",
+   "ถูก — shell หาเฉพาะใน directory ของ PATH",
+   "echo แค่พิมพ์ชื่อไฟล์",
+   "unset PATH จะทำให้หาคำสั่งอื่นไม่เจอด้วย"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

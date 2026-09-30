@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "Computer system ตามสไลด์ประกอบด้วยส่วนหลักอะไรบ้าง?",
+  "choices": [
+   "CPU, Memory (RAM) และ I/O devices",
+   "CPU, Kernel และ Shell",
+   "Mainboard, Power Supply และ Case",
+   "Host OS, Guest OS และ VM"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — สไลด์ระบุ CPU + Memory/RAM + I/O devices (disk, USB, VGA, network card)",
+   "Kernel/Shell เป็นชั้นซอฟต์แวร์ของ Linux ไม่ใช่องค์ประกอบฮาร์ดแวร์",
+   "เป็นชิ้นส่วนประกอบเครื่อง แต่ไม่ใช่องค์ประกอบหลัก 3 อย่างตามสไลด์",
+   "เป็นแนวคิดเรื่อง virtual machine ไม่ใช่ computer system"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Bus ระดับใดเชื่อม CPU กับ Memory โดยตรง?",
+  "choices": [
+   "General I/O Bus (PCI)",
+   "Peripheral I/O Bus",
+   "Memory Bus (proprietary)",
+   "USB Bus"
+  ],
+  "correct": 2,
+  "explain": [
+   "PCI เป็น General I/O Bus สำหรับอุปกรณ์ความเร็วสูง เช่น graphics",
+   "Peripheral bus ใช้กับดิสก์และอุปกรณ์ต่อพ่วง (SCSI, SATA, USB)",
+   "ถูก — Memory Bus เป็นแบบเฉพาะของผู้ผลิต เชื่อม CPU ↔ RAM",
+   "USB อยู่ใน peripheral I/O bus ไม่ได้ต่อ CPU กับ RAM"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "DDR SDRAM ย่อมาจากอะไร?",
+  "choices": [
+   "Dual Disk Raid Static Dynamic RAM",
+   "Direct Data Read Synchronous Dynamic RAM",
+   "Double Drive Rate Serial Dynamic RAM",
+   "Double Data Rate Synchronous Dynamic RAM"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่เกี่ยวกับ RAID หรือดิสก์",
+   "Direct Data Read ไม่ใช่คำที่ถูก ตัว D ตัวแรกคือ Double",
+   "ไม่ใช่ Drive และไม่ใช่ Serial",
+   "ถูก — Double Data Rate Synchronous Dynamic Random-Access Memory"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "สไลด์ระบุว่า ARM processor ใช้มากในอุปกรณ์ใด?",
+  "choices": [
+   "Supercomputer ของ IBM",
+   "มือถือ โดยเฉพาะ Android",
+   "Mainframe ในธนาคาร",
+   "เครื่องเล่น DVD"
+  ],
+  "correct": 1,
+  "explain": [
+   "สไลด์ไม่ได้ผูก ARM กับ supercomputer",
+   "ถูก — ARM ใช้มากในมือถือ โดยเฉพาะ Android OS เพราะประหยัดพลังงาน",
+   "ไม่ใช่ประเด็นของสไลด์",
+   "ไม่ใช่ประเด็นของสไลด์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "USB 2.0 มี maximum transfer rate เท่าใด?",
+  "choices": [
+   "12 Mbps",
+   "5 Gbps",
+   "480 Mbps",
+   "40 Gbps"
+  ],
+  "correct": 2,
+  "explain": [
+   "12 Mbps คือ USB 1.0/1.1",
+   "5 Gbps คือ USB 3.0",
+   "ถูก — USB 2.0 (2001) = 480 Mbps",
+   "40 Gbps คือ USB4"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน USB 3.2 และ USB4 ใช้ขั้วต่อแบบใดเท่านั้น?",
+  "choices": [
+   "Type C",
+   "Type A",
+   "Type B",
+   "Mini-B"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Type C เป็นแบบเดียวที่ใช้ใน USB 3.2 และ USB4",
+   "Type A ถูก deprecated ใน USB 3.2/USB4",
+   "Type B ก็ถูก deprecated เช่นกัน",
+   "ไม่ได้อยู่ในตารางของสไลด์ และไม่ใช่มาตรฐานหลักของ USB4"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โค้ด Linux ชุดแรกถูกปล่อยออกมาปีใด?",
+  "choices": [
+   "1969",
+   "1985",
+   "1996",
+   "1991"
+  ],
+  "correct": 3,
+  "explain": [
+   "1969 คือปีเกิด Unix",
+   "1985 คือ Windows 1.x",
+   "1996 คือปีที่เลือกเพนกวินเป็นมาสคอต",
+   "ถูก — Linus Torvalds ปล่อยโค้ด Linux แรกปี 1991"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Ubuntu ที่ใช้ในวิชานี้อยู่ในตระกูล distro ใด?",
+  "choices": [
+   "Red Hat",
+   "Debian",
+   "Slackware",
+   "Arch"
+  ],
+  "correct": 1,
+  "explain": [
+   "Red Hat มีลูกคือ Fedora, CentOS",
+   "ถูก — Ubuntu อยู่ตระกูล Debian (และมี Mint แตกจาก Ubuntu อีกที)",
+   "Slackware มีลูกคือ SuSE",
+   "Arch อยู่กลุ่ม Other"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในชั้นของ Linux architecture ชั้นใดควบคุมฮาร์ดแวร์โดยตรง?",
+  "choices": [
+   "Shell",
+   "Applications",
+   "Kernel",
+   "Terminal"
+  ],
+  "correct": 2,
+  "explain": [
+   "Shell รับคำสั่งผู้ใช้แล้วส่งต่อให้ kernel",
+   "Applications เป็นชั้นนอกสุด",
+   "ถูก — Kernel คือหัวใจ OS คุม process, memory, file, device โดยตรง",
+   "Terminal เป็นแค่หน้าต่างพิมพ์คำสั่งเข้า shell"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตอนสร้าง VM ใน Lab 1 เลือก hard disk file type แบบใด?",
+  "choices": [
+   "VHD",
+   "VMDK",
+   "ISO",
+   "VDI"
+  ],
+  "correct": 3,
+  "explain": [
+   "VHD เป็นตัวเลือกหนึ่งแต่ไม่ได้เลือก",
+   "VMDK เป็นรูปแบบของ VMware ไม่ได้เลือก",
+   "ISO คือไฟล์แผ่นติดตั้ง ไม่ใช่ไฟล์ดิสก์ของ VM",
+   "ถูก — VDI (VirtualBox Disk Image) รูปแบบของ VirtualBox เอง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ถ้าดิสก์เสมือนเล็กเกินไป ตัวติดตั้ง Ubuntu แจ้งว่าต้องใช้พื้นที่อย่างน้อยเท่าใด?",
+  "choices": [
+   "8.6 GB",
+   "4 GB",
+   "16 GB",
+   "2.5 GB"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ขึ้นข้อความ “You need at least 8.6 GB disk space” จึงต้องตั้งดิสก์ ≥10 GB",
+   "ต่ำกว่าความต้องการจริงของ Ubuntu 22.04",
+   "16 ในข้อความคือ 16.0 MB ที่เครื่องมี ไม่ใช่ความต้องการ",
+   "ไม่ใช่ตัวเลขในข้อความ error"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน prompt ของ Terminal สัญลักษณ์ `$` ท้ายสุดหมายถึงอะไร?",
+  "choices": [
+   "กำลังอยู่ที่ home directory",
+   "ผู้ใช้ธรรมดา (ไม่ใช่ root)",
+   "เครื่องต่ออินเทอร์เน็ตอยู่",
+   "ผู้ใช้เป็น root"
+  ],
+  "correct": 1,
+  "explain": [
+   "home directory แสดงด้วย `~` ไม่ใช่ `$`",
+   "ถูก — `$` = ผู้ใช้ธรรมดา ถ้าเป็น `#` คือ root",
+   "prompt ไม่ได้บอกสถานะเน็ต",
+   "root ใช้ `#`"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมคอมพิวเตอร์ถึงแยก bus เป็นหลายระดับ?",
+  "choices": [
+   "เพื่อให้ต่ออุปกรณ์ได้แค่ทีละชิ้น",
+   "เพราะ USB ต้องการไฟเลี้ยงมากกว่า RAM",
+   "เพื่อไม่ให้อุปกรณ์ช้าถ่วง CPU กับ RAM ที่ต้องคุยกันเร็วที่สุด",
+   "เพื่อให้ OS แต่ละตัวใช้ bus ของตัวเอง"
+  ],
+  "correct": 2,
+  "explain": [
+   "หลาย bus ทำให้ต่ออุปกรณ์ได้มากขึ้น ไม่ใช่น้อยลง",
+   "เรื่องไฟเลี้ยงไม่ใช่เหตุผลของการแยก bus",
+   "ถูก — CPU↔RAM มี bus ของตัวเอง ส่วนดิสก์/USB ที่ช้ากว่าอยู่ bus ไกลออกไป",
+   "bus เป็นเรื่องฮาร์ดแวร์ ไม่ได้แบ่งตาม OS"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม SSD ทนแรงกระแทกได้มากกว่า HDD (1500g vs 55g ขณะทำงาน)?",
+  "choices": [
+   "เพราะ SSD มีจานหมุนที่เล็กกว่า",
+   "เพราะ SSD เป็นชิป NAND flash ไม่มีชิ้นส่วนเคลื่อนไหว",
+   "เพราะ SSD ใช้ขั้วต่อ SATA",
+   "เพราะ SSD มีหัวอ่านสองหัว"
+  ],
+  "correct": 1,
+  "explain": [
+   "SSD ไม่มีจานหมุนเลย",
+   "ถูก — HDD มีหัวอ่านลอยเหนือจานหมุน กระแทกแล้วอาจขูดจาน SSD ไม่มีอะไรขยับ",
+   "ขั้วต่อไม่เกี่ยวกับความทนทาน HDD ก็ใช้ SATA ได้",
+   "SSD ไม่มีหัวอ่าน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดอธิบายความต่างระหว่าง PATA กับ SATA ได้ถูกต้อง?",
+  "choices": [
+   "PATA ส่งทีละบิต SATA ส่งหลายบิตพร้อมกัน",
+   "PATA ใช้กับ SSD เท่านั้น SATA ใช้กับ HDD เท่านั้น",
+   "PATA ใหม่กว่าและเร็วกว่า SATA",
+   "PATA ส่งแบบขนานสายแพกว้าง SATA ส่งแบบอนุกรมสายเล็ก"
+  ],
+  "correct": 3,
+  "explain": [
+   "สลับกัน — Parallel ส่งหลายบิต Serial ส่งทีละบิต",
+   "ทั้งคู่ไม่ได้จำกัดชนิดดิสก์แบบนั้น",
+   "PATA/IDE เก่ากว่า ปัจจุบันเครื่องใช้ SATA/NVMe แทน",
+   "ถูก — Parallel ATA vs Serial ATA"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สไลด์ ST-506 และ IDE ต้องการชี้ประเด็นอะไร?",
+  "choices": [
+   "ดิสก์ต้องทำงานคู่กับ disk controller",
+   "ดิสก์รุ่นเก่าเร็วกว่ารุ่นใหม่",
+   "ดิสก์ต่อกับ CPU ได้โดยตรงไม่ต้องมีตัวกลาง",
+   "IDE ใช้ได้เฉพาะกับเทป"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ทั้งสองต่อกับ controller card/IDE disk controller ซึ่งเป็นตัวกลาง",
+   "ไม่ใช่ประเด็นและไม่จริง",
+   "ตรงข้าม — ต้องผ่าน disk controller",
+   "IDE ใช้กับฮาร์ดดิสก์ ไม่ใช่เทป"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ความสัมพันธ์ระหว่าง Unix กับ Linux ข้อใดถูกต้อง?",
+  "choices": [
+   "Linux คือ Unix เวอร์ชัน 7 ที่เปลี่ยนชื่อ",
+   "Unix พัฒนาต่อมาจาก Linux",
+   "Linux เป็น Unix-like ไม่ได้มาจากโค้ด Unix โดยตรง",
+   "Linux และ Unix เกิดปีเดียวกัน"
+  ],
+  "correct": 2,
+  "explain": [
+   "Linux ไม่ได้มาจากโค้ด Unix",
+   "กลับกัน — Unix เกิดก่อน (1969)",
+   "ถูก — Linux ทำงานเหมือน Unix แต่เขียนขึ้นใหม่ และเป็น open source",
+   "Unix 1969, Linux 1991"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การใช้สัญญา GPL ส่งผลต่อ Linux อย่างไร?",
+  "choices": [
+   "ทำให้ Linux ขายได้เฉพาะบริษัทเดียว",
+   "ทำให้ทุกคนใช้ แก้ แจกจ่ายได้ แต่แจกต่อต้องเปิดซอร์ส ชุมชนจึงช่วยกันพัฒนา",
+   "ห้ามผู้อื่นแก้ไขโค้ด Linux",
+   "ทำให้ Linux ใช้ได้เฉพาะบน supercomputer"
+  ],
+  "correct": 1,
+  "explain": [
+   "ตรงข้ามกับแนวคิด open source",
+   "ถูก — นี่คือเหตุผลที่ Linux เติบโตจากชุมชนได้",
+   "GPL อนุญาตให้แก้ไขได้",
+   "GPL ไม่ได้จำกัดประเภทเครื่อง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เมื่อพิมพ์ `ls` ใน Terminal ลำดับการทำงานตาม Linux architecture คือข้อใด?",
+  "choices": [
+   "Kernel รับคำสั่ง → Shell อ่านดิสก์ → แสดงผล",
+   "Hardware ส่งคำสั่งให้ Shell → Kernel แสดงผล",
+   "ls คุยกับดิสก์โดยตรงโดยไม่ผ่าน kernel",
+   "Shell รับคำสั่ง → เรียก utility ls → ls ขอให้ kernel อ่านไฟล์จากดิสก์"
+  ],
+  "correct": 3,
+  "explain": [
+   "Kernel ไม่ได้รับคำสั่งจากผู้ใช้โดยตรง และ shell ไม่ได้อ่านดิสก์เอง",
+   "ลำดับกลับด้าน ผู้ใช้เป็นคนเริ่มคำสั่ง",
+   "โปรแกรมทั่วไปต้องผ่าน kernel เสมอ",
+   "ถูก — user → shell → utility → kernel → hardware แล้วผลย้อนกลับ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดจับคู่ host OS / guest OS ในห้องเรียนนี้ได้ถูกต้อง?",
+  "choices": [
+   "Host = Windows 10, Guest = Ubuntu",
+   "Host = Ubuntu, Guest = Windows 10",
+   "Host = VirtualBox, Guest = Windows 10",
+   "Host = Ubuntu, Guest = VirtualBox"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — host คือ OS บนเครื่องจริง guest คือ OS ใน VM",
+   "สลับกัน",
+   "VirtualBox เป็นซอฟต์แวร์ VM ไม่ใช่ OS",
+   "VirtualBox ไม่ใช่ guest OS"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Dynamically allocated ต่างจาก Fixed size อย่างไร?",
+  "choices": [
+   "Dynamic จองเต็มตั้งแต่แรก Fixed โตตามการใช้",
+   "Dynamic โตตามข้อมูลจริง (ไม่หดกลับ) Fixed จองเต็มตั้งแต่สร้าง",
+   "Dynamic ใช้ได้เฉพาะ SSD Fixed ใช้ได้เฉพาะ HDD",
+   "Dynamic หดเองเมื่อลบไฟล์ Fixed ไม่หด"
+  ],
+  "correct": 1,
+  "explain": [
+   "สลับกัน",
+   "ถูก — Fixed อาจสร้างนานกว่าแต่บางระบบใช้งานเร็วกว่า",
+   "ไม่ขึ้นกับชนิดดิสก์จริง",
+   "Dynamic ไม่หดกลับเองเมื่อลบไฟล์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเลือก “Erase disk and install Ubuntu” ใน VM ได้อย่างปลอดภัย?",
+  "choices": [
+   "เพราะ Ubuntu จะสำรองข้อมูล Windows ไว้ก่อน",
+   "เพราะตัวเลือกนี้ไม่ได้ลบอะไรจริง",
+   "เพราะลบเฉพาะดิสก์เสมือน (VDI) ของ VM ไม่แตะดิสก์ของ Windows",
+   "เพราะ VirtualBox จะถามยืนยันอีก 3 รอบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่มีการสำรองแบบนั้น",
+   "มันลบจริง แต่ลบแค่ดิสก์เสมือน",
+   "ถูก — guest มองเห็นแค่ดิสก์ VDI ของตัวเอง",
+   "ไม่ใช่เหตุผล"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การใส่ไฟล์ ISO ที่ Settings → Storage → Controller: IDE มีความหมายเทียบเท่ากับอะไร?",
+  "choices": [
+   "การฟอร์แมตดิสก์เสมือน",
+   "การเพิ่ม RAM ให้ VM",
+   "การเชื่อมเน็ตให้ VM",
+   "การเสียบแผ่นติดตั้งเข้าไดรฟ์ DVD ของเครื่องเสมือน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ISO ไม่ได้ฟอร์แมตดิสก์",
+   "RAM ตั้งที่ Base Memory",
+   "network ตั้งที่ส่วนอื่น",
+   "ถูก — เปิดเครื่องแล้ว VM จะบูตจากแผ่นนี้เพื่อติดตั้ง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Log Out, Power Off และ Suspend ต่างกันอย่างไร?",
+  "choices": [
+   "ออกจากบัญชี (เครื่องยังเปิด) / ปิดเครื่อง / พักเครื่องไว้",
+   "ทั้งสามคำสั่งปิดเครื่องเหมือนกัน",
+   "ปิดเครื่อง / ออกจากบัญชี / รีสตาร์ต",
+   "พักเครื่อง / ออกจากบัญชี / ปิดเครื่อง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Log Out ออกจากบัญชี, Power Off ปิด VM, Suspend พักไว้ไม่ได้ปิด",
+   "มีแค่ Power Off ที่ปิดเครื่อง",
+   "Suspend ไม่ใช่ restart และลำดับไม่ตรง",
+   "ลำดับสลับกัน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เพื่อนเปิด Programs and Features แล้วเจอ Oracle VM VirtualBox อยู่แล้ว ควรทำอย่างไรตาม Lab 1?",
+  "choices": [
+   "ถอนออกแล้วติดตั้ง Ubuntu ลง Windows แทน",
+   "ติดตั้ง VirtualBox ซ้ำอีกรอบทันที",
+   "ข้ามขั้นติดตั้ง VirtualBox ไปสร้าง VM ได้เลย",
+   "ต้องติดตั้ง VMware แทน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ต้องลง Ubuntu ลง Windows ตรง ๆ",
+   "ไม่จำเป็นต้องติดตั้งซ้ำ",
+   "ถูก — สไลด์บอกว่าถ้ามีอยู่แล้วข้ามขั้นติดตั้งได้",
+   "แลปใช้ VirtualBox"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ตั้งดิสก์เสมือนไว้แค่ 16 MB แล้วกด Continue ในหน้า Updates and other software ไม่ได้ ควรแก้อย่างไร?",
+  "choices": [
+   "เพิ่ม Base Memory เป็น 16 GB",
+   "สร้าง virtual hard disk ใหม่ให้ใหญ่พอ (≥10 GB)",
+   "เลือก Try Ubuntu แทน Install",
+   "เปลี่ยน keyboard layout"
+  ],
+  "correct": 1,
+  "explain": [
+   "RAM ไม่เกี่ยวกับพื้นที่ติดตั้ง",
+   "ถูก — Ubuntu ต้องการ ≥8.6 GB จึงต้องสร้าง disk ใหม่",
+   "Try ไม่ได้ติดตั้ง แก้ปัญหาไม่ได้",
+   "layout ไม่เกี่ยวกับพื้นที่ดิสก์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องย้ายไฟล์ 20 GB ข้ามเครื่องให้เร็วที่สุด ควรเลือก USB มาตรฐานใดจากตาราง?",
+  "choices": [
+   "USB 1.1",
+   "USB 2.0",
+   "USB 3.0",
+   "USB4"
+  ],
+  "correct": 3,
+  "explain": [
+   "12 Mbps ช้าที่สุด",
+   "480 Mbps",
+   "5 Gbps เร็ว แต่ยังไม่เร็วที่สุด",
+   "ถูก — USB4 = 40 Gbps สูงสุดในตาราง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เห็น prompt `mai@lab-pc:~$` ข้อมูลใดสรุปได้ถูกต้อง?",
+  "choices": [
+   "ผู้ใช้ชื่อ mai ที่เครื่อง lab-pc อยู่ใน home directory เป็นผู้ใช้ธรรมดา",
+   "ผู้ใช้ชื่อ lab-pc ที่เครื่อง mai เป็น root",
+   "ผู้ใช้ชื่อ mai อยู่ที่ root directory /",
+   "ผู้ใช้ mai กำลังอยู่ในโฟลเดอร์ชื่อ $"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — username@hostname:ตำแหน่ง$ โดย ~ = home และ $ = ผู้ใช้ธรรมดา",
+   "สลับชื่อผู้ใช้กับชื่อเครื่อง และ $ ไม่ใช่ root",
+   "~ คือ home ไม่ใช่ /",
+   "$ เป็นสัญลักษณ์ประเภทผู้ใช้ ไม่ใช่ชื่อโฟลเดอร์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "นักศึกษาอยากลอง Linux แต่ไม่อยากเสี่ยงทำ Windows พัง วิธีใดเหมาะที่สุดตามบทเรียน?",
+  "choices": [
+   "ลบ Windows แล้วติดตั้ง Ubuntu แทน",
+   "ติดตั้ง Ubuntu เป็น guest OS ใน VirtualBox",
+   "อัปเกรด RAM เป็น DDR5",
+   "ติดตั้ง Android บนโน้ตบุ๊ก"
+  ],
+  "correct": 1,
+  "explain": [
+   "เสี่ยงเสียข้อมูล Windows",
+   "ถูก — ใช้ Linux จริงโดยไม่ต้องลบ Windows ถ้าพังก็พังแค่ VM",
+   "RAM ไม่เกี่ยวกับการลอง OS",
+   "ไม่ใช่วิธีในบทเรียน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการให้ไฟล์ดิสก์ VM ไม่กินพื้นที่เครื่องจริงเกินกว่าที่ใช้จริงตอนแรก ควรเลือกข้อใด?",
+  "choices": [
+   "Fixed size",
+   "ใช้ไฟล์ ISO แทนดิสก์",
+   "Dynamically allocated",
+   "ตั้ง Base Memory ให้ต่ำลง"
+  ],
+  "correct": 2,
+  "explain": [
+   "Fixed จองเต็มตั้งแต่สร้าง",
+   "ISO เป็นแผ่นติดตั้ง ใช้แทนดิสก์ไม่ได้",
+   "ถูก — โตตามข้อมูลจริงจนถึงขนาดสูงสุด",
+   "RAM ไม่เกี่ยวกับพื้นที่ดิสก์"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L4 – User Management + Lab 4 (User Management)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L4 – User Management + Lab 4 (User Management)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "/etc/passwd มีข้อมูลกี่ช่อง (field) ต่อ 1 บรรทัด?",
+  "choices": [
+   "4 ช่อง",
+   "7 ช่อง",
+   "8 ช่อง",
+   "10 ช่อง"
+  ],
+  "correct": 1,
+  "explain": [
+   "4 ช่องคือ /etc/group",
+   "ถูก — username, password, UID, GID, info, home, shell",
+   "8 ช่องคือ /etc/shadow",
+   "ไม่มีไฟล์ใดในบทนี้ที่มี 10 ช่อง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UID หมายเลข 0 จองไว้ให้ใคร?",
+  "choices": [
+   "ผู้ใช้ทั่วไปคนแรก",
+   "โปรแกรมที่ admin ติดตั้ง",
+   "Superuser (root)",
+   "ผู้ใช้ guest"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผู้ใช้ทั่วไปเริ่มที่ 1000",
+   "โปรแกรมที่ admin ติดตั้งใช้ 100–999",
+   "ถูก — UID 0 = root เท่านั้น",
+   "ไม่มี UID จองให้ guest"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่วง UID 100–999 จองให้อะไร?",
+  "choices": [
+   "โปรแกรมที่ผู้ดูแลระบบติดตั้ง",
+   "โปรแกรมของระบบ",
+   "ผู้ใช้ทั่วไป",
+   "root"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น systemd-network:x:100",
+   "โปรแกรมของระบบใช้ 1–99",
+   "ผู้ใช้ทั่วไปเริ่ม 1000",
+   "root คือ 0"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในช่อง password ของ /etc/passwd ค่า `x` หมายความว่าอะไร?",
+  "choices": [
+   "บัญชีถูก lock",
+   "ไม่มีรหัสผ่าน",
+   "ห้าม login",
+   "มีรหัสผ่าน โดยเก็บแบบเข้ารหัสไว้ที่ /etc/shadow"
+  ],
+  "correct": 3,
+  "explain": [
+   "lock ใช้ ! (ใน shadow)",
+   "ไม่มีรหัสใช้ * (ใน shadow)",
+   "ห้าม login ดูจาก shell /usr/sbin/nologin",
+   "ถูก — รหัสจริงอยู่ใน /etc/shadow"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "/bin/bash คือ shell ชนิดใด?",
+  "choices": [
+   "Bourne shell",
+   "C shell",
+   "Bourne Again shell",
+   "K shell"
+  ],
+  "correct": 2,
+  "explain": [
+   "Bourne shell คือ /bin/sh",
+   "C shell คือ /bin/csh",
+   "ถูก — bash = Bourne Again shell",
+   "K shell คือ /bin/ksh"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "/etc/shadow มีกี่ช่อง และใครอ่าน-เขียนได้?",
+  "choices": [
+   "8 ช่อง อ่าน-เขียนได้เฉพาะ root",
+   "7 ช่อง ทุกคนอ่านได้",
+   "4 ช่อง ทุกคนอ่านได้",
+   "8 ช่อง ทุกคนอ่านได้แต่แก้ไม่ได้"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เก็บรหัสเข้ารหัส จึงให้เฉพาะ root",
+   "นั่นคือ /etc/passwd",
+   "นั่นคือ /etc/group",
+   "shadow ผู้ใช้ทั่วไปอ่านไม่ได้ (Permission denied)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในช่องรหัสของ /etc/shadow ค่า `!` หมายถึงอะไร?",
+  "choices": [
+   "ไม่มีรหัสผ่าน",
+   "ผู้ใช้ถูก locked ไว้ ไม่ให้เข้าถึง",
+   "รหัสผ่านหมดอายุวันนี้",
+   "ผู้ใช้เป็น root"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไม่มีรหัสคือ *",
+   "ถูก — เช่น root:!:... ใน Ubuntu",
+   "วันหมดอายุอยู่ช่องอื่น",
+   "ไม่ได้บอกว่าเป็น root"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "/etc/group ช่องที่ 4 เก็บข้อมูลอะไร?",
+  "choices": [
+   "Group ID",
+   "รหัสผ่านกลุ่ม",
+   "Home directory ของกลุ่ม",
+   "รายชื่อสมาชิก (User List) คั่นด้วย ,"
+  ],
+  "correct": 3,
+  "explain": [
+   "GID คือช่องที่ 3",
+   "password คือช่องที่ 2",
+   "กลุ่มไม่มี home directory",
+   "ถูก — เช่น etda:x:1000:test01,test02,test03"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "`su` ย่อมาจากอะไร?",
+  "choices": [
+   "Super User",
+   "Substitute User",
+   "System Update",
+   "Sudo User"
+  ],
+  "correct": 1,
+  "explain": [
+   "ในสไลด์ Super user do คือ sudo",
+   "ถูก — su = Substitute User เปลี่ยนไปเป็นอีก user",
+   "ไม่เกี่ยวกับการอัปเดต",
+   "ไม่ใช่ชื่อเต็ม"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "option ใดของ useradd ใช้สร้าง home directory หากยังไม่มี?",
+  "choices": [
+   "-d",
+   "-h",
+   "-m",
+   "-c"
+  ],
+  "correct": 2,
+  "explain": [
+   "-d แค่กำหนด path ของ home แต่ไม่สร้าง",
+   "ไม่ใช่ option ในสไลด์",
+   "ถูก — -m = make home",
+   "-c ใส่ comment/รายละเอียด"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "option ใดของ usermod ใช้ปิดการใช้งาน (lock) ผู้ใช้?",
+  "choices": [
+   "-L",
+   "-U",
+   "-e",
+   "-l"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — -L = Lock",
+   "-U = Unlock",
+   "-e กำหนดวันหมดอายุ YYYY-MM-DD",
+   "ตัวเล็ก -l ไม่ใช่ lock ตามสไลด์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน Lab 4 หลังรัน `sudo useradd test1` แบบไม่ใส่ option ได้ UID และ shell อะไร?",
+  "choices": [
+   "UID 1000 และ /bin/bash",
+   "UID 2000 และ /bin/bash",
+   "UID 0 และ /bin/sh",
+   "UID 1001 และ /bin/sh"
+  ],
+  "correct": 3,
+  "explain": [
+   "1000 เป็นของ user ที่มีอยู่แล้ว (sudsanguan)",
+   "2000 และ bash คือ test2 ที่กำหนด option",
+   "0 เป็นของ root",
+   "ถูก — test1:x:1001:1001::/home/test1:/bin/sh"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม UNIX/Linux จึงนิยมใช้เป็น OS ของเครื่อง server?",
+  "choices": [
+   "เพราะรองรับผู้ใช้ได้ทีละคนเท่านั้น",
+   "เพราะไม่มีระบบรหัสผ่าน",
+   "เพราะออกแบบให้ multi-user และ multitasking",
+   "เพราะใช้ได้เฉพาะ GUI"
+  ],
+  "correct": 2,
+  "explain": [
+   "ตรงข้าม — ใช้ได้หลายคนพร้อมกัน",
+   "มีระบบรหัสผ่านใน /etc/shadow",
+   "ถูก — หลายคนใช้พร้อมกัน ทำหลายงานพร้อมกัน",
+   "server ส่วนใหญ่ใช้ command line"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมรหัสผ่านจึงแยกไปเก็บใน /etc/shadow แทน /etc/passwd?",
+  "choices": [
+   "เพราะ /etc/passwd ทุกคนอ่านได้ ส่วน shadow อ่านได้เฉพาะ root",
+   "เพราะ /etc/passwd เต็มแล้ว",
+   "เพราะ shadow เก็บได้เฉพาะตัวเลข",
+   "เพราะ passwd อ่านได้เฉพาะ root"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ผู้ใช้จึงไม่เห็นรหัส (แม้เข้ารหัส) ของคนอื่น",
+   "ไม่ใช่เหตุผล",
+   "shadow เก็บรหัสเข้ารหัสและค่าอายุรหัส",
+   "passwd ทุกคนอ่านได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `useradd test3` ที่ไม่มี sudo ขึ้น “cannot lock /etc/passwd”?",
+  "choices": [
+   "เพราะชื่อ test3 ซ้ำกับผู้ใช้อื่น",
+   "เพราะต้องแก้ /etc/passwd ซึ่งแก้ได้เฉพาะ root",
+   "เพราะ /etc/passwd ถูกลบไปแล้ว",
+   "เพราะต้องใส่ option -m เสมอ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ถ้าชื่อซ้ำจะขึ้น error อีกแบบ",
+   "ถูก — ต้องใช้ sudo useradd test3",
+   "ไฟล์ยังอยู่",
+   "-m ไม่บังคับ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "`su` กับ `sudo` ต่างกันอย่างไร?",
+  "choices": [
+   "su รันคำสั่งเดียวแบบ root sudo เปลี่ยนเป็น user อื่นถาวร",
+   "ทั้งสองใช้รหัสผ่านของ root เสมอ",
+   "su กลายเป็น user อื่น (ใช้รหัสคนนั้น) sudo รันคำสั่งด้วยสิทธิ์ root (ใช้รหัสตัวเอง)",
+   "sudo ใช้ได้เฉพาะ root"
+  ],
+  "correct": 2,
+  "explain": [
+   "สลับกัน",
+   "sudo ใช้รหัสของผู้ใช้เอง ([sudo] password for sudsanguan)",
+   "ถูก — su test1 ใส่รหัส test1, sudo ใส่รหัสตัวเอง",
+   "ผู้ใช้ในกลุ่ม sudo ใช้ได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมบัญชีระบบหลายตัว (daemon, bin, mail) ใช้ shell `/usr/sbin/nologin`?",
+  "choices": [
+   "เพราะบัญชีเหล่านี้เป็นของ root",
+   "เพื่อให้ login ได้เร็วขึ้น",
+   "เพราะไม่มี UID",
+   "เพราะเป็นบัญชีของโปรแกรม ไม่ได้มีไว้ให้คน login จึงปิดเพื่อความปลอดภัย"
+  ],
+  "correct": 3,
+  "explain": [
+   "มี UID ของตัวเอง ไม่ใช่ root",
+   "nologin ทำให้ login ไม่ได้เลย",
+   "ทุกบัญชีมี UID",
+   "ถูก — ถ้าพยายาม login จะขึ้น This account is currently not available"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม root ใน Ubuntu ถูกตั้งเป็น `!` ใน /etc/shadow?",
+  "choices": [
+   "ล็อกไม่ให้ login ตรง บังคับให้ใช้ sudo ซึ่งตรวจสอบได้ว่าใครทำอะไร",
+   "เพราะ root ไม่มีสิทธิ์อะไรเลย",
+   "เพราะติดตั้งผิดพลาด",
+   "เพราะ root ใช้รหัสว่าง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ปลอดภัยกว่าและติดตามได้",
+   "root ยังมีสิทธิ์ทุกอย่างผ่าน sudo",
+   "เป็นค่าตั้งต้นโดยตั้งใจ",
+   "รหัสว่างไม่ได้แสดงเป็น !"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้าอยากให้ผู้ใช้เปลี่ยนรหัสผ่านเองไม่ได้ ควรตั้งค่าใน /etc/shadow อย่างไร?",
+  "choices": [
+   "ตั้ง warning period เป็น 0",
+   "ตั้ง Maximum password age ให้น้อยกว่า Minimum",
+   "ตั้ง Maximum เป็น 99999",
+   "ลบช่อง Encrypted Password"
+  ],
+  "correct": 1,
+  "explain": [
+   "warning แค่แจ้งเตือน",
+   "ถูก — เป็นเทคนิคในสไลด์",
+   "99999 = ไม่หมดอายุ เปลี่ยนเมื่อไรก็ได้",
+   "ทำให้รหัสใช้ไม่ได้ ไม่ใช่วิธีที่สอน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Password Inactivity Period ต่างจาก Account expiration date อย่างไร?",
+  "choices": [
+   "ทั้งสองคือวันเปลี่ยนรหัสล่าสุด",
+   "Inactivity ปิดทันทีตามวันที่ Expiration ปิดเมื่อไม่เปลี่ยนรหัส",
+   "Inactivity เตือนก่อนหมดอายุ Expiration ห้ามเปลี่ยนรหัส",
+   "Inactivity: ไม่เปลี่ยนรหัสภายในกี่วันบัญชีถูกปิด / Expiration: ถึงวันที่กำหนดปิดทันที"
+  ],
+  "correct": 3,
+  "explain": [
+   "วันเปลี่ยนรหัสล่าสุดคือช่อง 3",
+   "สลับกัน",
+   "การเตือนคือ warning period",
+   "ถูก — ช่อง 7 กับช่อง 8 ของ shadow"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม test1 ที่สร้างด้วย `useradd test1` เฉย ๆ อาจ cd เข้า /home/test1 ไม่ได้?",
+  "choices": [
+   "เพราะ test1 ถูก lock",
+   "เพราะ shell เป็น /bin/sh",
+   "เพราะไม่ได้ใส่ -m ระบบจึงไม่สร้าง home directory จริง",
+   "เพราะ UID ของ test1 เป็น 1001"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ได้ถูก lock",
+   "shell ไม่เกี่ยวกับการมี directory",
+   "ถูก — /etc/passwd มี path แต่ directory ไม่ได้ถูกสร้าง",
+   "UID ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมใน Lab สร้างกลุ่ม testing ด้วย GID 2000 ได้สำเร็จ?",
+  "choices": [
+   "เพราะ test2 ที่เคยมีกลุ่ม GID 2000 ถูกลบไปแล้ว",
+   "เพราะ GID ซ้ำกันได้เสมอ",
+   "เพราะ groupadd ไม่เช็ก GID",
+   "เพราะ 2000 จองไว้ให้กลุ่มใหม่"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — sudo userdel test2 ทำให้ GID 2000 ว่าง",
+   "ปกติ GID ต้องไม่ซ้ำ",
+   "groupadd เช็กว่า GID ซ้ำไหม",
+   "ไม่มีการจองแบบนั้น"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ช่อง Home directory และ Command/shell ใน /etc/passwd ต้องเขียนเป็น path แบบใด?",
+  "choices": [
+   "Relative path เช่น ../home/user",
+   "ชื่อ directory อย่างเดียว เช่น user",
+   "Absolute path อ้างอิงจาก / เช่น /home/user",
+   "URL เช่น http://home/user"
+  ],
+  "correct": 2,
+  "explain": [
+   "relative path ขึ้นกับตำแหน่งปัจจุบัน ใช้ไม่ได้",
+   "ต้องเป็น path เต็ม",
+   "ถูก — สไลด์ระบุว่าต้องเป็น absolute path",
+   "ไม่ใช่รูปแบบของ path ในระบบไฟล์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในระบบใหญ่ ทำไมจึงควรสร้างกลุ่มผู้ใช้ (group)?",
+  "choices": [
+   "เพื่อให้ผู้ใช้ไม่ต้องมีรหัสผ่าน",
+   "เพื่อจัดการสิทธิ์ได้ง่าย เช่น ให้กลุ่ม A แก้ไฟล์ได้เฉพาะบาง directory",
+   "เพื่อให้ทุกคนเป็น root",
+   "เพื่อลดจำนวน UID"
+  ],
+  "correct": 1,
+  "explain": [
+   "กลุ่มไม่เกี่ยวกับการยกเลิกรหัสผ่าน",
+   "ถูก — กำหนดสิทธิ์ทีเดียวทั้งกลุ่ม",
+   "ตรงข้ามกับหลักความปลอดภัย",
+   "ผู้ใช้แต่ละคนยังมี UID ของตัวเอง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการสร้างผู้ใช้ somchai ที่มี home directory จริงและใช้ bash ควรใช้คำสั่งใด?",
+  "choices": [
+   "useradd somchai",
+   "sudo useradd -d /home/somchai somchai",
+   "sudo useradd -m -s /bin/bash somchai",
+   "sudo usermod -m somchai"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่มี sudo จะ Permission denied และไม่สร้าง home",
+   "-d แค่กำหนด path ไม่ได้สร้าง directory",
+   "ถูก — -m สร้าง home, -s กำหนด shell",
+   "usermod ใช้แก้ผู้ใช้ที่มีอยู่แล้ว"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการเปลี่ยนรายละเอียดของ test1 เป็น “Dr. Thitinan” ใช้คำสั่งใด?",
+  "choices": [
+   "sudo useradd -c \"Dr. Thitinan\" test1",
+   "sudo usermod test1 -c \"Dr. Thitinan\"",
+   "sudo passwd -c \"Dr. Thitinan\" test1",
+   "sudo groupadd \"Dr. Thitinan\""
+  ],
+  "correct": 1,
+  "explain": [
+   "useradd ใช้สร้างใหม่ test1 มีอยู่แล้วจะ error",
+   "ถูก — ช่อง User ID Info เปลี่ยนเป็น Dr. Thitinan",
+   "passwd ใช้ตั้งรหัสผ่าน",
+   "groupadd สร้างกลุ่ม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "นักศึกษาฝึกงานจะออกสิ้นเดือนธันวาคม 2026 ต้องการให้บัญชี intern หมดอายุวันนั้น ใช้คำสั่งใด?",
+  "choices": [
+   "sudo usermod -L intern",
+   "sudo userdel intern",
+   "sudo passwd intern",
+   "sudo usermod -e 2026-12-31 intern"
+  ],
+  "correct": 3,
+  "explain": [
+   "-L lock ทันที ไม่ได้ตั้งวัน",
+   "ลบทันที ไม่ใช่ตั้งวันหมดอายุ",
+   "แค่เปลี่ยนรหัสผ่าน",
+   "ถูก — -e EXPIRE_DATE รูปแบบ YYYY-MM-DD"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "`id bob` ได้ groups=1002(bob),27(sudo),46(plugdev) ข้อใดสรุปได้ถูกต้อง?",
+  "choices": [
+   "bob เป็นสมาชิก 3 กลุ่ม และอยู่กลุ่ม sudo จึงใช้คำสั่ง sudo ได้",
+   "bob เป็น root เพราะอยู่กลุ่ม sudo",
+   "bob มี UID 27",
+   "bob อยู่กลุ่มเดียว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — กลุ่ม sudo คือเหตุผลที่ใช้ sudo ได้",
+   "อยู่กลุ่ม sudo ไม่ได้ทำให้ UID เป็น 0",
+   "27 คือ GID ของกลุ่ม sudo",
+   "มี 3 กลุ่ม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "อ่านบรรทัด `web:x:150:150::/var/www:/usr/sbin/nologin` ข้อใดถูกต้อง?",
+  "choices": [
+   "เป็นผู้ใช้ทั่วไปที่ login ได้",
+   "เป็นบัญชีของโปรแกรมที่ admin ติดตั้ง และ login ไม่ได้",
+   "เป็น root เพราะ home อยู่ใต้ /var",
+   "ไม่มีรหัสผ่านเพราะช่อง info ว่าง"
+  ],
+  "correct": 1,
+  "explain": [
+   "UID 150 ไม่ใช่ผู้ใช้ทั่วไป และ shell ห้าม login",
+   "ถูก — UID 100–999 + nologin",
+   "root ต้อง UID 0",
+   "ช่อง info ว่างไม่เกี่ยวกับรหัส x = มีรหัส"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผู้ใช้ทั่วไปพิมพ์ `more /etc/shadow` แล้วขึ้น Permission denied ควรแก้อย่างไร?",
+  "choices": [
+   "ใช้ cat แทน more",
+   "เปลี่ยนไปอ่าน /etc/group",
+   "ใช้ sudo more /etc/shadow",
+   "ใช้ su test1 แล้วอ่านอีกครั้ง"
+  ],
+  "correct": 2,
+  "explain": [
+   "cat ก็ไม่มีสิทธิ์เช่นกัน",
+   "ได้ข้อมูลคนละไฟล์",
+   "ถูก — shadow อ่านได้เฉพาะ root ต้องยืมสิทธิ์ด้วย sudo",
+   "test1 เป็นผู้ใช้ธรรมดาก็อ่านไม่ได้"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

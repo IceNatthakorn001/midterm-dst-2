@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L7 – Storage + Lab 7 (Storage)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L7 – Storage + Lab 7 (Storage)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ และการนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ลำดับการ boot เครื่องตามสไลด์ข้อใดถูกต้อง?",
+  "choices": [
+   "MBR → BIOS → Bootloader → Active partition",
+   "BIOS → MBR → Boot sector ของ active partition → Bootloader",
+   "Bootloader → BIOS → MBR → Kernel",
+   "BIOS → Kernel → MBR → Bootloader"
+  ],
+  "correct": 1,
+  "explain": [
+   "BIOS ต้องทำงานก่อนเสมอ",
+   "ถูก — BIOS initialize hardware แล้วอ่าน MBR ที่ sector 0 ส่งต่อให้ boot sector ซึ่งโหลด bootloader",
+   "bootloader ทำงานหลัง BIOS",
+   "kernel ถูกโหลดโดย bootloader หลัง MBR"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้นตอนที่ BIOS ตรวจอุปกรณ์พื้นฐานตอนเปิดเครื่อง (แจ้งด้วยเสียง beep ถ้าผิดปกติ) เรียกว่าอะไร?",
+  "choices": [
+   "Bootstrap Loader",
+   "CMOS",
+   "POST (Power-On Self-Test)",
+   "Secure Boot"
+  ],
+  "correct": 2,
+  "explain": [
+   "Bootstrap Loader คือขั้นเริ่มอ่าน OS",
+   "CMOS เป็นที่เก็บค่าตั้งของ BIOS",
+   "ถูก — POST ตรวจจอ หน่วยความจำ ดิสก์ คีย์บอร์ด เมาส์",
+   "Secure Boot เป็นฟีเจอร์ของ UEFI"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UEFI ย่อมาจากอะไร?",
+  "choices": [
+   "Unified Extensible Firmware Interface",
+   "Universal External File Index",
+   "Unified Embedded Flash Input",
+   "User Extended Firmware Installer"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตัวแทนสมัยใหม่ของ legacy BIOS",
+   "ไม่ใช่ชื่อเต็ม",
+   "ไม่ใช่ชื่อเต็ม",
+   "ไม่ใช่ชื่อเต็ม"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "GRUB มาแทน bootloader ตัวใดบน Linux?",
+  "choices": [
+   "BIOS",
+   "init",
+   "systemd",
+   "LILO (Linux Loader)"
+  ],
+  "correct": 3,
+  "explain": [
+   "BIOS เป็น firmware ไม่ใช่ bootloader",
+   "init คือ process แรก PID 1",
+   "systemd แทน init ไม่ใช่ bootloader",
+   "ถูก — GRUB = Grand Unified Bootloader มาแทน LILO"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "MBR ขนาด 512 bytes แบ่งเป็นส่วนใดบ้าง?",
+  "choices": [
+   "440 bootstrap + 70 partition table + 2 signature",
+   "446 bootstrap + 64 partition table + 2 signature",
+   "400 bootstrap + 100 partition table + 12 signature",
+   "256 bootstrap + 256 partition table"
+  ],
+  "correct": 1,
+  "explain": [
+   "ตัวเลขไม่ตรง",
+   "ถูก — 446 + 64 (4×16) + 2 (0x55 0xAA) = 512",
+   "ตัวเลขไม่ตรง",
+   "ตัวเลขไม่ตรง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "GPT รองรับ partition ได้มากที่สุดกี่ partition?",
+  "choices": [
+   "4",
+   "16",
+   "128",
+   "256"
+  ],
+  "correct": 2,
+  "explain": [
+   "4 primary คือข้อจำกัดของ MBR",
+   "ไม่ใช่ตัวเลขในสไลด์",
+   "ถูก — GPT รองรับ 128 partitions และดิสก์ 9.4 ZB",
+   "ไม่ใช่ตัวเลขในสไลด์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน `ls -l /dev` ตัวอักษรแรก `b` หมายถึงอุปกรณ์ชนิดใด?",
+  "choices": [
+   "Block device เช่น hard drive, DVD",
+   "Boot device",
+   "Backup device",
+   "Binary file"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — รับส่งทีละบล็อก เช่น sda, sda1",
+   "ไม่ใช่ความหมาย",
+   "ไม่ใช่ความหมาย",
+   "ไม่ใช่ความหมาย"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดแสดง storage drive และ partition ทั้งหมดเป็นแผนผังต้นไม้ พร้อมคอลัมน์ MAJ:MIN, RM, TYPE?",
+  "choices": [
+   "df -i",
+   "dmesg",
+   "blkid",
+   "lsblk"
+  ],
+  "correct": 3,
+  "explain": [
+   "df -i แสดงการใช้ inode",
+   "dmesg แสดงข้อความ kernel",
+   "blkid แสดง UUID และ TYPE ของ partition",
+   "ถูก — lsblk = list block devices"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในโหมดโต้ตอบของ fdisk ปุ่มใดบันทึก partition table ลงดิสก์แล้วออก?",
+  "choices": [
+   "q",
+   "p",
+   "w",
+   "n"
+  ],
+  "correct": 2,
+  "explain": [
+   "q ออกโดยไม่บันทึก",
+   "p แสดง partition table",
+   "ถูก — w = write table to disk and exit",
+   "n เพิ่ม partition ใหม่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดใช้ตัดการเชื่อมต่อ partition ออกจากระบบไฟล์ของ Linux?",
+  "choices": [
+   "unmount /dev/sdb1",
+   "umount /dev/sdb1",
+   "eject /dev/sdb1",
+   "mount -d /dev/sdb1"
+  ],
+  "correct": 1,
+  "explain": [
+   "ไม่มีคำสั่งชื่อ unmount (ไม่มีตัว n)",
+   "ถูก — umount คล้าย safe remove USB บน Windows",
+   "ไม่ใช่คำสั่งที่สอน",
+   "ไม่ใช่รูปแบบที่สอน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในโครงสร้าง file system ส่วนใดเก็บข้อมูลของทั้ง file system เช่น จำนวน inodes และจำนวน data blocks?",
+  "choices": [
+   "Superblock",
+   "inode bitmap",
+   "Data region",
+   "Directory entry"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — อยู่ block 0 ในตัวอย่างดิสก์ 256 KB",
+   "inode bitmap ติดตามว่า inode ไหนว่าง",
+   "data region เก็บข้อมูลของ user",
+   "directory entry เก็บชื่อไฟล์ → inode"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UUID มีรูปแบบอย่างไร?",
+  "choices": [
+   "64-bit เขียนเป็น 16 ตัวอักษร",
+   "ตัวเลขฐานสิบ 10 หลัก",
+   "ชื่อดิสก์ เช่น sdb1",
+   "128-bit เขียนเป็น 36 ตัวอักษร รูปแบบ 8-4-4-4-12"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ใช่ขนาดของ UUID",
+   "UUID เป็นเลขฐานสิบหก",
+   "sdb1 เป็นชื่อ device ไม่ใช่ UUID",
+   "ถูก — เลขฐานสิบหก 32 ตัว + ขีด 4 ตัว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดเป็นข้อแตกต่างระหว่าง BIOS กับ UEFI ที่ถูกต้อง?",
+  "choices": [
+   "BIOS รองรับ GPT UEFI ใช้ MBR",
+   "BIOS ทำงาน 64-bit UEFI ทำงาน 16-bit",
+   "BIOS initialize ทีละอย่าง UEFI initialize พร้อมกันและมี Secure Boot",
+   "ทั้งสองแสดงผลแบบ text อย่างเดียว"
+  ],
+  "correct": 2,
+  "explain": [
+   "สลับกัน — BIOS ใช้ MBR, UEFI ใช้ GPT",
+   "สลับกัน — BIOS 16-bit, UEFI 32/64-bit",
+   "ถูก — sequential vs parallel",
+   "UEFI มี GUI และรองรับเมาส์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม MBR จึงมี primary partition ได้มากสุดแค่ 4?",
+  "choices": [
+   "เพราะ partition table มีขนาด 64 bytes แต่ละ entry ใช้ 16 bytes",
+   "เพราะ BIOS นับได้แค่ 4",
+   "เพราะดิสก์มี 4 จาน",
+   "เพราะ boot signature มีขนาด 4 bytes"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 64 / 16 = 4 entry",
+   "ไม่เกี่ยวกับการนับของ BIOS",
+   "ไม่เกี่ยวกับจำนวนจาน",
+   "boot signature มี 2 bytes และไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม MBR ถูกจำกัดที่ดิสก์ประมาณ 2.2 TB?",
+  "choices": [
+   "เพราะ bootstrap code มีแค่ 446 bytes",
+   "เพราะ Start LBA และ Number of Sectors ยาว 32 bit → 2³² × 512 bytes",
+   "เพราะ BIOS ทำงาน 16-bit",
+   "เพราะ partition มีได้แค่ 4 อัน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ขนาด bootstrap code ไม่ได้จำกัดขนาดดิสก์",
+   "ถูก — ที่อยู่ sector มีแค่ 32 bit",
+   "ไม่ใช่สาเหตุของขีดจำกัดขนาดดิสก์",
+   "จำนวน partition เป็นข้อจำกัดอีกเรื่อง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สไลด์หนึ่งบอก MBR อยู่ sector 0 อีกสไลด์บอก cylinder 0, head 0, sector 1 เพราะอะไร?",
+  "choices": [
+   "เพราะสไลด์พิมพ์ผิด",
+   "เพราะมี MBR สองชุด",
+   "เพราะ sector 1 เป็นสำเนาสำรอง",
+   "เพราะ CHS นับ sector เริ่มจาก 1 ส่วน LBA นับเริ่มจาก 0 จึงเป็นตำแหน่งเดียวกัน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ไม่ขัดกัน",
+   "MBR มีชุดเดียวที่ต้นดิสก์",
+   "ไม่ใช่สำเนาสำรอง",
+   "ถูก — วิธีนับต่างกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การจัดโครงสร้างไดรฟ์ของ Linux ต่างจาก Windows อย่างไร?",
+  "choices": [
+   "Linux ใช้ไดรฟ์ C, D เหมือน Windows",
+   "Linux เป็นต้นไม้เดียวจาก / และ mount อุปกรณ์เข้ากับ directory ส่วน Windows แยกต้นไม้ตามไดรฟ์",
+   "Windows มีต้นไม้เดียวจาก C:\\",
+   "ทั้งสองไม่มีแนวคิดเรื่อง mount"
+  ],
+  "correct": 1,
+  "explain": [
+   "Linux ไม่มีตัวอักษรไดรฟ์",
+   "ถูก — เช่น mount sdb1 ไว้ที่ /mnt/sdb1",
+   "Windows แยก C, D เป็นคนละต้นไม้",
+   "Linux ใช้ mount เป็นหลัก"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "inode เก็บอะไร และไม่เก็บอะไร?",
+  "choices": [
+   "เก็บชื่อไฟล์และเนื้อหาไฟล์",
+   "เก็บเฉพาะเนื้อหาไฟล์",
+   "เก็บ metadata (size, time, owner, group, ตัวชี้ block) แต่ไม่เก็บชื่อไฟล์",
+   "เก็บรายชื่อ partition ทั้งหมด"
+  ],
+  "correct": 2,
+  "explain": [
+   "ชื่ออยู่ใน directory entry และเนื้อหาอยู่ใน data block",
+   "เนื้อหาอยู่ใน data block",
+   "ถูก — ชื่อไฟล์อยู่ใน directory entry ที่ชี้ไป inode",
+   "รายชื่อ partition อยู่ใน partition table"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมหลังสร้าง partition ด้วย parted แล้วยังเก็บไฟล์ไม่ได้ทันที?",
+  "choices": [
+   "เพราะยังไม่ได้สร้าง file system (mkfs) และยังไม่ได้ mount เข้ากับ directory",
+   "เพราะต้อง reboot 2 ครั้ง",
+   "เพราะ parted สร้างได้เฉพาะ partition ว่างที่อ่านอย่างเดียว",
+   "เพราะต้องติดตั้ง vim ก่อน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ป้าย ext4 ใน parted เป็นแค่ชนิด ยังไม่ได้ format จริง",
+   "ไม่จำเป็นต้อง reboot",
+   "parted ไม่ได้ทำให้อ่านอย่างเดียว",
+   "vim ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมใน /etc/fstab ควรใช้ UUID แทน /dev/sdb1?",
+  "choices": [
+   "เพราะ UUID สั้นกว่า",
+   "เพราะ /dev/sdb1 ใช้ได้เฉพาะ Windows",
+   "เพราะ UUID ทำให้ดิสก์เร็วขึ้น",
+   "เพราะชื่อ /dev/sdX เปลี่ยนได้เมื่อเพิ่ม/ถอดดิสก์ แต่ UUID ไม่เปลี่ยน"
+  ],
+  "correct": 3,
+  "explain": [
+   "UUID ยาวกว่า",
+   "/dev/sdb1 เป็นชื่อของ Linux",
+   "ไม่ได้เพิ่มความเร็ว",
+   "ถูก — ตอน boot จึง mount partition ที่ถูกต้องเสมอ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `sudo parted -l` แสดง sdb ว่า unrecognised disk label?",
+  "choices": [
+   "เพราะ sdb เสีย",
+   "เพราะ sdb เป็นดิสก์ใหม่ที่ยังไม่มี partition table ต้อง mklabel ก่อน",
+   "เพราะ sdb ถูก mount อยู่",
+   "เพราะ sdb เป็น character device"
+  ],
+  "correct": 1,
+  "explain": [
+   "ดิสก์ปกติ แค่ยังว่าง",
+   "ถูก — Partition Table: unknown",
+   "ยังไม่ได้ mount",
+   "ดิสก์เป็น block device"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้า inode ของ file system ถูกใช้หมด แต่พื้นที่ยังเหลือ จะเกิดอะไรขึ้น?",
+  "choices": [
+   "สร้างไฟล์ใหม่ได้ตามปกติ",
+   "ระบบจะเพิ่ม inode ให้อัตโนมัติ",
+   "สร้างไฟล์ใหม่ไม่ได้ เพราะทุกไฟล์ต้องมี inode",
+   "ไฟล์เดิมจะถูกลบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ไม่ได้ — ไฟล์ใหม่ต้องการ inode",
+   "จำนวน inode กำหนดตอน mkfs",
+   "ถูก — ตรวจได้ด้วย df -i",
+   "ไม่มีการลบไฟล์อัตโนมัติ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Primary, Extended และ Logical partition สัมพันธ์กันอย่างไรใน MBR?",
+  "choices": [
+   "Logical ครอบ Extended ไว้ข้างใน",
+   "ทั้งสามแบบเหมือนกันต่างแค่ชื่อ",
+   "Extended เป็นกล่องที่ข้างในแบ่งเป็น Logical ได้หลายอัน (เลข 5 ขึ้นไป)",
+   "Primary ใช้ได้เฉพาะ GPT"
+  ],
+  "correct": 2,
+  "explain": [
+   "กลับด้าน",
+   "ต่างกันในบทบาท",
+   "ถูก — ทำให้เกินข้อจำกัด 4 partition ได้ เช่น sda5 ใน Lab",
+   "primary เป็นแนวคิดของ MBR"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม `mkfs.ext4 /dev/sdb2` ใน Lab ขึ้น “Filesystem too small for a journal”?",
+  "choices": [
+   "เพราะ sdb2 มีขนาดแค่ประมาณ 1 MB เล็กเกินกว่าจะมี journal",
+   "เพราะ sdb2 ถูก mount อยู่",
+   "เพราะ ext4 ไม่มี journal",
+   "เพราะต้องใช้ fdisk ก่อน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ได้แค่ 256 blocks และ 128 inodes",
+   "ยังไม่ได้ mount ตอนนั้น",
+   "ext4 มี journal (sdb1 ได้ 4096 blocks)",
+   "partition ถูกสร้างแล้วด้วย parted"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการ format partition /dev/sdb1 ให้เป็น ext4 ใช้คำสั่งใด?",
+  "choices": [
+   "sudo mkfs.ext4 /dev/sdb1",
+   "sudo mount -t ext4 /dev/sdb1",
+   "sudo fdisk ext4 /dev/sdb1",
+   "sudo lsblk -f /dev/sdb1"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ระวัง: ลบข้อมูลเดิมทั้งหมด ต้องแน่ใจชื่ออุปกรณ์",
+   "mount เชื่อมต่อ ไม่ได้สร้าง file system",
+   "fdisk ใช้แบ่ง partition",
+   "lsblk -f แค่แสดงข้อมูล"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการเชื่อม partition sdb1 เข้ากับ directory /mnt/sdb1 ใช้คำสั่งใด?",
+  "choices": [
+   "sudo mount /mnt/sdb1 /dev/sdb1",
+   "sudo umount /dev/sdb1 /mnt/sdb1",
+   "sudo mkdir /dev/sdb1 /mnt/sdb1",
+   "sudo mount /dev/sdb1 /mnt/sdb1"
+  ],
+  "correct": 3,
+  "explain": [
+   "ลำดับผิด ต้อง device ก่อน mount point",
+   "umount ใช้ตัดการเชื่อมต่อ",
+   "mkdir สร้าง directory ไม่ได้ mount",
+   "ถูก — mount &lt;device&gt; &lt;mount point&gt;"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เพิ่มดิสก์ใหม่ให้ VM แล้ว ต้องการตรวจว่า kernel เห็นดิสก์ใหม่ชื่ออะไร ใช้คำสั่งใดตาม Lab 7?",
+  "choices": [
+   "df -i",
+   "dmesg | grep sd",
+   "fsck -N /dev/sdb",
+   "cat /etc/fstab"
+  ],
+  "correct": 1,
+  "explain": [
+   "df -i แสดง inode ของ fs ที่ mount แล้ว",
+   "ถูก — เห็น [sdb] 2.15 GB/2.00 GiB",
+   "ต้องรู้ชื่อก่อนถึงจะใช้ได้",
+   "fstab เป็นรายการ mount ที่ตั้งไว้ ไม่ได้บอกดิสก์ใหม่"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการตรวจว่า partition ที่ mount แล้วเป็น file system ชนิดใด พร้อมขนาดอ่านง่าย ใช้คำสั่งใด?",
+  "choices": [
+   "df -i",
+   "sudo parted /dev/sdb",
+   "df -Th",
+   "ls -l /dev"
+  ],
+  "correct": 2,
+  "explain": [
+   "-i แสดงจำนวน inode ไม่ใช่ชนิด",
+   "parted ใช้แบ่ง partition",
+   "ถูก — -T แสดงชนิด -h ขนาดอ่านง่าย",
+   "ls -l /dev แสดงชนิด device (b/c) ไม่ใช่ file system"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ดิสก์ขนาด 4 TB ต้องการแบ่ง 10 partition ควรใช้ partition table แบบใด?",
+  "choices": [
+   "GPT",
+   "MBR แบบ primary ทั้งหมด",
+   "MBR เพราะรองรับได้ถึง 9.4 ZB",
+   "ไม่ต้องมี partition table"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — GPT รองรับ 128 partitions และดิสก์ขนาดใหญ่มาก",
+   "MBR ได้แค่ 4 primary และจำกัด ~2 TB",
+   "9.4 ZB เป็นของ GPT",
+   "ต้องมี partition table ก่อนแบ่ง partition"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ก่อนแก้ไฟล์ /etc/fstab เพื่อเพิ่ม mount อัตโนมัติ ควรทำอะไรก่อนตาม Lab 7?",
+  "choices": [
+   "ลบ /etc/fstab ทิ้ง",
+   "สำรองไฟล์ด้วย sudo cp -v /etc/fstab /etc/fstab.backup",
+   "รัน mkfs กับ /dev/sda1",
+   "umount root partition"
+  ],
+  "correct": 1,
+  "explain": [
+   "ระบบจะ boot ไม่ขึ้น",
+   "ถูก — ถ้าแก้ผิดจะกู้คืนได้",
+   "จะลบข้อมูลระบบ",
+   "ทำให้ระบบใช้งานไม่ได้"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  html += '<div><span>ความจำ</span><span>' + byType.recall[0] + ' / ' + byType.recall[1] + '</span></div>';
+  html += '<div><span>ความเข้าใจ</span><span>' + byType.understand[0] + ' / ' + byType.understand[1] + '</span></div>';
+  html += '<div><span>การนำไปใช้</span><span>' + byType.apply[0] + ' / ' + byType.apply[1] + '</span></div>';
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
