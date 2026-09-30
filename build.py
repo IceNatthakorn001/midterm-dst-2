@@ -156,7 +156,9 @@ def find_lessons(subj):
 def find_reviews(subj, prefix="Review-"):
     """standalone pages: <sum by claude>/Review-*/<page>.html (also Animation-*)"""
     reviews = []
-    for f in sorted(p for p in subj["dir"].iterdir() if p.is_dir() and p.name.startswith(prefix)):
+    order = ["Stop-and-Wait", "GBN", "SR"]  # teaching order for Animation-* pages
+    rank = lambda p: next((i for i, k in enumerate(order) if k in p.name), len(order))
+    for f in sorted((p for p in subj["dir"].iterdir() if p.is_dir() and p.name.startswith(prefix)), key=lambda p: (rank(p), p.name)):
         pages = sorted(f.glob("*.html"))
         if not pages:
             continue
