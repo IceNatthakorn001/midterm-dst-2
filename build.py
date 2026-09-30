@@ -140,6 +140,7 @@ def find_lessons(subj):
         if not mds:
             continue
         quizzes = sorted(f.glob("quiz-*.html"))
+        quizzes2 = sorted(f.glob("quiz2-*.html"))
         short = f / "สรุปสั้นๆ.md"
         text = mds[0].read_text(encoding="utf-8")
         m = re.search(r"^#\s+(.+)$", text, re.M)
@@ -147,6 +148,7 @@ def find_lessons(subj):
         title = re.sub(r"^สรุป\s*[:：]\s*", "", title)
         lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title,
                         "md": text, "quiz": quizzes[0] if quizzes else None,
+                        "quiz2": quizzes2[0] if quizzes2 else None,
                         "short": short.read_text(encoding="utf-8") if short.exists() else None})
     return lessons
 
@@ -257,6 +259,8 @@ def build():
               next_l = lessons[i + 1] if i + 1 < len(lessons) else None
               toc_html = "".join(f'<li><a href="#{a}">{esc(t)}</a></li>' for a, t in toc)
               quiz_btn = ('<a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a>' if les["quiz"] else "")
+              if les["quiz2"]:
+                  quiz_btn += '<a class="btn btn-quiz" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a>'
               switch_btn = ('' if not les["short"] else
                             '<a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a>' if is_short else
                             '<a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a>')
@@ -292,12 +296,14 @@ def build():
               (ldir / page_name).write_text(
                   page(f"{'สรุปสั้น · ' if is_short else ''}{les['title']} · {subj['code']}", content, 2, subj["accent"]), encoding="utf-8")
 
-            if les["quiz"]:
-                q = les["quiz"].read_text(encoding="utf-8")
+            for key, out_name in (("quiz", "quiz.html"), ("quiz2", "quiz2.html")):
+                if not les[key]:
+                    continue
+                q = les[key].read_text(encoding="utf-8")
                 bar = QUIZ_BAR.format(subject=esc(f"{subj['icon']} {subj['code']}"))
                 q = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, q, count=1)
                 q = q.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
-                (ldir / "quiz.html").write_text(q, encoding="utf-8")
+                (ldir / out_name).write_text(q, encoding="utf-8")
 
             search_index.append({"s": subj["code"], "t": les["title"], "u": f"{subj['slug']}/{les['slug']}/index.html",
                                  "h": [t for _, t in full_toc]})
@@ -324,12 +330,14 @@ def build():
         rows = ""
         for n, les in enumerate(lessons, 1):
             qlink = (f'<a class="chip chip-quiz" href="{les["slug"]}/quiz.html">📝 Quiz</a>' if les["quiz"] else "")
+            if les["quiz2"]:
+                qlink += f'<a class="chip chip-quiz" href="{les["slug"]}/quiz2.html">📝 Quiz 2</a>'
             slink = (f'<a class="chip" href="{les["slug"]}/short.html">⚡ สรุปสั้น</a>' if les["short"] else "")
             rows += (f'<li class="lesson-row"><span class="num">{n:02d}</span>'
                      f'<a class="lesson-link" href="{les["slug"]}/index.html"><small>{esc(les["label"])}</small>'
                      f'<span>{esc(les["title"])}</span></a>'
                      f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
-        nq = sum(1 for l in lessons if l["quiz"])
+        nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) for l in lessons)
         sbody = f"""
 <main class="wrap">
   <div class="crumbs"><a href="../index.html">หน้าแรก</a> / {esc(subj['code'])}</div>

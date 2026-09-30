@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 6.1 Media Access Control (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 6.1 Media Access Control (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นตัวอย่างการสื่อสารแบบ Simplex?",
+  "choices": [
+   "Ethernet switch",
+   "โทรศัพท์มือถือคุยสาย",
+   "วิทยุ FM ที่เปิดฟังอยู่",
+   "walkie-talkie"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็น full-duplex",
+   "ผิด — เป็น full-duplex",
+   "ถูก — simplex ส่งทางเดียว เช่น TV/วิทยุ",
+   "ผิด — เป็น half-duplex"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "อุปกรณ์ใดทำงานแบบ full-duplex ตามสไลด์?",
+  "choices": [
+   "legacy bus LAN",
+   "Ethernet switch",
+   "Wireless LAN",
+   "Ethernet hub"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — bus เป็น half-duplex",
+   "ถูก — switch ส่งและรับพร้อมกันได้",
+   "ผิด — WLAN เป็น half-duplex",
+   "ผิด — hub เป็น half-duplex"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ALOHA ถูกออกแบบสำหรับ radio LAN ที่ความเร็วเท่าใด?",
+  "choices": [
+   "9600 bps",
+   "1 Mbps",
+   "100 Mbps",
+   "54 Mbps"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ALOHA (ฮาวาย ต้น 1970s) ที่ 9600 bps",
+   "ผิด — ไม่ใช่",
+   "ผิด — เป็นของ Fast Ethernet",
+   "ผิด — เป็นความเร็ว WLAN สูงสุดในตาราง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Vulnerable time ของ Slotted ALOHA เท่ากับเท่าใด?",
+  "choices": [
+   "2 × T_fr",
+   "4 × T_fr",
+   "½ × T_fr",
+   "1 × T_fr"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ Pure ALOHA",
+   "ผิด — มากเกิน",
+   "ผิด — น้อยเกิน",
+   "ถูก — ส่งได้เฉพาะต้น slot จึงเหลือ T_fr"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "CSMA/CA ใช้ในเครือข่ายใด?",
+  "choices": [
+   "DQDB (IEEE 802.6)",
+   "Wi-Fi (802.11)",
+   "Ethernet (802.3)",
+   "Token Ring 802.5"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็น reservation",
+   "ถูก — Wireless LAN ใช้ CSMA/CA",
+   "ผิด — legacy Ethernet ใช้ CSMA/CD",
+   "ผิด — ใช้ token passing"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Gigabit Ethernet ใช้ access method ใดตามตาราง?",
+  "choices": [
+   "CSMA/Poll",
+   "Token pass",
+   "CSMA/CD",
+   "Switched"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ WLAN",
+   "ผิด — ไม่ใช่",
+   "ผิด — เป็นของ Fast Ethernet",
+   "ถูก — Gigabit Ethernet และ Fibre Channel เป็น switched"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน token passing แต่ละสถานีต้องรู้จักใคร?",
+  "choices": [
+   "primary/secondaries",
+   "AP และ base station",
+   "successor/predecessor",
+   "master และ slave ทุกตัว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นของ polling",
+   "ผิด — ไม่ใช่",
+   "ถูก — สถานีจัดเป็นวง รู้ตัวก่อนหน้าและตัวถัดไป",
+   "ผิด — เป็นแนวคิด master-slave"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Dual ring ใน token passing มีไว้ทำอะไร?",
+  "choices": [
+   "มีวงแหวนสำรองวนทิศตรงข้ามกัน",
+   "แยกวงสำหรับ ACK โดยเฉพาะ",
+   "ให้สองสถานีส่งพร้อมกันได้เลย",
+   "ให้ token วิ่งเร็วเป็นสองเท่า"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ถ้าวงหลักขาดใช้วงสำรองได้",
+   "ผิด — ไม่ใช่",
+   "ผิด — ยังส่งได้เฉพาะผู้ถือ token",
+   "ผิด — ไม่ใช่วัตถุประสงค์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน polling คำว่า “Select” หมายถึงอะไร?",
+  "choices": [
+   "primary ส่งให้ secondary",
+   "primary ถาม secondary",
+   "secondary ส่ง token ต่อ",
+   "secondary ขอส่งเองก่อน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — select = primary ส่งให้ secondary",
+   "ผิด — นั่นคือ poll",
+   "ผิด — polling ไม่มี token",
+   "ผิด — secondary ต้องรอคำสั่ง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "DQDB (IEEE 802.6) เป็น controlled access แบบใด?",
+  "choices": [
+   "Polling แบบรวมศูนย์กลาง",
+   "Reservation แบบกระจาย",
+   "Token ring แบบกระจาย",
+   "Reservation แบบรวมศูนย์"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ถูก — DQDB, DAMA = reservation แบบ decentralized",
+   "ผิด — token passing ไม่ใช่ DQDB",
+   "ผิด — BRAP คือแบบ centralized"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "SIFS ย่อมาจากอะไร?",
+  "choices": [
+   "Station Idle Frame Sense",
+   "Sequence Info Frame Set",
+   "Short Inter-Frame Space",
+   "Slot Interval Frame Size"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — Short Inter-Frame Space",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Channelization ข้อใดแบ่งช่องด้วย “รหัส”?",
+  "choices": [
+   "FDMA",
+   "OFDMA",
+   "TDMA",
+   "CDMA"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — แบ่งความถี่",
+   "ผิด — แบ่งความถี่แบบ orthogonal",
+   "ผิด — แบ่งเวลา",
+   "ถูก — Code-Division Multiple Access"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Physical topology ต่างจาก logical topology อย่างไร?",
+  "choices": [
+   "เดินสายจริง vs ไร้สายเท่านั้น",
+   "เสมือนตาม IP vs กายภาพจริง",
+   "กายภาพจริง vs เสมือนตาม IP",
+   "ใช้ในบ้าน vs ใช้ในองค์กรใหญ่"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่เกณฑ์",
+   "ผิด — สลับกัน",
+   "ถูก — physical = การต่อจริง / logical = เสมือน ใช้ interface และ IP addressing",
+   "ผิด — ไม่ใช่เกณฑ์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมสัญญาณจากคนละเครือข่ายจึงชนกันได้?",
+  "choices": [
+   "ใช้ความถี่เดียวกันในอากาศ",
+   "ใช้ switch ตัวเดียวกัน",
+   "ใช้ MAC address ซ้ำกัน",
+   "อยู่ใน VLAN เดียวกันพอดี"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — collision เกิดในอากาศได้ถ้าความถี่เดียวกัน",
+   "ผิด — switch แยก collision domain",
+   "ผิด — address ไม่ทำให้สัญญาณชน",
+   "ผิด — ไม่ใช่เงื่อนไข"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม ALOHA ต้องรอ ACK นาน 2 เท่าของ max propagation delay?",
+  "choices": [
+   "ต้องตรวจ carrier สองรอบ",
+   "frame ไปแล้ว ACK ต้องเดินกลับ",
+   "ต้องรอสถานีอื่นส่งให้เสร็จก่อน",
+   "ต้องรอ slot ถัดไปเสมอทุกครั้ง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ALOHA ไม่มี carrier sense",
+   "ถูก — ไปหนึ่งเที่ยว กลับหนึ่งเที่ยว",
+   "ผิด — ALOHA ไม่รอใคร",
+   "ผิด — pure ALOHA ไม่มี slot"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "p-persistent ต่างจาก 1-persistent อย่างไรเมื่อช่องว่าง?",
+  "choices": [
+   "ไม่ส่งจนกว่าจะได้ token",
+   "รอเวลาสุ่มแล้วค่อยฟังใหม่",
+   "ส่งทันทีโดยไม่สุ่มเลยสักครั้ง",
+   "ส่งตามความน่าจะเป็น p"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็น token passing",
+   "ผิด — นั่นคือ non-persistent เมื่อช่องไม่ว่าง",
+   "ผิด — นั่นคือ 1-persistent",
+   "ถูก — ลดโอกาสหลายสถานีส่งพร้อมกันทันทีที่ว่าง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม controlled access จึงไม่มี collision?",
+  "choices": [
+   "ส่งได้เฉพาะต้น slot",
+   "ต้องได้รับอนุญาตก่อนส่ง",
+   "ทุกสถานีฟังช่องก่อนส่ง",
+   "ใช้ความถี่คนละย่านเสมอ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — slotted ALOHA ยังชนได้",
+   "ถูก — ผลัดกันส่งตามสิทธิ์ ไม่มีใครส่งพร้อมกัน",
+   "ผิด — carrier sense ยังชนได้",
+   "ผิด — นั่นคือ FDMA"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม backoff ของ CSMA/CD จึงขยายช่วงสุ่มทุกครั้งที่ชน?",
+  "choices": [
+   "เพิ่มความเร็วของสายสัญญาณ",
+   "ทำให้ frame สั้นลงเรื่อย ๆ",
+   "ลดโอกาสชนซ้ำเมื่อโหลดสูง",
+   "ให้สถานีเดิมได้ส่งก่อนเสมอ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่เกี่ยว",
+   "ถูก — ช่วง 0 ถึง (2^N − 1) กว้างขึ้น โอกาสสุ่มได้ค่าเดียวกันลดลง",
+   "ผิด — ไม่ได้ให้สิทธิพิเศษ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม CSMA/CA จึงต้องรอ ACK หลังส่ง frame?",
+  "choices": [
+   "ใช้ ACK แทน MAC address",
+   "ACK ทำให้ส่งได้เร็วขึ้นมาก",
+   "ต้องได้ token ถัดไปก่อน",
+   "ตรวจการชนเองไม่ได้เลย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่ token passing",
+   "ถูก — ไร้สายไม่มี collision detection จึงรู้ว่าสำเร็จจาก ACK"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมสถานี C, D ตั้ง NAV เมื่อได้ยิน CTS จาก B?",
+  "choices": [
+   "รู้ว่า B จะรับข้อมูลช่วงนั้น",
+   "CTS สั่งให้ C, D ส่งต่อทันที",
+   "CTS บอกว่า A ส่งเสร็จแล้ว",
+   "CTS ใช้แทน token ของวง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แม้ไม่ได้ยิน A (hidden) แต่ได้ยิน B จึงงดส่งตามระยะเวลาที่ระบุ",
+   "ผิด — ตรงข้าม",
+   "ผิด — CTS มาก่อน data",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม token passing ต้องจำกัดเวลาถือ token?",
+  "choices": [
+   "ป้องกัน token ชนกันเอง",
+   "ให้ทุกสถานีได้ส่งยุติธรรม",
+   "ลด propagation delay",
+   "ให้ส่ง ACK ได้เร็วขึ้นอีก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — token มีตัวเดียวไม่ชน",
+   "ถูก — หมดเวลาต้องปล่อย token ให้สถานีถัดไป",
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อเสียของ FDMA เมื่อบางสถานีไม่ได้ส่งข้อมูลคืออะไร?",
+  "choices": [
+   "guard band หายไปหมด",
+   "ต้องส่ง token เพิ่มมากขึ้น",
+   "ย่านความถี่นั้นว่างเสียเปล่า",
+   "สถานีอื่นชนกันมากขึ้นมาก"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่มี token",
+   "ถูก — band จองไว้ให้สถานีนั้น (เช่น station 3 เงียบ ย่านก็ว่าง)",
+   "ผิด — FDMA ไม่ชน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“MAC method” ต่างจาก “MAC address” อย่างไร?",
+  "choices": [
+   "ใช้ใน WAN vs ใช้ใน LAN",
+   "ที่อยู่ฮาร์ดแวร์ vs วิธีคุมสื่อ",
+   "ของ router vs switch",
+   "วิธีคุมสื่อ vs ที่อยู่ฮาร์ดแวร์"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — สลับกัน",
+   "ผิด — ไม่ใช่",
+   "ถูก — method คุมการเข้าถึงสื่อ / address ระบุอุปกรณ์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม contention-based access จึงประสิทธิภาพแย่เมื่อ traffic หนาแน่น?",
+  "choices": [
+   "สถานีแย่งกันจนชนบ่อยขึ้น",
+   "ต้องจอง minislot ทุกรอบ",
+   "ต้องรอ token นานขึ้นมาก",
+   "ความถี่ถูกแบ่งจนแคบเกิน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ยิ่งหลายสถานีส่ง ยิ่งชนและต้อง backoff บ่อย",
+   "ผิด — นั่นคือ reservation",
+   "ผิด — ไม่มี token",
+   "ผิด — นั่นคือ FDMA"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "โรงงานต้องการเครือข่ายที่ทุกเครื่องได้ส่งตามรอบเวลาแน่นอน ควรใช้กลุ่มใด?",
+  "choices": [
+   "CSMA ไม่มี CD/CA",
+   "Controlled access",
+   "Pure ALOHA random",
+   "Random access MAC"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — random",
+   "ถูก — deterministic แต่ละโหนดมีเวลาของตัวเอง",
+   "ผิด — random ชนบ่อย",
+   "ผิด — ไม่แน่นอน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ช่องสัญญาณเดียวแบ่งให้ผู้ใช้ผลัดกันส่งตาม time slot ใช้วิธีใด?",
+  "choices": [
+   "FDMA",
+   "ALOHA",
+   "TDMA",
+   "CDMA"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — แบ่งความถี่",
+   "ผิด — random access",
+   "ถูก — bandwidth เป็นช่องเดียวแบ่งตามเวลา",
+   "ผิด — แบ่งรหัส"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "LAN เก่าใช้ hub แล้วชนกันบ่อย แก้ง่ายที่สุดด้วยอะไร?",
+  "choices": [
+   "เปลี่ยนเป็น switch",
+   "ใช้สาย coax แทน",
+   "ใช้ Pure ALOHA",
+   "เพิ่ม hub อีกตัว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — switch เป็น full-duplex แยก collision domain",
+   "ผิด — ยังเป็นสื่อแชร์",
+   "ผิด — ชนมากกว่า",
+   "ผิด — ยิ่งแชร์มากขึ้น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "วิทยุสื่อสารที่ต้องกดปุ่มพูดทีละฝั่ง ทำงานแบบใด?",
+  "choices": [
+   "Full-duplex",
+   "Multiplexing",
+   "Simplex mode",
+   "Half-duplex"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ต้องพูดพร้อมกันได้",
+   "ผิด — ไม่ใช่โหมดในสไลด์",
+   "ผิด — ต้องทางเดียวตลอด",
+   "ถูก — walkie-talkie ส่งหรือรับได้ทีละฝั่ง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "Wi-Fi ต้องการให้ ACK ได้สิทธิ์ส่งก่อน frame ทั่วไป ควรให้ ACK รอ IFS แบบใด?",
+  "choices": [
+   "NAV (ยาว)",
+   "SIFS (สั้น)",
+   "RTS (สั้น)",
+   "DIFS (ยาว)"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — NAV ไม่ใช่ IFS",
+   "ถูก — IFS สั้น = priority สูง",
+   "ผิด — RTS เป็น frame ไม่ใช่ IFS",
+   "ผิด — ยาวกว่า priority ต่ำกว่า"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เครือข่ายเซ็นเซอร์ส่งข้อมูลนาน ๆ ครั้ง โหลดเบา อยากได้วิธีที่ง่าย ควรใช้กลุ่มใด?",
+  "choices": [
+   "Random access",
+   "Polling mode",
+   "Reservation",
+   "Token passing"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — contention-based เหมาะกับ bursty โหลดเบา และ implement ง่าย",
+   "ผิด — ต้องมี primary คุม",
+   "ผิด — ต้องจองทุกรอบ",
+   "ผิด — ซับซ้อนกว่า"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "frame 1,000 bits บนช่อง 100 kbps ใช้ Pure ALOHA มี vulnerable time เท่าใด?",
+  "choices": [
+   "40 ms",
+   "2 ms",
+   "20 ms",
+   "10 ms"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คูณ 4",
+   "ผิด — ผิดหลัก",
+   "ถูก — T_fr = 1,000/10⁵ = 10 ms → 2 × 10 = 20 ms",
+   "ผิด — เป็นของ slotted"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากข้อก่อน ถ้าเปลี่ยนเป็น Slotted ALOHA vulnerable time เท่าใด?",
+  "choices": [
+   "20 ms",
+   "1 ms",
+   "5 ms",
+   "10 ms"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ pure",
+   "ผิด — ผิดหลัก",
+   "ผิด — หาร 2 เกิน",
+   "ถูก — slotted = T_fr = 10 ms"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ALOHA สองสถานีห่างสุด 600 km สัญญาณ 3×10⁸ m/s ต้องรอ ACK อย่างน้อยเท่าใด?",
+  "choices": [
+   "2 ms",
+   "4 ms",
+   "0.2 ms",
+   "8 ms"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ลืมคูณ 2",
+   "ถูก — Tp = 6×10⁵ / 3×10⁸ = 2 ms → 2 × Tp = 4 ms",
+   "ผิด — ผิดหลัก",
+   "ผิด — คูณ 4"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "CSMA/CD ชนครั้งที่ 4 (N = 4) propagation time = 10 µs สุ่มรอได้สูงสุดเท่าใด?",
+  "choices": [
+   "40 µs",
+   "160 µs",
+   "70 µs",
+   "150 µs"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้ N × 10",
+   "ผิด — ลืมลบ 1 (2⁴ × 10)",
+   "ผิด — ใช้ N = 3",
+   "ถูก — (2⁴ − 1) × 10 = 15 × 10 = 150 µs"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "CSMA/CD ชนครั้งที่ 5 ค่า K สูงสุดที่สุ่มได้ (รอ K × propagation time) คือเท่าใด?",
+  "choices": [
+   "5",
+   "15",
+   "31",
+   "32"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ใช้ N ตรง ๆ",
+   "ผิด — ใช้ N = 4",
+   "ถูก — 2⁵ − 1 = 31",
+   "ผิด — ลืมลบ 1"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "p-persistent p = 0.3 ช่องว่าง สุ่มเลข 1–100 ได้ 25 สถานีจะทำอย่างไร?",
+  "choices": [
+   "ส่ง frame ทันที",
+   "รอ slot ถัดไป",
+   "รอเวลาสุ่มใหม่",
+   "ส่ง RTS ก่อน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 25 &lt; 30 (p × 100) จึงส่ง",
+   "ผิด — จะรอเมื่อได้ ≥ 30",
+   "ผิด — เป็น non-persistent",
+   "ผิด — ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "CSMA/CA contention window เริ่ม 1 slot เพิ่มเป็น 2 เท่าทุกครั้ง หลังไม่ว่าง 3 ครั้งจะมีกี่ slot?",
+  "choices": [
+   "4 slots",
+   "6 slots",
+   "3 slots",
+   "8 slots"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เพิ่มแค่ 2 ครั้ง",
+   "ผิด — บวก 2 แทนคูณ",
+   "ผิด — บวก 1 แทนคูณ",
+   "ถูก — 1 → 2 → 4 → 8"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "Reservation 6 สถานี minislots (สถานี 6 5 4 3 2 1) = 1 0 1 0 0 1 สถานีใดได้ส่ง?",
+  "choices": [
+   "สถานี 1, 3, 6",
+   "สถานี 6, 4, 1",
+   "สถานี 5, 3, 2",
+   "สถานี 6, 3, 1"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — อ่านจากซ้ายเป็นสถานี 1",
+   "ถูก — บิต 1 ตรงกับสถานี 6, 4, 1",
+   "ผิด — เลือกบิต 0",
+   "ผิด — อ่านตำแหน่งผิด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "CSMA/CD ลิงก์ 10 Mbps propagation สูงสุด 25.6 µs frame ต้องยาวอย่างน้อยกี่บิต?",
+  "choices": [
+   "1,024 bits",
+   "256 bits",
+   "512 bits",
+   "64 bits"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คูณ 4",
+   "ผิด — ลืมคูณ 2 (ไปกลับ)",
+   "ถูก — T_fr ≥ 2 × Tp = 51.2 µs → 51.2×10⁻⁶ × 10⁷ = 512 bits",
+   "ผิด — เป็นจำนวน byte (512/8)"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "TDMA ลิงก์ 1 Mbps แบ่ง 4 สถานีเท่ากัน อัตราเฉลี่ยต่อสถานีเท่าใด?",
+  "choices": [
+   "250 kbps",
+   "4 Mbps",
+   "400 kbps",
+   "1 Mbps"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 1 Mbps / 4 = 250 kbps (ส่งเต็มอัตราเฉพาะใน slot ตัวเอง)",
+   "ผิด — คูณแทนหาร",
+   "ผิด — คำนวณผิด",
+   "ผิด — เป็นอัตราขณะอยู่ใน slot"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

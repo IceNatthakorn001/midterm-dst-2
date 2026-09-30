@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L7 Storage (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L7 Storage (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "หน้าที่ (Functions) ของ BIOS ตามภาพในสไลด์คือข้อใด?",
+  "choices": [
+   "POST/Loader/Driver/Setup",
+   "mount, umount, mkfs, fsck",
+   "MBR, GPT, LBA, CHS, UEFI",
+   "GRUB, LILO, init, systemd"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — POST, Bootstrap Loader, BIOS Driver, BIOS Setup",
+   "ผิด — เป็นคำสั่ง Linux",
+   "ผิด — เป็นเรื่อง partition/ที่อยู่ดิสก์",
+   "ผิด — เป็น bootloader/init"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "BIOS เก็บค่าที่ตั้งไว้เกี่ยวกับอุปกรณ์ไว้ที่ใด?",
+  "choices": [
+   "GRUB",
+   "inode",
+   "MBR",
+   "CMOS"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็น bootloader",
+   "ผิด — เป็นของ file system",
+   "ผิด — MBR อยู่บนดิสก์",
+   "ถูก — แก้ได้ผ่านหน้าจอ BIOS"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Legacy BIOS ทำงานในโหมดกี่บิต?",
+  "choices": [
+   "64-bit",
+   "128-bit",
+   "16-bit",
+   "32-bit"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — UEFI ทำได้",
+   "ผิด — ไม่ใช่",
+   "ถูก — BIOS 16-bit",
+   "ผิด — UEFI ทำได้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ฟีเจอร์ความปลอดภัยที่ UEFI มีแต่ BIOS ไม่มีคืออะไร?",
+  "choices": [
+   "Boot Menu",
+   "Secure Boot",
+   "Beep Code",
+   "POST Check"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ทั้งคู่มี",
+   "ถูก — UEFI มี Secure Boot",
+   "ผิด — BIOS ก็มี",
+   "ผิด — BIOS ก็มี"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "process แรกที่ kernel สร้างหลัง boot คืออะไร?",
+  "choices": [
+   "GRUB (PID 0)",
+   "login (PID 2)",
+   "bash (PID 1)",
+   "init (PID 1)"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — GRUB ไม่ใช่ process ของ Linux",
+   "ผิด — ไม่ใช่",
+   "ผิด — bash มาทีหลัง",
+   "ถูก — init เป็นบรรพบุรุษของทุก process (Ubuntu ใหม่ใช้ systemd)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Boot Signature 2 bytes ท้าย MBR มีค่าเท่าใด?",
+  "choices": [
+   "0x00 0x01",
+   "0x7E 0x7E",
+   "0x55 0xAA",
+   "0xFF 0xFF"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — เป็น flag ของ HDLC",
+   "ถูก — บอกว่าเป็น MBR ที่ใช้ได้",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Partition Entry หนึ่งอันใน MBR มีขนาดเท่าใด?",
+  "choices": [
+   "16 bytes",
+   "64 bytes",
+   "4 bytes",
+   "446 bytes"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 4 entry × 16 = 64 bytes",
+   "ผิด — เป็นขนาดทั้งตาราง",
+   "ผิด — เป็นขนาดฟิลด์ Start LBA",
+   "ผิด — เป็น bootstrap code"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "logical partition ใน MBR เริ่มนับหมายเลขที่เท่าใด?",
+  "choices": [
+   "4",
+   "5",
+   "1",
+   "0"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เลขสุดท้ายของ primary",
+   "ถูก — 1–4 สงวนให้ primary/extended",
+   "ผิด — เป็น primary แรก",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นตัวอย่าง character device?",
+  "choices": [
+   "hard disk",
+   "keyboard",
+   "SSD NVMe",
+   "DVD drive"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — block device",
+   "ถูก — รับส่งทีละตัวอักษร (c)",
+   "ผิด — block device",
+   "ผิด — block device"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คอลัมน์ RM ของ lsblk บอกอะไร?",
+  "choices": [
+   "ถอดออกได้ไหม",
+   "อ่านได้อย่างเดียว",
+   "ขนาดของดิสก์",
+   "ชนิดของอุปกรณ์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — removable (1 = ถอดได้)",
+   "ผิด — นั่นคือ RO",
+   "ผิด — นั่นคือ SIZE",
+   "ผิด — นั่นคือ TYPE"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในโหมดโต้ตอบของ fdisk ปุ่ม n ทำอะไร?",
+  "choices": [
+   "ลบ partition ที่มีอยู่",
+   "ออกโดยไม่บันทึกตาราง",
+   "เพิ่ม partition ใหม่",
+   "แสดงตาราง partition"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นั่นคือ d",
+   "ผิด — นั่นคือ q",
+   "ถูก — add a new partition",
+   "ผิด — นั่นคือ p"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Lab 7 สร้างดิสก์ใหม่ใน VirtualBox เป็นชนิดใด?",
+  "choices": [
+   "VDI Dynamically",
+   "ISO Disc Image",
+   "VHD Dynamically",
+   "VMDK Pre-allocate"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ L1",
+   "ผิด — ISO เป็นแผ่นติดตั้ง",
+   "ผิด — ไม่ได้ใช้",
+   "ถูก — VMDK + Pre-allocate Full size 2 GB"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“BIOS ไม่ขึ้นกับ OS” หมายความว่าอย่างไร?",
+  "choices": [
+   "ต้องอัปเดตไปพร้อมกับ OS",
+   "ติดตั้งมากับ Linux เสมอ",
+   "ใช้ได้กับ Windows เท่านั้น",
+   "ทำงานก่อนและไม่สน OS ใด"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — อยู่บนเมนบอร์ด",
+   "ผิด — ไม่ผูก OS",
+   "ถูก — แค่หา bootloader จากดิสก์ ไม่รู้จัก OS"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม UEFI จึง boot เร็วกว่า BIOS?",
+  "choices": [
+   "ใช้ MBR ที่มีขนาดเล็กกว่า",
+   "ข้ามการตรวจอุปกรณ์ทั้งหมด",
+   "initialize อุปกรณ์พร้อมกัน",
+   "ทำงานแบบ 16-bit เท่านั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — UEFI ใช้ GPT",
+   "ผิด — ยังตรวจ",
+   "ถูก — parallel แทน sequential",
+   "ผิด — UEFI เป็น 32/64-bit"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "LBA ดีกว่า CHS ตรงไหน?",
+  "choices": [
+   "ระบุตำแหน่งด้วยเลขเดียว",
+   "ใช้ได้เฉพาะดิสก์ SSD ใหม่",
+   "ต้องรู้จำนวนหัวอ่านเสมอ",
+   "sector เริ่มนับที่ 1 เสมอ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — นับ block 0, 1, 2, … ไม่ต้องใช้ 3 พิกัด",
+   "ผิด — ใช้ได้ทั่วไป",
+   "ผิด — นั่นคือ CHS",
+   "ผิด — LBA เริ่มที่ 0"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม MBR จึงมี Extended partition?",
+  "choices": [
+   "เพื่อเก็บ bootloader ไว้",
+   "เพื่อสร้าง logical เกิน 4",
+   "เพื่อให้ใช้งานกับ UEFI ได้",
+   "เพื่อขยายดิสก์เกิน 2 TB"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่หน้าที่",
+   "ถูก — กล่องครอบที่แบ่งเป็น logical ได้หลายอัน",
+   "ผิด — UEFI ใช้ GPT",
+   "ผิด — ไม่แก้ข้อจำกัด 2 TB"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Virtual File System (VFS) มีบทบาทอย่างไร?",
+  "choices": [
+   "เข้ารหัสไฟล์ทุกไฟล์ในดิสก์",
+   "เก็บข้อมูลไฟล์แทนดิสก์จริง",
+   "สร้าง partition ให้เอง",
+   "ให้ใช้คำสั่งเดียวกับทุก fs"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ได้เก็บข้อมูล",
+   "ผิด — ไม่ใช่",
+   "ถูก — ชั้นกลางระหว่าง kernel กับ ext4/VFAT ฯลฯ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "inode bitmap ต่างจาก data bitmap อย่างไร?",
+  "choices": [
+   "inode ว่าง vs block ว่าง",
+   "อยู่ใน RAM vs อยู่บนดิสก์",
+   "เก็บค่า UID vs เก็บค่า GID",
+   "เก็บชื่อไฟล์ vs เนื้อหาไฟล์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 0 = free, 1 = in-use",
+   "ผิด — ทั้งคู่อยู่ใน file system",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมไฟล์เดียวจึงมีได้หลายชื่อ (link)?",
+  "choices": [
+   "inode เก็บชื่อได้หลายชื่อ",
+   "superblock สร้างชื่อสำรอง",
+   "ชื่ออยู่ใน directory entry",
+   "data block มีชื่อซ้ำกันได้"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — inode ไม่เก็บชื่อ",
+   "ผิด — ไม่ใช่",
+   "ถูก — หลาย entry ชี้ inode เดียวกันได้",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Indirect block ใน inode มีไว้ทำอะไร?",
+  "choices": [
+   "สำรอง superblock ของดิสก์",
+   "ชี้รายการ block ของไฟล์ใหญ่",
+   "เก็บสิทธิ์ rwx ของไฟล์นั้นไว้",
+   "เก็บชื่อไฟล์ที่ยาวมากเกินไป"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ถูก — ชี้ไป block ที่เก็บ block address อีกทอด",
+   "ผิด — ไม่ใช่หน้าที่ indirect",
+   "ผิด — ชื่ออยู่ directory entry"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมต้องตรวจชื่ออุปกรณ์ให้ดีก่อนรัน mkfs?",
+  "choices": [
+   "mkfs ใช้เวลานานหลายวัน",
+   "mkfs ลบข้อมูลเดิมทั้งหมด",
+   "mkfs ต้องรันแค่ครั้งเดียว",
+   "mkfs เปลี่ยนชื่อดิสก์ทุกลูก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่เหตุผล",
+   "ถูก — mkfs = format ถ้าพิมพ์ /dev/sda1 ผิดระบบพัง",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม fsck -N /dev/sdb1 จึงปลอดภัย?",
+  "choices": [
+   "แค่แสดง ไม่ได้ทำจริง",
+   "ทำงานได้เฉพาะ root",
+   "สำรองข้อมูลก่อนซ่อม",
+   "ซ่อมโดยไม่ต้อง umount"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — -N ไม่ตรวจจริง",
+   "ผิด — ไม่ใช่เหตุผล",
+   "ผิด — ไม่ได้สำรอง",
+   "ผิด — ห้ามซ่อม partition ที่ mount อยู่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "หลัง sudo mount /dev/sdb1 /mnt/sdb1 จะเห็นอะไรใน /mnt/sdb1?",
+  "choices": [
+   "ไฟล์ของ root เดิม",
+   "ไฟล์ของ /dev ทั้งหมด",
+   "ไฟล์ทั้งหมดที่อยู่บน sdb1",
+   "directory ว่างเสมอ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — partition ถูกต่อเข้าที่ mount point",
+   "ผิด — แสดงเนื้อหา partition"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Pre-allocate Full size ต่างจาก Dynamically allocated อย่างไร?",
+  "choices": [
+   "ใช้ได้กับ VDI vs VMDK",
+   "โตตามใช้ vs จองเต็มทันที",
+   "เร็วกว่า vs ปลอดภัยกว่า",
+   "จองเต็มทันที vs โตตามใช้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่ความต่าง",
+   "ผิด — สลับกัน",
+   "ผิด — ไม่ใช่",
+   "ถูก — Lab 7 จอง 2 GB ทันที"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการรู้ว่าดิสก์ใช้ partition table แบบ gpt หรือ dos ดูจากคำสั่งใด?",
+  "choices": [
+   "sudo dmesg -T",
+   "sudo fdisk -l",
+   "sudo df -ih",
+   "sudo blkid -o"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นข้อความ kernel ไม่ได้บอก disklabel",
+   "ถูก — บรรทัด Disklabel type",
+   "ผิด — ดู inode",
+   "ผิด — ดู UUID/TYPE ของ fs"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ใน parted ต้องการสร้าง partition table แบบ GPT ใช้คำสั่งใด?",
+  "choices": [
+   "print gpt",
+   "mkfs gpt",
+   "mklabel gpt",
+   "mkpart gpt"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — แค่แสดง",
+   "ผิด — ไม่ใช่คำสั่ง parted",
+   "ถูก — mklabel กำหนดชนิด partition table",
+   "ผิด — สร้าง partition"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการ UUID ของ /dev/sdb1 เพื่อใส่ใน /etc/fstab ใช้คำสั่งใด?",
+  "choices": [
+   "sudo blkid /dev/sdb1",
+   "sudo parted /dev/sdb1",
+   "sudo mkfs /dev/sdb1",
+   "sudo umount /dev/sdb1"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แสดง UUID และ TYPE",
+   "ผิด — จัดการ partition",
+   "ผิด — format ลบข้อมูล",
+   "ผิด — ตัดการเชื่อมต่อ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "จะถอด USB ที่ mount ไว้ที่ /media/usb อย่างปลอดภัย ใช้คำสั่งใด?",
+  "choices": [
+   "sudo mkfs /media/usb",
+   "sudo unmount /media/usb",
+   "sudo rm -r /media/usb",
+   "sudo umount /media/usb"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่มีคำสั่ง unmount",
+   "ผิด — ลบ directory",
+   "ถูก — umount (ไม่มีตัว n)"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "สร้างไฟล์ไม่ได้ทั้งที่พื้นที่เหลือ ควรตรวจอะไรเป็นอันดับแรก?",
+  "choices": [
+   "lsblk ดู RM",
+   "df -Th ดูชนิด",
+   "df -i ดู inode",
+   "fdisk ดู label"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่ตอบปัญหา",
+   "ถูก — inode หมดจะสร้างไฟล์ใหม่ไม่ได้",
+   "ผิด — ไม่เกี่ยว"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เครื่องใหม่ต้องการเปิด Secure Boot ต้องใช้ firmware แบบใด?",
+  "choices": [
+   "GRUB",
+   "UEFI",
+   "BIOS",
+   "LILO"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็น bootloader",
+   "ถูก — Secure Boot เป็นของ UEFI",
+   "ผิด — ไม่มี Secure Boot",
+   "ผิด — เป็น bootloader เก่า"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ดิสก์ 2 head × 10 sector/track (sector เริ่ม 0 แบบในสไลด์) ตำแหน่ง C1 H0 S5 คือ LBA ใด?",
+  "choices": [
+   "105",
+   "15",
+   "26",
+   "25"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้ C×100",
+   "ผิด — ลืมคูณจำนวน head",
+   "ผิด — นับ sector เริ่ม 1",
+   "ถูก — (1×2 + 0)×10 + 5 = 25"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ดิสก์เดียวกัน (2 head × 10 sector) LBA 37 คือตำแหน่ง CHS ใด?",
+  "choices": [
+   "C1 H1 S7",
+   "C0 H1 S7",
+   "C3 H1 S7",
+   "C1 H0 S7"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 37 ÷ 20 = 1 เศษ 17 → H = 1, S = 7",
+   "ผิด — cylinder ผิด",
+   "ผิด — หารด้วย 10 แทน 20",
+   "ผิด — head ผิด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ดิสก์ 512 KB แบ่ง block ละ 4 KB ได้กี่ blocks?",
+  "choices": [
+   "256 blocks",
+   "128 blocks",
+   "2048 blocks",
+   "64 blocks"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — หาร 2",
+   "ถูก — 512 / 4 = 128",
+   "ผิด — คูณแทนหาร",
+   "ผิด — เป็นของ 256 KB"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ใน MBR 512 bytes Boot Signature เริ่มที่ byte offset ใด (นับจาก 0)?",
+  "choices": [
+   "446",
+   "64",
+   "510",
+   "512"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นจุดเริ่ม partition table",
+   "ผิด — เป็นขนาดตาราง",
+   "ถูก — 446 + 64 = 510 (byte 510–511)",
+   "ผิด — เกินขนาด MBR"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ถ้า MBR ใช้ที่อยู่ 32 บิต แต่ sector ขนาด 4096 bytes ดิสก์ใหญ่สุดประมาณเท่าใด?",
+  "choices": [
+   "≈ 8.8 TB",
+   "≈ 35.2 TB",
+   "≈ 2.2 TB",
+   "≈ 17.6 TB"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — คูณ 2048",
+   "ผิด — คูณ 8192",
+   "ผิด — เป็นกรณี 512 bytes",
+   "ถูก — 2³² × 4096 ≈ 17.6 × 10¹² bytes"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "dmesg แสดง sdb มี 4194304 logical blocks ขนาด 512 bytes ดิสก์ใหญ่เท่าใด?",
+  "choices": [
+   "2 GiB",
+   "512 MiB",
+   "1 GiB",
+   "4 GiB"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 4194304 × 512 = 2,147,483,648 bytes = 2 GiB",
+   "ผิด — ผิดหลัก",
+   "ผิด — หาร 2",
+   "ผิด — คูณเกิน 2 เท่า"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "sdb2 มี Start 2000896 และ End 2002943 มีกี่ sectors?",
+  "choices": [
+   "2048",
+   "2000896",
+   "4096",
+   "2047"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 2002943 − 2000896 + 1 = 2048 (= 1 MiB)",
+   "ผิด — เป็น Start",
+   "ผิด — คูณ 2",
+   "ผิด — ลืม +1"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "mkfs สร้าง 250000 blocks ขนาด 4 KiB พื้นที่รวมประมาณเท่าใด?",
+  "choices": [
+   "≈ 250.0 MiB",
+   "≈ 1953 MiB",
+   "≈ 62.5 MiB",
+   "≈ 976.6 MiB"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ลืมคูณ 4 KiB",
+   "ผิด — คูณ 8 KiB",
+   "ผิด — หาร 4",
+   "ถูก — 250000 × 4096 = 1,024,000,000 bytes ≈ 976.6 MiB"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "df -i: Inodes 1310720, IUsed 227605 มี IFree เท่าใด?",
+  "choices": [
+   "1538325",
+   "1083115",
+   "1083105",
+   "227605"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — บวกแทนลบ",
+   "ถูก — 1310720 − 227605",
+   "ผิด — ลบผิด",
+   "ผิด — เป็นที่ใช้ไป"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "partition เริ่ม sector 2048 จบ 2099199 (sector 512 bytes) ขนาดเท่าใด?",
+  "choices": [
+   "1 MiB",
+   "512 MiB",
+   "1 GiB",
+   "2 GiB"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ผิดหลัก",
+   "ผิด — หาร 2",
+   "ถูก — 2097152 sectors × 512 = 1,073,741,824 bytes = 1 GiB",
+   "ผิด — คูณ 2"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

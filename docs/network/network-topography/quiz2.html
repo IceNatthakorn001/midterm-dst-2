@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Network Topography (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Network Topography (ชุดที่ 2)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "LAN ตามตารางขนาดเครือข่ายครอบคลุมระยะประมาณเท่าใด?",
+  "choices": [
+   "10 ม. – 1 กม.",
+   "10 กม. – 50 กม.",
+   "100 กม. ขึ้นไป",
+   "1 ม. – 10 ม."
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — LAN ครอบคลุมห้อง อาคาร วิทยาเขต (10 ม. – 1 กม.)",
+   "ผิด — ระดับเมืองคือ MAN (~10 กม.)",
+   "ผิด — เป็นระยะของ WAN",
+   "ผิด — ใกล้เคียงระยะ PAN (~1 ม.)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เทคโนโลยีตัวอย่างของ WAN (100 กม.+) ในสไลด์คืออะไร?",
+  "choices": [
+   "Ethernet, WiFi LAN",
+   "Bluetooth, Piconet",
+   "Cable, 802.16 MAN",
+   "Optical Backbone, 5G"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ LAN",
+   "ผิด — เป็นของ PAN",
+   "ผิด — เป็นของ MAN",
+   "ถูก — WAN ใช้ Optical Backbone และ 5G"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เครือข่ายระดับโลก ~10,000 กม. (The Internet) ใช้เทคโนโลยีใดเป็นตัวแทน?",
+  "choices": [
+   "Bluetooth",
+   "TCP/IP",
+   "802.16",
+   "802.11"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Bluetooth ระดับ PAN",
+   "ถูก — Internet ระดับโลกเชื่อมกันด้วย TCP/IP",
+   "ผิด — 802.16 (WiMAX) ระดับเมือง",
+   "ผิด — 802.11 คือ WiFi ระดับ LAN"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในบ้าน อุปกรณ์ใดคือ “เราเตอร์หลัก” ที่เชื่อมบ้านเข้ากับ ISP?",
+  "choices": [
+   "Piconet",
+   "eNode-B",
+   "Gateway",
+   "Switch"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — piconet เป็นเครือข่าย Bluetooth ไม่ใช่เราเตอร์",
+   "ผิด — eNode-B เป็นเสาสัญญาณมือถือ",
+   "ถูก — Gateway คือเราเตอร์หลักของบ้าน",
+   "ผิด — switch เชื่อมอุปกรณ์ใน LAN ไม่ได้เป็นทางออกสู่ ISP"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "อุปกรณ์ใดเป็นตัวอย่างของ slave device ใน Bluetooth PAN?",
+  "choices": [
+   "เสาสัญญาณ 4G",
+   "สมาร์ทโฟน",
+   "เราเตอร์บ้าน",
+   "หูฟังไร้สาย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ cellular ไม่ใช่ PAN",
+   "ผิด — สมาร์ทโฟนเป็น master",
+   "ผิด — เป็นของ home network",
+   "ถูก — หูฟัง นาฬิกา เครื่องเสียงรถ เป็น slave"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Enterprise LAN มีโครงสร้างตามลำดับชั้นแบบใด?",
+  "choices": [
+   "Router → End Systems → Switches",
+   "Router → Switches → End Systems",
+   "Switches → Router → End Systems",
+   "End Systems → Router → Switches"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — switches อยู่ระหว่าง router กับ end systems",
+   "ถูก — Institutional Router → Core/Edge Switches → Workstations/Servers",
+   "ผิด — router อยู่บนสุดต่อออกอินเทอร์เน็ต",
+   "ผิด — end systems อยู่ล่างสุด"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "WiFi แบบ Infrastructure Mode สื่อสารผ่านอะไร?",
+  "choices": [
+   "Access Point",
+   "Load Balancer",
+   "Piconet Master",
+   "Core Router"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ผ่าน AP (base station) ที่เชื่อมกับ wired network",
+   "ผิด — อยู่ใน data center",
+   "ผิด — piconet/master เป็นของ Bluetooth",
+   "ผิด — ไม่ได้ใช้เชื่อม WiFi ของผู้ใช้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เครือข่ายมือถือแบ่งพื้นที่ให้บริการเป็นรูปทรงใด?",
+  "choices": [
+   "ตารางสี่เหลี่ยม",
+   "สามเหลี่ยมซ้อน",
+   "เซลล์หกเหลี่ยม",
+   "วงกลมซ้อนกัน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่รูปแบบในสไลด์",
+   "ผิด — ไม่ใช่รูปแบบในสไลด์",
+   "ถูก — พื้นที่แบ่งเป็นเซลล์รูปหกเหลี่ยม",
+   "ผิด — วงกลมซ้อนเป็นภาพสรุป network of networks"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Core Network ในเครือข่ายมือถือทำหน้าที่ใด?",
+  "choices": [
+   "ยืนยันตัวตนผู้ใช้ด้วยซิมการ์ด",
+   "จัดการข้อมูลและการเคลื่อนที่",
+   "จัดสรรคลื่นวิทยุภายในเซลล์ย่อย",
+   "แปลง IP ภายในเป็นสาธารณะ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ซิมอยู่ที่ UE",
+   "ถูก — core network เป็นศูนย์กลางจัดการข้อมูลและ mobility",
+   "ผิด — เป็นหน้าที่ eNode-B",
+   "ผิด — เป็นหน้าที่ NAT"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Data center มีโครงสร้างชั้นเรียงจากบนลงล่างอย่างไร?",
+  "choices": [
+   "Core Routers → Edge Switches → Racks",
+   "Core Routers → Racks → Edge Switches",
+   "Racks → Core Routers → Edge Switches",
+   "Edge Switches → Core Routers → Racks"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Internet → Core Routers → Edge Switches → Server Racks",
+   "ผิด — edge switches อยู่เหนือ racks",
+   "ผิด — racks อยู่ล่างสุด",
+   "ผิด — core อยู่เหนือ edge"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เครือข่ายไร้สายใช้ตัวกลางใดในการส่งข้อมูล?",
+  "choices": [
+   "ใยแก้วนำแสง",
+   "สายทองแดง",
+   "คลื่นความถี่วิทยุ",
+   "สายโคแอกซ์"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นตัวกลางของ wired",
+   "ผิด — เป็นตัวกลางของ wired",
+   "ถูก — wireless ใช้ radio spectrum",
+   "ผิด — เป็นตัวกลางของ wired (cable)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Data center หนึ่งแห่งเชื่อมต่อโฮสต์ได้ในระดับใด (Massive Scale)?",
+  "choices": [
+   "ไม่เกินร้อยเครื่อง",
+   "ไม่เกินสิบเครื่อง",
+   "เพียงหนึ่งเครื่อง",
+   "หลายหมื่นเครื่อง"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — น้อยเกินไป",
+   "ผิด — น้อยเกินไปมาก",
+   "ผิด — ขัดกับ massive scale",
+   "ถูก — เชื่อมโฮสต์หลายหมื่นเครื่องในศูนย์เดียว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมหลายบ้านใช้ IP ภายใน 10.0.0.1 ซ้ำกันได้โดยไม่ชนกัน?",
+  "choices": [
+   "ISP แจก IP ภายในไม่ซ้ำกันเลย",
+   "Bluetooth แยก IP ให้แต่ละบ้าน",
+   "IP ภายในมีความหมายแค่ในบ้าน",
+   "Router สุ่ม IP ใหม่ทุก ๆ วินาที"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ISP ให้ public IP ตัวเดียว",
+   "ผิด — Bluetooth ไม่เกี่ยว",
+   "ถูก — IP ภายในใช้แค่ในเครือข่ายส่วนตัว ข้างนอกเห็นแค่ public IP ผ่าน NAT",
+   "ผิด — ไม่ใช่กลไกนี้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม Bluetooth PAN จึงมี master คุมการเชื่อมต่อ?",
+  "choices": [
+   "ให้ slave คุยกันเองได้เร็ว",
+   "เพิ่มระยะทางเป็นหลายกิโล",
+   "ให้ใช้สายสัญญาณแทนไร้สาย",
+   "จัดสรรความถี่ไม่ให้ทับซ้อน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — slave พูดตามที่ master จัดให้",
+   "ผิด — PAN ระยะสั้นมาก",
+   "ผิด — PAN เป็นไร้สาย",
+   "ถูก — master ควบคุมการเชื่อมต่อและจัดสรรความถี่ให้ slave"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมวิดีโอคอลจึงอ่อนไหวต่อความหน่วงมากกว่าการเปิดเว็บ?",
+  "choices": [
+   "ต้องผ่าน Piconet ก่อนทุกครั้ง",
+   "เป็นข้อมูลแบบ time-sensitive",
+   "เป็นข้อมูลแบบ elastic ที่รอได้",
+   "ใช้ public IP หลายตัวพร้อมกัน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่เกี่ยวกับ Bluetooth",
+   "ถูก — ต้องทันเวลา กระตุก 1 วินาทีก็ใช้ไม่ได้",
+   "ผิด — elastic คือแบบเว็บที่รอได้",
+   "ผิด — ไม่เกี่ยวกับจำนวน IP"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม wireless ต้องใช้กลไก “หลีกเลี่ยง” การชน แทนการแยกช่องแบบ switch?",
+  "choices": [
+   "ทุกเครื่องใช้สื่อกลางร่วมกัน",
+   "wireless ไม่มีการชนเลย",
+   "คลื่นวิทยุไม่มีทางชนกันได้",
+   "switch ใช้กับคลื่นได้ดีกว่า"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — คลื่นวิทยุเป็นสื่อกลางร่วม แยกสายให้แต่ละเครื่องไม่ได้",
+   "ผิด — มีการชนจึงต้องหลีกเลี่ยง",
+   "ผิด — ชนกันได้",
+   "ผิด — switch แยกช่องบนสาย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ขั้น Coordination ใน handover ทำอะไร?",
+  "choices": [
+   "ตัดการเชื่อมต่อจากทุกเสาทันที",
+   "เชื่อมกับเสาปัจจุบันเป็นครั้งแรก",
+   "ประเมินสัญญาณและเตรียมโอนย้าย",
+   "ส่งมอบการเชื่อมต่อให้เสาใหม่"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — handover ไม่ตัดการเชื่อมต่อ",
+   "ผิด — เป็นขั้น Association",
+   "ถูก — อยู่รอยต่อ A กับ B ระบบวัดความแรงสัญญาณและเตรียมโอน",
+   "ผิด — เป็นขั้น Handover"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม data center ต้องมี load balancing?",
+  "choices": [
+   "ไม่ให้เครื่องใดรับงานหนักเกิน",
+   "ให้ทุกคำขอไปเครื่องเดียวกัน",
+   "เปลี่ยนสายเป็นไร้สายทั้งหมด",
+   "ลดจำนวนเซิร์ฟเวอร์ที่ใช้งาน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — กระจายภาระงานให้สมดุล",
+   "ผิด — ตรงข้ามกับการกระจายโหลด",
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่ใช่เป้าหมาย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“Resource Sharing” ใน Enterprise LAN หมายถึงอะไร?",
+  "choices": [
+   "แชร์คลื่นวิทยุกับเสาสัญญาณมือถือ",
+   "แชร์ข้อมูลและเซิร์ฟเวอร์ส่วนกลาง",
+   "แชร์สายเคเบิลร่วมกับ ISP อื่น",
+   "แชร์ public IP กับบ้านข้าง ๆ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นเรื่อง cellular",
+   "ถูก — พนักงานใช้ข้อมูลและเซิร์ฟเวอร์ส่วนกลางร่วมกัน",
+   "ผิด — ไม่ใช่ความหมายนี้",
+   "ผิด — ไม่เกี่ยวกับ NAT บ้าน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การเปรียบอินเทอร์เน็ตกับ “ระบบถนน” สื่อถึงอะไร?",
+  "choices": [
+   "ข้อมูลวิ่งได้เพียงทิศทางเดียวเท่านั้น",
+   "ทุกถนนมีเจ้าของคนเดียวกันหมดทุกสาย",
+   "เครือข่ายเล็กไม่ต้องต่อกับทางหลวง",
+   "แต่ละเครือข่ายมีเจ้าของแต่ต่อทางหลัก"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้สื่อเรื่องทิศทาง",
+   "ผิด — อินเทอร์เน็ตไม่มีเจ้าของคนเดียว",
+   "ผิด — ทุกเครือข่ายต้องเชื่อมกัน",
+   "ถูก — ซอย ถนนนิคม ถนนเมือง มีเจ้าของต่างกันแต่เชื่อมกับทางหลวงหลัก (backbone)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมจึงมีเครือข่ายหลายประเภท (PAN, LAN, MAN, WAN) แทนแบบเดียว?",
+  "choices": [
+   "แต่ละแบบแก้ปัญหาเฉพาะทาง",
+   "เพื่อให้ต่อกันไม่ได้โดยตั้งใจ",
+   "เพราะใช้ความถี่เดียวกันหมด",
+   "เพราะมาตรฐานยังไม่ถูกคิด"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แต่ละประเภทออกแบบมาแก้ปัญหาตามระยะและการใช้งาน",
+   "ผิด — ทุกแบบสื่อสารกันได้",
+   "ผิด — ใช้เทคโนโลยีต่างกัน",
+   "ผิด — มีมาตรฐานเชื่อมกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "อะไรทำให้เครือข่าย 1 เมตรถึง 10,000 กม. สื่อสารกันได้?",
+  "choices": [
+   "ทุกเครือข่ายใช้สายเดียวกัน",
+   "ทุกเครือข่ายเป็นไร้สาย",
+   "ทุกอุปกรณ์มี IP สาธารณะ",
+   "โปรโตคอลมาตรฐานร่วมกัน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้สื่อกลางหลากหลาย",
+   "ผิด — มีทั้งมีสายและไร้สาย",
+   "ผิด — บ้านใช้ NAT แชร์ IP เดียว",
+   "ถูก — สื่อสารกันผ่านโปรโตคอลมาตรฐาน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมอุปกรณ์มือถือ (UE) จึงต้องมีซิมการ์ด?",
+  "choices": [
+   "ใช้แปลง IP เป็นสาธารณะ",
+   "ใช้เพิ่มความแรงสัญญาณเสา",
+   "ใช้ยืนยันตัวตนกับเครือข่าย",
+   "ใช้เก็บไฟล์วิดีโอที่ดาวน์โหลด"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นหน้าที่ NAT",
+   "ผิด — ความแรงสัญญาณขึ้นกับเสาและระยะ",
+   "ถูก — UE มีรหัสยืนยันตัวตนผ่านซิมการ์ด",
+   "ผิด — ซิมไม่ได้ใช้เก็บไฟล์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเครือข่ายบ้านต้องใส่ใจ IoT เป็นพิเศษ?",
+  "choices": [
+   "IoT ต้องมี public IP ของตัวเอง",
+   "อุปกรณ์ IoT ต้องการความเสถียร",
+   "IoT ใช้ได้เฉพาะแบบมีสายเท่านั้น",
+   "IoT ต้องใช้ bandwidth สูงมาก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ใช้ NAT ได้",
+   "ถูก — เซ็นเซอร์และเครื่องใช้ไฟฟ้าต้องการการเชื่อมต่อที่เสถียร",
+   "ผิด — IoT จำนวนมากไร้สาย",
+   "ผิด — จุดเน้นคือความเสถียร"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "นาฬิกาอัจฉริยะเชื่อมกับสมาร์ทโฟน ข้อใดถูกต้อง?",
+  "choices": [
+   "PAN โดยมือถือเป็น master",
+   "MAN โดยนาฬิกาเป็นเสา UE",
+   "LAN โดยมือถือเป็น AP หลัก",
+   "PAN โดยนาฬิกาเป็น master"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Bluetooth PAN สมาร์ทโฟนคุมการเชื่อมต่อ",
+   "ผิด — ไม่ใช่ระดับเมือง",
+   "ผิด — ไม่ใช่ WiFi LAN",
+   "ผิด — นาฬิกาเป็น slave"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เครือข่ายเชื่อมหลายอาคารในวิทยาเขตระยะ ~800 เมตร จัดเป็นประเภทใด?",
+  "choices": [
+   "MAN",
+   "LAN",
+   "WAN",
+   "PAN"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — MAN ~10 กม. ระดับเมือง",
+   "ถูก — 10 ม. – 1 กม. (วิทยาเขต) คือ LAN",
+   "ผิด — WAN 100 กม.+",
+   "ผิด — PAN ~1 ม."
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เชื่อมสาขาหลายแห่งภายในเมืองเดียว ระยะ ~10 กม. ควรจัดเป็นเครือข่ายแบบใด?",
+  "choices": [
+   "PAN",
+   "WAN",
+   "MAN",
+   "LAN"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — PAN ระยะตัวบุคคล",
+   "ผิด — WAN ระดับประเทศ/ทวีป",
+   "ถูก — ระดับเมือง ~10 กม. คือ MAN (เช่น Cable, 802.16)",
+   "ผิด — LAN ไม่เกิน ~1 กม."
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เครื่องตั้งโต๊ะในออฟฟิศต้องการความเร็วสูงและไม่ชนกันเลย ควรใช้อะไร?",
+  "choices": [
+   "WiFi แบบ ad-hoc",
+   "4G ผ่านเสาใกล้บ้าน",
+   "Bluetooth piconet",
+   "Ethernet ต่อ switch"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไร้สายใช้สื่อกลางร่วม",
+   "ผิด — แชร์ช่องสัญญาณ",
+   "ผิด — ระยะสั้นและช้า",
+   "ถูก — wired + switch แยกช่องสัญญาณ ไม่มีการชน ความเร็ว 1–10 Gbps"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ฝ่ายความปลอดภัยนั่งปนกับแผนกอื่นในชั้นเดียว แต่ต้องแยกเครือข่าย ควรใช้อะไร?",
+  "choices": [
+   "PAN",
+   "NAT",
+   "DNS",
+   "VLAN"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — PAN เป็นเครือข่ายส่วนตัวรอบตัว",
+   "ผิด — NAT แปลงที่อยู่ ไม่ได้แยกกลุ่ม",
+   "ผิด — DNS แปลงชื่อเป็น IP ไม่ได้แยกกลุ่มเครือข่าย",
+   "ถูก — VLAN จัดกลุ่มตามแผนก/ความปลอดภัยด้วยซอฟต์แวร์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "กดดูหนังแล้วคำขอไปถึง data center ส่วนใดเลือกเซิร์ฟเวอร์ที่เก็บหนัง?",
+  "choices": [
+   "WAN Backbone",
+   "Load Balancer",
+   "Base Station",
+   "NAT Router"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นเส้นทาง WAN",
+   "ถูก — load balancer ส่งคำขอไปเซิร์ฟเวอร์ที่เหมาะสม",
+   "ผิด — อยู่ที่ขอบเครือข่ายมือถือ",
+   "ผิด — อยู่ที่บ้าน"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

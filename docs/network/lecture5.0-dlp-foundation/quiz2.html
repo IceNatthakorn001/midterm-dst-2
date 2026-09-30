@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 5.0 Data Link Layer Foundation (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 5.0 Data Link Layer Foundation (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ใน Lecture 5.0 หน่วยข้อมูลที่ Network layer ส่งลงมาให้ Data Link เรียกว่าอะไร?",
+  "choices": [
+   "Message",
+   "Bits",
+   "Packet",
+   "Segment"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Message เป็นของ Application",
+   "ผิด — Bits เป็นของ Physical",
+   "ถูก — Network layer ใส่ IP header ได้ Packet แล้วส่งให้ Data Link ห่อเป็น Frame",
+   "ผิด — Segment เป็นของ Transport"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Physical layer มีการเชื่อมต่อแบบใดตาม TCP/IP model ในสไลด์?",
+  "choices": [
+   "physical point-to-point",
+   "logical host-to-host",
+   "logical end-to-end path",
+   "logical hop-by-hop link"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Physical layer เป็น physical connections (point-to-point)",
+   "ผิด — เป็นของ Network",
+   "ผิด — เป็นของ Application/Transport",
+   "ผิด — Data link เป็น hop-by-hop แต่ไม่ใช่ logical"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Frame header มีข้อมูลสำคัญใด?",
+  "choices": [
+   "ชื่อโดเมนของต้นทาง/ปลายทาง",
+   "MAC address ต้นทาง/ปลายทาง",
+   "port number ต้นทาง/ปลายทาง",
+   "IP address ต้นทาง/ปลายทาง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ชื่อโดเมนไม่อยู่ใน frame header",
+   "ถูก — header มี source/destination link-layer (MAC) addresses",
+   "ผิด — port อยู่ใน transport header",
+   "ผิด — IP อยู่ใน IP header"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "PPP ใช้โปรโตคอลควบคุมคู่ใดในการตั้งค่าลิงก์?",
+  "choices": [
+   "SDLC/CAN",
+   "LLC/SNAP",
+   "PDCP/RLC",
+   "LCP/NCP"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นตัวอย่าง bit-oriented protocols",
+   "ผิด — เป็นของ IEEE 802",
+   "ผิด — เป็นของ LTE/5G",
+   "ถูก — PPP: Framing, LCP/NCP, FCS"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Data link ของเครือข่ายมือถือ LTE/5G ประกอบด้วยโปรโตคอลใด?",
+  "choices": [
+   "LLC, SNAP, MAC",
+   "LCP, NCP, FCS",
+   "PDCP, RLC, MAC",
+   "HDLC, LAPB, PPP"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นของ IEEE 802 LAN",
+   "ผิด — เป็นของ PPP",
+   "ถูก — Cellular เป็น system-specific: PDCP, RLC, MAC",
+   "ผิด — เป็นโปรโตคอล point-to-point/WAN"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Token Ring (legacy) เป็นมาตรฐาน IEEE ใด?",
+  "choices": [
+   "802.11",
+   "802.5",
+   "802.3",
+   "802.15.4"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 802.11 คือ Wi-Fi",
+   "ถูก — Token Ring = 802.5 ใช้ token access",
+   "ผิด — 802.3 คือ Ethernet",
+   "ผิด — 802.15.4 คือ low-power WPAN"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โครงสร้าง frame ทั่วไปเรียงลำดับอย่างไร?",
+  "choices": [
+   "Flag|Address|Control|Data|FCS|Flag",
+   "Flag|Control|Data|Address|FCS|Flag",
+   "Address|Flag|Control|Data|Flag|FCS",
+   "Flag|Data|Address|Control|FCS|Flag"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Flag | Address | Control | Data | FCS | Flag",
+   "ผิด — address อยู่ก่อน control",
+   "ผิด — flag ต้องอยู่หัวและท้าย",
+   "ผิด — address/control อยู่ก่อน data"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นตัวอย่างของ bit-oriented protocol ทั้งหมด?",
+  "choices": [
+   "Bisync, SLIP, PPP",
+   "UART, PPP, Bisync",
+   "Modbus, UART, PPP",
+   "HDLC, SDLC, CAN"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็น byte-oriented",
+   "ผิด — เป็น character-oriented",
+   "ผิด — เป็น character-oriented",
+   "ถูก — HDLC, SDLC, CAN, Frame Relay, ATM, X.25 เป็น bit-oriented"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UART ใช้อะไรกำหนดขอบเขตข้อมูลแต่ละชุด?",
+  "choices": [
+   "START/STOP conditions",
+   "flag pattern 01111110",
+   "length field ในส่วนหัว",
+   "start/stop bits ต่อไบต์"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ I²C",
+   "ผิด — เป็น flag ของ HDLC",
+   "ผิด — เป็นของ Ethernet/802.11",
+   "ถูก — UART ใช้ start/stop bits"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Byte stuffing เพิ่มอะไรเข้าไปในข้อมูล?",
+  "choices": [
+   "ESC 1 ไบต์",
+   "Flag 1 ไบต์",
+   "บิต 0 หนึ่งบิต",
+   "padding ท้าย"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เพิ่ม ESC หน้า flag หรือ ESC ที่อยู่ในข้อมูล",
+   "ผิด — การเพิ่ม flag จะทำให้ตัด frame ผิด",
+   "ผิด — นั่นคือ bit stuffing",
+   "ผิด — padding ใช้เติมให้ถึงขนาดขั้นต่ำ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Low-power WPAN ในตาราง data link protocols คือมาตรฐานใด?",
+  "choices": [
+   "IEEE 802.3",
+   "IEEE 802.11",
+   "IEEE 802.15.4",
+   "IEEE 802.5"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Ethernet",
+   "ผิด — Wi-Fi",
+   "ถูก — 802.15.4 ใช้ Adaptation + MAC สำหรับ low-power framing/access",
+   "ผิด — Token Ring"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Sublayer MAC รับผิดชอบงานใด?",
+  "choices": [
+   "หาเส้นทาง IP ข้ามหลายเครือข่าย",
+   "framing, addressing, FCS",
+   "multiplex IPv4, IPv6, ARP",
+   "ต่อ TCP session ข้ามเครื่อง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นหน้าที่ Network layer",
+   "ถูก — MAC: frame format, MAC addressing, medium access, FCS",
+   "ผิด — เป็นหน้าที่ LLC",
+   "ผิด — เป็นหน้าที่ Transport layer"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม LLC จึงอยู่ด้านบนของ MAC?",
+  "choices": [
+   "เป็นตัวเชื่อมกับ network layer",
+   "เป็นตัวคำนวณ FCS ให้ frame",
+   "เป็นตัวส่งสัญญาณไฟฟ้าลงสายเอง",
+   "เป็นตัวแย่งสิทธิ์การใช้สื่อกลาง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — LLC ทำ network-layer interface + multiplexing จึงอยู่ติด network layer",
+   "ผิด — FCS เป็นงาน MAC",
+   "ผิด — เป็นงาน physical",
+   "ผิด — เป็นงาน MAC"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม error recovery และ flow control จึงเป็นบริการ “optional” ของ data link?",
+  "choices": [
+   "ทำได้เฉพาะที่ physical",
+   "ใช้ได้เฉพาะบน Wi-Fi",
+   "บางลิงก์ไม่จำเป็นต้องมี",
+   "ทุกลิงก์ห้ามใช้เด็ดขาด"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นงาน data link",
+   "ผิด — ไม่ได้จำกัดแค่ Wi-Fi",
+   "ถูก — บางเทคโนโลยี (เช่น Wi-Fi) ทำ ACK/retransmission บางแบบ (Ethernet) ไม่ทำ",
+   "ผิด — ใช้ได้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม framing แบบ length/fixed-size จึงไม่ต้องทำ stuffing?",
+  "choices": [
+   "ข้อมูลจะไม่มีบิต 1 อยู่เลยสักตัว",
+   "ใช้ ESC แทน stuffing แล้ว",
+   "ผู้รับไม่ต้องหาขอบของ frame เลย",
+   "ไม่ได้ใช้ delimiter หาขอบเขต"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ข้อมูลมีอะไรก็ได้",
+   "ผิด — ESC คือ byte stuffing",
+   "ผิด — ยังต้องรู้ขอบเขต (จาก length)",
+   "ถูก — ใช้ length field/ขนาดคงที่ ข้อมูลจึงไม่ถูกเข้าใจผิดเป็น delimiter"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม overhead ของ framing แบบ length/fixed-size จึงคาดการณ์ได้?",
+  "choices": [
+   "ข้อมูลทุก frame เหมือนกัน",
+   "ไม่มีบิตเพิ่มตามเนื้อข้อมูล",
+   "เพิ่ม 0 ทุก 5 บิตเสมอ",
+   "เพิ่ม ESC ทุกไบต์เท่ากัน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ข้อมูลต่างกันได้",
+   "ถูก — ไม่ stuff overhead จึงไม่ขึ้นกับข้อมูล (อาจมีแค่ padding)",
+   "ผิด — นั่นคือ bit stuffing และขึ้นกับข้อมูล",
+   "ผิด — ไม่ใช้ ESC"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Unicode สร้างปัญหาให้ byte-oriented framing อย่างไร?",
+  "choices": [
+   "Unicode ไม่มีตัวอักษรภาษาไทย",
+   "Unicode ห้ามส่งผ่านสายทองแดง",
+   "Unicode ต้องใช้ flag สองตัว",
+   "ตัวอักษร 16/32 บิตขัดกับ 8 บิต"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Unicode มีภาษาไทย",
+   "ผิด — ไม่เกี่ยวกับสื่อกลาง",
+   "ผิด — ไม่ใช่ประเด็น",
+   "ถูก — byte-oriented คิดเป็นตัวอักษร 8 บิต แต่ Unicode มี 16 และ 32 บิต"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม Wi-Fi 802.11 จึงมีหน้าที่ ACK และ retransmission ใน data link?",
+  "choices": [
+   "ลิงก์ไร้สายเกิด error บ่อย",
+   "Wi-Fi ส่งข้อมูลทีละบิตเท่านั้น",
+   "ACK ใช้แทน MAC address",
+   "Wi-Fi ไม่มี FCS ตรวจ error"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — สื่อไร้สายเสี่ยงสัญญาณรบกวนและการชน จึงยืนยันการรับทุก frame",
+   "ผิด — ไม่ใช่เหตุผล",
+   "ผิด — ACK ไม่ได้แทน address",
+   "ผิด — Wi-Fi มี FCS"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม MAC address ใน frame เปลี่ยนทุก hop แต่ IP address คงเดิม?",
+  "choices": [
+   "router ไม่รู้จัก IP address",
+   "IP ถูกเข้ารหัสไว้จนแก้ไม่ได้",
+   "MAC ใช้ได้แค่ในลิงก์ท้องถิ่น",
+   "MAC ระบุ process ปลายทาง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — router ใช้ IP ส่งต่อ",
+   "ผิด — ไม่ใช่เหตุผล",
+   "ถูก — link-layer address ระบุอุปกรณ์บนลิงก์นั้น IP ระบุต้นทาง/ปลายทางทั้งเส้นทาง",
+   "ผิด — process ระบุด้วย port"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผู้รับ HDLC เห็นบิต 01111110 ในสตรีม ตีความว่าอะไร?",
+  "choices": [
+   "ค่า FCS ของ frame นั้น",
+   "ขอบเขตของ frame (flag)",
+   "บิต error ต้องทิ้ง frame",
+   "ข้อมูลที่ถูก stuff ไปแล้ว"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — FCS เป็นค่าตรวจ error",
+   "ถูก — 0x7E เป็น flag บอกหัว/ท้าย frame เพราะข้อมูลถูก stuff จนไม่มี 1 ติดกัน 6 ตัว",
+   "ผิด — ไม่ใช่ error",
+   "ผิด — ข้อมูลที่ stuff แล้วจะไม่มีรูปนี้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เป้าหมายของ multiple access บนสื่อที่แชร์คือข้อใด?",
+  "choices": [
+   "ให้สถานีเดียวส่งได้ตลอดเวลา",
+   "ให้ทุกสถานีส่งพร้อมกันเสมอ",
+   "ตัดสถานีที่ช้าออกจากสื่อกลาง",
+   "ยุติธรรม มีประสิทธิภาพ ชนน้อย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ยุติธรรม",
+   "ผิด — ส่งพร้อมกันทำให้ชน",
+   "ผิด — ไม่ใช่เป้าหมาย",
+   "ถูก — fairly, efficiently, fewer collisions"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม full-duplex switch แบบ star จึงไม่มี contention?",
+  "choices": [
+   "แต่ละลิงก์เป็นของสถานีเดียว",
+   "ทุกสถานีแชร์สายเส้นเดียวกัน",
+   "ใช้ token วนรอบทุกเครื่อง",
+   "switch ส่ง frame ทีละพอร์ต"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — dedicated link: ไม่มีใครมาแย่งใช้ ส่งและรับพร้อมกันได้",
+   "ผิด — นั่นคือ bus (shared)",
+   "ผิด — นั่นคือ token ring",
+   "ผิด — switch ส่งขนานได้หลายพอร์ต"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“Data transparency” ใน framing หมายถึงอะไร?",
+  "choices": [
+   "ผู้ส่งมองเห็นข้อมูลในเครื่องผู้รับ",
+   "ส่งข้อมูลใดก็ได้ไม่ปน delimiter",
+   "frame ไม่มี header/trailer",
+   "ข้อมูลถูกเข้ารหัสจนคนอื่นอ่านไม่ได้"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่ความหมาย",
+   "ถูก — ใช้ stuffing ให้ข้อมูลใด ๆ ไม่ถูกเข้าใจผิดว่าเป็นขอบ frame",
+   "ผิด — frame ยังมี header/trailer",
+   "ผิด — ไม่เกี่ยวกับการเข้ารหัส"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม Wireshark ปกติจึงไม่เห็น preamble, SFD และ FCS?",
+  "choices": [
+   "อยู่ใน IP header แทน",
+   "ถูกเข้ารหัสไว้โดย TLS",
+   "การ์ดเครือข่ายตัดออกก่อน",
+   "frame ไม่มีฟิลด์เหล่านี้"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ได้อยู่ใน IP header",
+   "ผิด — TLS อยู่ชั้นบน",
+   "ถูก — NIC จัดการและตัดทิ้งก่อนส่งให้ OS",
+   "ผิด — Ethernet frame มีฟิลด์เหล่านี้"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เน็ตบ้าน DSL ที่ต้อง login ด้วย username/password กับ ISP มักใช้อะไร?",
+  "choices": [
+   "LAPB",
+   "HDLC",
+   "CAN",
+   "PPPoE"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ X.25",
+   "ผิด — HDLC ใช้กับ serial WAN",
+   "ผิด — ใช้ในอุปกรณ์อุตสาหกรรม/รถยนต์",
+   "ถูก — PPP ปัจจุบันพบใน PPPoE (broadband/DSL)"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบ CAN bus ในรถยนต์ใช้ framing แบบใด?",
+  "choices": [
+   "Bit-oriented",
+   "Token-based",
+   "Fixed-size",
+   "Byte-oriented"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — CAN อยู่กลุ่ม bit-oriented",
+   "ผิด — ไม่ใช่วิธี framing ในตาราง",
+   "ผิด — เป็นของ Ethernet/ATM",
+   "ผิด — เป็นของ UART/PPP/Modbus"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ออกแบบ LAN ความเร็วสูงที่อยากได้ overhead คงที่ ควรใช้ framing แบบใด?",
+  "choices": [
+   "Byte-oriented+ESC",
+   "Length/Fixed-size",
+   "Character stuffing",
+   "Bit-oriented+flag"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — overhead ขึ้นกับข้อมูล",
+   "ถูก — มีประสิทธิภาพ overhead คาดการณ์ได้ เหมาะกับ LAN ความเร็วสูง",
+   "ผิด — overhead ขึ้นกับข้อมูล",
+   "ผิด — stuffed bits ขึ้นกับข้อมูล"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "Wireshark แสดง “Ethernet II, Src: …, Dst: …” ค่า Src/Dst นี้คืออะไร?",
+  "choices": [
+   "IP address",
+   "Port number",
+   "MAC address",
+   "Domain name"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — IP อยู่ในบรรทัด IPv4",
+   "ผิด — port อยู่ในบรรทัด TCP",
+   "ถูก — เป็น link-layer (MAC) address ใน frame header",
+   "ผิด — ไม่อยู่ใน frame"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เซ็นเซอร์ไร้สายใช้แบตเตอรี่ต้องการ data link ที่ประหยัดพลังงาน ควรเลือกอะไร?",
+  "choices": [
+   "IEEE 802.15.4",
+   "Token Ring",
+   "Frame Relay",
+   "IEEE 802.3"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — low-power WPAN framing/access",
+   "ผิด — legacy LAN",
+   "ผิด — เป็น WAN",
+   "ผิด — Ethernet ใช้สาย"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "สถานีภาคพื้นหลายแห่งส่งขึ้นดาวเทียมดวงเดียวกัน ต้องมีกลไกใดเพิ่ม?",
+  "choices": [
+   "IP routing ในดาวเทียม",
+   "Port number แยกต่อสถานี",
+   "Medium access control",
+   "Byte stuffing ซ้ำสองรอบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่ปัญหา data link",
+   "ผิด — port เป็นของ transport",
+   "ถูก — satellite เป็นสื่อที่แชร์ ต้องมี MAC ประสานการส่ง",
+   "ผิด — ไม่แก้ปัญหาการแย่งสื่อ"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อมูล 01111111 หลังทำ bit stuffing (HDLC) จะได้ข้อใด?",
+  "choices": [
+   "001111111",
+   "011111011",
+   "011111110",
+   "011111101"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — แทรกผิดตำแหน่ง",
+   "ถูก — 0 + 11111 → แทรก 0 → 0 11111 0 11",
+   "ผิด — ต่อ 0 ไว้ท้ายแทน",
+   "ผิด — แทรกหลัง 1 ตัวที่ 6 (ช้าไป)"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อมูล 11111111111 (1 ติดกัน 11 ตัว) หลัง bit stuffing ได้ข้อใด?",
+  "choices": [
+   "111110111111",
+   "1111110111110",
+   "1111101111110",
+   "1111101111101"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — แทรกแค่ครั้งเดียว",
+   "ผิด — แทรกหลัง 1 ตัวที่ 6",
+   "ผิด — แทรก 0 ท้ายผิดตำแหน่ง",
+   "ถูก — 11111 0 11111 0 1"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อมูล 0111110111110 ต้องแทรกบิตเพิ่มกี่บิตตอน bit stuffing?",
+  "choices": [
+   "0 บิต",
+   "3 บิต",
+   "1 บิต",
+   "2 บิต"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ต้องแทรกแม้ถัดไปจะเป็น 0 อยู่แล้ว",
+   "ผิด — นับเกิน",
+   "ผิด — เจอ 11111 สองครั้ง",
+   "ถูก — มี 11111 สองชุด → แทรก 0 สองตัว ได้ 011111001111100"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ผู้รับ HDLC ได้ 0111110110 (ภายใน frame) หลัง unstuff เหลือข้อใด?",
+  "choices": [
+   "011111010",
+   "011111110",
+   "0111110110",
+   "01111110"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ลบบิตผิดตำแหน่ง",
+   "ถูก — ลบ 0 ที่ตามหลัง 11111 → 011111 + 110",
+   "ผิด — ยังไม่ได้ unstuff",
+   "ผิด — ลบเกินไป 1 บิต"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ผู้รับได้ 1111101111100 หลัง unstuff เหลือกี่บิต และเป็นอะไร?",
+  "choices": [
+   "1111111110",
+   "11111011111",
+   "11111111110",
+   "111111111100"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ลบเกิน",
+   "ผิด — ลบ 0 ผิดตัว",
+   "ถูก — ลบ 0 หลัง 11111 ทั้งสองจุด เหลือ 11 บิต",
+   "ผิด — ลบแค่จุดเดียว"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อมูลเป็นเลข 1 ติดกัน 20 ตัว หลัง bit stuffing ยาวกี่บิต?",
+  "choices": [
+   "24 บิต",
+   "25 บิต",
+   "23 บิต",
+   "20 บิต"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แทรก 0 หลังทุก 1 ห้าตัว = 4 ครั้ง → 20 + 4 = 24",
+   "ผิด — นับเกิน",
+   "ผิด — ลืมแทรกหลังชุดสุดท้าย",
+   "ผิด — ไม่ได้ stuff"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อมูล A Flag B ESC ESC C (6 ไบต์) หลัง byte stuffing ต้องเพิ่มกี่ไบต์?",
+  "choices": [
+   "3 ไบต์",
+   "1 ไบต์",
+   "2 ไบต์",
+   "4 ไบต์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เพิ่ม ESC หน้า Flag 1 ตัว + หน้า ESC อีก 2 ตัว = 3",
+   "ผิด — ลืม ESC ในข้อมูล",
+   "ผิด — stuff ESC แค่ตัวเดียว",
+   "ผิด — นับเกิน"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "payload 10 ไบต์ มี Flag 2 ตัว และ ESC 1 ตัว หลัง byte stuffing payload ยาวกี่ไบต์?",
+  "choices": [
+   "16 ไบต์",
+   "11 ไบต์",
+   "12 ไบต์",
+   "13 ไบต์"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — คูณแทนบวก",
+   "ผิด — stuff แค่ตัวเดียว",
+   "ผิด — ลืม stuff ESC",
+   "ถูก — เพิ่ม ESC 3 ตัว → 10 + 3 = 13"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "frame 1,000 bits บนลิงก์ 1 Mbps vulnerable time (2 × T_fr) เท่าใด?",
+  "choices": [
+   "1 ms",
+   "2 ms",
+   "0.5 ms",
+   "4 ms"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นแค่ T_fr",
+   "ถูก — T_fr = 1,000/10⁶ = 1 ms → 2 × 1 = 2 ms",
+   "ผิด — หารแทนคูณ",
+   "ผิด — คูณ 4"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "Alice ส่งถึง Bob ผ่าน router 4 ตัว datagram ถูกห่อเป็น frame ใหม่ทั้งหมดกี่ครั้ง (นับทุกลิงก์)?",
+  "choices": [
+   "1 ครั้ง",
+   "4 ครั้ง",
+   "5 ครั้ง",
+   "6 ครั้ง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — frame สร้างใหม่ทุก hop",
+   "ผิด — ลืมลิงก์แรกจาก Alice",
+   "ถูก — 4 routers = 5 ลิงก์ แต่ละลิงก์ใช้ frame ของตัวเอง",
+   "ผิด — นับเกิน"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

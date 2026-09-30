@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L4 User Management (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L4 User Management (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "Username ใน /etc/passwd ยาวได้ไม่เกินกี่ตัวอักษร?",
+  "choices": [
+   "32 ตัว",
+   "64 ตัว",
+   "8 ตัว",
+   "16 ตัว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ไม่เกิน 32 ตัวอักษร",
+   "ผิด — มากเกิน",
+   "ผิด — น้อยเกิน",
+   "ผิด — น้อยเกิน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่องที่ 5 ของ /etc/passwd (User ID Info) เก็บอะไร?",
+  "choices": [
+   "path ของ shell ที่ใช้",
+   "ชื่อ-นามสกุล เบอร์โทร",
+   "รหัสผ่านที่เข้ารหัสแล้ว",
+   "หมายเลขกลุ่มหลัก GID"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ช่องที่ 7",
+   "ถูก — รายละเอียดเพิ่มของผู้ใช้",
+   "ผิด — อยู่ใน /etc/shadow",
+   "ผิด — ช่องที่ 4"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UID ช่วง 1–99 จองให้ใคร?",
+  "choices": [
+   "superuser root",
+   "ผู้ใช้ทั่วไปที่สร้างใหม่",
+   "โปรแกรมที่ admin ลง",
+   "โปรแกรมของระบบ"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — UID 0",
+   "ผิด — 1000 ขึ้นไป",
+   "ผิด — 100–999",
+   "ถูก — 1–99 = โปรแกรมของระบบ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "/bin/csh คือ shell ชนิดใด?",
+  "choices": [
+   "K shell (ksh)",
+   "Bourne (sh)",
+   "C shell (csh)",
+   "Bourne Again"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — /bin/ksh",
+   "ผิด — /bin/sh",
+   "ถูก — /bin/csh",
+   "ผิด — /bin/bash"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน /etc/shadow ช่องที่ 5 (Maximum password age) ค่า 99999 หมายถึงอะไร?",
+  "choices": [
+   "แทบไม่มีวันหมดอายุ",
+   "ห้ามเปลี่ยนรหัสเลย",
+   "ต้องเปลี่ยนทุกวัน",
+   "บัญชีถูกล็อกแล้ว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เปลี่ยนเมื่อไรก็ได้ แทบไม่หมดอายุ",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ผิด — ล็อกคือ !"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่องที่ 6 ของ /etc/shadow (ค่า 7 ในตัวอย่าง) คืออะไร?",
+  "choices": [
+   "Password inactive days",
+   "Password warning period",
+   "Account expiration date",
+   "Minimum password age"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ช่องที่ 7",
+   "ถูก — เตือนก่อนหมดอายุ 7 วัน",
+   "ผิด — ช่องที่ 8",
+   "ผิด — ช่องที่ 4"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในช่องรหัสของ /etc/shadow ค่า * หมายถึงอะไร?",
+  "choices": [
+   "รหัสผ่านหมดอายุในวันนี้",
+   "user นี้ถูกล็อกไว้แล้ว",
+   "รหัสเก็บที่ /etc/passwd",
+   "ไม่มีรหัสเข้าถึง user นี้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — นั่นคือ !",
+   "ผิด — กลับกัน",
+   "ถูก — * = ไม่มีรหัส เช่น daemon"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "รหัสผ่านใน shadow ที่ขึ้นต้นด้วย $6$ ใช้อัลกอริทึมใด?",
+  "choices": [
+   "yescrypt",
+   "MD5-crypt",
+   "SHA-512",
+   "AES-256"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — $y$",
+   "ผิด — $1$",
+   "ถูก — $6$ = SHA-512",
+   "ผิด — ไม่ใช่ในบท"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "sudo ย่อมาจากอะไร?",
+  "choices": [
+   "Switch user do",
+   "System user do",
+   "Super user do",
+   "Secure user do"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — substitute คือ su",
+   "ผิด — ไม่ใช่",
+   "ถูก — Super user do",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "option ใดของ usermod ใช้กำหนดวันหมดอายุของผู้ใช้?",
+  "choices": [
+   "-U",
+   "-e",
+   "-L",
+   "-m"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — unlock",
+   "ถูก — -e YYYY-MM-DD",
+   "ผิด — lock",
+   "ผิด — สร้าง/ย้าย home"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งใดแสดง uid, gid และทุกกลุ่มของผู้ใช้?",
+  "choices": [
+   "groups",
+   "su",
+   "whoami",
+   "id"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — แสดงแค่กลุ่ม",
+   "ผิด — สลับผู้ใช้",
+   "ผิด — แสดงแค่ชื่อ",
+   "ถูก — id แสดงครบ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Bangkok ใช้เวลาเท่าใดเทียบกับ UTC?",
+  "choices": [
+   "UTC+7",
+   "UTC−7",
+   "UTC+8",
+   "UTC+5"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — UTC+7",
+   "ผิด — กลับเครื่องหมาย",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม /etc/passwd อ่านได้ทุกคนแต่ /etc/shadow อ่านได้เฉพาะ root?",
+  "choices": [
+   "passwd ใช้ได้เฉพาะ root",
+   "shadow เก็บรหัสที่เข้ารหัสไว้",
+   "shadow ใหญ่เกินกว่าจะเปิด",
+   "passwd ไม่มีข้อมูลสำคัญเลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ทุกคนอ่านได้",
+   "ถูก — กันไม่ให้ผู้ใช้เห็นรหัสของคนอื่น",
+   "ผิด — ไม่ใช่",
+   "ผิด — มี UID/home แต่ไม่ลับ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Minimum password age ต่างจาก Maximum password age อย่างไร?",
+  "choices": [
+   "อายุสูงสุด vs ต้องรอก่อนเปลี่ยน",
+   "วันสร้างบัญชี vs วันลบบัญชีทิ้ง",
+   "ต้องรอก่อนเปลี่ยน vs อายุสูงสุด",
+   "วันเตือนล่วงหน้า vs วันปิดบัญชี"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — สลับกัน",
+   "ผิด — ไม่ใช่",
+   "ถูก — min = ต้องรอ, max = อายุสูงสุด",
+   "ผิด — นั่นคือ warn/inactive"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมผู้ใช้ที่อยู่กลุ่ม sudo จึงใช้คำสั่ง sudo ได้?",
+  "choices": [
+   "กลุ่ม sudo ได้สิทธิ์ยืม root",
+   "กลุ่ม sudo มี UID เป็น 0",
+   "sudo ไม่ต้องใช้รหัสเลย",
+   "ทุกคนใช้ sudo ได้อยู่แล้ว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ระบบอนุญาตสมาชิกกลุ่ม sudo ให้รันคำสั่งแบบ root",
+   "ผิด — UID 0 คือ root",
+   "ผิด — ต้องใส่รหัสตัวเอง",
+   "ผิด — ไม่ใช่ทุกคน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "หลัง su test1 ทำไมยังอยู่ directory เดิม?",
+  "choices": [
+   "ต้อง reboot ก่อนจึงเปลี่ยน",
+   "test1 ไม่มีสิทธิ์ใช้คำสั่ง cd",
+   "su พากลับ home อัตโนมัติ",
+   "su เปลี่ยนแค่ตัวผู้ใช้เท่านั้น"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ต้อง",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ได้พากลับ",
+   "ถูก — su ธรรมดาไม่ย้าย directory (ในแลปยังอยู่ /home)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม test1 จึงเข้าไปดูไฟล์ใน home ของ sudsanguan ได้?",
+  "choices": [
+   "home ทุกอันเป็นของ test1",
+   "directory นั้นเปิดให้อ่านได้",
+   "test1 เป็น root อยู่แล้ว",
+   "su ให้สิทธิ์อ่านได้ทุกไฟล์เลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ถูก — สิทธิ์ drwxr-xr-x ให้คนอื่นอ่าน/เข้าได้ (ต่อยอดใน L5)",
+   "ผิด — test1 เป็นผู้ใช้ทั่วไป",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "sync:x:4:65534:sync:/bin:/bin/sync แสดงว่าบัญชีนี้ทำอะไรเมื่อ login?",
+  "choices": [
+   "รันคำสั่ง sync แล้วจบ",
+   "เข้า home /home/sync",
+   "ขึ้นข้อความห้าม login",
+   "เปิด bash ให้ใช้งานปกติ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — shell คือ /bin/sync ไม่ใช่ shell ปกติ",
+   "ผิด — home คือ /bin",
+   "ผิด — นั่นคือ nologin",
+   "ผิด — ไม่ใช่ bash"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมควรใช้ sudo แทนการ login เป็น root ตรง ๆ?",
+  "choices": [
+   "root ใช้คำสั่งได้น้อยกว่า",
+   "sudo ทำงานเร็วกว่า root",
+   "sudo ไม่ต้องใส่รหัสผ่านเลย",
+   "ตรวจสอบได้ว่าใครทำอะไร"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — root ทำได้ทุกอย่าง",
+   "ผิด — ไม่ใช่",
+   "ผิด — ต้องใส่รหัสตัวเอง",
+   "ถูก — บันทึกผู้ใช้แต่ละคนที่ยืมสิทธิ์ และ root ถูกล็อกไว้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "useradd แบบไม่ใส่ option ได้ค่าเริ่มต้นใดบ้าง?",
+  "choices": [
+   "ไม่มี UID จนกว่าจะตั้งให้เอง",
+   "UID 0, shell /bin/bash",
+   "UID ถัดไป, shell /bin/sh",
+   "UID 2000, shell /bin/csh"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ได้ UID อัตโนมัติ",
+   "ผิด — UID 0 เป็นของ root",
+   "ถูก — เช่น test1 ได้ 1001 และ /bin/sh (ไม่สร้าง home)",
+   "ผิด — 2000 ได้จาก -u 2000"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมบัญชีที่ติดตั้งมากับโปรแกรมมักมี * หรือ ! ในช่องรหัส?",
+  "choices": [
+   "เพื่อให้ login ได้ทุกคน",
+   "ไม่ต้องการให้คน login",
+   "เป็นบัญชีที่ถูกลบไปแล้ว",
+   "รหัสถูกเก็บไว้ในไฟล์อื่น"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ตรงข้าม",
+   "ถูก — ปิดการเข้าระบบด้วยรหัสผ่านเพื่อความปลอดภัย",
+   "ผิด — ยังอยู่",
+   "ผิด — x คือเก็บใน shadow"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมการสร้างกลุ่มจึงช่วยจัดการสิทธิ์ในระบบใหญ่?",
+  "choices": [
+   "ให้สิทธิ์ทีละกลุ่มแทนทีละคน",
+   "กลุ่มช่วยเข้ารหัสไฟล์ให้",
+   "กลุ่มลบผู้ใช้เก่าออกเอง",
+   "กลุ่มทำให้ไม่ต้องมี UID"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น ให้กลุ่ม A แก้ไฟล์ได้เฉพาะบาง directory",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ผิด — ยังต้องมี UID"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมรหัสผ่านต้องพิมพ์ 2 ครั้งตอนใช้ passwd?",
+  "choices": [
+   "ต้องใช้ 2 รหัสพร้อมกัน",
+   "ครั้งแรกเป็นรหัส root",
+   "เพื่อเข้ารหัสผ่านสองชั้น",
+   "ยืนยันว่าพิมพ์ได้ตรงกัน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้รหัสเดียว",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — ถ้าตรงกันจึงบันทึก กันพิมพ์ผิด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม UID ของผู้ใช้แต่ละคนต้องไม่ซ้ำกัน?",
+  "choices": [
+   "UID บอกขนาดของ home",
+   "UID ใช้ตั้งชื่อเครื่องในวง",
+   "ระบบใช้ UID ระบุตัวผู้ใช้",
+   "UID ใช้เป็นรหัสผ่านของผู้ใช้"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่เกี่ยว",
+   "ถูก — ระบบระบุตัวผู้ใช้ (และเจ้าของไฟล์) ด้วย UID ถ้าซ้ำจะแยกไม่ออก",
+   "ผิด — รหัสผ่านอยู่ใน shadow"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการสร้าง user dev ที่มี UID 1500 home /home/dev (สร้างจริง) ใช้ bash ใช้คำสั่งใด?",
+  "choices": [
+   "sudo usermod -u 1500 -m -s /bin/bash dev",
+   "sudo useradd -g 1500 -d -s /bin/sh dev",
+   "sudo useradd -u 1500 -m -s /bin/bash dev",
+   "sudo useradd -u 1500 -s /bin/bash dev"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — usermod แก้ผู้ใช้ที่มีอยู่",
+   "ผิด — -g คือ GID และ shell ผิด",
+   "ถูก — useradd + -u + -m + -s และต้องมี sudo",
+   "ผิด — ไม่มี -m จึงไม่สร้าง home จริง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการล็อกบัญชี intern ชั่วคราวโดยไม่ลบ ใช้คำสั่งใด?",
+  "choices": [
+   "sudo usermod -L intern",
+   "sudo userdel intern",
+   "sudo usermod -U intern",
+   "sudo passwd -d intern"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — -L = Lock",
+   "ผิด — ลบผู้ใช้",
+   "ผิด — -U = Unlock",
+   "ผิด — ไม่ใช่คำสั่งในบท"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการสร้างกลุ่ม design ที่มี GID 3000 ใช้คำสั่งใด?",
+  "choices": [
+   "sudo useradd -g 3000 design",
+   "sudo groupmod -g 3000 design",
+   "sudo groupadd -u 3000 design",
+   "sudo groupadd -g 3000 design"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — สร้าง user",
+   "ผิด — groupmod ใช้แก้กลุ่มเดิม ไม่ใช่สร้างใหม่",
+   "ผิด — -u ไม่ใช่ของ groupadd",
+   "ถูก — groupadd -g GID ชื่อกลุ่ม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "บรรทัด lab:x:1003:1003::/home/lab:/usr/sbin/nologin ข้อใดถูก?",
+  "choices": [
+   "ผู้ใช้ที่ใช้ bash เป็น shell",
+   "ผู้ใช้ทั่วไปที่ login ไม่ได้",
+   "root ที่ login ได้ตามปกติ",
+   "บัญชีระบบที่ไม่มี home dir"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — shell เป็น nologin",
+   "ถูก — UID 1003 ≥ 1000 และ shell เป็น nologin",
+   "ผิด — root คือ UID 0",
+   "ผิด — home คือ /home/lab"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เปลี่ยน home ของ test1 เป็น /home/test02 ใช้คำสั่งใด?",
+  "choices": [
+   "sudo usermod -d /home/test02 test1",
+   "sudo usermod -s /home/test02 test1",
+   "sudo usermod -c /home/test02 test1",
+   "sudo useradd -d /home/test02 test1"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — usermod -d เปลี่ยน home",
+   "ผิด — -s เปลี่ยน shell",
+   "ผิด — -c เปลี่ยนรายละเอียด",
+   "ผิด — useradd สร้างใหม่"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "useradd test5 แล้วขึ้น cannot lock /etc/passwd ควรแก้อย่างไร?",
+  "choices": [
+   "เปลี่ยนเป็น groupadd",
+   "รันคำสั่งซ้ำจนกว่าจะผ่าน",
+   "ใส่ sudo นำหน้าคำสั่ง",
+   "ลบไฟล์ /etc/passwd ทิ้ง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คนละงาน",
+   "ผิด — ไม่มีสิทธิ์ก็ไม่ผ่าน",
+   "ถูก — ต้องใช้สิทธิ์ root ในการแก้ /etc/passwd",
+   "ผิด — อันตรายมาก"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "shadow: Date of last change = 19000 และ Maximum = 90 รหัสจะหมดอายุวันที่ (นับแบบเดียวกัน) เท่าใด?",
+  "choices": [
+   "19900",
+   "19090",
+   "19000",
+   "18910"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — บวกผิดหลัก",
+   "ถูก — 19000 + 90 = 19090",
+   "ผิด — เป็นวันเปลี่ยนล่าสุด",
+   "ผิด — ลบแทนบวก"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากข้อก่อน (หมดอายุวัน 19090) ถ้า Warning = 7 ระบบเริ่มเตือนวันใด?",
+  "choices": [
+   "19090",
+   "19007",
+   "19097",
+   "19083"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นวันหมดอายุ",
+   "ผิด — นับจากวันเปลี่ยนรหัส",
+   "ผิด — บวกแทนลบ",
+   "ถูก — 19090 − 7 = 19083"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "Date of last change = 19000, Minimum = 5 ผู้ใช้เปลี่ยนรหัสได้เร็วสุดวันใด?",
+  "choices": [
+   "19005",
+   "19000",
+   "18995",
+   "19050"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 19000 + 5",
+   "ผิด — ต้องรอ 5 วัน",
+   "ผิด — ลบแทนบวก",
+   "ผิด — บวกผิดหลัก"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "รหัสหมดอายุวัน 19090 และ Inactivity = 10 บัญชีจะถูกปิดวันใด?",
+  "choices": [
+   "19190",
+   "19080",
+   "19100",
+   "19090"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — บวกผิดหลัก",
+   "ผิด — ลบแทนบวก",
+   "ถูก — หลังหมดอายุอีก 10 วัน = 19100",
+   "ผิด — เป็นวันหมดอายุรหัส"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "เวลา UTC 03:00 ตรงกับเวลา Bangkok กี่โมง?",
+  "choices": [
+   "20:00",
+   "10:00",
+   "08:00",
+   "04:00"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ลบ 7 แล้ววนรอบ",
+   "ถูก — UTC+7 → 03:00 + 7 = 10:00",
+   "ผิด — บวกผิด",
+   "ผิด — บวกแค่ 1"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "เวลา Bangkok 22:00 ตรงกับ UTC กี่โมง?",
+  "choices": [
+   "22:00",
+   "05:00",
+   "29:00",
+   "15:00"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้แปลง",
+   "ผิด — บวก 7 แล้ววนรอบ",
+   "ผิด — บวกแทนลบ",
+   "ถูก — 22:00 − 7 = 15:00"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ค่า 18262 วัน (นับจาก 1 ม.ค. 1970) ตรงกับประมาณปีใด?",
+  "choices": [
+   "ค.ศ. 2018",
+   "ค.ศ. 2050",
+   "ค.ศ. 2020",
+   "ค.ศ. 2000"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — หารผิด",
+   "ผิด — นับเป็นปีเลย",
+   "ถูก — 18262 ÷ 365.25 ≈ 50 ปี → 1 ม.ค. 2020",
+   "ผิด — คิดเป็น 30 ปี"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ช่วง UID 100–999 (โปรแกรมที่ admin ติดตั้ง) มีทั้งหมดกี่หมายเลข?",
+  "choices": [
+   "999",
+   "900",
+   "899",
+   "1000"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นับตั้งแต่ 1",
+   "ถูก — 999 − 100 + 1 = 900",
+   "ผิด — ลืม +1",
+   "ผิด — นับตั้งแต่ 0"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ระบบมีผู้ใช้ UID 1000 และ 1001 อยู่แล้ว useradd คนใหม่ (ไม่ใส่ -u) จะได้ UID ใด?",
+  "choices": [
+   "1002",
+   "1000",
+   "2000",
+   "999"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ใช้หมายเลขถัดไป",
+   "ผิด — มีคนใช้แล้ว",
+   "ผิด — ต้องกำหนด -u 2000 เอง",
+   "ผิด — อยู่ในช่วงโปรแกรม"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "id bob ได้ groups=1002(bob),27(sudo),46(plugdev),100(users) bob อยู่กี่กลุ่ม?",
+  "choices": [
+   "1 กลุ่ม",
+   "5 กลุ่ม",
+   "3 กลุ่ม",
+   "4 กลุ่ม"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นับแค่กลุ่มหลัก",
+   "ผิด — นับเกิน",
+   "ผิด — ลืมกลุ่มหลักของตัวเอง",
+   "ถูก — bob, sudo, plugdev, users"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

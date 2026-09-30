@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Internet Architecture (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🌐 ITDS231</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Internet Architecture (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "Access network กลุ่มใดเป็นแบบ Dedicated ทั้งหมด?",
+  "choices": [
+   "FTTH, HFC, Ethernet",
+   "DSL, Ethernet, Wi-Fi",
+   "FTTH, DSL, Ethernet",
+   "HFC, Wi-Fi, 4G/5G"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — HFC เป็น Shared",
+   "ผิด — Wi-Fi เป็น Shared",
+   "ถูก — Dedicated = FTTH, DSL, Ethernet",
+   "ผิด — ทั้งหมดเป็น Shared"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "4G/5G ใช้คลื่นความถี่แบบใด?",
+  "choices": [
+   "Unlicensed",
+   "Infrared",
+   "Coaxial",
+   "Licensed"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ Wi-Fi",
+   "ผิด — ไม่ใช่ในตาราง",
+   "ผิด — เป็นสายสัญญาณ ไม่ใช่คลื่น",
+   "ถูก — ค่ายมือถือประมูลคลื่นมา (licensed)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Ethernet ในตาราง access network มีความเร็วช่วงใด?",
+  "choices": [
+   "100 Mbps – 1 Gbps+",
+   "10 Mbps – 100 Gbps",
+   "10s Mbps – 100s Mbps",
+   "&lt;10 Mbps – 10s Mbps"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นของ FTTH",
+   "ถูก — Ethernet 10 Mbps – 100 Gbps",
+   "ผิด — เป็นของ HFC",
+   "ผิด — เป็นของ DSL"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "DSL ใช้สื่อกลางชนิดใด?",
+  "choices": [
+   "Copper Wire",
+   "Radio Wave",
+   "Coaxial Cable",
+   "Fiber Optic"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — DSL ใช้สายทองแดง (สายโทรศัพท์)",
+   "ผิด — เป็นของ Wi-Fi/4G/5G",
+   "ผิด — เป็นของ HFC",
+   "ผิด — เป็นของ FTTH"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "delay ใด “ตรวจ header และตัดสินใจหาเส้นทาง”?",
+  "choices": [
+   "d_proc",
+   "d_trans",
+   "d_queue",
+   "d_prop"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — processing delay",
+   "ผิด — d_trans คือดันบิตลงสาย",
+   "ผิด — d_queue คือรอในคิว",
+   "ผิด — d_prop คือสัญญาณเดินทาง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Transport layer ทำหน้าที่สื่อสารระดับใด?",
+  "choices": [
+   "โหนดสองตัวที่อยู่ติดกัน",
+   "โฮสต์ต้นทาง-ปลายทาง",
+   "บิตแต่ละบิตบนสื่อกลาง",
+   "โพรเซส-ต่อ-โพรเซส"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ Link",
+   "ผิด — เป็นของ Network",
+   "ผิด — เป็นของ Physical",
+   "ถูก — TCP/UDP ส่งระหว่าง process (segment)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Link layer เคลื่อนย้าย frame ระหว่างอะไร?",
+  "choices": [
+   "ISP สองระดับ",
+   "แอปสองแอป",
+   "โหนดที่ติดกัน",
+   "โพรเซสสองตัว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่นิยาม layer",
+   "ผิด — เป็นของ Application",
+   "ถูก — link layer ส่งระหว่าง node ที่อยู่ติดกัน",
+   "ผิด — เป็นของ Transport"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Botnet คืออะไร?",
+  "choices": [
+   "เครือข่ายส่วนตัวของ Google",
+   "Host ที่ถูกยึดรอคำสั่งโจมตี",
+   "ผู้บุกรุกแทรกกลางการสื่อสาร",
+   "มัลแวร์ที่ต้องให้ผู้ใช้คลิกเอง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็น content provider network",
+   "ถูก — มัลแวร์ยึด host จำนวนมากเป็น bot รอคำสั่งไปทำ DDoS",
+   "ผิด — นั่นคือ MITM",
+   "ผิด — ไม่ใช่นิยาม botnet"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "พีระมิด ISP เรียงจากบนลงล่างอย่างไร?",
+  "choices": [
+   "Access → Regional → Tier-1",
+   "Regional → Tier-1 → Access",
+   "Tier-1 → Access → Regional",
+   "Tier-1 → Regional → Access"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — กลับหัว",
+   "ผิด — Tier-1 อยู่บนสุด",
+   "ผิด — Regional อยู่ตรงกลาง",
+   "ถูก — Tier-1 อยู่บนสุด Access ใกล้ผู้ใช้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตัวอย่าง circuit switching: ลิงก์ 2 Mbps ผู้ใช้คนละ 1 Mbps รับได้สูงสุดกี่คน?",
+  "choices": [
+   "2 คน",
+   "1 คน",
+   "3 คน",
+   "4 คน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — จองคนละ 1 Mbps รับได้ 2 คนถ้วน",
+   "ผิด — น้อยเกิน",
+   "ผิด — packet switching จึงรับได้มากกว่า 3",
+   "ผิด — เกินความจุ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "handshake ของ TCP ในลำดับขั้น TCP/IP stack ใช้ข้อความใด?",
+  "choices": [
+   "GET/POST",
+   "RTS/CTS",
+   "SYN/ACK",
+   "HELO/QUIT"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็น HTTP methods",
+   "ผิด — ไม่ใช่ TCP handshake",
+   "ถูก — TCP handshake ใช้ SYN/ACK",
+   "ผิด — เป็นคำสั่ง SMTP"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "สไลด์นี้ระบุความเร็วสัญญาณในสื่อกลาง (s) ประมาณเท่าใด?",
+  "choices": [
+   "2.5×10⁶ m/s",
+   "2.5×10⁸ m/s",
+   "3.0×10⁵ m/s",
+   "1.0×10³ m/s"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ผิดหลัก",
+   "ถูก — ~2.5×10⁸ m/s (โจทย์มักใช้ 2×10⁸)",
+   "ผิด — ต่ำเกินไปมาก",
+   "ผิด — ต่ำเกินไปมาก"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม d_queue จึงเป็น delay ตัวเดียวที่แปรผัน?",
+  "choices": [
+   "ขึ้นกับขนาดแพ็กเก็ตซึ่งคงที่เสมอ",
+   "ขึ้นกับความเร็ว CPU โฮสต์",
+   "ขึ้นกับปริมาณทราฟฟิกขณะนั้น",
+   "ขึ้นกับความยาวสายซึ่งเปลี่ยน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ขนาดแพ็กเก็ตเกี่ยวกับ d_trans",
+   "ผิด — ไม่ใช่ตัวกำหนดหลัก",
+   "ถูก — รอในคิวมากน้อยตามความหนาแน่นของทราฟฟิก",
+   "ผิด — ความยาวสายคงที่ (d_prop)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมความเร็ว HFC ช่วงคนใช้เยอะจึงตก แต่ DSL ไม่ค่อยตก?",
+  "choices": [
+   "HFC แชร์ DSL เป็นแบบเฉพาะ",
+   "DSL แชร์ HFC เป็นแบบเฉพาะ",
+   "HFC ใช้ใยแก้ว DSL ใช้วิทยุ",
+   "ทั้งสองแบบแชร์ช่องเท่ากันหมด"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — HFC = Shared, DSL = Dedicated",
+   "ผิด — กลับกัน",
+   "ผิด — HFC ใช้ coaxial DSL ใช้ทองแดง",
+   "ผิด — DSL เป็น dedicated"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม packet switching จึงเหมาะกับข้อมูลแบบ bursty?",
+  "choices": [
+   "จองลิงก์ไว้ตลอดการเชื่อมต่อ",
+   "แชร์ลิงก์เฉพาะช่วงที่ส่งจริง",
+   "รับประกัน bandwidth คงที่",
+   "ไม่มีคิวให้ต้องรอเลยสักนิด"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นั่นคือ circuit",
+   "ถูก — ใช้ทรัพยากรเฉพาะตอนมีข้อมูล คนอื่นใช้ช่วงที่เหลือได้",
+   "ผิด — นั่นคือ circuit",
+   "ผิด — มี queuing delay"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เมื่อ I เข้าใกล้ 1 ทำไม queuing delay จึงพุ่งสูงชัน?",
+  "choices": [
+   "แพ็กเก็ตเล็กลงจนส่งได้ช้า",
+   "router หยุดทำงานชั่วคราว",
+   "สายสัญญาณยาวขึ้นทันทีทันใด",
+   "ข้อมูลเข้าเกือบเท่าที่ระบายได้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่สาเหตุ",
+   "ผิด — router ยังทำงาน",
+   "ผิด — ความยาวสายไม่เปลี่ยน",
+   "ถูก — อัตราเข้าเกือบเท่าความสามารถ คิวจึงสะสมยาวมาก"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม d_prop จึงไม่ขึ้นกับ L และ R?",
+  "choices": [
+   "ขึ้นกับขนาดคิวของ router",
+   "ขึ้นกับความยาวของ header",
+   "ขึ้นกับจำนวนผู้ใช้ในลิงก์นั้น",
+   "ขึ้นกับระยะทางและฟิสิกส์ล้วน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นเรื่องของ d_queue",
+   "ผิด — header มีผลกับ L (d_trans)",
+   "ผิด — จำนวนผู้ใช้มีผลกับ d_queue",
+   "ถูก — d/s ขึ้นกับระยะทางและความเร็วสัญญาณเท่านั้น"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม Host B ต้องแกะ header ครบทุกชั้น แต่ router แกะถึง L3?",
+  "choices": [
+   "router ไม่มี Link layer เลย",
+   "Host B เป็นผู้รับข้อความตัวจริง",
+   "router ต้องอ่านเนื้อหาของแอป",
+   "Host B ไม่มี Physical layer"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — router มี link layer",
+   "ถูก — ปลายทางต้องส่งข้อมูลถึงแอป router แค่หา IP ปลายทาง",
+   "ผิด — router ไม่ดูเนื้อหาแอป",
+   "ผิด — ทุกโฮสต์มี physical"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมการหั่นข้อความเป็นแพ็กเก็ตเล็กจึงให้ลิงก์ทำงานพร้อมกันได้?",
+  "choices": [
+   "แพ็กเก็ตแรกส่งต่อได้ขณะตัวหลังมา",
+   "ไม่ต้อง store-and-forward",
+   "ลด d_prop ของทุกลิงก์ลงได้",
+   "ทุกลิงก์เร็วขึ้นเป็นสามเท่าทันที"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — pipelining: ลิงก์ถัดไปส่งแพ็กเก็ตแรกขณะลิงก์ก่อนส่งแพ็กเก็ตถัดไป",
+   "ผิด — ยัง store-and-forward ทีละแพ็กเก็ต",
+   "ผิด — d_prop ไม่เปลี่ยน",
+   "ผิด — ความเร็วลิงก์เท่าเดิม"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Worm ต่างจากมัลแวร์ทั่วไปที่ต้องหลอกผู้ใช้อย่างไร?",
+  "choices": [
+   "แทรกกลางระหว่าง Alice/Bob",
+   "ยิงทราฟฟิกจากเครื่องเดียวพร้อมกัน",
+   "แพร่เองโดยไม่ต้องให้ผู้ใช้ทำอะไร",
+   "แพร่ได้เฉพาะเมื่อผู้ใช้เปิดไฟล์แนบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นั่นคือ MITM",
+   "ผิด — ไม่ใช่นิยาม worm",
+   "ถูก — worm คัดลอกตัวเองไปโฮสต์ที่มีช่องโหว่อัตโนมัติ",
+   "ผิด — ตรงข้ามกับ worm"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "MITM (Trudy) ทำอะไรได้บ้างกับการสื่อสาร?",
+  "choices": [
+   "ยิงทราฟฟิกจากหลายพันเครื่อง",
+   "คัดลอกตัวเองไปทุกโฮสต์อัตโนมัติ",
+   "เพิ่มความเร็วให้ลิงก์ของเหยื่อ",
+   "ดักอ่าน ปลอมแปลง แก้ไขข้อมูล"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นั่นคือ botnet/DDoS",
+   "ผิด — นั่นคือ worm",
+   "ผิด — ไม่ใช่",
+   "ถูก — แทรกกลาง Alice ↔ Bob เพื่ออ่าน/ปลอม/แก้ข้อมูล"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเน็ตบ้าน 2 Mbps อาจได้ throughput แค่ 100 kbps?",
+  "choices": [
+   "แพ็กเก็ตใหญ่กว่าความเร็วลิงก์",
+   "มีลิงก์คอขวดช้ากว่าบนเส้นทาง",
+   "router เพิ่มความเร็วให้ไม่ทัน",
+   "d_prop ลด bandwidth ลงไป"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่เหตุผล",
+   "ถูก — throughput = min(R1, R2, R3) ลิงก์ 100 kbps เป็นคอขวด",
+   "ผิด — ไม่ใช่กลไก",
+   "ผิด — d_prop ไม่ลด bandwidth"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม circuit switching จึงคาดการณ์ประสิทธิภาพได้?",
+  "choices": [
+   "จอง bandwidth คงที่ไว้",
+   "แชร์ลิงก์กับคนอื่นตลอด",
+   "ไม่มีการตั้งวงจรก่อนส่ง",
+   "ใช้คิวใหญ่ที่ทุก router"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — dedicated path/TDM slot รับประกัน bandwidth ตลอดการเชื่อมต่อ",
+   "ผิด — นั่นคือ packet switching",
+   "ผิด — circuit ต้องตั้งวงจรก่อน",
+   "ผิด — circuit ไม่ได้พึ่งคิว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมมาตรฐาน (Standards) จึงจำเป็นต่ออินเทอร์เน็ต?",
+  "choices": [
+   "ให้แต่ละค่ายผูกขาดตลาดได้",
+   "ลด d_prop ของสายสัญญาณ",
+   "ให้อุปกรณ์ต่างค่ายคุยกันได้",
+   "ให้ ISP เก็บค่า transit"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ตรงข้าม",
+   "ผิด — ไม่เกี่ยว",
+   "ถูก — interoperability: กำหนดลำดับและรูปแบบให้ทุกค่ายเข้าใจตรงกัน",
+   "ผิด — ไม่ใช่วัตถุประสงค์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เซิร์ฟเวอร์อยู่ไกล 15,000 กม. ซื้อเน็ตแรงขึ้นแล้วความหน่วงส่วนใดยังลดไม่ได้?",
+  "choices": [
+   "d_queue",
+   "d_proc",
+   "d_trans",
+   "d_prop"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้ขึ้นกับระยะ",
+   "ผิด — ไม่ได้ขึ้นกับระยะ",
+   "ผิด — R สูงขึ้นลด d_trans ได้",
+   "ถูก — d_prop ขึ้นกับระยะทาง ไม่ขึ้นกับ bandwidth"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการเชื่อมต่อขณะเดินทางข้ามเมืองตลอดเวลา ควรใช้ access network ใด?",
+  "choices": [
+   "4G/5G",
+   "DSL",
+   "Wi-Fi",
+   "FTTH"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Wide-area, high mobility",
+   "ผิด — ต้องอยู่กับที่",
+   "ผิด — ระยะสั้น",
+   "ผิด — ต้องอยู่กับที่"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ISP สองรายระดับเดียวกันส่งข้อมูลหากันเยอะ อยากเลี่ยงค่า transit ควรทำอะไร?",
+  "choices": [
+   "ลด TTL ของแพ็กเก็ต",
+   "เปลี่ยนเป็น circuit",
+   "Peering ผ่าน IXP",
+   "ซื้อ transit เพิ่ม"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่แก้เรื่องค่าใช้จ่าย",
+   "ถูก — peering ตรงหรือผ่าน IXP หลีกเลี่ยง transit fee",
+   "ผิด — ยิ่งเสียเงิน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "router มี traffic intensity 1.2 ต่อเนื่อง ผลที่จะเกิดคือข้อใด?",
+  "choices": [
+   "คิวว่างและ delay เกือบศูนย์",
+   "buffer เต็มและแพ็กเก็ตถูกทิ้ง",
+   "d_prop เพิ่มขึ้นตามความยาวคิว",
+   "throughput เพิ่มเป็น 1.2 เท่า"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นกรณี I ≈ 0",
+   "ถูก — I &gt; 1 เป็น unstable region คิวยาวจน buffer เต็ม → packet loss",
+   "ผิด — d_prop ไม่เกี่ยวกับคิว",
+   "ผิด — ส่งออกได้ไม่เกิน R"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "บ้านต้องการ bandwidth เฉพาะตัวและเร็วระดับ 1 Gbps ควรเลือกอะไร?",
+  "choices": [
+   "DSL",
+   "Wi-Fi",
+   "HFC",
+   "FTTH"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — DSL ช้ากว่ามาก",
+   "ผิด — Wi-Fi เป็น shared",
+   "ผิด — HFC เป็น shared",
+   "ถูก — FTTH dedicated 100 Mbps – 1 Gbps+"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "มีคนใน Wi-Fi ร้านกาแฟดักและแก้ข้อความระหว่างเรากับเว็บธนาคาร เป็นภัยแบบใด?",
+  "choices": [
+   "Traffic intensity",
+   "Man-in-the-Middle",
+   "Self-replicating",
+   "Botnet flooding"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่ภัยคุกคาม",
+   "ถูก — แทรกกลางเพื่อดักอ่าน/แก้ไข",
+   "ผิด — worm แพร่ตัวเอง",
+   "ผิด — botnet ถล่มด้วยทราฟฟิก"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "แพ็กเก็ต 12,000 bits ผ่านสาย 3 Mbps มี transmission delay เท่าใด?",
+  "choices": [
+   "4 ms",
+   "0.4 ms",
+   "40 ms",
+   "36 ms"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 12,000 / 3×10⁶ = 0.004 s = 4 ms",
+   "ผิด — ผิดหลัก 10 เท่า",
+   "ผิด — ผิดหลัก 10 เท่า",
+   "ผิด — คูณแทนหาร"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "อัปโหลดไฟล์ 2 MB ผ่านลิงก์ 8 Mbps ใช้เวลาดันข้อมูลลงสายเท่าใด?",
+  "choices": [
+   "4 s",
+   "0.25 s",
+   "2 s",
+   "16 s"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คำนวณผิด",
+   "ผิด — ลืมแปลง bytes เป็น bits",
+   "ถูก — 2×10⁶×8 = 16×10⁶ bits ÷ 8×10⁶ = 2 s",
+   "ผิด — ลืมหารด้วย R"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "500 bytes ผ่านสาย 100 Mbps ยาว 5,000 km (s = 2×10⁸ m/s) d_trans + d_prop เท่าใด?",
+  "choices": [
+   "25.04 ms",
+   "20.04 ms",
+   "0.040 ms",
+   "25.00 ms"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — d_trans = 4,000/10⁸ = 0.04 ms, d_prop = 5×10⁶/2×10⁸ = 25 ms รวม 25.04 ms",
+   "ผิด — ใช้ s = 2.5×10⁸ แทนค่าที่โจทย์ให้",
+   "ผิด — ลืม d_prop",
+   "ผิด — ลืม d_trans"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "เส้นทาง 10 Mbps → 500 kbps → 4 Mbps ส่งไฟล์ 1 MB ใช้เวลาเท่าใด?",
+  "choices": [
+   "0.8 s",
+   "2 s",
+   "16 s",
+   "128 s"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ใช้ลิงก์เร็วสุด 10 Mbps",
+   "ผิด — ใช้ 4 Mbps หรือลืมแปลง byte",
+   "ถูก — throughput = 500 kbps → 8×10⁶ / 5×10⁵ = 16 s",
+   "ผิด — คูณ 8 ซ้ำสองครั้ง"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "L = 1,000 bits, a = 1,500 แพ็กเก็ต/s, R = 1 Mbps ค่า I และผลคือข้อใด?",
+  "choices": [
+   "I = 0.15 คิวว่าง",
+   "I = 1.50 คิวล้น",
+   "I = 0.67 คิวปกติ",
+   "I = 1.50 คิวว่าง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ผิดหลัก",
+   "ถูก — La/R = 1.5×10⁶/10⁶ = 1.5 &gt; 1 → unstable, loss",
+   "ผิด — กลับเศษส่วน R/La",
+   "ผิด — ค่าถูกแต่ผลผิด I &gt; 1 คิวล้น"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "Circuit switching ลิงก์ 10 Mbps ผู้ใช้คนละ 2 Mbps รองรับได้กี่คน?",
+  "choices": [
+   "2 คน",
+   "20 คน",
+   "10 คน",
+   "5 คน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้ค่าต่อคน",
+   "ผิด — คูณแทนหาร",
+   "ผิด — นับตาม Mbps ของลิงก์",
+   "ถูก — 10 / 2 = 5 คน"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ข้อความ 2×10⁶ bits ผ่าน 2 ลิงก์ ลิงก์ละ 10 Mbps ไม่แบ่งแพ็กเก็ต ใช้เวลารวมเท่าใด?",
+  "choices": [
+   "0.8 s",
+   "0.4 s",
+   "0.6 s",
+   "0.2 s"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — คูณ 4",
+   "ถูก — ลิงก์ละ 2×10⁶/10⁷ = 0.2 s × 2 ลิงก์ = 0.4 s",
+   "ผิด — คิดเป็น 3 ลิงก์",
+   "ผิด — คิดลิงก์เดียว"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากข้อก่อน ถ้าแบ่งเป็น 200 แพ็กเก็ต แพ็กเก็ตละ 10⁴ bits ใช้เวลารวมเท่าใด?",
+  "choices": [
+   "0.201 s",
+   "0.202 s",
+   "0.200 s",
+   "0.400 s"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ต่อแพ็กเก็ต 10⁴/10⁷ = 0.001 s → 2×0.001 + 199×0.001 = 0.201 s",
+   "ผิด — นับแพ็กเก็ตเกิน",
+   "ผิด — ลืมเวลาลิงก์ที่ 2 ของแพ็กเก็ตสุดท้าย",
+   "ผิด — เป็นกรณีไม่แบ่ง"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ถ้า d_prop = 30 ms และ s = 2×10⁸ m/s สายยาวเท่าใด?",
+  "choices": [
+   "600 km",
+   "60,000 km",
+   "6,000 km",
+   "1,500 km"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ผิดหลัก",
+   "ผิด — ผิดหลัก",
+   "ถูก — d = 0.03 × 2×10⁸ = 6×10⁶ m = 6,000 km",
+   "ผิด — หารแทนคูณ"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ต้องการให้แพ็กเก็ต 1,500 bytes มี d_trans = 1 ms ต้องใช้ R เท่าใด?",
+  "choices": [
+   "15 Mbps",
+   "1.5 Mbps",
+   "1.2 Mbps",
+   "12 Mbps"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — คำนวณผิด",
+   "ผิด — ลืมแปลง bytes",
+   "ผิด — ผิดหลัก",
+   "ถูก — R = L/d = 12,000 bits / 0.001 s = 12 Mbps"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

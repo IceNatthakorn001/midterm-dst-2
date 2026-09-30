@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L1 Computer Systems + Ubuntu VM (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L1 Computer Systems + Ubuntu VM (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "General I/O Bus สำหรับอุปกรณ์ความเร็วสูงอย่าง Graphics ตัวอย่างในสไลด์คืออะไร?",
+  "choices": [
+   "SATA",
+   "USB",
+   "SCSI",
+   "PCI"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — อยู่ Peripheral I/O Bus",
+   "ผิด — อยู่ Peripheral I/O Bus",
+   "ผิด — อยู่ Peripheral I/O Bus",
+   "ถูก — General I/O Bus เช่น PCI"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "SSD เก็บข้อมูลไว้ในอะไร?",
+  "choices": [
+   "แผ่นอ่านด้วยแสงเลเซอร์",
+   "NAND flash memory",
+   "เทปแม่เหล็กแบบม้วน",
+   "จานแม่เหล็กที่หมุนอยู่"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นั่นคือ optical disk",
+   "ถูก — SSD = Cache + Controller + NAND flash",
+   "ผิด — นั่นคือ tape",
+   "ผิด — นั่นคือ HDD"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Optical disk ตามสไลด์ได้แก่อะไร?",
+  "choices": [
+   "USB-C และ SCSI",
+   "SATA และ mSATA",
+   "DVD และ Blu-ray",
+   "HDD, SSD และเทป"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็น bus/interface",
+   "ผิด — เป็น interface",
+   "ถูก — อ่านด้วยแสงเลเซอร์",
+   "ผิด — HDD แม่เหล็ก SSD flash"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "USB 3.0 ออกปีใดและเร็วสูงสุดเท่าใด?",
+  "choices": [
+   "2008, 5 Gbps",
+   "2001, 480 Mbps",
+   "2019, 40 Gbps",
+   "2013, 10 Gbps"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — USB 3.0 ปี 2008 ที่ 5 Gbps",
+   "ผิด — USB 2.0",
+   "ผิด — USB4",
+   "ผิด — USB 3.1"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Linus ประกาศใช้สัญญา GPL กับ Linux ปีใด?",
+  "choices": [
+   "1991",
+   "1999",
+   "1992",
+   "1996"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ปีปล่อยโค้ดแรก",
+   "ผิด — ปี Red Hat เข้าตลาดหุ้น",
+   "ถูก — 1992",
+   "ผิด — ปีเลือกมาสคอตเพนกวิน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "distribution แรกที่คนใช้กันแพร่หลาย (ปี 1993) คืออะไร?",
+  "choices": [
+   "Ubuntu",
+   "Fedora",
+   "Debian",
+   "Slackware"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — มาทีหลังในตระกูล Debian",
+   "ผิด — ตระกูล Red Hat มาทีหลัง",
+   "ผิด — ไม่ใช่ตามสไลด์",
+   "ถูก — Slackware ปี 1993"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Fedora และ CentOS อยู่ในตระกูล distro ใด?",
+  "choices": [
+   "Red Hat",
+   "Debian",
+   "Slackware",
+   "Gentoo"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตระกูล Red Hat",
+   "ผิด — Debian มี Ubuntu, Knoppix",
+   "ผิด — Slackware มี SuSE",
+   "ผิด — Gentoo อยู่กลุ่ม Other"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Linux เลือกเพนกวิน (Tux) เป็นมาสคอตปีใด?",
+  "choices": [
+   "2007",
+   "1996",
+   "1992",
+   "1998"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ปีตั้ง Linux Foundation",
+   "ถูก — 1996 หลัง Linus โดนเพนกวินกัด",
+   "ผิด — ปี GPL",
+   "ผิด — ปีบริษัทใหญ่รองรับ Linux"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ซอฟต์แวร์ virtual machine ที่สไลด์ยกตัวอย่างคืออะไร?",
+  "choices": [
+   "GRUB, BIOS, UEFI boot",
+   "bash, zsh, fish, dash",
+   "VirtualBox, VMware, KVM",
+   "Windows, Ubuntu, macOS"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นตัวบูต/firmware",
+   "ผิด — เป็น shell",
+   "ถูก — Oracle VM VirtualBox, VMware Workstation, KVM",
+   "ผิด — เป็น OS"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตอนสร้าง VM ใน Lab 1 ตั้ง Base Memory เท่าใด?",
+  "choices": [
+   "4 GB (4096 MB)",
+   "8 GB (8192 MB)",
+   "2 GB (2048 MB)",
+   "10 GB (10240 MB)"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่ค่าในแลป",
+   "ถูก — Base Memory 8 GB",
+   "ผิด — ไม่ใช่ค่าในแลป",
+   "ผิด — 10 GB คือขนาดดิสก์ขั้นต่ำ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "M1 Max ในสไลด์ผลิตด้วย process ขนาดเท่าใด?",
+  "choices": [
+   "5 nm",
+   "10 nm",
+   "32 nm",
+   "64 nm"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 5 nm process",
+   "ผิด — 10 คือจำนวน CPU core",
+   "ผิด — 32 คือจำนวน GPU core",
+   "ผิด — 64 คือ GB unified memory"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้น “Where are you?” ตอนติดตั้ง Ubuntu เลือกอะไร?",
+  "choices": [
+   "Jakarta",
+   "Singapore",
+   "Kolkata",
+   "Bangkok"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — เลือกเวลาประเทศไทย Bangkok"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Disk controller มีบทบาทอย่างไร?",
+  "choices": [
+   "ตัวจ่ายไฟฟ้าให้ดิสก์ทุกลูก",
+   "ตัวกลางระหว่างดิสก์กับ CPU",
+   "ตัวเก็บข้อมูลแทนดิสก์ทั้งหมด",
+   "ตัวระบายความร้อนของดิสก์"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไฟมาจาก power supply",
+   "ถูก — ดิสก์ต้องทำงานคู่กับ controller (ST-506, IDE)",
+   "ผิด — ไม่ได้เก็บข้อมูล",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“Type A deprecated ใน USB 3.2/USB4” หมายความว่าอย่างไร?",
+  "choices": [
+   "Type A คือ Type C รุ่นใหม่",
+   "Type A เร็วที่สุดในทุกรุ่น",
+   "มาตรฐานใหม่เลิกใช้ Type A",
+   "Type A ใช้ได้เฉพาะ USB4"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คนละแบบ",
+   "ผิด — ไม่ใช่",
+   "ถูก — USB 3.2 และ USB4 ใช้ Type C เท่านั้น",
+   "ผิด — ตรงข้าม"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“Linux เป็น Unix-like” หมายถึงอะไร?",
+  "choices": [
+   "Linux ซื้อโค้ดมาจาก Unix",
+   "Linux คือ Unix รุ่นใหม่ล่าสุด",
+   "Linux ใช้ได้เฉพาะบน Unix",
+   "ทำงานคล้าย Unix แต่เขียนใหม่"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้ซื้อโค้ด",
+   "ผิด — ไม่ใช่รุ่นของ Unix",
+   "ผิด — ไม่ใช่",
+   "ถูก — Linux เขียนใหม่ให้ทำงานเหมือน Unix และเป็น open source"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Linux distribution (distro) คืออะไร?",
+  "choices": [
+   "kernel + โปรแกรมที่รวมพร้อมใช้",
+   "ชื่อรุ่นของฮาร์ดแวร์ที่รัน Linux",
+   "โปรแกรมจำลองเครื่อง Linux",
+   "kernel เปล่า ๆ ที่ยังไม่มีอะไร"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น Ubuntu, Fedora รวม kernel และโปรแกรมต่าง ๆ",
+   "ผิด — ไม่ใช่ฮาร์ดแวร์",
+   "ผิด — นั่นคือ VM",
+   "ผิด — distro มีมากกว่า kernel"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม shell จึงถูกเปรียบเป็น “พนักงานรับออเดอร์”?",
+  "choices": [
+   "เป็นโปรแกรมที่ผู้ใช้เปิดดูเว็บ",
+   "เก็บไฟล์ทั้งหมดของผู้ใช้แต่ละคน",
+   "รับคำสั่งผู้ใช้ส่งต่อให้ kernel",
+   "ทำงานกับฮาร์ดแวร์โดยตรงเอง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นั่นคือ application",
+   "ผิด — ไฟล์อยู่บนดิสก์",
+   "ถูก — shell แปลคำสั่งแล้วส่งให้ kernel (เชฟ)",
+   "ผิด — นั่นคือ kernel"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเน็ตหลุดชั่วคราวตอนติดตั้ง VirtualBox?",
+  "choices": [
+   "Windows ถูกถอนการติดตั้ง",
+   "สร้าง adapter เสมือนขึ้นมา",
+   "VirtualBox บล็อกเว็บทั้งหมด",
+   "ไฟล์ติดตั้งมีขนาดใหญ่เกินไป"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ถูก — ติดตั้ง adapter เสมือนให้ VM ออกเน็ตผ่าน host จึงรีเซ็ตเครือข่าย",
+   "ผิด — ไม่ได้บล็อก",
+   "ผิด — ไม่ใช่เหตุผล"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ไฟล์ ISO ต่างจากไฟล์ VDI อย่างไร?",
+  "choices": [
+   "ดิสก์ของ VM vs แผ่นติดตั้ง",
+   "ไฟล์ Windows vs Linux",
+   "ไฟล์เสียง vs ไฟล์ภาพ",
+   "แผ่นติดตั้ง vs ดิสก์ของ VM"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — สลับกัน",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — ISO ใช้บูตติดตั้ง, VDI คือดิสก์เสมือนที่ OS ถูกติดตั้งลงไป"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ดิสก์แบบ dynamically allocated มีข้อควรรู้อะไร?",
+  "choices": [
+   "ลบไฟล์แล้วไฟล์ดิสก์ไม่หดเอง",
+   "ใช้ได้เฉพาะ Windows guest",
+   "ขยายเกินขนาดสูงสุดที่ตั้งได้",
+   "จองพื้นที่เต็มขนาดตั้งแต่สร้าง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — โตตามข้อมูลแต่จะไม่หดกลับเอง",
+   "ผิด — ไม่ใช่",
+   "ผิด — โตได้ถึงขนาดสูงสุดเท่านั้น",
+   "ผิด — นั่นคือ fixed size"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมควร Power Off จากใน Ubuntu ก่อนปิดหน้าต่าง VirtualBox?",
+  "choices": [
+   "เพื่อลบ VM ทิ้งหลังใช้เสร็จ",
+   "ให้ Windows ปิดตามอัตโนมัติ",
+   "กันไฟล์ในดิสก์เสมือนเสียหาย",
+   "เพื่อคืน RAM ให้ Ubuntu เพิ่ม"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ได้ลบ VM",
+   "ผิด — ไม่เกี่ยว",
+   "ถูก — เหมือนปิดคอมจริง ไม่ใช่ถอดปลั๊ก",
+   "ผิด — ไม่ใช่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมต้องเลือกดาวน์โหลด VirtualBox แบบ “Windows hosts”?",
+  "choices": [
+   "Ubuntu ต้องใช้ไฟล์ Windows",
+   "เครื่องจริงที่ติดตั้งเป็น Windows",
+   "เป็นรุ่นเดียวที่ดาวน์โหลดได้ฟรี",
+   "เพื่อให้ guest เป็น Windows"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ถูก — VirtualBox ติดตั้งบน host OS คือ Windows 10",
+   "ผิด — ทุกรุ่นฟรี",
+   "ผิด — guest คือ Ubuntu"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "“Try Ubuntu” ต่างจาก “Install Ubuntu” อย่างไร?",
+  "choices": [
+   "ติดตั้งแบบย่อแทนแบบเต็ม",
+   "ลบ Windows แล้วติดตั้งแทน",
+   "ติดตั้งลงเครื่องจริงแทน VM",
+   "ลองใช้โดยไม่ติดตั้งลงดิสก์"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ใช่",
+   "ถูก — Try รันจากแผ่นโดยไม่เขียนดิสก์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมสไลด์เน้นว่าต้องจำ account และ password ที่ตั้งตอนติดตั้ง?",
+  "choices": [
+   "ต้องใช้ login ทำแลปทั้งเทอม",
+   "ต้องส่งให้อาจารย์ทุกสัปดาห์",
+   "ใช้ได้แค่ครั้งเดียวแล้วหมดอายุ",
+   "ใช้ปลดล็อก Windows ของแลป"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ลืมแล้วเข้า VM ไม่ได้ ทำแลปต่อไม่ได้",
+   "ผิด — ไม่ใช่",
+   "ผิด — ไม่ได้หมดอายุ",
+   "ผิด — เป็นบัญชีใน Ubuntu"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เห็น prompt root@srv:/etc# ข้อใดสรุปถูก?",
+  "choices": [
+   "ผู้ใช้ srv อยู่ที่ /etc",
+   "ผู้ใช้ root อยู่ที่ /etc",
+   "ผู้ใช้ทั่วไปอยู่ที่ /etc",
+   "ผู้ใช้ root อยู่ที่ home"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — srv คือชื่อเครื่อง",
+   "ถูก — root คือ username, srv คือชื่อเครื่อง, /etc คือตำแหน่ง, # คือ root",
+   "ผิด — # หมายถึง root",
+   "ผิด — ตำแหน่งคือ /etc ไม่ใช่ ~"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เพื่อนใช้ Windows อยากฝึก Linux โดยไม่แบ่งพาร์ทิชันใหม่ ควรทำอย่างไร?",
+  "choices": [
+   "ติดตั้ง Ubuntu ใน VM",
+   "ฟอร์แมตแล้วลง Linux",
+   "เปลี่ยน CPU เป็น ARM",
+   "ซื้อดิสก์ SCSI มาเพิ่ม"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ใช้ Linux ได้โดยไม่กระทบเครื่องจริง",
+   "ผิด — เสี่ยงเสียข้อมูล",
+   "ผิด — ไม่เกี่ยว",
+   "ผิด — ไม่จำเป็น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ส่งรายงาน Lab 1 ของนักศึกษารหัส 6887123 ควรตั้งชื่อไฟล์ใด?",
+  "choices": [
+   "lab1_6887123.docx",
+   "6887123-lab1.zip",
+   "Lab1_final_v2.pdf",
+   "6887123_lab1.pdf"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ลำดับและชนิดไฟล์ผิด",
+   "ผิด — ต้องเป็น PDF และใช้ _",
+   "ผิด — ไม่มีรหัสนักศึกษา",
+   "ถูก — รูปแบบ 6887xxx_lab1.pdf"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "เครื่องมีพื้นที่เหลือเยอะและอยากให้ดิสก์ VM ทำงานเร็ว ควรเลือกแบบใด?",
+  "choices": [
+   "Dynamic size",
+   "Try Ubuntu",
+   "Fixed size",
+   "ISO image"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ประหยัดพื้นที่แต่อาจช้ากว่า",
+   "ผิด — ไม่ได้ติดตั้งลงดิสก์",
+   "ถูก — จองเต็มตั้งแต่แรก บางระบบใช้งานเร็วกว่า",
+   "ผิด — เป็นแผ่นติดตั้ง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "โน้ตบุ๊กใหม่รองรับ USB4 เท่านั้น ต้องใช้สาย/ขั้วต่อแบบใด?",
+  "choices": [
+   "Type B",
+   "Mini-B",
+   "Type A",
+   "Type C"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — deprecated",
+   "ผิด — ไม่ใช่",
+   "ผิด — deprecated",
+   "ถูก — USB 3.2/USB4 ใช้ Type C เท่านั้น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องเลือก CPU ให้มือถือ Android ที่ประหยัดพลังงาน ตามสไลด์ควรเป็นแบบใด?",
+  "choices": [
+   "ARM",
+   "PCI",
+   "DDR5",
+   "x86"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ARM ใช้มากในมือถือ โดยเฉพาะ Android",
+   "ผิด — เป็น bus",
+   "ผิด — เป็นหน่วยความจำ",
+   "ผิด — ใช้ใน PC"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ไฟล์ 600 MB ผ่าน USB 2.0 (480 Mbps) ใช้เวลาอย่างน้อยกี่วินาที?",
+  "choices": [
+   "0.8 s",
+   "10 s",
+   "80 s",
+   "1.25 s"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — หารกลับด้าน",
+   "ถูก — 600 × 8 = 4,800 Mb ÷ 480 = 10 s",
+   "ผิด — คูณ 8 ซ้ำ",
+   "ผิด — ลืมแปลง MB เป็น Mb"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ไฟล์ 600 MB เดิม ผ่าน USB 3.0 (5 Gbps) ใช้เวลาอย่างน้อยเท่าใด?",
+  "choices": [
+   "0.12 s",
+   "120 s",
+   "0.96 s",
+   "9.60 s"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ลืมแปลง byte เป็น bit",
+   "ผิด — คำนวณผิดหน่วย",
+   "ถูก — 4,800 Mb ÷ 5,000 Mbps = 0.96 s",
+   "ผิด — ใช้ 500 Mbps"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ไฟล์ 10 GB ผ่าน USB 3.2 (20 Gbps) ใช้เวลาอย่างน้อยเท่าใด?",
+  "choices": [
+   "2 s",
+   "40 s",
+   "4 s",
+   "0.5 s"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ใช้ 40 Gbps (USB4)",
+   "ผิด — ผิดหลัก",
+   "ถูก — 80 Gb ÷ 20 Gbps = 4 s",
+   "ผิด — ลืมแปลง byte เป็น bit"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ไฟล์ 3 MB ผ่าน USB 1.0 (12 Mbps) ใช้เวลาอย่างน้อยเท่าใด?",
+  "choices": [
+   "4 s",
+   "2 s",
+   "0.25 s",
+   "36 s"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — คำนวณผิด",
+   "ถูก — 24 Mb ÷ 12 Mbps = 2 s",
+   "ผิด — ลืมแปลง byte เป็น bit",
+   "ผิด — คูณแทนหาร"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "USB4 (40 Gbps) เร็วกว่า USB 2.0 (480 Mbps) ประมาณกี่เท่า?",
+  "choices": [
+   "≈ 8 เท่า",
+   "≈ 12 เท่า",
+   "≈ 830 เท่า",
+   "≈ 83 เท่า"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เทียบกับ USB 3.0 (40,000 ÷ 5,000)",
+   "ผิด — คำนวณผิด",
+   "ผิด — ผิดหลัก",
+   "ถูก — 40,000 ÷ 480 ≈ 83.3"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "USB 3.0 (5 Gbps) เร็วกว่า USB 2.0 (480 Mbps) ประมาณกี่เท่า?",
+  "choices": [
+   "≈ 10 เท่า",
+   "≈ 1 เท่า",
+   "≈ 100 เท่า",
+   "≈ 5 เท่า"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 5,000 ÷ 480 ≈ 10.4",
+   "ผิด — ลืมว่า G กับ M ต่างกัน 1,000 เท่า",
+   "ผิด — ผิดหลัก",
+   "ผิด — คำนวณผิด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ต้องการตั้ง Base Memory ของ VM เป็น 4 GB ต้องใส่กี่ MB (แบบ VirtualBox)?",
+  "choices": [
+   "8192 MB",
+   "4096 MB",
+   "4000 MB",
+   "2048 MB"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็น 8 GB",
+   "ถูก — 4 × 1024 = 4096 MB (เหมือน 8 GB = 8192 MB)",
+   "ผิด — ใช้ 1000",
+   "ผิด — เป็น 2 GB"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ดิสก์เสมือน 10 GB ติดตั้ง Ubuntu ที่ต้องใช้ 8.6 GB จะเหลือพื้นที่ประมาณเท่าใด?",
+  "choices": [
+   "0.86 GB",
+   "2.4 GB",
+   "18.6 GB",
+   "1.4 GB"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — หารแทนลบ",
+   "ผิด — ลบผิด",
+   "ผิด — บวกแทนลบ",
+   "ถูก — 10 − 8.6 = 1.4 GB (จึงควรตั้งมากกว่า 10 GB ถ้าทำได้)"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "SSD ทนแรงกระแทก 1500g ขณะทำงาน HDD ทน 55g ขณะทำงาน SSD ทนกว่าประมาณกี่เท่า?",
+  "choices": [
+   "≈ 1445 เท่า",
+   "≈ 55 เท่า",
+   "≈ 27 เท่า",
+   "≈ 4 เท่า"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ลบแทนหาร",
+   "ผิด — ไม่ใช่",
+   "ถูก — 1500 ÷ 55 ≈ 27.3",
+   "ผิด — ใช้ค่า 350g (ไม่ทำงาน)"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "เครื่อง host มี RAM 16 GB แบ่งให้ VM 8 GB เหลือให้ host กี่เปอร์เซ็นต์?",
+  "choices": [
+   "50%",
+   "200%",
+   "75%",
+   "25%"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เหลือ 8 จาก 16 GB = 50%",
+   "ผิด — กลับเศษส่วน",
+   "ผิด — คำนวณผิด",
+   "ผิด — คำนวณผิด"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
