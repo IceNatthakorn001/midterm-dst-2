@@ -143,6 +143,10 @@ def find_lessons(subj):
         quizzes2 = sorted(f.glob("quiz2-*.html"))
         short = f / "สรุปสั้นๆ.md"
         text = mds[0].read_text(encoding="utf-8")
+        if len(mds) > 1:
+            # several summaries in one folder (e.g. a revised slide deck): publish them on one page
+            text = "\n\n---\n\n".join([text] + [p.read_text(encoding="utf-8") for p in mds[1:]])
+            text = re.sub(r"\[([^\]]*)\]\(สรุป-[^)]*\.md\)", r"**\1** (อยู่ถัดลงไปในหน้านี้)", text)
         m = re.search(r"^#\s+(.+)$", text, re.M)
         title = m.group(1).strip() if m else mds[0].stem
         title = re.sub(r"^สรุป\s*[:：]\s*", "", title)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 7 — VLAN (Virtual LAN) · ITDS231</title>
+<title>Lecture 7 (ฉบับใหม่) — ARP + Transparent Switches + VLAN · ITDS231</title>
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
@@ -25,18 +25,639 @@
       <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
       <div class="toc-inner">
         <a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a>
-        <ol><li><a href="#1-overview-of-vlans">1. Overview of VLANs</a></li><li><a href="#2-types-of-vlans">2. Types of VLANs ⭐</a></li><li><a href="#3-vlans-ในสภาพแวดล้อมหลาย-switch">3. VLANs ในสภาพแวดล้อมหลาย Switch</a></li><li><a href="#4-voice-vlan">4. Voice VLAN</a></li><li><a href="#5-vlan-configuration">5. VLAN Configuration</a></li><li><a href="#6-vlan-trunks">6. VLAN Trunks</a></li><li><a href="#7-สรุปคำสั่ง">7. สรุปคำสั่ง</a></li><li><a href="#8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</a></li><li><a href="#9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+        <ol><li><a href="#1-recap-ethernet">1. Recap: Ethernet</a></li><li><a href="#2-arp-address-resolution-protocol">2. ARP (Address Resolution Protocol) ⭐⭐</a></li><li><a href="#3-repeater-hub-bridge-switch">3. Repeater, Hub, Bridge, Switch ⭐</a></li><li><a href="#4-transparent-switches">4. Transparent Switches ⭐</a></li><li><a href="#5-loop-problem">5. Loop Problem ⭐</a></li><li><a href="#6-spanning-tree-algorithm">6. Spanning Tree Algorithm ⭐⭐</a></li><li><a href="#7-vlan-สไลด์ที่เพิ่มใหม่">7. VLAN — สไลด์ที่เพิ่มใหม่</a></li><li><a href="#8-vlan-หัวข้อที่เหมือนฉบับเดิม-สรุปย่อ">8. VLAN — หัวข้อที่เหมือนฉบับเดิม (สรุปย่อ)</a></li><li><a href="#9-คำศัพท์สำคัญ">9. คำศัพท์สำคัญ</a></li><li><a href="#10-สรุปท้ายบท-จุดที่มักออกสอบ">10. สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#1-overview-of-vlans">1. Overview of VLANs</a></li><li><a href="#2-types-of-vlans">2. Types of VLANs ⭐</a></li><li><a href="#3-vlans-ในสภาพแวดล้อมหลาย-switch">3. VLANs ในสภาพแวดล้อมหลาย Switch</a></li><li><a href="#4-voice-vlan">4. Voice VLAN</a></li><li><a href="#5-vlan-configuration">5. VLAN Configuration</a></li><li><a href="#6-vlan-trunks">6. VLAN Trunks</a></li><li><a href="#7-สรุปคำสั่ง">7. สรุปคำสั่ง</a></li><li><a href="#8-คำศัพท์สำคัญ">8. คำศัพท์สำคัญ</a></li><li><a href="#9-สรุปท้ายบท-จุดที่มักออกสอบ">9. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
       </div>
     </aside>
     <main class="lesson">
       <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture7-VLAN</div>
-      <h1 class="lesson-title">Lecture 7 — VLAN (Virtual LAN)</h1>
+      <h1 class="lesson-title">Lecture 7 (ฉบับใหม่) — ARP + Transparent Switches + VLAN</h1>
       <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a><a class="btn btn-quiz" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a></div>
       <article class="prose"><blockquote class="callout">
+<p>สไลด์ฉบับปรับปรุง <code>ITDS231-Lecture7-ARP-Switch-VLAN-2026.pdf</code> (53 หน้า, ผศ.ดร.ฐิตินันท์ ตันติธรรม) — ฉบับเดิมมีเฉพาะ VLAN</p>
+<p>ฉบับนี้ <strong>เพิ่ม 4 หัวข้อใหม่ไว้ข้างหน้า</strong>: Recap Ethernet, <strong>ARP</strong>, <strong>Repeater–Hub–Bridge–Switch</strong>, <strong>Transparent Switch + Loop + Spanning Tree</strong> และเพิ่มสไลด์ VLAN อีก 2 หน้า (Why VLANs?, NETGEAR &amp; Home Router)</p>
+<p>เนื้อหา VLAN ส่วนที่เหลือ (ชนิด VLAN, trunk, 802.1Q, voice VLAN, ranges, คำสั่ง Cisco IOS) <strong>เหมือนฉบับเดิม</strong> — ดูรายละเอียดเต็มที่ <strong>สรุป-Lecture7-VLAN.md</strong> (อยู่ถัดลงไปในหน้านี้)</p>
+<p>ภาพในไฟล์นี้ขึ้นต้นด้วย <code>l7b-</code> (เลขหน้าตามสไลด์ฉบับใหม่)</p>
+</blockquote>
+<h2 id="1-recap-ethernet">1. Recap: Ethernet</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th>สรุป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ethernet Frame</strong></td>
+<td>Preamble 7 | SFD 1 | Destination MAC 6 | Source MAC 6 | Type/Length 2 | Data 46–1500 | FCS 4 (ไบต์) — frame ทั่วไป <strong>64 ถึง 1518 ไบต์</strong>; FCS ช่วยตรวจ error</td>
+</tr>
+<tr>
+<td><strong>MAC Address</strong></td>
+<td>ที่อยู่ Layer 2 ขนาด <strong>48 บิต</strong>; destination MAC ระบุผู้รับ, source MAC ระบุผู้ส่ง</td>
+</tr>
+<tr>
+<td><strong>Switching</strong></td>
+<td>switch <strong>เรียนรู้ source MAC</strong> ลง MAC address table แล้ว <strong>ส่ง frame ออกเฉพาะพอร์ตที่ถูกต้อง</strong></td>
+</tr>
+<tr>
+<td><strong>Broadcast</strong></td>
+<td>dest MAC <code>FF:FF:FF:FF:FF:FF</code> → flood ออก <strong>ทุกพอร์ตใน VLAN เดียวกัน ยกเว้นพอร์ตขาเข้า</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Key takeaways:</strong> Frame = หน่วยข้อมูล Layer 2 · MAC address = ตัวระบุอุปกรณ์ · Switch = learns and forwards · Broadcast = one-to-all ภายใน LAN/VLAN</p>
+<p><img loading="lazy" src="img/l7b-p004.jpg" alt="Recap: Ethernet" /></p>
+<hr />
+<h2 id="2-arp-address-resolution-protocol">2. ARP (Address Resolution Protocol) ⭐⭐</h2>
+<h3 id="21-arp-คืออะไร">2.1 ARP คืออะไร</h3>
+<ul>
+<li>การสื่อสารใน LAN <strong>ต้องใช้ MAC address</strong></li>
+<li><strong>ARP = แปลง IP address เป็น MAC address</strong></li>
+<li>เป็นโปรโตคอลแบบ <strong>request–response</strong></li>
+<li>ข้อความ ARP ถูก <strong>ห่อด้วย link-layer protocol โดยตรง</strong> (ไม่ได้อยู่ใน IP packet)</li>
+<li><strong>ARP cache</strong> เก็บรายการคู่ IP ↔ MAC — เก็บใน host โดย OS</li>
+</ul>
+<p><strong>ARP entry 2 ชนิด:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dynamic</strong></td>
+<td>ARP <strong>สร้างและดูแลอัตโนมัติ</strong> (ไม่ถาวร)</td>
+</tr>
+<tr>
+<td><strong>Static</strong></td>
+<td><strong>ผู้ใช้ตั้งค่าเอง</strong> (ไม่หมดอายุ — never age)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="22-ตัวอย่าง-arp-cache-arp--a">2.2 ตัวอย่าง ARP cache (<code>arp -a</code>)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Internet Address</th>
+<th>Physical Address</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>192.168.1.1</td>
+<td>00-04-ed-ec-f2-b6</td>
+<td>dynamic</td>
+</tr>
+<tr>
+<td>192.168.1.3</td>
+<td>84-8e-df-e1-44-21</td>
+<td>dynamic</td>
+</tr>
+<tr>
+<td>192.168.1.4</td>
+<td>8c-0e-e3-86-95-a9</td>
+<td>dynamic</td>
+</tr>
+<tr>
+<td>192.168.1.255</td>
+<td>ff-ff-ff-ff-ff-ff</td>
+<td>static</td>
+</tr>
+<tr>
+<td>224.0.0.22</td>
+<td>01-00-5e-00-00-16</td>
+<td>static</td>
+</tr>
+<tr>
+<td>224.0.0.252</td>
+<td>01-00-5e-00-00-fc</td>
+<td>static</td>
+</tr>
+<tr>
+<td>255.255.255.255</td>
+<td>ff-ff-ff-ff-ff-ff</td>
+<td>static</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ เครื่องจริงใน LAN เป็น <strong>dynamic</strong>; ที่อยู่ <strong>broadcast</strong> (ff-ff-…) และ <strong>multicast</strong> (01-00-5e-…) เป็น <strong>static</strong></p>
+<p><img loading="lazy" src="img/l7b-p007.jpg" alt="ARP cache" /></p>
+<h3 id="23-arp-operations">2.3 ARP Operations ⭐</h3>
+<p>A ต้องการส่งข้อมูลให้ B:
+0. A <strong>เช็ค ARP cache</strong> ของตัวเองก่อน</p>
+<ol>
+<li>A <strong>broadcast ARP request</strong> ถึงทุกเครื่องในเครือข่าย (ใช้ broadcast address)</li>
+<li>B <strong>ส่ง ARP reply</strong> กลับหา A</li>
+<li>A <strong>เก็บคำตอบลง cache</strong> แล้วเริ่มสื่อสาร</li>
+</ol>
+<p><img loading="lazy" src="img/l7b-p008.jpg" alt="ARP Operations" /></p>
+<h3 id="24-arp-request-reply-messages">2.4 ARP Request / Reply Messages</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>ARP request</strong></th>
+<th><strong>ARP reply</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Operation</td>
+<td>0x0001</td>
+<td>0x0002</td>
+</tr>
+<tr>
+<td>Hardware type / Protocol type</td>
+<td>0x0001 (Ethernet) / 0x0800 (IPv4)</td>
+<td>เหมือนกัน</td>
+</tr>
+<tr>
+<td>Hardware length / Protocol length</td>
+<td>0x06 / 0x04 (MAC 6 ไบต์, IP 4 ไบต์)</td>
+<td>เหมือนกัน</td>
+</tr>
+<tr>
+<td>Sender</td>
+<td>A_MAC, A_IP</td>
+<td>B_MAC, B_IP</td>
+</tr>
+<tr>
+<td>Target</td>
+<td><strong>All 0s</strong> (ยังไม่รู้ MAC ของ B), B_IP</td>
+<td>A_MAC, A_IP</td>
+</tr>
+<tr>
+<td>Frame</td>
+<td>ปลายทาง = <strong>broadcast address</strong> (จาก A ถึงทุกเครื่อง)</td>
+<td><strong>unicast</strong> (จาก B ถึง A)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7b-p009.jpg" alt="ARP messages" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Request = broadcast, Reply = unicast</strong> — และ request ใส่ <strong>0 ทั้งหมด</strong> ในช่อง MAC ของปลายทางเพราะยังไม่รู้</p>
+</blockquote>
+<h3 id="25-ตัวอย่าง-internet-communication-alice-r1-r2-bob">2.5 ตัวอย่าง Internet Communication (Alice → R1 → R2 → Bob) ⭐</h3>
+<p>N = network address (IP), L = link address (MAC)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่วง</th>
+<th>ดู routing/forwarding table</th>
+<th>ARP หา MAC ของ</th>
+<th>Frame</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1) ที่ Alice</td>
+<td>next hop = <strong>N1 ของ R1</strong></td>
+<td>N1 → ได้ <strong>L1</strong></td>
+<td>dest <strong>L1</strong>, src <strong>LA</strong>, datagram NA → NB</td>
+</tr>
+<tr>
+<td>(2) ที่ R1</td>
+<td>next hop = <strong>N3 ของ R2</strong></td>
+<td>N3 → ได้ <strong>L3</strong></td>
+<td>dest <strong>L3</strong>, src <strong>L2</strong>, datagram NA → NB</td>
+</tr>
+<tr>
+<td>(3) ที่ R2</td>
+<td>next hop = <strong>NB</strong></td>
+<td>NB → ได้ <strong>LB</strong></td>
+<td>dest <strong>LB</strong>, src <strong>L4</strong>, datagram NA → NB</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>data-link layer ได้ link-layer address ของตัวเอง (LA) จาก interface</li>
+<li><strong>IP ต้นทาง/ปลายทาง (NA, NB) ไม่เปลี่ยน แต่ MAC เปลี่ยนทุก hop</strong> และ ARP ถูกใช้หา MAC ของ <strong>next hop</strong> ไม่ใช่ของปลายทางสุดท้าย</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>(1) Alice</th>
+<th>(2) R1</th>
+<th>(3) R2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img loading="lazy" src="img/l7b-p010.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p011.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p012.jpg" alt="" /></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-repeater-hub-bridge-switch">3. Repeater, Hub, Bridge, Switch ⭐</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>อุปกรณ์</th>
+<th>Layer</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repeater</strong></td>
+<td>Physical</td>
+<td>ต่อ LAN 2 segment เพื่อ <strong>regenerate และ re-time สัญญาณ</strong> กลับเป็นรูปบิตเดิม แล้วส่งกลับลง bus → <strong>แก้ข้อจำกัดความยาวสาย coaxial</strong>; ⚠️ <strong>เป็น regenerator ไม่ใช่ amplifier</strong></td>
+</tr>
+<tr>
+<td><strong>Hub</strong></td>
+<td>Physical เท่านั้น</td>
+<td>repeater ที่พัฒนาเป็น <strong>multiport</strong> เป็นจุดเชื่อมหลายอุปกรณ์ + ทำหน้าที่ repeater</td>
+</tr>
+<tr>
+<td><strong>Bridge</strong></td>
+<td>Data link</td>
+<td>มี <strong>ตารางใช้ตัดสินใจ filtering</strong>; <strong>ไม่เปลี่ยน MAC address ใน frame</strong>; ปกติมี <strong>2 พอร์ต</strong></td>
+</tr>
+<tr>
+<td><strong>Switch</strong></td>
+<td>Physical + Data link</td>
+<td><strong>multi-port bridge</strong> (self-learning); <strong>แยก collision domain เหลือ 1 อุปกรณ์ต่อ domain</strong> — แก้ปัญหาของ hub</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ยุคแรกใช้ bus topology — เมื่อ bus ยาวเกิน สัญญาณปลายสาย <strong>attenuate และเพี้ยน</strong> จึงต้องมี repeater</li>
+</ul>
+<h3 id="31-hub-ทำงานอย่างไร">3.1 Hub ทำงานอย่างไร</h3>
+<ul>
+<li>frame จาก A ถึง B มาถึง hub → <strong>regenerate สัญญาณ</strong> (ลบ noise) → <strong>ส่งออกทุกพอร์ต ยกเว้นพอร์ตที่รับเข้า</strong> = frame ถูก <strong>broadcast</strong></li>
+<li>ทุกสถานีได้รับ แต่ <strong>เฉพาะ B เก็บไว้</strong> ที่เหลือทิ้ง</li>
+<li>hub/repeater เป็นอุปกรณ์ physical layer:
+<ul>
+<li><strong>ไม่มี link-layer address</strong></li>
+<li><strong>ไม่ตรวจ link-layer address</strong> ของ frame</li>
+<li><strong>ไม่มี filtering</strong> — ไม่มีความฉลาดพอจะรู้ว่าควรส่งออกพอร์ตไหน</li>
+</ul>
+</li>
+</ul>
+<h3 id="32-switch">3.2 Switch</h3>
+<ul>
+<li><strong>ระดับ physical:</strong> regenerate สัญญาณที่รับมา</li>
+<li><strong>ระดับ data link:</strong> ตรวจ <strong>MAC address (source และ destination)</strong> ใน frame แล้วส่งไปยัง destination MAC (<strong>filtering</strong>) — ตัดสินใจได้ว่าควรส่งออกพอร์ตไหน</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Repeater</th>
+<th>Hub</th>
+<th>Bridge</th>
+<th>Switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img loading="lazy" src="img/l7b-p015.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p017.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p018.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p020.jpg" alt="" /></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7b-p016.jpg" alt="Repeater is a regenerator" /></p>
+<p><img loading="lazy" src="img/l7b-p019.jpg" alt="Multi-port bridge" /></p>
+<hr />
+<h2 id="4-transparent-switches">4. Transparent Switches ⭐</h2>
+<ul>
+<li><strong>Transparent switch</strong> = switch ที่ <strong>สถานีไม่รู้เลยว่ามี switch อยู่</strong></li>
+<li>เพิ่มหรือถอด switch ออกจากระบบ <strong>ไม่ต้องตั้งค่าสถานีใหม่</strong></li>
+<li>ตาม <strong>IEEE 802.1d</strong> ระบบที่ใช้ transparent switch ต้องผ่าน 3 เงื่อนไข:
+<ol>
+<li><strong>Frame ต้องถูก forward</strong> จากสถานีหนึ่งไปอีกสถานี</li>
+<li><strong>Forwarding table อัปเดตอัตโนมัติ</strong> โดยเรียนรู้จากการเคลื่อนที่ของ frame</li>
+<li><strong>ต้องป้องกัน loop</strong> ในระบบ</li>
+</ol>
+</li>
+</ul>
+<h3 id="41-learning-process-ตารางค่อย-ๆ-ถูกสร้าง">4.1 Learning Process (ตารางค่อย ๆ ถูกสร้าง)</h3>
+<p>Switch 4 พอร์ต: A (71:2B:13:45:61:41) พอร์ต 1, B (…:42) พอร์ต 2, C (64:2B:13:45:61:12) พอร์ต 3, D (…:13) พอร์ต 4</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>เหตุการณ์</th>
+<th>ตารางที่ได้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>เริ่มต้น</td>
+<td>ว่าง</td>
+</tr>
+<tr>
+<td>b</td>
+<td>A ส่ง frame ถึง D</td>
+<td>A → พอร์ต 1</td>
+</tr>
+<tr>
+<td>c</td>
+<td>D ส่ง frame ถึง B</td>
+<td>+ D → พอร์ต 4</td>
+</tr>
+<tr>
+<td>d</td>
+<td>B ส่ง frame ถึง A</td>
+<td>+ B → พอร์ต 2</td>
+</tr>
+<tr>
+<td>e</td>
+<td>C ส่ง frame ถึง D</td>
+<td>+ C → พอร์ต 3</td>
+</tr>
+</tbody>
+</table></div>
+<p>→ เรียนรู้จาก <strong>source address</strong> ของ frame ที่เข้ามาเสมอ</p>
+<p><img loading="lazy" src="img/l7b-p023.jpg" alt="Learning Process" /></p>
+<hr />
+<h2 id="5-loop-problem">5. Loop Problem ⭐</h2>
+<ul>
+<li>ผู้ดูแลระบบชอบมี <strong>switch สำรอง (redundant)</strong> — มากกว่า 1 ตัวระหว่าง LAN คู่เดียวกัน — เพื่อความน่าเชื่อถือ (ตัวหนึ่งเสีย อีกตัวทำงานแทน)</li>
+<li>แต่ <strong>redundancy สร้าง loop</strong> ได้ — loop เกิดเฉพาะเมื่อ <strong>broadcasting LAN 2 วงขึ้นไป (เช่นที่ใช้ hub) ถูกเชื่อมด้วย switch มากกว่า 1 ตัว</strong></li>
+<li>วิธีแก้: switch ต้อง <strong>คุยกันเพื่อสร้างโครงสร้างแบบ tree</strong></li>
+</ul>
+<p><strong>ลำดับเหตุการณ์ (A ส่ง frame ถึง D, ตารางของ switch ทั้งสองยังว่าง):</strong></p>
+<ol>
+<li>switch ทั้งสอง forward frame และบันทึก source A</li>
+<li>ตอนนี้มี frame <strong>2 สำเนา</strong> บน LAN 2 — สำเนาจาก switch ซ้ายถูก switch ขวารับ (ไม่รู้ D) จึงส่งต่อ และกลับกัน; ตารางถูกอัปเดตแต่ยังไม่มีข้อมูลของ D</li>
+<li>มี 2 สำเนาบน LAN 1 → ทำซ้ำขั้น 2</li>
+<li><strong>วนไปเรื่อย ๆ</strong> — switch เป็น repeater ด้วย จึง regenerate สำเนาใหม่ทุกรอบ</li>
+</ol>
+<p><strong>สรุปไทยจากสไลด์:</strong> switch เรียนรู้ตำแหน่งของ A <strong>ผิดสลับไปมาระหว่างพอร์ต 1 และ 2</strong> และ flood frame กลับไปมา frame วนซ้ำและเพิ่มจำนวนต่อเนื่อง <strong>เพราะ Ethernet frame ไม่มีค่า TTL</strong> สำหรับหยุดการวนลูป — ป้องกันด้วย <strong>Spanning Tree Protocol (STP)</strong> ซึ่งปิดกั้นเส้นทางสำรองบางเส้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Loop Problem</th>
+<th>ลำดับการวน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img loading="lazy" src="img/l7b-p024.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p025.jpg" alt="" /></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-spanning-tree-algorithm">6. Spanning Tree Algorithm ⭐⭐</h2>
+<ul>
+<li><strong>IEEE 802.1d</strong> กำหนดให้ switch ใช้ <strong>spanning tree algorithm</strong> สร้าง topology ที่ไม่มี loop</li>
+<li>spanning tree = อัลกอริทึมกราฟที่แปลง <strong>กราฟให้เป็น tree ที่ไม่มี loop</strong></li>
+<li>เปลี่ยน physical topology ไม่ได้ (สายต่ออยู่จริง) → สร้าง <strong>logical topology ทับ physical</strong></li>
+<li>switch <strong>แลกเปลี่ยนข้อมูลลิงก์กัน</strong> แล้วสร้าง spanning tree</li>
+<li>⚠️ ในอัลกอริทึมนี้ <strong>switch ถูกมองเป็น node</strong> ของกราฟ</li>
+</ul>
+<h3 id="61-cost">6.1 Cost</h3>
+<ul>
+<li>กำหนด <strong>cost (metric)</strong> ให้ทุก edge — ความหมายขึ้นกับผู้ดูแลระบบ ในสไลด์ใช้ <strong>minimum hops</strong></li>
+<li>hop count: <strong>switch → LAN = 1</strong>, <strong>LAN → switch = 0</strong></li>
+</ul>
+<h3 id="62-ขั้นตอน">6.2 ขั้นตอน</h3>
+<ol>
+<li>switch ทุกตัว <strong>broadcast ID</strong> ของตัวเอง → switch ที่ <strong>ID ต่ำสุด = root switch</strong></li>
+<li>หา <strong>shortest path</strong> (cost รวมต่ำสุด) จาก root ไปยังทุก switch/LAN (ปกติใช้ <strong>Dijkstra</strong>)</li>
+<li>รวม shortest path ทั้งหมด = shortest tree</li>
+<li>พอร์ตที่อยู่บน spanning tree = <strong>forwarding port</strong> (ส่งต่อ frame); พอร์ตที่ไม่อยู่ = <strong>blocking port</strong> (บล็อก frame)</li>
+</ol>
+<h3 id="63-ตัวอย่างในสไลด์-s1s5-lan1lan4">6.3 ตัวอย่างในสไลด์ (S1–S5, LAN1–LAN4)</h3>
+<ul>
+<li><strong>S1 เป็น root</strong> (ID ต่ำสุด) cost สะสม: S1 = 0, LAN1 = 1, LAN2 = 1, S2 = 1, S3 = 1, S4 = 1, LAN3 = 2, LAN4 = 2, S5 = 2</li>
+<li>พอร์ตบนลิงก์ <strong>S3–LAN3, S3–LAN4 และ S5–LAN3 เป็น blocking port</strong> — ยังเก็บลิงก์ไว้เป็นเส้นทางสำรอง</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Physical → Abstract topology</th>
+<th>Cost และ Spanning tree</th>
+<th>Port assignment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img loading="lazy" src="img/l7b-p028.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p029.jpg" alt="" /></td>
+<td><img loading="lazy" src="img/l7b-p030.jpg" alt="" /></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-vlan-สไลด์ที่เพิ่มใหม่">7. VLAN — สไลด์ที่เพิ่มใหม่</h2>
+<h3 id="71-bridge-to-vlan-why-vlans">7.1 Bridge to VLAN: Why VLANs?</h3>
+<ul>
+<li><strong>ไม่มี VLAN</strong> → switch ที่ต่อกันทำตัวเป็น <strong>Layer-2 broadcast domain ใหญ่วงเดียว</strong></li>
+<li>VLAN จัดกลุ่มอุปกรณ์แบบ logical แม้ต่ออยู่คนละ switch</li>
+<li><strong>แต่ละ VLAN = broadcast domain แยก</strong> และมักตรงกับ <strong>IP subnet คนละวง</strong></li>
+<li><strong>Trunk link</strong> พา traffic หลาย VLAN ระหว่าง switch ด้วย <strong>802.1Q tagging</strong></li>
+</ul>
+<p><img loading="lazy" src="img/l7b-p032.jpg" alt="Why VLANs" /></p>
+<h3 id="72-vlan-configuration-netgear-home-router">7.2 VLAN Configuration — NETGEAR &amp; Home Router ⭐</h3>
+<p><strong>หลัก:</strong> พอร์ต <strong>untagged</strong> ต่อ end device; พอร์ต <strong>tagged</strong> พาหลาย VLAN ระหว่างอุปกรณ์ที่รู้จัก VLAN</p>
+<p>ขั้นตอน: สร้าง VLAN โดยกำหนด <strong>VLAN ID ใหม่</strong> → ไปที่ <strong>VLAN membership (VLAN tagging)</strong> → กำหนดได้ 3 แบบ: <strong>port assignment</strong>, <strong>IP address range assignment</strong>, <strong>MAC address assignment</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเด็น</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VLAN ID 10</td>
+<td>สร้าง Layer 2 broadcast domain แยก</td>
+</tr>
+<tr>
+<td>พอร์ต <strong>U (Untagged)</strong></td>
+<td><strong>access port</strong> — frame ขาออก <strong>ไม่มี 802.1Q tag</strong> ต่อ end device หรือ home router</td>
+</tr>
+<tr>
+<td>พอร์ต <strong>T (Tagged)</strong></td>
+<td><strong>trunk port</strong> — frame คง VLAN tag ไว้ พาได้หลาย VLAN</td>
+</tr>
+<tr>
+<td>พอร์ตที่ไม่มี U หรือ T</td>
+<td><strong>ไม่เป็นสมาชิก VLAN 10</strong> แลก Layer 2 traffic กับ VLAN นี้ตรง ๆ ไม่ได้</td>
+</tr>
+<tr>
+<td><strong>PVID</strong></td>
+<td>ของพอร์ต untagged ควรตั้งเป็น 10 เพื่อให้ <strong>frame ขาเข้าที่ไม่มี tag ถูกจัดเข้า VLAN 10</strong></td>
+</tr>
+<tr>
+<td><strong>Inter-VLAN routing</strong></td>
+<td>ข้าม VLAN ต้องใช้อุปกรณ์ <strong>Layer 3</strong> (router หรือ Layer 3 switch)</td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>router ต้องมี gateway interface ของ VLAN เช่น <strong>192.168.10.1/24</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="img/l7b-p048.jpg" alt="NETGEAR VLAN" /></p>
+<hr />
+<h2 id="8-vlan-หัวข้อที่เหมือนฉบับเดิม-สรุปย่อ">8. VLAN — หัวข้อที่เหมือนฉบับเดิม (สรุปย่อ)</h2>
+<p>รายละเอียดเต็มพร้อมภาพอยู่ใน <strong>สรุป-Lecture7-VLAN.md</strong> (อยู่ถัดลงไปในหน้านี้)</p>
+<ul>
+<li><strong>VLAN</strong> = logical segmentation; unicast/multicast/broadcast แยกในแต่ละ VLAN; แต่ละ VLAN มีช่วง IP ของตัวเอง</li>
+<li><strong>ประโยชน์ 6 ข้อ:</strong> smaller broadcast domains, security, IT efficiency, reduced cost, performance, simpler management</li>
+<li><strong>VLAN 1</strong> = default / default native / default management, ลบหรือเปลี่ยนชื่อไม่ได้</li>
+<li><strong>Native VLAN</strong> (trunk เท่านั้น, ไม่ถูก tag) · <strong>Data VLAN</strong> · <strong>Management VLAN</strong> (SSH/Telnet, SVI) · <strong>Voice VLAN</strong> (CDP, CoS)</li>
+<li><strong>Trunk:</strong> point-to-point, หลาย VLAN, default รองรับทุก VLAN, 802.1Q</li>
+<li><strong>802.1Q tag 4 ไบต์:</strong> TPID 0x8100 | Priority 3 บิต | CFI 1 บิต | VID 12 บิต (4096 VLANs); ใส่/ถอด tag ต้องคำนวณ FCS ใหม่</li>
+<li><strong>Ranges:</strong> normal 1–1005 (vlan.dat) / extended 1006–4095 (running-config)</li>
+<li><strong>คำสั่ง:</strong> <code>vlan id</code> + <code>name</code>, <code>switchport mode access</code>, <code>switchport access vlan id</code>, <code>show vlan [brief | id | name | summary]</code>, <code>no vlan id</code>, <code>delete flash:vlan.dat</code>, <code>switchport mode trunk</code>, <code>switchport trunk native vlan</code>, <code>switchport trunk allowed vlan</code></li>
+</ul>
+<hr />
+<h2 id="9-คำศัพท์สำคัญ">9. คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARP</td>
+<td>แปลง IP → MAC ใน LAN</td>
+<td>ถามว่า &quot;ใครมี IP นี้&quot;</td>
+</tr>
+<tr>
+<td>ARP cache</td>
+<td>ตาราง IP ↔ MAC ใน host</td>
+<td><code>arp -a</code></td>
+</tr>
+<tr>
+<td>Dynamic / Static entry</td>
+<td>ARP สร้างเอง ไม่ถาวร / ตั้งเอง ไม่หมดอายุ</td>
+<td></td>
+</tr>
+<tr>
+<td>ARP request / reply</td>
+<td>broadcast / unicast</td>
+<td></td>
+</tr>
+<tr>
+<td>Next hop</td>
+<td>router ถัดไปตาม routing table</td>
+<td>ARP หา MAC ของตัวนี้</td>
+</tr>
+<tr>
+<td>Repeater</td>
+<td>regenerate + re-time สัญญาณ (physical)</td>
+<td>ไม่ใช่ amplifier</td>
+</tr>
+<tr>
+<td>Hub</td>
+<td>multiport repeater ส่งออกทุกพอร์ต ไม่มี filtering</td>
+<td></td>
+</tr>
+<tr>
+<td>Bridge</td>
+<td>Layer 2, มีตาราง filtering, 2 พอร์ต</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch</td>
+<td>multi-port bridge, physical + data link</td>
+<td></td>
+</tr>
+<tr>
+<td>Filtering</td>
+<td>ตัดสินใจว่าส่ง frame ออกพอร์ตไหนจาก destination MAC</td>
+<td></td>
+</tr>
+<tr>
+<td>Transparent switch</td>
+<td>สถานีไม่รู้ว่ามี switch</td>
+<td>802.1d</td>
+</tr>
+<tr>
+<td>Loop</td>
+<td>frame วนไม่สิ้นสุดเมื่อมี switch สำรอง</td>
+<td>Ethernet ไม่มี TTL</td>
+</tr>
+<tr>
+<td>Spanning tree / STP</td>
+<td>สร้าง logical topology ไม่มี loop</td>
+<td></td>
+</tr>
+<tr>
+<td>Root switch</td>
+<td>switch ที่ ID ต่ำสุด</td>
+<td></td>
+</tr>
+<tr>
+<td>Forwarding / Blocking port</td>
+<td>พอร์ตบน tree / พอร์ตที่ถูกบล็อก</td>
+<td></td>
+</tr>
+<tr>
+<td>Untagged / Tagged port</td>
+<td>access port / trunk port</td>
+<td>U / T</td>
+</tr>
+<tr>
+<td>PVID</td>
+<td>VLAN ที่ frame ขาเข้าแบบไม่มี tag ถูกจัดเข้า</td>
+<td></td>
+</tr>
+<tr>
+<td>Inter-VLAN routing</td>
+<td>ข้าม VLAN ด้วยอุปกรณ์ Layer 3</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-สรุปท้ายบท-จุดที่มักออกสอบ">10. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ol>
+<li><strong>ARP:</strong> IP → MAC, request–response, ห่อใน link-layer frame โดยตรง</li>
+<li><strong>ARP cache:</strong> dynamic (ไม่ถาวร) vs static (ไม่หมดอายุ); <code>arp -a</code></li>
+<li><strong>ARP 4 ขั้น:</strong> เช็ค cache → broadcast request → reply (unicast) → เก็บ cache</li>
+<li><strong>ARP request ใส่ all 0s</strong> ในช่อง MAC ปลายทาง; operation 1 = request, 2 = reply</li>
+<li><strong>ข้ามเครือข่าย:</strong> ARP หา MAC ของ <strong>next hop</strong>; IP คงเดิม MAC เปลี่ยนทุก hop</li>
+<li><strong>Repeater</strong> = regenerator (ไม่ใช่ amplifier), physical layer</li>
+<li><strong>Hub</strong> = multiport repeater, ส่งออกทุกพอร์ต, ไม่มี link-layer address, ไม่มี filtering</li>
+<li><strong>Bridge</strong> = data link, มีตาราง filtering, 2 พอร์ต, ไม่เปลี่ยน MAC</li>
+<li><strong>Switch</strong> = multi-port bridge, ทำงานทั้ง physical และ data link, แยก collision domain</li>
+<li><strong>Transparent switch + 3 เงื่อนไข 802.1d:</strong> forward, เรียนรู้ตารางเอง, ป้องกัน loop</li>
+<li><strong>Learning process:</strong> ตารางเริ่มว่าง เพิ่มจาก source address ทีละ frame</li>
+<li><strong>Loop problem:</strong> เกิดจาก redundant switches; frame วนและเพิ่มจำนวน; Ethernet frame <strong>ไม่มี TTL</strong></li>
+<li><strong>Spanning tree:</strong> logical topology ทับ physical; switch เป็น node; root = ID ต่ำสุด; shortest path (Dijkstra); forwarding vs blocking port</li>
+<li><strong>Cost:</strong> switch → LAN = 1, LAN → switch = 0</li>
+<li><strong>ตัวอย่าง:</strong> S1 root; block S3–LAN3, S3–LAN4, S5–LAN3</li>
+<li><strong>Untagged (U) = access, Tagged (T) = trunk, PVID</strong>, inter-VLAN routing ต้องใช้ Layer 3 + gateway</li>
+<li>หัวข้อ VLAN เดิมทั้งหมด (ดูไฟล์สรุปเดิม)</li>
+</ol>
+<hr />
+<h1>สรุป: Lecture 7 — VLAN (Virtual LAN)</h1>
+<blockquote class="callout">
 <p>บทนี้ต่อยอดจาก Lecture 6.2 (Ethernet switch) — <strong>VLAN แบ่ง switched LAN ออกเป็นหลายกลุ่มแบบ logical</strong> โดยไม่ต้องเดินสายใหม่</p>
 <p>เรียนความหมายและประโยชน์ของ VLAN, ชนิดของ VLAN (default, data, native, management, voice), VLAN ข้ามหลาย switch ด้วย <strong>trunk</strong> และ <strong>IEEE 802.1Q tag</strong>, ช่วงหมายเลข VLAN, และ <strong>คำสั่ง Cisco IOS</strong> สำหรับสร้าง กำหนดพอร์ต ตรวจสอบ ลบ VLAN และตั้งค่า trunk (ใช้ใน Lab 7/8)</p>
 <p>หมายเหตุ: หน้า Outline มีหัวข้อ Dynamic Trunking Protocol (DTP) แต่สไลด์ชุดนี้ไม่มีเนื้อหาของ DTP</p>
 </blockquote>
+<h2 id="สารบัญ-1">สารบัญ</h2>
+<ol>
+<li>Overview of VLANs</li>
+<li>Types of VLANs</li>
+<li>VLANs ในสภาพแวดล้อมหลาย switch (Trunk, 802.1Q tag)</li>
+<li>Voice VLAN</li>
+<li>VLAN Configuration (ranges, สร้าง, กำหนดพอร์ต, ตรวจสอบ, ลบ)</li>
+<li>VLAN Trunks (ตั้งค่า, ตัวอย่าง, ตรวจสอบ, reset)</li>
+<li>สรุปคำสั่ง</li>
+<li>คำศัพท์สำคัญ</li>
+<li>จุดที่มักออกสอบ</li>
+</ol>
+<hr />
 <h2 id="1-overview-of-vlans">1. Overview of VLANs</h2>
 <h3 id="11-vlan-คืออะไร">1.1 VLAN คืออะไร ⭐</h3>
 <ul>
