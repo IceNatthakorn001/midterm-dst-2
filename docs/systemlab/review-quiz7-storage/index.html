@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Quiz: Quiz 7 — Storage (ข้อสอบจริง)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Quiz 7 — Storage (ข้อสอบจริง)</h1>
+<div class="sub">10 ข้อ แบ่งเป็นความจำ 5 ข้อ ความเข้าใจ 2 ข้อ การนำไปใช้ 2 ข้อ การคำนวณ 1 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น · เฉลยเป็นแนวคำตอบจากสไลด์ Lecture 7 + Lab 7 ไม่ใช่เฉลยทางการ ข้อที่ก้ำกึ่งมีเครื่องหมาย ⚠️</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "apply",
+  "q": "อธิบายความหมายของผลลัพธ์ที่ได้จากการ mount /dev/sda2 ต่อไปนี้<pre style=\"background:#2d0922;color:#eee;padding:10px 12px;border-radius:6px;font-size:0.8rem;font-weight:400;overflow-x:auto;margin:10px 0 0\">$ df -i | grep sd\n/dev/sda1   1310720  227605  1083115   18%  /\n/dev/sdb2       128      11      117    9%  /mnt/sdb2</pre>",
+  "choices": [
+   "/dev/sdb2 mount ที่ /mnt/sdb2 มีพื้นที่ทั้งหมด 128 KB ใช้ไป 11 KB เหลือ 117 KB (ใช้ไป 9%)",
+   "/dev/sdb2 mount ที่ /mnt/sdb2 มี block ทั้งหมด 128 ใช้ไป 11 เหลือ 117 (ใช้ไป 9%)",
+   "/dev/sdb2 mount ที่ /mnt/sdb2 มี inode ทั้งหมด 128 ใช้ไป 11 เหลือ 117 (ใช้ไป 9%)",
+   "/dev/sdb2 mount ที่ /mnt/sdb2 มี inode ทั้งหมด 128 เหลือว่าง 11 ใช้ไป 117 (ว่าง 9%)"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ถ้าเป็นขนาดพื้นที่ต้องใช้ df หรือ df -h แต่คำสั่งนี้มี option -i จึงเป็นข้อมูล inode ไม่ใช่ขนาดเป็น KB",
+   "ผิด — option -i ของ df คือ inode ไม่ใช่ block (จำนวน block ดูได้จาก df ปกติ หรือผลของ mkfs ซึ่ง sdb2 มี 256 block)",
+   "ถูก — df -i แสดงข้อมูล inode คอลัมน์คือ Filesystem, Inodes, IUsed, IFree, IUse%, Mounted on ดังนั้น sdb2 มี inode ทั้งหมด 128 ใช้ไป 11 เหลือ 117 คิดเป็น 9% และสร้างไฟล์/ไดเรกทอรีเพิ่มได้อีก 117 รายการ (128 inode ตรงกับผล mkfs.ext4 /dev/sdb2 ใน Lab 7) หมายเหตุ: โจทย์เขียนว่า /dev/sda2 แต่ในผลลัพธ์เป็น /dev/sdb2 น่าจะพิมพ์ผิด ข้อสอบจริงเป็นแบบเติมคำตอบ",
+   "ผิด — สลับคอลัมน์ ลำดับคือ Inodes (ทั้งหมด), IUsed (ใช้ไป), IFree (เหลือ) และ 9% คือ IUse% (ใช้ไป) ไม่ใช่ที่ว่าง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ประเภทของ file system ที่สร้างในห้อง lab บนระบบ Ubuntu คืออะไร",
+  "choices": [
+   "ext4",
+   "msdos",
+   "ext2",
+   "ntfs"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Lab 7 สร้าง file system ด้วย sudo mkfs.ext4 /dev/sdb1 และ sudo mkfs.ext4 /dev/sdb2 และ blkid แสดง TYPE=\"ext4\"",
+   "ผิด — msdos คือ FAT ของ MS-DOS (ใน parted คำว่า msdos ยังเป็นชื่อชนิด partition table แบบ MBR ด้วย) ไม่ใช่ file system ที่สร้างใน lab",
+   "ผิด — ext2 เป็นรุ่นเก่าที่ไม่มี journal ใน lab ใช้คำสั่ง mkfs.ext4 (แม้ sdb2 จะเล็กจนไม่มี journal ก็ยังเป็น ext4)",
+   "ผิด — ntfs เป็น file system ของ Windows"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อมูลเกี่ยวกับโครงสร้างของ File system เก็บไว้ที่ใด",
+  "choices": [
+   "inode table",
+   "Root directory",
+   "Superblock",
+   "Boot sector"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — inode table เก็บ metadata ของแต่ละไฟล์ (size, owner, permission, ตัวชี้ data block) ไม่ใช่ข้อมูลของทั้ง file system",
+   "ผิด — root directory คือไดเรกทอรีบนสุด (/) เก็บรายชื่อไฟล์กับหมายเลข inode",
+   "ถูก — superblock เก็บข้อมูลภาพรวมโครงสร้างของ file system เช่น ขนาด block จำนวน block/inode ทั้งหมด และจำนวนที่ว่าง (จึงมี superblock backups หลายชุด)",
+   "ผิด — boot sector เก็บโค้ดสำหรับ boot ระบบ ไม่ใช่โครงสร้างของ file system"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดคือระบบ file system ของ Microsoft Windows (มีมากกว่า 1 คำตอบ) — ตัวเลือกในข้อสอบ: a. fat32   b. msdos   c. ntfs   d. ext4",
+  "choices": [
+   "fat32 และ msdos",
+   "fat32, msdos และ ntfs",
+   "fat32 และ ntfs",
+   "ntfs และ ext4"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ขาด ntfs ซึ่งเป็น file system หลักของ Windows ส่วน msdos เป็นของ MS-DOS",
+   "ผิด — msdos (FAT รุ่นเก่า) เป็นของ Microsoft จริง แต่เป็นของ MS-DOS และสไลด์ไม่ได้จัดไว้ใต้ Windows ⚠️ ข้อนี้ก้ำกึ่ง ยังไม่ได้ยืนยันกับเฉลยของอาจารย์",
+   "ถูก — สไลด์ Lecture 7 ระบุว่า FAT32 (Windows), NTFS (Windows), ext4 (Linux) ⚠️ msdos ก้ำกึ่ง ยังไม่ได้ยืนยันกับเฉลยของอาจารย์",
+   "ผิด — ext4 เป็น file system ของ Linux"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดคือตัวอย่างข้อมูลที่เก็บไว้ที่ inode ของแต่ละ file (มีมากกว่า 1 คำตอบ) — ตัวเลือกในข้อสอบ: a. group name   b. file permission   c. password   d. owner id",
+  "choices": [
+   "file permission และ owner id",
+   "group name และ owner id",
+   "file permission และ password",
+   "group name, file permission และ owner id"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — inode เก็บ metadata ของไฟล์: type/permission, owner (UID), group (GID), size, เวลา และตัวชี้ไป data block ⚠️ group name ก้ำกึ่ง ยังไม่ได้ยืนยันกับเฉลยของอาจารย์",
+   "ผิด — ขาด file permission และ inode เก็บ group เป็นตัวเลข GID ไม่ใช่ชื่อ (ชื่อกลุ่มอยู่ใน /etc/group)",
+   "ผิด — password ไม่ได้อยู่ใน inode รหัสผ่านเก็บใน /etc/shadow",
+   "ผิด — สไลด์เขียนว่า inode เก็บ \"owner, group\" แต่ที่เก็บจริงคือ group ID ไม่ใช่ group name สังเกตว่าตัวเลือก d ใช้คำว่า id แต่ a ใช้คำว่า name ⚠️ ข้อนี้ก้ำกึ่ง ถ้าอาจารย์นับ group ด้วย คำตอบจะเป็นข้อนี้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คำสั่งที่ใช้ในการดูรายการ partition ของ disk คือคำสั่งอะไร",
+  "choices": [
+   "df -h",
+   "sudo fdisk -l",
+   "sudo mkfs -l",
+   "sudo mount -l"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — df -h แสดงพื้นที่ใช้ไป/คงเหลือของ file system ที่ mount อยู่ ไม่ใช่รายการ partition ของดิสก์",
+   "ถูก — fdisk -l แสดงรายการ partition ของดิสก์ทุกลูก (ต้องใช้สิทธิ์ root) คำสั่งอื่นในบทที่ดูได้เหมือนกันคือ lsblk และ print ภายใน parted ข้อสอบจริงเป็นแบบเติมคำตอบ",
+   "ผิด — mkfs ใช้สร้าง file system (format) ไม่ได้ใช้ดูรายการ partition",
+   "ผิด — mount -l แสดง file system ที่ mount อยู่ partition ที่ยังไม่ mount จะไม่แสดง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การตรวจสอบอุปกรณ์ต่างๆ บน Mainboard จะกระทำโดยซอฟต์แวร์ชื่ออะไร",
+  "choices": [
+   "Power-On-Self-Test",
+   "MBR",
+   "Boot Loader",
+   "BIOS"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — POST เป็นชื่อขั้นตอน/ฟังก์ชันตรวจอุปกรณ์ที่ BIOS ทำ ไม่ใช่ตัวซอฟต์แวร์ ⚠️ ข้อนี้ก้ำกึ่ง ถ้าอาจารย์เน้นว่าตัวที่ตรวจคือ POST คำตอบจะเป็นข้อนี้",
+   "ผิด — MBR คือ sector แรกของดิสก์ (512 bytes) เก็บ bootloader ขั้นแรกกับ partition table",
+   "ผิด — boot loader (เช่น GRUB) ทำหน้าที่โหลด kernel ของ OS หลังจากตรวจอุปกรณ์เสร็จแล้ว",
+   "ถูก — โจทย์ถามชื่อซอฟต์แวร์ ซึ่งคือ BIOS (firmware) สไลด์เขียนว่า BIOS ตรวจอุปกรณ์พื้นฐาน และเรียกขั้นตอนนี้ว่า Power-On Self-Test (POST) ⚠️ ก้ำกึ่งกับ POST ยังไม่ได้ยืนยันกับเฉลยของอาจารย์"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "อธิบายความหมายของคำสั่งต่อไปนี้ “sudo mkfs.ext4 /dev/sdb1”",
+  "choices": [
+   "สร้าง file system ชนิด ext4 บน partition ที่ 1 ของดิสก์ sdb",
+   "mount partition ที่ 1 ของดิสก์ sdb เป็น file system ชนิด ext4",
+   "สร้าง partition ที่ 1 ชนิด ext4 ขึ้นมาใหม่บนดิสก์ sdb",
+   "ตรวจสอบชนิด file system ของ partition ที่ 1 ของดิสก์ sdb"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — sudo = รันด้วยสิทธิ์ root, mkfs.ext4 = make file system ชนิด ext4 (format), /dev/sdb1 = partition ที่ 1 ของดิสก์ sdb ข้อมูลเดิมใน partition จะถูกลบทั้งหมด ข้อสอบจริงเป็นแบบเติมคำตอบ",
+   "ผิด — การ mount ใช้คำสั่ง mount เช่น sudo mount /dev/sdb1 /mnt/sdb1 ส่วน mkfs คือการ format",
+   "ผิด — การสร้าง partition ใช้ parted (mkpart) หรือ fdisk ส่วน mkfs ทำกับ partition ที่มีอยู่แล้ว",
+   "ผิด — การตรวจชนิด file system ใช้ sudo blkid /dev/sdb1 หรือ lsblk -f"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อมูลของ disk partition เก็บไว้ที่ใด",
+  "choices": [
+   "File System",
+   "Disk drive",
+   "BIOS",
+   "MBR"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — file system อยู่ภายในแต่ละ partition เก็บข้อมูลไฟล์ ไม่ได้เก็บตาราง partition ของดิสก์",
+   "ผิด — กว้างเกินไป MBR อยู่บนดิสก์ก็จริง แต่ตำแหน่งที่เก็บข้อมูล partition โดยเฉพาะคือ MBR",
+   "ผิด — BIOS เป็น firmware บน mainboard ค่าตั้งเก็บใน CMOS ไม่ได้เก็บข้อมูล partition",
+   "ถูก — MBR (Master Boot Record) คือ sector แรกของดิสก์ ขนาด 512 bytes ภายในมี partition table ที่เก็บข้อมูลของแต่ละ partition (จุดเริ่ม ขนาด ชนิด) ร่วมกับโค้ด bootloader"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ถ้ามี disk ขนาด 512 KB และได้แบ่งออกเป็น block โดย 1 block มีขนาด 4 KB ดังนั้น จำนวน block ของ disk นี้ เท่ากับเท่าไหร่",
+  "choices": [
+   "256",
+   "128",
+   "64",
+   "32"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 256 ได้จาก 512 ÷ 2 คือคิดว่า block ละ 2 KB",
+   "ถูก — จำนวน block = ขนาด disk ÷ ขนาด block = 512 KB ÷ 4 KB = 128 block",
+   "ผิด — 64 ได้จาก 512 ÷ 8 คือคิดว่า block ละ 8 KB",
+   "ผิด — 32 ได้จาก 512 ÷ 16 คือคิดว่า block ละ 16 KB"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
