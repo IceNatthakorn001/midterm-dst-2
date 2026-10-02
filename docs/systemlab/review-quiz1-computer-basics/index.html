@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Quiz: Quiz 1 — พื้นฐานคอมพิวเตอร์ (ข้อสอบจริง)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Quiz 1 — พื้นฐานคอมพิวเตอร์ (ข้อสอบจริง)</h1>
+<div class="sub">8 ข้อ จากข้อสอบจริง (โจทย์ ตัวเลือก และลำดับตามต้นฉบับ) — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "หน่วยความจำข้อใดต่อไปนี้ ที่จัดว่าเร็วที่สุด?",
+  "choices": [
+   "แคชของ CPU",
+   "หน่วยความจำเสมือน (Virtual Memory)",
+   "Hard Disk Drive",
+   "หน่วยความจำหลัก (DRAM)"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แคชของ CPU (SRAM อยู่ใน/ใกล้ CPU) เร็วระดับนาโนวินาที เร็วที่สุดใน memory hierarchy: แคช → DRAM → Hard Disk → Virtual Memory หลักจำ: ยิ่งใกล้ CPU → ยิ่งเร็ว ยิ่งแพง และยิ่งความจุน้อย",
+   "ผิด — Virtual Memory ใช้พื้นที่บนดิสก์มาทำเป็นหน่วยความจำ จึงช้าระดับเดียวกับดิสก์ (และมี overhead จากการสลับ page เพิ่มอีก)",
+   "ผิด — Hard Disk Drive ช้าระดับมิลลิวินาที เพราะมีชิ้นส่วนกลไกหมุน",
+   "ผิด — หน่วยความจำหลัก (DRAM) ช้ากว่าแคชหลายสิบเท่า"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดไม่ใช่ตัวอย่างของระบบปฏิบัติการประเภท Unix",
+  "choices": [
+   "Ubuntu",
+   "CentOS",
+   "Debian",
+   "VirtualBox"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Ubuntu เป็น Linux distribution (พัฒนาต่อจาก Debian) จัดอยู่ในตระกูล Unix-like",
+   "ผิด — CentOS เป็น Linux distribution พัฒนาจาก Red Hat Enterprise Linux (RHEL) จัดอยู่ในตระกูล Unix-like",
+   "ผิด — Debian เป็น Linux distribution (distro ต้นทางของ Ubuntu) จัดอยู่ในตระกูล Unix-like",
+   "ถูก — VirtualBox ไม่ใช่ระบบปฏิบัติการ แต่เป็น hypervisor (ซอฟต์แวร์สร้างเครื่องเสมือน/Virtual Machine) ที่ใช้ติดตั้งและรัน OS อื่นซ้อนบนเครื่องเรา"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "หน่วยวัดความจุข้อมูลใดมีปริมาณสูงที่สุด?",
+  "choices": [
+   "TB (เทระไบต์)",
+   "GB (กิกะไบต์)",
+   "MB (เมกะไบต์)",
+   "KB (กิโลไบต์)"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — TB = 1,024 GB ใหญ่ที่สุดในตัวเลือก เรียงจากน้อยไปมาก แต่ละขั้นคูณ 1,024 (2^10): KB → MB → GB → TB (ถัดจาก TB ไปคือ PB, EB)",
+   "ผิด — GB = 1,024 MB ยังเล็กกว่า TB",
+   "ผิด — MB = 1,024 KB เล็กกว่า GB และ TB",
+   "ผิด — KB = 1,024 bytes เล็กที่สุดในตัวเลือก"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดคือ Disk Interface ที่ทันสมัยและใช้กันทั่วไปในการเชื่อมต่อ Hard disk กับคอมพิวเตอร์?",
+  "choices": [
+   "Serial ATA (SATA)",
+   "Parallel ATA (PATA)",
+   "Fibre Channel (FC)",
+   "SCSI"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — SATA เป็น interface มาตรฐานปัจจุบันสำหรับต่อ Hard disk ในคอมพิวเตอร์ทั่วไป มาแทน PATA หลักจำ: PATA (ขนาน, เก่า) → SATA (อนุกรม, ใหม่ และใช้ทั่วไป)",
+   "ผิด — PATA (IDE) เป็นรุ่นเก่า ส่งข้อมูลแบบขนาน สายแพกว้าง ช้ากว่า เลิกใช้แล้ว",
+   "ผิด — Fibre Channel (FC) ใช้ในระบบ storage ระดับองค์กร (SAN) ไม่ใช่การใช้งานทั่วไป",
+   "ผิด — SCSI เป็นรุ่นเก่า เคยใช้ในเซิร์ฟเวอร์ ปัจจุบันถูกแทนด้วย SAS"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดคือคุณสมบัติหลักของ RAM ที่แตกต่างจาก Hard disk?",
+  "choices": [
+   "RAM เป็นหน่วยความจำแบบลบเลือนที่ข้อมูลจะหายไปเมื่อปิดเครื่อง",
+   "RAM เป็นหน่วยความจำแบบไม่ลบเลือน",
+   "RAM เก็บข้อมูลได้แม้ไม่มีพลังงาน",
+   "RAM มีความเร็วในการเข้าถึงข้อมูลช้ากว่า Hard disk"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — RAM เป็น volatile memory ต้องมีไฟเลี้ยงตลอดเวลา พอปิดเครื่องข้อมูลหายหมด ส่วน Hard disk เป็น non-volatile เก็บข้อมูลได้ถาวรแม้ไม่มีไฟ หลักจำ: RAM = เร็ว แต่ชั่วคราว / Hard disk = ช้ากว่า แต่ถาวร",
+   "ผิด — แบบไม่ลบเลือน (non-volatile) เป็นคุณสมบัติของ Hard disk ไม่ใช่ RAM",
+   "ผิด — เก็บข้อมูลได้แม้ไม่มีพลังงานเป็นคุณสมบัติของ Hard disk ไม่ใช่ RAM",
+   "ผิด — กลับกัน RAM เร็วกว่า Hard disk มาก"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "หน้าที่พื้นฐานของหน่วยประมวลผลกลางหรือ CPU คืออะไร?",
+  "choices": [
+   "แสดงผลลัพธ์ทางกราฟิก",
+   "ประมวลผลและปฏิบัติตามคำสั่งของโปรแกรม",
+   "จัดเก็บข้อมูลถาวร",
+   "รับข้อมูลจากอุปกรณ์นำเข้าเท่านั้น"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — แสดงผลทางกราฟิกเป็นหน้าที่ของ GPU / การ์ดจอ",
+   "ถูก — CPU ทำหน้าที่เป็น \"สมอง\" ของคอมพิวเตอร์ ทำงานเป็นวงจร Fetch → Decode → Execute (ดึงคำสั่ง → แปลคำสั่ง → ปฏิบัติตามคำสั่ง)",
+   "ผิด — จัดเก็บข้อมูลถาวรเป็นหน้าที่ของหน่วยความจำสำรอง (Hard disk, SSD)",
+   "ผิด — รับข้อมูลเป็นหน้าที่ของหน่วยรับข้อมูล (Input unit) และคำว่า \"เท่านั้น\" ทำให้ผิดชัดเจน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดต่อไปนี้ ไม่ใช่ คุณสมบัติของคอมพิวเตอร์?",
+  "choices": [
+   "มีความเร็วสูง",
+   "มีความน่าเชื่อถือ",
+   "มีความแม่นยำ",
+   "มีความคิดสร้างสรรค์"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ความเร็ว (Speed) เป็นคุณสมบัติของคอมพิวเตอร์: ประมวลผลได้เร็วมาก",
+   "ผิด — ความน่าเชื่อถือ (Reliability) เป็นคุณสมบัติของคอมพิวเตอร์: ทำงานซ้ำได้ผลเหมือนเดิม ไม่เหนื่อยล้า",
+   "ผิด — ความแม่นยำ (Accuracy) เป็นคุณสมบัติของคอมพิวเตอร์: ผลลัพธ์ถูกต้องถ้าข้อมูลและคำสั่งถูก",
+   "ถูก — คอมพิวเตอร์ทำงานตามคำสั่งที่มนุษย์เขียนไว้เท่านั้น คิดริเริ่มเองไม่ได้ ความคิดสร้างสรรค์จึงเป็นคุณสมบัติของมนุษย์ (คุณสมบัติของคอมพิวเตอร์ที่มักออกสอบ: Speed, Accuracy, Reliability, Storage)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดอธิบายความหมายของ Hard Disk Drive (HDD) ได้ถูกต้องที่สุด?",
+  "choices": [
+   "หน่วยความจำหลักที่ใช้เก็บข้อมูลชั่วคราวเมื่อคอมพิวเตอร์เปิดอยู่",
+   "อุปกรณ์เก็บข้อมูลที่ใช้แผ่น Disk ที่หมุนอย่างรวดเร็วเพื่อจัดเก็บข้อมูลแบบแม่เหล็ก",
+   "หน่วยประมวลผลที่ทำหน้าที่ในการคำนวณ",
+   "อุปกรณ์ที่ใช้ในการนำเข้าข้อมูลสู่คอมพิวเตอร์"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — หน่วยความจำหลักที่เก็บข้อมูลชั่วคราวคือ RAM",
+   "ถูก — HDD เก็บข้อมูลบนแผ่นจานแม่เหล็ก (platter) ที่หมุนด้วยความเร็วสูง (เช่น 5,400 / 7,200 RPM) โดยมีหัวอ่าน-เขียนเคลื่อนไปอ่านและบันทึกข้อมูล เป็นหน่วยความจำสำรองแบบ non-volatile",
+   "ผิด — หน่วยประมวลผลที่ทำหน้าที่คำนวณคือ CPU",
+   "ผิด — อุปกรณ์นำเข้าข้อมูลคืออุปกรณ์ Input เช่น คีย์บอร์ด เมาส์"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
