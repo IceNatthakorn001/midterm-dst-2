@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Quiz: Quiz 5 — File Permission &amp; Ownership (ข้อสอบจริง)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+  pre.term { background:#300a24; color:#f2f2f2; font-family:Consolas,"Courier New",monospace; font-size:0.8rem; font-weight:normal; line-height:1.45; padding:12px; border-radius:8px; overflow-x:auto; margin:10px 0 0; white-space:pre; }
+</style>
+</head>
+<body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🐧 ITDS212</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Quiz 5 — File Permission &amp; Ownership (ข้อสอบจริง)</h1>
+<div class="sub">10 ข้อ แบ่งเป็นความจำ 3 ข้อ ความเข้าใจ 2 ข้อ การนำไปใช้ 5 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "understand",
+  "q": "ในภาพต่อไปนี้ ให้เหตุผลว่าทำไมจึงเกิดข้อความว่า Permission denied<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ pwd\n/home\nsudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-x---  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ ls -l test\nls: cannot open directory 'test': Permission denied\nsudsanguan@sudsanguan-VM:/home$ </pre>",
+  "choices": [
+   "ผู้ใช้ชื่อ sudsanguan และผู้ใช้ชื่อ test ไม่ได้อยู่ในกลุ่มเดียวกัน",
+   "directory test ไม่อนุญาตให้ผู้ใช้คนอื่นเข้าถึง",
+   "ผู้ใช้ชื่อ sudsanguan ไม่มีสิทธิ์เข้าถึง directory test",
+   "directory test ให้เฉพาะผู้ใช้ test เข้าถึงเท่านั้น"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด (แต่ใกล้เคียงมาก) — เป็นเรื่องจริงว่า sudsanguan ไม่ได้อยู่ในกลุ่ม test จึงไม่ได้สิทธิ์ r-x ของ group แต่สาเหตุที่ถูกปฏิเสธโดยตรงคือสิทธิ์ของ others เป็น --- หมายเหตุ: ข้อนี้กำกวม ถ้าอาจารย์เน้นเรื่องกลุ่ม ข้อนี้อาจเป็นคำตอบที่ตั้งใจไว้",
+   "ถูก — สิทธิ์ drwxr-x--- แบ่งเป็น owner rwx / group r-x / others --- ผู้ใช้ sudsanguan ไม่ใช่เจ้าของและไม่อยู่ในกลุ่ม test จึงเป็น others (ผู้ใช้คนอื่น) ซึ่งไม่มีสิทธิ์ใดเลย",
+   "ผิด — แค่พูดซ้ำข้อความ Permission denied ไม่ได้บอกเหตุผลว่าทำไมจึงไม่มีสิทธิ์",
+   "ผิด — group ก็มีสิทธิ์ r-x ด้วย สมาชิกกลุ่ม test เข้าถึงได้ ไม่ใช่เฉพาะผู้ใช้ test คนเดียว"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ในรูปต่อไปนี้ ถ้าต้องการเปลี่ยนเจ้าของไฟล์ first.c เป็นผู้ใช้ชื่อ test ต้องใช้คำสั่งอะไร<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-xr-x  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ cd test\nsudsanguan@sudsanguan-VM:/home/test$ ls -l\ntotal 4\n-rw-r--r-- 1 root root 130 ก.ย.  11 21:48 first.c\nsudsanguan@sudsanguan-VM:/home/test$ </pre>",
+  "choices": [
+   "sudo chmod first.c test",
+   "sudo chown test first.c",
+   "sudo chown first.c test",
+   "sudo chgrp test first.c"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — chmod ใช้เปลี่ยนสิทธิ์ (rwx) ไม่ใช่เปลี่ยนเจ้าของ และรูปแบบ argument ก็ผิด",
+   "ถูก — รูปแบบคือ chown &lt;เจ้าของใหม่&gt; &lt;ไฟล์&gt; และต้องใช้ sudo เพราะไฟล์เป็นของ root",
+   "ผิด — สลับลำดับ argument ต้องใส่ชื่อเจ้าของใหม่ก่อน แล้วตามด้วยชื่อไฟล์",
+   "ผิด — chgrp เปลี่ยนแค่กลุ่มของไฟล์ ไม่ได้เปลี่ยนเจ้าของ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในรูปต่อไปนี้ UID ของผู้ใช้ test เท่ากับเท่าไหร่<pre class=\"term\">sudsanguan:x:1000:1000:Sudsanguan,,,:/home/sudsanguan:/bin/bash\ntest:x:777:1001:Testuser:/home/test:/bin/bash</pre>",
+  "choices": [
+   "1001",
+   "1000",
+   "777"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 1001 อยู่ช่องที่ 4 คือ GID (กลุ่มหลัก) ของ test",
+   "ผิด — 1000 เป็น UID ของผู้ใช้ sudsanguan ในบรรทัดบน",
+   "ถูก — รูปแบบ /etc/passwd คือ ชื่อ:รหัสผ่าน:UID:GID:คำอธิบาย:home:shell ช่องที่ 3 ของบรรทัด test คือ 777"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ในภาพต่อไปนี้ ถ้าต้องการให้ผู้ใช้คนอื่น สามารถอ่านไฟล์ใน directory test ได้ โดยการเปลี่ยน permission ต้องใช้คำสั่งอะไร<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ pwd\n/home\nsudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-x---  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ </pre>",
+  "choices": [
+   "sudo chmod 750 test",
+   "sudo chmod 751 test",
+   "sudo chmod 753 test",
+   "sudo chmod 755 test"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — 750 คือ drwxr-x--- เท่ากับของเดิม others ยังไม่มีสิทธิ์อะไรเลย",
+   "ผิด — 751 ให้ others แค่ x (1) เข้า directory ได้ แต่ ls ดูรายชื่อไฟล์ไม่ได้เพราะไม่มี r",
+   "ผิด — 753 ให้ others เป็น -wx (2+1) เขียนและเข้าได้ แต่อ่านรายชื่อไฟล์ไม่ได้",
+   "ถูก — others ต้องมี r (4) เพื่อดูรายชื่อไฟล์ และ x (1) เพื่อเข้า directory รวมเป็น 5 จึงได้ 755 (drwxr-xr-x)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในรูปต่อไปนี้ แสดงข้อมูลของไฟล์ชื่ออะไร<pre class=\"term\">lxd:x:135:sudsanguan\nsudsanguan:x:1000:\nsambashare:x:136:sudsanguan\ntest:x:1001:</pre>",
+  "choices": [
+   "/etc/users",
+   "/etc/group",
+   "/etc/shadow",
+   "/etc/passwd"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่มีไฟล์ /etc/users ในระบบ Linux",
+   "ถูก — แต่ละบรรทัดมี 4 ช่อง คือ ชื่อกลุ่ม:รหัสผ่าน:GID:รายชื่อสมาชิก เช่น lxd:x:135:sudsanguan คือกลุ่ม lxd, GID 135, มี sudsanguan เป็นสมาชิก",
+   "ผิด — /etc/shadow เก็บ hash ของรหัสผ่านและข้อมูลอายุรหัสผ่าน มี 9 ช่อง",
+   "ผิด — /etc/passwd มี 7 ช่อง ลงท้ายด้วย home directory และ shell"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ในภาพต่อไปนี้ ถ้าต้องการดูชื่อไฟล์ใน directory ชื่อ test ต้องใช้คำสั่งอะไร โดยไม่ต้องเปลี่ยน permission (ข้อสอบจริงเป็นแบบพิมพ์ตอบ)<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ pwd\n/home\nsudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-x---  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ ls -l test\nls: cannot open directory 'test': Permission denied\nsudsanguan@sudsanguan-VM:/home$ </pre>",
+  "choices": [
+   "sudo ls -l test",
+   "sudo cd test",
+   "sudo chmod 755 test",
+   "ls -a test"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — sudo รันคำสั่งด้วยสิทธิ์ root ซึ่งข้ามการตรวจ permission ของ directory ได้ จึงดูรายชื่อไฟล์ได้โดยไม่ต้องแก้สิทธิ์ (sudo ls test ก็ใช้ได้เช่นกัน)",
+   "ผิด — cd เป็นคำสั่ง built-in ของ shell ใช้กับ sudo ไม่ได้ และ cd ก็ไม่ได้แสดงชื่อไฟล์",
+   "ผิด — ใช้งานได้จริง แต่เป็นการเปลี่ยน permission ซึ่งโจทย์ห้ามไว้",
+   "ผิด — -a แค่แสดงไฟล์ซ่อนเพิ่ม ยังรันด้วยสิทธิ์ sudsanguan เหมือนเดิม จึง Permission denied เช่นเดิม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ถ้าผู้ใช้ชื่อ dst ต้องการเปลี่ยน password ของผู้ใช้ชื่อ test ต้องใช้คำสั่งอะไร และให้บอกรูปแบบของคำสั่งที่ถูกต้องด้วย (ข้อสอบจริงเป็นแบบพิมพ์ตอบ)",
+  "choices": [
+   "passwd test",
+   "sudo passwd test",
+   "sudo passwd dst test",
+   "sudo usermod test"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ผู้ใช้ทั่วไปใช้ passwd เปลี่ยนได้แค่รหัสผ่านของตัวเอง จะเปลี่ยนของคนอื่นต้องมีสิทธิ์ root",
+   "ถูก — รูปแบบคือ sudo passwd &lt;ชื่อผู้ใช้&gt; ระบบถามรหัสผ่านของ dst (สำหรับ sudo) แล้วให้ตั้งรหัสผ่านใหม่ของ test 2 ครั้ง โดยไม่ต้องรู้รหัสเดิม",
+   "ผิด — passwd รับชื่อผู้ใช้เป้าหมายแค่ชื่อเดียว ไม่ต้องใส่ชื่อคนที่สั่ง",
+   "ผิด — usermod ใช้แก้ข้อมูลบัญชี (UID, home, shell) และต้องมี option กำกับ คำสั่งเปลี่ยนรหัสผ่านคือ passwd"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ในรูปต่อไปนี้ ถ้าต้องการเปลี่ยนกลุ่มของไฟล์ first.c เป็นผู้ใช้ชื่อ sudsanguan ต้องใช้คำสั่งอะไร (ข้อสอบจริงเป็นแบบพิมพ์ตอบ)<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-xr-x  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ cd test\nsudsanguan@sudsanguan-VM:/home/test$ ls -l\ntotal 4\n-rw-r--r-- 1 root root 130 ก.ย.  11 21:48 first.c\nsudsanguan@sudsanguan-VM:/home/test$ </pre>",
+  "choices": [
+   "sudo chgrp sudsanguan first.c",
+   "sudo chgrp first.c sudsanguan",
+   "sudo chown sudsanguan first.c",
+   "sudo chmod sudsanguan first.c"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — รูปแบบคือ chgrp &lt;กลุ่มใหม่&gt; &lt;ไฟล์&gt; ต้องมี sudo เพราะไฟล์เป็นของ root (sudo chown :sudsanguan first.c ให้ผลเหมือนกัน)",
+   "ผิด — สลับลำดับ argument ต้องใส่ชื่อกลุ่มก่อน แล้วตามด้วยชื่อไฟล์",
+   "ผิด — chown แบบนี้เปลี่ยนเจ้าของไฟล์ ไม่ได้เปลี่ยนกลุ่ม",
+   "ผิด — chmod ใช้เปลี่ยนสิทธิ์ (rwx) ไม่ใช่กลุ่มของไฟล์"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในภาพต่อไปนี้ สมาชิกของกลุ่ม test มีสิทธิ์ใดบ้างในการเข้าถึง directory “test”<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ pwd\n/home\nsudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-x---  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ </pre>",
+  "choices": [
+   "read and execute",
+   "read, write, execute",
+   "execute only",
+   "read only"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — drwxr-x--- ชุดกลาง (group) คือ r-x จึงอ่านรายชื่อไฟล์ได้ (read) และเข้า directory ได้ (execute) แต่สร้างหรือลบไฟล์ไม่ได้",
+   "ผิด — rwx เป็นสิทธิ์ของ owner (ผู้ใช้ test) ไม่ใช่ของ group",
+   "ผิด — group มี r ด้วย ไม่ได้มีแค่ x",
+   "ผิด — group มี x ด้วย จึงเข้า directory ได้ ไม่ได้มีแค่ r"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในภาพต่อไปนี้ ใครคือเจ้าของไฟล์ first.c (ข้อสอบจริงเป็นแบบพิมพ์ตอบ)<pre class=\"term\">sudsanguan@sudsanguan-VM:/home$ ls -l\ntotal 8\ndrwxr-x--- 15 sudsanguan sudsanguan 4096 ก.ย.  11 21:44 sudsanguan\ndrwxr-xr-x  2 test       test       4096 ก.ย.  11 21:48 test\nsudsanguan@sudsanguan-VM:/home$ cd test\nsudsanguan@sudsanguan-VM:/home/test$ ls -l\ntotal 4\n-rw-r--r-- 1 root root 130 ก.ย.  11 21:48 first.c\nsudsanguan@sudsanguan-VM:/home/test$ </pre>",
+  "choices": [
+   "test",
+   "root",
+   "sudsanguan",
+   "first.c"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — test เป็นเจ้าของ directory ที่ไฟล์อยู่ แต่เจ้าของไฟล์ดูจากบรรทัดของไฟล์เอง ไม่ใช่จาก directory",
+   "ถูก — บรรทัด -rw-r--r-- 1 root root 130 ... first.c คอลัมน์ที่ 3 คือเจ้าของ (root) และคอลัมน์ที่ 4 คือกลุ่ม (root)",
+   "ผิด — sudsanguan เป็นผู้ใช้ที่ login อยู่ ไม่ได้เป็นเจ้าของไฟล์นี้",
+   "ผิด — first.c เป็นชื่อไฟล์ ไม่ใช่ชื่อผู้ใช้"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
