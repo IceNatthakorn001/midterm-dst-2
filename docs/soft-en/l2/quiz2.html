@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L2 – Software Process Models (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L2 – Software Process Models (ชุดที่ 2)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ใน Knight Capital (2012) อัลกอริทึมที่ผิดพลาดเทรดต่อเนื่องประมาณเท่าใดก่อนปิดระบบได้?",
+  "choices": [
+   "120 นาที",
+   "45 นาที",
+   "90 นาที",
+   "15 นาที"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นานเกินไป ตัวเลขในสไลด์คือ 45 นาที",
+   "ถูก — สไลด์ระบุว่าเทรดผิดต่อเนื่องประมาณ 45 นาที เสียหายมากกว่า 440 ล้านดอลลาร์",
+   "ผิด — นานเกินไป ตัวเลขในสไลด์คือ 45 นาที",
+   "ผิด — สั้นเกินไป ตัวเลขในสไลด์คือ 45 นาที"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ผลของ CrowdStrike outage (2024) ที่ผู้ใช้เห็นคืออะไร?",
+  "choices": [
+   "เครื่อง Windows ขึ้นจอฟ้า restart วน",
+   "เครื่อง Windows ถูกเข้ารหัสไฟล์ทั้งหมด",
+   "เว็บสมัครประกันสุขภาพเปิดใช้งานไม่ได้",
+   "ระบบเทรดหุ้นส่งคำสั่งซื้อขายผิดจำนวนมาก"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — อัปเดตที่ผิดพลาดหลุดออกไป ทำให้ Windows จำนวนมากขึ้น Blue Screen แล้ว restart วนไป",
+   "ผิด — ไม่ใช่ ransomware สไลด์พูดถึงจอฟ้าและ restart วน",
+   "ผิด — นี่คือเหตุการณ์ของ HealthCare.gov",
+   "ผิด — นี่คือเหตุการณ์ของ Knight Capital"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "กิจกรรมพื้นฐาน Maintenance and evolution ทำอะไร?",
+  "choices": [
+   "วางโครงสร้างและส่วนประกอบระบบ",
+   "หาข้อผิดพลาดเทียบกับ requirement",
+   "แก้ปัญหาและปรับซอฟต์แวร์ไปตามเวลา",
+   "ส่งมอบซอฟต์แวร์ไปใช้ในระบบงานจริง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นหน้าที่ของ System and software design",
+   "ผิด — เป็นหน้าที่ของ Testing and quality assurance",
+   "ถูก — Maintenance and evolution คือแก้ปัญหา อัปเดตฟีเจอร์ และปรับซอฟต์แวร์ไปตามเวลา",
+   "ผิด — เป็นหน้าที่ของ Deployment and release"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Layered Technology เรียงจากฐานขึ้นไปด้านบนอย่างไร?",
+  "choices": [
+   "Process → Quality focus → Methods → Tools",
+   "Tools → Methods → Process → Quality focus",
+   "Quality focus → Methods → Process → Tools",
+   "Quality focus → Process → Methods → Tools"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ฐานต้องเป็น Quality focus ไม่ใช่ Process",
+   "ผิด — กลับด้าน Tools อยู่ชั้นบนสุด ไม่ใช่ฐาน",
+   "ผิด — Process ต้องอยู่ถัดจาก Quality focus ก่อน Methods",
+   "ถูก — ฐานคือ Quality focus แล้วตามด้วย Process, Methods และ Tools"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "คุณสมบัติ Customization ของ development framework หมายถึงอะไร?",
+  "choices": [
+   "แก้ไขและเพิ่มฟังก์ชันให้ตรงความต้องการได้",
+   "มีส่วนประกอบสำเร็จรูปให้พัฒนาได้เร็วขึ้น",
+   "มีแนวปฏิบัติที่ดีช่วยให้โค้ดเป็นระเบียบขึ้น",
+   "ให้โครงสร้างพื้นฐานจึงไม่ต้องเริ่มจากศูนย์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Customization คือปรับแก้และเพิ่มฟังก์ชันให้ตรงความต้องการ",
+   "ผิด — นี่คือ Components and Tools",
+   "ผิด — นี่คือ Best Practices and Guidelines",
+   "ผิด — นี่คือ Foundation"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตามสไลด์ umbrella activities มีทั้งหมดกี่อย่าง?",
+  "choices": [
+   "5",
+   "10",
+   "6",
+   "8"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — 5 คือจำนวนสิ่งที่ process model ต้องกำหนด",
+   "ผิด — สไลด์ระบุ 8 อย่าง ไม่ใช่ 10",
+   "ผิด — 6 คือจำนวนกิจกรรมพื้นฐานของการพัฒนา",
+   "ถูก — มี 8 อย่าง เช่น project management, formal technical reviews, SQA, configuration management, risk management"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Daily Scrum Meeting จัดทุกกี่ชั่วโมง?",
+  "choices": [
+   "48 ชั่วโมง",
+   "24 ชั่วโมง",
+   "12 ชั่วโมง",
+   "72 ชั่วโมง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ห่างเกินไป สไลด์ระบุทุก 24 ชั่วโมง",
+   "ถูก — Daily Scrum คือประชุมสั้น ๆ ทุก 24 ชั่วโมง",
+   "ผิด — ถี่เกินไป สไลด์ระบุทุก 24 ชั่วโมง",
+   "ผิด — ห่างเกินไป สไลด์ระบุทุก 24 ชั่วโมง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นลักษณะของ Agile processes ตามสไลด์?",
+  "choices": [
+   "Fixed long iterations",
+   "Formal communications",
+   "Minimal documentation",
+   "Upfront system design"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Agile ใช้ short releases and iterations",
+   "ผิด — Agile ใช้ informal communications",
+   "ถูก — Agile ใช้เอกสารน้อยที่สุดเท่าที่จำเป็น",
+   "ผิด — Agile ใช้ incremental design ไม่ออกแบบทั้งหมดล่วงหน้า"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Sprint Backlog ใน Scrum คืออะไร?",
+  "choices": [
+   "ภาพเป้าหมายผลิตภัณฑ์",
+   "งานที่เลือกมาทำในรอบนี้",
+   "รายการฟีเจอร์ทั้งหมด",
+   "ชิ้นงานที่พร้อมส่งมอบ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นี่คือ Vision",
+   "ถูก — Sprint Backlog คืองานที่ดึงจาก Product Backlog มาทำใน sprint นี้",
+   "ผิด — นี่คือ Product Backlog",
+   "ผิด — นี่คือ Potentially Shippable Product Increment"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "มาตรฐานของ ISO ที่สไลด์ยกในเรื่อง process assessment คือชุดใด?",
+  "choices": [
+   "ISO 14000",
+   "ISO 31000",
+   "ISO 27000",
+   "ISO 9000"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ISO 14000 เป็นเรื่องสิ่งแวดล้อม ไม่อยู่ในสไลด์",
+   "ผิด — ISO 31000 เป็นเรื่องบริหารความเสี่ยง ไม่อยู่ในสไลด์",
+   "ผิด — ISO 27000 เป็นเรื่องความปลอดภัยสารสนเทศ ไม่อยู่ในสไลด์",
+   "ถูก — สไลด์ระบุ ISO 9000 series คู่กับ SEI ที่ Carnegie Mellon"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดไม่ใช่จุดประสงค์ของ process model ตามสไลด์?",
+  "choices": [
+   "ช่วยสื่อสารระหว่าง stakeholders",
+   "ทำให้ชิ้นงานสม่ำเสมอและมีคุณภาพ",
+   "รับประกันว่าซอฟต์แวร์ไม่มีบั๊กเลย",
+   "ช่วยทีมวางแผนและบริหารโครงการ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นจุดประสงค์ข้อ 3: สื่อสารและประสานงาน",
+   "ผิด — เป็นจุดประสงค์ข้อ 2: consistency and quality",
+   "ถูก — process model ช่วยคุมคุณภาพ แต่ไม่ได้รับประกันว่าไม่มีบั๊กเลย",
+   "ผิด — เป็นจุดประสงค์ข้อ 1: วางแผน ลงมือทำ และบริหารโครงการ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในภาพ Spiral model จุดที่คั่นระหว่างรอบเรียกว่าอะไร?",
+  "choices": [
+   "Review",
+   "Bucket",
+   "Sprint",
+   "Release"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — แต่ละรอบของเกลียวมีจุด Review คั่นก่อนขึ้นรอบถัดไป",
+   "ผิด — Integration bucket เป็นคำของ Incremental แบบ A",
+   "ผิด — Sprint เป็นคำของ Scrum",
+   "ผิด — Release เป็นคำของ Incremental แบบ B"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Umbrella activities ต่างจาก framework activities อย่างไร?",
+  "choices": [
+   "ทำเฉพาะช่วงท้ายของโครงการ",
+   "ทำต่อเนื่องตลอดทั้งโครงการ",
+   "ทำครั้งเดียวก่อนเริ่มโครงการ",
+   "ทำเฉพาะช่วงเขียนโค้ดเท่านั้น"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ไม่ได้จำกัดอยู่ช่วงท้าย",
+   "ถูก — umbrella activities ครอบทุกช่วง ไม่ได้อยู่ช่วงใดช่วงหนึ่ง",
+   "ผิด — ไม่ได้ทำครั้งเดียวแล้วจบ",
+   "ผิด — ไม่ได้จำกัดอยู่ช่วง coding"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ต้นเหตุจริงของ Knight Capital ตามสไลด์คืออะไร นอกจากตัวบั๊ก?",
+  "choices": [
+   "ทีมพัฒนามีจำนวนคนไม่เพียงพอต่อปริมาณงาน",
+   "การออกแบบหน้าจอของผู้ใช้งานไม่ชัดเจน",
+   "การ deploy และการควบคุมงานล้มเหลว",
+   "ลูกค้าเปลี่ยน requirement กลางทาง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — สไลด์ไม่ได้พูดถึงจำนวนคน",
+   "ผิด — สไลด์ไม่ได้พูดถึง UI",
+   "ถูก — ทดสอบไม่พอ ไม่มี safeguards และบริหารความเสี่ยงไม่ดี โค้ดผิดจึงขึ้นระบบจริง",
+   "ผิด — สไลด์ไม่ได้พูดถึง requirement เปลี่ยน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สไลด์ Code and Fix บอกว่าบางคนเริ่มทำโดยไม่เข้าใจ problem statement ซึ่งก็คืออะไร?",
+  "choices": [
+   "Maintenance",
+   "Deployment",
+   "Integration",
+   "Requirement"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — maintenance คือการดูแลหลังส่งมอบ",
+   "ผิด — deployment คือการส่งมอบ ไม่ใช่โจทย์ปัญหา",
+   "ผิด — integration คือการรวมระบบ",
+   "ถูก — problem statement คือ requirement ถ้าไม่เข้าใจก็ไม่รู้ว่าระบบควรทำอะไร"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อเสียใดเป็นของ Incremental model โดยเฉพาะ?",
+  "choices": [
+   "มีปัญหาตอนรวมระบบเข้าด้วยกัน",
+   "ทดสอบได้หลังเขียนโค้ดเสร็จแล้ว",
+   "เอกสารอาจไม่พอถ้าจัดการไม่ดี",
+   "ต้องมีผู้เชี่ยวชาญด้านความเสี่ยง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Incremental ทำหลายส่วนขนานกัน จึงเจอ integration challenges",
+   "ผิด — เป็นข้อเสียของ Waterfall",
+   "ผิด — เป็นข้อเสียของ Agile",
+   "ผิด — เป็นข้อเสียของ Spiral"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Incremental ต่างจาก Spiral ที่จุดใด?",
+  "choices": [
+   "แบ่งตาม requirement ส่วน Spiral วนตามความเสี่ยง",
+   "แบ่งตามความเสี่ยง ส่วน Spiral วนตาม requirement",
+   "ไม่มีการทดสอบเลย ส่วน Spiral ทดสอบทุก quadrant",
+   "ไม่มีการรวมระบบเลย ส่วน Spiral รวมระบบทุกรอบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Incremental แบ่งงานตาม requirement ส่วน Spiral ขับเคลื่อนด้วยความเสี่ยง",
+   "ผิด — สลับกัน Spiral ต่างหากที่ risk-driven",
+   "ผิด — Incremental มี unit test และ integrated system test",
+   "ผิด — Incremental แบบ A รวมชิ้นงานเข้า integration bucket"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การที่เกลียวของ Spiral “ใหญ่ขึ้นทุกรอบ” สื่อถึงอะไร?",
+  "choices": [
+   "จำนวนคนในทีมต้องเพิ่มขึ้นในทุกรอบ",
+   "ระยะเวลาแต่ละรอบกำหนดให้เท่ากัน",
+   "ความเสี่ยงของโครงการเพิ่มขึ้นทุกรอบ",
+   "งานและต้นทุนสะสมเพิ่มขึ้นเรื่อย ๆ"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — สไลด์ไม่ได้ผูกขนาดเกลียวกับจำนวนคน",
+   "ผิด — สไลด์ไม่ได้กำหนดว่าทุกรอบยาวเท่ากัน",
+   "ผิด — แต่ละรอบมี quadrant แก้ความเสี่ยง ความเสี่ยงควรลดลง",
+   "ถูก — แต่ละรอบทำงานมากขึ้นและต้นทุนสะสมมากขึ้น"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมลูกค้าของโครงการ Agile จึงมักพอใจมากขึ้น?",
+  "choices": [
+   "ได้ระบบครบทุกฟีเจอร์ในครั้งเดียว",
+   "ได้ราคาและเวลาที่ตายตัวแน่นอน",
+   "ได้ให้ feedback อย่างสม่ำเสมอ",
+   "ได้เอกสารครบและเป็นทางการ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Agile ส่งมอบเพิ่มทีละส่วน ไม่ใช่ครั้งเดียว",
+   "ผิด — Agile คาดการณ์ต้นทุนและเวลาได้ยาก",
+   "ถูก — Agile ส่งของเป็นรอบ ลูกค้าเห็นและให้ feedback ได้สม่ำเสมอ",
+   "ผิด — Agile ใช้เอกสารน้อย เอกสารหนักเป็นของ Traditional"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เรื่อง documentation Agile ต่างจาก Traditional อย่างไร?",
+  "choices": [
+   "ไม่ยอมให้มีเอกสารใด ๆ ในโครงการ",
+   "ถือว่า source code ก็เป็นเอกสาร",
+   "สื่อสารผ่าน memo และเอกสารทางการ",
+   "ต้องมีเอกสารครบก่อนเริ่มเขียนโค้ด"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Agile ยังมีเอกสาร แค่น้อยที่สุดเท่าที่จำเป็น",
+   "ถูก — Agile ทำเอกสารเท่าที่จำเป็น และนับ source code เป็นเอกสารด้วย",
+   "ผิด — นี่คือการสื่อสารของ Traditional",
+   "ผิด — นี่คือแนวทางของ Traditional"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "สมมติฐานเรื่อง requirement ของ Agile คือข้อใด?",
+  "choices": [
+   "requirement ต้องเขียนเป็นทางการ",
+   "requirement จะเปลี่ยนระหว่างทาง",
+   "requirement ต้องครบก่อนออกแบบ",
+   "requirement จะไม่เปลี่ยนอีกเลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Agile ใช้ requirement แบบไม่เป็นทางการ",
+   "ถูก — Agile สมมติว่า requirement จะเปลี่ยน จึงคุยกับผู้ใช้ตลอด",
+   "ผิด — เป็นแนวทาง upfront ของ Traditional",
+   "ผิด — เป็นสมมติฐานของ Traditional"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Cross-functional team ใน Scrum หมายถึงอะไร?",
+  "choices": [
+   "ทีมที่มีทักษะที่ต้องใช้ครบในทีมเดียว",
+   "ทีมที่แยกฝ่าย test ออกเป็นอีกบริษัท",
+   "ทีมที่ทำงานข้ามหลายโครงการพร้อมกัน",
+   "ทีมที่สมาชิกทุกคนทำหน้าที่เดียวกันหมด"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — มีทั้ง dev, test, design ในทีมเดียว จึงทำงานจบได้ในทีม",
+   "ผิด — ตรงข้าม ทักษะต้องอยู่ในทีมเดียวกัน",
+   "ผิด — ไม่ได้หมายถึงทำหลายโครงการ",
+   "ผิด — ตรงข้าม ต้องมีหลายทักษะ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Spotify ใช้อะไรกำหนดลำดับความสำคัญของงาน?",
+  "choices": [
+   "แผนงานรายปีที่อนุมัติไว้แล้ว",
+   "สัญญากับผู้รับจ้างแต่ละเจ้า",
+   "ข้อมูลผู้ใช้แบบ real-time",
+   "คำสั่งจากผู้บริหารระดับสูง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Spotify เน้น fast iteration ไม่ยึดแผนรายปี",
+   "ผิด — ผู้รับจ้างหลายเจ้าเป็นลักษณะของ HealthCare.gov",
+   "ถูก — Spotify ตัดสินใจแบบ data-driven ด้วยข้อมูลผู้ใช้ real-time และ A/B testing",
+   "ผิด — squad มี autonomy ไม่ต้องรออนุมัติจากเบื้องบน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Process assessment ตอบคำถามใด?",
+  "choices": [
+   "โครงการนี้ควรใช้งบประมาณเท่าใด",
+   "ลูกค้าพอใจกับผลิตภัณฑ์มากแค่ไหน",
+   "ซอฟต์แวร์ตัวนี้ยังมีบั๊กเหลืออยู่อีกกี่จุด",
+   "กระบวนการองค์กร mature แค่ไหน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นเรื่องการประมาณต้นทุนโครงการ",
+   "ผิด — เป็นเรื่องความพึงพอใจลูกค้า ไม่ใช่ความ mature ของกระบวนการ",
+   "ผิด — เป็นเรื่องการทดสอบผลิตภัณฑ์ ไม่ใช่ประเมินกระบวนการ",
+   "ถูก — ประเมินว่ากระบวนการ SE ขององค์กร mature แค่ไหน และต้องปรับปรุงไหม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "นักศึกษาทำการบ้านโปรแกรมเล็ก ๆ โดยเขียนโค้ด รัน เจอผิดก็แก้ วนไปจนผ่าน โดยไม่วางแผนอะไร เป็นโมเดลใด?",
+  "choices": [
+   "Spiral model",
+   "Code and Fix",
+   "Incremental",
+   "Waterfall"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Spiral ต้องมี risk analysis และ prototype ทุกรอบ",
+   "ถูก — เขียน → ทดสอบ → แก้ วนจนใช้ได้ คือ Code and Fix เหมาะกับงานเล็กมาก",
+   "ผิด — Incremental แบ่ง requirement เป็นชิ้นแล้วพัฒนาแยก",
+   "ผิด — Waterfall ต้องทำเป็นช่วงเรียงกันและมีเอกสาร"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "บริษัทให้ 4 ทีมพัฒนา requirement หลักคนละชุดแยกกัน แล้วนำชิ้นที่เสร็จมารวมกันเพื่อทำ integrated system test ก่อนส่งมอบ เป็นโมเดลใด?",
+  "choices": [
+   "Scrum แบบ sprint",
+   "Spiral แบบวนรอบ",
+   "Incremental แบบ A",
+   "Incremental แบบ B"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Scrum ทำเป็น sprint 2–4 สัปดาห์จาก backlog",
+   "ผิด — Spiral วนตาม quadrant ที่มี risk analysis",
+   "ถูก — พัฒนาแยกแล้วรวมเข้า integration bucket เพื่อทดสอบทั้งระบบ คือแบบ A",
+   "ผิด — แบบ B ปล่อยให้ผู้ใช้เป็นหลาย release"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "โครงการหนึ่งประชุมติดตามงานทุกวัน แต่ deadline และ scope ตายตัว และผู้ใช้จริงไม่เคยได้ลองระบบเลย ควรแก้จุดใดก่อนเพื่อให้เป็น Agile จริง?",
+  "choices": [
+   "ส่งมอบเป็นรอบและเก็บ feedback ผู้ใช้",
+   "เพิ่มจำนวนการประชุมติดตามความคืบหน้า",
+   "เลื่อนการทดสอบทั้งระบบไปไว้ช่วงท้าย",
+   "เพิ่มผู้รับจ้างให้ทำหลาย module พร้อมกัน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — หัวใจของ Agile คือส่งของที่ใช้ได้เป็นรอบและได้ feedback จริง ไม่ใช่แค่ประชุมบ่อย",
+   "ผิด — ประชุมบ่อยอย่างเดียวคือ Fake Agile แบบ HealthCare.gov",
+   "ผิด — late testing เป็นสาเหตุที่ HealthCare.gov ล้มเหลว",
+   "ผิด — ผู้รับจ้างหลายเจ้าทำให้ integration แย่ลง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ลูกค้าต้องการเซ็นสัญญาที่กำหนดราคาและวันส่งมอบตายตัวล่วงหน้า 2 ปี ข้อเสียใดของ Agile จะกระทบมากที่สุด?",
+  "choices": [
+   "ผู้ใช้มีส่วนร่วมแค่ตอนต้นกับท้าย",
+   "พบปัญหาของระบบได้ช้าเกินไป",
+   "ต้องมีผู้เชี่ยวชาญความเสี่ยง",
+   "คาดการณ์ต้นทุนและเวลาได้ยาก"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นลักษณะของ Traditional ไม่ใช่ Agile",
+   "ผิด — Agile เจอปัญหาเร็ว เจอช้าเป็นของ Waterfall",
+   "ผิด — เป็นข้อเสียของ Spiral",
+   "ถูก — Agile คาดการณ์ต้นทุนและเวลาได้ยาก และยากกับโครงการที่ scope ตายตัว"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผู้บริหารอยากรู้ว่ากระบวนการพัฒนาซอฟต์แวร์ของบริษัทอยู่ระดับใดเมื่อเทียบมาตรฐานของ ISO หรือ SEI ควรทำสิ่งใด?",
+  "choices": [
+   "Process assessment",
+   "Reuse management",
+   "Product backlog",
+   "Risk management"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — process assessment ประเมินว่ากระบวนการ mature แค่ไหน โดย ISO และ SEI ช่วยประเมิน",
+   "ผิด — reusability management คือจัดการสิ่งที่นำกลับมาใช้ซ้ำ",
+   "ผิด — product backlog คือรายการงานของผลิตภัณฑ์ใน Scrum",
+   "ผิด — risk management คือประเมินและรับมือความเสี่ยงของโครงการ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมกำหนดวิธีควบคุมเวอร์ชันของโค้ดและการเปลี่ยนแปลงทุกครั้งตลอดโครงการ เป็น umbrella activity ใด?",
+  "choices": [
+   "Reusability management",
+   "Measurement of metrics",
+   "Risk management process",
+   "Configuration management"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — reusability management คือกำหนดเกณฑ์สิ่งที่ใช้ซ้ำได้",
+   "ผิด — measurement คือเก็บตัวชี้วัดของกระบวนการ โครงการ และผลิตภัณฑ์",
+   "ผิด — risk management คือประเมินและรับมือความเสี่ยง",
+   "ถูก — software configuration management คือจัดการเวอร์ชันและการเปลี่ยนแปลง"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

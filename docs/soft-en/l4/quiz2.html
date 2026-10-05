@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L4 – Use Case Modeling (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L4 – Use Case Modeling (ชุดที่ 2)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "Behavioral models แสดงอะไร?",
+  "choices": [
+   "ข้อมูลเคลื่อนที่ระหว่าง process อย่างไร",
+   "ซอฟต์แวร์ตอบสนองต่อ event อย่างไร",
+   "information domain ของปัญหาคืออะไร",
+   "class มี attribute และ operation"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นี่คือ flow models",
+   "ถูก — behavioral models แสดงการตอบสนองของซอฟต์แวร์ต่อ event",
+   "ผิด — นี่คือ data models",
+   "ผิด — นี่คือ class models"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "กล่อง system boundary ใน use case diagram ใส่ชื่ออะไร?",
+  "choices": [
+   "ชื่อของระบบ",
+   "ชื่อ use case",
+   "ชื่อของผู้พัฒนา",
+   "ชื่อของ actor"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — กล่องแทนขอบเขตของระบบ จึงใส่ชื่อระบบ",
+   "ผิด — ชื่อ use case อยู่ในวงรี",
+   "ผิด — ไม่มีการใส่ชื่อผู้พัฒนาในแผนภาพ",
+   "ผิด — actor อยู่นอกกล่อง ชื่ออยู่ใต้คนก้าง"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ลูกศร &lt;&lt;extends&gt;&gt; ชี้จากไหนไปไหน?",
+  "choices": [
+   "จาก base use case ไปหา actor",
+   "จาก base ไป extending use case",
+   "จาก actor ไป extending use case",
+   "จาก extending use case ไป base"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — extend เป็นความสัมพันธ์ระหว่าง use case ไม่เกี่ยวกับ actor",
+   "ผิด — นี่คือทิศแบบ include (base → included)",
+   "ผิด — extend เป็นความสัมพันธ์ระหว่าง use case ไม่เกี่ยวกับ actor",
+   "ถูก — extend เริ่มจาก use case ที่มาเสริม ชี้ไปที่ base use case"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ความสัมพันธ์ include และ extend วาดด้วยเส้นแบบใด?",
+  "choices": [
+   "เส้นทึบไม่มีหัว",
+   "ลูกศรเส้นทึบ",
+   "ลูกศรเส้นประ",
+   "เส้นประไม่มีหัว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เส้นทึบไม่มีหัวลูกศรคือ association",
+   "ผิด — ไม่ใช่สัญลักษณ์ของ include/extend",
+   "ถูก — ทั้งคู่เป็นลูกศรเส้นประ ติดป้าย &lt;&lt;includes&gt;&gt; หรือ &lt;&lt;extends&gt;&gt;",
+   "ผิด — ต้องมีหัวลูกศรเพื่อบอกทิศ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้นสุดท้าย (ขั้นที่ 6) ของการสร้าง use case คืออะไร?",
+  "choices": [
+   "Review and refine",
+   "Identify actors",
+   "Set relationships",
+   "Draw the diagram"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ขั้น 6 คือตรวจและปรับ: เช็กความครอบคลุมและ validate กับ stakeholder",
+   "ผิด — หา actor เป็นขั้นที่ 2",
+   "ผิด — สร้างความสัมพันธ์เป็นขั้นที่ 4",
+   "ผิด — วาดแผนภาพเป็นขั้นที่ 5"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็น objective ของ requirements analysis?",
+  "choices": [
+   "เขียนโค้ดต้นแบบของระบบให้เสร็จก่อน",
+   "วางรากฐานสำหรับการออกแบบซอฟต์แวร์",
+   "ประมาณต้นทุนและระยะเวลาของโครงการ",
+   "ทดสอบซอฟต์แวร์ให้ผ่านก่อนส่งมอบให้ลูกค้า"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — analysis สร้างโมเดล ไม่ใช่เขียนโค้ด",
+   "ถูก — objectives คือ อธิบายสิ่งที่ลูกค้าต้องการ, วางฐานการออกแบบ, กำหนด requirement ที่ validate ได้",
+   "ผิด — เป็นงานบริหารโครงการ",
+   "ผิด — เป็นงานขั้น testing"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่อง Goal in Context ใน use case narrative คืออะไร?",
+  "choices": [
+   "สภาพของระบบหลังจาก use case เสร็จ",
+   "เหตุการณ์ที่ทำให้ use case เริ่มต้นขึ้น",
+   "เป้าหมายหรือจุดประสงค์ของ use case",
+   "เงื่อนไขที่ต้องจริงก่อนเริ่ม use case"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นี่คือ Postcondition",
+   "ผิด — นี่คือ Trigger",
+   "ถูก — Goal in Context คือเป้าหมายหรือจุดประสงค์ของ use case",
+   "ผิด — นี่คือ Precondition"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ช่องใดใน narrative บอกสภาพของระบบหลัง use case เสร็จ?",
+  "choices": [
+   "Precondition",
+   "Main Scenario",
+   "Goal in Context",
+   "Postcondition"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Precondition คือสภาพก่อนเริ่ม",
+   "ผิด — Scenario คือลำดับปฏิสัมพันธ์ปกติ",
+   "ผิด — Goal in Context คือเป้าหมาย",
+   "ถูก — Postcondition คือสภาพของระบบหลัง use case เสร็จ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตามนิยาม use case คือลำดับขั้นตอนเพื่ออะไร?",
+  "choices": [
+   "กำหนดลำดับการเขียนโค้ดของทีม",
+   "ทำงานธุรกิจหนึ่งอย่างให้สำเร็จ",
+   "แสดงโครงสร้างฐานข้อมูลของระบบ",
+   "ทดสอบฟังก์ชันทีละหน้าจอของระบบ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — use case มองจากผู้ใช้ภายนอก ไม่ใช่แผนเขียนโค้ด",
+   "ถูก — use case คือ scenario ที่สัมพันธ์กันเพื่อทำ business task หนึ่งอย่างให้สำเร็จ",
+   "ผิด — เป็นหน้าที่ของ data model",
+   "ผิด — ไม่ใช่เครื่องมือทดสอบ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Primary actor คือใคร?",
+  "choices": [
+   "ผู้มีบทบาทสนับสนุนอย่างระบบจ่ายเงิน",
+   "ผู้อนุมัติงบประมาณทั้งหมดของโครงการ",
+   "ผู้ใช้ระบบโดยตรงเพื่อบรรลุเป้าหมาย",
+   "ผู้พัฒนาที่เขียนโค้ดของ use case นั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นี่คือ secondary actor",
+   "ผิด — ผู้อนุมัติงบไม่ได้โต้ตอบกับระบบ",
+   "ถูก — primary actor ใช้ระบบโดยตรงเพื่อบรรลุเป้าหมาย เช่น customer",
+   "ผิด — ผู้พัฒนาไม่ใช่ actor ของระบบ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เทคนิคของ scenario-based model ที่ใช้บ่อยที่สุดคืออะไร?",
+  "choices": [
+   "Behaviour modelling",
+   "Entity data modelling",
+   "Data flow modelling",
+   "Use case modelling"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นของ behavioral models",
+   "ผิด — เป็นของ data models",
+   "ผิด — เป็นของ flow models",
+   "ถูก — สไลด์ระบุว่าเทคนิคที่ใช้บ่อยคือ use case modelling"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "จุดเริ่มของการเขียน use case ตามสไลด์คืออะไร?",
+  "choices": [
+   "ลิสต์กิจกรรมที่ actor แต่ละคนทำ",
+   "ลิสต์ความเสี่ยงทั้งหมดของโครงการ",
+   "ลิสต์ตารางข้อมูลที่ระบบต้องเก็บ",
+   "ลิสต์หน้าจอทั้งหมดที่ต้องออกแบบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เริ่มจากลิสต์ฟังก์ชันหรือกิจกรรมที่ actor แต่ละคนทำ",
+   "ผิด — เป็นงาน risk management",
+   "ผิด — เป็นงานของ data model",
+   "ผิด — เป็นงานออกแบบ UI"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Flow models ต่างจาก scenario-based models อย่างไร?",
+  "choices": [
+   "เน้นการตอบสนอง event ไม่ใช่ข้อมูล",
+   "เน้นมุมมองของ actor ไม่ใช่ตัวข้อมูล",
+   "เน้นโครงสร้าง class ไม่ใช่ process",
+   "เน้นการไหลของข้อมูล ไม่ใช่มุม actor"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นี่คือ behavioral models",
+   "ผิด — นี่คือ scenario-based models",
+   "ผิด — นี่คือ class models",
+   "ถูก — flow models แสดงการเคลื่อนที่และการแปลงข้อมูลระหว่าง process"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ตามแนวคิดของ Jacobson actor อยู่ตรงไหนของแผนภาพ และเพราะอะไร?",
+  "choices": [
+   "ตรงไหนก็ได้ เพราะสไลด์ไม่มีกฎกำหนด",
+   "บนเส้นกล่อง เพราะเป็นตัวเชื่อมสองฝั่ง",
+   "นอกกล่อง เพราะเป็นสิ่งที่อยู่ภายนอกระบบ",
+   "ในกล่อง เพราะเป็นส่วนประกอบของระบบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — มีกฎชัดเจน: actor นอกกล่อง use case ในกล่อง",
+   "ผิด — ไม่มีการวาด actor บนเส้นกล่อง",
+   "ถูก — actors คือสิ่งที่อยู่นอกระบบ จึงวาดนอก system boundary",
+   "ผิด — สิ่งที่อยู่ในกล่องคือ use case"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดถูกต้องเกี่ยวกับ actor?",
+  "choices": [
+   "อาจเป็นระบบภายนอก เช่น ธนาคาร",
+   "อาจเป็นฐานข้อมูลภายในของระบบ",
+   "ต้องเป็นพนักงานขององค์กรเท่านั้น",
+   "ต้องเป็นมนุษย์ที่ใช้งานระบบเท่านั้น"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — actor เป็นคนหรือระบบอื่นก็ได้ เช่น Bank ในตัวอย่าง Manage Account",
+   "ผิด — สิ่งที่อยู่ในระบบไม่ใช่ actor",
+   "ผิด — ลูกค้าภายนอกก็เป็น actor ได้",
+   "ผิด — ไม่จำเป็นต้องเป็นคน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ตัวอย่าง Manage Account ที่เชื่อมทั้ง Customer และ Bank แสดงให้เห็นอะไร?",
+  "choices": [
+   "actor หนึ่งคนมีได้ use case เดียว",
+   "use case หนึ่งอันมีได้หลาย actor",
+   "actor สองคนต้องสืบทอดจากกันเสมอ",
+   "use case ต้องมี actor สองคนเสมอ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — actor หนึ่งคนมีหลาย use case ได้ เช่น Customer กับ Browse Items และ Place Order",
+   "ถูก — use case เดียวสัมพันธ์กับหลาย actor ได้ผ่าน association",
+   "ผิด — association ไม่ได้หมายถึง inheritance",
+   "ผิด — ไม่ได้บังคับจำนวน actor"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Checkout ที่ include Scan Item, Calculate Total and Tax และ Payment ใช้ include เพื่ออะไร?",
+  "choices": [
+   "แยก use case ใหญ่ออกเป็นส่วนย่อย",
+   "ลดเส้นซ้ำระหว่าง actor หลายคน",
+   "แสดงลำดับเวลาของการทำงานจริง",
+   "เพิ่มพฤติกรรมเสริมที่เลือกทำหรือไม่ก็ได้"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตัวอย่าง Checkout ใช้ include เพื่อทำ use case ใหญ่ให้เรียบง่ายโดยแยกเป็นส่วน",
+   "ผิด — นี่คือจุดประสงค์ของ inheritance",
+   "ผิด — use case diagram ไม่ได้แสดงลำดับเวลา",
+   "ผิด — นี่คือจุดประสงค์ของ extend"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Inheritance ต่างจาก include ที่จุดใด?",
+  "choices": [
+   "ใช้กับงานเสริมบางครั้ง ส่วน include ใช้กับงานที่ทำเสมอ",
+   "ใช้ลูกศรเส้นประ ส่วน include ใช้เส้นทึบไม่มีหัวลูกศร",
+   "ใช้ระหว่าง actor ส่วน include ใช้ระหว่าง use case",
+   "ใช้ระหว่าง use case ส่วน include ใช้ระหว่าง actor"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — งานเสริมคือ extend ไม่ใช่ inheritance",
+   "ผิด — include ใช้ลูกศรเส้นประ",
+   "ถูก — inheritance ย้ายพฤติกรรมร่วมไปไว้ที่ abstract actor ส่วน include อยู่ระหว่าง use case",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "คำถามใดใช้ตัดสินว่าควรเป็น include หรือ extend?",
+  "choices": [
+   "A กับ B ใช้ actor คนเดียวกันไหม",
+   "A เกิดก่อนหรือเกิดหลัง B กันแน่",
+   "A กับ B อยู่ในกล่องเดียวกันไหม",
+   "ทุกครั้งที่ทำ A ต้องทำ B ด้วยไหม"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่เกณฑ์แยก include กับ extend",
+   "ผิด — ลำดับเวลาไม่ใช่เกณฑ์ตัดสิน",
+   "ผิด — use case ทั้งคู่อยู่ในกล่องระบบอยู่แล้ว",
+   "ถูก — ถ้าต้องทำทุกครั้งใช้ include ถ้าแค่บางครั้งใช้ extend"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ช่อง Scenario ต่างจากช่อง Exception อย่างไร?",
+  "choices": [
+   "ทางเมื่อเกิดข้อผิดพลาด กับ ทางปกติ",
+   "ทางปกติ กับ ทางเมื่อเกิดข้อผิดพลาด",
+   "เหตุการณ์เริ่มต้น กับ เป้าหมายของงาน",
+   "สภาพก่อนเริ่ม กับ สภาพหลังจบงาน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — สลับกัน",
+   "ถูก — Scenario คือ main flow ส่วน Exception คือสิ่งที่เกิดเมื่อมี error หรือ input ไม่ถูกต้อง",
+   "ผิด — นี่คือ Trigger กับ Goal in Context",
+   "ผิด — นี่คือ Precondition กับ Postcondition"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Use case diagram ต่างจาก use case narrative อย่างไร?",
+  "choices": [
+   "มุมมองของข้อมูลไหล กับ มุมมองของผู้ใช้ระบบ",
+   "ใช้ตอนออกแบบ กับ ใช้ตอนทดสอบระบบเท่านั้น",
+   "ภาพรวมว่าใครใช้ระบบ กับ รายละเอียดทีละขั้น",
+   "รายละเอียดทีละขั้น กับ ภาพรวมว่าใครใช้ระบบ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ทั้งคู่เป็นมุมมองของผู้ใช้",
+   "ผิด — ทั้งคู่ใช้ในขั้นวิเคราะห์ requirement",
+   "ถูก — diagram บอกเป็นภาพว่าใครใช้ระบบและใช้แบบไหน ส่วน narrative อธิบาย step-by-step",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ขั้น Review and refine ตรวจเรื่องใดเป็นหลัก?",
+  "choices": [
+   "ครอบคลุม functional requirement ทุกข้อ",
+   "ครอบคลุม non-functional requirement",
+   "ฐานข้อมูลรองรับทุก use case ที่มีอยู่ในแผนภาพ",
+   "โค้ดทุกส่วนตรงตามแผนภาพที่วาดไว้ทั้งหมดแล้ว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตรวจว่าครอบคลุมทุก functional requirement และ validate กับ stakeholder",
+   "ผิด — use case แทน functional requirements เป็นหลัก",
+   "ผิด — ยังไม่ถึงขั้นออกแบบฐานข้อมูล",
+   "ผิด — ยังไม่ถึงขั้นเขียนโค้ด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมชื่อ use case “Patient registration” จึงยังไม่เหมาะ?",
+  "choices": [
+   "ใช้ภาษาอังกฤษแทนภาษาไทย",
+   "ชื่อไม่ได้ขึ้นต้นด้วยคำกริยา",
+   "ไม่ได้ระบุชื่อ actor ไว้ด้วย",
+   "ยาวเกินกว่าที่วงรีจะรับได้"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ภาษาไม่ใช่กฎในสไลด์",
+   "ถูก — ชื่อ use case ต้องขึ้นต้นด้วย verb เช่น Register patient",
+   "ผิด — ชื่อ use case ไม่ต้องมีชื่อ actor",
+   "ผิด — ความยาวไม่ใช่ปัญหา"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Requirements analysis สัมพันธ์กับขั้น elicitation อย่างไร?",
+  "choices": [
+   "ตรวจรับระบบที่พัฒนาเสร็จเรียบร้อยแล้ว",
+   "แปลง requirement ไปเป็นโค้ดโดยตรง",
+   "เก็บ requirement ชุดใหม่แทนของเดิม",
+   "ขยายรายละเอียด requirement ที่เก็บมา"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ใช่ขั้น acceptance",
+   "ผิด — analysis เป็นสะพานไปสู่ design ไม่ใช่โค้ดโดยตรง",
+   "ผิด — ไม่ได้เก็บใหม่แทน แต่ต่อยอดของเดิม",
+   "ถูก — analysis ขยายรายละเอียด requirement พื้นฐานจาก elicitation แล้วสร้างเป็นโมเดล"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "แอปสั่งอาหาร: ตอน Place Order ลูกค้าบางคนใส่โค้ดส่วนลด (Apply Coupon) บางคนไม่ใส่ ควรวาดอย่างไร?",
+  "choices": [
+   "ลูกศร includes จาก Apply Coupon",
+   "ลูกศร extends จาก Place Order",
+   "ลูกศร includes จาก Place Order",
+   "ลูกศร extends จาก Apply Coupon"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้ทำทุกครั้ง จึงไม่ใช่ include",
+   "ผิด — ทิศกลับด้าน extends ต้องเริ่มจาก use case ที่มาเสริม",
+   "ผิด — ไม่ได้ทำทุกครั้ง จึงไม่ใช่ include",
+   "ถูก — เป็นพฤติกรรม optional จึงใช้ extends และลูกศรเริ่มจาก extending use case ไป base"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ใน narrative ของ Borrow Book ข้อความ “สมาชิกเข้าสู่ระบบแล้วและไม่มีค่าปรับค้าง” ควรอยู่ช่องใด?",
+  "choices": [
+   "Precondition",
+   "Trigger event",
+   "Postcondition",
+   "Goal in Context"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เป็นสภาพที่ต้องเป็นจริงก่อนเริ่ม use case",
+   "ผิด — Trigger คือเหตุการณ์ที่เริ่ม เช่น กดปุ่มยืม",
+   "ผิด — Postcondition คือสภาพหลังยืมเสร็จ",
+   "ผิด — Goal คือเป้าหมาย เช่น สมาชิกได้ยืมหนังสือ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ข้อใดเขียนช่อง Trigger ของ use case Borrow Book ได้ถูกต้อง?",
+  "choices": [
+   "หนังสือถูกยืมเรียบร้อย",
+   "สมาชิกกดปุ่มยืมหนังสือ",
+   "สมาชิกอยากยืมหนังสือ",
+   "สมาชิกเข้าสู่ระบบแล้ว"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นสภาพหลังจบ คือ postcondition",
+   "ถูก — trigger ต้องเป็นเหตุการณ์ที่ทำให้ use case เริ่ม",
+   "ผิด — เป็นความต้องการ ไม่ใช่เหตุการณ์ที่เกิดขึ้นกับระบบ",
+   "ผิด — เป็นสภาพที่เป็นจริงอยู่แล้ว คือ precondition"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบจองตั๋วหนัง ข้อใดเหมาะเป็น use case ที่สุด?",
+  "choices": [
+   "กดปุ่มยืนยันบนหน้าจอ",
+   "ระบบคำนวณราคารวม",
+   "จองที่นั่งชมภาพยนตร์",
+   "หน้าจอเลือกที่นั่งว่าง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นแค่ขั้นตอนย่อย ไม่ใช่งานธุรกิจ",
+   "ผิด — เป็นสิ่งที่ระบบทำเองระหว่างทาง ควรเป็นขั้นตอนใน narrative",
+   "ถูก — เป็น business task หนึ่งอย่างที่ actor ทำกับระบบ และขึ้นต้นด้วยกริยา",
+   "ผิด — เป็นหน้าจอ ไม่ใช่งานที่ actor ทำ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมกำหนดขอบเขตระบบและวาดกล่อง system boundary เสร็จแล้ว ขั้นถัดไปตามสไลด์คืออะไร?",
+  "choices": [
+   "Identify use cases",
+   "Draw the diagram",
+   "Identify the actors",
+   "Review and refine"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — หา use case เป็นขั้นที่ 3 ต้องรู้ actor ก่อน",
+   "ผิด — วาดแผนภาพเป็นขั้นที่ 5",
+   "ถูก — ลำดับคือ boundary → actors → use cases → relationships → draw → review",
+   "ผิด — ตรวจและปรับเป็นขั้นสุดท้าย"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบห้องสมุดส่งข้อความแจ้งเตือนผ่าน SMS Gateway ของผู้ให้บริการภายนอก SMS Gateway ควรวาดเป็นอะไร?",
+  "choices": [
+   "secondary actor นอกกล่อง",
+   "use case อยู่ภายในกล่อง",
+   "abstract actor ในกล่อง",
+   "primary actor นอกกล่อง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เป็นระบบภายนอกที่มีบทบาทสนับสนุน จึงเป็น secondary actor และ actor อยู่นอกกล่อง",
+   "ผิด — use case คืองานที่ระบบทำ ไม่ใช่ระบบภายนอก",
+   "ผิด — abstract actor ใช้รวมพฤติกรรมร่วมของหลาย actor และ actor ไม่อยู่ในกล่อง",
+   "ผิด — อยู่นอกกล่องถูกแล้ว แต่ไม่ได้ใช้ระบบเพื่อเป้าหมายของตัวเอง จึงไม่ใช่ primary"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
