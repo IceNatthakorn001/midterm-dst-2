@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L1 – SE Foundation &amp; SPM (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L1 – SE Foundation &amp; SPM (ชุดที่ 2)</h1>
+<div class="sub">40 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ การคำนวณ 10 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ข้อใดไม่ใช่องค์ประกอบ 4 อย่างของ business process ตามสไลด์?",
+  "choices": [
+   "Rules",
+   "Tasks",
+   "Actors",
+   "Budgets"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — rules เป็นองค์ประกอบ: กฎหรือเงื่อนไข",
+   "ผิด — tasks เป็นองค์ประกอบ: งานแต่ละขั้น",
+   "ผิด — actors เป็นองค์ประกอบ: คนหรือฝ่ายที่ทำงาน",
+   "ถูก — องค์ประกอบคือ actors, tasks/activities, rules และ inputs/outputs ไม่มี budgets"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "BPMN ใช้ทำอะไร?",
+  "choices": [
+   "ประมาณต้นทุนของโครงการ",
+   "วาด business process",
+   "ทดสอบโค้ดให้ครบทีละส่วนย่อย",
+   "จัดตารางเวลาของแต่ละ task"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นงาน cost estimation",
+   "ถูก — BPMN (Business Process Model and Notation) ใช้วาด business process เป็นแผนภาพ",
+   "ผิด — เป็นงาน unit testing",
+   "ผิด — เป็นงานของ Gantt chart"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใครเป็นผู้กล่าวว่า “Software is eating the world”?",
+  "choices": [
+   "Marc Andreessen",
+   "Roger S. Pressman",
+   "Ian Sommerville",
+   "Timothy Lethbridge"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Marc Andreessen กล่าวว่าธุรกิจทุกประเภทกำลังถูกขับเคลื่อนด้วยซอฟต์แวร์",
+   "ผิด — Pressman เป็นเจ้าของนิยามองค์ประกอบของ software",
+   "ผิด — Sommerville เป็นผู้แต่งตำราที่ใช้ใน L3",
+   "ผิด — Lethbridge เป็นเจ้าของนิยาม Software Engineering ในสไลด์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Bad-fix errors มีสัดส่วนเท่าใดตามสไลด์?",
+  "choices": [
+   "24.17%",
+   "13.33%",
+   "11.67%",
+   "12.50%"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 24.17% คือ design errors",
+   "ผิด — 13.33% คือ documentation errors",
+   "ถูก — bad-fix errors (แก้บั๊กแล้วเกิดบั๊กใหม่) คือ 11.67% น้อยที่สุดใน 5 ชนิด",
+   "ผิด — 12.50% คือ requirements errors"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็น key success factor ตาม Chaos &amp; Capers Jones Report?",
+  "choices": [
+   "Larger team size",
+   "Proper planning",
+   "Longer schedule",
+   "Newest tooling"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ขนาดทีมไม่อยู่ในรายการ",
+   "ถูก — key success factors: user involvement, executive management support, clear requirement statements, proper planning",
+   "ผิด — ความยาวตารางเวลาไม่อยู่ในรายการ",
+   "ผิด — เครื่องมือใหม่ไม่อยู่ในรายการ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "UX/UI Designer มีหน้าที่ใดตามสไลด์?",
+  "choices": [
+   "สร้าง persona, wireframe, mockup",
+   "เลือกเทคโนโลยีและ framework ที่ใช้",
+   "จัดตาราง task และจัดสรรทรัพยากร",
+   "เขียน test plan และรายงาน defect"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — UX/UI Designer ทำ user research, persona, wireframe, mockup, prototype",
+   "ผิด — เป็นหน้าที่ของ System Analyst",
+   "ผิด — เป็นหน้าที่ของ Project Manager",
+   "ผิด — เป็นหน้าที่ของ QA Engineer / Tester"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นหลัก coding convention ที่สไลด์แนะนำ?",
+  "choices": [
+   "Test after release",
+   "Avoid code reviews",
+   "Use shortest names",
+   "Know the libraries"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — สไลด์ให้ test before using",
+   "ผิด — สไลด์ให้ do code reviews",
+   "ผิด — สไลด์ให้ choose names carefully ไม่ใช่สั้นที่สุด",
+   "ถูก — รู้จัก library ที่มี จะได้ไม่เขียนซ้ำ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดไม่อยู่ในตัวอย่าง quality indicators ของสไลด์ L1?",
+  "choices": [
+   "Efficiency",
+   "Reusability",
+   "Portability",
+   "Testability"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — efficiency อยู่ในรายการ",
+   "ผิด — reusability อยู่ในรายการ",
+   "ถูก — สไลด์ยก usability, efficiency, testability, maintainability, reusability ไม่มี portability",
+   "ผิด — testability อยู่ในรายการ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Project attributes ตามสไลด์มีกี่ข้อ?",
+  "choices": [
+   "5",
+   "7",
+   "9",
+   "10"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 5 คือจำนวน goals of software project management",
+   "ถูก — มี 7 ข้อ: unique purpose, temporary, drive change, value creation, require resources, customer/sponsor, uncertainty",
+   "ผิด — 9 คือจำนวน advantages of project management",
+   "ผิด — 10 คือจำนวน knowledge areas"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เครื่องมือใดอยู่ในด้าน Time ของ project management tools?",
+  "choices": [
+   "Scope statement",
+   "Cost estimates",
+   "Project charter",
+   "Gantt charts"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — อยู่ในด้าน Scope",
+   "ผิด — อยู่ในด้าน Cost",
+   "ผิด — อยู่ในด้าน Scope",
+   "ถูก — ด้าน Time: Gantt charts, network diagrams, critical path analysis"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้นแรกของการสร้าง WBS คืออะไร?",
+  "choices": [
+   "วาง timeline โครงการ",
+   "มอบหมายผู้รับผิดชอบงาน",
+   "กำหนด project scope",
+   "ประมาณเวลาของ task"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นขั้นที่ 7",
+   "ผิด — เป็นขั้นที่ 6",
+   "ถูก — ขั้น 1 คือกำหนด project scope ว่าจะมี function อะไรบ้าง",
+   "ผิด — เป็นขั้นที่ 5"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดอยู่ใน Top 3 success factors ของโครงการ?",
+  "choices": [
+   "Adequate funding",
+   "Latest technology",
+   "Longest timeline",
+   "Largest team size"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — top 3: adequate funding, staff expertise, engagement from all stakeholders",
+   "ผิด — ไม่อยู่ใน top 3",
+   "ผิด — ไม่อยู่ใน top 3",
+   "ผิด — ไม่อยู่ใน top 3"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Software development ช่วย business process อย่างไร?",
+  "choices": [
+   "ทำให้ไม่ต้องมี business need",
+   "ทำให้กฎของธุรกิจเปลี่ยนไปทั้งหมด",
+   "ทำให้ไม่ต้องมีคนทำงานอีกต่อไป",
+   "ทำให้มีประสิทธิภาพและแม่นยำขึ้น"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — business need เป็นแรงผลักดัน ยังต้องมีเสมอ",
+   "ผิด — ซอฟต์แวร์ช่วยทำตาม process ไม่ได้เปลี่ยนกฎทั้งหมด",
+   "ผิด — สไลด์ไม่ได้บอกว่าแทนคนทั้งหมด",
+   "ถูก — ทำให้ process efficient, accurate, scalable และถูก digitised/automated"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การที่ซอฟต์แวร์ intangible ทำให้เกิดผลอะไร?",
+  "choices": [
+   "วัดความคืบหน้าและคุณภาพได้ยาก",
+   "สึกหรอเร็วกว่าเครื่องจักรทั่วไป",
+   "ไม่ต้องใช้แรงงานคนในการพัฒนา",
+   "ผลิตซ้ำแต่ละชุดมีต้นทุนสูงมาก"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — จับต้องไม่ได้ จึงวัดความคืบหน้าและคุณภาพยากกว่าของจริง",
+   "ผิด — ซอฟต์แวร์ไม่สึกหรอ",
+   "ผิด — ซอฟต์แวร์ labour intensive",
+   "ผิด — การ copy ซอฟต์แวร์แทบไม่มีต้นทุน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "วลี “cost, time and other constraints” ในนิยาม SE สื่อถึงอะไร?",
+  "choices": [
+   "ความซับซ้อนสูงของตัวระบบ",
+   "เป้าหมายสุดท้ายของโครงการ",
+   "ข้อจำกัดที่ต้องทำงานภายใต้",
+   "ความเป็นวิศวกรรมของวิธีทำ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ความซับซ้อนคือ large, high-quality software systems",
+   "ผิด — เป้าหมายคือ solving customers' problems",
+   "ถูก — เป็นส่วน “ข้อจำกัด” ของนิยาม",
+   "ผิด — ความเป็นวิศวกรรมคือ systematic development and evolution"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "5 ด้านที่ต้องคำนึงใน SE ของ Tsui &amp; Karam สื่อให้เห็นอะไร?",
+  "choices": [
+   "SE ไม่เกี่ยวกับคนและทีมงาน",
+   "SE ไม่ได้มีแค่การเขียนโค้ด",
+   "SE ใช้ได้กับระบบเล็กเท่านั้น",
+   "SE คือการเขียนโค้ดให้เร็วขึ้น"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — people skills and teamwork เป็น 1 ใน 5 ด้าน",
+   "ถูก — มีทั้ง process, methodology, metrics, people skills และ project management",
+   "ผิด — SE เน้นระบบใหญ่ที่ซับซ้อน",
+   "ผิด — ไม่ได้เน้นความเร็วในการเขียนโค้ด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ตามสไลด์ใครเป็นผู้กำหนด requirement?",
+  "choices": [
+   "ผู้ทดสอบกำหนดหลังทดสอบเสร็จ",
+   "โปรแกรมเมอร์กำหนดเองทั้งหมด",
+   "วิศวกรกำหนด โดยมีลูกค้าช่วย",
+   "ลูกค้ากำหนด โดยมีวิศวกรช่วย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — requirement ต้องมีก่อนการทดสอบ",
+   "ผิด — โปรแกรมเมอร์ทำตาม requirement ไม่ได้กำหนดเอง",
+   "ผิด — สลับบทบาท ลูกค้าเป็นผู้กำหนดหลัก",
+   "ถูก — requirement ถูกกำหนดโดยลูกค้า โดยมีวิศวกรช่วย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Breadth issue ต่างจาก Depth issue อย่างไร?",
+  "choices": [
+   "จำนวนที่มากขึ้น กับ การเชื่อมโยงซ้อนกัน",
+   "การเชื่อมโยงซ้อนกัน กับ จำนวนที่มากขึ้น",
+   "ปัญหาด้านเทคนิค กับ ปัญหาด้านการบริหาร",
+   "ปัญหาก่อนปล่อย กับ ปัญหาหลังปล่อยระบบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — breadth = จำนวน function, feature, interface, user; depth = nesting และ chained relationships",
+   "ผิด — สลับกัน",
+   "ผิด — นี่คือ technical vs non-technical issues",
+   "ผิด — นี่คือ pre-release vs post-release support"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Pre-requisite ต่างจาก co-requisite อย่างไร?",
+  "choices": [
+   "ทำหรือไม่ทำก็ได้ กับ ต้องทำเสมอ",
+   "ต้องทำไปพร้อมกัน กับ ต้องเสร็จก่อน",
+   "ต้องเสร็จก่อน กับ ต้องทำไปพร้อมกัน",
+   "ทำโดยลูกค้า กับ ทำโดยทีมพัฒนา"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่ความหมายของสองคำนี้",
+   "ผิด — สลับกัน",
+   "ถูก — pre-requisite คืองานที่ต้องเสร็จก่อน ส่วน co-requisite คืองานที่ต้องทำไปพร้อมกัน",
+   "ผิด — ไม่ใช่ความหมายของสองคำนี้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ใน 4P's ส่วน “Problem” ครอบคลุมอะไร?",
+  "choices": [
+   "tasks, milestones และ deliverables",
+   "objectives, scope และ constraints",
+   "roles และหน้าที่ของสมาชิกแต่ละคนในทีม",
+   "เครื่องมือ ภาษา และ platform ที่ใช้พัฒนา"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นี่คือ Process",
+   "ถูก — Problem: objectives, scope, alternatives, technical and management constraints",
+   "ผิด — นี่คือ People",
+   "ผิด — ไม่ใช่ 1 ใน 4P's"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อความ “ภาพใหญ่เป็นลำดับ แต่ระดับย่อยวนซ้ำได้” ของ POMA หมายความว่าอะไร?",
+  "choices": [
+   "ทำ P-O-M-A เรียงกัน แต่ย้อนปรับได้",
+   "ทำ P-O-M-A โดยข้ามขั้นใดก็ได้ตามใจ",
+   "ทำ P-O-M-A พร้อมกันทั้งหมดตั้งแต่ต้น",
+   "ทำ P-O-M-A เรียงกันครั้งเดียวแล้วจบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ระดับ macro ดูเป็นลำดับ แต่ระดับ micro วนซ้ำได้มาก",
+   "ผิด — ไม่ได้ให้ข้ามขั้น",
+   "ผิด — ภาพใหญ่ยังเป็นลำดับ ไม่ได้ทำพร้อมกัน",
+   "ผิด — ระดับย่อยวนซ้ำได้ ไม่ใช่ครั้งเดียวจบ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ขั้น Organizing ของ POMA ทำอะไร?",
+  "choices": [
+   "เก็บข้อมูลสถานะของโครงการ",
+   "ประมาณ effort และเวลา",
+   "ออกแบบโครงสร้างทีมและจ้างคน",
+   "ปรับทรัพยากรหรือเนื้องานใหม่"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นขั้น Monitoring",
+   "ผิด — เป็นขั้น Planning",
+   "ถูก — organizing: ออกแบบโครงสร้างองค์กร จ้างคน จัดอบรม ตั้งกลไกติดตาม",
+   "ผิด — เป็นขั้น Adjusting"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใดไม่ใช่วิธีวัด project success ตามสไลด์?",
+  "choices": [
+   "ผลลัพธ์ได้ตามเป้าหมายหลักที่ตั้งไว้",
+   "ได้ตาม scope, time และ cost",
+   "ลูกค้าหรือ sponsor พอใจกับผล",
+   "โครงการใช้เทคโนโลยีใหม่ที่สุด"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นวิธีวัดข้อ 3 เช่น ROI ดี",
+   "ผิด — เป็นวิธีวัดข้อ 1",
+   "ผิด — เป็นวิธีวัดข้อ 2",
+   "ถูก — สไลด์ไม่ได้ใช้ความใหม่ของเทคโนโลยีเป็นตัววัด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "PERT ต่างจาก Gantt chart อย่างไร?",
+  "choices": [
+   "แสดงแท่งตามเวลา ส่วน Gantt เป็นลำดับของ task",
+   "แสดงลำดับของ task ส่วน Gantt เป็นแท่งตามเวลา",
+   "แสดงขอบเขตงาน ส่วน Gantt แสดงต้นทุนของ task",
+   "แสดงต้นทุนของ task ส่วน Gantt แสดงขอบเขตงาน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — สลับกัน",
+   "ถูก — PERT แสดงลำดับและความสัมพันธ์ของ task ส่วน Gantt เป็นแผนภูมิแท่งแนวนอนตามเวลา",
+   "ผิด — ขอบเขตงานเป็นเรื่องของ WBS / scope statement",
+   "ผิด — ทั้งคู่เป็นเครื่องมือด้านเวลา ไม่ใช่ต้นทุน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมต้องการคนเขียน test plan ทดสอบทั้ง functional และ non-functional แล้วรายงาน defect ควรเป็นบทบาทใด?",
+  "choices": [
+   "Sys Analyst",
+   "QA Engineer",
+   "SW Developer",
+   "UX Designer"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — SA แปลง requirement เป็น technical specification",
+   "ถูก — QA Engineer / Tester ทำ test plan, test case, ทดสอบ และรายงาน defect",
+   "ผิด — developer ทำ unit test และแก้ defect แต่ไม่ได้ดูแล test plan รวม",
+   "ผิด — UX/UI designer ทำ research และ prototype"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "โครงการช้ากว่าแผน PM จึงตัดฟีเจอร์รองออก 2 รายการ เป็นการปรับด้านใดในขั้น Adjusting?",
+  "choices": [
+   "Project schedule",
+   "Project sponsor",
+   "Project content",
+   "Project resources"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ปรับ schedule คือเลื่อนกำหนดเวลา",
+   "ผิด — sponsor ไม่ใช่ด้านที่ปรับในขั้น Adjusting",
+   "ถูก — ตัดฟีเจอร์คือปรับเนื้องานหรือ scope",
+   "ผิด — ปรับ resources คือเพิ่มหรือลดคนและทรัพยากร"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "PM จ้างนักพัฒนาเพิ่ม 2 คน จัดอบรมเครื่องมือ และตั้งระบบติดตามความเสี่ยง อยู่ในขั้นใดของ POMA?",
+  "choices": [
+   "Organizing",
+   "Monitoring",
+   "Planning",
+   "Adjusting"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — จ้างคน จัดอบรม และตั้ง tracking mechanisms เป็นงานของ Organizing",
+   "ผิด — Monitoring คือเก็บ วิเคราะห์ และรายงานสถานะ",
+   "ผิด — Planning คือประมาณ effort, schedule และวิเคราะห์ความเสี่ยง",
+   "ผิด — Adjusting คือปรับ resources, schedule หรือ content เมื่อมีปัญหา"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมตัดสินว่า “ออกแบบ UI” กับ “ออกแบบฐานข้อมูล” ทำพร้อมกันได้ แต่ “เขียนโค้ด” ต้องรอทั้งคู่เสร็จ อยู่ในขั้นใดของ WBS?",
+  "choices": [
+   "ขั้นประมาณเวลา task",
+   "ขั้นมอบหมายผู้ทำงาน",
+   "ขั้นกำหนด scope งาน",
+   "ขั้นเรียงลำดับ task"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ขั้น 5 คือประมาณเวลา",
+   "ผิด — ขั้น 6 คือมอบหมายผู้รับผิดชอบ",
+   "ผิด — ขั้น 1 คือกำหนด scope",
+   "ถูก — ขั้น 4: เรียงลำดับ task ว่า sequential หรือ parallel"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "Tester ป้อนอายุเป็น -5 เพื่อดูว่าระบบปฏิเสธข้อมูลหรือไม่ โดยไม่ได้ดูโค้ดข้างในเลย เป็นการทดสอบแบบใด?",
+  "choices": [
+   "White-box testing",
+   "Unit-level testing",
+   "Acceptance testing",
+   "Black-box testing"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — white-box ทดสอบตามเส้นทางในโค้ด",
+   "ผิด — unit testing คือโปรแกรมเมอร์ทดสอบชิ้นย่อย",
+   "ผิด — acceptance testing คือด่านที่ลูกค้าตัดสินรับหรือปฏิเสธ",
+   "ถูก — ไม่รู้โค้ดข้างใน ดู data validation จาก input/output"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบร้านค้าต้องเชื่อมต่อเพิ่มกับระบบธนาคารและระบบภาษีของรัฐ ความซับซ้อนที่เพิ่มขึ้นเป็นเรื่องใด?",
+  "choices": [
+   "Quality issue",
+   "Budget issue",
+   "Breadth issue",
+   "Depth issue"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ไม่ใช่หมวดของ size and complexity",
+   "ผิด — ไม่ใช่หมวดของ size and complexity",
+   "ถูก — interfaces ไปยังระบบภายนอกที่มากขึ้นเป็น breadth issue",
+   "ผิด — depth คือ nesting และ chained relationships"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ทีมมี 5 คน จำนวนเส้นทางการสื่อสารสูงสุดคือเท่าใด?",
+  "choices": [
+   "25 เส้นทาง",
+   "10 เส้นทาง",
+   "20 เส้นทาง",
+   "5 เส้นทาง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 25 คือ 5² ใช้สูตรผิด",
+   "ถูก — n(n−1)/2 = 5×4/2 = 10",
+   "ผิด — 20 คือ 5×4 ลืมหาร 2",
+   "ผิด — 5 คือจำนวนคน ไม่ใช่จำนวนเส้นทาง"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ทีมมี 10 คน จำนวนเส้นทางการสื่อสารสูงสุดคือเท่าใด?",
+  "choices": [
+   "45 เส้นทาง",
+   "50 เส้นทาง",
+   "90 เส้นทาง",
+   "100 เส้นทาง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 10×9/2 = 45",
+   "ผิด — 50 คือ 10²/2 ใช้ n แทน n−1",
+   "ผิด — 90 คือ 10×9 ลืมหาร 2",
+   "ผิด — 100 คือ 10² ใช้สูตรผิด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ทีมเพิ่มจาก 6 คนเป็น 8 คน เส้นทางการสื่อสารสูงสุดเพิ่มขึ้นกี่เส้นทาง?",
+  "choices": [
+   "13 เส้นทาง",
+   "28 เส้นทาง",
+   "26 เส้นทาง",
+   "2 เส้นทาง"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 8 คน = 28, 6 คน = 15 เพิ่มขึ้น 28 − 15 = 13",
+   "ผิด — 28 คือจำนวนเส้นทางของ 8 คน ยังไม่ได้ลบของเดิม",
+   "ผิด — 26 คือ 56 − 30 ลืมหาร 2 ทั้งสองค่า",
+   "ผิด — 2 คือจำนวนคนที่เพิ่ม ไม่ใช่จำนวนเส้นทาง"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ทีมหนึ่งมีเส้นทางการสื่อสารสูงสุด 21 เส้นทาง ทีมนี้มีกี่คน?",
+  "choices": [
+   "6 คน",
+   "21 คน",
+   "8 คน",
+   "7 คน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — 6 คนมี 15 เส้นทาง",
+   "ผิด — 21 คือจำนวนเส้นทาง ไม่ใช่จำนวนคน",
+   "ผิด — 8 คนมี 28 เส้นทาง",
+   "ถูก — 7×6/2 = 21"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "ทีม 12 คนถูกแบ่งเป็น 2 ทีมย่อย ทีมละ 6 คน ถ้านับเฉพาะการสื่อสารภายในทีมย่อย รวมมีกี่เส้นทาง?",
+  "choices": [
+   "36 เส้นทาง",
+   "30 เส้นทาง",
+   "15 เส้นทาง",
+   "66 เส้นทาง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 36 คือ 6×6 ใช้สูตรผิด",
+   "ถูก — ทีมละ 6×5/2 = 15 สองทีมรวม 30 (จากเดิม 66 ถ้าไม่แบ่ง)",
+   "ผิด — 15 คือของทีมย่อยเดียว ยังไม่ได้คูณ 2",
+   "ผิด — 66 คือ 12×11/2 ของทีมเดียว 12 คน"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "งาน A (5 หน่วย) → กลุ่ม B ทำขนานกัน: B1 (4), B2 (7), B3 (2) → งาน C (3) ใช้เวลารวมเท่าใด?",
+  "choices": [
+   "12 หน่วย",
+   "21 หน่วย",
+   "15 หน่วย",
+   "10 หน่วย"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 12 คือใช้ B1 (4) แทนงานที่นานสุด",
+   "ผิด — 21 คือบวกทุกงานเหมือนทำต่อกัน",
+   "ถูก — กลุ่มขนานเสร็จเมื่องานที่นานสุดเสร็จ: 5 + 7 + 3 = 15",
+   "ผิด — 10 คือใช้ B3 (2) แทนงานที่นานสุด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากตารางในสไลด์ งาน 1 (12), 2 (2), 3a–3c (8, 6, 3), 4a–4c (20, 2, 2), 5a–5c (5, 1, 1) ถ้าทำทีละงานต่อกันทั้งหมด ใช้เวลาเท่าใด?",
+  "choices": [
+   "52 หน่วย",
+   "60 หน่วย",
+   "47 หน่วย",
+   "62 หน่วย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — 52 บวกไม่ครบทุกงาน",
+   "ผิด — 60 คือลืมบวกงาน 2",
+   "ผิด — 47 คือเวลาเมื่อทำงานย่อยในกลุ่มขนานกัน",
+   "ถูก — 12 + 2 + 17 + 24 + 7 = 62"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "งาน 1 (10) → กลุ่ม 2 ขนาน: 2a (6), 2b (9) → กลุ่ม 3 ขนาน: 3a (4), 3b (4), 3c (8) การทำขนานประหยัดเวลากว่าทำต่อกันทั้งหมดกี่หน่วย?",
+  "choices": [
+   "10 หน่วย",
+   "41 หน่วย",
+   "14 หน่วย",
+   "27 หน่วย"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 10 คือเวลาของงาน 1 เท่านั้น",
+   "ผิด — 41 คือเวลารวมแบบทำต่อกัน",
+   "ถูก — ต่อกัน = 41, ขนาน = 10 + 9 + 8 = 27 ประหยัด 41 − 27 = 14",
+   "ผิด — 27 คือเวลารวมแบบขนาน ไม่ใช่ส่วนที่ประหยัด"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากข้อก่อนหน้า (10 → 6, 9 → 4, 4, 8 แบบขนาน) ถ้างาน 2a ช้าไป 2 หน่วย เวลารวมของโครงการเป็นเท่าใด?",
+  "choices": [
+   "27 หน่วย",
+   "43 หน่วย",
+   "29 หน่วย",
+   "25 หน่วย"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 2a เป็น 8 ยังสั้นกว่า 2b (9) กลุ่ม 2 จึงยังใช้ 9: 10 + 9 + 8 = 27",
+   "ผิด — 43 คือคิดแบบทำต่อกันทั้งหมด",
+   "ผิด — 29 คือบวก 2 เข้าไปตรง ๆ ทั้งที่ 2a ไม่ใช่งานที่นานสุด",
+   "ผิด — 25 คือลบ 2 ออกแทน"
+  ]
+ },
+ {
+  "type": "calc",
+  "q": "จากโครงการเดิม (10 → 6, 9 → 4, 4, 8 แบบขนาน) ถ้างาน 2b ช้าไป 3 หน่วย เวลารวมของโครงการเป็นเท่าใด?",
+  "choices": [
+   "33 หน่วย",
+   "30 หน่วย",
+   "44 หน่วย",
+   "27 หน่วย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 33 คือบวก 3 ซ้ำสองครั้ง",
+   "ถูก — 2b เป็นงานที่นานสุดของกลุ่ม กลายเป็น 12: 10 + 12 + 8 = 30",
+   "ผิด — 44 คือคิดแบบทำต่อกันทั้งหมด",
+   "ผิด — 27 คือค่าเดิม แต่ 2b อยู่บนเส้นทางที่นานสุด จึงกระทบทั้งโครงการ"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only)
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(firstChoices[i] === questions[i].correct ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = firstChoices.reduce((acc, val, idx) => {
+    return (val !== null && val === questions[idx].correct) ? acc + 1 : acc;
+  }, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (firstChoices[idx] !== null && firstChoices[idx] === qd.correct) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
