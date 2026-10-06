@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L7 Flow Modeling II (ชุดที่ 3)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L7 Flow Modeling II (ชุดที่ 3)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 7 ข้อ ความเข้าใจ 7 ข้อ การนำไปใช้ 4 ข้อ ลากเติมคำ 12 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "PDL ที่ใช้เขียน PSPEC แบบ pseudocode ย่อมาจากอะไร?",
+  "choices": [
+   "Process Design Language",
+   "Program Design Language",
+   "Process Data Logic List",
+   "Program Detail Language"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — P คือ Program ไม่ใช่ Process",
+   "ถูก — PDL = Program Design Language คือ pseudocode ที่ผสมภาษาอังกฤษกับโครงสร้างโปรแกรม",
+   "ผิด — ไม่ตรงกับคำเต็มของ PDL",
+   "ผิด — D คือ Design ไม่ใช่ Detail"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "CSPEC ย่อมาจากอะไร?",
+  "choices": [
+   "Condition Specification",
+   "Context Specification",
+   "Control Specification",
+   "Component Specification"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — C คือ Control ไม่ใช่ Condition",
+   "ผิด — context ใช้กับ context diagram ไม่ใช่ CSPEC",
+   "ถูก — CSPEC = Control Specification อธิบายการตอบสนองต่อ control flow (event)",
+   "ผิด — component เป็นสิ่งที่ PSPEC ถูกแปลงไปในขั้น design"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน narrative ของ Analyze Triangle ขั้นที่ 2 ตรวจอะไร?",
+  "choices": [
+   "ตรวจว่าเป็นจำนวนเต็ม",
+   "ตรวจว่ามีค่าเป็นศูนย์",
+   "ตรวจว่าทุกค่าเท่ากัน",
+   "ตรวจว่าทุกค่าเป็นบวก"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — narrative ไม่ได้กำหนดว่าต้องเป็นจำนวนเต็ม",
+   "ผิด — narrative ตรวจค่าติดลบ ไม่ได้ระบุเรื่องศูนย์",
+   "ผิด — การดูว่าด้านเท่ากันไหมอยู่ขั้นระบุชนิดสามเหลี่ยม",
+   "ถูก — ขั้นที่ 2 ตรวจว่าค่าทั้งหมดเป็นบวก ถ้าเจอค่าติดลบให้ส่ง error message"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Template “Do the following based on [condition]: Case 1 … End Case” เป็นของ construct ใด?",
+  "choices": [
+   "Complex condition",
+   "Multiple conditions",
+   "Sequence of steps",
+   "Simple condition"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Complex condition ใช้เมื่อเงื่อนไขมีมากกว่า 2 ค่า เขียนด้วย Case",
+   "ผิด — Multiple conditions ใช้ decision table",
+   "ผิด — Sequence of steps เป็นขั้นตอนเรียงกัน ไม่มีเงื่อนไข",
+   "ผิด — Simple condition ใช้ If … then … else … End If"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "แถวล่างของ decision table ที่บอกการกระทำเรียกว่าอะไร?",
+  "choices": [
+   "Condition stubs",
+   "Action stubs",
+   "Decision stubs",
+   "Selection stubs"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — condition stubs คือแถวบนที่เป็นเงื่อนไข",
+   "ถูก — แถวล่างคือ action stubs (การกระทำ)",
+   "ผิด — ไม่มีคำนี้ในโครงสร้าง decision table",
+   "ผิด — ไม่มีคำนี้ในโครงสร้าง decision table"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในแนวทางแบบฝึก Zoo Ticketing DFD data store D2 คืออะไร?",
+  "choices": [
+   "Bookings",
+   "Reports",
+   "Payments",
+   "Visitors"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — D2 Bookings เก็บข้อมูลการจองและตั๋ว (D1 คือ Ticket Prices)",
+   "ผิด — Sales report เป็น data flow ที่ส่งให้ Administrator",
+   "ผิด — การจ่ายเงินทำผ่าน payment provider ซึ่งเป็น external entity",
+   "ผิด — Visitor เป็น external entity ไม่ใช่ data store"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Zero-to-many iteration ใน Structured English เขียนด้วยรูปแบบใด?",
+  "choices": [
+   "If then else",
+   "Repeat until",
+   "Based on case",
+   "Do while loop"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — If … then … else เป็น simple condition",
+   "ผิด — Repeat … until เป็น one-to-many iteration",
+   "ผิด — Do the following based on … Case เป็น complex condition",
+   "ถูก — Zero-to-many ใช้ Do while … End Do หรือ For … End For"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ใน Rule 1 ของ LMART (เช็คส่วนตัวไม่เกิน $75) ทำไมเงื่อนไข “Company accredited” จึงเป็น doesn't matter?",
+  "choices": [
+   "เช็คทุกชนิดแลกได้เสมอถ้ามีบัตรสมาชิก",
+   "เช็คส่วนตัวต้องมาจากบริษัทที่อนุมัติแล้ว",
+   "เช็คส่วนตัวไม่เกี่ยวกับบริษัทผู้ออกเช็ค",
+   "เช็คเงินเดือนไม่จำกัดจำนวนเงินอยู่แล้ว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เช็คส่วนตัวเกิน $75 และเช็คเงินเดือนจากบริษัทที่ไม่อนุมัติแลกไม่ได้",
+   "ผิด — เงื่อนไขบริษัทที่อนุมัติใช้กับเช็คเงินเดือน",
+   "ถูก — การอนุมัติบริษัทใช้กับเช็คเงินเดือนเท่านั้น จึงไม่มีผลกับเช็คส่วนตัว",
+   "ผิด — เป็นเหตุผลของ Rule 2 และ Rule 1 เป็นเรื่องเช็คส่วนตัว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ใน PDL ของ Analyze Triangle เงื่อนไข “ด้านยาวสุดน้อยกว่าผลรวมของอีกสองด้าน” ใช้ทำอะไร?",
+  "choices": [
+   "ตัดสินว่าเป็นสามเหลี่ยมด้านเท่าหรือไม่",
+   "คำนวณพื้นที่ของสามเหลี่ยมที่รับเข้ามา",
+   "ตัดสินว่าเป็นสามเหลี่ยมได้จริงหรือไม่",
+   "ตรวจว่าความยาวด้านเป็นค่าติดลบหรือไม่"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ชนิดด้านเท่าดูจากจำนวนด้านที่เท่ากัน",
+   "ผิด — process นี้ระบุชนิดสามเหลี่ยม ไม่ได้คำนวณพื้นที่",
+   "ถูก — ถ้าไม่เป็นจริงจะ output type = 0 แปลว่าไม่มีสามเหลี่ยม",
+   "ผิด — ค่าติดลบถูกตรวจในบรรทัดก่อนหน้า"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม decision table จึงใช้ได้ทั้งใน PSPEC และ CSPEC?",
+  "choices": [
+   "เพราะเป็นแผนภาพแสดงลำดับของสถานะ",
+   "เพราะเขียนเป็นโค้ดที่คอมไพล์ได้ทันที",
+   "เพราะใช้แทน DFD ได้ทั้งแผนภาพเลย",
+   "เพราะจับคู่เงื่อนไขกับการกระทำได้ทั้งคู่"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ลำดับของสถานะคือ state diagram",
+   "ผิด — เป็น specification ไม่ใช่โค้ด",
+   "ผิด — decision table อธิบายตรรกะ ไม่ได้แทน DFD",
+   "ถูก — ทั้งตรรกะของ process และการตอบสนองต่อ event ล้วนเป็นเงื่อนไข → การกระทำ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในตัวอย่าง Calculate Ticket Price ทำไม “For each ticket in the order” จึงเป็น zero-to-many iteration?",
+  "choices": [
+   "ตรวจเงื่อนไขต้นรอบ จึงอาจไม่ทำเลย",
+   "ตรวจหลายเงื่อนไข จึงต้องใช้ตาราง",
+   "ไม่มีการตรวจเงื่อนไข จึงทำรอบเดียว",
+   "ตรวจเงื่อนไขท้ายรอบ จึงทำอย่างน้อย 1"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — For/Do while ตรวจก่อนเข้ารอบ ถ้าไม่มีรายการก็ไม่ทำเลยสักรอบ",
+   "ผิด — หลายเงื่อนไขผสมกันคือ multiple conditions",
+   "ผิด — ทำรอบเดียวไม่มีเงื่อนไขคือ sequence of steps",
+   "ผิด — นี่คือ one-to-many iteration (Repeat … until)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในแบบฝึก Zoo DFD ทำไม D1 Ticket Prices จึงผ่านกฎของ data store?",
+  "choices": [
+   "เป็น store ที่อยู่ใน context diagram ด้วย",
+   "เป็น interface ระหว่าง process 1 กับ 2",
+   "เป็น interface ระหว่าง entity กับ store",
+   "เป็น store ที่ไม่มี process ใดมาอ่านเลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — context diagram ไม่มี data store",
+   "ถูก — process 1 Manage Pricing เขียนลง D1 และ process 2 Process Ticket Order อ่านจาก D1",
+   "ผิด — entity ต่อกับ store โดยตรงไม่ได้",
+   "ผิด — store ที่ไม่มีใครอ่านจะไม่เป็น interface ระหว่าง 2 process"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Sequence of steps ต่างจาก construct อื่นของ Structured English อย่างไร?",
+  "choices": [
+   "ทำซ้ำไปจนกว่าเงื่อนไขเป็นเท็จ",
+   "เลือกทำตามค่าของเงื่อนไขเดียว",
+   "ทำเรียงกันไปโดยไม่มีเงื่อนไข",
+   "เลือกทำตามหลายเงื่อนไขผสมกัน"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — นี่คือ iteration",
+   "ผิด — นี่คือ simple/complex condition",
+   "ถูก — sequence คือขั้นตอนเรียงกัน ไม่มีเงื่อนไขหรือการวนซ้ำ",
+   "ผิด — นี่คือ multiple conditions"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม sensor, interrupt และ switch จึงเป็นแหล่งหา event ของ control flow?",
+  "choices": [
+   "ให้สัญญาณจริง/เท็จ ณ จุดเวลาหนึ่ง",
+   "เป็นที่เก็บข้อมูลถาวรของทั้งระบบ",
+   "ให้ข้อมูลตัวเลขที่ไหลต่อเนื่องตลอด",
+   "เป็น process ที่แปลงข้อมูลในระบบ"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — event เป็นเงื่อนไข Boolean ที่เกิดขึ้น ณ จุดเวลาใดเวลาหนึ่ง",
+   "ผิด — ที่เก็บข้อมูลถาวรคือ data store",
+   "ผิด — ข้อมูลที่ไหลและถูกแปลงคือ data flow",
+   "ผิด — สิ่งเหล่านี้เป็นแหล่งกำเนิดสัญญาณ ไม่ใช่ process"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ป้อนความยาวด้าน 5, 5, 8 ให้ process Analyze Triangle ผลลัพธ์คือข้อใด?",
+  "choices": [
+   "type 0 (ไม่เป็นรูป)",
+   "isosceles (หน้าจั่ว)",
+   "equilateral (เท่า)",
+   "scalene (ด้านไม่เท่า)"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — type 0 เกิดเมื่อด้านยาวสุดไม่น้อยกว่าผลรวมอีกสองด้าน แต่ 8 &lt; 10",
+   "ถูก — 8 &lt; 5 + 5 จึงเป็นสามเหลี่ยม และมี 2 ด้านเท่ากัน = isosceles",
+   "ผิด — equilateral ต้องเท่ากันทั้ง 3 ด้าน",
+   "ผิด — scalene คือไม่มีด้านใดเท่ากัน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "นโยบายห้องสมุด: สมาชิก VIP ยืมได้เสมอ ส่วนสมาชิกทั่วไปยืมได้เมื่อไม่มีค่าปรับค้าง ใน rule ของ VIP ช่อง “มีค่าปรับค้าง” ควรใส่อะไร?",
+  "choices": [
+   "ใส่ X กำกับไว้ทั้งสองแถว",
+   "ใส่ no เพียงค่าเดียว",
+   "ใส่ yes เพียงค่าเดียว",
+   "ใส่ doesn't matter"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — X ใช้ในแถว action เพื่อบอกว่าต้องทำ action ไหน",
+   "ผิด — จะทำให้ขาดกรณี VIP ที่มีค่าปรับ",
+   "ผิด — จะทำให้ขาดกรณี VIP ที่ไม่มีค่าปรับ",
+   "ถูก — VIP ยืมได้ไม่ว่ามีค่าปรับหรือไม่ จึงใช้ doesn't matter เพื่อลดจำนวน rule"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ตรรกะ: รับรหัสสมาชิก → ค้นหาข้อมูล → แสดงชื่อสมาชิก โดยไม่มีการตัดสินใจหรือวนซ้ำ ควรใช้ construct ใด?",
+  "choices": [
+   "Simple condition",
+   "Complex condition",
+   "Multiple conditions",
+   "Sequence of steps"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — simple condition ใช้เมื่อมีเงื่อนไข 2 ค่า",
+   "ผิด — complex condition ใช้เมื่อเงื่อนไขมีมากกว่า 2 ค่า",
+   "ผิด — multiple conditions ใช้เมื่อมีหลายเงื่อนไขผสมกัน",
+   "ถูก — ขั้นตอนเรียงกันไม่มีเงื่อนไข ใช้ sequence of steps"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "Process หนึ่งคำนวณ “ดอกเบี้ย = เงินต้น × อัตรา × เวลา” เท่านั้น รูปแบบ PSPEC ใดกระชับและตรงที่สุด?",
+  "choices": [
+   "Equations",
+   "Narrative",
+   "Diagrams",
+   "Tables"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ตรรกะเป็นสูตรเดียว เขียนเป็น equation ได้ตรงและไม่กำกวม",
+   "ผิด — narrative ใช้ได้แต่ยาวกว่าและกำกวมได้",
+   "ผิด — แผนภาพไม่จำเป็นสำหรับสูตรเดียว",
+   "ผิด — ตารางเหมาะกับหลายเงื่อนไข ไม่ใช่สูตรเดียว"
+  ]
+ },
+ {
+  "type": "fill",
+  "q": "ทำไมต้องอธิบาย process",
+  "parts": [
+   "DFD บอกแค่ว่า process ",
+   " แต่ไม่บอกว่า ",
+   " จึงต้องมีเครื่องมืออธิบายเพิ่ม คือ ",
+   ", Structured English และ ",
+   ""
+  ],
+  "blanks": [
+   "รับอะไรและส่งอะไรออก",
+   "คำนวณอย่างไร",
+   "PSPEC",
+   "Decision Table"
+  ],
+  "bank": [
+   "ใครเป็นคนทำ",
+   "รับอะไรและส่งอะไรออก",
+   "คำนวณอย่างไร",
+   "CSPEC",
+   "Decision Table",
+   "PSPEC"
+  ],
+  "explain": "ถ้าไม่อธิบายตรรกะข้างใน programmer ต้องเดาเอง — เครื่องมือ 3 อย่าง: Process Specification (PSPEC), Structured English, Decision Table"
+ },
+ {
+  "type": "fill",
+  "q": "Process Specification (PSPEC)",
+  "parts": [
+   "PSPEC เขียนให้ ",
+   " ซึ่งเป็นระดับล่างสุดของ DFD รูปแบบหนึ่งคือ pseudocode หรือ ",
+   " ซึ่งชัดเจนและใกล้โค้ด ส่วนแบบ ",
+   " อ่านง่ายสำหรับ stakeholder แต่ ",
+   ""
+  ],
+  "blanks": [
+   "primitive process",
+   "PDL",
+   "narrative",
+   "กำกวมได้"
+  ],
+  "bank": [
+   "CSPEC",
+   "primitive process",
+   "กำกวมได้",
+   "ทดสอบไม่ได้",
+   "context diagram",
+   "narrative",
+   "PDL"
+  ],
+  "explain": "PSPEC มี 5 รูปแบบ: narrative, pseudocode (PDL), equations, tables, diagrams &amp; charts — narrative อ่านง่ายแต่กำกวมได้ / PDL ชัดเจนเหมาะกับ programmer"
+ },
+ {
+  "type": "fill",
+  "q": "เติม PDL ของ process Analyze Triangle",
+  "parts": [
+   "read side dimensions;<br>if any dimension is ",
+   " then produce error message;<br>if the largest dimension is ",
+   " the sum of the others then<br>    if three sides are equal then type is ",
+   ";<br>    if two sides are equal then type is ",
+   ";<br>    if no sides are equal then type is ",
+   ";<br>else output type = ",
+   ", indication that no triangle exists;"
+  ],
+  "blanks": [
+   "negative",
+   "less than",
+   "equilateral",
+   "isosceles",
+   "scalene",
+   "0"
+  ],
+  "bank": [
+   "1",
+   "0",
+   "negative",
+   "equilateral",
+   "scalene",
+   "positive",
+   "isosceles",
+   "less than",
+   "greater than"
+  ],
+  "explain": "ตรวจค่าติดลบ → ตรวจกฎสามเหลี่ยม (ด้านยาวสุด &lt; ผลรวมอีกสองด้าน) → 3 ด้านเท่า = equilateral / 2 ด้านเท่า = isosceles / ไม่เท่าเลย = scalene / ไม่ผ่านกฎ = type 0"
+ },
+ {
+  "type": "fill",
+  "q": "Constructs ของ Structured English ด้านเงื่อนไข",
+  "parts": [
+   "",
+   " — ทำขั้นตอนเรียงกัน ไม่มีเงื่อนไข<br>",
+   " — เงื่อนไขมีแค่ 2 ค่า ใช้ If … then … else<br>",
+   " — เงื่อนไขมีมากกว่า 2 ค่า ใช้ Case<br>",
+   " — ทดสอบหลายเงื่อนไขพร้อมกัน ใช้ decision table"
+  ],
+  "blanks": [
+   "Sequence of steps",
+   "Simple condition",
+   "Complex condition",
+   "Multiple conditions"
+  ],
+  "bank": [
+   "Multiple conditions",
+   "Nested loop",
+   "Recursion",
+   "Simple condition",
+   "Sequence of steps",
+   "Complex condition"
+  ],
+  "explain": "Simple = 2 ค่า (if-else) / Complex = เงื่อนไขเดียวหลายค่า (case) / Multiple = หลายเงื่อนไขผสมกัน (decision table)"
+ },
+ {
+  "type": "fill",
+  "q": "Iteration สองแบบ",
+  "parts": [
+   "",
+   " iteration เขียนด้วย ",
+   " ตรวจเงื่อนไข ",
+   " จึงทำอย่างน้อย 1 รอบ<br>",
+   " iteration เขียนด้วย ",
+   " ตรวจเงื่อนไข ",
+   " จึงอาจไม่ทำเลย"
+  ],
+  "blanks": [
+   "One-to-many",
+   "Repeat … until",
+   "ท้ายรอบ",
+   "Zero-to-many",
+   "Do while",
+   "ต้นรอบ"
+  ],
+  "bank": [
+   "Zero-to-many",
+   "Do while",
+   "กลางรอบ",
+   "Case … End Case",
+   "One-to-many",
+   "ต้นรอบ",
+   "Repeat … until",
+   "ท้ายรอบ"
+  ],
+  "explain": "One-to-many (Repeat … until) = do-while ทำอย่างน้อย 1 รอบ / Zero-to-many (Do while, For) = while/for อาจทำ 0 รอบ"
+ },
+ {
+  "type": "fill",
+  "q": "เติม Structured English ของ Calculate Ticket Price",
+  "parts": [
+   "Set total price to 0<br>",
+   " each ticket in the order:<br>    Do the following ",
+   " ticket type:<br>        Case 1: If ticket type = \"Child\" then unit price = child price<br>        Case 2: If ticket type = \"Adult\" then unit price = adult price<br>    ",
+   "<br>    Add unit price × quantity to total price<br>",
+   "<br>Output total price"
+  ],
+  "blanks": [
+   "For",
+   "based on",
+   "End Case",
+   "End For"
+  ],
+  "bank": [
+   "For",
+   "End If",
+   "Repeat",
+   "until",
+   "based on",
+   "End Case",
+   "End For"
+  ],
+  "explain": "For … End For = zero-to-many iteration (วนทุกตั๋วในออเดอร์) และ Do the following based on … Case … End Case = complex condition (ประเภทตั๋วมีมากกว่า 2 ค่า)"
+ },
+ {
+  "type": "fill",
+  "q": "โครงสร้างของ decision table",
+  "parts": [
+   "แถวบนของตารางคือ ",
+   " แถวล่างคือ ",
+   " และแต่ละคอลัมน์คือ ",
+   " หนึ่งข้อ เครื่องหมาย ",
+   " บอกว่าต้องทำ action ไหน ส่วนค่า ",
+   " ช่วยลดจำนวน rule"
+  ],
+  "blanks": [
+   "condition stubs",
+   "action stubs",
+   "rule",
+   "X",
+   "doesn't matter"
+  ],
+  "bank": [
+   "data store",
+   "X",
+   "action stubs",
+   "doesn't matter",
+   "O",
+   "condition stubs",
+   "rule"
+  ],
+  "explain": "Condition stubs (เงื่อนไข) / Action stubs (การกระทำ) / คอลัมน์ = rules / X = ทำ action นั้น / doesn't matter = เงื่อนไขนั้นไม่มีผล ช่วยลด rule จาก 2ⁿ"
+ },
+ {
+  "type": "fill",
+  "q": "Decision table ของ LMART",
+  "parts": [
+   "Rule 1: เช็คส่วนตัว ยอดไม่เกิน $75 → ",
+   "<br>Rule 2: เช็คเงินเดือน บริษัทได้รับอนุมัติ = ",
+   " → Cash the check<br>Rule 3: เช็คส่วนตัว ยอดไม่เกิน $75 = ",
+   " → ",
+   "<br>Rule 4: เช็คเงินเดือน บริษัทได้รับอนุมัติ = no → Don't cash the check"
+  ],
+  "blanks": [
+   "Cash the check",
+   "yes",
+   "no",
+   "Don't cash the check"
+  ],
+  "bank": [
+   "Call the manager",
+   "doesn't matter",
+   "yes",
+   "no",
+   "Cash the check",
+   "Don't cash the check"
+  ],
+  "explain": "Policy: เช็คส่วนตัวแลกได้ไม่เกิน $75 และเช็คเงินเดือนแลกได้เฉพาะจากบริษัทที่ LMART อนุมัติ → Rule 1, 2 แลกได้ / Rule 3, 4 แลกไม่ได้"
+ },
+ {
+  "type": "fill",
+  "q": "Data flow เทียบกับ Control flow",
+  "parts": [
+   "Data flow วาดด้วย ",
+   " เป็นข้อมูลที่ถูก process ",
+   "<br>Control flow วาดด้วย ",
+   " แทน event ซึ่งเป็นเงื่อนไขแบบ ",
+   " และเกิดขึ้น ณ ",
+   ""
+  ],
+  "blanks": [
+   "เส้นทึบ",
+   "แปลง",
+   "เส้นประ",
+   "Boolean",
+   "จุดเวลาหนึ่ง"
+  ],
+  "bank": [
+   "Boolean",
+   "เส้นทึบ",
+   "ตลอดเวลา",
+   "แปลง",
+   "ตัวเลข",
+   "เส้นคู่",
+   "เส้นประ",
+   "จุดเวลาหนึ่ง"
+  ],
+  "explain": "Data flow = ข้อมูลที่เคลื่อนที่และถูกแปลง (เส้นทึบ) / Control flow = สัญญาณหรือ event แบบ Boolean ไม่ถูกแปลง เกิด ณ จุดเวลาหนึ่ง (เส้นประ)"
+ },
+ {
+  "type": "fill",
+  "q": "ตัวอย่างการหาร",
+  "parts": [
+   "",
+   " ถูกส่งไปทั้ง process Divide และ Test that Divisor is Not Zero ถ้าตัวหารไม่ใช่ 0 process ทดสอบจะส่ง control flow ชื่อ ",
+   " ไปบอก Divide จากนั้น Divide รับ Divisor กับ ",
+   " แล้วส่ง ",
+   " และ Remainder ออกมา"
+  ],
+  "blanks": [
+   "Divisor",
+   "OK",
+   "Dividend",
+   "Quotient"
+  ],
+  "bank": [
+   "Product",
+   "Error",
+   "Divisor",
+   "Dividend",
+   "Quotient",
+   "OK"
+  ],
+  "explain": "“OK” เป็นสัญญาณอนุญาต ไม่ใช่ข้อมูลที่ถูกนำไปคำนวณ จึงวาดเป็นเส้นประ ส่วน Divisor, Dividend, Quotient, Remainder เป็น data flow เส้นทึบ"
+ },
+ {
+  "type": "fill",
+  "q": "PSPEC กับ CSPEC",
+  "parts": [
+   "",
+   " อธิบายว่า process ทำอะไรกับข้อมูล ส่วน ",
+   " อธิบายว่าระบบตอบสนองต่อ event อย่างไร<br>รูปแบบ CSPEC แบบ ",
+   " เป็น sequential spec ส่วน state transition table, decision tables และ activation tables เป็น ",
+   " spec"
+  ],
+  "blanks": [
+   "PSPEC",
+   "CSPEC",
+   "State diagram",
+   "combinatorial"
+  ],
+  "bank": [
+   "PSPEC",
+   "iterative",
+   "State diagram",
+   "combinatorial",
+   "CSPEC",
+   "DFD"
+  ],
+  "explain": "PSPEC: narrative, PDL, Structured English, decision table / CSPEC: state diagram (sequential) และตารางต่าง ๆ (combinatorial) — decision table ใช้ได้ทั้งสองแบบ"
+ },
+ {
+  "type": "fill",
+  "q": "แนวทางแบบฝึก Zoo Ticketing DFD Level 1",
+  "parts": [
+   "Data store D1 คือ ",
+   " และ D2 คือ ",
+   "<br>Process 1 ",
+   " รับข้อมูลจาก Administrator แล้วเขียนลง D1<br>Process 6 ",
+   " อ่านข้อมูลจาก D2 แล้วส่งรายงานให้ Administrator"
+  ],
+  "blanks": [
+   "Ticket Prices",
+   "Bookings",
+   "Manage Pricing",
+   "Generate Sales Report"
+  ],
+  "bank": [
+   "Manage Pricing",
+   "Process Payment",
+   "Ticket Prices",
+   "Generate Sales Report",
+   "Visitors",
+   "Bookings"
+  ],
+  "explain": "Level 1 มี 6 process (≤7): Manage Pricing, Process Ticket Order, Process Payment and Issue Ticket, Check Ticket Status, Process Cancellation, Generate Sales Report — D1 อยู่ระหว่าง process 1 กับ 2 และ D2 อยู่ระหว่าง 3, 4, 5, 6"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

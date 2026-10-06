@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L3 Requirement Engineering (ชุดที่ 3)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L3 Requirement Engineering (ชุดที่ 3)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 7 ข้อ ความเข้าใจ 7 ข้อ การนำไปใช้ 4 ข้อ ลากเติมคำ 12 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ตามภาพ Sources of requirements Project Sponsor ให้ข้อมูลอะไรกับ BA?",
+  "choices": [
+   "Business requirements",
+   "End-user requirements",
+   "Scope and status data",
+   "Technical constraints"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Project Sponsor ให้ business requirements",
+   "ผิด — User requirements มาจาก Business User",
+   "ผิด — Scope and status มาจาก Project Manager",
+   "ผิด — ข้อจำกัดและความคาดหวังมาจาก Other Stakeholders"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นประเภทย่อยของ Organizational requirements ตาม Sommerville?",
+  "choices": [
+   "Regulatory",
+   "Operational",
+   "Security",
+   "Usability"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Regulatory อยู่ใน External requirements",
+   "ถูก — Organizational มี Environmental, Operational, Development",
+   "ผิด — Security อยู่ใน Product requirements",
+   "ผิด — Usability อยู่ใน Product requirements"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็น metric ของ Robustness ตามตารางในสไลด์?",
+  "choices": [
+   "Screen refresh time per page",
+   "Mean time to system failure",
+   "Time to restart after failure",
+   "Number of help frames used"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Screen refresh time เป็น metric ของ Speed",
+   "ผิด — Mean time to failure เป็น metric ของ Reliability",
+   "ถูก — Robustness วัดด้วย time to restart after failure, % events causing failure",
+   "ผิด — Number of help frames เป็น metric ของ Ease of use"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็น 1 ใน 6 Dimensions of Detailed Elicitation?",
+  "choices": [
+   "Team Structure",
+   "Project Timeline",
+   "Budget Planning",
+   "Business Workflow"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — โครงสร้างทีมไม่อยู่ใน 6 มิติ",
+   "ผิด — timeline เป็นเรื่องการบริหารโครงการ ไม่ใช่มิติของ elicitation",
+   "ผิด — งบประมาณไม่อยู่ใน 6 มิติ",
+   "ถูก — 6 มิติ: Individual Functionality, Business Workflow, Data, UI, Existing Systems, Other Constraints"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "User story วัดผลด้วย Acceptance Criteria หรืออะไร?",
+  "choices": [
+   "Definition of Done",
+   "Definition of Need",
+   "Declaration of Done",
+   "Description of Done"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — วัดด้วย Acceptance Criteria หรือ Definition of Done (DoD)",
+   "ผิด — ไม่มีคำนี้ในสไลด์ DoD ย่อมาจาก Definition of Done",
+   "ผิด — D ตัวแรกคือ Definition ไม่ใช่ Declaration",
+   "ผิด — D ตัวแรกคือ Definition ไม่ใช่ Description"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "บทใดของ SRS ใช้อธิบายศัพท์เทคนิคที่ปรากฏในเอกสาร?",
+  "choices": [
+   "Indexes",
+   "Glossary",
+   "Preface",
+   "Appendix"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Index คือดัชนีท้ายเล่ม",
+   "ถูก — Glossary คือบทอธิบายศัพท์เทคนิค",
+   "ผิด — Preface บอกกลุ่มผู้อ่านและประวัติเวอร์ชัน",
+   "ผิด — Appendices ใส่รายละเอียดเช่น hardware, database requirements"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นเรื่องที่ต้องพิจารณาใน Requirements management planning?",
+  "choices": [
+   "Interview questions",
+   "Prototype fidelity",
+   "Traceability policies",
+   "Feasibility studies"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — คำถามสัมภาษณ์เป็นเรื่องของ elicitation",
+   "ผิด — fidelity เป็นเรื่องของ prototyping",
+   "ถูก — พิจารณา 4 เรื่อง: identification, change management process, traceability policies, tool support",
+   "ผิด — feasibility study ทำช่วงต้นของ RE ไม่ใช่ส่วนของ management planning"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม software developers จึงต้องอ่าน system requirements ไม่ใช่แค่ user requirements?",
+  "choices": [
+   "เพราะเขียนสั้นกว่าและอ่านจบได้เร็ว",
+   "เพราะเขียนด้วยภาษาที่ลูกค้าเข้าใจ",
+   "เพราะใช้สำหรับเสนอราคาโครงการ",
+   "เพราะระบุว่าต้อง implement อะไร"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — system requirements ละเอียดและยาวกว่า",
+   "ผิด — ภาษาที่ลูกค้าเข้าใจคือลักษณะของ user requirements",
+   "ผิด — การเสนอราคา (bid) เป็นงานของ managers",
+   "ถูก — system requirements ละเอียดและกำหนดชัดว่าต้อง implement อะไร"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Product requirements ต่างจาก Organizational requirements อย่างไร?",
+  "choices": [
+   "ปัจจัยภายนอก / พฤติกรรมของตัวผลิตภัณฑ์",
+   "นโยบายขององค์กร / พฤติกรรมของผลิตภัณฑ์",
+   "พฤติกรรมของผลิตภัณฑ์ / นโยบายขององค์กร",
+   "ฟังก์ชันของระบบ / ข้อกำหนดของกฎหมาย"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ปัจจัยภายนอกคือ External requirements",
+   "ผิด — สลับกัน",
+   "ถูก — Product = พฤติกรรมของตัวผลิตภัณฑ์ / Organizational = มาจากนโยบายและขั้นตอนขององค์กร",
+   "ผิด — ทั้งสองเป็น non-functional ไม่ใช่ฟังก์ชัน และกฎหมายคือ External"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมวงจร elicitation จึงต้องมีขั้น Prioritization and negotiation?",
+  "choices": [
+   "ทีมพัฒนาต้องต่อรองราคากับลูกค้าทุกราย",
+   "requirement ทุกข้อสำคัญเท่ากันเสมอ",
+   "stakeholder ทุกกลุ่มต้องการเหมือนกัน",
+   "stakeholder ต่างกลุ่มต้องการขัดกันได้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — negotiation ในที่นี้คือเจรจาเรื่อง requirement ที่ขัดกัน ไม่ใช่ราคา",
+   "ผิด — ถ้าสำคัญเท่ากันก็ไม่ต้องจัดลำดับ",
+   "ผิด — ถ้าเหมือนกันก็ไม่ต้องเจรจา",
+   "ถูก — stakeholder ต่างกลุ่มมี requirement ต่างกัน จึงต้องจัดลำดับและเจรจาเมื่อขัดกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมสไลด์จึงเสนอเทคนิค elicitation หลายแบบแทนที่จะใช้แบบเดียว?",
+  "choices": [
+   "ทุกเทคนิคให้ผลเหมือนกันทุกสถานการณ์",
+   "แต่ละเทคนิคเหมาะกับสถานการณ์ต่างกัน",
+   "กฎหมายบังคับให้ใช้ครบทุกเทคนิคเสมอ",
+   "เทคนิคเดียวใช้ได้เฉพาะโครงการเล็ก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ถ้าให้ผลเหมือนกันก็ไม่ต้องมีหลายแบบ",
+   "ถูก — ไม่มีเทคนิคเดียวที่ดีที่สุด ต้องเลือกให้เหมาะกับสถานการณ์",
+   "ผิด — ไม่มีข้อบังคับเช่นนั้น",
+   "ผิด — สไลด์ไม่ได้จำกัดเทคนิคตามขนาดโครงการ"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เอกสาร requirements ช่วยควบคุม scope creep ได้อย่างไร?",
+  "choices": [
+   "เป็นหลักอ้างอิงว่าอะไรอยู่ในขอบเขต",
+   "เป็นรายการบั๊กที่พบหลังส่งมอบงาน",
+   "เป็นเครื่องมือเขียนโค้ดแทนนักพัฒนา",
+   "เป็นสัญญาห้ามแก้ requirement เลย"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เมื่อมีเอกสารอ้างอิง ก็เห็นได้ว่าสิ่งที่ขอเพิ่มอยู่นอกขอบเขตเดิมหรือไม่",
+   "ผิด — เอกสาร requirement ไม่ใช่รายการบั๊ก",
+   "ผิด — เอกสารไม่ได้เขียนโค้ดให้",
+   "ผิด — requirement ยังเปลี่ยนได้ผ่าน change management"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "System maintenance engineers ใช้ SRS เพื่ออะไร?",
+  "choices": [
+   "เข้าใจระบบและความสัมพันธ์ระหว่างส่วนต่าง ๆ",
+   "วางแผนเสนอราคาและกระบวนการพัฒนาระบบ",
+   "สร้าง validation tests สำหรับทดสอบระบบ",
+   "ระบุ requirement และการเปลี่ยนแปลงใหม่"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ผู้ดูแลระบบใช้ SRS เพื่อเข้าใจระบบและความสัมพันธ์ระหว่างส่วนต่าง ๆ",
+   "ผิด — เป็นการใช้งานของ Managers",
+   "ผิด — เป็นการใช้งานของ System test engineers",
+   "ผิด — เป็นบทบาทของ System customers"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม user requirements จึงต้องเขียนด้วยภาษาที่ลูกค้าเข้าใจ?",
+  "choices": [
+   "ผู้อ่านหลักคือทีมโปรแกรมเมอร์เอง",
+   "ผู้อ่านหลักคือฝั่งลูกค้าและผู้จัดการ",
+   "เพื่อให้นำไปคอมไพล์เป็นโค้ดได้ทันที",
+   "เพื่อให้เอกสารสั้นลงเหลือหน้าเดียว"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — developer อ่าน system requirements เป็นหลัก",
+   "ถูก — client managers, end-users และ contractor managers ต้องอ่านเข้าใจโดยไม่ต้องรู้เทคนิค",
+   "ผิด — user requirements เป็นภาษาธรรมชาติ ไม่ได้ใช้คอมไพล์",
+   "ผิด — เป้าหมายคือความเข้าใจ ไม่ใช่ความสั้น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "“ระบบต้องกลับมาให้บริการได้ภายใน 30 วินาทีหลังเกิดความล้มเหลว” เป็นการวัด property ใด?",
+  "choices": [
+   "Portability",
+   "Reliability",
+   "Usability",
+   "Robustness"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Portability วัดด้วยจำนวน target systems",
+   "ผิด — Reliability วัดด้วย mean time to failure หรือ availability",
+   "ผิด — Usability/Ease of use วัดด้วย training time",
+   "ถูก — time to restart after failure เป็น metric ของ Robustness"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมใช้ข้อมูล traceability ดูว่าการแก้ requirement R12 กระทบส่วนใดบ้าง แล้วประมาณค่าใช้จ่าย อยู่ขั้นใด?",
+  "choices": [
+   "Requirements identification",
+   "Change implementation phase",
+   "Change analysis and costing",
+   "Problem analysis and change"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — identification คือการให้ ID ไม่ซ้ำ ทำในช่วง planning",
+   "ผิด — implementation คือขั้นลงมือแก้ design และ implementation",
+   "ถูก — ขั้นที่ 2 ประเมินผลกระทบด้วย traceability แล้วประมาณต้นทุน",
+   "ผิด — ขั้นแรกคือระบุปัญหาและตัดสินว่ารับหรือถอนคำขอ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ข้อความ “จำเป็นเพราะกฎหมายกำหนดให้เก็บ log อย่างน้อย 90 วัน” ควรอยู่ในช่องใดของ structured specification?",
+  "choices": [
+   "Action",
+   "Source",
+   "Rationale",
+   "Output"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Action บอกขั้นตอนการทำงานของระบบ",
+   "ผิด — Source บอกว่าใครเป็นผู้ให้ requirement",
+   "ถูก — Rationale บอกว่าทำไม requirement นี้จำเป็น",
+   "ผิด — Output บอกผลลัพธ์ที่คาดว่าจะได้"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "BA เตรียมคำถาม 20 ข้อ แล้วถามพนักงานทุกคนตามลำดับเดิมทุกครั้ง เป็นเทคนิคใด?",
+  "choices": [
+   "Open interview",
+   "Site observation",
+   "JRP workshops",
+   "Closed interview"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Open interview ไม่มีสคริปต์ตายตัว",
+   "ผิด — observation คือเข้าไปดูการทำงานจริง ไม่ใช่การถาม",
+   "ผิด — JRP คือประชุมวางแผน requirement ร่วมกันเป็นกลุ่ม",
+   "ถูก — Closed interview ถามตามชุดคำถามที่เตรียมไว้"
+  ]
+ },
+ {
+  "type": "fill",
+  "q": "4 กระบวนการของ Requirements Engineering เรียงตามลำดับ",
+  "parts": [
+   "",
+   " → ",
+   " → ",
+   " → ",
+   ""
+  ],
+  "blanks": [
+   "Elicitation",
+   "Specification",
+   "Validation",
+   "Change"
+  ],
+  "bank": [
+   "Validation",
+   "Elicitation",
+   "Implementation",
+   "Change",
+   "Specification",
+   "Estimation"
+  ],
+  "explain": "RE มี 4 กระบวนการ: Elicitation (เก็บ) → Specification (เขียน) → Validation (ตรวจ) → Change (จัดการการเปลี่ยนแปลง) เป็นกระบวนการแบบวนซ้ำ และ output คือ system requirements document"
+ },
+ {
+  "type": "fill",
+  "q": "User requirements เทียบกับ System requirements",
+  "parts": [
+   "User requirements เขียนด้วยภาษาที่ลูกค้าเข้าใจ เป็นประโยค ",
+   " ผู้อ่านเช่น ",
+   "<br>System requirements ",
+   " และกำหนดชัดว่าต้อง implement อะไร ผู้อ่านสำคัญคือ ",
+   ""
+  ],
+  "blanks": [
+   "กว้าง ๆ",
+   "Client managers",
+   "ละเอียดกว่า",
+   "Software developers"
+  ],
+  "bank": [
+   "นักการตลาด",
+   "ละเอียดกว่า",
+   "กว้าง ๆ",
+   "เป็นโค้ด",
+   "Software developers",
+   "Client managers"
+  ],
+  "explain": "User requirements = กว้าง ภาษาลูกค้า (managers อ่านแค่ส่วนนี้) / System requirements = ละเอียด ระบุว่าต้อง implement อะไร (developers อ่าน)"
+ },
+ {
+  "type": "fill",
+  "q": "Non-functional requirements 3 กลุ่มของ Sommerville",
+  "parts": [
+   "",
+   " requirements — พฤติกรรมของตัวผลิตภัณฑ์ เช่น usability, security<br>",
+   " requirements — มาจากนโยบายและขั้นตอนขององค์กร<br>",
+   " requirements — มาจากปัจจัยภายนอก เช่น กฎหมายและจริยธรรม"
+  ],
+  "blanks": [
+   "Product",
+   "Organizational",
+   "External"
+  ],
+  "bank": [
+   "Internal",
+   "Organizational",
+   "Functional",
+   "External",
+   "Product"
+  ],
+  "explain": "Product (usability, efficiency, dependability, security) / Organizational (environmental, operational, development) / External (regulatory, ethical, legislative)"
+ },
+ {
+  "type": "fill",
+  "q": "3 คำถามของ Feasibility Study",
+  "parts": [
+   "1. ระบบช่วยให้องค์กรบรรลุ ",
+   " ไหม<br>2. สร้างได้ภายใน ",
+   " ด้วยเทคโนโลยีปัจจุบันไหม<br>3. ",
+   " ที่ใช้อยู่ได้ไหม<br>ถ้าคำตอบข้อใดข้อหนึ่งเป็น “ไม่” ก็ ",
+   " โครงการ"
+  ],
+  "blanks": [
+   "เป้าหมายโดยรวม",
+   "เวลาและงบ",
+   "รวมเข้ากับระบบอื่น",
+   "ไม่ควรเดินหน้า"
+  ],
+  "bank": [
+   "รวมเข้ากับระบบอื่น",
+   "ทำต่อแบบลดขนาด",
+   "เป้าหมายโดยรวม",
+   "ไม่ควรเดินหน้า",
+   "เวลาและงบ",
+   "ทำหน้าจอสวย"
+  ],
+  "explain": "Feasibility study ทำตั้งแต่ช่วงต้นของ RE สั้นและเจาะจง ถามเรื่องเป้าหมายองค์กร / เวลา-งบ-เทคโนโลยี / การรวมกับระบบอื่น — ตอบ “ไม่” ข้อเดียวก็ไม่ควรทำต่อ"
+ },
+ {
+  "type": "fill",
+  "q": "วงจร Elicitation and Analysis 4 ขั้น",
+  "parts": [
+   "",
+   " → ",
+   " → ",
+   " → ",
+   " → วนกลับไปขั้นแรก"
+  ],
+  "blanks": [
+   "Discovery and understanding",
+   "Classification and organization",
+   "Prioritization and negotiation",
+   "Documentation"
+  ],
+  "bank": [
+   "Implementation",
+   "Discovery and understanding",
+   "Classification and organization",
+   "Documentation",
+   "Prioritization and negotiation",
+   "Validation and testing"
+  ],
+  "explain": "คุยกับ stakeholder → จัดกลุ่ม requirement → จัดลำดับความสำคัญและเจรจาเมื่อขัดกัน → บันทึก แล้ววนซ้ำ"
+ },
+ {
+  "type": "fill",
+  "q": "Guidelines ของ natural language specification",
+  "parts": [
+   "ใช้คำว่า “",
+   "” กับ requirement ที่ต้องมี (mandatory) และ “",
+   "” กับสิ่งที่ควรมี (desirable) ควรหลีกเลี่ยง ",
+   " และคำย่อ และใส่ ",
+   " เพื่อบอกว่าทำไมต้องมี requirement นั้น"
+  ],
+  "blanks": [
+   "Shall",
+   "Should",
+   "jargon",
+   "rationale"
+  ],
+  "bank": [
+   "Shall",
+   "Should",
+   "rationale",
+   "Must",
+   "jargon",
+   "prototype"
+  ],
+  "explain": "Shall = mandatory / Should = desirable — ใช้ภาษาให้สม่ำเสมอ เน้นข้อความส่วนสำคัญ เลี่ยง jargon และใส่ rationale ว่าทำไมต้องมีและใครเสนอ"
+ },
+ {
+  "type": "fill",
+  "q": "เติม template ของ user story",
+  "parts": [
+   "",
+   " ลูกค้าร้านหนังสือ<br>",
+   " ค้นหาหนังสือจากชื่อผู้แต่ง<br>",
+   " หาเล่มที่ต้องการได้เร็วขึ้น"
+  ],
+  "blanks": [
+   "As a",
+   "I want",
+   "So that"
+  ],
+  "bank": [
+   "So that",
+   "Then",
+   "When",
+   "Given",
+   "As a",
+   "I want"
+  ],
+  "explain": "User story: As a (บทบาท) … I want (ความสามารถ) … So that (ประโยชน์) ส่วน Given–When–Then เป็นรูปแบบของ acceptance criteria (Gherkin)"
+ },
+ {
+  "type": "fill",
+  "q": "ช่องของ structured specification",
+  "parts": [
+   "",
+   " — ทำไม requirement นี้จำเป็น<br>",
+   " — ใครเป็นผู้ให้ requirement นี้<br>",
+   " — สภาพที่ต้องเป็นจริงก่อนเริ่ม<br>",
+   " — สภาพของระบบหลังทำเสร็จ"
+  ],
+  "blanks": [
+   "Rationale",
+   "Source",
+   "Precondition",
+   "Postcondition"
+  ],
+  "bank": [
+   "Action",
+   "Source",
+   "Rationale",
+   "Precondition",
+   "Output(s)",
+   "Postcondition"
+  ],
+  "explain": "10 ช่อง: ID, type, Description, Rationale, Source, Input(s), Output(s), Action, Precondition, Postcondition — Action คือขั้นตอนการทำงาน ส่วน Output(s) คือผลลัพธ์ที่คาด"
+ },
+ {
+  "type": "fill",
+  "q": "Validation criteria",
+  "parts": [
+   "",
+   " — สะท้อนความต้องการจริงของผู้ใช้<br>",
+   " — requirement ไม่ขัดแย้งกันเอง<br>",
+   " — กำหนดทุกฟังก์ชันและข้อจำกัดครบ<br>",
+   " — ออกแบบ test ที่ทำซ้ำได้เพื่อพิสูจน์<br>",
+   " — สืบย้อนไปยังฟังก์ชันของระบบได้"
+  ],
+  "blanks": [
+   "Validity",
+   "Consistency",
+   "Completeness",
+   "Verifiability",
+   "Traceability"
+  ],
+  "bank": [
+   "Consistency",
+   "Verifiability",
+   "Completeness",
+   "Clarity",
+   "Realism",
+   "Validity",
+   "Traceability"
+  ],
+  "explain": "7 เกณฑ์: Validity, Consistency, Completeness, Realism (ทำได้จริง), Clarity (ไม่กำกวม), Verifiability, Traceability"
+ },
+ {
+  "type": "fill",
+  "q": "Requirements management สองกระบวนการ",
+  "parts": [
+   "Requirements management planning ทำใน ",
+   " ส่วน change management ทำ ",
+   "<br>ขั้นของ change management: Problem analysis and change specification → Change ",
+   " → Change ",
+   ""
+  ],
+  "blanks": [
+   "ช่วงวางแผน",
+   "หลังเอกสารอนุมัติแล้ว",
+   "analysis and costing",
+   "implementation"
+  ],
+  "bank": [
+   "negotiation",
+   "analysis and costing",
+   "หลังเอกสารอนุมัติแล้ว",
+   "ช่วงวางแผน",
+   "implementation",
+   "ก่อนเก็บ requirement"
+  ],
+  "explain": "Planning (ช่วงวางแผน: ID ไม่ซ้ำ, change process, traceability, tool) / Change management (หลังอนุมัติ: วิเคราะห์ปัญหา → วิเคราะห์ผลกระทบและต้นทุน → ลงมือแก้)"
+ },
+ {
+  "type": "fill",
+  "q": "เทคนิค elicitation",
+  "parts": [
+   "",
+   " — นักวิเคราะห์เข้าไปอยู่ในสภาพแวดล้อมการทำงานจริง ช่วยค้นพบ ",
+   "<br>",
+   " — ถามตามชุดคำถามที่เตรียมไว้<br>",
+   " — คุยเปิดกว้าง ไม่มีสคริปต์ตายตัว"
+  ],
+  "blanks": [
+   "Ethnography",
+   "implicit requirements",
+   "Closed interview",
+   "Open interview"
+  ],
+  "bank": [
+   "Questionnaire",
+   "formal process",
+   "Open interview",
+   "Closed interview",
+   "Ethnography",
+   "implicit requirements"
+  ],
+  "explain": "Interview = ฟังจากที่เขาเล่า (closed มีชุดคำถาม / open ไม่มีสคริปต์) ส่วน Ethnography = ดูจากที่เขาทำจริง จึงได้ implicit requirements ที่ต่างจากกระบวนการทางการ"
+ },
+ {
+  "type": "fill",
+  "q": "ERD และ Prototype",
+  "parts": [
+   "ใน ERD ",
+   " ระบุจำนวนของ entity ที่สัมพันธ์กัน ส่วน ",
+   " ระบุว่าความสัมพันธ์จำเป็นต้องมีหรือไม่<br>Prototype แบบ ",
+   " ใช้กระดาษแทนหน้าจอ ส่วน ",
+   " ใช้เครื่องมืออย่าง Figma"
+  ],
+  "blanks": [
+   "Cardinality",
+   "Modality",
+   "Low fidelity",
+   "High fidelity"
+  ],
+  "bank": [
+   "Mid fidelity",
+   "Modality",
+   "Low fidelity",
+   "Traceability",
+   "High fidelity",
+   "Cardinality"
+  ],
+  "explain": "Cardinality = กี่อัน / Modality = จำเป็นต้องมีไหม (| mandatory, ○ optional) — Low fidelity ถูก เร็ว แก้ง่าย / High fidelity สมจริงแต่ใช้แรงมากกว่า"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

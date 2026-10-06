@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L4 Use Case Modeling (ชุดที่ 3)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L4 Use Case Modeling (ชุดที่ 3)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 7 ข้อ ความเข้าใจ 7 ข้อ การนำไปใช้ 4 ข้อ ลากเติมคำ 12 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ขั้นตอน Requirements Analysis and Modeling ตามสไลด์มีกี่ขั้น?",
+  "choices": [
+   "6",
+   "5",
+   "8",
+   "3"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 6 คือจำนวนขั้นของการสร้าง use case",
+   "ถูก — 5 ขั้น: วิเคราะห์ functional req. → แยกโครงสร้าง → ระบุพฤติกรรม → เขียนและปรับปรุง use case → ยืนยันกับ stakeholder",
+   "ผิด — 8 คือจำนวนช่องของ use case narrative",
+   "ผิด — 3 คือจำนวน objectives ของ requirements analysis"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Actor ใน use case diagram วาดด้วยสัญลักษณ์ใด?",
+  "choices": [
+   "รูปคนก้าง",
+   "รูปกล่อง",
+   "รูปลูกศร",
+   "รูปวงรี"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — actor วาดเป็นคนก้าง (stickman) พร้อมชื่อ actor",
+   "ผิด — กล่องคือ system boundary",
+   "ผิด — ลูกศรใช้กับความสัมพันธ์ include/extend",
+   "ผิด — วงรีคือ use case"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตาม UML ความสัมพันธ์ Inheritance ระหว่าง actor วาดอย่างไร?",
+  "choices": [
+   "เส้นประ หัวสามเหลี่ยมโปร่ง",
+   "เส้นทึบ ไม่มีหัวลูกศรเลย",
+   "เส้นประ ติดป้าย includes",
+   "เส้นทึบ หัวสามเหลี่ยมโปร่ง"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — inheritance ใช้เส้นทึบ ไม่ใช่เส้นประ",
+   "ผิด — เส้นทึบไม่มีหัวลูกศรคือ association",
+   "ผิด — เส้นประติดป้าย includes ใช้ระหว่าง use case",
+   "ถูก — เส้นทึบ หัวลูกศรสามเหลี่ยมโปร่ง ชี้จาก actor ลูกไปหา actor แม่"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในแบบฝึก Zoo Ticketing use case ใดเป็นของ Administrator?",
+  "choices": [
+   "Purchase Ticket Online",
+   "Sell Ticket at Counter",
+   "Manage Ticket Prices",
+   "View My Ticket Status"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Purchase Ticket Online เป็นของ Visitor",
+   "ผิด — Sell Ticket at Counter เป็นของ Ticket Staff",
+   "ถูก — Administrator: Manage Visit Rounds, Manage Ticket Prices, Manage Staff Accounts, Generate Sales Report",
+   "ผิด — View Ticket Status เป็นของ Visitor"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้นที่ 2 ของการสร้าง use case คืออะไร?",
+  "choices": [
+   "Review and refine",
+   "Identify the actors",
+   "Identify use cases",
+   "Draw the diagram"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Review and refine เป็นขั้นที่ 6",
+   "ถูก — ขั้น 2 คือ Identify the actors (primary และ secondary)",
+   "ผิด — Identify use cases เป็นขั้นที่ 3",
+   "ผิด — Draw a use case diagram เป็นขั้นที่ 5"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ขั้นสุดท้ายของ Requirements Analysis and Modeling (ขั้นที่ 5) คืออะไร?",
+  "choices": [
+   "เขียนและปรับปรุง use case diagram",
+   "แยกโครงสร้างของปัญหาออกเป็นส่วน ๆ",
+   "ยืนยันว่าโมเดลตอบโจทย์ stakeholder",
+   "วิเคราะห์ functional requirements"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — เป็นขั้นที่ 4",
+   "ผิด — เป็นขั้นที่ 2",
+   "ถูก — ขั้นที่ 5 คือยืนยันว่าโมเดลตอบความต้องการของ stakeholder ทุกฝ่าย",
+   "ผิด — เป็นขั้นที่ 1"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในตัวอย่างห้องสมุด abstract actor ที่สร้างขึ้นเพื่อลดเส้นซ้ำชื่อว่าอะไร?",
+  "choices": [
+   "Library Staff",
+   "Library Admin",
+   "Library Patron",
+   "Library User"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่มี actor ชื่อนี้ในตัวอย่าง",
+   "ผิด — ไม่มี actor ชื่อนี้ในตัวอย่าง",
+   "ผิด — Patron เป็น actor ลูกที่สืบทอดจาก Library User",
+   "ถูก — Library User ถือ Search library inventory แล้วให้ Visitor และ Patron สืบทอด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Class models ต่างจาก Data models อย่างไร?",
+  "choices": [
+   "class กับ operation / information domain",
+   "การตอบสนองต่อ event ต่าง ๆ / มุมมองของผู้ใช้",
+   "มุมมองของผู้ใช้ระบบ / การไหลของข้อมูลในระบบ",
+   "information domain / class กับ operation"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Class models เป็นแบบ OO (class, attribute, operation) ส่วน Data models แสดง information domain ด้วย ER diagram",
+   "ผิด — นี่คือ behavioral กับ scenario-based models",
+   "ผิด — นี่คือ scenario-based กับ flow models",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Secondary actor ต่างจาก primary actor อย่างไร?",
+  "choices": [
+   "ใช้ระบบโดยตรงเพื่อให้บรรลุเป้าหมายของตนเอง",
+   "อยู่ในกล่อง system boundary กับ use case",
+   "เป็นคนเท่านั้น ส่วน primary เป็นระบบภายนอก",
+   "มีบทบาทสนับสนุน ไม่ได้ใช้ระบบเพื่อเป้าหมายตน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นี่คือนิยามของ primary actor",
+   "ผิด — actor ทุกชนิดอยู่นอกกล่อง",
+   "ผิด — actor ทั้งสองชนิดเป็นคนหรือระบบภายนอกก็ได้",
+   "ถูก — secondary มีบทบาทสนับสนุน เช่น payment service"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมการสร้าง use case จึงเริ่มจากการระบุ system boundary?",
+  "choices": [
+   "เพื่อรู้ว่าระบบต้องใช้ภาษาโปรแกรมอะไรบ้าง",
+   "เพื่อรู้ว่าแต่ละ use case ใช้เวลาเท่าใด",
+   "เพื่อรู้ว่าอะไรอยู่ในระบบและอะไรอยู่นอกระบบ",
+   "เพื่อรู้ว่าฐานข้อมูลควรต้องมีตารางอะไรบ้าง"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ภาษาโปรแกรมเป็นเรื่องของ design/implementation",
+   "ผิด — เวลาเป็นเรื่องการวางแผนโครงการ",
+   "ถูก — ขอบเขตบอกว่า use case (ในกล่อง) และ actor (นอกกล่อง) คืออะไร",
+   "ผิด — ตารางฐานข้อมูลเป็นเรื่องของ data model/design"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ช่อง Goal in Context ต่างจากช่อง Postcondition อย่างไร?",
+  "choices": [
+   "เหตุการณ์ที่เริ่ม use case / เงื่อนไขก่อนเริ่มต้น",
+   "เป้าหมายของ use case / สภาพระบบหลังเสร็จ",
+   "ลำดับขั้นตอนตามปกติ / ทางเลือกเมื่อเกิดผิดพลาด",
+   "สภาพระบบหลังเสร็จ / เป้าหมายของ use case"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นี่คือ Trigger กับ Precondition",
+   "ถูก — Goal in Context คือจุดประสงค์ ส่วน Postcondition คือสภาพของระบบหลัง use case เสร็จ",
+   "ผิด — นี่คือ Scenario กับ Exception",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "เมื่ออ่านโจทย์ข้อความ คำกริยาที่ actor ทำกับระบบมักกลายเป็นอะไรในแผนภาพ?",
+  "choices": [
+   "use case",
+   "actor",
+   "boundary",
+   "include"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — คำกริยาที่ actor ทำกับระบบ → use case (ตั้งชื่อแบบกริยา + กรรม)",
+   "ผิด — actor มาจากคำนามที่เป็นคน ตำแหน่ง หรือระบบภายนอก",
+   "ผิด — boundary คือขอบเขตของระบบ ไม่ได้มาจากคำกริยา",
+   "ผิด — include เป็นความสัมพันธ์ ไม่ใช่สิ่งที่ได้จากคำกริยาโดยตรง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในช่อง Exception รหัส “5a” หมายความว่าอย่างไร?",
+  "choices": [
+   "ขั้นที่ 5 ที่ทำโดย actor ชื่อขึ้นต้นด้วย a",
+   "ทางเลือกเมื่อขั้นที่ 5 ของ scenario พลาด",
+   "ขั้นตอนย่อยแรกที่ต้องทำก่อนขั้นที่ 5 เสมอ",
+   "use case ลำดับที่ 5 ของ actor ตัวแรก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ตัวอักษรไม่ได้อ้างถึง actor",
+   "ถูก — 5a คือ exception ที่แตกจากขั้นที่ 5 เช่น ชำระเงินไม่สำเร็จ → ลองใหม่",
+   "ผิด — ไม่ใช่ขั้นย่อยของทางปกติ แต่เป็นทางเมื่อผิดพลาด",
+   "ผิด — เลขอ้างถึงขั้นใน scenario ไม่ใช่ลำดับ use case"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม “แจ้งเตือนสินค้าหมด” ในร้าน POS จึงเหมาะเป็น extend หรือ exception ไม่ใช่ include?",
+  "choices": [
+   "เพราะเกิดทุกครั้งที่มีการขายสินค้า",
+   "เพราะเป็นงานที่ต้องทำก่อนเปิดร้าน",
+   "เพราะเกิดเฉพาะบางครั้งที่มีการขาย",
+   "เพราะเป็นงานที่ actor ภายนอกทำ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ถ้าเกิดทุกครั้งจะเป็น include",
+   "ผิด — ไม่เกี่ยวกับเวลาก่อนเปิดร้าน",
+   "ถูก — สินค้าไม่ได้หมดทุกครั้ง พฤติกรรมที่เกิดบางครั้งคือ extend หรือ exception",
+   "ผิด — การแจ้งเตือนเป็นสิ่งที่ระบบทำ ไม่ใช่ actor ภายนอก"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผู้ใช้ต้อง login ก่อนใช้ทุก use case ของระบบ ตามคำแนะนำในบทเรียนควรจัดการอย่างไร?",
+  "choices": [
+   "ลาก extend จาก login ทุกอัน",
+   "เขียน login เป็น postcondition",
+   "ลาก include ไป login ทุกอัน",
+   "เขียน login เป็น precondition"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — login ไม่ใช่พฤติกรรมเสริมแบบ optional",
+   "ผิด — postcondition คือสภาพหลัง use case เสร็จ ไม่ใช่ก่อนเริ่ม",
+   "ผิด — ทำได้แต่แผนภาพจะรก บทเรียนแนะนำให้ใช้ precondition แทน",
+   "ถูก — หลายตำราไม่นิยม include login กับทุก use case แต่ให้เขียนเป็น precondition"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ระบบโรงแรม: ตอน Book Room ลูกค้าบางคนขอ Add Breakfast เพิ่ม ควรวาดความสัมพันธ์อย่างไร?",
+  "choices": [
+   "Add Breakfast ──► Book Room ป้าย extends",
+   "Add Breakfast ──► Book Room ป้าย includes",
+   "Book Room ──► Add Breakfast ป้าย extends",
+   "Book Room ──► Add Breakfast ป้าย includes"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เป็น optional จึงใช้ extends และลูกศรเริ่มจาก extending ชี้ไป base",
+   "ผิด — ทั้งป้ายและทิศไม่ตรงกับพฤติกรรม optional",
+   "ผิด — ทิศกลับด้าน ลูกศร extends ต้องชี้เข้าหา base",
+   "ผิด — includes หมายถึงต้องทำทุกครั้ง แต่อาหารเช้าเป็นทางเลือก"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ข้อความ “ที่นั่งที่เลือกถูกจองไปแล้ว → ระบบให้เลือกที่นั่งใหม่” ควรอยู่ช่องใดของ narrative?",
+  "choices": [
+   "Precondition",
+   "Exception flow",
+   "Scenario flow",
+   "Trigger event"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Precondition คือสภาพที่ต้องเป็นจริงก่อนเริ่ม",
+   "ถูก — เป็นสิ่งที่เกิดเมื่อมีบางอย่างผิดพลาด จึงอยู่ช่อง Exception",
+   "ผิด — Scenario คือลำดับปกติ (main flow)",
+   "ผิด — Trigger คือเหตุการณ์ที่ทำให้ use case เริ่ม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการแสดงว่าระบบลิฟต์ตอบสนองอย่างไรเมื่อมีคนกดปุ่มเรียก ควรใช้แผนภาพใด?",
+  "choices": [
+   "State diagram",
+   "ER diagram",
+   "Class diagram",
+   "DFD diagram"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Behavioral models แสดงการตอบสนองต่อ event ด้วย state diagram",
+   "ผิด — ER diagram แสดง information domain",
+   "ผิด — class diagram แสดง class, attribute, operation",
+   "ผิด — DFD แสดงการเคลื่อนที่และการแปลงข้อมูล"
+  ]
+ },
+ {
+  "type": "fill",
+  "q": "Requirements modeling approaches 5 แบบ",
+  "parts": [
+   "",
+   " — requirement จากมุมมองผู้ใช้ ใช้ use case<br>",
+   " — class, attribute, operation แบบ OO<br>",
+   " — การเคลื่อนที่และการแปลงข้อมูล ใช้ DFD<br>",
+   " — ซอฟต์แวร์ตอบสนองต่อ event อย่างไร<br>",
+   " — information domain ของปัญหา ใช้ ER diagram"
+  ],
+  "blanks": [
+   "Scenario-based",
+   "Class models",
+   "Flow models",
+   "Behavioral models",
+   "Data models"
+  ],
+  "bank": [
+   "Scenario-based",
+   "Data models",
+   "Risk models",
+   "Behavioral models",
+   "Flow models",
+   "Class models",
+   "Process models"
+  ],
+  "explain": "Scenario = ใครทำอะไร / Class = มีของอะไร / Flow = ข้อมูลไหลไปไหน / Behavior = เกิดเหตุแล้วทำอะไร / Data = ข้อมูลสัมพันธ์กันอย่างไร"
+ },
+ {
+  "type": "fill",
+  "q": "แนวคิดของ Jacobson และ scenario-based model",
+  "parts": [
+   "ตาม Jacobson actor คือสิ่งที่อยู่ ",
+   " ส่วน use case คือสิ่งที่ ",
+   "<br>Scenario-based model เน้น ",
+   " requirements จากมุมมองของ ",
+   ""
+  ],
+  "blanks": [
+   "นอกระบบ",
+   "ระบบต้องทำ",
+   "functional",
+   "actor"
+  ],
+  "bank": [
+   "developer",
+   "ระบบต้องทำ",
+   "actor",
+   "นอกระบบ",
+   "functional",
+   "ในระบบ",
+   "non-functional"
+  ],
+  "explain": "Use cases ช่วยนิยามว่าอะไรอยู่นอกระบบ (actors) และระบบควรทำอะไร (use cases) — เน้น functional requirements จากมุมมอง actor จึงใช้ validate กับ stakeholder ได้ดี"
+ },
+ {
+  "type": "fill",
+  "q": "สัญลักษณ์พื้นฐานของ use case diagram",
+  "parts": [
+   "Use case วาดเป็น ",
+   " และตั้งชื่อขึ้นต้นด้วย ",
+   "<br>Actor วาดเป็น ",
+   " อยู่นอกระบบ<br>System boundary วาดเป็น ",
+   " ใส่ชื่อระบบ"
+  ],
+  "blanks": [
+   "วงรี",
+   "คำกริยา",
+   "คนก้าง",
+   "กล่อง"
+  ],
+  "bank": [
+   "สามเหลี่ยม",
+   "วงรี",
+   "คนก้าง",
+   "คำกริยา",
+   "กล่อง",
+   "คำนาม"
+  ],
+  "explain": "Use case = วงรี ชื่อแบบกริยา + กรรม (Register patient) / Actor = stickman อยู่นอกกล่อง / System boundary = กล่อง"
+ },
+ {
+  "type": "fill",
+  "q": "ความสัมพันธ์ 4 แบบใน use case diagram",
+  "parts": [
+   "",
+   " — เชื่อม actor กับ use case ด้วยเส้นทึบ<br>",
+   " — ระหว่าง actor กับ actor ย้ายพฤติกรรมร่วมไปไว้ที่ abstract actor<br>",
+   " — ระหว่าง use case กับ use case ต้องทำเสมอ<br>",
+   " — ระหว่าง use case กับ use case เป็นพฤติกรรมเสริม"
+  ],
+  "blanks": [
+   "Association",
+   "Inheritance",
+   "Includes",
+   "Extends"
+  ],
+  "bank": [
+   "Dependency",
+   "Extends",
+   "Includes",
+   "Association",
+   "Inheritance",
+   "Aggregation"
+  ],
+  "explain": "Association (actor–use case) / Inheritance (actor–actor ลดเส้นซ้ำ) / Includes (use case–use case ทำเสมอ) / Extends (use case–use case optional)"
+ },
+ {
+  "type": "fill",
+  "q": "ทิศลูกศรของ include และ extend",
+  "parts": [
+   "ลูกศร &lt;&lt;includes&gt;&gt; เริ่มจาก ",
+   " ชี้ไปที่ ",
+   "<br>ลูกศร &lt;&lt;extends&gt;&gt; เริ่มจาก ",
+   " ชี้ไปที่ ",
+   "<br>ทั้งสองแบบวาดด้วย ",
+   ""
+  ],
+  "blanks": [
+   "base",
+   "included use case",
+   "extending use case",
+   "base",
+   "เส้นประ"
+  ],
+  "bank": [
+   "extending use case",
+   "included use case",
+   "เส้นประ",
+   "actor",
+   "base",
+   "เส้นทึบ",
+   "base"
+  ],
+  "explain": "includes: base ──► included (Withdraw Cash ──► Customer Authentication) / extends: extending ──► base (Get Help On Registration ──► Registration) ทั้งคู่เป็นลูกศรเส้นประ"
+ },
+ {
+  "type": "fill",
+  "q": "6 ขั้นของการสร้าง use case",
+  "parts": [
+   "1. Identify the ",
+   "<br>2. Identify the ",
+   "<br>3. Identify ",
+   "<br>4. Establish ",
+   "<br>5. Draw a use case diagram<br>6. ",
+   ""
+  ],
+  "blanks": [
+   "system boundary",
+   "actors",
+   "use cases",
+   "relationships",
+   "Review and refine"
+  ],
+  "bank": [
+   "actors",
+   "relationships",
+   "classes",
+   "system boundary",
+   "use cases",
+   "Write test cases",
+   "Review and refine"
+  ],
+  "explain": "ขอบเขต → actor (primary/secondary) → use case (งานหลักของ actor) → ความสัมพันธ์ → วาด → ตรวจว่าครอบคลุมทุก functional requirement และ validate กับ stakeholder"
+ },
+ {
+  "type": "fill",
+  "q": "ช่องของ use case narrative",
+  "parts": [
+   "",
+   " — เงื่อนไขที่ต้องเป็นจริงก่อนเริ่ม<br>",
+   " — เหตุการณ์ที่ทำให้ use case เริ่ม<br>",
+   " — ลำดับปฏิสัมพันธ์ปกติ หรือ main flow<br>",
+   " — สิ่งที่เกิดเมื่อมีบางอย่างผิดพลาด<br>",
+   " — สภาพของระบบหลัง use case เสร็จ"
+  ],
+  "blanks": [
+   "Precondition",
+   "Trigger",
+   "Scenario",
+   "Exception",
+   "Postcondition"
+  ],
+  "bank": [
+   "Precondition",
+   "Exception",
+   "Trigger",
+   "Postcondition",
+   "Goal in Context",
+   "Scenario",
+   "Primary Actor"
+  ],
+  "explain": "Precondition = สภาพที่เป็นจริงอยู่แล้ว / Trigger = เหตุการณ์ที่เริ่ม / Scenario = main flow / Exception = ทางเมื่อผิดพลาด / Postcondition = สภาพหลังเสร็จ"
+ },
+ {
+  "type": "fill",
+  "q": "เติม use case narrative ของ “Reserve Study Room”",
+  "parts": [
+   "Primary Actor: ",
+   "<br>Precondition: ",
+   "<br>Trigger: ",
+   "<br>Exception: ",
+   "<br>Postcondition: ",
+   ""
+  ],
+  "blanks": [
+   "Student",
+   "นักศึกษาเข้าสู่ระบบแล้ว",
+   "นักศึกษากดเมนู “จองห้อง”",
+   "ห้องเต็มในช่วงเวลาที่เลือก → ให้เลือกเวลาใหม่",
+   "ระบบบันทึกการจองไว้และมีรหัสการจอง"
+  ],
+  "bank": [
+   "นักศึกษาเข้าสู่ระบบแล้ว",
+   "Student",
+   "นักศึกษากดเมนู “จองห้อง”",
+   "ห้องเต็มในช่วงเวลาที่เลือก → ให้เลือกเวลาใหม่",
+   "ระบบแสดงรายการห้องว่างให้เลือก",
+   "Reserve Room",
+   "ระบบบันทึกการจองไว้และมีรหัสการจอง"
+  ],
+  "explain": "Precondition เป็น “สภาพ” (login แล้ว) ส่วน Trigger เป็น “เหตุการณ์” (กดเมนู) — “ระบบแสดงรายการห้องว่าง” เป็นขั้นตอนใน Scenario และ Reserve Room เป็นชื่อ use case ไม่ใช่ actor"
+ },
+ {
+  "type": "fill",
+  "q": "ร้าน POS: ตัดสินว่าแต่ละ use case สัมพันธ์กับ Process Sale แบบใด",
+  "parts": [
+   "Calculate Total (เกิดทุกการขาย) → ",
+   "<br>Apply Discount (ใช้เฉพาะบางการขาย) → ",
+   "<br>Issue Receipt (เกิดทุกการขาย) → ",
+   "<br>Alert Out of Stock (เกิดเมื่อสินค้าหมด) → ",
+   ""
+  ],
+  "blanks": [
+   "include",
+   "extend",
+   "include",
+   "extend"
+  ],
+  "bank": [
+   "include",
+   "extend",
+   "extend",
+   "association",
+   "inheritance",
+   "include"
+  ],
+  "explain": "ทดสอบด้วยคำถาม “ทุกครั้งที่ทำ A ต้องทำ B ไหม?” — ต้อง = include / แค่บางครั้ง = extend"
+ },
+ {
+  "type": "fill",
+  "q": "Actor ในแบบฝึก Zoo Ticketing System",
+  "parts": [
+   "",
+   " — Purchase Ticket Online, Request Ticket Cancellation<br>",
+   " — Sell Ticket at Counter, Manage Ticket Order<br>",
+   " — Manage Ticket Prices, Generate Sales Report<br>",
+   " — Make Payment, Process Refund (secondary actor)"
+  ],
+  "blanks": [
+   "Visitor",
+   "Ticket Staff",
+   "Administrator",
+   "Payment Gateway"
+  ],
+  "bank": [
+   "Visitor",
+   "Bank Manager",
+   "Payment Gateway",
+   "Ticket Staff",
+   "Zoo Keeper",
+   "Administrator"
+  ],
+  "explain": "Visitor, Ticket Staff, Administrator เป็น primary actor ส่วน Payment Gateway เป็น secondary actor ที่สนับสนุนการจ่ายและคืนเงิน"
+ },
+ {
+  "type": "fill",
+  "q": "Requirements Analysis",
+  "parts": [
+   "Analysis model เปรียบเป็น ",
+   " เชื่อม requirement ที่เป็นข้อความไปสู่ ",
+   " งานนี้มักทำโดย ",
+   " และ objective ข้อหนึ่งคือกำหนดชุด requirement ที่ ",
+   " ได้"
+  ],
+  "blanks": [
+   "สะพาน",
+   "การออกแบบ",
+   "Business Analyst",
+   "validate"
+  ],
+  "bank": [
+   "Tester",
+   "สะพาน",
+   "validate",
+   "compile",
+   "การออกแบบ",
+   "Business Analyst",
+   "กำแพง"
+  ],
+  "explain": "Objectives 3 ข้อ: อธิบายว่าลูกค้าต้องการอะไร / วางรากฐานสำหรับการออกแบบ / กำหนดชุด requirement ที่ validate ได้ — มักทำโดย BA"
+ },
+ {
+  "type": "fill",
+  "q": "วิธีหา actor และ use case จากโจทย์ข้อความ",
+  "parts": [
+   "คำนามที่เป็นคน ตำแหน่ง หรือระบบภายนอก → ",
+   "<br>คำกริยาที่ actor ทำกับระบบ → ",
+   "<br>สิ่งที่ระบบทำเองอัตโนมัติระหว่างทาง → ",
+   ""
+  ],
+  "blanks": [
+   "actor",
+   "use case",
+   "ขั้นตอนใน narrative"
+  ],
+  "bank": [
+   "abstract actor",
+   "ขั้นตอนใน narrative",
+   "actor",
+   "system boundary",
+   "use case"
+  ],
+  "explain": "คำนาม → actor / คำกริยา → use case / สิ่งที่ระบบทำเอง (เช่น ระบบคำนวณราคา) มักเป็นขั้นตอนใน narrative หรือ include ไม่ใช่ use case ที่ actor เป็นเจ้าของ"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

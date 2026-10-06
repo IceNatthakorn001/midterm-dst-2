@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: L2 Software Process Models (ชุดที่ 3)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🧩 ITDS261</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: L2 Software Process Models (ชุดที่ 3)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 7 ข้อ ความเข้าใจ 7 ข้อ การนำไปใช้ 4 ข้อ ลากเติมคำ 12 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "กิจกรรมพื้นฐานที่ทุก process model มีเหมือนกันมีกี่อย่างตามสไลด์?",
+  "choices": [
+   "6",
+   "10",
+   "8",
+   "4"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — 6 อย่าง: requirements, design, implementation, testing, deployment, maintenance",
+   "ผิด — 10 คือจำนวน knowledge areas ของ PMBOK (L1)",
+   "ผิด — 8 คือจำนวน umbrella activities",
+   "ผิด — 4 คือจำนวน quadrant ของ Spiral"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ชั้น Methods ใน Layered Technology หมายถึงอะไร?",
+  "choices": [
+   "กรอบที่ยึดทุกชั้นเอาไว้",
+   "วิธีทำงานในเชิงเทคนิค",
+   "ตัวช่วยทำงานอัตโนมัติ",
+   "ฐานรากของทุกชั้นงาน"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ตัวยึดชั้นต่าง ๆ คือ Process",
+   "ถูก — Methods คือ “how-to” เชิงเทคนิคของการสร้างซอฟต์แวร์",
+   "ผิด — ตัวช่วยให้ทำง่ายหรืออัตโนมัติคือ Tools",
+   "ผิด — ฐานรากคือ Quality focus"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อใดเป็นตัวอย่างของ development framework?",
+  "choices": [
+   "CMMI",
+   "Scrum",
+   "Django",
+   "Spiral"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — CMMI ใช้ประเมินความ mature ของกระบวนการ",
+   "ผิด — Scrum เป็นวิธีทำงานแบบ Agile",
+   "ถูก — Django, React, Laravel คือโครงโค้ดสำเร็จรูป",
+   "ผิด — Spiral เป็น process model"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "สไลด์จัด Waterfall model เป็นโมเดลลักษณะใด?",
+  "choices": [
+   "Risk-driven and spiral",
+   "Iterative and cyclic",
+   "Adaptive and flexible",
+   "Linear and sequential"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — risk-driven คือ Spiral",
+   "ผิด — Waterfall ไม่วนรอบ ต้องจบช่วงหนึ่งก่อนเริ่มช่วงถัดไป",
+   "ผิด — ปรับตัวยืดหยุ่นคือลักษณะของ Agile",
+   "ถูก — Waterfall เป็น traditional model แบบ linear and sequential"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Quadrant ที่ 1 ของ Spiral model คือข้อใด?",
+  "choices": [
+   "Plan Next Phase",
+   "Resolve All Risks",
+   "Set Objectives",
+   "Develop Product"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Quadrant 1 คือ Plan Next Phase (req. plan, dev plan, test plan)",
+   "ผิด — การหาและแก้ความเสี่ยงอยู่ quadrant 3",
+   "ผิด — Determine Objectives, Alternatives, Constraints อยู่ quadrant 2",
+   "ผิด — Develop, Verify Next-level Product อยู่ quadrant 4"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เมื่อจบแต่ละ sprint ทีม Scrum ควรได้อะไร?",
+  "choices": [
+   "Product Vision",
+   "Product Increment",
+   "Product Backlog",
+   "Sprint Backlog"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Vision คือภาพเป้าหมายของผลิตภัณฑ์ กำหนดไว้ตั้งแต่ต้น",
+   "ถูก — ได้ Potentially Shippable Product Increment คือชิ้นงานที่พร้อมส่งมอบ",
+   "ผิด — Product Backlog คือรายการงานทั้งหมด มีตั้งแต่ก่อนเริ่ม sprint",
+   "ผิด — Sprint Backlog คืองานที่เลือกมาทำในรอบ ไม่ใช่ผลลัพธ์"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Spotify ใช้เทคนิคใดร่วมกับ continuous delivery เพื่อให้ได้ feedback รวดเร็ว?",
+  "choices": [
+   "Beta testing",
+   "Late testing",
+   "A/B testing",
+   "Unit testing"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — สไลด์ไม่ได้กล่าวถึง beta testing",
+   "ผิด — late testing คือสาเหตุที่ HealthCare.gov ล้มเหลว",
+   "ถูก — สไลด์ระบุ continuous delivery, A/B testing และ feedback ที่รวดเร็ว",
+   "ผิด — unit testing ทดสอบโค้ดชิ้นย่อย ไม่ใช่การเก็บ feedback ผู้ใช้"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้าทุกโมเดลมีกิจกรรมพื้นฐาน 6 อย่างเหมือนกัน แล้วแต่ละโมเดลต่างกันที่อะไร?",
+  "choices": [
+   "ภาษา เครื่องมือ และฐานข้อมูล",
+   "ขนาดทีม งบ และสถานที่ทำงาน",
+   "ชนิดของลูกค้าและชนิดของสัญญา",
+   "ลำดับ จำนวนรอบ ความละเอียด"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นเรื่องเทคโนโลยี ไม่ใช่ความต่างของ process model",
+   "ผิด — เป็นปัจจัยของโครงการ ไม่ใช่นิยามความต่างของโมเดล",
+   "ผิด — ชนิดลูกค้าช่วยเลือกโมเดล แต่ไม่ใช่สิ่งที่โมเดลต่างกัน",
+   "ถูก — ทุกโมเดลทำกิจกรรมเดียวกัน ต่างแค่ลำดับ จำนวนรอบ และความละเอียด"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมชั้น Process จึงสำคัญใน Layered Technology?",
+  "choices": [
+   "เป็นชั้นบนสุดที่ผู้ใช้ทุกคนมองเห็นได้",
+   "เป็นตัวแทนเครื่องมืออัตโนมัติทั้งหมด",
+   "เป็นตัวยึดชั้นอื่นและกำหนดกรอบงาน",
+   "เป็นชั้นที่ไม่ต้องอาศัยชั้นคุณภาพเลย"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ชั้นบนสุดคือ Tools",
+   "ผิด — เครื่องมืออัตโนมัติคือชั้น Tools",
+   "ถูก — Process ยึดชั้นต่าง ๆ ไว้ด้วยกันและกำหนดกรอบการทำงาน",
+   "ผิด — ทุกชั้นตั้งอยู่บนฐาน Quality focus"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "การที่ deliverable ของช่วงหนึ่งใน Waterfall เป็น input ของช่วงถัดไป ทำให้เกิดผลอย่างไร?",
+  "choices": [
+   "ลูกค้าเปลี่ยน requirement ได้ทุกช่วง",
+   "ข้ามช่วงทดสอบได้ถ้าเอกสารครบถ้วนแล้ว",
+   "ทำหลายช่วงซ้อนกันได้เพื่อประหยัดเวลา",
+   "ต้องจบช่วงก่อนหน้าก่อนจึงเริ่มช่วงถัดไป"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Waterfall ไม่ยืดหยุ่น เมื่อเริ่มพัฒนาแล้วเปลี่ยนยาก",
+   "ผิด — ไม่มีการข้ามช่วง ทุกช่วงต้องทำตามลำดับ",
+   "ผิด — Waterfall ไม่ให้ช่วงซ้อนทับกัน",
+   "ถูก — ช่วงต่าง ๆ ไม่ซ้อนทับกัน เพราะช่วงถัดไปต้องใช้ผลของช่วงก่อน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม Agile จึงเจอปัญหาได้เร็วกว่า Waterfall?",
+  "choices": [
+   "เขียนเอกสารละเอียดก่อนเริ่มเขียนโค้ดเสมอ",
+   "ส่งงานเป็นรอบสั้นและได้ feedback สม่ำเสมอ",
+   "มีผู้เชี่ยวชาญความเสี่ยงประจำอยู่ทุกทีมเสมอ",
+   "ทดสอบทั้งระบบครั้งเดียวตอนท้ายของโครงการ"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — เป็นลักษณะของ Traditional ไม่ใช่ Agile",
+   "ถูก — รอบสั้น 2–4 สัปดาห์ทำให้ลูกค้าเห็นของจริงและแจ้งปัญหาได้เร็ว",
+   "ผิด — ผู้เชี่ยวชาญความเสี่ยงเป็นข้อกำหนดของ Spiral",
+   "ผิด — นี่คือเหตุที่ Waterfall เจอปัญหาช้า"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "คำว่า Agile เป็น “family” หมายความว่าอย่างไร?",
+  "choices": [
+   "เป็นกลุ่มของหลายวิธี ไม่ใช่วิธีเดียว",
+   "เป็นชื่อเรียกอีกแบบของ Waterfall",
+   "เป็นวิธีเดียวที่ทุกทีมต้องทำเหมือนกัน",
+   "เป็นวิธีที่ใช้ได้กับทีมครอบครัวเท่านั้น"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Agile เป็นตระกูลของวิธี เช่น Scrum เป็นวิธีหนึ่งในนั้น",
+   "ผิด — Agile ตรงข้ามกับ Waterfall ที่เป็น traditional",
+   "ผิด — Agile ไม่ใช่วิธีเดียวตายตัว",
+   "ผิด — family หมายถึงตระกูลของวิธี ไม่เกี่ยวกับชนิดทีม"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ปัญหา Poor integration ของ HealthCare.gov เกิดจากอะไร?",
+  "choices": [
+   "ผู้รับจ้างหลายเจ้าทำแยกกันขาดการประสาน",
+   "ทีมเดียวทำทุก module จนงานล้นมือเกินไป",
+   "squad อิสระเกินไปจนไม่มีใครตัดสินใจ",
+   "ลูกค้าเปลี่ยน requirement ทุกสัปดาห์"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ผู้รับจ้างหลายเจ้าทำคนละ module พอประกอบกันแล้วใช้ไม่ได้",
+   "ผิด — ปัญหาคือหลายเจ้าแยกกันทำ ไม่ใช่ทีมเดียว",
+   "ผิด — squad เป็นของ Spotify ซึ่งเป็นเคสที่สำเร็จ",
+   "ผิด — โครงการมี scope และ deadline ตายตัว ไม่ได้เปลี่ยนบ่อย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Pre-conditions และ post-conditions ที่ process model ต้องกำหนดคืออะไร?",
+  "choices": [
+   "รายชื่อคนทำก่อนและหลังแต่ละ task",
+   "เงื่อนไขก่อนเริ่มและหลังจบแต่ละ task",
+   "ต้นทุนก่อนเริ่มและหลังจบแต่ละ task",
+   "เอกสารที่อ่านก่อนและหลังแต่ละ task"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — คนที่ทำ task เป็นอีกข้อหนึ่งใน 5 ข้อ ไม่ใช่ pre/post-condition",
+   "ถูก — บอกว่าต้องมีอะไรพร้อมก่อนเริ่ม task และสิ่งที่ต้องเป็นจริงเมื่อ task จบ",
+   "ผิด — process model ไม่ได้กำหนดต้นทุนในข้อนี้",
+   "ผิด — input/output ของ task เป็นอีกข้อหนึ่งที่แยกจากเงื่อนไข"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมเก็บสถิติจำนวน defect และเวลาที่ใช้ของทุก sprint ไว้เปรียบเทียบ เป็น umbrella activity ใด?",
+  "choices": [
+   "Risk control",
+   "Reusability",
+   "Tech reviews",
+   "Measurement"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Risk management คือการระบุและรับมือความเสี่ยง",
+   "ผิด — Reusability management คือการจัดการสิ่งที่นำกลับมาใช้ซ้ำ",
+   "ผิด — Formal technical reviews คือการประชุมตรวจชิ้นงาน",
+   "ถูก — การเก็บตัวเลขเพื่อวัดงานและคุณภาพคือ Measurement"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีม Spiral สร้าง prototype เพื่อทดลองเทคโนโลยีที่ยังไม่มั่นใจก่อนลงทุนต่อ งานนี้อยู่ quadrant ใด?",
+  "choices": [
+   "Quadrant 4",
+   "Quadrant 1",
+   "Quadrant 3",
+   "Quadrant 2"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Q4 คือ Develop, Verify พัฒนาและตรวจสอบผลิตภัณฑ์จริง",
+   "ผิด — Q1 คือ Plan Next Phase วางแผนรอบถัดไป",
+   "ถูก — Q3 Evaluate Alternatives, Identify, Resolve Risks มี risk analysis และ prototype",
+   "ผิด — Q2 คือกำหนด objectives, alternatives, constraints"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ลูกค้าว่างคุยได้แค่ตอนเก็บ requirement กับตอนตรวจรับงาน และ requirement ถูกกำหนดโดยสัญญา ควรใช้แนวทางใด?",
+  "choices": [
+   "Spotify squad model",
+   "Agile Scrum process",
+   "Traditional process",
+   "Code and Fix model"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Squad model พึ่ง feedback ผู้ใช้แบบ real-time",
+   "ผิด — Agile ต้องการ user involvement บ่อยตลอดโครงการ",
+   "ถูก — Traditional ต้องการผู้ใช้แค่ตอนต้นและตอนท้าย เหมาะกับ requirement ชัดที่มีสัญญาคุม",
+   "ผิด — Code and Fix เหมาะกับงานเล็กมากเท่านั้น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ทีมเลือกใช้ React เพราะมีชิ้นส่วน UI สำเร็จรูปให้หยิบใช้ ได้ประโยชน์จากคุณสมบัติใดของ development framework?",
+  "choices": [
+   "Umbrella Activities",
+   "Quality Checkpoints",
+   "Framework Activities",
+   "Components and Tools"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — Umbrella activities เป็นของ process framework",
+   "ผิด — QA checkpoints อยู่ใน task set ของ process framework",
+   "ผิด — Framework activities คือกิจกรรมหลักของ process framework",
+   "ถูก — Components and Tools คือชิ้นส่วนสำเร็จรูปที่ทำให้พัฒนาเร็วขึ้น"
+  ]
+ },
+ {
+  "type": "fill",
+  "q": "Layered Technology เรียงจากชั้นบนสุดลงไปหาฐาน",
+  "parts": [
+   "ชั้นบนสุดคือ ",
+   " ที่ช่วยให้ทำงานอัตโนมัติ ถัดลงมาคือ ",
+   " ซึ่งเป็นวิธีทำเชิงเทคนิค ถัดมาคือ ",
+   " ที่ยึดทุกชั้นไว้ด้วยกัน และฐานของทุกอย่างคือ ",
+   ""
+  ],
+  "blanks": [
+   "Tools",
+   "Methods",
+   "Process",
+   "Quality focus"
+  ],
+  "bank": [
+   "Process",
+   "Tools",
+   "People",
+   "Quality focus",
+   "Methods",
+   "Product"
+  ],
+  "explain": "บนลงล่าง: Tools → Methods → Process → Quality focus (ฐาน)"
+ },
+ {
+  "type": "fill",
+  "q": "ลำดับกิจกรรมพื้นฐาน 6 อย่างของการพัฒนาซอฟต์แวร์",
+  "parts": [
+   "Requirements analysis → ",
+   " → ",
+   " → ",
+   " → ",
+   " → Maintenance and evolution"
+  ],
+  "blanks": [
+   "System and software design",
+   "Implementation",
+   "Testing and quality assurance",
+   "Deployment and release"
+  ],
+  "bank": [
+   "Sprint planning",
+   "Testing and quality assurance",
+   "System and software design",
+   "Risk analysis",
+   "Deployment and release",
+   "Implementation"
+  ],
+  "explain": "6 กิจกรรม: Requirements analysis → Design → Implementation (coding) → Testing and QA → Deployment and release → Maintenance and evolution"
+ },
+ {
+  "type": "fill",
+  "q": "ส่วนประกอบของ Task Sets ใน process framework",
+  "parts": [
+   "Task Sets ประกอบด้วย ",
+   " คืองานที่ต้องทำ ",
+   " คือชิ้นงานที่ได้ รวมถึง Milestones กับ deliverables และ ",
+   " ไว้ตรวจคุณภาพ"
+  ],
+  "blanks": [
+   "Work tasks",
+   "Work products",
+   "QA checkpoints"
+  ],
+  "bank": [
+   "Sprint backlog",
+   "Work products",
+   "Umbrella activities",
+   "QA checkpoints",
+   "Work tasks"
+  ],
+  "explain": "Task set = Work tasks + Work products + Milestones, deliverables + QA checkpoints ส่วน umbrella activities เป็นกิจกรรมที่ครอบทุกช่วง ไม่ได้อยู่ใน task set"
+ },
+ {
+  "type": "fill",
+  "q": "5 อย่างที่ process model ต้องกำหนด",
+  "parts": [
+   "ชุดของ task / ",
+   " และ output ของแต่ละ task / ",
+   " และ post-conditions / ",
+   " ของ task / ",
+   " แต่ละ task"
+  ],
+  "blanks": [
+   "Input",
+   "Pre-conditions",
+   "ลำดับการไหล",
+   "คนที่ทำ"
+  ],
+  "bank": [
+   "ลำดับการไหล",
+   "ภาษาโปรแกรม",
+   "Input",
+   "คนที่ทำ",
+   "Pre-conditions",
+   "ราคา"
+  ],
+  "explain": "Process model กำหนด: ชุดของ task, input-output, pre/post-conditions, ลำดับการไหล และคนที่ทำ task — คำสำคัญคือ coordination, tasks, people"
+ },
+ {
+  "type": "fill",
+  "q": "ลักษณะของ Waterfall model",
+  "parts": [
+   "ช่วงต่าง ๆ ของ Waterfall ",
+   " กัน แต่ละช่วงผลิต ",
+   " ที่เป็น input ของช่วงถัดไป โมเดลนี้เน้น ",
+   " และการวางแผน ข้อเสียสำคัญคือเจอปัญหา ",
+   ""
+  ],
+  "blanks": [
+   "ไม่ซ้อนทับ",
+   "deliverable",
+   "เอกสาร",
+   "ช้า"
+  ],
+  "bank": [
+   "prototype",
+   "deliverable",
+   "ไม่ซ้อนทับ",
+   "เอกสาร",
+   "เร็ว",
+   "ช้า",
+   "วนซ้ำ"
+  ],
+  "explain": "Waterfall = linear and sequential ต้องจบช่วงหนึ่งก่อนเริ่มถัดไป เอกสารครบ แต่ทดสอบหลังเขียนโค้ดเสร็จจึงเจอปัญหาช้า"
+ },
+ {
+  "type": "fill",
+  "q": "Incremental model สองแบบ",
+  "parts": [
+   "แบบ A รวมชิ้นที่เสร็จเข้า ",
+   " อย่างต่อเนื่อง ส่วนแบบ B แพ็กแล้วปล่อยเป็นหลาย ",
+   " ข้อดีของ Incremental คือ ",
+   " ส่วนข้อเสียคือปัญหาตอน ",
+   ""
+  ],
+  "blanks": [
+   "integration bucket",
+   "release",
+   "divide and conquer",
+   "รวมระบบ"
+  ],
+  "bank": [
+   "วิเคราะห์ความเสี่ยง",
+   "integration bucket",
+   "release",
+   "sprint",
+   "รวมระบบ",
+   "divide and conquer"
+  ],
+  "explain": "A = Integration Bucket (รวมแล้วทดสอบทั้งระบบ) / B = Multiple Release (ส่งผู้ใช้ทีละ release) ข้อดี divide and conquer เหมาะกับระบบใหญ่ ข้อเสียคือ integration challenges"
+ },
+ {
+  "type": "fill",
+  "q": "4 quadrant ของ Spiral model",
+  "parts": [
+   "1. ",
+   " Next Phase<br>2. Determine ",
+   ", Alternatives, Constraints<br>3. Evaluate Alternatives, Identify, Resolve ",
+   "<br>4. ",
+   ", Verify Next-level Product"
+  ],
+  "blanks": [
+   "Plan",
+   "Objectives",
+   "Risks",
+   "Develop"
+  ],
+  "bank": [
+   "Develop",
+   "Objectives",
+   "Risks",
+   "Deploy",
+   "Backlog",
+   "Plan"
+  ],
+  "explain": "Spiral วนผ่าน 4 quadrant: Plan next phase → Determine objectives, alternatives, constraints → Evaluate alternatives, resolve risks (risk analysis, prototype) → Develop, verify"
+ },
+ {
+  "type": "fill",
+  "q": "Agile Manifesto — ให้คุณค่ากับด้านซ้ายมากกว่าด้านขวา",
+  "parts": [
+   "",
+   " over processes and tools<br>",
+   " over comprehensive documentation<br>",
+   " over contract negotiation<br>",
+   " over following a plan"
+  ],
+  "blanks": [
+   "Individuals and interactions",
+   "Working software",
+   "Customer collaboration",
+   "Responding to change"
+  ],
+  "bank": [
+   "Individuals and interactions",
+   "Fixed scope",
+   "Customer collaboration",
+   "Working software",
+   "Responding to change",
+   "Detailed design"
+  ],
+  "explain": "4 ค่านิยมของ Agile — “over” ไม่ได้แปลว่าไม่เอาด้านขวา แต่ให้น้ำหนักด้านซ้ายมากกว่า"
+ },
+ {
+  "type": "fill",
+  "q": "องค์ประกอบของ Scrum",
+  "parts": [
+   "",
+   " — รายการฟีเจอร์และงานทั้งหมด เรียงตามความสำคัญ<br>",
+   " — งานที่เลือกมาทำในรอบนี้<br>",
+   " — รอบการทำงาน 2–4 สัปดาห์<br>",
+   " — ประชุมสั้น ๆ ทุก 24 ชั่วโมง"
+  ],
+  "blanks": [
+   "Product Backlog",
+   "Sprint Backlog",
+   "Sprint",
+   "Daily Scrum Meeting"
+  ],
+  "bank": [
+   "Sprint Backlog",
+   "Daily Scrum Meeting",
+   "Sprint",
+   "Tribe",
+   "Vision",
+   "Product Backlog"
+  ],
+  "explain": "Vision → Product Backlog → Sprint Backlog → Sprint (2–4 สัปดาห์ มี Daily Scrum ทุก 24 ชม.) → Potentially Shippable Product Increment — Tribe เป็นของ Spotify model"
+ },
+ {
+  "type": "fill",
+  "q": "Agile เทียบกับ Traditional",
+  "parts": [
+   "เรื่อง requirement Agile สมมติว่า ",
+   " ส่วน Traditional สมมติว่า ",
+   "<br>เรื่องผู้ใช้ Agile ให้มีส่วนร่วม ",
+   " ส่วน Traditional แค่ ",
+   ""
+  ],
+  "blanks": [
+   "จะเปลี่ยน",
+   "ไม่เปลี่ยน",
+   "บ่อยตลอดโครงการ",
+   "ตอนต้นและตอนท้าย"
+  ],
+  "bank": [
+   "ไม่มีส่วนร่วมเลย",
+   "บ่อยตลอดโครงการ",
+   "ไม่เปลี่ยน",
+   "จะเปลี่ยน",
+   "ตอนต้นและตอนท้าย",
+   "เฉพาะตอนเขียนโค้ด"
+  ],
+  "explain": "Agile: requirement เปลี่ยนได้ ผู้ใช้มีส่วนร่วมบ่อย / Traditional: requirement ไม่เปลี่ยน ผู้ใช้เข้ามาแค่ตอนเก็บ requirement กับ acceptance test"
+ },
+ {
+  "type": "fill",
+  "q": "กรณีศึกษา Spotify และ HealthCare.gov",
+  "parts": [
+   "Spotify จัดทีมเล็กอิสระแบบ cross-functional เรียกว่า ",
+   " และเรียกกลุ่มของทีมเหล่านี้ว่า ",
+   "<br>HealthCare.gov ล้มเหลวเพราะเป็น ",
+   " และทดสอบทั้งระบบช้าเกินไปหรือ ",
+   ""
+  ],
+  "blanks": [
+   "Squads",
+   "Tribes",
+   "Fake Agile",
+   "Late testing"
+  ],
+  "bank": [
+   "Sprints",
+   "A/B testing",
+   "Late testing",
+   "Fake Agile",
+   "Squads",
+   "Tribes"
+  ],
+  "explain": "Spotify: squads (อิสระ cross-functional) รวมกันเป็น tribes เน้น continuous delivery / HealthCare.gov: Fake Agile, poor integration, late testing, ไม่มี feedback จากผู้ใช้จริง"
+ },
+ {
+  "type": "fill",
+  "q": "เลือกโมเดลให้เหมาะกับสถานการณ์",
+  "parts": [
+   "งานเล็กมาก ๆ เขียนแล้วแก้วนไป → ",
+   "<br>requirement ชัดเจน ไม่เปลี่ยน → ",
+   "<br>ระบบใหญ่ซับซ้อน แบ่งพัฒนาเป็นชิ้น → ",
+   "<br>โครงการใหญ่ที่ความเสี่ยงสูง → ",
+   "<br>requirement ไม่แน่นอน ต้องส่งเร็ว → ",
+   ""
+  ],
+  "blanks": [
+   "Code and Fix",
+   "Waterfall",
+   "Incremental",
+   "Spiral",
+   "Agile"
+  ],
+  "bank": [
+   "Code and Fix",
+   "BPMN",
+   "Incremental",
+   "Spiral",
+   "CMMI",
+   "Agile",
+   "Waterfall"
+  ],
+  "explain": "ดู 3 อย่าง: requirement ชัดไหม / ระบบใหญ่และเสี่ยงแค่ไหน / ลูกค้าคุยได้บ่อยไหม — CMMI ใช้ประเมินกระบวนการ ไม่ใช่ process model"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>
