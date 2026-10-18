@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 7: Functions, OOP, DOM — เติมโค้ด (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+.fill-text{font-family:Consolas,'Courier New',monospace;white-space:pre-wrap;font-size:.92rem;line-height:2.4;background:#f6f8fa;border:1px solid #e1e4e8;border-radius:8px;padding:10px 12px;overflow-x:auto;text-align:left}
+.fill-text .slot,.bank .chip,.chip.ghost{font-family:Consolas,'Courier New',monospace}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 7: Functions, OOP, DOM — เติมโค้ด (ชุดที่ 2)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นลากเติมคำ 30 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "fill",
+  "q": "ฟังก์ชันที่คืนค่า",
+  "parts": [
+   "",
+   " sum(a, b) {<br>  ",
+   " a + b;<br>}<br>console.log(sum(3, 4));   // 7"
+  ],
+  "blanks": [
+   "function",
+   "return"
+  ],
+  "bank": [
+   "return",
+   "print",
+   "def",
+   "function",
+   "func"
+  ],
+  "explain": "ประกาศด้วย function ชื่อ(พารามิเตอร์) และใช้ return ส่งค่ากลับ ถ้าไม่มี return จะได้ undefined"
+ },
+ {
+  "type": "fill",
+  "q": "พารามิเตอร์ค่าเริ่มต้น (default parameter)",
+  "parts": [
+   "function showMsg(from, text ",
+   " \"no message\") {<br>  return from + \": \" + text;<br>}<br>console.log(showMsg(\"Ann\"));          // Ann: no message<br>console.log(showMsg(\"Ann\", ",
+   "));    // Ann: Hi"
+  ],
+  "blanks": [
+   "=",
+   "\"Hi\""
+  ],
+  "bank": [
+   "=",
+   "==",
+   ":",
+   "\"Hi\"",
+   "\"Ann\""
+  ],
+  "explain": "กำหนด default ด้วย = ในวงเล็บพารามิเตอร์ ถ้าไม่ส่ง text มาจะใช้ \"no message\" ถ้าส่งมาจะใช้ค่าที่ส่ง"
+ },
+ {
+  "type": "fill",
+  "q": "arrow function แบบต่าง ๆ",
+  "parts": [
+   "let sum = (a, b) ",
+   " a + b;<br>let sayHello = ",
+   " =&gt; \"Hello!\";<br>let subtract = (a, b) =&gt; ",
+   "<br>  let result = a - b;<br>  ",
+   " result;<br>};<br>console.log(sum(2, 3), sayHello(), subtract(9, 4));   // 5 Hello! 5"
+  ],
+  "blanks": [
+   "=&gt;",
+   "()",
+   "{",
+   "return"
+  ],
+  "bank": [
+   "{",
+   "return",
+   "=&gt;",
+   "()",
+   "[]",
+   "==&gt;",
+   "-&gt;"
+  ],
+  "explain": "(a, b) =&gt; expression คืนค่าอัตโนมัติ ไม่มีพารามิเตอร์ใช้ () ถ้าหลายบรรทัดต้องมี { } และเขียน return เอง"
+ },
+ {
+  "type": "fill",
+  "q": "constructor function สร้าง object",
+  "parts": [
+   "function Person(firstName, age) {<br>  ",
+   ".firstName = firstName;<br>  this.age = age;<br>  this.getInfo = ",
+   " () {<br>    return this.firstName + \" Age is \" + this.age;<br>  };<br>}<br>var p1 = ",
+   " Person(\"Wud\", 30);<br>console.log(p1.getInfo());   // Wud Age is 30"
+  ],
+  "blanks": [
+   "this",
+   "function",
+   "new"
+  ],
+  "bank": [
+   "new",
+   "function",
+   "class",
+   "create",
+   "this",
+   "self"
+  ],
+  "explain": "ใน constructor function ใช้ this อ้างถึง object ที่กำลังสร้าง และต้องเรียกด้วย new"
+ },
+ {
+  "type": "fill",
+  "q": "constructor function: private กับ public",
+  "parts": [
+   "function Counter() {<br>  ",
+   " count = 0;                   // private<br>  ",
+   ".increase = function () {    // public<br>    count++;<br>    return count;<br>  };<br>}<br>const c = new Counter();<br>c.increase();<br>console.log(c.increase());   // 2<br>console.log(c.count);        // ",
+   ""
+  ],
+  "blanks": [
+   "let",
+   "this",
+   "undefined"
+  ],
+  "bank": [
+   "let",
+   "self",
+   "0",
+   "private",
+   "this",
+   "undefined"
+  ],
+  "explain": "สไลด์: public ใช้ this ส่วน private ใช้ var/let ตัวแปร count จึงอ่านจากนอก object ไม่ได้ (c.count = undefined)"
+ },
+ {
+  "type": "fill",
+  "q": "first-class function: เก็บฟังก์ชันในตัวแปรและใน array",
+  "parts": [
+   "var square = ",
+   " (wide) {<br>  return Math.",
+   "(wide, 2);<br>};<br>let myFuncs = [square];<br>console.log(",
+   "(4));       // 16<br>console.log(myFuncs[0](5));     // 25"
+  ],
+  "blanks": [
+   "function",
+   "pow",
+   "square"
+  ],
+  "bank": [
+   "func",
+   "sqrt",
+   "pow",
+   "area",
+   "square",
+   "function"
+  ],
+  "explain": "ฟังก์ชันเก็บในตัวแปรได้ (anonymous/expression function) เรียกผ่านชื่อตัวแปร และเก็บใน array แล้วเรียก myFuncs[0](5) ได้"
+ },
+ {
+  "type": "fill",
+  "q": "first-class function: ส่งฟังก์ชันเป็น argument",
+  "parts": [
+   "function flexible(fOperation, operand1, operand2) {<br>  return ",
+   "(operand1, operand2);<br>}<br>let sumFunction = function (num1, num2) {<br>  return num1 + num2;<br>};<br>console.log(flexible(",
+   ", 3, 4));   // 7"
+  ],
+  "blanks": [
+   "fOperation",
+   "sumFunction"
+  ],
+  "bank": [
+   "fOperation",
+   "sumFunction",
+   "sumFunction()",
+   "operand1",
+   "flexible"
+  ],
+  "explain": "ส่งชื่อฟังก์ชันโดยไม่ใส่ () เพื่อส่งตัวฟังก์ชัน (ถ้าใส่ () จะเรียกทันที) แล้วข้างในเรียกผ่านพารามิเตอร์ fOperation"
+ },
+ {
+  "type": "fill",
+  "q": "first-class function: คืนค่าเป็นฟังก์ชัน",
+  "parts": [
+   "const makeArea = function (wide) {<br>  let area = Math.pow(wide, 2);<br>  ",
+   " () =&gt; {<br>    console.log(`area: ${",
+   "}`);<br>  };<br>};<br>let areaOf4 = makeArea(4);<br>",
+   "();   // area: 16"
+  ],
+  "blanks": [
+   "return",
+   "area",
+   "areaOf4"
+  ],
+  "bank": [
+   "yield",
+   "wide",
+   "return",
+   "area",
+   "areaOf4",
+   "makeArea"
+  ],
+  "explain": "makeArea คืนฟังก์ชัน arrow ออกมา เก็บไว้ใน areaOf4 แล้วค่อยเรียก areaOf4() ฟังก์ชันนี้ยังจำค่า area ได้ (closure)"
+ },
+ {
+  "type": "fill",
+  "q": "high-order function: map",
+  "parts": [
+   "function square(w) { return w * w; }<br>let wides = [2, 7, 9, 10];<br>console.log(wides.",
+   "(",
+   "));   // 4, 49, 81, 100"
+  ],
+  "blanks": [
+   "map",
+   "square"
+  ],
+  "bank": [
+   "filter",
+   "square",
+   "map",
+   "forEach",
+   "square()"
+  ],
+  "explain": "map รับฟังก์ชันเป็น argument (ส่งชื่อ ไม่ใส่วงเล็บ) แล้วคืน array ใหม่ของผลลัพธ์"
+ },
+ {
+  "type": "fill",
+  "q": "high-order function: filter หาเลขคู่",
+  "parts": [
+   "let wides = [2, 7, 9, 10];<br>const evenNumbers = wides.",
+   "((num) =&gt; num ",
+   " 2 ",
+   " 0);<br>console.log(evenNumbers);   // 2, 10"
+  ],
+  "blanks": [
+   "filter",
+   "%",
+   "==="
+  ],
+  "bank": [
+   "filter",
+   "=",
+   "/",
+   "map",
+   "%",
+   "==="
+  ],
+  "explain": "filter เก็บตัวที่ callback คืน true ตัวเลขคู่คือ num % 2 === 0"
+ },
+ {
+  "type": "fill",
+  "q": "callback function กับ setTimeout",
+  "parts": [
+   "function greet() {<br>  console.log(\"Howdy!\");<br>}<br>",
+   "(",
+   ", ",
+   ");   // พิมพ์ครั้งเดียวหลังผ่านไป 2 วินาที"
+  ],
+  "blanks": [
+   "setTimeout",
+   "greet",
+   "2000"
+  ],
+  "bank": [
+   "greet",
+   "greet()",
+   "setTimeout",
+   "2000",
+   "setInterval",
+   "2"
+  ],
+  "explain": "setTimeout(ฟังก์ชัน, มิลลิวินาที) เรียก callback ครั้งเดียว 2 วินาที = 2000 ms (setInterval เรียกซ้ำเรื่อย ๆ)"
+ },
+ {
+  "type": "fill",
+  "q": "scope ของ var กับ let",
+  "parts": [
+   "function test() {<br>  if (true) {<br>    ",
+   " a = 1;   // ใช้นอก if ได้ (function scope)<br>    ",
+   " b = 2;   // ใช้ได้แค่ใน if (block scope)<br>  }<br>  console.log(a);   // 1<br>  // console.log(b);  -&gt; ReferenceError<br>}<br>test();"
+  ],
+  "blanks": [
+   "var",
+   "let"
+  ],
+  "bank": [
+   "var",
+   "global",
+   "static",
+   "let"
+  ],
+  "explain": "var มี scope ทั้งฟังก์ชัน จึงใช้นอก if ได้ ส่วน let/const เป็น block scope ใช้ได้แค่ใน { }"
+ },
+ {
+  "type": "fill",
+  "q": "closure",
+  "parts": [
+   "function displayFullname(name) {<br>  return ",
+   " console.log(",
+   ");<br>}<br>const printFullname = displayFullname(\"Wudhichart\");<br>",
+   "();   // Wudhichart"
+  ],
+  "blanks": [
+   "() =&gt;",
+   "name",
+   "printFullname"
+  ],
+  "bank": [
+   "name",
+   "this.name",
+   "displayFullname",
+   "() =&gt;",
+   "printFullname",
+   "=&gt; ()"
+  ],
+  "explain": "ฟังก์ชันที่คืนออกมาจำตัวแปร name ไว้ (closure) จึงเรียก printFullname() ทีหลังได้แม้ displayFullname จบไปแล้ว"
+ },
+ {
+  "type": "fill",
+  "q": "ประกาศ class",
+  "parts": [
+   "",
+   " Instructor {<br>  ",
+   "(_firstName, _subjects) {<br>    ",
+   ".firstName = _firstName;<br>    this.subjects = _subjects;<br>  }<br>  teach() {<br>    return \"I teach \" + this.subjects + \".\";<br>  }<br>}<br>console.log(new Instructor(\"Wud\", [\"WWW\", \"JS\"]).teach());   // I teach WWW,JS."
+  ],
+  "blanks": [
+   "class",
+   "constructor",
+   "this"
+  ],
+  "bank": [
+   "init",
+   "self",
+   "constructor",
+   "this",
+   "function",
+   "class"
+  ],
+  "explain": "class ชื่อ { constructor(...) { this.prop = ... } method() {...} } constructor ถูกเรียกทุกครั้งที่สร้าง object"
+ },
+ {
+  "type": "fill",
+  "q": "สร้าง object จาก class แล้วแก้ค่าและเรียกเมธอด",
+  "parts": [
+   "class Instructor {<br>  constructor(_firstName, _subjects) {<br>    this.firstName = _firstName;<br>    this.subjects = _subjects;<br>  }<br>  sayHello() { return \"Hey! I'm \" + this.firstName; }<br>}<br>let kjidapa = ",
+   " Instructor(\"Jidapa\", [\"HTML\", \"JS\"]);<br>kjidapa.",
+   " = \"Aj. Pa\";<br>console.log(kjidapa.",
+   "());   // Hey! I'm Aj. Pa"
+  ],
+  "blanks": [
+   "new",
+   "firstName",
+   "sayHello"
+  ],
+  "bank": [
+   "firstName",
+   "new",
+   "subjects",
+   "create",
+   "teach",
+   "sayHello"
+  ],
+  "explain": "ใช้ new เรียก constructor, obj.prop = ค่าใหม่ เพื่อแก้ property และ obj.method() เพื่อเรียกเมธอด"
+ },
+ {
+  "type": "fill",
+  "q": "สืบทอด class (inheritance)",
+  "parts": [
+   "class Instructor {<br>  constructor(_firstName, _subjects) {<br>    this.firstName = _firstName;<br>    this.subjects = _subjects;<br>  }<br>  sayHello() { return \"Hey! I'm \" + this.firstName; }<br>}<br>class UnivInstructor ",
+   " Instructor {<br>  constructor(_firstName, _subjects, _university) {<br>    ",
+   "(_firstName, _subjects);<br>    this.",
+   " = _university;<br>  }<br>  getUniversity() { return \"My office is at \" + this.university; }<br>}<br>let k2 = new UnivInstructor(\"Jidapa\", [\"HTML\"], \"Mahidol\");<br>console.log(k2.sayHello(), \"/\", k2.getUniversity());   // Hey! I'm Jidapa / My office is at Mahidol"
+  ],
+  "blanks": [
+   "extends",
+   "super",
+   "university"
+  ],
+  "bank": [
+   "implements",
+   "extends",
+   "super",
+   "this",
+   "university",
+   "parent"
+  ],
+  "explain": "extends สร้าง subclass, super(...) เรียก constructor ของ superclass แล้วค่อยตั้ง property ของตัวเอง เมธอดของแม่ (sayHello) ใช้ได้เลย"
+ },
+ {
+  "type": "fill",
+  "q": "เพิ่ม property และเมธอดให้ object ระหว่างรัน",
+  "parts": [
+   "let obj = { firstName: \"Jidapa\" };<br>console.log(obj.nickName);   // ",
+   "<br>obj.nickName = \"Pa\";<br>obj.sayMyName = ",
+   " () {<br>  return \"I am \" + ",
+   ".nickName;<br>};<br>console.log(obj.sayMyName());   // I am Pa"
+  ],
+  "blanks": [
+   "undefined",
+   "function",
+   "this"
+  ],
+  "bank": [
+   "TypeError",
+   "this",
+   "undefined",
+   "null",
+   "function",
+   "self"
+  ],
+  "explain": "property ที่ยังไม่มีอ่านได้ undefined เพิ่ม property/เมธอดใหม่ได้ทันที ใน function ปกติ this คือ object ที่เรียกเมธอด"
+ },
+ {
+  "type": "fill",
+  "q": "เลือก element ด้วย id แล้วอ่านข้อความ",
+  "parts": [
+   "&lt;div id=\"div_content\"&gt;This is sample text.&lt;/div&gt;<br>&lt;script&gt;<br>  let divNode = document.",
+   "(\"",
+   "\");<br>  console.log(divNode.",
+   ");<br>&lt;/script&gt;"
+  ],
+  "blanks": [
+   "getElementById",
+   "div_content",
+   "textContent"
+  ],
+  "bank": [
+   "value",
+   "getElementsByClassName",
+   "#div_content",
+   "textContent",
+   "div_content",
+   "getElementById"
+  ],
+  "explain": "getElementById รับชื่อ id ตรง ๆ (ไม่มี #) แล้วอ่านข้อความด้วย textContent ส่วน value ใช้กับ input"
+ },
+ {
+  "type": "fill",
+  "q": "เลือก element ด้วย CSS selector",
+  "parts": [
+   "let divNode = document.",
+   "(\"",
+   "\");   // element แรกที่ตรง<br>let allCells = document.",
+   "(\"",
+   "\");     // ทุก element ที่มี class cell"
+  ],
+  "blanks": [
+   "querySelector",
+   "#div_content",
+   "querySelectorAll",
+   ".cell"
+  ],
+  "bank": [
+   "querySelectorAll",
+   "#div_content",
+   "cell",
+   ".cell",
+   "div_content",
+   "querySelector",
+   "getElementById"
+  ],
+  "explain": "querySelector/querySelectorAll ใช้ CSS selector: # นำหน้า id และ . นำหน้า class ตัวแรกได้ element เดียว ตัวหลังได้ NodeList"
+ },
+ {
+  "type": "fill",
+  "q": "อ่านข้อความจากหลาย element ด้วย class",
+  "parts": [
+   "let colorNodes = document.",
+   "(\"colors\");<br>let output = \"Color: \";<br>for (var i = 0; i &lt; colorNodes.",
+   "; i++) {<br>  output += colorNodes[i].",
+   " + \" \";<br>}<br>// output = \"Color: R G B \""
+  ],
+  "blanks": [
+   "getElementsByClassName",
+   "length",
+   "textContent"
+  ],
+  "bank": [
+   "getElementById",
+   "nodeValue",
+   "length",
+   "getElementsByClassName",
+   "textContent",
+   "size"
+  ],
+  "explain": "getElementsByClassName คืน collection ต้องวนด้วย length และ index แล้วอ่านข้อความด้วย textContent"
+ },
+ {
+  "type": "fill",
+  "q": "แก้ข้อความของทุก &lt;span&gt; ให้มีเลขนำหน้า",
+  "parts": [
+   "let spans = document.",
+   "(\"",
+   "\");<br>for (var i = 0; i &lt; spans.length; i++) {<br>  spans[i].textContent = ",
+   " + \":\" + spans[i].textContent;<br>}<br>// ผล: 0:Red 1:Green 2:Blue"
+  ],
+  "blanks": [
+   "getElementsByTagName",
+   "span",
+   "i"
+  ],
+  "bank": [
+   "span",
+   "i + 1",
+   "getElementsByClassName",
+   "i",
+   "colors",
+   "getElementsByTagName"
+  ],
+  "explain": "getElementsByTagName ใช้ชื่อแท็ก (span) index เริ่ม 0 จึงได้ 0:Red (ถ้า i + 1 จะได้ 1:Red)"
+ },
+ {
+  "type": "fill",
+  "q": "สร้าง element ใหม่แล้วใส่ลงหน้าเว็บ",
+  "parts": [
+   "let divDemo = document.getElementById(\"div_demo\");<br>divDemo.",
+   " = \"&lt;p&gt;First&lt;/p&gt;\";<br>var p2 = document.",
+   "(\"p\");<br>var txtP2 = document.",
+   "(\"Second\");<br>p2.",
+   "(txtP2);<br>divDemo.appendChild(p2);"
+  ],
+  "blanks": [
+   "innerHTML",
+   "createElement",
+   "createTextNode",
+   "appendChild"
+  ],
+  "bank": [
+   "addChild",
+   "createNode",
+   "appendChild",
+   "textContent",
+   "createElement",
+   "createTextNode",
+   "innerHTML"
+  ],
+  "explain": "innerHTML ตีความแท็ก &lt;p&gt; (textContent จะโชว์แท็กเป็นตัวอักษร) createElement สร้างแท็ก createTextNode สร้างข้อความ appendChild ใส่เป็นลูกตัวสุดท้าย"
+ },
+ {
+  "type": "fill",
+  "q": "ลบ &lt;span id=\"color_G\"&gt; ออกจาก &lt;div id=\"div_color\"&gt;",
+  "parts": [
+   "let divColor = document.getElementById(\"div_color\");<br>let colorG = document.getElementById(\"",
+   "\");<br>",
+   ".",
+   "(",
+   ");"
+  ],
+  "blanks": [
+   "color_G",
+   "divColor",
+   "removeChild",
+   "colorG"
+  ],
+  "bank": [
+   "colorG",
+   "divColor",
+   "colorG()",
+   "color_G",
+   "removeChild",
+   "div_color",
+   "deleteChild"
+  ],
+  "explain": "parent.removeChild(child) ต้องเรียกจาก parent (divColor) และส่ง node ลูกที่จะลบ (colorG)"
+ },
+ {
+  "type": "fill",
+  "q": "ตั้งค่า attribute class ให้ทุก &lt;span&gt;",
+  "parts": [
+   "let spanColor = document.getElementsByTagName(\"span\");<br>for (var i = 0; i &lt; spanColor.length; i++) {<br>  spanColor[i].",
+   "(\"",
+   "\", \"",
+   "\");<br>}"
+  ],
+  "blanks": [
+   "setAttribute",
+   "class",
+   "colors"
+  ],
+  "bank": [
+   "id",
+   "className",
+   "getAttribute",
+   "class",
+   "colors",
+   "setAttribute"
+  ],
+  "explain": "setAttribute(\"ชื่อ attribute\", \"ค่า\") ชื่อ attribute ใน HTML คือ class จึงได้ &lt;span class=\"colors\"&gt;"
+ },
+ {
+  "type": "fill",
+  "q": "ปุ่มบวกเลขจาก input สองช่อง",
+  "parts": [
+   "&lt;input type=\"text\" id=\"num1\"&gt; + &lt;input type=\"text\" id=\"num2\"&gt; = &lt;input type=\"text\" id=\"sum\"&gt;<br>&lt;button ",
+   "=\"sum()\"&gt;Sum Me&lt;/button&gt;<br>&lt;script&gt;<br>function sum() {<br>  var num1 = ",
+   "(document.getElementById(\"num1\").",
+   ");<br>  var num2 = parseFloat(document.getElementById(\"num2\").value);<br>  document.getElementById(\"sum\").value = num1 + num2;<br>}<br>&lt;/script&gt;"
+  ],
+  "blanks": [
+   "onclick",
+   "parseFloat",
+   "value"
+  ],
+  "bank": [
+   "value",
+   "parseFloat",
+   "onclick",
+   "textContent",
+   "String",
+   "click"
+  ],
+  "explain": "attribute ใน HTML ใช้ onclick (มี on) ค่าใน input อ่านด้วย .value ซึ่งเป็น string ต้อง parseFloat ก่อนบวก ไม่งั้นจะต่อ string"
+ },
+ {
+  "type": "fill",
+  "q": "ผูก mouse event ให้ตรงกับชื่อฟังก์ชัน",
+  "parts": [
+   "&lt;div id=\"demo\"<br>  ",
+   "=\"myMouseOver()\"<br>  ",
+   "=\"myMouseOut()\"<br>  ",
+   "=\"myPress()\"<br>  ",
+   "=\"myRelease()\"&gt;<br>  This is me!!!!<br>&lt;/div&gt;"
+  ],
+  "blanks": [
+   "onmouseover",
+   "onmouseout",
+   "onmousedown",
+   "onmouseup"
+  ],
+  "bank": [
+   "onhover",
+   "onmousemove",
+   "onrelease",
+   "onmouseout",
+   "onmousedown",
+   "onmouseover",
+   "onmouseup"
+  ],
+  "explain": "over = เมาส์เข้า, out = เมาส์ออก, down = กดปุ่มเมาส์ลง (press), up = ปล่อยปุ่ม (release)"
+ },
+ {
+  "type": "fill",
+  "q": "เปลี่ยนข้อความและสีพื้นหลังตอนกดเมาส์",
+  "parts": [
+   "function myPress() {<br>  let divDemo = document.getElementById(\"demo\");<br>  divDemo.",
+   " = \"I am pressing...\";<br>  divDemo.",
+   ".",
+   " = \"green\";<br>}"
+  ],
+  "blanks": [
+   "innerHTML",
+   "style",
+   "backgroundColor"
+  ],
+  "bank": [
+   "background-color",
+   "backgroundColor",
+   "innerHTML",
+   "style",
+   "css",
+   "value"
+  ],
+  "explain": "element.style.ชื่อ CSS แบบ camelCase เช่น background-color → backgroundColor"
+ },
+ {
+  "type": "fill",
+  "q": "ผูก event ด้วย JavaScript",
+  "parts": [
+   "let btn = document.getElementById(\"btn\");<br>btn.",
+   "(\"",
+   "\", ",
+   ");"
+  ],
+  "blanks": [
+   "addEventListener",
+   "click",
+   "MyClick"
+  ],
+  "bank": [
+   "MyClick()",
+   "onclick",
+   "addEvent",
+   "click",
+   "addEventListener",
+   "MyClick"
+  ],
+  "explain": "addEventListener(\"click\", ฟังก์ชัน) ชื่อ event ไม่มี on และส่งฟังก์ชันโดยไม่ใส่ () ไม่งั้นจะถูกเรียกทันที"
+ },
+ {
+  "type": "fill",
+  "q": "เลือก event ให้ตรงกับเวลาที่ฟังก์ชันควรทำงาน (init ตอนหน้าโหลดเสร็จ, check ตอนส่งฟอร์ม, pick ตอนเปลี่ยนตัวเลือก, hint ตอนช่องกรอกได้ focus)",
+  "parts": [
+   "&lt;body ",
+   "=\"init()\"&gt;<br>  &lt;form ",
+   "=\"return check()\"&gt;<br>    &lt;select ",
+   "=\"pick()\"&gt;...&lt;/select&gt;<br>    &lt;input type=\"text\" ",
+   "=\"hint()\"&gt;<br>  &lt;/form&gt;<br>&lt;/body&gt;"
+  ],
+  "blanks": [
+   "onload",
+   "onsubmit",
+   "onchange",
+   "onfocus"
+  ],
+  "bank": [
+   "onsubmit",
+   "onload",
+   "onreset",
+   "onchange",
+   "onunload",
+   "onclick",
+   "onfocus"
+  ],
+  "explain": "onload = โหลดเสร็จ, onsubmit = ส่งฟอร์ม, onchange = เลือกค่าใหม่ใน select, onfocus = element ได้ focus"
+ },
+ {
+  "type": "fill",
+  "q": "high-order function ที่คืนฟังก์ชัน",
+  "parts": [
+   "function multiplier(factor) {<br>  return ",
+   " (x) {<br>    return x ",
+   " factor;<br>  };<br>}<br>const double = ",
+   "(2);<br>console.log(double(5));   // 10"
+  ],
+  "blanks": [
+   "function",
+   "*",
+   "multiplier"
+  ],
+  "bank": [
+   "new",
+   "*",
+   "double",
+   "function",
+   "multiplier",
+   "+"
+  ],
+  "explain": "multiplier คืนฟังก์ชันใหม่ที่จำ factor ไว้ double = multiplier(2) จึงคูณ 2 → 5 × 2 = 10"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

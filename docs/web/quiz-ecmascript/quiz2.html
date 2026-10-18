@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: ECMAScript Versions — เติมโค้ด (ชุดที่ 2)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+.fill-text{font-family:Consolas,'Courier New',monospace;white-space:pre-wrap;font-size:.92rem;line-height:2.4;background:#f6f8fa;border:1px solid #e1e4e8;border-radius:8px;padding:10px 12px;overflow-x:auto;text-align:left}
+.fill-text .slot,.bank .chip,.chip.ghost{font-family:Consolas,'Courier New',monospace}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: ECMAScript Versions — เติมโค้ด (ชุดที่ 2)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นลากเติมคำ 30 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น (ข้อลากเติมคำ: ลากคำไปวางให้ครบทุกช่องแล้วกดตรวจคำตอบ นับคะแนนจากการตรวจครั้งแรก)</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "fill",
+  "q": "ES6: สร้าง Promise (producing code)",
+  "parts": [
+   "let myPromise = new ",
+   "(function (",
+   ", ",
+   ") {<br>  let x = 0;<br>  if (x == 0) {<br>    setTimeout(() =&gt; resolve(\"finished\"), 1000);       // สำเร็จ<br>  } else {<br>    setTimeout(() =&gt; reject(new Error(\"No No!\")), 1000); // ล้มเหลว<br>  }<br>});"
+  ],
+  "blanks": [
+   "Promise",
+   "resolve",
+   "reject"
+  ],
+  "bank": [
+   "Promise",
+   "Async",
+   "resolve",
+   "then",
+   "reject",
+   "fulfill"
+  ],
+  "explain": "new Promise(function (resolve, reject) {...}) พารามิเตอร์ตัวแรกคือ resolve (สำเร็จ → fulfilled) ตัวที่สองคือ reject (ล้มเหลว → rejected)"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: รับผลจาก Promise (consuming code)",
+  "parts": [
+   "myPromise<br>  .",
+   "((value) =&gt; console.log(value))     // ตอนสำเร็จ<br>  .",
+   "((error) =&gt; console.log(error))    // ตอนล้มเหลว<br>  .",
+   "(() =&gt; console.log(\"done\"));     // ทำเสมอ"
+  ],
+  "blanks": [
+   "then",
+   "catch",
+   "finally"
+  ],
+  "bank": [
+   "done",
+   "catch",
+   "finally",
+   "then",
+   "error",
+   "await"
+  ],
+  "explain": "ลงทะเบียน consumer ด้วย .then (ผลสำเร็จ), .catch (error) และ .finally (ทำทุกกรณี)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2017: async/await และลำดับผลลัพธ์ (myPromise resolve \"finished\" หลัง 1 วินาที)",
+  "parts": [
+   "const asyncFunction = ",
+   " () =&gt; {<br>  console.log(",
+   " myPromise);<br>};<br>console.log(\"Before\");<br>asyncFunction();<br>console.log(\"After\");<br>// ลำดับที่พิมพ์: Before → ",
+   " → ",
+   ""
+  ],
+  "blanks": [
+   "async",
+   "await",
+   "After",
+   "finished"
+  ],
+  "bank": [
+   "After",
+   "Before",
+   "sync",
+   "finished",
+   "await",
+   "wait",
+   "async"
+  ],
+  "explain": "async ทำให้ฟังก์ชันคืน promise และ await รอเฉพาะในฟังก์ชัน โค้ดข้างนอกทำต่อทันที จึงพิมพ์ After ก่อน finished"
+ },
+ {
+  "type": "fill",
+  "q": "ES2017: async function คืน promise เสมอ",
+  "parts": [
+   "",
+   " function f() {<br>  return 2;<br>}<br>f().",
+   "((v) =&gt; console.log(v));   // 2"
+  ],
+  "blanks": [
+   "async",
+   "then"
+  ],
+  "bank": [
+   "catch",
+   "then",
+   "await",
+   "async",
+   "promise"
+  ],
+  "explain": "ใส่ async หน้า function แล้วค่าที่ return จะถูกห่อเป็น promise จึงต้องรับด้วย .then"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: template literal",
+  "parts": [
+   "const name = \"Wudhichart\";<br>const price = 50, qty = 3;<br>const hello = ",
+   ";<br>const total = `Total: ${",
+   "} Baht`;<br>console.log(hello);   // Hello, Wudhichart<br>console.log(total);   // Total: 150 Baht"
+  ],
+  "blanks": [
+   "`Hello, ${name}`",
+   "price * qty"
+  ],
+  "bank": [
+   "`Hello, ${name}`",
+   "price * qty",
+   "price + qty",
+   "\"Hello, ${name}\"",
+   "'Hello, ${name}'"
+  ],
+  "explain": "template literal ต้องใช้ backtick ` ` เท่านั้นถึงจะแทนค่า ${...} ได้ ใน ${ } ใส่ expression ได้ เช่น price * qty"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: rest parameter รับ argument ได้ไม่จำกัด",
+  "parts": [
+   "function findMax(",
+   ") {<br>  let max = 0;<br>  for (let arg ",
+   " args) {<br>    max = max &lt; arg ? arg : max;<br>  }<br>  return max;<br>}<br>console.log(findMax(3, 9, 4));   // 9"
+  ],
+  "blanks": [
+   "...args",
+   "of"
+  ],
+  "bank": [
+   "...args",
+   "in",
+   "args[]",
+   "of",
+   "*args"
+  ],
+  "explain": "...args รวม argument ทั้งหมดเป็น array และ for...of วนค่าทีละตัว (for...in จะได้ index เป็น string)"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: spread operator",
+  "parts": [
+   "const a = [1, 2, 3];<br>const b = [ ",
+   "a, 4, 5, 6 ];         // 1,2,3,4,5,6<br>const letters = [ ...",
+   " ];       // H,e,l,l,o<br>const obj = { name: \"Wud\" };<br>const obj2 = { ",
+   "obj, age: 31 };    // { name: \"Wud\", age: 31 }<br>console.log(b.join(), letters.join(), obj2.name, obj2.age);"
+  ],
+  "blanks": [
+   "...",
+   "\"Hello\"",
+   "..."
+  ],
+  "bank": [
+   "Hello",
+   "...",
+   "...",
+   "\"Hello\"",
+   "*",
+   ".."
+  ],
+  "explain": "... กระจายสมาชิกของ array, string หรือ object ออกมา [...\"Hello\"] ได้ตัวอักษรทีละตัว (Hello ไม่มีเครื่องหมายคำพูดจะกลายเป็นชื่อตัวแปร)"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: destructuring assignment",
+  "parts": [
+   "const person = { firstName: \"Wudhichart\", age: 30, lecturer: true };<br>let { firstName",
+   " name, ",
+   " } = person;<br>console.log(name, age);   // Wudhichart 30<br>let [ one, ",
+   " ] = [1, 2];<br>console.log(two);          // 2"
+  ],
+  "blanks": [
+   ":",
+   "age",
+   "two"
+  ],
+  "bank": [
+   "lecturer",
+   "as",
+   "=",
+   "age",
+   ":",
+   "two"
+  ],
+  "explain": "{ firstName: name } คือดึง firstName มาเก็บในชื่อใหม่ name, { age } ดึงชื่อเดิม และ array ดึงตามตำแหน่ง"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: for...of หยุดลูปกลางคันได้ (ต่างจาก forEach)",
+  "parts": [
+   "for (const ele ",
+   " [\"a\", \"b\", \"c\"]) {<br>  if (ele === \"b\") ",
+   ";<br>  console.log(ele);<br>}<br>// พิมพ์แค่ a"
+  ],
+  "blanks": [
+   "of",
+   "break"
+  ],
+  "bank": [
+   "return false",
+   "continue",
+   "in",
+   "of",
+   "break"
+  ],
+  "explain": "for...of วนค่าของ iterable และใช้ break/continue/return ได้ (forEach ทำไม่ได้) ถ้าใช้ continue จะพิมพ์ a และ c"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: Map และ WeakMap",
+  "parts": [
+   "const m = new ",
+   "();<br>m.",
+   "(\"name\", \"Wud\");          // key เป็น string ได้<br>console.log(m.",
+   "(\"name\"));    // Wud<br>console.log(m.",
+   ");           // 1<br>const wm = new ",
+   "();<br>const node = {};<br>wm.set(node, \"data\");              // key ต้องเป็น object"
+  ],
+  "blanks": [
+   "Map",
+   "set",
+   "get",
+   "size",
+   "WeakMap"
+  ],
+  "bank": [
+   "set",
+   "get",
+   "length",
+   "size",
+   "Set",
+   "put",
+   "WeakMap",
+   "Map"
+  ],
+  "explain": "Map ใช้ key อะไรก็ได้ มี set/get/size ส่วน WeakMap ใช้ key เป็น object ไม่มี size และวนลูปไม่ได้"
+ },
+ {
+  "type": "fill",
+  "q": "ES6: เมธอดใหม่ของ String/Object/Array",
+  "parts": [
+   "console.log(\"Hello\".",
+   "(3));              // HelloHelloHello<br>let numbers = [10, 30, 25, 48];<br>console.log(numbers.",
+   "((n) =&gt; n &gt; 20));      // 30<br>console.log(numbers.",
+   "((n) =&gt; n &gt; 20)); // 1<br>console.log(Object.",
+   "(NaN, NaN));            // true"
+  ],
+  "blanks": [
+   "repeat",
+   "find",
+   "findIndex",
+   "is"
+  ],
+  "bank": [
+   "repeat",
+   "filter",
+   "equals",
+   "findIndex",
+   "find",
+   "indexOf",
+   "is"
+  ],
+  "explain": "repeat ทำซ้ำ string, find คืนค่าแรกที่ผ่าน, findIndex คืน index ของตัวแรกที่ผ่าน, Object.is เทียบว่าเป็นค่าเดียวกันไหม"
+ },
+ {
+  "type": "fill",
+  "q": "ES2016: includes และตัวยกกำลัง",
+  "parts": [
+   "let numbers = [10, 30, 25, 48];<br>console.log(numbers.",
+   "(30));   // true<br>console.log(numbers.",
+   "(99));    // -1 (วิธีเดิมใน ES6)<br>console.log(2 ",
+   " 10);               // 1024"
+  ],
+  "blanks": [
+   "includes",
+   "indexOf",
+   "**"
+  ],
+  "bank": [
+   "contains",
+   "^",
+   "indexOf",
+   "**",
+   "includes",
+   "has"
+  ],
+  "explain": "includes คืน true/false ตรง ๆ ส่วน indexOf คืน -1 ถ้าไม่เจอ และ ** คือยกกำลัง (^ คือ XOR)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2017: string padding",
+  "parts": [
+   "let s = \"World\";<br>console.log(s.",
+   "(10, \"Hello\"));   // HelloWorld<br>console.log(s.",
+   "(10, \"Hello\"));     // WorldHello<br>console.log(\"5\".padStart(",
+   ", \"0\"));        // 005"
+  ],
+  "blanks": [
+   "padStart",
+   "padEnd",
+   "3"
+  ],
+  "bank": [
+   "padEnd",
+   "padStart",
+   "trimStart",
+   "padLeft",
+   "3",
+   "2"
+  ],
+  "explain": "padStart เติมด้านหน้า padEnd เติมด้านหลัง ตัวเลขแรกคือความยาวรวม \"5\" ยาว 3 → 005"
+ },
+ {
+  "type": "fill",
+  "q": "ES2017/ES2019: Object.values, entries, fromEntries",
+  "parts": [
+   "const person = { firstName: \"Wud\", age: 30 };<br>console.log(Object.",
+   "(person));    // Wud, 30<br>console.log(Object.",
+   "(person));   // คู่ key-value: firstName,Wud และ age,30<br>const person2 = Object.",
+   "(Object.entries(person));   // สร้าง object ใหม่จากคู่ key-value"
+  ],
+  "blanks": [
+   "values",
+   "entries",
+   "fromEntries"
+  ],
+  "bank": [
+   "toArray",
+   "getOwnPropertyDescriptors",
+   "keys",
+   "values",
+   "fromEntries",
+   "entries"
+  ],
+  "explain": "values ได้ค่าของ property, entries ได้คู่ [key, value], fromEntries (ES2019) แปลงคู่ key-value กลับเป็น object ใหม่"
+ },
+ {
+  "type": "fill",
+  "q": "ES2018: rest/spread properties ของ object",
+  "parts": [
+   "const { firstName, lastName, ",
+   " } = {<br>  firstName: \"Wudhichart\", lastName: \"Sawangphol\", lecturer: true, age: 30 };<br>console.log(others);   // { lecturer: true, age: 30 }<br>const person2 = { firstName, lastName, ",
+   " };"
+  ],
+  "blanks": [
+   "...others",
+   "...others"
+  ],
+  "bank": [
+   "...others",
+   "...rest",
+   "others",
+   "...others",
+   "*others"
+  ],
+  "explain": "...others ตอน destructure เก็บ property ที่เหลือ ส่วนตอนสร้าง object ใช้ ...others กระจายกลับ (ถ้าเขียน others เฉย ๆ จะได้ property ชื่อ others)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2018: for-await-of",
+  "parts": [
+   "const processArray = ",
+   " (numbers) =&gt; {<br>  for ",
+   " (let element ",
+   " numbers) {<br>    console.log(element);<br>  }<br>  console.log(\"Finished\");<br>};"
+  ],
+  "blanks": [
+   "async",
+   "await",
+   "of"
+  ],
+  "bank": [
+   "await",
+   "of",
+   "async",
+   "in",
+   "sync",
+   "wait"
+  ],
+  "explain": "for await (... of ...) ใช้ได้ใน async function วนค่าแบบรอแต่ละตัวให้เสร็จก่อน Finished จึงพิมพ์ทีหลังสุด"
+ },
+ {
+  "type": "fill",
+  "q": "ES2019: flat และ flatMap",
+  "parts": [
+   "const array = [\"Apple\", \"Orange\", [\"Grape\", [\"Pineapple\"]]];<br>console.log(array.",
+   "(",
+   "));   // Apple,Orange,Grape,Pineapple (คลี่ 2 ชั้น)<br>const nums = [1, 2, 3];<br>console.log(nums.",
+   "((n) =&gt; [n, n * 2]));   // 1,2,2,4,3,6"
+  ],
+  "blanks": [
+   "flat",
+   "2",
+   "flatMap"
+  ],
+  "bank": [
+   "flatMap",
+   "2",
+   "flat",
+   "map",
+   "flatten",
+   "1"
+  ],
+  "explain": "flat(ระดับ) คลี่ array ซ้อน Pineapple อยู่ชั้นที่ 2 จึงต้อง flat(2) ส่วน flatMap = map แล้ว flat 1 ชั้น"
+ },
+ {
+  "type": "fill",
+  "q": "ES2019: trimStart และ trimEnd",
+  "parts": [
+   "let s = \"   Hi   \";<br>console.log(\"|\" + s.",
+   "() + \"|\");   // |Hi   |<br>console.log(\"|\" + s.",
+   "() + \"|\");     // |   Hi|"
+  ],
+  "blanks": [
+   "trimStart",
+   "trimEnd"
+  ],
+  "bank": [
+   "trimStart",
+   "trimEnd",
+   "strip",
+   "padStart",
+   "trim"
+  ],
+  "explain": "trimStart ตัดช่องว่างด้านหน้า trimEnd ตัดด้านหลัง (trim ตัดทั้งสองด้าน)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2020: BigInt, ?? เทียบกับ ||",
+  "parts": [
+   "const big = 9007199254740993",
+   ";   // BigInt<br>const nullish = null;<br>console.log(nullish ?? \"Jidapa\");     // Jidapa<br>console.log(0 ",
+   " 100);            // 0<br>console.log(0 ",
+   " 100);            // 100"
+  ],
+  "blanks": [
+   "n",
+   "??",
+   "||"
+  ],
+  "bank": [
+   "?.",
+   "L",
+   "??",
+   "n",
+   "&amp;&amp;",
+   "||"
+  ],
+  "explain": "เติม n ท้ายตัวเลขเป็น BigInt, ?? ใช้ค่าสำรองเฉพาะ null/undefined (0 จึงคงเดิม) ส่วน || ใช้ค่าสำรองเมื่อเป็น falsy (0 → 100)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2020: optional chaining",
+  "parts": [
+   "const obj = { prop: { subLevelProp: { value: \"Wudhichart\" } } };<br>console.log(obj",
+   "prop?.secondsubLevelProp?.value);   // undefined (ไม่ error)<br>const cars = null;<br>console.log(cars",
+   "[3]);                               // undefined"
+  ],
+  "blanks": [
+   "?.",
+   "?."
+  ],
+  "bank": [
+   "?.",
+   "??",
+   "!.",
+   ".",
+   "?."
+  ],
+  "explain": "?. หยุดและคืน undefined เมื่อเจอ null/undefined ใช้กับ array ได้ในรูป ?.[index] (ถ้าใช้ . ธรรมดาจะ TypeError)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2020: matchAll หาทุกคำที่ตรง",
+  "parts": [
+   "const fruits = \"orange, banana, orange\";<br>const matched = fruits.",
+   "(/orange/",
+   ");<br>for (const result of matched) console.log(result.index);   // 0 และ 16"
+  ],
+  "blanks": [
+   "matchAll",
+   "g"
+  ],
+  "bank": [
+   "matchAll",
+   "g",
+   "replaceAll",
+   "match",
+   "i"
+  ],
+  "explain": "matchAll ต้องใช้ regex ที่มี flag g (global) และคืน iterator ของผลที่ตรงทุกตัว"
+ },
+ {
+  "type": "fill",
+  "q": "ES2021: numeric separator และ replaceAll",
+  "parts": [
+   "const billion = 1",
+   "000_000_000;<br>console.log(billion);   // 1000000000<br>const str = \"first row, first person\";<br>console.log(str.",
+   "(\"first\", \"last\"));   // last row, last person"
+  ],
+  "blanks": [
+   "_",
+   "replaceAll"
+  ],
+  "bank": [
+   "replaceAll",
+   ",",
+   ".",
+   "_",
+   "replace"
+  ],
+  "explain": "_ ใช้คั่นหลักตัวเลขให้อ่านง่าย replaceAll แทนทุกจุด (replace ด้วย string แทนแค่จุดแรก)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2021: logical assignment operators",
+  "parts": [
+   "let x = 1, y = 0, z = 5;<br>x ",
+   " z;   // x = 5 (x truthy จึงรับค่า z)<br>y ",
+   " z;   // y = 5 (y falsy จึงรับค่า z)<br>const a = { age: 36 };<br>a.height ",
+   " 175;   // ไม่มี height (undefined) จึงได้ 175<br>console.log(x, y, a.height);"
+  ],
+  "blanks": [
+   "&amp;&amp;=",
+   "||=",
+   "??="
+  ],
+  "bank": [
+   "||=",
+   "?=",
+   "+=",
+   "??=",
+   "&amp;&amp;="
+  ],
+  "explain": "&amp;&amp;= กำหนดเมื่อซ้ายเป็น truthy, ||= เมื่อซ้ายเป็น falsy, ??= เมื่อซ้ายเป็น null/undefined"
+ },
+ {
+  "type": "fill",
+  "q": "ES2022: .at() และ Object.hasOwn()",
+  "parts": [
+   "const arr = [1, 2, 3, 4];<br>console.log(arr.",
+   "(2));         // 3<br>console.log(\"1234\".at(",
+   "));      // 4<br>console.log(Object.",
+   "({ foo: false }, \"foo\"));   // true"
+  ],
+  "blanks": [
+   "at",
+   "3",
+   "hasOwn"
+  ],
+  "bank": [
+   "3",
+   "get",
+   "4",
+   "has",
+   "hasOwn",
+   "at"
+  ],
+  "explain": ".at(index) ใช้ได้ทั้ง array และ string (index เริ่ม 0) Object.hasOwn(obj, key) เช็กว่ามี property นั้นเป็นของตัวเองไหม"
+ },
+ {
+  "type": "fill",
+  "q": "ES2022: ระบุสาเหตุของ error (cause)",
+  "parts": [
+   "try {<br>  doSomeComputationThatThrowAnError();<br>} ",
+   " (error) {<br>  ",
+   " new Error(\"This is error\", { ",
+   ": error });<br>}"
+  ],
+  "blanks": [
+   "catch",
+   "throw",
+   "cause"
+  ],
+  "bank": [
+   "except",
+   "return",
+   "throw",
+   "cause",
+   "catch",
+   "reason"
+  ],
+  "explain": "จับ error ด้วย catch แล้ว throw error ใหม่โดยแนบ error เดิมไว้ใน option { cause: error }"
+ },
+ {
+  "type": "fill",
+  "q": "ES2023: findLast และ Change Array by Copy",
+  "parts": [
+   "const a = [5, 10, 15, 20];<br>console.log(a.",
+   "((n) =&gt; n &gt; 10));        // 20<br>console.log(a.",
+   "((n) =&gt; n &gt; 10));   // 3<br>const sorted = a.",
+   "((x, y) =&gt; y - x);   // คืนสำเนาเรียงใหม่ a เดิมไม่เปลี่ยน<br>const changed = a.",
+   "(0, 99);                 // 99, 10, 15, 20"
+  ],
+  "blanks": [
+   "findLast",
+   "findLastIndex",
+   "toSorted",
+   "with"
+  ],
+  "bank": [
+   "findLastIndex",
+   "toSorted",
+   "find",
+   "set",
+   "with",
+   "findLast",
+   "sort"
+  ],
+  "explain": "findLast/findLastIndex ค้นจากท้าย toSorted และ with คืน array ใหม่ (sort แก้ array เดิม)"
+ },
+ {
+  "type": "fill",
+  "q": "ES2025: Set methods",
+  "parts": [
+   "const A = new Set([1, 2, 3]);<br>const B = new Set([3, 4, 5]);<br>console.log(A.",
+   "(B));          // {1, 2, 3, 4, 5}<br>console.log(A.",
+   "(B));   // {3}<br>console.log(A.",
+   "(B));     // {1, 2}<br>console.log(A.",
+   "(B));     // false"
+  ],
+  "blanks": [
+   "union",
+   "intersection",
+   "difference",
+   "isSubsetOf"
+  ],
+  "bank": [
+   "difference",
+   "merge",
+   "union",
+   "intersection",
+   "symmetricDifference",
+   "includes",
+   "isSubsetOf"
+  ],
+  "explain": "union = รวม, intersection = ส่วนที่ซ้ำ, difference = A ลบ B, isSubsetOf = A อยู่ใน B ทั้งหมดไหม (symmetricDifference จะได้ {1, 2, 4, 5})"
+ },
+ {
+  "type": "fill",
+  "q": "ES2025: import JSON และ Promise.try()",
+  "parts": [
+   "import config from \"./config.json\" ",
+   " { type: \"",
+   "\" };<br>Promise.",
+   "(() =&gt; mayThrow())<br>  .then((val) =&gt; console.log(\"Value:\", val))<br>  .",
+   "((err) =&gt; console.error(\"Caught:\", err.message));"
+  ],
+  "blanks": [
+   "with",
+   "json",
+   "try",
+   "catch"
+  ],
+  "bank": [
+   "catch",
+   "module",
+   "try",
+   "json",
+   "with",
+   "assert",
+   "resolve"
+  ],
+  "explain": "import JSON ต้องระบุ with { type: \"json\" } และ Promise.try ห่อฟังก์ชันที่อาจ throw ให้ error กลายเป็น rejection ที่ .catch รับได้"
+ },
+ {
+  "type": "fill",
+  "q": "ES2025: Iterator helpers (lazy)",
+  "parts": [
+   "const it = Iterator.",
+   "([1, 2, 3, 4, 5])<br>  .filter((n) =&gt; n % 2 === 0)   // 2, 4<br>  .map((n) =&gt; n * n)            // 4, 16<br>  .",
+   "(2);<br>console.log(it.",
+   "());   // 4, 16"
+  ],
+  "blanks": [
+   "from",
+   "take",
+   "toArray"
+  ],
+  "bank": [
+   "from",
+   "slice",
+   "of",
+   "toArray",
+   "take",
+   "toList"
+  ],
+  "explain": "Iterator.from() สร้าง iterator แล้วต่อ filter/map/take แบบ lazy ไม่สร้าง array ทุกขั้น สุดท้ายแปลงด้วย toArray()"
+ },
+ {
+  "type": "fill",
+  "q": "ES2026: ฟีเจอร์ใหม่",
+  "parts": [
+   "const exact = Math.",
+   "([1e16, 1, -1e16]);   // 1 (ไม่เสียความแม่นยำ)<br>console.log(Error.",
+   "(err));                    // true แม้ error มาจาก iframe<br>const visits = new Map();<br>const stats = visits.",
+   "(\"user_456\", { count: 0 });<br>const bytes = new Uint8Array([72, 101, 108, 108, 111]);<br>console.log(bytes.",
+   "());                      // SGVsbG8="
+  ],
+  "blanks": [
+   "sumPrecise",
+   "isError",
+   "getOrInsert",
+   "toBase64"
+  ],
+  "bank": [
+   "getOrInsert",
+   "sum",
+   "getOrSet",
+   "toBase64",
+   "sumPrecise",
+   "isError",
+   "instanceof"
+  ],
+  "explain": "sumPrecise บวกแม่นยำ, Error.isError เช็ก error ข้าม realm, getOrInsert ดึงค่าหรือใส่ค่าเริ่มต้นถ้ายังไม่มี key, toBase64 แปลง byte เป็น Base64"
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

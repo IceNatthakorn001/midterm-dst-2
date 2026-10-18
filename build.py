@@ -342,10 +342,14 @@ def build():
             qdir = sdir / qp["slug"]
             qdir.mkdir(parents=True, exist_ok=True)
             bar = QUIZPAGE_BAR.format(subject=esc(f"{subj['icon']} {subj['code']}"))
-            q = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, qp["html"], count=1)
-            q = q.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
+            # first set (quiz-*) -> index.html, second set (quiz2-*) -> quiz2.html
+            q2files = sorted((subj["dir"] / qp["label"]).glob("quiz2-*.html"))
+            qp["quiz2"] = bool(q2files)
+            for out_name, text in [("index.html", qp["html"])] + [("quiz2.html", f.read_text(encoding="utf-8")) for f in q2files[:1]]:
+                q = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, text, count=1)
+                q = q.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
+                (qdir / out_name).write_text(q, encoding="utf-8")
             qp["title"] = re.sub(r"^Quiz:\s*", "", qp["title"])
-            (qdir / "index.html").write_text(q, encoding="utf-8")
             search_index.append({"s": subj["code"], "t": qp["title"], "u": f"{subj['slug']}/{qp['slug']}/index.html", "h": []})
         for rv in reviews + anims:
             rdir = sdir / rv["slug"]
@@ -373,7 +377,9 @@ def build():
             f'<li class="lesson-row"><span class="num">📝</span>'
             f'<a class="lesson-link" href="{qp["slug"]}/index.html"><small>{esc(qp["label"])}</small>'
             f'<span>{esc(qp["title"])}</span></a>'
-            f'<div class="row-actions"><a class="chip chip-quiz" href="{qp["slug"]}/index.html">📝 ทำแบบทดสอบ</a></div></li>'
+            f'<div class="row-actions"><a class="chip chip-quiz" href="{qp["slug"]}/index.html">📝 Quiz</a>'
+            + (f'<a class="chip chip-quiz" href="{qp["slug"]}/quiz2.html">🧩 Quiz 2 เติมโค้ด</a>' if qp["quiz2"] else "")
+            + '</div></li>'
             for qp in quizpages)
         review_block = ((f'<h2 style="margin:24px 0 8px">📝 แบบทดสอบ</h2><ol class="lesson-list">{quiz_rows}</ol>' if quizpages else "")
                         + (f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>' if reviews else "")
@@ -391,7 +397,7 @@ def build():
                      f'<a class="lesson-link" href="{les["slug"]}/index.html"><small>{esc(les["label"])}</small>'
                      f'<span>{esc(les["title"])}</span></a>'
                      f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
-        nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons) + len(quizpages)
+        nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons) + sum(1 + qp["quiz2"] for qp in quizpages)
         sbody = f"""
 <main class="wrap">
   <div class="crumbs"><a href="../index.html">หน้าแรก</a> / {esc(subj['code'])}</div>
