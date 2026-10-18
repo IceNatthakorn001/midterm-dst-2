@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ทวน HTML CSS JS</title>
+<style>
+    :root {
+        --bg: #f6f7f9; --card: #ffffff; --text: #1d2125; --muted: #5c6670;
+        --line: #dfe3e8; --accent: #0b6e6e; --accent-soft: #e2f3f1;
+        --code-bg: #f1f3f5; --warn: #b3261e; --warn-soft: #fbeceb; --ok: #2f7d32;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            --bg: #14171a; --card: #1c2024; --text: #e8eaed; --muted: #a3abb2;
+            --line: #2e343a; --accent: #4dd0c4; --accent-soft: #14312f;
+            --code-bg: #23282d; --warn: #ef8279; --warn-soft: #3a1f1d; --ok: #7ac47f;
+        }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+        font-family: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif; line-height: 1.65; }
+    header.top { background: var(--accent); color: #fff; padding: 26px 16px; }
+    header.top .inner, .wrap { max-width: 920px; margin: 0 auto; }
+    header.top h1 { margin: 0 0 4px; font-size: 1.55rem; }
+    header.top p { margin: 0; opacity: .9; }
+    .wrap { padding: 24px 16px 64px; }
+    nav.toc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; }
+    nav.toc ol { margin: 6px 0; padding-left: 20px; columns: 2; }
+    @media (max-width: 600px) { nav.toc ol { columns: 1; } }
+    a { color: var(--accent); }
+    h2 { margin: 40px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); font-size: 1.35rem; }
+    h3 { margin: 26px 0 8px; font-size: 1.1rem; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 12px 0; }
+    pre, code { font-family: Consolas, "Cascadia Code", monospace; font-size: .9em; }
+    code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+    pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: .95em; }
+    th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--accent-soft); }
+    .tbl { overflow-x: auto; }
+    .trap { border-left: 4px solid var(--warn); background: var(--warn-soft); padding: 8px 14px; border-radius: 6px; margin: 12px 0; }
+    .tip { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 8px 14px; border-radius: 6px; margin: 12px 0; }
+    .ans { color: var(--ok); font-weight: 600; }
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; margin: 10px 0; }
+    summary { cursor: pointer; font-weight: 600; }
+    .flow { font-family: Consolas, monospace; background: var(--code-bg); padding: 10px 14px; border-radius: 8px; overflow-x: auto; white-space: pre; }
+</style>
+</head>
+<body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<header class="top"><div class="inner">
+    <h1>ทวน HTML · CSS · JavaScript ก่อนสอบ</h1>
+    <p>ITDS241 Web Technologies · สรุปจากสไลด์ L1, L2 (HTML) · L3, L4 (CSS) · L6, L7 (JS) · มีเฉลยข้อ "What is the output?" ทุกข้อในสไลด์</p>
+</div></header>
+
+<div class="wrap">
+<nav class="toc"><strong>สารบัญ</strong>
+<ol>
+    <li><a href="#net">Internet &amp; WWW</a></li>
+    <li><a href="#html1">HTML พื้นฐาน</a></li>
+    <li><a href="#table">ตาราง</a></li>
+    <li><a href="#media">Media</a></li>
+    <li><a href="#form">Form + Validation</a></li>
+    <li><a href="#semantic">Semantic Elements</a></li>
+    <li><a href="#css1">CSS: Syntax &amp; Selectors</a></li>
+    <li><a href="#cascade">Specificity &amp; Cascading Order</a></li>
+    <li><a href="#prop">CSS Properties &amp; Box Model</a></li>
+    <li><a href="#layout">Layout: Float / Flexbox</a></li>
+    <li><a href="#rwd">Responsive + Media Query</a></li>
+    <li><a href="#bs">Bootstrap</a></li>
+    <li><a href="#js1">JS: ตัวแปร / ชนิดข้อมูล</a></li>
+    <li><a href="#builtin">Built-in Objects</a></li>
+    <li><a href="#op">Operators</a></li>
+    <li><a href="#ctrl">if / switch / loops</a></li>
+    <li><a href="#func">Functions</a></li>
+    <li><a href="#scope">Scope &amp; Closure</a></li>
+    <li><a href="#oop">Class / OOP</a></li>
+    <li><a href="#dom">DOM</a></li>
+    <li><a href="#event">Events</a></li>
+    <li><a href="#answers">เฉลย "What is the output?"</a></li>
+    <li><a href="#traps">กับดักที่มักพลาด</a></li>
+</ol>
+<p style="margin:6px 0 0">ฝึกเขียนโค้ดต่อได้ที่ <a href="../../exam-practice/index.html">ชุดโจทย์ exam-practice</a></p>
+</nav>
+
+<!-- ======================= HTML ======================= -->
+<h2 id="net">1. Internet &amp; WWW (L1)</h2>
+<div class="card">
+<ul>
+    <li><b>Internet</b> = เครือข่ายใหญ่สุดในโลก ใช้มาตรฐาน <b>TCP/IP</b> เกิดจาก ARPANET (1969 node แรกที่ UCLA, 1983 DNS, 1990 ARPANET ปิดและเกิด WWW)</li>
+    <li><b>TCP</b> แบ่งข้อมูลเป็น packet และประกอบกลับ · <b>IP</b> ส่ง/route packet ไปถึงปลายทาง</li>
+    <li><b>IPv4</b> = <code>###.###.###.###</code> แต่ละช่อง 0–255</li>
+    <li><b>Port</b> = "เลขห้อง" ของบริการ: HTTP <b>80</b> · FTP <b>21</b> · Telnet <b>23</b> · SMTP <b>25</b></li>
+    <li><b>DNS</b> แปลงชื่อโดเมน ↔ IP · โดเมนเป็นลำดับชั้น: .com .edu .gov .org .th</li>
+    <li><b>WWW</b> (Tim Berners-Lee) ใช้โปรโตคอล <b>HTTP</b> · Browser ส่ง <b>HTTP Request</b> → Web Server ตอบ <b>Response</b></li>
+    <li>ส่วนประกอบ: Client (ขอ) · Server (ให้) · Network · Router/Gateway (เชื่อม 2 เครือข่าย) · Firewall (ความปลอดภัย)</li>
+</ul>
+<div class="flow">http://john:secret@www.example.com:8080/demo/index.html
+└protocol┘└user:password┘└──domain name──┘└port┘└───path───┘</div>
+<p>Front-end = HTML (โครงสร้าง) + CSS (หน้าตา) + JavaScript (พฤติกรรม/โต้ตอบ)</p>
+</div>
+
+<h2 id="html1">2. HTML พื้นฐาน (L1)</h2>
+<div class="card">
+<ul>
+    <li>HTML = HyperText Markup Language ไฟล์ <code>.html</code>/<code>.htm</code> · Tag ไม่สนตัวพิมพ์เล็ก-ใหญ่ (แต่นิยมเขียนเล็ก)</li>
+    <li>Tag ซ้อนกันได้ แต่<b>ห้ามไขว้กัน</b> (<code>&lt;b&gt;&lt;i&gt;..&lt;/b&gt;&lt;/i&gt;</code> ผิด)</li>
+    <li>บาง tag ไม่มี tag ปิด: <code>&lt;br&gt;</code> <code>&lt;img&gt;</code> <code>&lt;input&gt;</code> · Tag ที่ browser ไม่รู้จักจะถูก<b>ข้ามเฉย ๆ ไม่ error</b></li>
+    <li>Attribute อยู่ใน tag เปิด รูปแบบ <code>name="value"</code> · ถ้าค่ามี <code>"</code> อยู่ข้างในให้ใช้ <code>'...'</code> ครอบ</li>
+    <li>Comment: <code>&lt;!-- ข้อความ --&gt;</code> · ตรวจความถูกต้องได้ที่ validator.w3.org</li>
+</ul>
+<pre><code>&lt;!DOCTYPE html&gt;          &lt;!-- ต้องอยู่บรรทัดแรกเสมอ --&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;I Love HTML&lt;/title&gt;   &lt;!-- ชื่อบนแท็บ browser --&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    เนื้อหาที่แสดงผลทั้งหมดอยู่ตรงนี้
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<div class="tbl"><table>
+<tr><th>Tag</th><th>หน้าที่ / จุดที่ต้องจำ</th></tr>
+<tr><td><code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code></td><td>หัวข้อ h1 ใหญ่สุด h6 เล็กสุด มีบรรทัดว่างก่อน-หลังอัตโนมัติ</td></tr>
+<tr><td><code>&lt;p&gt;</code></td><td>ย่อหน้า · เว้นวรรค/ขึ้นบรรทัดหลายครั้งในโค้ด → browser ยุบเหลือ<b>ช่องว่างเดียว</b></td></tr>
+<tr><td><code>&lt;br&gt;</code></td><td>ขึ้นบรรทัดใหม่ ไม่มี tag ปิด</td></tr>
+<tr><td><code>&lt;a href=""&gt;</code></td><td>ลิงก์ · absolute: <code>http://www.google.com</code> · relative: <code>1_headings.html</code> · อีเมล: <code>href="mailto:abc@example.com"</code></td></tr>
+<tr><td><code>&lt;ol&gt;</code> / <code>&lt;ul&gt;</code> + <code>&lt;li&gt;</code></td><td>รายการมีเลข / รายการ bullet · ซ้อน list ได้โดยใส่ <code>&lt;ul&gt;</code> ไว้<b>ใน</b> <code>&lt;li&gt;</code></td></tr>
+<tr><td><code>&lt;dl&gt;</code> + <code>&lt;dt&gt;</code> <code>&lt;dd&gt;</code></td><td>Definition list: dt = คำ, dd = คำอธิบาย</td></tr>
+<tr><td><code>&lt;img src="" alt=""&gt;</code></td><td>รูปภาพ ไม่มี tag ปิด · <code>alt</code> เพื่อ accessibility (screen reader) · ไฟล์: GIF JPEG PNG SVG · เอา <code>&lt;img&gt;</code> ไว้ใน <code>&lt;a&gt;</code> = รูปที่คลิกได้</td></tr>
+</table></div>
+<p><b>Character entities</b> (ขึ้นต้น <code>&amp;</code> ลงท้าย <code>;</code> · case-sensitive)</p>
+<div class="tbl"><table>
+<tr><th>ผลลัพธ์</th><th>Entity</th><th>Number</th><th>ผลลัพธ์</th><th>Entity</th><th>Number</th></tr>
+<tr><td>(เว้นวรรค)</td><td><code>&amp;nbsp;</code></td><td>&amp;#160;</td><td>©</td><td><code>&amp;copy;</code></td><td>&amp;#169;</td></tr>
+<tr><td>&lt;</td><td><code>&amp;lt;</code></td><td>&amp;#60;</td><td>®</td><td><code>&amp;reg;</code></td><td>&amp;#174;</td></tr>
+<tr><td>&gt;</td><td><code>&amp;gt;</code></td><td>&amp;#62;</td><td>×</td><td><code>&amp;times;</code></td><td>&amp;#215;</td></tr>
+<tr><td>&amp;</td><td><code>&amp;amp;</code></td><td>&amp;#38;</td><td>÷</td><td><code>&amp;divide;</code></td><td>&amp;#247;</td></tr>
+<tr><td>"</td><td><code>&amp;quot;</code></td><td>&amp;#34;</td><td>¢ £ ¥ §</td><td><code>&amp;cent; &amp;pound; &amp;yen; &amp;sect;</code></td><td></td></tr>
+<tr><td>'</td><td><code>&amp;apos;</code></td><td>&amp;#39;</td><td></td><td></td><td></td></tr>
+</table></div>
+</div>
+
+<h2 id="table">3. ตาราง (L1)</h2>
+<div class="card">
+<ul>
+    <li><code>&lt;table&gt;</code> → แถว <code>&lt;tr&gt;</code> → ช่อง <code>&lt;td&gt;</code> (ข้อมูล: ตัวปกติ ชิดซ้าย) หรือ <code>&lt;th&gt;</code> (หัวตาราง: <b>ตัวหนา + กึ่งกลาง</b>)</li>
+    <li>เนื้อหาทุกอย่างต้องอยู่ใน <code>&lt;td&gt;</code>/<code>&lt;th&gt;</code> เท่านั้น · ช่องว่าง: <code>&lt;td&gt;&amp;nbsp;&lt;/td&gt;</code></li>
+    <li>ค่าเริ่มต้น<b>ไม่มีเส้นขอบ</b> ต้องใส่ CSS: <code>table, tr, th, td { border: 1px solid black; }</code></li>
+    <li><code>colspan="3"</code> = ขยายช่องไปทางขวา 3 คอลัมน์ · <code>rowspan="2"</code> = ขยายลงล่าง 2 แถว</li>
+</ul>
+<pre><code>&lt;table&gt;
+  &lt;tr&gt; &lt;td rowspan="3"&gt;&lt;img src="Usagi.gif" alt="Usagi"&gt;&lt;/td&gt;
+       &lt;th colspan="3"&gt;Character: Usagi&lt;/th&gt; &lt;/tr&gt;
+  &lt;tr&gt; &lt;th&gt;Color&lt;/th&gt; &lt;th&gt;Type&lt;/th&gt; &lt;th&gt;Best friends&lt;/th&gt; &lt;/tr&gt;
+  &lt;tr&gt; &lt;td&gt;Light Pink&lt;/td&gt; &lt;td&gt;Rabbit&lt;/td&gt; &lt;td&gt;Piske&lt;/td&gt; &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+<p>HTML Style Guide: ใช้ <code>&lt;!DOCTYPE html&gt;</code> · ปิด tag ให้ครบ · ชื่อ tag/attribute ตัวเล็ก · ค่า attribute ใส่ double quote · เยื้องบรรทัดให้อ่านง่าย</p>
+</div>
+
+<h2 id="media">4. HTML Media (L2)</h2>
+<div class="card">
+<div class="tbl"><table>
+<tr><th></th><th>Audio</th><th>Video</th></tr>
+<tr><td>ฟอร์แมต</td><td>MP3, WAV, OGG</td><td>MP4, WebM, OGG</td></tr>
+<tr><td>attribute</td><td colspan="2"><code>controls</code> = แสดงปุ่ม play/pause/volume · <code>autoplay</code> = เล่นเอง · video มี <code>width</code> <code>height</code></td></tr>
+</table></div>
+<pre><code>&lt;video width="320" height="240" autoplay controls&gt;
+  &lt;source src="small.mp4" type="video/mp4"&gt;
+  &lt;source src="small.ogg" type="video/ogg"&gt;
+  Your browser does not support the video tag.   &lt;!-- แสดงเมื่อ browser ไม่รองรับ --&gt;
+&lt;/video&gt;
+
+&lt;iframe width="320" height="240" src="https://www.youtube.com/embed/VIDEO_ID"&gt;&lt;/iframe&gt;</code></pre>
+<p>ก่อน HTML5 ต้องใช้ plug-in (เช่น Flash) ถึงจะเล่นวิดีโอได้ · YouTube ใช้ <code>&lt;iframe&gt;</code> + ลิงก์ <code>/embed/</code></p>
+</div>
+
+<h2 id="form">5. Form + Validation + Submission (L2)</h2>
+<div class="card">
+<div class="tbl"><table>
+<tr><th>Element</th><th>ใช้ทำอะไร</th></tr>
+<tr><td><code>&lt;form&gt;</code></td><td>ครอบ element ของฟอร์มทั้งหมด (ทุก element ต้องอยู่ข้างใน)</td></tr>
+<tr><td><code>&lt;input type="..."&gt;</code></td><td>text · password (ซ่อนตัวอักษร) · radio · checkbox · email · tel · date / week / month / time / datetime-local</td></tr>
+<tr><td><code>&lt;label for="id"&gt;</code></td><td>ป้ายชื่อ ผูกกับ input ผ่าน <b>id</b> (ช่วย screen reader)</td></tr>
+<tr><td><code>&lt;textarea rows cols&gt;</code></td><td>กล่องข้อความหลายบรรทัด</td></tr>
+<tr><td><code>&lt;select&gt;</code> + <code>&lt;option value&gt;</code></td><td>dropdown · ค่าเริ่มต้นใช้ <code>selected</code></td></tr>
+<tr><td><code>&lt;button type&gt;</code></td><td><b>submit</b> = ส่งฟอร์ม · <b>reset</b> = ล้างกลับค่าเดิม · <b>button</b> = ปุ่มทั่วไป (เรียกฟังก์ชัน JS)</td></tr>
+<tr><td><code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code></td><td>ตีกรอบจัดกลุ่ม + หัวข้อกรอบ</td></tr>
+</table></div>
+<div class="trap"><b>Radio vs Checkbox:</b> radio เลือกได้ <b>1</b> อัน, checkbox เลือกได้<b>หลาย</b>อัน — ทั้งคู่ต้องใช้ <code>name</code> <b>เหมือนกัน</b>ถึงจะเป็นกลุ่มเดียวกัน · ค่าเริ่มต้นใช้ <code>checked</code></div>
+<pre><code>&lt;input type="radio" name="bloodGr" value="A" checked&gt;A
+&lt;input type="radio" name="bloodGr" value="B"&gt;B
+&lt;input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" title="Mobile: XXX-XXX-XXXX"&gt;
+&lt;input type="email" placeholder="Your e-mail" required&gt;
+&lt;input type="date" max="2010-01-01"&gt;</code></pre>
+<p><b>Validation attributes (HTML5)</b></p>
+<div class="tbl"><table>
+<tr><th>Attribute</th><th>ความหมาย</th></tr>
+<tr><td><code>min</code> / <code>max</code></td><td>ค่าต่ำสุด/สูงสุด (ใช้กับ date, number)</td></tr>
+<tr><td><code>pattern</code></td><td>Regular expression ที่ค่าต้องตรง (ตรวจตอน submit)</td></tr>
+<tr><td><code>title</code></td><td>คำอธิบาย pattern ให้ผู้ใช้</td></tr>
+<tr><td><code>placeholder</code></td><td>ข้อความจาง ๆ บอกใบ้ในช่อง</td></tr>
+<tr><td><code>required</code></td><td>ต้องกรอกก่อน submit</td></tr>
+</table></div>
+<p><b>Regex ในสไลด์:</b> <code>[A-Za-z]{3}</code> ตัวอักษร 3 ตัวพอดี · <code>[A-Z]{5,}</code> ตัวใหญ่ 5 ตัวขึ้นไป · <code>.{2,4}</code> อักขระอะไรก็ได้ 2–4 ตัว · <code>[0-9]{2}88[0-9]{3}</code> รูปแบบ ##88###</p>
+<p>ตรวจฟอร์มฝั่ง client ได้ 2 วิธี: <b>HTML5 attributes</b> และ <b>JavaScript</b></p>
+<p><b>Submission:</b> <code>&lt;form action="somewhere.html" method="GET"&gt;</code></p>
+<ul>
+    <li><code>action</code> = ส่งข้อมูลไปที่ไหน · <code>method</code> = GET หรือ POST</li>
+    <li><b>GET</b> → ข้อมูลแสดงใน <b>URL</b> เป็นคู่ <code>name=value</code> (เช่น <code>?firstname=A&amp;lastname=B</code>)</li>
+    <li><b>POST</b> → ข้อมูลอยู่<b>ใน packet</b> ไม่โชว์ใน URL</li>
+    <li>ถ้าไม่มี <code>name</code> ค่าช่องนั้นจะไม่ถูกส่งไป</li>
+</ul>
+</div>
+
+<h2 id="semantic">6. Semantic Elements &amp; Layout (L2)</h2>
+<div class="card">
+<p>Semantic = "มีความหมาย" → ช่วย screen reader / search engine รู้ว่าส่วนไหนคืออะไร (แทนการใช้ <code>&lt;div class="header"&gt;</code> แบบเดิม)</p>
+<div class="tbl"><table>
+<tr><th>Tag</th><th>ความหมาย</th></tr>
+<tr><td><code>&lt;header&gt;</code></td><td>ส่วนหัวของเอกสาร/section</td></tr>
+<tr><td><code>&lt;nav&gt;</code></td><td>แถบเมนู / ลิงก์นำทาง</td></tr>
+<tr><td><code>&lt;section&gt;</code></td><td>ส่วนทั่วไปของเอกสาร (generic)</td></tr>
+<tr><td><code>&lt;article&gt;</code></td><td>เนื้อหาที่<b>อยู่ได้ด้วยตัวเอง</b> เช่น โพสต์ ข่าว คอมเมนต์</td></tr>
+<tr><td><code>&lt;aside&gt;</code></td><td>เนื้อหาข้าง ๆ (sidebar) ที่เกี่ยวข้องกับเนื้อหารอบ ๆ</td></tr>
+<tr><td><code>&lt;footer&gt;</code></td><td>ส่วนท้าย (ผู้เขียน, ติดต่อ)</td></tr>
+</table></div>
+<p><code>&lt;article&gt;</code> อยู่ใน <code>&lt;section&gt;</code> ได้ และ <code>&lt;section&gt;</code> ก็มี <code>&lt;article&gt;</code> ข้างในได้ · Layout ทั่วไป: มือถือ 1 คอลัมน์ · แท็บเล็ต 2 · เดสก์ท็อป 3</p>
+</div>
+
+<!-- ======================= CSS ======================= -->
+<h2 id="css1">7. CSS: Syntax &amp; Selectors (L3)</h2>
+<div class="card">
+<pre><code>selector {                 /* declaration block */
+    property: value;       /* declaration: ปิดด้วย ; */
+    background-color: red;
+}                          /* comment ใน CSS ใช้ /* */ เท่านั้น */</code></pre>
+<p>สี: ชื่อ (<code>red</code>) หรือ hex (<code>#FF0000</code>) — red #FF0000 · green #00FF00 · blue #0000FF · magenta #FF00FF · cyan #00FFFF</p>
+<div class="tbl"><table>
+<tr><th>Selector</th><th>ตัวอย่าง</th><th>เลือกอะไร</th></tr>
+<tr><td>Universal</td><td><code>*</code></td><td>ทุก element</td></tr>
+<tr><td>Element</td><td><code>p</code></td><td>ทุก <code>&lt;p&gt;</code></td></tr>
+<tr><td>Class</td><td><code>.clsSp</code></td><td>ทุกตัวที่ <code>class="clsSp"</code></td></tr>
+<tr><td>Element + class</td><td><code>p.clsSp</code></td><td>เฉพาะ <code>&lt;p&gt;</code> ที่มี class นี้</td></tr>
+<tr><td>ID</td><td><code>#p1</code></td><td>ตัวที่ <code>id="p1"</code> (id ต้องไม่ซ้ำในหน้า)</td></tr>
+<tr><td>Grouping</td><td><code>#p1, .clsSp</code></td><td>ใช้สไตล์เดียวกันหลาย selector (คั่นด้วย<b>จุลภาค</b>)</td></tr>
+<tr><td>Descendant</td><td><code>article p</code></td><td><code>&lt;p&gt;</code> ที่อยู่ข้างใน <code>&lt;article&gt;</code> (คั่นด้วย<b>เว้นวรรค</b>)</td></tr>
+<tr><td>Pseudo-class</td><td><code>a:hover</code> <code>a:active</code></td><td>สถานะ: เมาส์ชี้ / กำลังคลิก (มี <code>:visited</code> ด้วย)</td></tr>
+<tr><td>Pseudo-element</td><td><code>.row::after</code></td><td>ส่วนหนึ่งของ element (ใช้ clear float)</td></tr>
+</table></div>
+<p>หลาย class ในตัวเดียว: <code>&lt;p class="line red"&gt;</code> (คั่นด้วยเว้นวรรค) → ได้ทั้งสไตล์ <code>.line</code> และ <code>.red</code></p>
+<div class="trap"><code>h1, p</code> (จุลภาค = ทั้งสองอย่าง) ≠ <code>h1 p</code> (เว้นวรรค = p ที่อยู่ใน h1) ≠ <code>h1.p</code> (h1 ที่มี class p)</div>
+</div>
+
+<h2 id="cascade">8. Specificity &amp; Cascading Order (L3) — ออกสอบบ่อย</h2>
+<div class="card">
+<p><b>กฎข้อ 1 — Specificity (ความเจาะจง):</b> <b>ID &gt; Class &gt; Element</b> · ถ้าเจาะจงเท่ากัน → <b>กฎที่อยู่ทีหลังชนะ</b></p>
+<p><b>กฎข้อ 2 — วิธีใส่ CSS 3 แบบ:</b></p>
+<div class="tbl"><table>
+<tr><th>แบบ</th><th>เขียนที่ไหน</th><th>ตัวอย่าง</th></tr>
+<tr><td>External</td><td>ไฟล์ .css แยก ลิงก์ใน <code>&lt;head&gt;</code> · 1 ไฟล์ใช้ได้หลายหน้า</td><td><code>&lt;link rel="stylesheet" href="myStyle.css"&gt;</code></td></tr>
+<tr><td>Internal</td><td><code>&lt;style&gt;</code> ใน <code>&lt;head&gt;</code> · เฉพาะหน้านั้น</td><td><code>&lt;style&gt; body{...} &lt;/style&gt;</code></td></tr>
+<tr><td>Inline</td><td>attribute <code>style</code> ของ tag นั้น</td><td><code>&lt;p style="color:white;"&gt;</code></td></tr>
+</table></div>
+<div class="tip"><b>Inline &gt; Internal = External &gt; Browser default</b><br>
+Internal กับ External มีลำดับความสำคัญ<b>เท่ากัน</b> → ตัวที่ถูกประกาศ<b>ทีหลัง</b>ในโค้ด (อยู่ล่างกว่าใน <code>&lt;head&gt;</code>) ชนะ<br>
+แต่ต้องเทียบ <b>specificity ก่อน</b>: class ใน internal ชนะ element ใน external เสมอ ไม่ว่าลำดับจะเป็นยังไง</div>
+<p>วิธีคิดเวลาเจอโจทย์: (1) ตัดกฎที่ selector ไม่ตรงทิ้ง → (2) inline ชนะทุกอย่าง → (3) เทียบ ID/class/element → (4) ถ้าเท่ากัน ดูว่าอันไหนอยู่ล่างสุด</p>
+</div>
+
+<h2 id="prop">9. CSS Properties &amp; Box Model (L3)</h2>
+<div class="card">
+<div class="tbl"><table>
+<tr><th>กลุ่ม</th><th>Property</th></tr>
+<tr><td>Font / text</td><td><code>color</code> <code>font-family</code> (เช่น <code>Arial, sans-serif</code> — generic ไว้ท้ายสุดเป็นตัวสำรอง) <code>font-size</code> <code>font-weight</code> (normal/bold/600) <code>font-style</code> (italic) <code>text-align</code> <code>text-decoration: none</code> (เอาเส้นใต้ลิงก์ออก)</td></tr>
+<tr><td>Border</td><td><code>border-color</code> <code>border-width</code> <code>border-style</code> (solid/dashed/dotted/hidden) <code>border-radius</code> · ย่อ: <code>border: 5px solid gray;</code> (width style color)</td></tr>
+<tr><td>Size</td><td><code>width: 80%</code> (เทียบกับ container แม่) · <code>height: 400px</code></td></tr>
+<tr><td>Display</td><td><code>display: block</code> = ขึ้นบรรทัดใหม่ + กว้างเต็มแถว · <code>display: flex</code> · <code>display: grid</code></td></tr>
+</table></div>
+<div class="flow">┌──────────── margin (ระยะห่างนอกขอบ) ────────────┐
+│  ┌────────── border (เส้นขอบ) ──────────┐       │
+│  │  ┌────── padding (ระยะในขอบ) ─────┐  │       │
+│  │  │           content               │  │       │
+│  │  └─────────────────────────────────┘  │       │
+│  └───────────────────────────────────────┘       │
+└──────────────────────────────────────────────────┘</div>
+<ul>
+    <li><code>margin: auto;</code> + กำหนด <code>width</code> → จัด block element <b>กึ่งกลางแนวนอน</b></li>
+    <li><code>padding: 14px 16px;</code> = บน-ล่าง 14, ซ้าย-ขวา 16</li>
+    <li><b>หน่วย</b> Absolute: <code>cm mm in px pt</code> · Relative: <code>em</code> (เทียบ font-size) <code>rem</code> <code>vw</code> <code>%</code> → relative ช่วยให้ scale ได้หลายอุปกรณ์</li>
+    <li><code>float: left | right | none</code> = ลอยชิดข้าง ข้อความไหลอ้อม · <code>clear: left | right | both | none</code> = ห้ามมี float ข้างนั้น</li>
+</ul>
+<pre><code>/* nav bar แนวตั้งจากสไลด์ */
+nav a {
+    display: block;
+    background-color: #AED6F1;
+    padding: 5px;
+    color: #1F618D;
+    text-align: center;
+    text-decoration: none;
+}</code></pre>
+</div>
+
+<h2 id="layout">10. Layout: Float &amp; Flexbox (L4)</h2>
+<div class="card">
+<p>5 วิธีทำ multi-column: (1) table — <b>ไม่แนะนำ</b> ใช้กับข้อมูลตารางเท่านั้น (2) float (3) flexbox (4) framework เช่น Bootstrap (5) grid</p>
+<h3>Float layout (3 คอลัมน์)</h3>
+<pre><code>nav { overflow: hidden; background-color: darkblue; }
+nav a { float: right; display: block; padding: 14px 16px; }
+.column { float: left; width: 33.33%; }
+.row::after { content: ""; display: table; clear: both; }   /* clear float หลังแถว */</code></pre>
+<h3>Flexbox — ตั้งที่ <u>container (แม่)</u> แล้วมีผลกับ<u>ลูกโดยตรง</u></h3>
+<pre><code>.container {
+    display: flex;
+    flex-direction: row;            /* row | row-reverse | column | column-reverse */
+    flex-wrap: wrap;                /* nowrap | wrap | wrap-reverse */
+    justify-content: space-evenly;  /* แกนหลัก: flex-start | flex-end | center |
+                                       space-between | space-around | space-evenly */
+    align-items: center;            /* แกนขวาง: flex-start | flex-end | center */
+}</code></pre>
+<div class="tbl"><table>
+<tr><th>justify-content</th><th>ภาพ (3 กล่อง)</th></tr>
+<tr><td>flex-start</td><td><code>[■■■      ]</code></td></tr>
+<tr><td>flex-end</td><td><code>[      ■■■]</code></td></tr>
+<tr><td>center</td><td><code>[   ■■■   ]</code></td></tr>
+<tr><td>space-between</td><td><code>[■   ■   ■]</code> ชิดขอบสุดสองข้าง</td></tr>
+<tr><td>space-around</td><td><code>[ ■  ■  ■ ]</code> ขอบได้ครึ่งหนึ่งของช่องระหว่างกล่อง</td></tr>
+<tr><td>space-evenly</td><td><code>[  ■  ■  ■  ]</code> ทุกช่องเท่ากันหมด</td></tr>
+</table></div>
+<p>ถ้า <code>flex-direction: row</code> → justify-content = แนวนอน, align-items = แนวตั้ง (ถ้าเป็น column จะสลับกัน) · ตัวอย่างสไลด์: nav ใช้ <code>justify-content: flex-end</code> ให้เมนูชิดขวา — "No more float and clear"</p>
+<p>Grid (ในตัวอย่าง Tic Tac Toe): <code>display: grid; grid-template-columns: repeat(3, auto);</code> → ตาราง 3 คอลัมน์</p>
+</div>
+
+<h2 id="rwd">11. Responsive Web Design + Media Query (L4)</h2>
+<div class="card">
+<ul>
+    <li>RWD = หน้าเว็บแสดงผลดีทุกขนาดจอ ใช้แค่ HTML + CSS (Media Query)</li>
+    <li><b>Mobile first</b> = ออกแบบสำหรับมือถือก่อน แล้วค่อยใช้ <code>min-width</code> ขยายสำหรับจอใหญ่ (สวนทางกับแบบดั้งเดิม)</li>
+    <li>ต้องมี viewport meta ใน <code>&lt;head&gt;</code>: <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code> (width ตามจออุปกรณ์, initial-scale = zoom ตอนโหลด)</li>
+</ul>
+<pre><code>div { font-size: 4em; }                              /* ค่าเริ่มต้น */
+@media screen and (max-width: 768px) {               /* จอ ≤ 768px */
+    div { font-size: 2em; }
+}
+@media screen and (min-width: 1000px) {              /* จอ ≥ 1000px */
+    div { font-size: 8em; }
+}
+/* จอ 769–999px → ไม่เข้าเงื่อนไขไหน → ใช้ 4em */</code></pre>
+<div class="trap"><code>max-width: 768px</code> = "<b>ไม่เกิน</b> 768" (จอเล็ก) · <code>min-width: 1000px</code> = "<b>อย่างน้อย</b> 1000" (จอใหญ่) · ถ้าหลายเงื่อนไขตรงพร้อมกัน ตัวที่อยู่ล่างสุดชนะ</div>
+<pre><code>/* Mobile first ตามสไลด์ */
+nav, .container { display: flex; flex-direction: column; }  /* มือถือ: เรียงแนวตั้ง */
+@media screen and (min-width: 600px) {
+    nav { flex-direction: row-reverse; justify-content: flex-start; }
+    .container { flex-direction: row; }                      /* จอใหญ่: เรียงแนวนอน */
+}</code></pre>
+<p>ทดสอบได้ใน Developer Tools ของ browser (โหมดอุปกรณ์)</p>
+</div>
+
+<h2 id="bs">12. Bootstrap (L4)</h2>
+<div class="card">
+<ol>
+    <li>HTML5 template + <code>&lt;meta charset&gt;</code> + viewport (BS ต้องการ HTML5 doctype)</li>
+    <li>ใส่ CSS (<code>&lt;link&gt;</code>) และ JS (<code>&lt;script&gt;</code>) ของ Bootstrap จาก CDN</li>
+    <li>จัด layout ด้วย grid: <b>container → row → col → content</b></li>
+    <li>ใส่ class / component (card, navbar, modal, carousel, accordion ฯลฯ)</li>
+</ol>
+<ul>
+    <li><code>.container</code> = มี max-width ตาม breakpoint · <code>.container-fluid</code> = กว้าง 100% ทุกขนาด · <code>.container-{bp}</code> = 100% จนถึง breakpoint นั้น</li>
+    <li>Grid สร้างจาก flexbox · <b>1 แถว = 12 หน่วย</b> (ผลรวม col ≤ 12) · มี 6 breakpoints</li>
+    <li><code>col-sm-6</code> = กว้าง 6/12 เมื่อจอ ≥ sm (576px) · ถ้าจอ &lt; 576px คอลัมน์จะ<b>ซ้อนลงมาเป็นแนวตั้ง</b></li>
+</ul>
+<pre><code>&lt;main class="container"&gt;
+  &lt;section class="row"&gt;
+    &lt;div class="col-sm-8"&gt;8 หน่วย&lt;/div&gt;
+    &lt;div class="col-sm-4"&gt;4 หน่วย&lt;/div&gt;      &lt;!-- 8+4 = 12 --&gt;
+  &lt;/section&gt;
+&lt;/main&gt;</code></pre>
+</div>
+
+<!-- ======================= JS ======================= -->
+<h2 id="js1">13. JavaScript: พื้นฐาน ตัวแปร ชนิดข้อมูล (L6)</h2>
+<div class="card">
+<ul>
+    <li>JS = scripting language น้ำหนักเบา · <b>interpreted</b> (รันได้เลยไม่ต้อง compile) · เพิ่ม interactivity: เปลี่ยนเนื้อหา, ตอบสนอง event, อ่าน/เขียน element, validate ข้อมูล, ตรวจ browser, สร้าง cookie</li>
+    <li>ใส่ได้ 2 แบบ: <code>&lt;script&gt;...&lt;/script&gt;</code> (ใน head หรือ body) หรือไฟล์แยก <code>&lt;script src="myScript.js"&gt;&lt;/script&gt;</code> (ในไฟล์ .js <b>ไม่ต้อง</b>มี tag script)</li>
+    <li>แสดงผล: <code>console.log()</code> (เปิด console: F12 / Option+Cmd+J) หรือแสดงบนหน้าเว็บผ่าน DOM</li>
+    <li>ชื่อตัวแปร: ขึ้นต้นด้วยตัวอักษร · มีแค่ตัวอักษร+ตัวเลข ไม่มีเว้นวรรค · ห้ามเป็น keyword</li>
+    <li><code>=</code> คือ<b>กำหนดค่า</b> ไม่ใช่เท่ากับ</li>
+</ul>
+<div class="tbl"><table>
+<tr><th></th><th>var</th><th>let</th><th>const</th></tr>
+<tr><td>Scope</td><td>function / global (ทะลุ block <code>{}</code>)</td><td>block</td><td>block</td></tr>
+<tr><td>เปลี่ยนค่า (update)</td><td>ได้</td><td>ได้</td><td><b>ไม่ได้</b></td></tr>
+<tr><td>ประกาศซ้ำ (re-declare)</td><td>ได้</td><td><b>ไม่ได้</b> (ใน scope เดียวกัน)</td><td><b>ไม่ได้</b></td></tr>
+</table></div>
+<p><b>ชนิดข้อมูล 6 แบบ:</b> Boolean (true/false) · Number · String · Null (ตั้งใจให้ว่าง) · Undefined (ประกาศแล้วยังไม่กำหนดค่า) · Object</p>
+<p>JS เป็น <b>weakly typed</b> — ตัวแปรเดิมเปลี่ยนไปเก็บค่าชนิดอื่นได้ · ดูชนิดด้วย <code>typeof x</code></p>
+<pre><code>var person = { firstName: "Wudhichart", age: 30, feesPaid: true };  // user-defined object
+person.age = 40;                 // เข้าถึงด้วย .property
+person["feesPaid"] = false;      // หรือ ["property"]
+person["parking permit"] = "blue";  // ชื่อมีเว้นวรรค → ต้องใช้ [" "] เท่านั้น
+var copy = person;               // copy ชี้ object "ตัวเดียวกัน" (reference) — แก้ตัวหนึ่ง อีกตัวเปลี่ยนด้วย</code></pre>
+</div>
+
+<h2 id="builtin">14. Built-in Objects (L6)</h2>
+<div class="card">
+<div class="tbl"><table>
+<tr><th>Object</th><th>ที่ต้องรู้</th></tr>
+<tr><td>Number</td><td><code>Number.parseInt("10.569")</code>→10 · <code>parseFloat</code>→10.569 · <code>parseInt("Hello")</code>→<b>NaN</b> · <code>Number.isNaN()</code> <code>Number.isInteger()</code> · instance: <code>toString()</code> <code>valueOf()</code> <code>toExponential()</code></td></tr>
+<tr><td>Math</td><td><b>ไม่มี constructor</b> (ไม่ต้อง new) · <code>Math.PI</code> <code>Math.SQRT2</code> <code>Math.pow(x,y)</code> <code>Math.round(x)</code> <code>Math.abs(x)</code> (+ ใช้บ่อย: <code>Math.random()</code> <code>Math.floor()</code> <code>Math.max()</code>)</td></tr>
+<tr><td>Date</td><td><code>new Date()</code> = ตอนนี้ · <code>new Date("2017-08-13T10:20:30")</code> (ISO 8601) · นับ ms ตั้งแต่ 1 ม.ค. 1970 UTC · <code>getDate()</code> = วันที่ 1–31 · <code>getDay()</code> = <b>วันในสัปดาห์ 0=อาทิตย์</b> · <code>getFullYear()</code> · (<code>getMonth()</code> เริ่มที่ 0)</td></tr>
+<tr><td>Array</td><td><code>["a","b"]</code> / <code>new Array(5)</code> · <code>arr[0]</code> · <code>.length</code> · <code>Array.isArray()</code> · <code>push()</code> เพิ่มท้าย · <code>pop()</code> ลบ+คืนตัวท้าย · <code>indexOf()</code> (ไม่เจอ → -1) · <code>lastIndexOf()</code> · <code>forEach</code> <code>map</code> (คืน array ใหม่) <code>filter</code> <code>reduce</code> <code>reduceRight</code> <code>every</code> <code>some</code> <code>includes</code></td></tr>
+<tr><td>String</td><td>ต่อด้วย <code>+</code> · <code>.length</code> · <code>charAt(i)</code> · <code>split(" ")</code> → array · <code>substring(start, end)</code> (<b>ไม่รวม end</b>)</td></tr>
+</table></div>
+<pre><code>let nums = [2, 7, 9, 10];
+nums.map(x =&gt; x * x);            // [4, 49, 81, 100]
+nums.filter(x =&gt; x % 2 === 0);   // [2, 10]
+nums.reduce((sum, x) =&gt; sum + x, 0);  // 28
+nums.every(x =&gt; x &gt; 1);          // true   (ทุกตัวผ่าน)
+nums.some(x =&gt; x &gt; 9);           // true   (มีบางตัวผ่าน)
+nums.forEach(x =&gt; console.log(x));  // ไม่คืนค่า</code></pre>
+</div>
+
+<h2 id="op">15. Operators (L6)</h2>
+<div class="card">
+<ul>
+    <li>Arithmetic: <code>+ - * / %</code> (เศษ: <code>5 % 3</code> = 2) <code>**</code> (ยกกำลัง) <code>++ --</code></li>
+    <li>Assignment: <code>= += -= *= /= %= **=</code> (<code>x += y</code> คือ <code>x = x + y</code>)</li>
+    <li>Comparison: <code>==</code> แปลงชนิดก่อนเทียบ · <code>===</code> เทียบทั้ง<b>ชนิดและค่า</b> · <code>!= !== &gt; &gt;= &lt; &lt;=</code></li>
+    <li>Logical: <code>&amp;&amp;</code> (จริงเมื่อจริงทั้งคู่) <code>||</code> (จริงถ้ามีอย่างน้อยหนึ่ง) <code>!</code> (กลับค่า)</li>
+</ul>
+<pre><code>"1" === 1   // false        "1" == 1    // true
+"5" + 3     // "53" (ต่อ string)   "5" - 3  // 2 (แปลงเป็นเลข)
+x++  // ใช้ค่าเดิมก่อนแล้วค่อยบวก     ++x  // บวกก่อนแล้วใช้ค่า</code></pre>
+<p><b>ลำดับความสำคัญ:</b> <code>()</code> → postfix <code>x++</code> → <code>! +x -x ++x</code> → <code>**</code> → <code>* / %</code> → <code>+ -</code> → <code>&lt; &lt;= &gt; &gt;=</code> → <code>== != === !==</code> → <code>&amp;&amp;</code> → <code>||</code> → <code>=</code></p>
+</div>
+
+<h2 id="ctrl">16. Control Structures (L6)</h2>
+<div class="card">
+<pre><code>// if / else if / else
+if (mark &gt;= 80) grade = "A";
+else if (mark &gt;= 70) grade = "B";
+else grade = "F";
+
+// ternary: condition ? ถ้าจริง : ถ้าเท็จ
+var bigger = num1 &gt; num2 ? num1 : num2;
+
+// switch — เทียบแบบ === และถ้าไม่มี break จะ "ไหลต่อ" (fall-through) ไป case ถัดไป
+switch (expr) {
+    case 'Soda':
+    case 'Sparking Water':        // สอง case ใช้โค้ดเดียวกัน
+        console.log('30 Baht'); break;
+    default:
+        console.log('Sorry');
+}
+
+while (n &lt; 10) { n++; }            // เช็คเงื่อนไขก่อน → อาจไม่ทำเลยสักรอบ
+do { n++; } while (n &lt; 1);         // ทำก่อน 1 รอบเสมอ แล้วค่อยเช็ค
+for (let i = 0; i &lt; 10; i++) { }   // init; condition; final-expression
+
+for (let i = 0; i &lt; arr.length; i++) console.log(arr[i]);  // วน array
+for (let prop in obj) console.log(prop + "=" + obj[prop]); // วน key ของ object
+
+myLoop:                              // label
+for (i = 0; i &lt; 10; i++) {
+    if (i % 3 == 0) continue myLoop; // ข้ามรอบนี้ไปรอบถัดไป
+    if (i == 5) break myLoop;        // ออกจากลูปทันที
+}</code></pre>
+<ul>
+    <li><b>Counter-controlled loop</b> = รู้จำนวนรอบ ใช้ตัวนับ (for / while)</li>
+    <li><b>Sentinel-controlled loop</b> = ไม่รู้จำนวนรอบล่วงหน้า หยุดเมื่อเจอค่าพิเศษ/flag (มักใช้ while)</li>
+    <li>ต้องให้ลูปเปลี่ยนเงื่อนไขได้ ไม่งั้นเป็น <b>infinite loop</b></li>
+</ul>
+</div>
+
+<h2 id="func">17. Functions (L7)</h2>
+<div class="card">
+<p>ทำไมใช้ function: Reusability · Modularity · Code Organization · Maintainability</p>
+<pre><code>function showMessage() { alert('Hello!'); }            // ไม่คืนค่า
+function sum(a, b) { return a + b; }                   // คืนค่า
+function msg(from, text = "no message") { ... }        // default parameter
+
+let f  = function (a, b) { return a + b; };            // anonymous / expression function
+let f2 = (a, b) =&gt; a + b;                              // arrow function (บรรทัดเดียว return อัตโนมัติ)
+let hi = () =&gt; alert("Hello!");                        // ไม่มี parameter
+let sub = (a, b) =&gt; { let r = a - b; return r; };      // หลายบรรทัด ต้องมี {} และ return เอง</code></pre>
+<div class="tbl"><table>
+<tr><th>คำศัพท์</th><th>ความหมาย</th></tr>
+<tr><td>First-class function</td><td>ฟังก์ชันถูกใช้เหมือนตัวแปร: เก็บในตัวแปร · ส่งเป็น argument · return ออกมา · เก็บใน array</td></tr>
+<tr><td>Higher-order function</td><td>ฟังก์ชันที่<b>รับ</b>ฟังก์ชันหรือ<b>คืน</b>ฟังก์ชัน เช่น <code>map</code> <code>filter</code></td></tr>
+<tr><td>Callback function</td><td>ฟังก์ชันที่ส่งให้ API เรียกทีหลัง เมื่อเกิด event/งาน async เช่น <code>setTimeout(greet, 2000)</code> (ส่ง <code>greet</code> ไม่ใส่วงเล็บ)</td></tr>
+<tr><td>Constructor function</td><td>สร้าง object ที่มี property ชุดเดียวกัน เรียกด้วย <code>new</code> ใช้ <code>this</code> อ้าง object ที่กำลังสร้าง</td></tr>
+</table></div>
+<pre><code>function Person(firstName, age) {        // constructor function (ชื่อขึ้นต้นตัวใหญ่)
+    this.firstName = firstName;          // public
+    this.age = age;
+    this.getInfo = function () { return this.firstName + " Age is " + this.age; };
+}
+var p1 = new Person("Wudhichart", 30);
+
+function flexible(fOp, a, b) { return fOp(a, b); }   // ส่งฟังก์ชันเป็น argument
+flexible((x, y) =&gt; x + y, 3, 4);                     // 7</code></pre>
+<p>Template literal: <code>`area: ${area}`</code> (ใช้ backtick)</p>
+</div>
+
+<h2 id="scope">18. Scope, Lifetime &amp; Closure (L7)</h2>
+<div class="card">
+<ul>
+    <li><b>Global</b> = ประกาศนอกฟังก์ชัน ใช้ได้ทั้งหน้า (ทุก <code>&lt;script&gt;</code> ปกติ) อยู่จนปิดหน้าเว็บ</li>
+    <li><b>Local</b> = ประกาศในฟังก์ชัน ใช้ได้ในฟังก์ชันนั้น อยู่ตั้งแต่ฟังก์ชันถูกเรียกจนจบ</li>
+    <li><code>let</code>/<code>const</code> = <b>block scope</b> → ออกนอก <code>{}</code> แล้วเรียกใช้ = <code>ReferenceError: ... is not defined</code></li>
+    <li><code>var</code> = ขอบเขตแค่ฟังก์ชัน → ประกาศใน <code>if {}</code> แล้วใช้นอก if (แต่ในฟังก์ชันเดียวกัน) ได้ ไม่ error</li>
+    <li><code>&lt;script type="module"&gt;</code> มี scope ของตัวเอง → script อื่นมองไม่เห็นตัวแปรในนั้น</li>
+    <li>ชื่อ global กับ local ซ้ำกัน → ในฟังก์ชันใช้ตัว <b>local</b></li>
+    <li>ตัวแปรควรมี scope เล็กที่สุดเท่าที่ทำได้</li>
+</ul>
+<pre><code>// Closure = ฟังก์ชัน + ตัวแปรภายนอกที่มันจำไว้
+function displayFullname(name) {
+    return () =&gt; console.log(name);   // ฟังก์ชันข้างในยังจำ name ได้
+}
+const printFullname = displayFullname("Wudhichart Sawangphol");
+printFullname();   // Wudhichart Sawangphol</code></pre>
+</div>
+
+<h2 id="oop">19. Class / OOP (L7)</h2>
+<div class="card">
+<ul>
+    <li><b>Class</b> = แม่แบบ (properties + methods) · <b>Object</b> = class ที่ใส่ค่าจริง · การสร้าง object = <b>Instantiation</b></li>
+    <li><code>constructor</code> ถูกเรียกทุกครั้งที่ <code>new</code> · ต้องประกาศ class <b>ก่อน</b>สร้าง object</li>
+    <li><b>Inheritance</b>: subclass ได้ property/method ทั้งหมดของ superclass (<code>extends</code>) · <b>Polymorphism</b> (ตามสไลด์): subclass มี property/method เฉพาะตัวเพิ่มได้</li>
+    <li>ใน constructor ของ subclass ต้องเรียก <code>super(...)</code> <b>ก่อน</b>ใช้ <code>this</code></li>
+</ul>
+<pre><code>class Instructor {
+    constructor(_firstName, _lastName, _subjects) {
+        this.firstName = _firstName;
+        this.lastName  = _lastName;
+        this.subjects  = _subjects;
+    }
+    sayHello() { return "Hey! I'm " + this.firstName + ". Nice to meet you!!!"; }
+    teach()    { return "I teach " + this.subjects + "."; }
+}
+
+class UnivInstructor extends Instructor {
+    constructor(_firstName, _lastName, _subjects, _university, _campus) {
+        super(_firstName, _lastName, _subjects);   // ส่งต่อให้ superclass
+        this.university = _university;
+        this.campus = _campus;
+    }
+    getUniversity() { return "My office is at " + this.university + ", " + this.campus + "."; }
+}
+
+let k = new UnivInstructor("Jidapa", "Kraisangka", ["HTML","OOP:JS"], "Mahidol University", "Salaya");
+k.sayHello();       // Hey! I'm Jidapa. Nice to meet you!!!   (สืบทอดมา)
+k.teach();          // I teach HTML,OOP:JS.   (array ต่อ string → คั่นด้วย , ไม่มีเว้นวรรค)
+k.getUniversity();  // My office is at Mahidol University, Salaya.
+k.nickName;         // undefined  (property ที่ไม่มี → ไม่ error)
+k.nickName = "Pa";  // เพิ่ม property ทีหลังได้
+k.sayMyName();      // TypeError: k.sayMyName is not a function  (เรียก method ที่ไม่มี → error!)</code></pre>
+</div>
+
+<h2 id="dom">20. DOM — Document Object Model (L7)</h2>
+<div class="card">
+<ul>
+    <li>DOM = มาตรฐาน W3C · เป็น interface ให้โปรแกรมเข้าถึง/แก้ไข เนื้อหา โครงสร้าง และสไตล์ของเอกสาร · มี 3 ส่วน: Core DOM, XML DOM, HTML DOM · ไม่ผูกกับภาษาใดภาษาหนึ่ง</li>
+    <li>หน้า HTML = <b>tree</b> ของ node · ทุกอย่างเป็น node: document node · element node (ทุก tag) · text node · attribute node · comment node</li>
+    <li>ความสัมพันธ์: parent / child / sibling (พี่น้อง ระดับเดียวกัน) / ancestor / descendant</li>
+</ul>
+<div class="flow">Document
+ └ &lt;html&gt;  (root element)
+    ├ &lt;head&gt; └ &lt;title&gt; └ "DOM"
+    └ &lt;body&gt;
+       ├ &lt;h1&gt; └ "Document object model"
+       └ &lt;p align="left"&gt; └ "A HTML document is..."     (&lt;h1&gt; กับ &lt;p&gt; = siblings)</div>
+<div class="tbl"><table>
+<tr><th>คำสั่ง</th><th>คืนค่า</th></tr>
+<tr><td><code>document.getElementById("id")</code></td><td>element เดียว (ไม่ใส่ #)</td></tr>
+<tr><td><code>document.getElementsByClassName("cls")</code></td><td>collection (ใช้ <code>[i]</code> + <code>.length</code>) (ไม่ใส่ .)</td></tr>
+<tr><td><code>document.getElementsByTagName("span")</code></td><td>collection</td></tr>
+<tr><td><code>document.querySelector("#id / .cls / tag")</code></td><td><b>ตัวแรก</b>ที่ตรง CSS selector</td></tr>
+<tr><td><code>document.querySelectorAll(".cell")</code></td><td>NodeList ทุกตัวที่ตรง (ใช้ <code>.forEach</code> ได้)</td></tr>
+<tr><td><code>document.write()</code> / <code>writeln()</code></td><td>เขียน HTML ลงเอกสาร (writeln เพิ่ม newline)</td></tr>
+</table></div>
+<div class="tbl"><table>
+<tr><th>Property / Method ของ element</th><th>ใช้ทำอะไร</th></tr>
+<tr><td><code>el.innerHTML</code></td><td>อ่าน/เขียน <b>HTML</b> ข้างใน (tag ถูกแปลงเป็น element จริง)</td></tr>
+<tr><td><code>el.textContent</code></td><td>อ่าน/เขียน<b>ข้อความล้วน</b> (tag จะแสดงเป็นตัวอักษร)</td></tr>
+<tr><td><code>input.value</code></td><td>ค่าในช่อง input (<b>เป็น string เสมอ</b> → ใช้ <code>parseFloat</code>/<code>parseInt</code>/<code>Number</code> ก่อนคำนวณ)</td></tr>
+<tr><td><code>el.style.backgroundColor = "green"</code></td><td>เปลี่ยน CSS (ชื่อแบบ camelCase)</td></tr>
+<tr><td><code>el.setAttribute("class","colors")</code> / <code>getAttribute("data-cell-index")</code></td><td>ตั้ง/อ่าน attribute (getAttribute คืน string)</td></tr>
+<tr><td><code>document.createElement("p")</code> + <code>document.createTextNode("Second")</code></td><td>สร้าง node ใหม่</td></tr>
+<tr><td><code>parent.appendChild(child)</code></td><td>เพิ่ม node เป็นลูกตัว<b>สุดท้าย</b></td></tr>
+<tr><td><code>parent.removeChild(child)</code></td><td>ลบลูก (ต้องหา parent และ child ให้ถูก)</td></tr>
+<tr><td><code>childNodes</code> <code>firstChild</code> <code>nodeValue</code> <code>getRootNode()</code></td><td>เดินใน tree</td></tr>
+</table></div>
+<pre><code>let div = document.getElementById("div_demo");
+div.innerHTML = "&lt;p&gt;First&lt;/p&gt;";
+let p2 = document.createElement("p");
+p2.appendChild(document.createTextNode("Second"));   // text → p
+div.appendChild(p2);                                 // p → div
+
+let colors = document.getElementsByClassName("colors");
+for (let i = 0; i &lt; colors.length; i++) {
+    colors[i].textContent = i + ":" + colors[i].textContent;   // 0:Red 1:Green 2:Blue
+}</code></pre>
+<div class="trap">ถ้า <code>&lt;script&gt;</code> อยู่ใน <code>&lt;head&gt;</code> แล้วเรียก <code>getElementById</code> ทันที จะได้ <code>null</code> เพราะ element ยังไม่ถูกสร้าง → วาง script ไว้ท้าย <code>&lt;body&gt;</code> (แบบในสไลด์)</div>
+</div>
+
+<h2 id="event">21. Events (L7)</h2>
+<div class="card">
+<p>Event = สิ่งที่ browser หรือผู้ใช้ทำ แล้วเราให้ฟังก์ชันตอบสนอง</p>
+<div class="tbl"><table>
+<tr><th>Event</th><th>เกิดเมื่อ</th><th>Event</th><th>เกิดเมื่อ</th></tr>
+<tr><td>onclick / ondblclick</td><td>คลิก / ดับเบิลคลิก</td><td>onmouseover / onmouseout</td><td>เมาส์เข้า / ออกจาก element</td></tr>
+<tr><td>onchange</td><td>เลือก select ใหม่ หรือแก้ input แล้ว<b>ออกจากช่อง</b></td><td>onmousedown / onmouseup</td><td>กด / ปล่อยปุ่มเมาส์</td></tr>
+<tr><td>onfocus</td><td>element ได้ focus</td><td>onmousemove</td><td>เมาส์ขยับ</td></tr>
+<tr><td>onkeydown / onkeyup / onkeypress</td><td>กดลง / ปล่อย / กดแล้วปล่อย</td><td>onsubmit / onreset</td><td>ส่ง / รีเซ็ตฟอร์ม</td></tr>
+<tr><td>onload / onunload</td><td>โหลดเสร็จ / กำลังออกจากหน้า</td><td>onresize / onselect / onabort</td><td>เปลี่ยนขนาด / เลือกข้อความ / หยุดโหลดรูป</td></tr>
+</table></div>
+<pre><code>&lt;!-- วิธี 1: attribute ใน HTML (ใส่วงเล็บ) --&gt;
+&lt;input type="text" id="num1"&gt; + &lt;input type="text" id="num2"&gt; =
+&lt;input type="text" id="sum"&gt;
+&lt;button onclick="sum()"&gt;Sum Me&lt;/button&gt;
+&lt;script&gt;
+function sum() {
+    var n1 = parseFloat(document.getElementById("num1").value);
+    var n2 = parseFloat(document.getElementById("num2").value);
+    document.getElementById("sum").value = n1 + n2;
+}
+&lt;/script&gt;
+
+// วิธี 2: addEventListener (ชื่อ event ไม่มี "on" และส่งฟังก์ชันไม่ใส่วงเล็บ)
+document.getElementById("btn").addEventListener("click", sum);
+document.querySelectorAll(".cell").forEach(cell =&gt; cell.addEventListener("click", handleCellClick));
+
+function handleCellClick(e) {
+    const cell = e.target;      // element ที่ถูกคลิก
+    const idx = parseInt(cell.getAttribute("data-cell-index"));
+}</code></pre>
+<div class="trap"><code>addEventListener("click", sum)</code> ✔ · <code>addEventListener("onclick", sum)</code> ✘ · <code>addEventListener("click", sum())</code> ✘ (จะเรียก sum ทันทีแล้วส่งผลลัพธ์ไปแทน)</div>
+<p><b>Tic Tac Toe (ตัวอย่างใหญ่ใน L6):</b> <code>gameState</code> = array 9 ช่อง <code>""</code> · <code>winningConditions</code> = 8 ชุด (3 แถว 3 คอลัมน์ 2 ทแยง) · คลิกช่อง → ถ้าช่องไม่ว่างหรือเกมจบแล้ว <code>return</code> · บันทึก + <code>innerHTML = currentPlayer</code> · ตรวจชนะ (a===b &amp;&amp; b===c) · เสมอ = <code>!gameState.includes("")</code> · สลับผู้เล่น <code>currentPlayer = currentPlayer === "X" ? "O" : "X"</code></p>
+</div>
+
+<!-- ======================= ANSWERS ======================= -->
+<h2 id="answers">22. เฉลย "What is the output?" / แบบฝึกในสไลด์</h2>
+<p>ลองคิดเองก่อนแล้วค่อยกดเปิดดูเฉลย</p>
+
+<details><summary>CSS Ex2 (L3) — <code>&lt;h1 id="blue" class="green"&gt;</code> กับกฎ <code>#header</code>, <code>h1.green</code>, <code>h1</code>, <code>.red</code></summary>
+<p class="ans">พื้นหลังสีเขียว (green)</p>
+<p><code>#header</code> ไม่ตรง (id จริงคือ blue) · <code>.red</code> ไม่ตรง · เหลือ <code>h1.green</code> (class+element) กับ <code>h1</code> (element) → <code>h1.green</code> เจาะจงกว่า</p></details>
+
+<details><summary>Cascading order (L3 หน้า 33) — external cornflowerblue/serif, internal deeppink/monospace, inline greenyellow/sans-serif บน body</summary>
+<p class="ans">greenyellow + sans-serif</p><p>Inline ชนะทุกอย่าง</p></details>
+
+<details><summary>Internal <code>h1 {deeppink}</code> แล้วลิงก์ external <code>h1 {orange}</code> ทีหลัง (L3 หน้า 36)</summary>
+<p class="ans">orange (และ font sans-serif)</p><p>Internal = External → ตัวที่อยู่ทีหลัง (external) ชนะ</p></details>
+
+<details><summary>CSS Ex3 — internal <code>.colored {deeppink}</code> แล้ว external <code>h1 {orange}</code> ทีหลัง</summary>
+<p class="ans">deeppink</p><p>class เจาะจงกว่า element → ลำดับไม่มีผล</p></details>
+
+<details><summary>CSS Ex4 — internal <code>.colored {deeppink}</code> แล้ว external <code>.colored {orange}</code> ทีหลัง</summary>
+<p class="ans">orange</p><p>เจาะจงเท่ากัน (class vs class) → ตัวที่อยู่ทีหลังชนะ</p></details>
+
+<details><summary>Media Query Ex2 (L4) — div 4em / max-width 768 → 2em / min-width 1000 → 8em</summary>
+<p class="ans">จอ ≤ 768px → 2em · 769–999px → 4em · ≥ 1000px → 8em</p></details>
+
+<details><summary>var vs let ใน block (L6 หน้า 31)</summary>
+<pre><code>var number = 1; { var number = 4; }  console.log("number is " + number);
+let number = 2; { let number = 5; }  console.log("number is " + number);</code></pre>
+<p class="ans">number is 4 · number is 2</p>
+<p>var ไม่มี block scope → ตัวใน <code>{}</code> คือตัวเดียวกัน ทับค่าเป็น 4 · let ใน <code>{}</code> เป็นตัวแปรใหม่ ตัวนอกยังเป็น 2 (สองชุดนี้ต้องรันแยกกัน ไม่งั้น let ซ้ำชื่อ var จะ SyntaxError)</p></details>
+
+<details><summary>var i ใน for loop (L6 หน้า 32)</summary>
+<pre><code>var i = 5; for (var i = 0; i &lt; 10; i++) {}  console.log("i is " + i);</code></pre>
+<p class="ans">i is 10</p>
+<p>ลูปใช้ i ตัวเดียวกับข้างนอก จบลูปที่ i = 10 · ถ้าเป็น <code>let j = 5; for (let j = 0; ...)</code> → ข้างนอกยังเป็น <b>5</b> (ในสไลด์พิมพ์ <code>i++</code>/<code>+ i</code> ผิดเป็น typo ความตั้งใจคือ j)</p></details>
+
+<details><summary>Check understanding (L6 หน้า 36) — number1 ประกาศ → log → =10 → log → +10 → log</summary>
+<p class="ans">undefined · 10 · 20</p></details>
+
+<details><summary>Data types + typeof (L6 หน้า 39)</summary>
+<p class="ans">The value of myNum is 10 and type is number<br>The value of myStr is ten and type is string<br>The value of MyBool is true and type is boolean<br>The value of myNum is Hello World!! and type is string</p>
+<p>ทำได้ เพราะ JS เป็น weakly typed</p></details>
+
+<details><summary>User-defined object + reference (L6 หน้า 41)</summary>
+<p class="ans">Wudhichart is 40 years old.<br>Candidate is 40 years old.<br>Candidate up-to-date with fees: false<br>Wudhichart's parking permit is blue<br>Wudhichart's parking permit is blue<br>Wudhichart is 40 years old.</p>
+<p><code>aCandidate = wudhichart</code> คือชี้ object ตัวเดียวกัน แก้ทางไหนก็เห็นทั้งคู่</p></details>
+
+<details><summary>Number methods (L6 หน้า 43)</summary>
+<p class="ans">10 · 10.569 · NaN · true · "10" · 10 · "1e+1"</p></details>
+
+<details><summary>String methods (L6 หน้า 48) — <code>"Hello World"</code></summary>
+<p class="ans">length = 11 · charAt(1) = "e" · split(" ") = ["Hello", "World"] · substring(3,10) = "lo Worl"</p>
+<p>index: H0 e1 l2 l3 o4 ␣5 W6 o7 r8 l9 d10 → ตั้งแต่ 3 ถึง 9 (ไม่รวม 10)</p></details>
+
+<details><summary>if <code>num1 = 1, str1 = '1'</code>, เงื่อนไข <code>num1 === str1</code> (L6 หน้า 60)</summary>
+<p class="ans">ไม่มีอะไรแสดง</p><p><code>1 === '1'</code> เป็น false (ชนิดต่างกัน) และไม่มี else</p></details>
+
+<details><summary>if-else <code>num1 = 10, str1 = '1'</code> (L6 หน้า 61)</summary>
+<p class="ans">The condition num1 === str1 is false</p></details>
+
+<details><summary>Ternary num1 = 1, num2 = 3</summary><p class="ans">biggerNumber is 3</p></details>
+
+<details><summary>if-else-if mark = 75</summary><p class="ans">The grade is B</p></details>
+
+<details><summary>switch expr = "Soda"</summary>
+<p class="ans">Soda or Sparking Water is 30 Baht.</p><p>case 'Soda' ไม่มีโค้ดและไม่มี break → ไหลลงไปทำของ 'Sparking Water'</p></details>
+
+<details><summary>while n &lt; 10 (n++, x += n)</summary>
+<p class="ans">n = 10, x = 55</p><p>x = 1+2+…+10</p></details>
+
+<details><summary>while vs do-while (n = 1, เงื่อนไข n &lt; 1)</summary>
+<p class="ans">while: n = 1, x = 0 · do-while: n = 2, x = 2</p><p>while ไม่เข้าเลยสักรอบ · do-while ทำ 1 รอบก่อนเช็ค</p></details>
+
+<details><summary>for (var i = 0; i &lt; 10; i++) console.log</summary><p class="ans">i = 0, i = 1, … , i = 9 (10 บรรทัด)</p></details>
+
+<details><summary>label + continue เมื่อ i % 3 == 0</summary>
+<p class="ans">1 2 4 5 7 8</p><p>ข้าม 0, 3, 6, 9</p></details>
+
+<details><summary>label + break ที่ ind = 5</summary><p class="ans">Break at i=5!!</p></details>
+
+<details><summary>Nested loop: continue myOuterLoop ถ้า a % 6 != 0</summary>
+<p class="ans">a=0 b=0 … a=0 b=9 แล้ว a=6 b=0 … a=6 b=9 (รวม 20 บรรทัด)</p>
+<p>มีแค่ a = 0 และ 6 ที่หาร 6 ลงตัว ที่เหลือโดนข้ามไปทั้ง outer loop รอบนั้น</p></details>
+
+<details><summary>for...in บน object wudhichart</summary>
+<p class="ans">firstName=Wudhichart · lastName=sawangphol · age=30 · university=Mahidol · feesPaid=true</p></details>
+
+<details><summary>Functions L7 — flexible(sumFunction, 3, 4) / calculateAreaofSquare2(4)() / map / filter กับ [2, 7, 9, 10]</summary>
+<p class="ans">7 · "calculateAreaofSquare2: 16" · "Map: 4,49,81,100" · "evenNumbers: 2,10"</p></details>
+
+<details><summary>Scope: const ใน if แล้วใช้นอก if / var ใน if ภายในฟังก์ชัน / type="module"</summary>
+<p class="ans">const นอก block → ReferenceError: myName is not defined · var → ไม่ error (พิมพ์ชื่อได้) · ตัวแปรใน module → ReferenceError เมื่อเรียกจาก script อื่น</p></details>
+
+<details><summary>OOP — ผลของ kjidapa (Instructor) หลังเปลี่ยน firstName</summary>
+<p class="ans">Jidapa Kraisangka<br>Aj. Pa<br>Hey! I'm Aj. Pa. Nice to meet you!!!<br>I teach HTML,OOP:JS.</p></details>
+
+<details><summary>OOP — kjidapa2.nickName / sayMyName() (L7 หน้า 42)</summary>
+<p class="ans">undefined → Pa → TypeError: kjidapa2.sayMyName is not a function</p>
+<p>error ทำให้ script หยุด บรรทัดหลังจากนั้นไม่ถูกรัน (ถ้าลบบรรทัดที่ error ออก จะได้ "I am Jidapa or Pa")</p></details>
+
+<details><summary>DOM — getElementsByClassName("colors") กับ R G B แล้วต่อท้าย div</summary>
+<p class="ans">div แสดง "This is sample text.Color: R G B "</p></details>
+
+<!-- ======================= TRAPS ======================= -->
+<h2 id="traps">23. กับดักที่มักพลาด</h2>
+<div class="card">
+<ol>
+    <li><code>&lt;!DOCTYPE html&gt;</code> ต้องอยู่<b>ก่อน</b> <code>&lt;html&gt;</code> · <code>&lt;title&gt;</code> อยู่ใน <code>&lt;head&gt;</code></li>
+    <li><code>&lt;br&gt;</code> <code>&lt;img&gt;</code> <code>&lt;input&gt;</code> ไม่มี tag ปิด</li>
+    <li><code>&lt;th&gt;</code> ตัวหนาและกึ่งกลางเอง · ตารางไม่มีเส้นขอบถ้าไม่ใส่ CSS</li>
+    <li>colspan = ขยาย<b>แนวนอน</b> (หลายคอลัมน์) · rowspan = ขยาย<b>แนวตั้ง</b> (หลายแถว)</li>
+    <li>radio/checkbox กลุ่มเดียวกันต้อง <code>name</code> เหมือนกัน · label ผูกกับ input ด้วย <code>for</code> = <code>id</code></li>
+    <li>GET โชว์ข้อมูลใน URL · POST ไม่โชว์</li>
+    <li>ใน CSS ใช้ <code>.</code> กับ class และ <code>#</code> กับ id · แต่ใน <code>getElementById("x")</code> / <code>getElementsByClassName("x")</code> <b>ไม่ต้องใส่</b> · ส่วน <code>querySelector</code> <b>ต้องใส่</b></li>
+    <li>Inline &gt; Internal = External (ตัวหลังชนะ) · แต่ ID &gt; class &gt; element มาก่อนลำดับ</li>
+    <li>Flexbox ตั้ง <code>display:flex</code> ที่<b>แม่</b> ไม่ใช่ที่ลูก</li>
+    <li><code>max-width</code> = จอเล็กกว่าค่านี้ · <code>min-width</code> = จอใหญ่กว่าค่านี้</li>
+    <li>Bootstrap: 1 row = 12 หน่วย · container → row → col</li>
+    <li><code>==</code> แปลงชนิด · <code>===</code> ไม่แปลง · <code>"5" + 3 = "53"</code></li>
+    <li><code>input.value</code> เป็น string → ต้อง <code>parseFloat</code> ก่อนบวก ไม่งั้นได้ "12" แทน 3</li>
+    <li><code>const</code> เปลี่ยนค่าไม่ได้ · <code>let</code> ประกาศซ้ำไม่ได้ · <code>var</code> ทะลุ block</li>
+    <li>switch ลืม <code>break</code> → ไหลไป case ถัดไป · do-while ทำอย่างน้อย 1 รอบ</li>
+    <li><code>substring(3,10)</code> ไม่รวม index 10 · <code>getDay()</code> = วันในสัปดาห์ (0 = อาทิตย์) ไม่ใช่วันที่</li>
+    <li>subclass ต้องเรียก <code>super()</code> · สร้าง object ต้องใช้ <code>new</code></li>
+    <li>property ที่ไม่มี → <code>undefined</code> · method ที่ไม่มี → <b>TypeError</b></li>
+    <li><code>innerHTML</code> แปลง tag · <code>textContent</code> เป็นข้อความล้วน</li>
+    <li><code>addEventListener("click", fn)</code> — ไม่มี "on" และไม่ใส่ <code>()</code> · แต่ใน attribute HTML เขียน <code>onclick="fn()"</code></li>
+</ol>
+</div>
+</div>
+</body>
+</html>

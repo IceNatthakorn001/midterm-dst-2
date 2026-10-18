@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 7: JavaScript Part 2 (Functions, OOP, DOM)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+.qcode{font-family:Consolas,'Courier New',monospace;background:#1e1e2e;color:#e8e8f0;padding:10px 12px;border-radius:8px;font-size:.88rem;font-weight:400;line-height:1.45;white-space:pre;overflow-x:auto;margin:10px 0 0;text-align:left}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 7: JavaScript Part 2 (Functions, OOP, DOM)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "Constructor function ต้องเรียกใช้ด้วย operator ใดเพื่อสร้าง object",
+  "choices": [
+   "new",
+   "this",
+   "class",
+   "create"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น var person1 = new Person(\"Wudhichart\", \"Sawangphol\", 30);",
+   "ผิด — this ใช้ข้างในเพื่ออ้างถึง object ที่กำลังสร้าง",
+   "ผิด — class เป็นคำประกาศคลาส ไม่ใช่ตัวเรียกสร้าง",
+   "ผิด — JS ไม่มี operator ชื่อ create"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน constructor function คำว่า this หมายถึงอะไร",
+  "choices": [
+   "ตัว constructor function เอง",
+   "object ตัวแรกที่เคยสร้างจากฟังก์ชันนี้",
+   "object ใหม่ที่กำลังถูกสร้างจาก new",
+   "object window ของหน้าเว็บเสมอ"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — this ไม่ได้ชี้ไปที่ตัวฟังก์ชัน",
+   "ผิด — แต่ละครั้งที่ new จะได้ this เป็น object ใหม่",
+   "ถูก — the keyword this is used to refer to the object being created",
+   "ผิด — เมื่อเรียกด้วย new this คือ object ใหม่ ไม่ใช่ window"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน constructor function จะสร้างฟังก์ชันแบบ private ได้อย่างไร",
+  "choices": [
+   "ประกาศด้วย this.ชื่อ ไว้ข้างใน",
+   "ใส่คำว่า private หน้าชื่อฟังก์ชัน",
+   "ประกาศไว้นอกตัว constructor",
+   "ประกาศด้วย var หรือ let ข้างใน"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — this.ชื่อ คือ public เข้าถึงจากนอก object ได้",
+   "ผิด — สไลด์นี้ไม่ได้ใช้ keyword private",
+   "ผิด — ประกาศนอกก็ไม่ได้เป็นของ object",
+   "ถูก — สไลด์: public ใช้ this ส่วน private ใช้ var, let"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "High-order function คืออะไร",
+  "choices": [
+   "ฟังก์ชันที่ประกาศไว้ใน class เท่านั้น",
+   "ฟังก์ชันที่รับหรือคืนค่าเป็นฟังก์ชันอื่น",
+   "ฟังก์ชันที่ถูกเรียกก่อนฟังก์ชันอื่นเสมอ",
+   "ฟังก์ชันที่ไม่มีชื่อและไม่มีพารามิเตอร์"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นั่นคือ method ของ class",
+   "ถูก — functions that can take other functions as arguments or return functions as their results เช่น map, filter",
+   "ผิด — ไม่เกี่ยวกับลำดับการเรียก",
+   "ผิด — นั่นใกล้กับ anonymous function มากกว่า"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "โค้ด setTimeout(greet, 2000); ทำอะไร",
+  "choices": [
+   "เรียก greet เมื่อผ่านไป 2000 ms",
+   "เรียก greet ติดกันทั้งหมด 2000 ครั้ง",
+   "หยุดฟังก์ชัน greet เป็นเวลา 2 วินาที",
+   "เรียก greet ซ้ำ ๆ ทุก ๆ 2000 ms"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — greet เป็น callback ที่ setTimeout เรียกหลังผ่านไป 2000 มิลลิวินาที (2 วินาที)",
+   "ผิด — 2000 คือเวลาเป็น ms ไม่ใช่จำนวนครั้ง",
+   "ผิด — setTimeout ไม่ได้หยุดฟังก์ชัน แค่หน่วงเวลาก่อนเรียก",
+   "ผิด — เรียกซ้ำเป็นระยะคือ setInterval"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "DOM เป็นมาตรฐานขององค์กรใด",
+  "choices": [
+   "IETF",
+   "ISO",
+   "W3C",
+   "Ecma"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — IETF ดูแลโปรโตคอลอินเทอร์เน็ต เช่น HTTP",
+   "ผิด — สไลด์ระบุว่าเป็นมาตรฐาน W3C",
+   "ถูก — The DOM is a W3C (World Wide Web Consortium) standard",
+   "ผิด — Ecma International ดูแลมาตรฐาน ECMAScript"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "DOM แบ่งออกเป็นส่วนใดบ้าง",
+  "choices": [
+   "Node DOM, XML DOM, JSON DOM",
+   "Core DOM, JS DOM, Browser DOM",
+   "Core DOM, CSS DOM, HTML DOM",
+   "Core DOM, XML DOM, HTML DOM"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่มี Node DOM หรือ JSON DOM",
+   "ผิด — ไม่มี JS DOM หรือ Browser DOM",
+   "ผิด — ไม่มี CSS DOM ในการแบ่งนี้",
+   "ถูก — Core (ใช้กับเอกสารมีโครงสร้างทั่วไป), XML DOM, HTML DOM"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ข้อความที่อยู่ในแท็ก HTML เช่น \"DOM\" ใน &lt;title&gt;DOM&lt;/title&gt; เป็น node ชนิดใด",
+  "choices": [
+   "document node",
+   "เป็น text node",
+   "comment node",
+   "element node"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — document node คือทั้งเอกสาร",
+   "ถูก — The texts contained in the HTML elements are text nodes",
+   "ผิด — comment node คือคอมเมนต์ &lt;!-- --&gt; ในเอกสาร",
+   "ผิด — element node คือตัวแท็ก &lt;title&gt;"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "document.querySelector(selector) คืนค่าอะไร",
+  "choices": [
+   "true/false ว่ามี element นั้นไหม",
+   "ทุก element ที่ตรงกับ selector",
+   "จำนวน element ที่ตรงกับ selector",
+   "element แรกที่ตรงกับ selector"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่ได้คืนค่า boolean",
+   "ผิด — คืนทุกตัวคือ querySelectorAll()",
+   "ผิด — ไม่ได้คืนจำนวน",
+   "ถูก — Returns the first Element within the document that matches the specified selector"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "event ใดทำงานเมื่อเมาส์ “เลื่อนเข้า” บน element",
+  "choices": [
+   "onmousemove",
+   "onmousedown",
+   "onmouseover",
+   "onmouseout"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — onmousemove คือเมาส์ขยับ",
+   "ผิด — onmousedown คือกดปุ่มเมาส์ลง",
+   "ถูก — onmouseover: Fires when the mouse enters an element",
+   "ผิด — onmouseout คือเมาส์ออกจาก element"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ในการสร้าง subclass คำว่า super(...) ใน constructor ใช้ทำอะไร",
+  "choices": [
+   "สร้าง object ใหม่ของ subclass นั้น",
+   "เรียก constructor ของ superclass",
+   "ประกาศว่าเมธอดนี้เป็นแบบ private",
+   "ลบ property ของ superclass ทิ้ง"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — การสร้าง object ใช้ new",
+   "ถูก — super(cprop1, cprop2, …) ส่งค่าให้ constructor ของ superclass ตั้งค่า property ที่สืบทอด",
+   "ผิด — super ไม่เกี่ยวกับ private",
+   "ผิด — super ไม่ได้ลบอะไร"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เมธอดใดใช้เพิ่ม node ใหม่เป็นลูกตัวสุดท้ายของ parent",
+  "choices": [
+   "appendChild()",
+   "setAttribute()",
+   "createElement()",
+   "createTextNode()"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — appendChild() adds a new node to the last child of its parent",
+   "ผิด — setAttribute() ใช้ตั้งค่า attribute",
+   "ผิด — createElement() แค่สร้าง element ยังไม่ได้ใส่ลงในหน้า",
+   "ผิด — createTextNode() แค่สร้าง text node"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>if (true) {\n  const myName = \"Wudhichart\";\n}\nconsole.log(myName);</pre>",
+  "choices": [
+   "พิมพ์ Wudhichart",
+   "เกิด TypeError",
+   "ReferenceError",
+   "พิมพ์ undefined"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — จะพิมพ์ได้ถ้าใช้ var (function/global scope)",
+   "ผิด — ไม่ได้เรียกเป็นฟังก์ชัน",
+   "ถูก — const เป็น block scope ใช้ได้แค่ใน { } ของ if เรียกนอก block จึง ReferenceError",
+   "ผิด — ไม่ใช่ undefined เพราะตัวแปรไม่มีอยู่ใน scope นี้เลย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมโค้ดนี้ “ไม่ error” <pre class=qcode>function displayFullname() {\n  if (true) {\n    var myFullname = \"Wudhichart Sawangphol\";\n  }\n  console.log(myFullname);\n}\ndisplayFullname();</pre>",
+  "choices": [
+   "var มี scope เป็นทั้งฟังก์ชัน ไม่ใช่แค่ block",
+   "console.log ข้าม scope ได้ทุกกรณีอยู่แล้ว",
+   "if (true) ไม่ได้สร้าง block ใหม่ขึ้นมา",
+   "var เป็น global เสมอไม่ว่าจะประกาศที่ไหน"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — var scoped to their nearest function จึงใช้ได้ทั่วฟังก์ชัน displayFullname",
+   "ผิด — console.log ไม่ได้มีสิทธิ์พิเศษเรื่อง scope",
+   "ผิด — { } ของ if เป็น block ถ้าใช้ let/const จะ error",
+   "ผิด — var ในฟังก์ชันเป็น local ของฟังก์ชันนั้น"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม script ธรรมดาเรียกตัวแปรจาก &lt;script type=\"module\"&gt; ไม่ได้ (ReferenceError)",
+  "choices": [
+   "module ต้องโหลดหลัง script ธรรมดา",
+   "แต่ละ module มี scope แยกของตัวเอง",
+   "ตัวแปรใน module เป็น private ทุกตัว",
+   "const ใช้ข้าม &lt;script&gt; ไม่ได้ทุกกรณี"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ปัญหาคือ scope ไม่ใช่ลำดับการโหลด",
+   "ถูก — Each module also has its own scope ไม่ได้อยู่ใน global scope",
+   "ผิด — สไลด์ไม่ได้อธิบายแบบนั้น แค่บอกว่าอยู่ใน module scope",
+   "ผิด — const ใน script ธรรมดาเรียกข้าม &lt;script&gt; ได้ (global scope)"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม printFullname() ยังพิมพ์ชื่อได้ แม้ displayFullname ทำงานจบไปแล้ว <pre class=qcode>function displayFullname(name) {\n  return () =&gt; console.log(name);\n}\nconst printFullname = displayFullname(\"Wudhichart\");\nprintFullname();</pre>",
+  "choices": [
+   "name กลายเป็นตัวแปร global อัตโนมัติ",
+   "JS เรียก displayFullname ซ้ำให้อัตโนมัติ",
+   "arrow function copy ค่าลงในตัวเอง",
+   "closure เก็บการอ้างอิงตัวแปร name ไว้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — name ยังเป็น parameter ของฟังก์ชัน ไม่ใช่ global",
+   "ผิด — ไม่มีการเรียกซ้ำ ฟังก์ชันข้างในใช้ตัวแปรที่จำไว้",
+   "ผิด — สไลด์บอกว่า closure เก็บ reference ไม่ใช่การ copy ตอนรัน",
+   "ถูก — closure คือฟังก์ชันที่รวมกับการอ้างอิงตัวแปรภายนอก ทำให้เข้าถึง name ได้ภายหลัง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var x = \"global\";\nfunction show() {\n  var x = \"local\";\n  console.log(x);\n}\nshow();</pre>",
+  "choices": [
+   "local",
+   "error",
+   "global",
+   "null"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ถ้าชื่อ global กับ local ซ้ำกัน ในฟังก์ชันจะใช้ตัว local",
+   "ผิด — ประกาศ var ชื่อซ้ำในฟังก์ชันได้ ไม่ error",
+   "ผิด — ตัว local บังตัว global ภายในฟังก์ชัน",
+   "ผิด — x ถูกกำหนดเป็น \"local\" ก่อนพิมพ์แล้ว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "จากตัวอย่าง kjidapa2 ในสไลด์ ผลของ 2 บรรทัดนี้คืออะไร <pre class=qcode>console.log(kjidapa2.nickName);  // ยังไม่เคยกำหนด\nkjidapa2.sayMyName();           // ยังไม่เคยสร้าง</pre>",
+  "choices": [
+   "ReferenceError ทั้งสองบรรทัด",
+   "TypeError แล้ว undefined",
+   "undefined แล้ว undefined",
+   "undefined แล้ว TypeError"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — object มีอยู่จริง จึงไม่ใช่ ReferenceError",
+   "ผิด — สลับกัน",
+   "ผิด — การเรียกสิ่งที่ไม่ใช่ฟังก์ชันทำให้เกิด error",
+   "ถูก — อ่าน property ที่ไม่มีได้ undefined ส่วนเรียก undefined เป็นฟังก์ชันจะ TypeError: not a function"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ถ้าสั่ง el.innerHTML = \"&lt;b&gt;Hi&lt;/b&gt;\" เทียบกับ el.textContent = \"&lt;b&gt;Hi&lt;/b&gt;\" จะต่างกันอย่างไร",
+  "choices": [
+   "ทั้งสองแบบได้ Hi ตัวหนาเหมือนกันทุกประการ",
+   "innerHTML ได้ตัวหนา textContent โชว์แท็ก",
+   "ทั้งสองโชว์ &lt;b&gt;Hi&lt;/b&gt; เป็นข้อความเหมือนกัน",
+   "textContent ได้ตัวหนา innerHTML โชว์แท็ก"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — textContent ไม่แปลงแท็กเป็น HTML",
+   "ถูก — innerHTML ตีความเป็น HTML ส่วน textContent ตั้งค่าเป็นข้อความล้วน",
+   "ผิด — innerHTML ตีความแท็ก &lt;b&gt; จริง",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "getElementById() กับ getElementsByClassName() ต่างกันอย่างไร",
+  "choices": [
+   "ทั้งสองได้กลุ่ม แต่ตัวแรกจะเรียงจากท้ายเอกสารขึ้นมา",
+   "ทั้งสองได้ element เดียว แต่ค้นด้วยค่าที่ต่างกันเท่านั้น",
+   "ตัวแรกได้ element เดียว ตัวหลังได้กลุ่มต้องใช้ index",
+   "ตัวแรกได้กลุ่มต้องใช้ index ตัวหลังได้ element เดียว"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — getElementById คืนตัวเดียว",
+   "ผิด — getElementsByClassName คืนหลายตัว (มี s)",
+   "ถูก — id ไม่ซ้ำจึงคืน element เดียว ส่วน class คืน collection ต้องวนลูปหรือใช้ [i]",
+   "ผิด — สลับกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ตามสไลด์ object ของ UnivInstructor เรียก sayHello() ได้ทั้งที่ไม่ได้เขียนไว้ในคลาสนี้ เพราะอะไร",
+  "choices": [
+   "สืบทอดมาจากคลาสแม่ Instructor (inheritance)",
+   "ต้องเขียน sayHello ซ้ำใน subclass ถึงจะเรียกได้",
+   "JS สร้างเมธอดชื่อ sayHello ให้ทุกคลาสอัตโนมัติ",
+   "super() คัดลอกเฉพาะเมธอด ไม่คัดลอก property"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — A subclass inherits all the properties and methods of a superclass",
+   "ผิด — สไลด์บอกให้เขียนเฉพาะเมธอดที่ subclass มีเพิ่ม",
+   "ผิด — ไม่มีเมธอดอัตโนมัติแบบนั้น",
+   "ผิด — super() ใช้ตั้งค่า property ที่สืบทอด ส่วนเมธอดสืบทอดผ่าน extends"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ข้อใด “ไม่ใช่” คุณสมบัติของ first-class function ตามสไลด์",
+  "choices": [
+   "ส่งเป็น argument ได้",
+   "คืนค่าจากฟังก์ชันอื่นได้",
+   "เก็บไว้ในตัวแปรได้",
+   "ต้องประกาศก่อนเรียก"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เป็นคุณสมบัติ: passed as a parameter",
+   "ผิด — เป็นคุณสมบัติ: returned by another function",
+   "ผิด — เป็นคุณสมบัติ: assigned to a variable",
+   "ถูก — ไม่ได้อยู่ใน 4 ข้อของ first-class function"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>let nums = [2, 7, 9, 10];\nconst even = nums.filter((num) =&gt; num % 2 === 0);\nconsole.log(`evenNumbers: ${even}`);</pre>",
+  "choices": [
+   "evenNumbers: 9,10",
+   "evenNumbers: 2,10",
+   "evenNumbers: 7,9",
+   "evenNumbers: 4,100"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — filter เลือกตามเงื่อนไข ไม่ใช่ตามตำแหน่ง 9 เป็นเลขคี่",
+   "ถูก — filter เก็บเฉพาะตัวที่ callback คืน true คือเลขคู่ 2 และ 10",
+   "ผิด — นั่นคือเลขคี่",
+   "ผิด — filter ไม่เปลี่ยนค่า การยกกำลังสองคือ map"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเราควรใช้ function ตามเหตุผลในสไลด์",
+  "choices": [
+   "ทำให้ไม่ต้องประกาศตัวแปรด้วย let หรือ const",
+   "ทำให้ตัวแปรทุกตัวกลายเป็น global ใช้ได้ทุกที่",
+   "ใช้ซ้ำได้ แบ่งงานย่อย จัดโค้ดเป็นระเบียบ แก้ง่าย",
+   "ทำให้โปรแกรมรันเร็วขึ้นเพราะไม่ต้อง interpret"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ยังต้องประกาศตัวแปรตามปกติ",
+   "ผิด — ตัวแปรในฟังก์ชันเป็น local",
+   "ถูก — Reusability, Modularity, Organization, Maintainability",
+   "ผิด — ฟังก์ชันไม่ได้เปลี่ยนวิธีรันของ JS"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>function flexible(fOperation, a, b) {\n  return fOperation(a, b);\n}\nconsole.log(flexible((x, y) =&gt; x * y, 3, 4));</pre>",
+  "choices": [
+   "7",
+   "NaN",
+   "12",
+   "34"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 7 คือผลถ้าส่ง sumFunction (บวก)",
+   "ผิด — คูณตัวเลขได้ปกติ ไม่เป็น NaN",
+   "ถูก — ส่งฟังก์ชันคูณเข้าไปเป็น argument จึงได้ 3 × 4 = 12",
+   "ผิด — ไม่ได้ต่อ string"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>function showMsg(from, text = \"no message\") {\n  return from + \": \" + text;\n}\nconsole.log(showMsg(\"Ann\"));</pre>",
+  "choices": [
+   "Ann: no message",
+   "Ann: undefined",
+   "เกิด TypeError",
+   "no message: Ann"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ไม่ได้ส่ง text จึงใช้ค่า default \"no message\"",
+   "ผิด — จะเป็น undefined ถ้าไม่มี default",
+   "ผิด — ส่ง argument น้อยกว่าที่ประกาศได้ ไม่ error",
+   "ผิด — from อยู่หน้า \": \" ส่วน text อยู่หลัง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ต้องการให้กดปุ่ม id=\"btn\" แล้วเรียกฟังก์ชัน MyClick ควรเขียนแบบใด",
+  "choices": [
+   "btn.addEventListener(\"onclick\", MyClick)",
+   "btn.addEventListener(\"click\", MyClick)",
+   "btn.addEventListener(MyClick, \"click\")",
+   "btn.addEventListener(\"click\", MyClick())"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — addEventListener ใช้ \"click\" ไม่ใช่ \"onclick\"",
+   "ถูก — ชื่อ event ไม่มี on และส่งฟังก์ชัน (ไม่ใส่วงเล็บ) เป็น callback",
+   "ผิด — ลำดับ argument ผิด ต้องเป็น (event, function)",
+   "ผิด — MyClick() เรียกฟังก์ชันทันที แล้วส่งค่าที่คืนไปแทน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "หลังโค้ดนี้รัน span ทั้งสามแสดงข้อความอะไร <pre class=qcode>&lt;span&gt;Red&lt;/span&gt;&lt;span&gt;Green&lt;/span&gt;&lt;span&gt;Blue&lt;/span&gt;\nlet nodes = document.getElementsByTagName(\"span\");\nfor (var i = 0; i &lt; nodes.length; i++) {\n  nodes[i].textContent = i + \":\" + nodes[i].textContent;\n}</pre>",
+  "choices": [
+   "1:Red 2:Green 3:Blue",
+   "0:Red 0:Green 0:Blue",
+   "Red:0 Green:1 Blue:2",
+   "0:Red 1:Green 2:Blue"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — index ของ collection เริ่มที่ 0",
+   "ผิด — i เพิ่มทุกรอบ",
+   "ผิด — i + \":\" อยู่หน้าข้อความเดิม",
+   "ถูก — i เริ่มที่ 0 และนำหน้าข้อความเดิม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "จาก HTML นี้ &lt;h1&gt; กับ &lt;p&gt; มีความสัมพันธ์ใดใน DOM tree <pre class=qcode>&lt;body&gt;\n  &lt;h1&gt;Document object model&lt;/h1&gt;\n  &lt;p align=\"left\"&gt;A HTML document is ...&lt;/p&gt;\n&lt;/body&gt;</pre>",
+  "choices": [
+   "siblings (พี่น้อง มี parent คือ body)",
+   "ancestor/descendant (p เป็นบรรพบุรุษ)",
+   "ไม่มีความสัมพันธ์กันเลยเพราะเป็นคนละแท็ก",
+   "parent กับ child (h1 เป็นแม่ของ p)"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — สไลด์: &lt;h1&gt; and &lt;p&gt; are siblings ทั้งคู่เป็นลูกของ &lt;body&gt;",
+   "ผิด — p ไม่ได้ครอบ h1",
+   "ผิด — node ทุกตัวใน DOM เชื่อมกันเป็นต้นไม้",
+   "ผิด — h1 ปิดแท็กก่อน p เริ่ม จึงไม่ได้ซ้อนกัน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>class Instructor {\n  constructor(f, s) { this.firstName = f; this.subjects = s; }\n  teach() { return \"I teach \" + this.subjects + \".\"; }\n}\nlet t = new Instructor(\"Pisit\", [\"jQuery\", \"CSS\"]);\nt.firstName = \"Aj. P\";\nconsole.log(t.firstName + \" / \" + t.teach());</pre>",
+  "choices": [
+   "Aj. P / I teach [jQuery,CSS].",
+   "Aj. P / I teach undefined.",
+   "Pisit / I teach jQuery,CSS.",
+   "Aj. P / I teach jQuery,CSS."
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — array แปลงเป็น string ไม่มีวงเล็บเหลี่ยมและช่องว่าง",
+   "ผิด — subjects ถูกตั้งค่าใน constructor แล้ว",
+   "ผิด — firstName ถูกเปลี่ยนก่อนพิมพ์แล้ว",
+   "ถูก — แก้ property ได้หลังสร้าง และ array ต่อกับ string ได้ jQuery,CSS (คั่นด้วย , ไม่มีช่องว่าง)"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

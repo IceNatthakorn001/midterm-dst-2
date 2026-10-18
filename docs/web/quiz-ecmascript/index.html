@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: ECMAScript Versions (ES6 – ES2026)</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+.qcode{font-family:Consolas,'Courier New',monospace;background:#1e1e2e;color:#e8e8f0;padding:10px 12px;border-radius:8px;font-size:.88rem;font-weight:400;line-height:1.45;white-space:pre;overflow-x:auto;margin:10px 0 0;text-align:left}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: ECMAScript Versions (ES6 – ES2026)</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ECMAScript ถูกกำหนดมาตรฐานโดยองค์กรใด",
+  "choices": [
+   "Google Chrome Team",
+   "Ecma International",
+   "Mozilla Foundation",
+   "W3C Web Consortium"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — Chrome เป็นผู้ implement ไม่ใช่ผู้กำหนดมาตรฐาน",
+   "ถูก — ES is standardized by Ecma International และ JS คือ implementation ที่นิยมที่สุด",
+   "ผิด — Mozilla ทำ MDN และ Firefox แต่ไม่ได้กำหนดมาตรฐาน ES",
+   "ผิด — W3C ดูแล DOM/HTML ไม่ใช่ ECMAScript"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ES6 มีชื่อทางการว่าอะไร",
+  "choices": [
+   "ES2009",
+   "ES2016",
+   "ES2015",
+   "ES2006"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ปี 2009 คือ ES5",
+   "ผิด — ES2016 คือ ES7",
+   "ถูก — ES6 = ES2015 ออก June 2015",
+   "ผิด — ไม่มีเวอร์ชันชื่อนี้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ECMAScript edition ใดถูกยกเลิก (Abandoned) ไม่ได้ออกจริง",
+  "choices": [
+   "ES5.1",
+   "ES5",
+   "ES3",
+   "ES4"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ES5.1 ออก June 2011",
+   "ผิด — ES5 ออก December 2009",
+   "ผิด — ES3 ออก December 1999",
+   "ถูก — ตารางในสไลด์ระบุ ES4 = Abandoned"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Promise อยู่ในสถานะใดได้บ้าง",
+  "choices": [
+   "pending, fulfilled, rejected",
+   "opened, resolved, finished",
+   "waiting, succeeded, failed",
+   "pending, running, finished"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เริ่มที่ pending แล้วเปลี่ยนเป็น fulfilled (สำเร็จ) หรือ rejected (ล้มเหลว)",
+   "ผิด — resolved เป็นชื่อฟังก์ชัน resolve ไม่ใช่ชุดสถานะนี้",
+   "ผิด — ไม่ใช่ชื่อสถานะที่ JS ใช้",
+   "ผิด — ไม่มีสถานะ running/finished"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Template literal ใช้สัญลักษณ์ใดครอบ string และฝังตัวแปรด้วยอะไร",
+  "choices": [
+   "double \" \" และ #{ตัวแปร}",
+   "single ' ' และ ${ตัวแปร}",
+   "backtick ` ` และ {{ตัวแปร}}",
+   "backtick ` ` และ ${ตัวแปร}"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — \" \" ไม่แทนค่า และ #{} ไม่ใช่ syntax ของ JS",
+   "ผิด — ' ' ไม่แทนค่า ${} ให้",
+   "ผิด — {{ }} เป็น syntax ของ template engine อื่น",
+   "ถูก — เช่น `Hello, ${name}`"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Array.includes() และตัวดำเนินการยกกำลัง ** มาในเวอร์ชันใด",
+  "choices": [
+   "ES2019",
+   "ES2015",
+   "ES2016",
+   "ES2017"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ES2019 คือ flat, flatMap, fromEntries",
+   "ผิด — ES6 ใช้ indexOf ตรวจหาค่า",
+   "ถูก — ES2016 มีแค่ 2 อย่างคือ Array.includes() และ Exponentiation Operator",
+   "ผิด — ES2017 คือ padding, Object.values/entries, async"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "async/await, padStart/padEnd และ Object.entries() มาในเวอร์ชันใด",
+  "choices": [
+   "ES2017",
+   "ES2015",
+   "ES2020",
+   "ES2018"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ES2017: String padding, Object.values/entries, getOwnPropertyDescriptors, trailing commas, async functions",
+   "ผิด — ES6 มี Promise แต่ยังไม่มี async/await",
+   "ผิด — ES2020 คือ BigInt, ??, ?., matchAll",
+   "ผิด — ES2018 คือ Rest/Spread Properties และ for-await-of"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Nullish coalescing (??) และ Optional chaining (?.) มาในเวอร์ชันใด",
+  "choices": [
+   "ES2019",
+   "ES2020",
+   "ES2022",
+   "ES2021"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ES2019 คือ flat/flatMap/fromEntries/trimStart",
+   "ถูก — ES2020: BigInt, ??, ?., String.matchAll()",
+   "ผิด — ES2022 คือ .at(), Object.hasOwn, error cause",
+   "ผิด — ES2021 มี ??= (logical assignment) ซึ่งต่อยอดจาก ??"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ใน ES6 WeakMap ใช้อะไรเป็น key ได้",
+  "choices": [
+   "object เท่านั้น",
+   "number เท่านั้น",
+   "string เท่านั้น",
+   "ค่าชนิดใดก็ได้"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — WeakMap can only have a key as an object (ต่อมา ES2023 ให้ใช้ Symbol ได้ด้วย)",
+   "ผิด — number ใช้เป็น key ของ WeakMap ไม่ได้",
+   "ผิด — string ใช้เป็น key ของ WeakMap ไม่ได้",
+   "ผิด — ค่าใดก็ได้คือ Map"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "findLast(), findLastIndex() และ toSorted() มาในเวอร์ชันใด",
+  "choices": [
+   "ES2015",
+   "ES2023",
+   "ES2022",
+   "ES2025"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ES6 มีแค่ find() และ findIndex()",
+   "ถูก — ES2023: Find array from the last, Symbols as WeakMap keys, Change Array by Copy",
+   "ผิด — ES2022 คือ .at(), hasOwn, error cause, top-level await",
+   "ผิด — ES2025 คือ JSON modules, Iterator helpers, Set methods"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "feature ใดใช้สัญลักษณ์ @ นำหน้าเพื่อเพิ่มความสามารถให้ class/method",
+  "choices": [
+   "Temporal",
+   "Pipeline",
+   "Decorators",
+   "Records"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Temporal เป็น API จัดการวันเวลา ไม่ใช้ @",
+   "ผิด — Pipeline ใช้ |&gt;",
+   "ถูก — Decorators are prefixed with the @ symbol เช่น @log (stage 2 proposal)",
+   "ผิด — Records/Tuples ใช้ #{ } และ #[ ]"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Math.sumPrecise() และ Error.isError() มาในเวอร์ชันใด",
+  "choices": [
+   "ES2024",
+   "ES2023",
+   "ES2025",
+   "ES2026"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ES2024 คือ toWellFormed, waitSync, top-level await",
+   "ผิด — ES2023 คือ findLast, toSorted",
+   "ผิด — ES2025 คือ Promise.try, Set methods, Float16",
+   "ถูก — ES2026: sumPrecise, isError, Array.fromAsync, getOrInsert, rawJSON, Base64/Hex"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "โค้ดนี้พิมพ์ลำดับใด (myPromise resolve \"finished\" หลัง 1 วินาที) <pre class=qcode>const asyncFunction = async () =&gt; {\n  console.log(await resolveAfter1second());\n};\nconsole.log(\"Before\");\nasyncFunction();\nconsole.log(\"After\");</pre>",
+  "choices": [
+   "Before → finished → After",
+   "Before → After → finished",
+   "After → Before → finished",
+   "finished → Before → After"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — await ไม่ได้บล็อกโค้ดนอกฟังก์ชัน",
+   "ถูก — await หยุดแค่ใน async function โค้ดข้างนอกทำต่อทันที จึงพิมพ์ After ก่อน แล้ว finished มาทีหลัง",
+   "ผิด — console.log(\"Before\") อยู่บรรทัดแรก จึงพิมพ์ก่อน After",
+   "ผิด — Before ถูกพิมพ์ก่อนเรียก asyncFunction"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ใน myPromise ของสไลด์ ถ้า x = 5 (ไม่เท่ากับ 0) หลัง 1 วินาที state และ result ของ promise เป็นอะไร",
+  "choices": [
+   "rejected / Error(\"No No!\")",
+   "rejected / value \"finished\"",
+   "fulfilled / value \"finished\"",
+   "still pending / undefined"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — x != 0 จึงเรียก reject(new Error(\"No No!\")) state เป็น rejected และ result เป็น error",
+   "ผิด — result ของ reject คือ error ไม่ใช่ \"finished\"",
+   "ผิด — กรณีนี้เกิดเมื่อ x == 0 เท่านั้น",
+   "ผิด — pending คือก่อน 1 วินาที"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ควรเลือกใช้ WeakMap แทน Map ในกรณีใด",
+  "choices": [
+   "ต้องการวนลูปทุก key และ value ใน collection",
+   "ต้องการใช้ string หรือ number เป็น key ได้",
+   "ผูกข้อมูลกับ object ที่อาจถูกลบ เช่น DOM node",
+   "ต้องการรู้จำนวนคู่ข้อมูลทั้งหมดผ่าน property size"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — WeakMap วนลูปไม่ได้ (not enumerable) ต้องใช้ Map",
+   "ผิด — WeakMap ใช้ได้แค่ object เป็น key",
+   "ถูก — WeakMap ปล่อยให้ garbage collect ได้ ช่วยกัน memory leak",
+   "ผิด — WeakMap ไม่มี size"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "for...of ต่างจาก arr.forEach() อย่างไรตามสไลด์",
+  "choices": [
+   "for...of ใช้กับ array ไม่ได้ ใช้กับ object",
+   "forEach หยุดกลางคันด้วย break ได้ทันทีเสมอ",
+   "ทั้งสองแบบใช้ break ได้เหมือนกันทุกอย่างเลย",
+   "for...of ใช้ break, continue, return ได้"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — for...of ใช้กับ iterable เช่น array",
+   "ผิด — break ใช้ใน forEach ไม่ได้",
+   "ผิด — forEach ใช้ break ไม่ได้",
+   "ถูก — Unlike forEach(), you can use break, continue, and return"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>let a = 0;\nlet b = \"hi\";\na ||= 10;\nb ||= 10;\nconsole.log(a, b);</pre>",
+  "choices": [
+   "10 hi",
+   "0 10",
+   "10 10",
+   "0 hi"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ||= กำหนดค่าเมื่อด้านซ้ายเป็น falsy: 0 เป็น falsy จึงได้ 10 ส่วน \"hi\" truthy จึงคงเดิม",
+   "ผิด — สลับกัน",
+   "ผิด — \"hi\" เป็น truthy ไม่ถูกแทนที่",
+   "ผิด — 0 เป็น falsy จึงถูกแทนที่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>const cart = { count: 0 };\ncart.count ??= 5;\ncart.total ??= 99;\nconsole.log(cart.count, cart.total);</pre>",
+  "choices": [
+   "5 5",
+   "5 99",
+   "0 5",
+   "0 99"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — count คง 0 และ total ได้ 99",
+   "ผิด — จะได้ 5 ถ้าใช้ ||= เพราะ 0 เป็น falsy",
+   "ผิด — total ไม่มีค่า จึงถูกกำหนดเป็น 99 ไม่ใช่ 5",
+   "ถูก — ??= กำหนดเฉพาะเมื่อเป็น null/undefined: count = 0 ไม่ใช่ nullish จึงคง 0 ส่วน total ไม่มีจึงได้ 99"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร (obj ไม่มี property secondsubLevelProp) <pre class=qcode>console.log(obj?.prop?.secondsubLevelProp?.value);</pre>",
+  "choices": [
+   "TypeError",
+   "undefined",
+   "null value",
+   "empty string"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — จะ TypeError ถ้าใช้ . ธรรมดา (obj.prop.secondsubLevelProp.value)",
+   "ถูก — ?. เจอค่า undefined/null จะหยุดแล้วคืน undefined แทนการ error",
+   "ผิด — ?. คืน undefined ไม่ใช่ null",
+   "ผิด — ไม่ได้คืน string ว่าง"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "arr.toSorted() (ES2023) ต่างจาก arr.sort() อย่างไร",
+  "choices": [
+   "เรียงจากมากไปน้อย ต่างจาก sort ที่น้อยไปมาก",
+   "แก้ไข array เดิมโดยตรงและไม่คืนค่าอะไรกลับมา",
+   "คืน array ใหม่ที่เรียงแล้ว ส่วนตัวเดิมไม่เปลี่ยน",
+   "เรียงได้เฉพาะ array ที่เก็บค่าตัวเลขไว้เท่านั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ทิศทางขึ้นกับ compareFn เหมือน sort",
+   "ผิด — นั่นคือพฤติกรรมตรงข้าม toSorted ไม่แตะตัวเดิม",
+   "ถูก — กลุ่ม Change Array by Copy (toReversed, toSorted, toSpliced, with) คืนสำเนาใหม่",
+   "ผิด — เรียงค่าชนิดอื่นได้ เช่น string"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม ES2026 เพิ่ม Error.isError() ทั้งที่มี instanceof Error อยู่แล้ว",
+  "choices": [
+   "instanceof ตรวจได้แค่ error ใน async function",
+   "instanceof พลาดเมื่อ error มาจาก iframe/Worker",
+   "instanceof ทำให้ error หายไปจาก call stack เลย",
+   "instanceof ใช้ไม่ได้ในบล็อก try...catch ทุกกรณีเลย"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — instanceof ไม่ได้จำกัดแค่ async",
+   "ถูก — Error จาก iframe/Web Worker มี prototype ของ realm นั้น instanceof จึงได้ false แต่ isError ได้ true",
+   "ผิด — instanceof แค่ตรวจ ไม่ได้ลบ error",
+   "ผิด — ใช้ใน catch ได้ปกติ ปัญหาอยู่ที่ข้าม realm"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "Iterator helpers (ES2025) เช่น Iterator.from(arr).filter().map() ต่างจาก arr.filter().map() อย่างไร",
+  "choices": [
+   "ใช้ได้กับ array ตัวเลข ใช้กับ string ไม่ได้",
+   "ได้ผลลัพธ์เป็น Set แทนที่จะเป็น array เสมอ",
+   "ทำงานแบบ eager สร้าง array ใหม่ทุกขั้นตอน",
+   "ทำงานแบบ lazy ไม่สร้าง array ใหม่ทุกขั้น"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ใช้กับ iterable ได้ทั่วไป",
+   "ผิด — แปลงเป็น array ได้ด้วย .toArray()",
+   "ผิด — eager คือ arr.map()/filter() ปกติ",
+   "ถูก — lazy ไม่ eagerly create arrays จึงเหมาะกับ data stream"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "JSON.rawJSON() (ES2026) แก้ปัญหาอะไร",
+  "choices": [
+   "ตัวเลขใหญ่เกิน MAX_SAFE_INTEGER ถูกปัดจนค่าเพี้ยน",
+   "JSON ไม่รองรับ property ที่มีค่าเป็นชนิด boolean",
+   "JSON ที่มี string ภาษาไทยแสดงผลเป็นตัวอ่านไม่ออก",
+   "JSON.parse ทำงานช้าเกินไปเมื่อไฟล์มีขนาดใหญ่มาก"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เช่น id 9007199254740993 ถูกปัดเป็น ...992 rawJSON ใส่ข้อความตัวเลขตรง ๆ ได้",
+   "ผิด — JSON รองรับ boolean อยู่แล้ว",
+   "ผิด — เป็นเรื่อง Unicode ไม่ใช่ rawJSON",
+   "ผิด — rawJSON ไม่ได้เน้นความเร็ว"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ในสไลด์ Pipeline (|&gt;), Records &amp; Tuples, Decorators, Temporal API มีสถานะอย่างไร",
+  "choices": [
+   "ถูกยกเลิกไปพร้อมกับ ES4 และไม่ได้พัฒนาต่ออีกแล้ว",
+   "อยู่ในมาตรฐาน ES2015 และใช้ได้ทุก browser แล้ว",
+   "ยังเป็น proposal/experimental ไม่อยู่ในมาตรฐาน",
+   "เป็น library ภายนอกที่ต้องติดตั้งผ่าน npm เท่านั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ยังพัฒนาอยู่ใน TC39",
+   "ผิด — ยังไม่เป็นมาตรฐานและ browser ส่วนใหญ่ยังไม่รองรับ",
+   "ถูก — Pipeline stage 1, Decorators stage 2, Temporal stage 3, Records/Tuples เป็น proposal",
+   "ผิด — เป็นข้อเสนอของภาษาเอง (ต่างจาก moment.js)"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "หลังรันโค้ดนี้ มีตัวแปรใดบ้างที่ถูกสร้าง <pre class=qcode>const book = { title: \"JS\", year: 2026, pages: 300 };\nlet { title: t, year } = book;</pre>",
+  "choices": [
+   "title, t และ year",
+   "t, year และ pages",
+   "title และ year",
+   "t และ year เท่านั้น"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่มีตัวแปร title เกิดขึ้น",
+   "ผิด — ไม่ได้ดึง pages",
+   "ผิด — title ถูกเปลี่ยนชื่อเป็น t จึงไม่มีตัวแปร title",
+   "ถูก — title: t คือดึง title มาเก็บในชื่อใหม่ t ส่วน year ใช้ชื่อเดิม"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>console.log(\"7\".padStart(3, \"0\"));\nconsole.log(\"Hi\".padEnd(5, \"!\"));</pre>",
+  "choices": [
+   "007 และ Hi!!!",
+   "0007 และ Hi!!!",
+   "700 และ !!!Hi",
+   "07 และ Hi!!!!"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — เติมจนยาวรวม 3 และ 5: padStart เติมหน้า ได้ 007, padEnd เติมท้าย ได้ Hi!!!",
+   "ผิด — padStart(3) ได้ความยาวรวม 3 ตัว ไม่ใช่ 4",
+   "ผิด — padStart เติมด้านหน้า padEnd เติมด้านหลัง",
+   "ผิด — 07 ยาวแค่ 2 และ Hi!!!! ยาว 6 ไม่ตรงความยาวที่กำหนด"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>const arr = [1, [2, [3, [4]]]];\nconsole.log(arr.flat(2));</pre>",
+  "choices": [
+   "[1, [2, 3, [4]]]",
+   "[1, 2, [3, [4]]]",
+   "[1, 2, 3, [4]]",
+   "[[1, 2, 3, 4]]"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — flat คลี่จากชั้นนอกเข้าไป ไม่ได้ห่อ 2 กับ 3 ไว้ด้วยกัน",
+   "ผิด — นี่คือผลของ flat() (คลี่ 1 ชั้น)",
+   "ถูก — flat(2) คลี่ออก 2 ชั้น [4] ซ้อนอยู่ชั้นที่ 3 จึงยังเหลือ (ถ้าจะคลี่หมดใช้ flat(3) หรือ flat(Infinity))",
+   "ผิด — flat ไม่ได้ห่อผลลัพธ์ด้วย array อีกชั้น"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>const A = new Set([1, 2, 3, 4]);\nconst B = new Set([3, 4, 5]);\nconsole.log(A.symmetricDifference(B));</pre>",
+  "choices": [
+   "Set {3, 4, 5}",
+   "Set {1, 2, 5}",
+   "Set {3, 4}",
+   "Set {1, 2}"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — นั่นคือ B เดิม ไม่ได้ตัดตัวที่ซ้ำออก",
+   "ถูก — symmetricDifference = อยู่ในตัวใดตัวหนึ่งแต่ไม่อยู่ทั้งคู่ ตัด 3 กับ 4 ออก",
+   "ผิด — นั่นคือ intersection (ตัวที่อยู่ทั้งคู่)",
+   "ผิด — นั่นคือ difference (A − B) ขาด 5 จาก B"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>const a = [5, 10, 15, 20];\nconsole.log(a.findLast((n) =&gt; n &lt; 15), a.findLastIndex((n) =&gt; n &lt; 15));</pre>",
+  "choices": [
+   "10 1",
+   "5 0",
+   "15 2",
+   "20 3"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ค้นจากท้าย: 20, 15 ไม่ผ่าน 10 ผ่านเป็นตัวแรก อยู่ index 1",
+   "ผิด — นั่นคือผลของ find/findIndex ที่ค้นจากหัว",
+   "ผิด — 15 &lt; 15 เป็นเท็จ",
+   "ผิด — 20 ไม่ผ่านเงื่อนไข n &lt; 15"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร ((ว่าง) = string ว่าง \"\") <pre class=qcode>const nickname = \"\";\nconsole.log(nickname ?? \"Guest\");\nconsole.log(nickname || \"Guest\");</pre>",
+  "choices": [
+   "Guest / Guest",
+   "(ว่าง) / Guest",
+   "(ว่าง) / (ว่าง)",
+   "Guest / (ว่าง)"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — \"\" ไม่ใช่ nullish ?? จึงไม่แทนที่",
+   "ถูก — ?? ใช้ค่า default เฉพาะ null/undefined string ว่างจึงคงเดิม ส่วน || ถือว่า \"\" เป็น falsy จึงได้ Guest",
+   "ผิด — || แทนที่ค่า falsy อย่าง \"\"",
+   "ผิด — สลับกัน"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

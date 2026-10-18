@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: Lecture 6: JavaScript Part 1</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+.qcode{font-family:Consolas,'Courier New',monospace;background:#1e1e2e;color:#e8e8f0;padding:10px 12px;border-radius:8px;font-size:.88rem;font-weight:400;line-height:1.45;white-space:pre;overflow-x:auto;margin:10px 0 0;text-align:left}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 💻 ITDS241</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: Lecture 6: JavaScript Part 1</h1>
+<div class="sub">30 ข้อ แบ่งเป็นความจำ 12 ข้อ ความเข้าใจ 12 ข้อ การนำไปใช้ 6 ข้อ — กดเลือกคำตอบแต่ละข้อ จะเห็นเหตุผลทันที คะแนนนับจากการกดครั้งแรกของแต่ละข้อเท่านั้น</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { recall: "ความจำ", understand: "ความเข้าใจ", apply: "การนำไปใช้", calc: "การคำนวณ", fill: "ลากเติมคำ" };
+
+const questions = [
+ {
+  "type": "recall",
+  "q": "ข้อใดอธิบายลักษณะของ JavaScript ได้ถูกต้องตามสไลด์",
+  "choices": [
+   "ภาษา markup ใช้กำหนดโครงสร้างหน้าเว็บ",
+   "compiled ต้องคอมไพล์เป็นไฟล์ .exe ก่อน",
+   "interpreted รันได้เลยไม่ต้องคอมไพล์ก่อน",
+   "รันได้แค่ฝั่ง server ไม่รันใน browser"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ภาษา markup คือ HTML ส่วน JS เป็นภาษาโปรแกรม",
+   "ผิด — JS ไม่ต้องคอมไพล์ล่วงหน้า browser อ่านแล้วรันได้เลย",
+   "ถูก — สไลด์บอกว่า JS เป็น interpreted language สคริปต์รันได้เลยโดยไม่ต้อง compile ก่อน",
+   "ผิด — JS ถูกฝังใน HTML และรันใน browser ได้"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "แท็ก &lt;script&gt; สามารถวางไว้ตรงไหนของไฟล์ HTML ได้บ้าง",
+  "choices": [
+   "ได้เฉพาะใน &lt;head&gt; ห้ามวางที่อื่นเลย",
+   "ใน &lt;head&gt; หรือ &lt;body&gt; หรือทั้งสองที่",
+   "ได้เฉพาะท้าย &lt;body&gt; ห้ามวางที่อื่น",
+   "ต้องวางนอก &lt;html&gt; แยกจากเนื้อหา"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — วางใน &lt;body&gt; ก็ได้",
+   "ถูก — สไลด์: Script tag can be inserted anywhere in &lt;head&gt;, &lt;body&gt;, or both",
+   "ผิด — ท้าย body เป็นที่นิยมแต่ไม่ใช่ที่เดียวที่วางได้",
+   "ผิด — script ต้องอยู่ในเอกสาร ไม่ต้องแยกออกนอก &lt;html&gt;"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ถ้าแยกโค้ดไว้ในไฟล์ myScript.js แล้วเรียกด้วย &lt;script src=\"myScript.js\"&gt; ในไฟล์ .js ต้องเขียนอย่างไร",
+  "choices": [
+   "ต้องขึ้นต้นไฟล์ด้วย &lt;!DOCTYPE javascript&gt;",
+   "ต้องครอบโค้ดทั้งหมดด้วยแท็ก &lt;script&gt; อีกชั้น",
+   "ต้องเขียนโค้ดไว้ในคอมเมนต์ /* */ ทั้งหมด",
+   "เขียนโค้ด JS ได้เลย ไม่ต้องมีแท็ก &lt;script&gt;"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ไม่มี DOCTYPE สำหรับไฟล์ JS",
+   "ผิด — ใส่ &lt;script&gt; ในไฟล์ .js จะเป็น syntax error",
+   "ผิด — โค้ดในคอมเมนต์จะไม่ถูกรัน",
+   "ถูก — สไลด์: No need to put &lt;script&gt; in the .js file. All syntax is in JS"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ชื่อตัวแปรใดผิดกฎการตั้งชื่อตัวแปรตามสไลด์",
+  "choices": [
+   "2ndPlayer",
+   "playerTwo",
+   "player2",
+   "nextPlayer"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — ชื่อตัวแปรต้องขึ้นต้นด้วยตัวอักษร ห้ามขึ้นต้นด้วยตัวเลข",
+   "ผิด — มีแต่ตัวอักษร ไม่มีช่องว่าง ถูกกฎ",
+   "ผิด — ขึ้นต้นด้วยตัวอักษร ตามด้วยตัวเลขได้",
+   "ผิด — ขึ้นต้นด้วยตัวอักษร ไม่ใช่ keyword ถูกกฎ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตัวแปรที่ประกาศแล้วแต่ยังไม่เคยกำหนดค่า จะมีค่าเป็นอะไร",
+  "choices": [
+   "null value",
+   "undefined",
+   "0 (zero)",
+   "NaN value"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — null คือการตั้งใจให้ “ไม่มีค่า” ต้องกำหนดเอง",
+   "ถูก — A variable that has not been assigned a value has the value undefined",
+   "ผิด — JS ไม่ได้ตั้งค่าเริ่มต้นเป็น 0 ให้",
+   "ผิด — NaN คือผลของการแปลงเป็นตัวเลขไม่สำเร็จ"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ค่าเวลาภายใน Date object นับเป็นอะไร",
+  "choices": [
+   "มิลลิวินาทีนับจาก 1 ม.ค. 1970 UTC",
+   "วินาทีนับจาก 1 ม.ค. 1970 UTC",
+   "มิลลิวินาทีนับจาก 1 ม.ค. 2000 UTC",
+   "จำนวนวันนับจาก 1 ม.ค. 1970 UTC"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — Date objects are based on a time value that is the number of milliseconds since 1 January 1970 UTC",
+   "ผิด — หน่วยคือมิลลิวินาที ไม่ใช่วินาที",
+   "ผิด — จุดเริ่มคือปี 1970",
+   "ผิด — หน่วยคือมิลลิวินาที ไม่ใช่วัน"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "built-in object ใด “ไม่มี constructor” ใช้ new สร้างไม่ได้",
+  "choices": [
+   "Date",
+   "Number",
+   "Math",
+   "Array"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — สร้างได้ด้วย new Date()",
+   "ผิด — สร้างได้ด้วย new Number(\"10\")",
+   "ถูก — สไลด์: There is no constructor for Math ใช้ Math.PI, Math.pow() ได้เลย",
+   "ผิด — สร้างได้ด้วย new Array(5)"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "เมธอด arr.pop() ทำอะไร",
+  "choices": [
+   "เพิ่มสมาชิกใหม่ต่อท้ายอาร์เรย์",
+   "คืนค่าตำแหน่งของสมาชิกตัวแรก",
+   "ลบและคืนค่าสมาชิกตัวแรกสุด",
+   "ลบและคืนค่าสมาชิกตัวสุดท้าย"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นั่นคือ push()",
+   "ผิด — นั่นคือ indexOf()",
+   "ผิด — การลบตัวแรกคือ shift() ไม่ใช่ pop()",
+   "ถูก — pop(): Remove and return the last element"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "keyword ใดประกาศตัวแปรที่ “อัปเดตค่าไม่ได้และประกาศซ้ำไม่ได้”",
+  "choices": [
+   "static",
+   "let",
+   "var",
+   "const"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — static ไม่ใช่คำประกาศตัวแปรทั่วไป",
+   "ผิด — let อัปเดตค่าได้ แต่ประกาศซ้ำไม่ได้",
+   "ผิด — var ทั้งอัปเดตและประกาศซ้ำได้",
+   "ถูก — const cannot be updated or re-declared"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "รูปแบบของ Conditional (ternary) operator คือข้อใด",
+  "choices": [
+   "expr1 ? condition : expr2",
+   "condition ? expr1 : expr2",
+   "condition : expr1 ? expr2",
+   "condition ?? expr1 : expr2"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — condition ต้องอยู่หน้าเครื่องหมาย ?",
+   "ถูก — ถ้า condition จริงได้ expr1 ไม่จริงได้ expr2",
+   "ผิด — สลับ ? กับ : กัน",
+   "ผิด — ?? คือ nullish coalescing คนละตัว"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "ตามลำดับ operator precedence ในสไลด์ ตัวดำเนินการใดทำ “หลังสุด”",
+  "choices": [
+   "&amp;&amp;",
+   "||",
+   "=",
+   "==="
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — Logical AND อยู่ลำดับ 9",
+   "ผิด — Logical OR อยู่ลำดับ 10 ทำก่อน assignment",
+   "ถูก — Assignment อยู่ลำดับที่ 11 ซึ่งต่ำที่สุด",
+   "ผิด — Strict equality อยู่ลำดับ 8"
+  ]
+ },
+ {
+  "type": "recall",
+  "q": "Sentinel-controlled loop มีลักษณะอย่างไร",
+  "choices": [
+   "หยุดเมื่อเจอค่า sentinel ไม่รู้จำนวนรอบ",
+   "วนผ่านทุก property ของ object ทีละตัว",
+   "หยุดเมื่อตัวนับถึงค่าที่กำหนด รู้จำนวนรอบ",
+   "ทำอย่างน้อยหนึ่งรอบแล้วค่อยเช็กเงื่อนไข"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — sentinel value เดาไม่ได้ก่อนเข้าลูป จึงไม่รู้จำนวนรอบ มักใช้ while",
+   "ผิด — นั่นคือ for...in",
+   "ผิด — นั่นคือ counter-controlled loop",
+   "ผิด — นั่นคือลักษณะของ do-while"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์ของโค้ดนี้คืออะไร <pre class=qcode>console.log(\"1\" == 1);\nconsole.log(\"1\" === 1);</pre>",
+  "choices": [
+   "true แล้ว false",
+   "false แล้ว false",
+   "false แล้ว true",
+   "true แล้ว true"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — == แปลงชนิดก่อนเทียบ \"1\" กลายเป็น 1 จึง true ส่วน === เทียบชนิดด้วย string ≠ number จึง false",
+   "ผิด — == แปลงชนิดให้แล้วจึงเท่ากัน",
+   "ผิด — สลับกัน == หลวมกว่า ===",
+   "ผิด — === ไม่แปลงชนิด จึงเป็น false"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไม JS ยอมให้เขียน <pre class=qcode>var myNum = 10;\nmyNum = \"Hello World!!\";</pre> แล้ว typeof myNum ได้ \"string\"",
+  "choices": [
+   "typeof อ่านชนิดจากค่าแรกที่ประกาศไว้เสมอ",
+   "JS เป็น weakly typed เก็บค่าต่างชนิดได้",
+   "JS แปลง string เป็น number ให้อัตโนมัติ",
+   "เพราะประกาศด้วย var ถ้าใช้ let จะ error"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — typeof ดูค่าปัจจุบัน ไม่ใช่ค่าแรก",
+   "ถูก — JS เป็น weakly typed ตัวแปรเดียวเปลี่ยนไปเก็บค่าชนิดอื่นได้ระหว่างรัน",
+   "ผิด — ไม่ได้แปลง ค่าเป็น string และ typeof ก็ได้ \"string\"",
+   "ผิด — let ก็กำหนดค่าชนิดอื่นได้เหมือนกัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var number = 1;\n{\n  var number = 4;\n}\nconsole.log(\"number is \" + number);</pre>",
+  "choices": [
+   "SyntaxError",
+   "number is 1",
+   "number is 4",
+   "number is 5"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — var ประกาศซ้ำได้ ไม่ error",
+   "ผิด — จะได้ 1 ถ้าใช้ let ใน block ซึ่งแยก scope กัน",
+   "ถูก — var ไม่เป็น block scope การประกาศใน {} คือตัวแปรเดียวกัน จึงถูกทับเป็น 4",
+   "ผิด — ไม่มีการบวกกัน แค่กำหนดค่าใหม่"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>let number = 2;\n{\n  let number = 5;\n}\nconsole.log(\"number is \" + number);</pre>",
+  "choices": [
+   "SyntaxError",
+   "number is 7",
+   "number is 5",
+   "number is 2"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ประกาศ let ชื่อซ้ำได้ถ้าอยู่คนละ block",
+   "ผิด — ไม่มีการบวกค่า",
+   "ผิด — 5 อยู่แค่ใน block ออกมาแล้วหายไป",
+   "ถูก — let เป็น block scope ตัวใน {} เป็นคนละตัวกับข้างนอก ข้างนอกยังเป็น 2"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var p = { age: 30 };\nvar q = p;\np.age = 40;\nconsole.log(q.age);</pre>",
+  "choices": [
+   "30",
+   "null",
+   "70",
+   "40"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — จะเป็น 30 ถ้า q เป็นสำเนาแยก ซึ่งไม่ใช่",
+   "ผิด — null ต้องกำหนดเอง q.age มีค่าเพราะชี้ object เดียวกับ p",
+   "ผิด — ไม่มีการบวกค่า",
+   "ถูก — q = p ไม่ได้ copy object แต่ชี้ไป object เดียวกัน แก้ผ่าน p ก็เห็นผ่าน q"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์ของสามบรรทัดนี้ตามลำดับคือ <pre class=qcode>console.log(Number.parseInt(\"10.569\"));\nconsole.log(Number.parseFloat(\"10.569\"));\nconsole.log(Number.parseInt(\"Hello\"));</pre>",
+  "choices": [
+   "10.569, 10, NaN",
+   "10, 10.569, NaN",
+   "10, 10.569, 0",
+   "11, 10.569, NaN"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — สลับผลของ parseInt กับ parseFloat",
+   "ถูก — parseInt ตัดทศนิยมทิ้ง (ไม่ปัด) parseFloat เก็บทศนิยม แปลง \"Hello\" ไม่ได้จึงเป็น NaN",
+   "ผิด — แปลงไม่ได้ได้ NaN ไม่ใช่ 0",
+   "ผิด — parseInt ตัดทิ้ง ไม่ได้ปัดขึ้นเป็น 11"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var n = 1, x = 0;\ndo {\n  n++;\n  x += n;\n} while (n &lt; 1);\nconsole.log(\"n = \" + n + \", x = \" + x);</pre>",
+  "choices": [
+   "n = 2, x = 2",
+   "n = 2, x = 1",
+   "n = 1, x = 1",
+   "n = 1, x = 0"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — do-while ทำ 1 รอบก่อนเช็ก: n เป็น 2, x = 0+2 = 2 แล้วเช็ก 2&lt;1 เป็นเท็จจึงหยุด",
+   "ผิด — x บวกค่า n หลังเพิ่มแล้ว (2) ไม่ใช่ 1",
+   "ผิด — do-while ทำงานอย่างน้อย 1 รอบ n ต้องเพิ่ม",
+   "ผิด — นี่คือผลของ while ธรรมดาที่ไม่เข้าลูปเลย"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมเมื่อ expr = \"Soda\" switch จึงพิมพ์ 'Soda or Sparking Water is 30 Baht.' <pre class=qcode>case 'Soda':\ncase 'Sparking Water':\n  console.log('Soda or Sparking Water is 30 Baht.');\n  break;</pre>",
+  "choices": [
+   "switch จะทำ case สุดท้ายที่เขียนไว้ในโค้ดเสมอทุกครั้ง",
+   "ไม่มี case ไหนตรงเลย จึงข้ามไปทำส่วน default แทน",
+   "case 'Soda' ไม่มี break จึงไหลไปทำ case ถัดไป",
+   "switch เทียบแบบ == จึงมองว่า Soda เท่ากับ Water"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — switch ทำ case ที่ตรงค่า ไม่ใช่ case สุดท้าย",
+   "ผิด — มี case 'Soda' ตรงพอดี default จึงไม่ถูกทำ",
+   "ถูก — case ที่ไม่มี break จะ fall-through ไปทำคำสั่งของ case ถัดไปจนเจอ break",
+   "ผิด — switch เทียบแบบ strict และไม่ได้มองว่า 2 ค่านี้เท่ากัน"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>myForLoop:\nfor (var i = 0; i &lt; 10; i++) {\n  if (i % 3 == 0) continue myForLoop;\n  console.log(i);\n}</pre>",
+  "choices": [
+   "2 3 5 6 8 9",
+   "1 2 4 5 7 8",
+   "0 1 2 4 5 7",
+   "1 2 3 4 5 6"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — 3, 6, 9 ถูกข้าม ส่วน 1, 4, 7 ถูกพิมพ์",
+   "ถูก — i ที่หาร 3 ลงตัว (0,3,6,9) ถูก continue ข้ามไป ที่เหลือถูกพิมพ์",
+   "ผิด — 0 % 3 = 0 จึงหาร 3 ลงตัว 0 ถูกข้ามด้วย",
+   "ผิด — 3 และ 6 ถูกข้าม และลูปวิ่งไปถึง 8"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var n = 0, x = 0;\nwhile (n &lt; 10) {\n  n++;\n  x += n;\n}\nconsole.log(\"n = \" + n + \", x = \" + x);</pre>",
+  "choices": [
+   "n = 10, x = 55",
+   "n = 9, x = 45",
+   "n = 10, x = 45",
+   "n = 11, x = 66"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — n เพิ่มเป็น 1..10 และ x = 1+2+...+10 = 55 พอ n = 10 เงื่อนไข 10&lt;10 เท็จ ลูปหยุด",
+   "ผิด — ลูปหยุดเมื่อ n = 10 ไม่ใช่ 9",
+   "ผิด — 45 คือ 0+...+9 แต่ n++ ทำก่อน x += n",
+   "ผิด — เกินไปหนึ่งรอบ n ไม่ถึง 11"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ทำไมโค้ด Tic Tac Toe ต้องใช้ parseInt() ครอบ clickedCell.getAttribute(\"data-cell-index\")",
+  "choices": [
+   "getAttribute คืนค่าเป็น object จึงต้องแปลง",
+   "ใช้ตรวจว่าช่องในตารางนั้นถูกผู้เล่นกดไปแล้วหรือยัง",
+   "ใช้สลับตาผู้เล่นระหว่าง X กับ O หลังกดแต่ละช่อง",
+   "getAttribute คืนค่าเป็น string จึงต้องแปลง"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — ค่าที่ได้เป็น string ไม่ใช่ object",
+   "ผิด — การเช็กว่าช่องถูกกดแล้วใช้ gameState[i] !== \"\"",
+   "ผิด — การสลับตาทำใน handlePlayerChange ด้วย ternary",
+   "ถูก — คอมเมนต์ในสไลด์: The return value is string จึงแปลงเป็นเลข index"
+  ]
+ },
+ {
+  "type": "understand",
+  "q": "ต้องใช้รูปแบบ obj[\"...\"] แทน obj.prop ในกรณีใด",
+  "choices": [
+   "property เก็บค่าเป็นตัวเลขหรือ boolean",
+   "เมื่อ object ถูกสร้างด้วย new Object()",
+   "ชื่อ property มีช่องว่าง หรือชื่ออยู่ในตัวแปร",
+   "เมื่อต้องการแก้ค่า property ที่มีอยู่แล้วเท่านั้น"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — ชนิดของค่าไม่เกี่ยว ใช้ dot ได้ปกติ",
+   "ผิด — วิธีสร้าง object ไม่เกี่ยวกับการเข้าถึง",
+   "ถูก — เช่น obj[\"parking permit\"] หรือ obj[aProperty] ใช้ dot ไม่ได้",
+   "ผิด — dot ใช้แก้ค่าได้ เช่น wudhichart.age = 40"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ถ้า currentPlayer = \"O\" หลังรันบรรทัดนี้ currentPlayer มีค่าเป็นอะไร <pre class=qcode>currentPlayer = currentPlayer === \"X\" ? \"O\" : \"X\";</pre>",
+  "choices": [
+   "\"O\"",
+   "\"X\"",
+   "true",
+   "false"
+  ],
+  "correct": 1,
+  "explain": [
+   "ผิด — ได้ \"O\" เมื่อผู้เล่นปัจจุบันเป็น \"X\"",
+   "ถูก — \"O\" === \"X\" เป็นเท็จ จึงได้ค่าหลัง : คือ \"X\" (สลับตา)",
+   "ผิด — ternary คืนค่า expr ไม่ใช่ผลการเทียบ",
+   "ผิด — ternary คืนค่า expr ไม่ใช่ผลการเทียบ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ใน handleResultValidation() บรรทัด let roundDraw = !gameState.includes(\"\"); จะเป็น true เมื่อไร",
+  "choices": [
+   "ทุกช่องถูกกดครบแล้ว ไม่เหลือช่องว่าง",
+   "ยังเหลือช่องว่างอยู่อย่างน้อยหนึ่งช่อง",
+   "ผู้เล่นกดปุ่ม Restart เริ่มเกมใหม่",
+   "มีผู้เล่นคนหนึ่งเรียงครบสามช่องได้แล้ว"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — includes(\"\") เป็น false เมื่อไม่มีช่องว่าง พอใส่ ! จึงได้ true = เสมอ (เช็กผู้ชนะไปก่อนแล้ว)",
+   "ผิด — กรณีนี้ includes เป็น true แล้ว ! ทำให้เป็น false",
+   "ผิด — Restart ทำใน handleRestartGame",
+   "ผิด — กรณีชนะถูกเช็กด้วย roundWon และ return ไปก่อน"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ใช้โค้ด if-else-if ตัดเกรดจากสไลด์ (F &lt;50, D &lt;60, C &lt;70, B &lt;80, A 80–100) ถ้า mark = 80 จะได้อะไร",
+  "choices": [
+   "The grade is B",
+   "The grade is C",
+   "The grade is D",
+   "The grade is A"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — เกรด B คือ 70 ≤ mark &lt; 80 ไม่รวม 80",
+   "ผิด — เกรด C คือ 60 ≤ mark &lt; 70",
+   "ผิด — เกรด D คือ 50 ≤ mark &lt; 60",
+   "ถูก — 80 ไม่ผ่าน mark &lt; 80 ของเกรด B แต่ผ่าน mark &gt;= 80 &amp;&amp; mark &lt;= 100"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ค่าของนิพจน์ 2 + 3 * 4 ** 2 % 5 คือเท่าไร",
+  "choices": [
+   "4",
+   "14",
+   "5",
+   "50"
+  ],
+  "correct": 2,
+  "explain": [
+   "ผิด — 48 % 5 ได้เศษ 3 (ไม่ใช่ 2) จึงได้ 2 + 3 = 5",
+   "ผิด — 14 มาจากไม่ได้ทำ ** ก่อน (3*4=12 แล้ว +2)",
+   "ถูก — ** ก่อน: 4**2 = 16 → 3*16 = 48 → 48 % 5 = 3 → 2 + 3 = 5",
+   "ผิด — 50 มาจากบวก 2+3 ก่อน ซึ่งผิดลำดับ"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์คืออะไร <pre class=qcode>var str = \"Web Technology\";\nconsole.log(str.substring(4, 8));</pre>",
+  "choices": [
+   "Tech",
+   "Techn",
+   " Tec",
+   "b Te"
+  ],
+  "correct": 0,
+  "explain": [
+   "ถูก — substring(4, 8) เอาตำแหน่ง 4–7 (ไม่รวม 8): T e c h",
+   "ผิด — ตำแหน่ง end ไม่ถูกรวม จึงได้ 4 ตัว",
+   "ผิด — index เริ่มนับที่ 0 ตำแหน่ง 3 คือช่องว่าง 4 คือ T",
+   "ผิด — นับ index เลื่อนไปหนึ่งช่อง"
+  ]
+ },
+ {
+  "type": "apply",
+  "q": "ผลลัพธ์พิมพ์ออกมากี่บรรทัด <pre class=qcode>myOuterLoop:\nfor (var a = 0; a &lt; 10; a++) {\n  for (var b = 0; b &lt; 10; b++) {\n    if (a % 6 != 0) continue myOuterLoop;\n    console.log(\"a=\" + a + \" b=\" + b);\n  }\n}</pre>",
+  "choices": [
+   "10 บรรทัด",
+   "100 บรรทัด",
+   "2 บรรทัด",
+   "20 บรรทัด"
+  ],
+  "correct": 3,
+  "explain": [
+   "ผิด — นับแค่ a = 0 ลืม a = 6",
+   "ผิด — a อื่น ๆ ถูก continue ไปลูปนอกทันที",
+   "ผิด — ลูปในยังวิ่งครบ 10 รอบสำหรับ a ที่ผ่าน",
+   "ถูก — มีแค่ a = 0 และ a = 6 ที่ a % 6 == 0 แต่ละค่าพิมพ์ b = 0–9 รวม 2 × 10 = 20"
+  ]
+ }
+];
+
+let current = 0;
+const answered = new Array(questions.length).fill(null); // currently displayed choice per question
+const firstChoices = new Array(questions.length).fill(null); // choice used for scoring (first click only); ข้อ fill เก็บ true/false ของการตรวจครั้งแรก
+// สถานะข้อลากเติมคำ: placed[k] = index ของคำใน bank ที่วางในช่อง k, sel = คำที่แตะเลือกไว้
+const fillState = questions.map(newFillState);
+
+function newFillState(q) {
+  return q.type === 'fill' ? { placed: q.blanks.map(() => null), checked: false, sel: null } : null;
+}
+
+function isRight(i) {
+  if (firstChoices[i] === null) return false;
+  return questions[i].type === 'fill' ? firstChoices[i] === true : firstChoices[i] === questions[i].correct;
+}
+
+function buildJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  let html = '';
+  questions.forEach((q, i) => {
+    html += '<button data-i="' + i + '" onclick="jumpTo(' + i + ')">' + (i+1) + '</button>';
+  });
+  grid.innerHTML = html;
+  updateJumpGrid();
+}
+
+function updateJumpGrid() {
+  const grid = document.getElementById('jumpGrid');
+  Array.from(grid.children).forEach((btn, i) => {
+    btn.className = '';
+    if (i === current && current < questions.length) btn.classList.add('current');
+    if (firstChoices[i] !== null) {
+      btn.classList.add(isRight(i) ? 'done-correct' : 'done-wrong');
+    }
+  });
+}
+
+function jumpTo(i) {
+  current = i;
+  render();
+}
+
+function render() {
+  const area = document.getElementById('quizArea');
+  updateJumpGrid();
+  if (current >= questions.length) {
+    renderScore();
+    return;
+  }
+  const qd = questions[current];
+  const chosen = answered[current];
+
+  let html = '<div class="card">';
+  html += '<div class="progress-row">';
+  html += '<div class="progress">ข้อ ' + (current+1) + ' / ' + questions.length + '</div>';
+  html += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div>';
+  html += '</div>';
+  html += '<div class="question">' + qd.q + '</div>';
+
+  if (qd.type === 'fill') html += fillHtml(qd, fillState[current]);
+  else qd.choices.forEach((c, i) => {
+    let cls = 'choice';
+    if (chosen !== null) {
+      if (i === qd.correct) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+    }
+    html += '<button class="' + cls + '" onclick="selectChoice(' + i + ')">' + 'กขคง'[i] + '. ' + c + '</button>';
+    if (chosen !== null && i === chosen) {
+      const bgCls = (i === qd.correct) ? 'correct-bg' : 'wrong-bg';
+      html += '<div class="explain ' + bgCls + '">' + qd.explain[i] + '</div>';
+    }
+  });
+
+  html += '<div class="nav">';
+  html += '<button class="nav-btn" onclick="prevQ()" ' + (current===0?'disabled':'') + '>ก่อนหน้า</button>';
+  html += '<button class="nav-btn" onclick="nextQ()">' + (current===questions.length-1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button>';
+  html += '</div>';
+  html += '</div>';
+
+  area.innerHTML = html;
+}
+
+function fillHtml(qd, st) {
+  let html = '<div class="fill-text">';
+  qd.parts.forEach((p, k) => {
+    html += p;
+    if (k >= qd.blanks.length) return;
+    const c = st.placed[k];
+    const ok = c !== null && qd.bank[c] === qd.blanks[k];
+    let cls = 'slot';
+    if (st.checked) cls += ok ? ' correct' : ' wrong';
+    else if (c !== null) cls += ' filled';
+    else if (st.sel !== null) cls += ' target';
+    html += '<span class="' + cls + '" data-slot="' + k + '">' + (c !== null ? qd.bank[c] : '&nbsp;') + '</span>';
+    if (st.checked && !ok) html += '<span class="slot-ans">(' + qd.blanks[k] + ')</span>';
+  });
+  html += '</div>';
+
+  html += '<div class="bank-label">ลากคำไปวางในช่องว่าง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</div>';
+  html += '<div class="bank">';
+  qd.bank.forEach((w, i) => {
+    let cls = 'chip';
+    if (st.placed.includes(i)) cls += ' used';
+    if (st.sel === i) cls += ' sel';
+    html += '<span class="' + cls + '" data-chip="' + i + '">' + w + '</span>';
+  });
+  html += '</div>';
+
+  if (st.checked) {
+    const allOk = st.placed.every((c, k) => c !== null && qd.bank[c] === qd.blanks[k]);
+    html += '<div class="explain ' + (allOk ? 'correct-bg' : 'wrong-bg') + '">' + qd.explain + '</div>';
+    html += '<div class="fill-actions"><button class="ghost-btn" onclick="resetFill()">ลองใหม่</button></div>';
+  } else {
+    html += '<div class="fill-actions">';
+    html += '<button onclick="checkFill()" ' + (st.placed.includes(null) ? 'disabled' : '') + '>ตรวจคำตอบ</button>';
+    html += '<button class="ghost-btn" onclick="resetFill()">ล้างช่อง</button>';
+    html += '</div>';
+  }
+  return html;
+}
+
+function checkFill() {
+  const qd = questions[current], st = fillState[current];
+  if (st.placed.includes(null)) return;
+  st.checked = true;
+  st.sel = null;
+  if (firstChoices[current] === null) {
+    firstChoices[current] = st.placed.every((c, k) => qd.bank[c] === qd.blanks[k]);
+  }
+  render();
+}
+
+function resetFill() {
+  fillState[current] = newFillState(questions[current]);
+  render();
+}
+
+// วางคำ chip ลงช่อง k (from = ช่องเดิมถ้าลากมาจากช่องอื่น จะสลับคำกัน)
+function placeChip(st, chip, k, from) {
+  const prev = st.placed[k];
+  st.placed = st.placed.map(c => c === chip ? null : c);
+  st.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) st.placed[from] = prev;
+}
+
+let drag = null;
+
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  drag = null;
+}
+
+function slotAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el ? el.closest('.slot') : null;
+}
+
+document.addEventListener('pointerdown', e => {
+  const qd = questions[current];
+  if (!qd || qd.type !== 'fill') return;
+  const st = fillState[current];
+  if (st.checked) return;
+  const chipEl = e.target.closest('.chip');
+  const slotEl = e.target.closest('.slot');
+  if (chipEl && !chipEl.classList.contains('used')) {
+    drag = { chip: +chipEl.dataset.chip, from: null };
+  } else if (slotEl && st.placed[+slotEl.dataset.slot] !== null) {
+    drag = { chip: st.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  } else if (slotEl && st.sel !== null) {
+    placeChip(st, st.sel, +slotEl.dataset.slot, null);
+    st.sel = null;
+    render();
+    return;
+  } else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'chip ghost';
+    drag.ghost.innerHTML = questions[current].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.slot.over').forEach(el => el.classList.remove('over'));
+  const slot = slotAt(e.clientX, e.clientY);
+  if (slot) slot.classList.add('over');
+});
+
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = fillState[current];
+  endDrag();
+  if (d.moved) {
+    const slot = slotAt(e.clientX, e.clientY);
+    if (slot) placeChip(st, d.chip, +slot.dataset.slot, d.from);
+    else if (d.from !== null) st.placed[d.from] = null;
+    st.sel = null;
+  } else if (d.from !== null) {
+    // แตะคำในช่อง: ถ้าเลือกคำไว้อยู่ให้แทนที่ ไม่งั้นเอาคำออก
+    if (st.sel !== null) placeChip(st, st.sel, d.from, null);
+    else st.placed[d.from] = null;
+    st.sel = null;
+  } else {
+    st.sel = st.sel === d.chip ? null : d.chip;
+  }
+  render();
+});
+
+document.addEventListener('pointercancel', endDrag);
+
+function selectChoice(i) {
+  if (firstChoices[current] === null) {
+    firstChoices[current] = i;
+  }
+  answered[current] = i;
+  render();
+}
+
+function nextQ() {
+  if (current < questions.length - 1) {
+    current++;
+  } else {
+    current = questions.length; // trigger score screen
+  }
+  render();
+}
+
+function prevQ() {
+  if (current > 0) current--;
+  render();
+}
+
+function renderScore() {
+  const score = questions.reduce((acc, qd, idx) => isRight(idx) ? acc + 1 : acc, 0);
+
+  const byType = { recall: [0,0], understand: [0,0], apply: [0,0], calc: [0,0], fill: [0,0] };
+  questions.forEach((qd, idx) => {
+    byType[qd.type][1]++;
+    if (isRight(idx)) byType[qd.type][0]++;
+  });
+
+  const area = document.getElementById('quizArea');
+  let html = '<div class="card score-box">';
+  html += '<div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  html += '<div class="big">' + score + ' / ' + questions.length + '</div>';
+  html += '<div class="breakdown">';
+  Object.keys(byType).forEach(t => {
+    if (byType[t][1] > 0) html += '<div><span>' + TAG_LABEL[t] + '</span><span>' + byType[t][0] + ' / ' + byType[t][1] + '</span></div>';
+  });
+  html += '</div>';
+  html += '<button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function restart() {
+  current = 0;
+  for (let i = 0; i < questions.length; i++) {
+    answered[i] = null;
+    firstChoices[i] = null;
+    fillState[i] = newFillState(questions[i]);
+  }
+  render();
+}
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

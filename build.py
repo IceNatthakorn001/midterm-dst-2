@@ -62,6 +62,16 @@ SUBJECTS = [
         "accent": "#1d4ed8",
         "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"],
     },
+    {
+        "slug": "web",
+        "dir": YEAR / "Web" / "sum by claude",
+        "code": "ITDS241",
+        "name": "Web Technologies and Applications",
+        "th": "เทคโนโลยีเว็บและการประยุกต์ (HTML/CSS/JavaScript)",
+        "icon": "💻",
+        "accent": "#be185d",
+        "order": None,
+    },
 ]
 
 md = MarkdownIt("gfm-like", {"html": True, "linkify": False, "typographer": False})
@@ -224,6 +234,12 @@ def render_lesson(lesson, key="md"):
     return body, toc
 
 
+QUIZPAGE_BAR = """<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← {subject}</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>"""
+
 QUIZ_BAR = """<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
 <a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
 <span style="color:#999">|</span>
@@ -320,6 +336,17 @@ def build():
 
         reviews = find_reviews(subj)
         anims = find_reviews(subj, "Animation-")
+        # standalone quizzes not tied to a summary: <sum by claude>/Quiz-*/quiz-*.html
+        quizpages = find_reviews(subj, "Quiz-")
+        for qp in quizpages:
+            qdir = sdir / qp["slug"]
+            qdir.mkdir(parents=True, exist_ok=True)
+            bar = QUIZPAGE_BAR.format(subject=esc(f"{subj['icon']} {subj['code']}"))
+            q = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, qp["html"], count=1)
+            q = q.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
+            qp["title"] = re.sub(r"^Quiz:\s*", "", qp["title"])
+            (qdir / "index.html").write_text(q, encoding="utf-8")
+            search_index.append({"s": subj["code"], "t": qp["title"], "u": f"{subj['slug']}/{qp['slug']}/index.html", "h": []})
         for rv in reviews + anims:
             rdir = sdir / rv["slug"]
             rdir.mkdir(parents=True, exist_ok=True)
@@ -342,9 +369,16 @@ def build():
             f'<span>{esc(rv["title"])}</span></a>'
             f'<div class="row-actions"><a class="chip chip-quiz" href="{rv["slug"]}/index.html">▶ ดูแอนิเมชัน</a></div></li>'
             for rv in anims)
-        review_block = ((f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>' if reviews else "")
+        quiz_rows = "".join(
+            f'<li class="lesson-row"><span class="num">📝</span>'
+            f'<a class="lesson-link" href="{qp["slug"]}/index.html"><small>{esc(qp["label"])}</small>'
+            f'<span>{esc(qp["title"])}</span></a>'
+            f'<div class="row-actions"><a class="chip chip-quiz" href="{qp["slug"]}/index.html">📝 ทำแบบทดสอบ</a></div></li>'
+            for qp in quizpages)
+        review_block = ((f'<h2 style="margin:24px 0 8px">📝 แบบทดสอบ</h2><ol class="lesson-list">{quiz_rows}</ol>' if quizpages else "")
+                        + (f'<h2 style="margin:24px 0 8px">🎯 รีวิวก่อนสอบ</h2><ol class="lesson-list">{review_rows}</ol>' if reviews else "")
                         + (f'<h2 style="margin:24px 0 8px">🎬 Animation</h2><ol class="lesson-list">{anim_rows}</ol>' if anims else "")
-                        + (f'<h2 style="margin:24px 0 8px">📖 สรุปรายบท</h2>' if reviews or anims else ""))
+                        + (f'<h2 style="margin:24px 0 8px">📖 สรุปรายบท</h2>' if (reviews or anims or quizpages) and lessons else ""))
         rows = ""
         for n, les in enumerate(lessons, 1):
             qlink = (f'<a class="chip chip-quiz" href="{les["slug"]}/quiz.html">📝 Quiz</a>' if les["quiz"] else "")
@@ -357,7 +391,7 @@ def build():
                      f'<a class="lesson-link" href="{les["slug"]}/index.html"><small>{esc(les["label"])}</small>'
                      f'<span>{esc(les["title"])}</span></a>'
                      f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
-        nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons)
+        nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons) + len(quizpages)
         sbody = f"""
 <main class="wrap">
   <div class="crumbs"><a href="../index.html">หน้าแรก</a> / {esc(subj['code'])}</div>
@@ -377,7 +411,7 @@ def build():
             f'<a class="subject-card" href="{subj["slug"]}/index.html" style="--accent:{subj["accent"]}">'
             f'<div class="sc-icon">{subj["icon"]}</div><div class="code">{esc(subj["code"])}</div>'
             f'<h2>{esc(subj["name"])}</h2><p>{esc(subj["th"])}</p>'
-            f'<div class="sc-meta"><span>📖 {len(lessons)} บท</span><span>📝 {nq} quiz</span></div></a>')
+            f'<div class="sc-meta"><span>{f"📖 {len(lessons)} บท" if lessons else f"🎯 {len(reviews)} รีวิว"}</span><span>📝 {nq} quiz</span></div></a>')
 
     home = f"""
 <main class="wrap">
