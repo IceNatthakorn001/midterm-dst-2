@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chapter V — I/O Systems · ITDS211</title>
+<title>Chapter 05 — I/O Systems · ITDS211</title>
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
@@ -25,292 +25,203 @@
       <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
       <div class="toc-inner">
         <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
-        <ol><li><a href="#1-course-outline">1. Course Outline</a></li><li><a href="#2-generic-model-of-an-io-module">2. Generic Model of an I/O Module</a></li><li><a href="#3-external-devices">3. External Devices</a></li><li><a href="#4-functions-และ-block-diagram-ของ-io-module">4. Functions และ Block Diagram ของ I/O Module</a></li><li><a href="#5-สามเทคนิคของ-io">5. สามเทคนิคของ I/O ⭐⭐</a></li><li><a href="#6-io-commands">6. I/O Commands</a></li><li><a href="#7-three-techniques-for-input-of-a-block-of-data">7. Three Techniques for Input of a Block of Data ⭐</a></li><li><a href="#8-io-instructions-และ-io-mapping">8. I/O Instructions และ I/O Mapping</a></li><li><a href="#9-interrupt-driven-io">9. Interrupt-Driven I/O</a></li><li><a href="#10-design-issues-และ-device-identification">10. Design Issues และ Device Identification</a></li><li><a href="#11-intel-82c59a-และ-8255a">11. Intel 82C59A และ 8255A</a></li><li><a href="#12-direct-memory-access-dma">12. Direct Memory Access (DMA) ⭐⭐</a></li><li><a href="#13-intel-8237-dma-controller">13. Intel 8237 DMA Controller</a></li><li><a href="#14-direct-cache-access-dca">14. Direct Cache Access (DCA)</a></li><li><a href="#15-evolution-of-the-io-function-และ-io-channel-architecture">15. Evolution of the I/O Function และ I/O Channel Architecture</a></li><li><a href="#16-assignment-และหัวข้อ-interface-9-เรื่อง">16. Assignment และหัวข้อ Interface 9 เรื่อง</a></li><li><a href="#17-ibm-zec12-io-structure">17. IBM zEC12 I/O Structure</a></li><li><a href="#18-คำศัพท์สำคัญ">18. คำศัพท์สำคัญ</a></li><li><a href="#19-สรุปท้ายบท-จุดที่มักออกสอบ">19. สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+        <ol><li><a href="#1-io-module-และ-external-devices-สไลด์-35">1. I/O Module และ External Devices (สไลด์ 3–5)</a></li><li><a href="#2-หน้าที่ของ-io-module-สไลด์-67">2. หน้าที่ของ I/O Module (สไลด์ 6–7)</a></li><li><a href="#3-3-เทคนิคของ-io-สไลด์-811">3. 3 เทคนิคของ I/O (สไลด์ 8–11)</a></li><li><a href="#4-io-instructions-และ-io-mapping-สไลด์-1214">4. I/O Instructions และ I/O Mapping (สไลด์ 12–14)</a></li><li><a href="#5-interrupt-driven-io-สไลด์-1517">5. Interrupt-Driven I/O (สไลด์ 15–17)</a></li><li><a href="#6-design-issues-และ-device-identification-สไลด์-1819">6. Design Issues และ Device Identification (สไลด์ 18–19)</a></li><li><a href="#7-ชิปตัวอย่างของ-intel-สไลด์-2023">7. ชิปตัวอย่างของ Intel (สไลด์ 20–23)</a></li><li><a href="#8-dma-direct-memory-access-สไลด์-2430">8. DMA — Direct Memory Access (สไลด์ 24–30)</a></li><li><a href="#9-direct-cache-access-dca-สไลด์-3137">9. Direct Cache Access (DCA) (สไลด์ 31–37)</a></li><li><a href="#10-evolution-of-the-io-function-และ-io-channel-สไลด์-3839">10. Evolution of the I/O Function และ I/O Channel (สไลด์ 38–39)</a></li><li><a href="#11-assignment-และ-9-หัวข้อ-interface-สไลด์-4048">11. Assignment และ 9 หัวข้อ Interface (สไลด์ 40–48)</a></li><li><a href="#12-ibm-zec12-io-สไลด์-4951">12. IBM zEC12 I/O (สไลด์ 49–51)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่ควรจำ">สรุปท้ายบท / จุดที่ควรจำ</a></li></ol>
       </div>
     </aside>
     <main class="lesson">
       <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter05</div>
-      <h1 class="lesson-title">Chapter V — I/O Systems</h1>
+      <h1 class="lesson-title">Chapter 05 — I/O Systems</h1>
       <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
       <article class="prose"><blockquote class="callout">
-<p><strong>ภาพรวมบทนี้</strong> CPU กับ memory อย่างเดียวยังไม่พอ คอมพิวเตอร์ต้องคุยกับอุปกรณ์ภายนอก เช่น คีย์บอร์ด disk และ network ด้วย บทนี้ดูว่า <strong>I/O module</strong> ทำหน้าที่อะไร และมี <strong>3 เทคนิคหลัก</strong> ในการรับส่งข้อมูล คือ <strong>Programmed I/O, Interrupt-driven I/O และ DMA</strong> รวมถึงเรื่อง memory-mapped กับ isolated I/O, การหาว่าอุปกรณ์ตัวไหน interrupt, ชิปตัวอย่างของ Intel (82C59A, 8255A, 8237), <strong>Direct Cache Access (DCA/DDIO)</strong>, วิวัฒนาการของ I/O, I/O channel และหัวข้อ interface (USB, FireWire, SCSI, Thunderbolt, InfiniBand, PCIe, SATA, Ethernet, Wi-Fi) ที่เป็นงานกลุ่ม</p>
-<p>ต่อจาก Chapter 02 (bus, interrupt) และ Chapter 04 (cache, memory)</p>
+<p><strong>ภาพรวมบทนี้:</strong> CPU คุยกับอุปกรณ์ภายนอก (keyboard, disk, network ฯลฯ) ผ่าน <strong>I/O module</strong> บทนี้อธิบายว่า I/O module ทำหน้าที่อะไร และมี <strong>3 เทคนิค</strong> ในการรับส่งข้อมูล: <strong>Programmed I/O, Interrupt-driven I/O, DMA</strong></p>
+<p>ต่อด้วยการระบุอุปกรณ์ที่ขอ interrupt, ชิปตัวอย่างของ Intel (82C59A, 8255A, 8237A), <strong>Direct Cache Access (DCA/DDIO)</strong> สำหรับ network ความเร็วสูง, วิวัฒนาการของ I/O, I/O channel</p>
+<p>ท้ายบทมี <strong>Assignment กลุ่ม 9 หัวข้อ</strong> (USB, FireWire, SCSI, Thunderbolt, InfiniBand, PCI, SATA, Ethernet, Wi-Fi) และระบบ I/O ของ IBM zEC12</p>
 </blockquote>
-<h2 id="1-course-outline">1. Course Outline</h2>
-<p>รายการหัวข้อของวิชา บทนี้คือ <strong>input and output systems</strong> (ตัวที่เน้นสีแดงในสไลด์)</p>
+<h2 id="1-io-module-และ-external-devices-สไลด์-35">1. I/O Module และ External Devices (สไลด์ 3–5)</h2>
+<h3 id="11-generic-model-of-an-io-module-สไลด์-3">1.1 Generic Model of an I/O Module (สไลด์ 3)</h3>
+<p>I/O module ต่ออยู่กับ <strong>System Bus</strong> (Address Lines, Data Lines, Control Lines) ด้านหนึ่ง และมี <strong>links to peripheral devices</strong> อีกด้านหนึ่ง</p>
+<h3 id="12-external-devices-สไลด์-4">1.2 External Devices (สไลด์ 4)</h3>
 <ul>
-<li>The structure and architecture of the computer systems</li>
-<li>basic components of computers</li>
-<li>data representations</li>
-<li>the Assembly Language</li>
-<li>memory system organization</li>
-<li>the memory hierarchy; the cache memory</li>
-<li><strong>input and output systems</strong> ← บทนี้</li>
-<li>storage systems</li>
-<li>computing units</li>
-<li>the multiprocessor architecture</li>
-</ul>
-<hr />
-<h2 id="2-generic-model-of-an-io-module">2. Generic Model of an I/O Module</h2>
-<p><img loading="lazy" src="img/c5-p003.jpg" alt="I/O module ต่อกับ system bus (address, data, control lines) และมี links to peripheral devices" /></p>
-<ul>
-<li>ด้านบนต่อกับ <strong>System Bus</strong> ซึ่งมี 3 กลุ่มสาย:
-<ul>
-<li><strong>Address Lines</strong></li>
-<li><strong>Data Lines</strong></li>
-<li><strong>Control Lines</strong></li>
-</ul>
-</li>
-<li>ด้านล่างมี <strong>Links to peripheral devices</strong> (สายต่อไปยังอุปกรณ์ต่อพ่วง)</li>
-</ul>
-<blockquote class="callout">
-<p class="c-tip">💡 I/O module เปรียบเหมือน <strong>ล่าม</strong> ระหว่าง CPU กับอุปกรณ์ ทั้งสองฝั่งพูดคนละภาษาและทำงานคนละความเร็ว</p>
-</blockquote>
-<hr />
-<h2 id="3-external-devices">3. External Devices</h2>
-<ul>
-<li><strong>ทำหน้าที่แลกเปลี่ยนข้อมูล</strong> ระหว่างสภาพแวดล้อมภายนอกกับคอมพิวเตอร์</li>
-<li><strong>ต่อกับคอมพิวเตอร์ผ่าน link ไปยัง I/O module</strong></li>
-<li><strong>อุปกรณ์ภายนอกแบ่งเป็น 3 ประเภท:</strong></li>
+<li>ใช้แลกเปลี่ยนข้อมูลระหว่างสภาพแวดล้อมภายนอกกับคอมพิวเตอร์</li>
+<li>ต่อกับคอมพิวเตอร์ผ่าน <strong>link ไปยัง I/O module</strong></li>
+<li><strong>3 ประเภท:</strong></li>
 </ul>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>ประเภท</th>
 <th>ความหมาย</th>
-<th>ตัวอย่าง (เสริม)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>Human readable</strong></td>
-<td>สื่อสารกับคน</td>
-<td>จอ, เครื่องพิมพ์, คีย์บอร์ด</td>
+<td>สื่อสารกับมนุษย์</td>
 </tr>
 <tr>
 <td><strong>Machine readable</strong></td>
-<td><strong>สื่อสารกับอุปกรณ์</strong></td>
-<td>disk, tape, sensor</td>
+<td>สื่อสารกับอุปกรณ์ (equipments)</td>
 </tr>
 <tr>
 <td><strong>Communication</strong></td>
-<td><strong>เหมาะกับการสื่อสารกับอุปกรณ์ระยะไกล</strong> เช่น terminal หรือคอมพิวเตอร์อีกเครื่อง</td>
-<td>modem, network card</td>
+<td>สื่อสารกับอุปกรณ์ระยะไกล เช่น terminal หรือคอมพิวเตอร์อีกเครื่อง</td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="block-diagram-of-an-external-device">Block Diagram of an External Device</h3>
-<p><img loading="lazy" src="img/c5-p005.jpg" alt="Control logic, buffer, transducer ของอุปกรณ์ภายนอก" /></p>
+<h3 id="13-block-diagram-of-an-external-device-สไลด์-5">1.3 Block Diagram of an External Device (สไลด์ 5)</h3>
 <ul>
-<li><strong>Control signals from I/O module</strong> → <strong>Control Logic</strong></li>
-<li><strong>Status signals to I/O module</strong> ← จาก Control Logic</li>
-<li><strong>Data bits to and from I/O module</strong> ⇄ <strong>Buffer</strong></li>
-<li><strong>Transducer (ตัวแปลงสัญญาณ)</strong> แปลงระหว่างข้อมูลดิจิทัลกับ <strong>Data (device-unique) to and from environment</strong>
-<ul>
-<li>เช่น แปลงแรงกดปุ่มเป็นสัญญาณไฟฟ้า <em>(เสริม)</em></li>
-</ul>
-</li>
+<li>รับ <strong>Control signals</strong> จาก I/O module → <strong>Control Logic</strong></li>
+<li>ส่ง <strong>Status signals</strong> ไปยัง I/O module</li>
+<li><strong>Data bits</strong> ไป/กลับ I/O module ผ่าน <strong>Buffer</strong></li>
+<li><strong>Transducer (ตัวแปลงสัญญาณ)</strong> แปลงข้อมูลเฉพาะอุปกรณ์ (device-unique) ไป/กลับจากสภาพแวดล้อม</li>
 </ul>
 <hr />
-<h2 id="4-functions-และ-block-diagram-ของ-io-module">4. Functions และ Block Diagram ของ I/O Module</h2>
-<h3 id="41-หน้าที่หลักของ-io-module">4.1 หน้าที่หลักของ I/O Module ⭐</h3>
+<h2 id="2-หน้าที่ของ-io-module-สไลด์-67">2. หน้าที่ของ I/O Module (สไลด์ 6–7)</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>หน้าที่</th>
-<th>ความหมาย</th>
+<th>รายละเอียด</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>Control and timing</strong></td>
-<td><strong>ประสานการไหลของข้อมูล</strong> ระหว่างทรัพยากรภายในกับอุปกรณ์ภายนอก</td>
+<td>ประสานการไหลของข้อมูลระหว่างทรัพยากรภายในกับอุปกรณ์ภายนอก</td>
 </tr>
 <tr>
 <td><strong>Processor communication</strong></td>
-<td><strong>command decoding, data, status reporting, address recognition</strong></td>
+<td>command decoding, data, status reporting, address recognition</td>
 </tr>
 <tr>
 <td><strong>Device communication</strong></td>
-<td><strong>commands, status information และ data</strong> กับอุปกรณ์</td>
+<td>commands, status information, data</td>
 </tr>
 <tr>
 <td><strong>Data buffering</strong></td>
-<td><strong>พักข้อมูลเพื่อชดเชยความเร็ว</strong> ที่ต่างกันของอุปกรณ์กับ memory</td>
+<td>ทำ buffer เพื่อปรับความเร็วระหว่างอุปกรณ์กับ memory ให้สมดุล</td>
 </tr>
 <tr>
 <td><strong>Error detection</strong></td>
-<td><strong>ตรวจจับและรายงาน transmission errors</strong></td>
+<td>ตรวจจับและรายงาน transmission errors</td>
 </tr>
 </tbody>
 </table></div>
-<blockquote class="callout">
-<p class="c-tip">💡 <strong>Data buffering</strong> สำคัญเพราะ memory เร็วมาก แต่อุปกรณ์อย่างเครื่องพิมพ์ช้ามาก ต้องมีที่พักข้อมูลไว้ตรงกลาง</p>
-</blockquote>
-<h3 id="42-block-diagram-of-an-io-module">4.2 Block Diagram of an I/O Module</h3>
-<p><img loading="lazy" src="img/c5-p007.jpg" alt="I/O module: data registers, status/control registers, I/O logic, external device interface logic" /></p>
+<p><strong>Block Diagram of an I/O Module (สไลด์ 7):</strong></p>
 <ul>
-<li><strong>ฝั่ง Interface to System Bus:</strong>
-<ul>
-<li><strong>Data Lines</strong> ⇄ <strong>Data Registers</strong></li>
-<li><strong>Data Lines</strong> ⇄ <strong>Status/Control Registers</strong></li>
-<li><strong>Address Lines</strong> และ <strong>Control Lines</strong> → <strong>I/O Logic</strong></li>
-</ul>
-</li>
-<li><strong>ฝั่ง Interface to External Device:</strong>
-<ul>
-<li>มี <strong>External Device Interface Logic</strong> หลายชุด (หนึ่งชุดต่ออุปกรณ์)</li>
-<li>แต่ละชุดมีสาย <strong>Data, Status, Control</strong></li>
-</ul>
-</li>
+<li>ฝั่ง System Bus: Data Lines ↔ <strong>Data Registers</strong> และ <strong>Status/Control Registers</strong>; Address Lines และ Control Lines ↔ <strong>I/O Logic</strong></li>
+<li>ฝั่งอุปกรณ์: <strong>External Device Interface Logic</strong> หลายชุด แต่ละชุดมีสาย Data, Status, Control</li>
 </ul>
 <hr />
-<h2 id="5-สามเทคนิคของ-io">5. สามเทคนิคของ I/O ⭐⭐</h2>
-<h3 id="51-programmed-io">5.1 Programmed I/O</h3>
-<ol>
-<li><strong>Programmed I/O</strong>
-<ul>
-<li><strong>ข้อมูลแลกเปลี่ยนระหว่าง processor กับ I/O module</strong></li>
-<li><strong>processor รันโปรแกรมที่ควบคุม I/O โดยตรง</strong></li>
-<li>เมื่อ processor สั่งงาน <strong>ต้องรอจน I/O ทำเสร็จ</strong></li>
-<li>ถ้า processor เร็วกว่า I/O module มาก <strong>จะเสียเวลา processor เปล่า ๆ</strong></li>
-</ul>
-</li>
-<li><strong>Interrupt-driven I/O</strong>
-<ul>
-<li>processor <strong>สั่ง I/O command แล้วไปทำคำสั่งอื่นต่อ</strong></li>
-<li><strong>I/O module จะ interrupt processor เมื่อทำงานเสร็จ</strong></li>
-</ul>
-</li>
-<li><strong>Direct memory access (DMA)</strong>
-<ul>
-<li><strong>I/O module กับ main memory แลกเปลี่ยนข้อมูลกันโดยตรง</strong> โดย <strong>processor ไม่ต้องเกี่ยว</strong></li>
-</ul>
-</li>
-</ol>
-<blockquote class="callout">
-<p class="c-tip">💡 เปรียบกับการรอพัสดุ:</p>
-<ul>
-<li><strong>Programmed I/O</strong> = ยืนเฝ้าหน้าบ้านจนกว่าพัสดุจะมา</li>
-<li><strong>Interrupt-driven</strong> = ทำงานอื่นไปก่อน แล้วค่อยออกไปรับเมื่อกริ่งดัง</li>
-<li><strong>DMA</strong> = จ้างคนรับพัสดุแล้วเอาไปเก็บในห้องให้เลย ตัวเราแค่ได้รับแจ้งตอนเสร็จ</li>
-</ul>
-</blockquote>
-<h3 id="52-summary-of-io-techniques">5.2 Summary of I/O Techniques ⭐</h3>
+<h2 id="3-3-เทคนิคของ-io-สไลด์-811">3. 3 เทคนิคของ I/O (สไลด์ 8–11)</h2>
+<h3 id="31-เทคนิค-สไลด์-8">3.1 เทคนิค (สไลด์ 8)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เทคนิค</th>
+<th>การทำงาน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Programmed I/O</strong></td>
+<td>processor แลกข้อมูลกับ I/O module โดยรันโปรแกรมที่ควบคุม I/O โดยตรง — สั่งแล้ว <strong>ต้องรอจน I/O เสร็จ</strong> → ถ้า processor เร็วกว่า I/O module ก็ <strong>เสียเวลา processor</strong></td>
+</tr>
+<tr>
+<td><strong>2. Interrupt-driven I/O</strong></td>
+<td>processor สั่ง I/O แล้ว <strong>ทำคำสั่งอื่นต่อ</strong> แล้ว I/O module <strong>interrupt</strong> เมื่อทำงานเสร็จ</td>
+</tr>
+<tr>
+<td><strong>3. DMA (Direct memory access)</strong></td>
+<td>I/O module กับ main memory <strong>แลกข้อมูลกันโดยตรง ไม่ผ่าน processor</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-summary-of-io-techniques-สไลด์-9">3.2 Summary of I/O Techniques (สไลด์ 9)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th></th>
-<th><strong>No Interrupts</strong></th>
-<th><strong>Use of Interrupts</strong></th>
+<th>No Interrupts</th>
+<th>Use of Interrupts</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>I/O-to-memory transfer through processor</strong></td>
-<td><strong>Programmed I/O</strong></td>
-<td><strong>Interrupt-driven I/O</strong></td>
+<td>Programmed I/O</td>
+<td>Interrupt-driven I/O</td>
 </tr>
 <tr>
 <td><strong>Direct I/O-to-memory transfer</strong></td>
-<td>–</td>
-<td><strong>Direct memory access (DMA)</strong></td>
+<td>—</td>
+<td>DMA</td>
 </tr>
 </tbody>
 </table></div>
-<blockquote class="callout">
-<p class="c-warn">⚠️ <strong>DMA ก็ใช้ interrupt</strong> (แจ้งตอนโอนข้อมูลเสร็จ) แต่ข้อมูลไม่วิ่งผ่าน processor</p>
-</blockquote>
-<hr />
-<h2 id="6-io-commands">6. I/O Commands</h2>
-<p>เมื่อ processor อ้างถึง I/O module จะส่งคำสั่งได้ <strong>4 ประเภท</strong>:</p>
+<h3 id="33-io-commands-สไลด์-10">3.3 I/O Commands (สไลด์ 10)</h3>
+<p>เมื่อ processor อ้างถึง I/O module จะส่งคำสั่งได้ 4 แบบ:</p>
+<ol>
+<li><strong>Control</strong> — เปิดใช้งาน peripheral และบอกว่าต้องทำอะไร</li>
+<li><strong>Test</strong> — ทดสอบสถานะต่าง ๆ ของ I/O module และ peripherals</li>
+<li><strong>Read</strong> — ให้ I/O module ดึงข้อมูลจาก peripheral มาไว้ใน internal buffer</li>
+<li><strong>Write</strong> — ให้ I/O module นำข้อมูลจาก data bus แล้วส่งไปยัง peripheral</li>
+</ol>
+<h3 id="34-three-techniques-for-input-of-a-block-of-data-สไลด์-11">3.4 Three Techniques for Input of a Block of Data (สไลด์ 11)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>คำสั่ง</th>
-<th>ใช้ทำอะไร</th>
+<th>(a) Programmed I/O</th>
+<th>(b) Interrupt-driven I/O</th>
+<th>(c) DMA</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>1) Control</strong></td>
-<td><strong>เปิดใช้อุปกรณ์ต่อพ่วงและบอกว่าให้ทำอะไร</strong></td>
+<td>Issue Read command (CPU→I/O)</td>
+<td>Issue Read command (CPU→I/O) → <strong>Do something else</strong></td>
+<td>Issue Read block command to DMA (CPU→DMA) → <strong>Do something else</strong></td>
 </tr>
 <tr>
-<td><strong>2) Test</strong></td>
-<td><strong>ตรวจสถานะต่าง ๆ</strong> ของ I/O module และอุปกรณ์ (เช่น เปิดอยู่ไหม มี error ไหม)</td>
+<td>Read status (I/O→CPU)</td>
+<td>← Interrupt → Read status (I/O→CPU)</td>
+<td>← Interrupt → Read status of DMA (DMA→CPU)</td>
 </tr>
 <tr>
-<td><strong>3) Read</strong></td>
-<td>ให้ I/O module <strong>ดึงข้อมูลจากอุปกรณ์มาเก็บใน internal buffer</strong></td>
+<td>Check status: Not ready → วนอ่าน status ใหม่ / Error condition</td>
+<td>Check status / Error condition</td>
+<td>Next instruction</td>
 </tr>
 <tr>
-<td><strong>4) Write</strong></td>
-<td>ให้ I/O module <strong>รับข้อมูลจาก data bus แล้วส่งต่อให้อุปกรณ์</strong></td>
+<td>Ready → Read word from I/O (I/O→CPU)</td>
+<td>Ready → Read word (I/O→CPU)</td>
+<td></td>
+</tr>
+<tr>
+<td>Write word into memory (CPU→memory)</td>
+<td>Write word into memory (CPU→memory)</td>
+<td></td>
+</tr>
+<tr>
+<td>Done? No → วนกลับ / Yes → Next instruction</td>
+<td>Done? No → วนกลับ / Yes → Next instruction</td>
+<td></td>
 </tr>
 </tbody>
 </table></div>
-<hr />
-<h2 id="7-three-techniques-for-input-of-a-block-of-data">7. Three Techniques for Input of a Block of Data ⭐</h2>
-<p><img loading="lazy" src="img/c5-p011.jpg" alt="flowchart ของ (a) Programmed I/O (b) Interrupt-driven I/O (c) DMA" /></p>
-<p><strong>(a) Programmed I/O</strong></p>
-<ol>
-<li>Issue Read command to I/O module (CPU → I/O)</li>
-<li>Read status of I/O module (I/O → CPU)</li>
-<li>Check status:
-<ul>
-<li><strong>Not ready → กลับไปอ่าน status ใหม่ (วนรอ)</strong></li>
-<li>Error condition</li>
-<li>Ready → ไปต่อ</li>
-</ul>
-</li>
-<li>Read word from I/O module (I/O → CPU)</li>
-<li>Write word into memory (CPU → memory)</li>
-<li>Done? No → กลับไปข้อ 1 / Yes → Next instruction</li>
-</ol>
-<p><strong>(b) Interrupt-driven I/O</strong></p>
-<ol>
-<li>Issue Read command to I/O module (CPU → I/O) แล้ว <strong>Do something else</strong></li>
-<li><strong>Interrupt</strong> → Read status of I/O module (I/O → CPU)</li>
-<li>Check status (Error condition / Ready)</li>
-<li>Read word from I/O module (I/O → CPU)</li>
-<li>Write word into memory (CPU → memory)</li>
-<li>Done? No → กลับข้อ 1 / Yes → Next instruction</li>
-</ol>
-<p><strong>(c) Direct memory access</strong></p>
-<ol>
-<li>Issue Read block command to I/O module (CPU → DMA) แล้ว <strong>Do something else</strong></li>
-<li><strong>Interrupt</strong> → Read status of DMA module (DMA → CPU)</li>
-<li>Next instruction</li>
-</ol>
 <blockquote class="callout">
-<p class="c-tip">💡 ข้อต่างที่เห็นชัด:</p>
-<ul>
-<li>(a) CPU <strong>วนรอ</strong> สถานะอยู่ตลอด</li>
-<li>(b) CPU ไปทำงานอื่นได้ แต่ยัง <strong>ย้ายข้อมูลทีละ word เอง</strong></li>
-<li>(c) CPU สั่ง <strong>ทั้ง block</strong> ครั้งเดียว แล้วรอรับ interrupt ตอนเสร็จ</li>
-</ul>
+<p class="c-tip">💡 ความต่างสำคัญ: (a) CPU วนเช็ก status เอง | (b) CPU ไปทำอย่างอื่นแล้วรอ interrupt | (c) CPU สั่งครั้งเดียวทั้ง block แล้วรอ interrupt ตอนจบ</p>
 </blockquote>
 <hr />
-<h2 id="8-io-instructions-และ-io-mapping">8. I/O Instructions และ I/O Mapping</h2>
-<h3 id="81-io-instructions">8.1 I/O Instructions</h3>
+<h2 id="4-io-instructions-และ-io-mapping-สไลด์-1214">4. I/O Instructions และ I/O Mapping (สไลด์ 12–14)</h2>
+<h3 id="41-io-instructions-สไลด์-12">4.1 I/O Instructions (สไลด์ 12)</h3>
 <ul>
-<li>ใน <strong>programmed I/O</strong> คำสั่งเกี่ยวกับ I/O ที่ processor fetch จาก memory <strong>ตรงกับ I/O command</strong> ที่ processor ส่งให้ I/O module เกือบหนึ่งต่อหนึ่ง</li>
-<li><strong>รูปแบบคำสั่งขึ้นกับวิธีระบุ address ของอุปกรณ์ภายนอก</strong></li>
-<li><strong>อุปกรณ์ I/O แต่ละตัวที่ต่อผ่าน I/O module จะมี identifier หรือ address ไม่ซ้ำกัน</strong>
-<ul>
-<li>เมื่อ processor ส่ง I/O command คำสั่งจะมี <strong>address ของอุปกรณ์ที่ต้องการ</strong></li>
-<li>ดังนั้น <strong>I/O module ทุกตัวต้องแปล address lines</strong> เพื่อดูว่าคำสั่งนั้นส่งมาหาตัวเองไหม</li>
+<li>ใน programmed I/O คำสั่ง I/O ที่ processor fetch จาก memory <strong>สัมพันธ์ใกล้ชิด</strong> กับ I/O commands ที่ส่งให้ I/O module</li>
+<li>รูปแบบคำสั่งขึ้นกับวิธี address อุปกรณ์ภายนอก</li>
+<li>แต่ละ I/O device ได้ <strong>identifier/address เฉพาะ</strong> — คำสั่ง I/O มี address ของอุปกรณ์ → I/O module แต่ละตัวต้องตีความ address lines ว่าคำสั่งเป็นของตัวเองหรือไม่</li>
+<li><strong>Memory-mapped I/O:</strong> address space เดียวสำหรับ memory และ I/O devices → ต้องมีแค่ <strong>read line 1 เส้น และ write line 1 เส้น</strong> บน bus</li>
 </ul>
-</li>
-<li><strong>Memory-mapped I/O:</strong>
-<ul>
-<li><strong>ใช้ address space เดียวกัน</strong> ทั้ง memory locations และ I/O devices</li>
-<li>บน bus <strong>ต้องการแค่ read line 1 เส้นและ write line 1 เส้น</strong></li>
-</ul>
-</li>
-</ul>
-<h3 id="82-io-mapping-summary">8.2 I/O Mapping Summary ⭐⭐</h3>
+<h3 id="42-io-mapping-summary-สไลด์-13">4.2 I/O Mapping Summary (สไลด์ 13)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -322,452 +233,256 @@
 <tbody>
 <tr>
 <td>Address space</td>
-<td><strong>อุปกรณ์กับ memory ใช้ address space ร่วมกัน</strong></td>
-<td><strong>แยก address space</strong></td>
+<td>อุปกรณ์และ memory <strong>ใช้ร่วมกัน</strong></td>
+<td><strong>แยกกัน</strong></td>
 </tr>
 <tr>
-<td>การเข้าถึง</td>
-<td><strong>I/O ดูเหมือนการอ่าน/เขียน memory ธรรมดา</strong></td>
-<td><strong>ต้องมี I/O or memory select lines</strong></td>
+<td>คำสั่ง</td>
+<td>I/O เหมือน memory read/write — <strong>ไม่มีคำสั่ง I/O พิเศษ</strong></td>
+<td><strong>ต้องมีคำสั่ง I/O พิเศษ</strong></td>
 </tr>
 <tr>
-<td>คำสั่งพิเศษ</td>
-<td><strong>ไม่มีคำสั่งพิเศษสำหรับ I/O</strong></td>
-<td><strong>มีคำสั่งพิเศษสำหรับ I/O</strong></td>
+<td>สาย</td>
+<td>—</td>
+<td>ต้องมี I/O หรือ memory select lines</td>
 </tr>
 <tr>
-<td>ชุดคำสั่งที่ใช้ได้</td>
-<td><strong>คำสั่งเข้าถึง memory มีให้เลือกมาก</strong></td>
-<td><strong>มีจำนวนจำกัด (Limited set)</strong></td>
+<td>ชุดคำสั่ง</td>
+<td>มีคำสั่งเข้าถึง memory ให้เลือกมาก</td>
+<td>ชุดคำสั่ง <strong>จำกัด</strong></td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="83-memory-mapped-and-isolated-io-ตัวอย่างอ่านคีย์บอร์ด">8.3 Memory-Mapped and Isolated I/O (ตัวอย่างอ่านคีย์บอร์ด)</h3>
-<p><img loading="lazy" src="img/c5-p014.jpg" alt="ตัวอย่างโปรแกรมอ่านคีย์บอร์ดแบบ memory-mapped และ isolated I/O" /></p>
-<p><strong>(a) Memory-mapped I/O</strong></p>
+<h3 id="43-ตัวอย่าง-สไลด์-14-อ่าน-keyboard">4.3 ตัวอย่าง (สไลด์ 14) — อ่าน keyboard</h3>
 <ul>
-<li>address <strong>516</strong> = <strong>Keyboard input data register</strong></li>
-<li>address <strong>517</strong> = <strong>Keyboard input status and control register</strong>
-<ul>
-<li>บิต 7: <strong>1 = ready, 0 = busy</strong></li>
-<li>บิต 0: <strong>Set to 1 to start read</strong></li>
+<li>Keyboard input data register = address <strong>516</strong>, keyboard input status and control register = <strong>517</strong> (bit: 1 = ready, 0 = busy; set 1 เพื่อเริ่มอ่าน)</li>
 </ul>
-</li>
-</ul>
+<p><strong>(a) Memory-mapped I/O:</strong></p>
+<pre><code>200  Load AC   &quot;1&quot;   Load accumulator
+     Store AC  517   Initiate keyboard read
+202  Load AC   517   Get status byte
+     Branch if Sign = 0  202   Loop until ready
+     Load AC   516   Load data byte
+</code></pre>
+<p><strong>(b) Isolated I/O:</strong></p>
+<pre><code>200  Load I/O         5    Initiate keyboard read
+201  Test I/O         5    Check for completion
+     Branch Not Ready 201  Loop until complete
+     In               5    Load data byte
+</code></pre>
+<hr />
+<h2 id="5-interrupt-driven-io-สไลด์-1517">5. Interrupt-Driven I/O (สไลด์ 15–17)</h2>
+<h3 id="51-แนวคิด-สไลด์-15">5.1 แนวคิด (สไลด์ 15)</h3>
+<ol>
+<li>ปัญหาของ programmed I/O คือ processor ต้องรอนานจน I/O module พร้อมรับหรือส่งข้อมูล</li>
+<li>ทางเลือก: processor สั่ง I/O command ให้ module แล้วไปทำงานอื่นที่มีประโยชน์</li>
+<li>I/O module จะ interrupt processor เพื่อขอบริการเมื่อพร้อมแลกข้อมูล</li>
+<li>processor ทำการส่งข้อมูล แล้วกลับไปทำงานเดิมต่อ</li>
+</ol>
+<h3 id="52-simple-interrupt-processing-สไลด์-16">5.2 Simple Interrupt Processing (สไลด์ 16)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>ADDRESS</th>
-<th>INSTRUCTION</th>
-<th>OPERAND</th>
-<th>COMMENT</th>
+<th>ฝั่ง Hardware</th>
+<th>ฝั่ง Software</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>200</td>
-<td>Load AC</td>
-<td>&quot;1&quot;</td>
-<td>Load accumulator</td>
+<td>1. Device controller หรือ hardware อื่นส่ง interrupt</td>
+<td>6. Save remainder of process state information</td>
 </tr>
 <tr>
+<td>2. Processor ทำคำสั่งปัจจุบันให้เสร็จ</td>
+<td>7. <strong>Process interrupt</strong> (เริ่มทำงานในส่วนของ interrupt)</td>
+</tr>
+<tr>
+<td>3. Processor ส่งสัญญาณ acknowledgment ของ interrupt</td>
+<td>8. Restore process state information</td>
+</tr>
+<tr>
+<td>4. <strong>Processor push PSW และ PC ลง control stack</strong> (เก็บค่า PC, PSW/status register ก่อนไปเริ่มทำงานใน ISR)</td>
+<td>9. Restore old PSW และ PC</td>
+</tr>
+<tr>
+<td>5. Processor โหลดค่า PC ใหม่ตาม interrupt</td>
 <td></td>
-<td>Store AC</td>
-<td>517</td>
-<td>Initiate keyboard read</td>
-</tr>
-<tr>
-<td>202</td>
-<td>Load AC</td>
-<td>517</td>
-<td>Get status byte</td>
-</tr>
-<tr>
-<td></td>
-<td>Branch if Sign = 0</td>
-<td>202</td>
-<td>Loop until ready</td>
-</tr>
-<tr>
-<td></td>
-<td>Load AC</td>
-<td>516</td>
-<td>Load data byte</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>(b) Isolated I/O</strong></p>
+<h3 id="53-changes-in-memory-and-registers-for-an-interrupt-สไลด์-17">5.3 Changes in Memory and Registers for an Interrupt (สไลด์ 17)</h3>
+<ul>
+<li><strong>(a) Interrupt เกิดหลังคำสั่งที่ตำแหน่ง N:</strong> ค่า N+1 (ที่อยู่คำสั่งถัดไป) และ registers ถูก push ลง control stack (stack pointer จาก T เป็น T−M), PC ถูกตั้งเป็น Y (จุดเริ่ม ISR)</li>
+<li><strong>(b) Return from interrupt:</strong> ISR จบที่ Y+L (Return) → ดึงค่ากลับจาก stack, PC กลับเป็น N+1, stack pointer กลับเป็น T</li>
+</ul>
+<hr />
+<h2 id="6-design-issues-และ-device-identification-สไลด์-1819">6. Design Issues และ Device Identification (สไลด์ 18–19)</h2>
+<h3 id="61-design-issues-สไลด์-18">6.1 Design Issues (สไลด์ 18)</h3>
+<p>การทำ interrupt I/O มีคำถาม 2 ข้อ:</p>
+<ol>
+<li>มี I/O module หลายตัว → <strong>processor รู้ได้อย่างไรว่าอุปกรณ์ไหนส่ง interrupt?</strong></li>
+<li>ถ้ามีหลาย interrupt → <strong>processor เลือกทำตัวไหนก่อน?</strong></li>
+</ol>
+<h3 id="62-device-identification-4-เทคนิค-สไลด์-19">6.2 Device Identification — 4 เทคนิค (สไลด์ 19)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>ADDRESS</th>
-<th>INSTRUCTION</th>
-<th>OPERAND</th>
-<th>COMMENT</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>200</td>
-<td>Load I/O</td>
-<td>5</td>
-<td>Initiate keyboard read</td>
-</tr>
-<tr>
-<td>201</td>
-<td>Test I/O</td>
-<td>5</td>
-<td>Check for completion</td>
-</tr>
-<tr>
-<td></td>
-<td>Branch Not Ready</td>
-<td>201</td>
-<td>Loop until complete</td>
-</tr>
-<tr>
-<td></td>
-<td>In</td>
-<td>5</td>
-<td>Load data byte</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote class="callout">
-<p class="c-tip">💡 แบบ memory-mapped ใช้คำสั่ง <strong>Load/Store ธรรมดา</strong> กับ address 516/517 ส่วนแบบ isolated ใช้คำสั่งเฉพาะ <strong>Load I/O, Test I/O, In</strong> กับเลขอุปกรณ์ 5</p>
-<p>ทั้งสองตัวอย่างยังเป็น <strong>programmed I/O</strong> เพราะวนรอจนอุปกรณ์พร้อม</p>
-</blockquote>
-<hr />
-<h2 id="9-interrupt-driven-io">9. Interrupt-Driven I/O</h2>
-<h3 id="91-แนวคิด">9.1 แนวคิด</h3>
-<ol>
-<li><strong>ปัญหาของ programmed I/O:</strong> processor ต้อง <strong>รอนาน</strong> จนกว่า I/O module จะพร้อมรับหรือส่งข้อมูล</li>
-<li><strong>ทางเลือก:</strong> processor <strong>สั่ง I/O command ให้ module แล้วไปทำงานอื่นที่มีประโยชน์</strong></li>
-<li><strong>I/O module จะ interrupt processor เพื่อขอรับบริการ</strong> เมื่อพร้อมแลกเปลี่ยนข้อมูล</li>
-<li><strong>processor ทำการโอนข้อมูล แล้วกลับไปทำงานเดิมต่อ</strong></li>
-</ol>
-<h3 id="92-simple-interrupt-processing">9.2 Simple Interrupt Processing ⭐</h3>
-<p><img loading="lazy" src="img/c5-p016.jpg" alt="ขั้นตอน hardware/software ของการจัดการ interrupt" /></p>
-<p><strong>ฝั่ง Hardware</strong></p>
-<ol>
-<li><strong>Device controller</strong> หรือ hardware อื่น <strong>ส่ง interrupt</strong></li>
-<li><strong>Processor ทำคำสั่งปัจจุบันให้เสร็จก่อน</strong></li>
-<li><strong>Processor ส่งสัญญาณ acknowledgment</strong> ของ interrupt</li>
-<li><strong>Processor push PSW และ PC ลง control stack</strong> — สไลด์เขียนไว้ว่า <em>เก็บค่า PC, PSW (Status register) ก่อนไปเริ่มทำงานใน ISR</em></li>
-<li><strong>Processor โหลดค่า PC ใหม่ตาม interrupt</strong> (กระโดดไป ISR)</li>
-</ol>
-<p><strong>ฝั่ง Software</strong></p>
-<ol start="6">
-<li><strong>Save remainder of process state information</strong> (เช่น register อื่น ๆ)</li>
-<li><strong>Process interrupt</strong> — สไลด์เขียนไว้ว่า <em>เริ่มทำงานในส่วนของ interrupt</em></li>
-<li><strong>Restore process state information</strong></li>
-<li><strong>Restore old PSW and PC</strong> → กลับไปทำโปรแกรมเดิม</li>
-</ol>
-<blockquote class="callout">
-<p class="c-warn">⚠️ <strong>PC กับ PSW ถูกเก็บโดย hardware</strong> ส่วน register อื่นเก็บโดย <strong>software (ISR)</strong></p>
-</blockquote>
-<h3 id="93-changes-in-memory-and-registers-for-an-interrupt">9.3 Changes in Memory and Registers for an Interrupt</h3>
-<p><img loading="lazy" src="img/c5-p017.jpg" alt="stack และ PC ก่อนและหลัง interrupt" /></p>
-<ul>
-<li><strong>(a) Interrupt occurs after instruction at location N</strong>
-<ul>
-<li>ค่า <strong>N+1</strong> (ที่อยู่ถัดไปของ user program) และ register ถูก push ลง <strong>control stack</strong></li>
-<li>Stack pointer ลดจาก T เป็น <strong>T − M</strong></li>
-<li><strong>PC = Y</strong> (จุดเริ่มของ interrupt service routine)</li>
-</ul>
-</li>
-<li><strong>(b) Return from interrupt</strong>
-<ul>
-<li>ISR จบที่ <strong>Y + L</strong> (คำสั่ง Return)</li>
-<li>pop ค่าคืนจาก stack: <strong>PC = N + 1</strong>, stack pointer กลับเป็น <strong>T</strong></li>
-</ul>
-</li>
-</ul>
-<hr />
-<h2 id="10-design-issues-และ-device-identification">10. Design Issues และ Device Identification</h2>
-<h3 id="101-design-issues">10.1 Design Issues</h3>
-<p>การทำ interrupt I/O มี <strong>2 ปัญหาการออกแบบ</strong>:</p>
-<ol>
-<li>เพราะมี <strong>I/O module หลายตัว</strong> processor จะ <strong>รู้ได้อย่างไรว่าอุปกรณ์ไหนเป็นตัวส่ง interrupt?</strong></li>
-<li>ถ้า <strong>มีหลาย interrupt เกิดพร้อมกัน</strong> processor จะ <strong>เลือกทำตัวไหนก่อน?</strong></li>
-</ol>
-<h3 id="102-device-identification-4-เทคนิค">10.2 Device Identification — 4 เทคนิค ⭐⭐</h3>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>#</th>
 <th>เทคนิค</th>
-<th>วิธีทำงาน</th>
-<th>จุดเด่น/จุดด้อย</th>
+<th>การทำงาน</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td><strong>Multiple interrupt lines</strong></td>
-<td><strong>มีสาย interrupt หลายเส้น</strong> ระหว่าง processor กับ I/O modules</td>
-<td><strong>ตรงไปตรงมาที่สุด</strong> แต่มีสายได้ไม่มาก <strong>แต่ละเส้นจึงยังมักมีหลาย module ต่อร่วมกัน</strong></td>
+<td><strong>1. Multiple interrupt lines</strong></td>
+<td>มีหลายสายระหว่าง processor กับ I/O modules — ตรงไปตรงมาที่สุด แต่แม้ใช้หลายสาย แต่ละสายก็มักมีหลาย module ต่ออยู่</td>
 </tr>
 <tr>
-<td>2</td>
-<td><strong>Software poll</strong></td>
-<td>เมื่อมี interrupt processor กระโดดไป <strong>ISR ที่ poll ถามทีละ module</strong> ว่าใครเป็นตัวส่ง</td>
-<td><strong>เสียเวลามาก (time consuming)</strong></td>
+<td><strong>2. Software poll</strong></td>
+<td>เมื่อ processor เจอ interrupt จะไปที่ ISR ซึ่ง <strong>poll ทุก I/O module</strong> เพื่อหาว่าใครส่ง — <strong>เสียเวลา</strong></td>
 </tr>
 <tr>
-<td>3</td>
-<td><strong>Daisy chain (hardware poll, vectored)</strong></td>
-<td><strong>สาย interrupt acknowledge ต่อผ่านทุก module เป็นทอด ๆ</strong> module ที่ขอจะตอบด้วย <strong>vector</strong></td>
-<td>ใช้ <strong>vectored interrupt</strong></td>
+<td><strong>3. Daisy chain (hardware poll, vectored)</strong></td>
+<td>สาย interrupt acknowledge ต่อเป็นโซ่ผ่าน modules — module ที่ขอส่ง <strong>vector</strong> (address ของ I/O module หรือ ID เฉพาะ)</td>
 </tr>
 <tr>
-<td>4</td>
-<td><strong>Bus arbitration (vectored)</strong></td>
-<td>I/O module ต้อง <strong>ได้สิทธิ์ควบคุม bus ก่อน</strong> จึงยก interrupt request line → processor ตอบทาง <strong>interrupt acknowledge line</strong> → module ที่ขอ <strong>วาง vector ลงบน data lines</strong></td>
-<td>ใช้ vector เช่นกัน</td>
+<td><strong>4. Bus arbitration (vectored)</strong></td>
+<td>I/O module ต้อง <strong>ได้สิทธิ์ควบคุม bus ก่อน</strong> จึงยก interrupt request ได้ → processor ตอบทาง interrupt acknowledge line → module ที่ขอส่ง vector (address of I/O) ลง data lines</td>
 </tr>
 </tbody>
 </table></div>
 <ul>
-<li><strong>Vector</strong> = <strong>address ของ I/O module</strong> หรือตัวระบุเฉพาะอื่น</li>
-<li><strong>Vectored interrupt</strong> = processor <strong>ใช้ vector เป็น pointer ไปยัง device-service routine ที่ถูกต้องทันที</strong> ไม่ต้องรัน ISR กลางก่อน</li>
+<li><strong>Vectored interrupt:</strong> processor ใช้ vector เป็น pointer ไปยัง device-service routine ที่ถูกต้อง โดย <strong>ไม่ต้องรัน general interrupt-service routine ก่อน</strong></li>
 </ul>
-<p><strong>โน้ตภาษาไทยในสไลด์ (Bus arbitration):</strong></p>
-<ul>
-<li>I/O module ได้สิทธิ์ควบคุม BUS แล้วจึงขอ interrupt</li>
-<li>Processor detects interrupt</li>
-<li>Module ที่ร้องขอส่ง address of I/O ลงใน data line</li>
-</ul>
-<blockquote class="callout">
-<p class="c-tip">💡 <strong>Daisy chain</strong> เหมือนส่งกระดาษเช็กชื่อไปตามแถว คนแรกที่ยกมือจะเก็บกระดาษไว้แล้วตอบชื่อตัวเอง ทำให้ <strong>module ที่อยู่ใกล้ processor มี priority สูงกว่า</strong> <em>(เสริม)</em></p>
-</blockquote>
 <hr />
-<h2 id="11-intel-82c59a-และ-8255a">11. Intel 82C59A และ 8255A</h2>
-<h3 id="111-use-of-the-82c59a-interrupt-controller">11.1 Use of the 82C59A Interrupt Controller</h3>
-<p><img loading="lazy" src="img/c5-p020.jpg" alt="82C59A master/slave cascade ต่อ external devices 00–63 ไปยัง 80386" /></p>
+<h2 id="7-ชิปตัวอย่างของ-intel-สไลด์-2023">7. ชิปตัวอย่างของ Intel (สไลด์ 20–23)</h2>
+<h3 id="71-use-of-the-82c59a-interrupt-controller-สไลด์-20">7.1 Use of the 82C59A Interrupt Controller (สไลด์ 20)</h3>
 <ul>
-<li>ชิป <strong>82C59A</strong> คือ <strong>interrupt controller</strong> รับ interrupt ได้ <strong>8 เส้น (IR0–IR7)</strong></li>
-<li>ต่อแบบ <strong>cascade</strong>:
+<li><strong>Slave 82C59A</strong> แต่ละตัวรับ interrupt จาก external devices ได้ 8 ตัว (IR0–IR7) แล้วส่ง INT ไปยัง <strong>Master 82C59A</strong></li>
+<li>Master ส่ง INT ไปยัง <strong>INTR ของ 80386 processor</strong></li>
+<li>ภาพแสดง external device 00 ถึง 63 (slave หลายตัวต่อเข้า master)</li>
+</ul>
+<h3 id="72-intel-8255a-programmable-peripheral-interface-สไลด์-21">7.2 Intel 8255A Programmable Peripheral Interface (สไลด์ 21)</h3>
 <ul>
-<li><strong>Slave 82C59A</strong> หลายตัว แต่ละตัวรับ <strong>External device</strong> 8 ตัว (00–07, 08–15, …, 56–63)</li>
-<li>ขา <strong>INT</strong> ของ slave ต่อเข้า <strong>IR0–IR7 ของ Master 82C59A</strong></li>
-<li><strong>Master INT → INTR ของ 80386 processor</strong></li>
+<li>Block diagram: Data bus buffer (D7–D0, bi-directional), Read/write control logic (RD, WR, A1, A0, Reset, CS), <strong>Group A control</strong> → Port A (8) และ Port C upper (4), <strong>Group B control</strong> → Port C lower (4) และ Port B (8), 8-bit internal data bus</li>
+<li>I/O: PA7–PA0, PC7–PC4, PC3–PC0, PB7–PB0</li>
+<li>Pin layout 40 pins</li>
 </ul>
-</li>
-<li>รวมรองรับอุปกรณ์ได้สูงสุด <strong>64 ตัว</strong> (8 × 8)</li>
-</ul>
-<h3 id="112-intel-8255a-programmable-peripheral-interface">11.2 Intel 8255A Programmable Peripheral Interface</h3>
-<p><img loading="lazy" src="img/c5-p021.jpg" alt="8255A block diagram และ pin layout 40 ขา" /></p>
-<ul>
-<li><strong>(a) Block diagram</strong>
-<ul>
-<li><strong>Bi-directional data bus D7–D0</strong> ⇄ <strong>Data bus buffer</strong> ⇄ <strong>8-bit internal data bus</strong></li>
-<li><strong>Read/write control logic</strong> (RD, WR, A1, A0, Reset, CS)</li>
-<li><strong>Group A control:</strong> <strong>Port A (8 บิต)</strong> → I/O PA7–PA0, <strong>Port C upper (4)</strong> → PC7–PC4</li>
-<li><strong>Group B control:</strong> <strong>Port C lower (4)</strong> → PC3–PC0, <strong>Port B (8)</strong> → PB7–PB0</li>
-<li>Power supplies <strong>+5V, GND</strong></li>
-</ul>
-</li>
-<li><strong>(b) Pin layout:</strong> ชิป 40 ขา</li>
-</ul>
-<h3 id="113-intel-8255a-control-word">11.3 Intel 8255A Control Word</h3>
-<p><img loading="lazy" src="img/c5-p022.jpg" alt="control word ของ 8255: mode definition และ bit set/reset" /></p>
-<p><strong>(a) Mode definition of the 8255 control register</strong> (ใช้ตั้งค่า 8255)</p>
+<h3 id="73-intel-8255a-control-word-สไลด์-22">7.3 Intel 8255A Control Word (สไลด์ 22)</h3>
+<p><strong>(a) Mode definition (D7 = 1, Mode set flag active):</strong></p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>บิต</th>
+<th>Bit</th>
 <th>ความหมาย</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>D7</strong></td>
-<td><strong>Mode set flag: 1 = Active</strong></td>
-</tr>
-<tr>
-<td>D6, D5</td>
-<td><strong>Group A mode selection:</strong> 00 = Mode 0, 01 = Mode 1, 1X = Mode 2</td>
-</tr>
-<tr>
-<td>D4</td>
-<td><strong>Port A:</strong> 1 = Input, 0 = Output</td>
-</tr>
-<tr>
-<td>D3</td>
-<td><strong>Port C (upper):</strong> 1 = Input, 0 = Output</td>
-</tr>
-<tr>
-<td>D2</td>
-<td><strong>Group B mode selection:</strong> 0 = Mode 0, 1 = Mode 1</td>
+<td>D0</td>
+<td>Port C (lower): 1 = Input, 0 = Output</td>
 </tr>
 <tr>
 <td>D1</td>
-<td><strong>Port B:</strong> 1 = Input, 0 = Output</td>
+<td>Port B: 1 = Input, 0 = Output</td>
 </tr>
 <tr>
-<td>D0</td>
-<td><strong>Port C (lower):</strong> 1 = Input, 0 = Output</td>
+<td>D2</td>
+<td>Mode selection (Group B): 0 = Mode 0, 1 = Mode 1</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Port C (upper): 1 = Input, 0 = Output</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Port A: 1 = Input, 0 = Output</td>
+</tr>
+<tr>
+<td>D6–D5</td>
+<td>Mode selection (Group A): 00 = Mode 0, 01 = Mode 1, 1X = Mode 2</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Mode set flag: 1 = Active</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>(b) Bit definitions of the 8255 control register to modify single bits of port C</strong></p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>บิต</th>
-<th>ความหมาย</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>D7</strong></td>
-<td><strong>Bit set/reset flag: 0 = Active</strong></td>
-</tr>
-<tr>
-<td>D6–D4</td>
-<td>Don't care</td>
-</tr>
-<tr>
-<td>D3–D1</td>
-<td><strong>เลือกบิตของ Port C</strong> (000 = bit 0 … 111 = bit 7)</td>
-</tr>
-<tr>
-<td>D0</td>
-<td><strong>Bit set/reset:</strong> 1 = set, 0 = reset</td>
-</tr>
-</tbody>
-</table></div>
-<blockquote class="callout">
-<p class="c-tip">💡 <strong>D7 เป็นตัวแยกสองแบบ:</strong> 1 = ตั้งค่า mode ของ port, 0 = set/reset ทีละบิตของ port C</p>
-</blockquote>
-<h3 id="114-keyboard-display-interface-to-82c55a">11.4 Keyboard / Display Interface to 82C55A</h3>
-<p><img loading="lazy" src="img/c5-p023.jpg" alt="82C55A ต่อ keyboard (input port A) และ display (output port B)" /></p>
+<p><strong>(b) Bit set/reset ของ Port C (D7 = 0):</strong></p>
 <ul>
-<li><strong>INPUT PORT (A0–A7)</strong> ← <strong>KEYBOARD:</strong> R0–R5 (ข้อมูลปุ่ม), Shift, Control</li>
-<li><strong>C4, C5:</strong> <strong>Data ready, Acknowledge</strong> ของคีย์บอร์ด; <strong>C3 = Interrupt request</strong></li>
-<li><strong>OUTPUT PORT (B0–B7)</strong> → <strong>DISPLAY:</strong> S0–S5, Backspace, Clear</li>
-<li><strong>C1, C2, C6, C7:</strong> Data ready, Acknowledge, Blanking, Clear line ของจอ; <strong>C0 = Interrupt request</strong></li>
+<li>D6–D4: don't care</li>
+<li>D3–D1: เลือก bit 0–7 ของ Port C (000 = bit 0 … 111 = bit 7)</li>
+<li>D0: 1 = set, 0 = reset</li>
+</ul>
+<h3 id="74-keyboarddisplay-interface-to-82c55a-สไลด์-23">7.4 Keyboard/Display Interface to 82C55A (สไลด์ 23)</h3>
+<ul>
+<li><strong>Input port (A0–A7):</strong> รับจาก KEYBOARD (R0–R5, Shift, Control); C4 = Data ready, C5 = Acknowledge; C3 = Interrupt request</li>
+<li><strong>Output port (B0–B7):</strong> ส่งไป DISPLAY (S0–S5, Backspace, Clear); C1 = Data ready, C2 = Acknowledge, C6 = Blanking, C7 = Clear line; C0 = Interrupt request</li>
 </ul>
 <hr />
-<h2 id="12-direct-memory-access-dma">12. Direct Memory Access (DMA) ⭐⭐</h2>
-<h3 id="121-drawbacks-of-programmed-and-interrupt-driven-io">12.1 Drawbacks of Programmed and Interrupt-Driven I/O</h3>
-<p>ทั้งสองแบบมี <strong>ข้อเสียในตัว 2 ข้อ</strong>:</p>
+<h2 id="8-dma-direct-memory-access-สไลด์-2430">8. DMA — Direct Memory Access (สไลด์ 24–30)</h2>
+<h3 id="81-ข้อเสียของ-programmed-และ-interrupt-driven-io-สไลด์-24">8.1 ข้อเสียของ Programmed และ Interrupt-Driven I/O (สไลด์ 24)</h3>
 <ol>
-<li><strong>อัตราการโอนข้อมูล I/O ถูกจำกัดด้วยความเร็วที่ processor ตรวจและให้บริการอุปกรณ์</strong></li>
-<li><strong>processor ต้องผูกติดกับการจัดการ I/O transfer</strong> เพราะ <strong>ต้องรันหลายคำสั่งต่อการโอนแต่ละครั้ง</strong></li>
+<li><strong>อัตราการส่ง I/O ถูกจำกัด</strong> ด้วยความเร็วที่ processor ทดสอบและให้บริการอุปกรณ์</li>
+<li><strong>Processor ถูกผูกไว้</strong> กับการจัดการ I/O — ต้องรันหลายคำสั่งต่อการส่ง I/O แต่ละครั้ง</li>
 </ol>
-<p>→ <strong>เมื่อต้องย้ายข้อมูลจำนวนมาก</strong> เทคนิคที่มีประสิทธิภาพกว่าคือ <strong>direct memory access (DMA)</strong></p>
-<h3 id="122-typical-dma-block-diagram">12.2 Typical DMA Block Diagram</h3>
-<p><img loading="lazy" src="img/c5-p025.jpg" alt="DMA module: data count, data register, address register, control logic" /></p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>ส่วนประกอบ</th>
-<th>หน้าที่ (อธิบายเสริม)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Data count</strong></td>
-<td><strong>จำนวน word ที่ยังต้องโอน</strong></td>
-</tr>
-<tr>
-<td><strong>Data register</strong></td>
-<td>พักข้อมูล ต่อกับ <strong>Data lines</strong></td>
-</tr>
-<tr>
-<td><strong>Address register</strong></td>
-<td><strong>ตำแหน่ง memory ที่จะอ่าน/เขียน</strong> ต่อกับ <strong>Address lines</strong></td>
-</tr>
-<tr>
-<td><strong>Control logic</strong></td>
-<td>สัญญาณ <strong>Request to DMA, Acknowledge from DMA, Interrupt, Read, Write</strong></td>
-</tr>
-</tbody>
-</table></div>
-<h3 id="123-dma-and-interrupt-breakpoints-during-an-instruction-cycle">12.3 DMA and Interrupt Breakpoints During an Instruction Cycle ⭐</h3>
-<p><img loading="lazy" src="img/c5-p026.jpg" alt="ช่วงที่ processor หยุดให้ DMA และ interrupt ภายใน instruction cycle" /></p>
 <ul>
-<li>สไลด์อธิบายว่าเป็น <strong>จุดที่ Processor จะหยุดพักเพื่อตรวจสอบคำขอ (request) จาก DMA และ Interrupt</strong></li>
-<li><strong>Instruction Cycle</strong> แบ่งเป็น processor cycles: <strong>Fetch Instruction → Decode Instruction → Fetch Operand → Execute Instruction → Store Result → Process Interrupt</strong></li>
-<li><strong>DMA Breakpoints:</strong> แทรกได้ <strong>ระหว่าง processor cycle หลายจุด</strong> (หลัง fetch, decode, fetch operand, execute, store)</li>
-<li><strong>Interrupt Breakpoint:</strong> มี <strong>จุดเดียว ตอนท้าย cycle</strong> (หลัง Store Result)</li>
-<li>สไลด์สรุปว่า <strong>DMA แทรกเร็วและถี่กว่า เพราะเกี่ยวกับ hardware bus ตรง ส่วน Interrupt ต้องรอจนเสร็จคำสั่ง</strong></li>
+<li>→ เมื่อต้องย้ายข้อมูลปริมาณมาก <strong>DMA มีประสิทธิภาพกว่า</strong></li>
 </ul>
-<blockquote class="callout">
-<p class="c-warn">⚠️ <strong>DMA ไม่ใช่ interrupt</strong> processor แค่ <strong>หยุดใช้ bus ชั่วคราว</strong> (ไม่ต้องเก็บ context) จึงหยุดกลางคำสั่งได้</p>
-</blockquote>
-<h3 id="124-alternative-dma-configurations">12.4 Alternative DMA Configurations</h3>
-<p><img loading="lazy" src="img/c5-p027.jpg" alt="3 รูปแบบการต่อ DMA" /></p>
+<h3 id="82-typical-dma-block-diagram-สไลด์-25">8.2 Typical DMA Block Diagram (สไลด์ 25)</h3>
+<p>DMA module ประกอบด้วย:</p>
+<ul>
+<li><strong>Data count</strong></li>
+<li><strong>Data register</strong> (ต่อ Data lines)</li>
+<li><strong>Address register</strong> (ต่อ Address lines)</li>
+<li><strong>Control logic</strong> — สัญญาณ Request to DMA, Acknowledge from DMA, Interrupt, Read, Write</li>
+</ul>
+<h3 id="83-dma-and-interrupt-breakpoints-during-an-instruction-cycle-สไลด์-26">8.3 DMA and Interrupt Breakpoints During an Instruction Cycle (สไลด์ 26)</h3>
+<ul>
+<li>เป็นจุดที่ processor หยุดพักเพื่อตรวจคำขอ (request) จาก DMA และ interrupt</li>
+<li><strong>DMA แทรกได้เร็วและถี่กว่า</strong> เพราะเกี่ยวกับ hardware bus โดยตรง ส่วน <strong>interrupt ต้องรอจนคำสั่งเสร็จ</strong></li>
+</ul>
+<h3 id="84-alternative-dma-configurations-สไลด์-27">8.4 Alternative DMA Configurations (สไลด์ 27)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>แบบ</th>
 <th>ลักษณะ</th>
-<th>ข้อสังเกต (เสริม)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>(a) Single-bus, detached DMA</strong></td>
-<td>Processor, DMA, I/O, Memory <strong>ต่อ bus เดียวกันหมด</strong></td>
-<td>ถูกแต่ช้า ข้อมูลข้าม bus 2 ครั้ง (I/O → DMA → memory)</td>
+<td>Processor, DMA, I/O หลายตัว, Memory อยู่บน bus เดียวกัน</td>
 </tr>
 <tr>
 <td><strong>(b) Single-bus, Integrated DMA-I/O</strong></td>
-<td>DMA <strong>ติดกับ I/O</strong> (หรือ DMA หนึ่งตัวคุม I/O หลายตัว) นอก bus</td>
-<td>ลดการใช้ system bus</td>
+<td>DMA รวมกับ I/O หรือ DMA ต่อ I/O หลายตัวเอง</td>
 </tr>
 <tr>
 <td><strong>(c) I/O bus</strong></td>
-<td>DMA ต่อ <strong>system bus</strong> และมี <strong>I/O bus แยก</strong> สำหรับ I/O หลายตัว</td>
-<td>ขยายเพิ่มอุปกรณ์ได้ง่าย</td>
+<td>DMA ต่อกับ system bus และมี <strong>I/O bus แยก</strong> ไปยัง I/O หลายตัว</td>
 </tr>
 </tbody>
 </table></div>
-<hr />
-<h2 id="13-intel-8237-dma-controller">13. Intel 8237 DMA Controller</h2>
-<h3 id="131-8237-dma-usage-of-system-bus">13.1 8237 DMA Usage of System Bus</h3>
-<p><img loading="lazy" src="img/c5-p028.jpg" alt="8237 DMA chip ต่อกับ CPU, main memory, disk controller ผ่าน data/address/control bus" /></p>
+<h3 id="85-8237-dma-usage-of-system-bus-สไลด์-28">8.5 8237 DMA Usage of System Bus (สไลด์ 28)</h3>
 <ul>
-<li><strong>สัญญาณ:</strong>
+<li>CPU, 8237 DMA chip, Main memory, Disk controller ต่อกับ Data bus, Address bus, Control bus (IOR, IOW, MEMR, MEMW)</li>
+<li>สัญญาณ: <strong>DREQ</strong> = DMA request, <strong>DACK</strong> = DMA acknowledge, <strong>HRQ</strong> = HOLD request, <strong>HLDA</strong> = HOLD acknowledge</li>
+<li>ลำดับตามภาพ: Disk controller ส่ง DREQ → 8237 ส่ง HRQ ไป CPU → CPU ตอบ HLDA → 8237 ส่ง DACK ไปยัง disk controller</li>
+</ul>
+<h3 id="86-fly-by-dma-controller-สไลด์-29">8.6 Fly-By DMA Controller (สไลด์ 29)</h3>
 <ul>
-<li><strong>DACK = DMA acknowledge</strong></li>
-<li><strong>DREQ = DMA request</strong></li>
-<li><strong>HLDA = HOLD acknowledge</strong></li>
-<li><strong>HRQ = HOLD request</strong></li>
+<li><strong>ข้อมูลไม่ผ่านและไม่ถูกเก็บใน DMA chip</strong>
+<ul>
+<li>DMA เฉพาะระหว่าง I/O port กับ memory</li>
+<li>ไม่ใช่ระหว่าง I/O port 2 ตัว หรือ memory 2 ตำแหน่ง</li>
 </ul>
 </li>
-<li><strong>ลำดับการทำงาน (อธิบายตามภาพ แบบเสริม):</strong>
-<ol>
-<li><strong>Disk controller ส่ง DREQ</strong> ให้ 8237</li>
-<li><strong>8237 ส่ง HRQ ให้ CPU</strong> เพื่อขอยึด bus</li>
-<li><strong>CPU ตอบ HLDA</strong> และปล่อย bus</li>
-<li><strong>8237 ส่ง DACK</strong> ให้ disk controller แล้วโอนข้อมูลกับ <strong>main memory</strong> ผ่าน data bus/address bus/control bus (<strong>IOR, IOW, MEMR, MEMW</strong>)</li>
-<li>เสร็จแล้ว 8237 <strong>ยกเลิก HRQ</strong> คืน bus ให้ CPU</li>
-</ol>
-</li>
+<li>ทำ memory-to-memory ได้ผ่าน register</li>
+<li><strong>8237 มี 4 DMA channels</strong> — programmed แยกกัน, active ได้ทีละ 1 ตัว, หมายเลข 0, 1, 2, 3</li>
 </ul>
-<h3 id="132-fly-by-dma-controller">13.2 Fly-By DMA Controller</h3>
-<ul>
-<li><strong>ข้อมูลไม่วิ่งผ่านและไม่ถูกเก็บในชิป DMA</strong>
-<ul>
-<li><strong>DMA ใช้ได้เฉพาะระหว่าง I/O port กับ memory</strong></li>
-<li><strong>ใช้ระหว่าง I/O port สองตัว หรือ memory สองตำแหน่งไม่ได้</strong></li>
-</ul>
-</li>
-<li><strong>ทำ memory-to-memory ได้ผ่าน register</strong></li>
-<li><strong>8237 มี DMA 4 channels</strong>
-<ul>
-<li><strong>โปรแกรมแยกกันได้</strong></li>
-<li><strong>ใช้งานได้ทีละ channel</strong></li>
-<li><strong>หมายเลข 0, 1, 2 และ 3</strong></li>
-</ul>
-</li>
-</ul>
-<h3 id="133-intel-8237a-registers-table-72">13.3 Intel 8237A Registers (Table 7.2)</h3>
-<p><strong>E/D = enable/disable, TC = terminal count</strong></p>
+<h3 id="87-intel-8237a-registers-สไลด์-30">8.7 Intel 8237A Registers (สไลด์ 30)</h3>
+<p>(E/D = enable/disable, TC = terminal count)</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -781,47 +496,47 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>D0</strong></td>
+<td>D0</td>
 <td>Memory-to-memory E/D</td>
 <td>Channel 0 has reached TC</td>
-<td>Channel select</td>
-<td>Select channel mask bit</td>
+<td>Channel select (D1–D0)</td>
+<td>Select channel mask bit (D1–D0)</td>
 <td>Clear/set channel 0 mask bit</td>
 </tr>
 <tr>
-<td><strong>D1</strong></td>
+<td>D1</td>
 <td>Channel 0 address hold E/D</td>
 <td>Channel 1 has reached TC</td>
-<td>(Channel select)</td>
-<td>(Select channel mask bit)</td>
+<td>↑</td>
+<td>↑</td>
 <td>Clear/set channel 1 mask bit</td>
 </tr>
 <tr>
-<td><strong>D2</strong></td>
+<td>D2</td>
 <td>Controller E/D</td>
 <td>Channel 2 has reached TC</td>
-<td>Verify/write/read transfer</td>
+<td>Verify/write/read transfer (D3–D2)</td>
 <td>Clear/set mask bit</td>
 <td>Clear/set channel 2 mask bit</td>
 </tr>
 <tr>
-<td><strong>D3</strong></td>
+<td>D3</td>
 <td>Normal/compressed timing</td>
 <td>Channel 3 has reached TC</td>
-<td>(Verify/write/read transfer)</td>
-<td>Not used</td>
+<td>↑</td>
+<td>Not used (D3–D7)</td>
 <td>Clear/set channel 3 mask bit</td>
 </tr>
 <tr>
-<td><strong>D4</strong></td>
+<td>D4</td>
 <td>Fixed/rotating priority</td>
 <td>Channel 0 request</td>
 <td>Auto-initialization E/D</td>
 <td>Not used</td>
-<td>Not used</td>
+<td>Not used (D4–D7)</td>
 </tr>
 <tr>
-<td><strong>D5</strong></td>
+<td>D5</td>
 <td>Late/extended write selection</td>
 <td>Channel 0 request</td>
 <td>Address increment/decrement select</td>
@@ -829,87 +544,57 @@
 <td>Not used</td>
 </tr>
 <tr>
-<td><strong>D6</strong></td>
+<td>D6</td>
 <td>DREQ sense active high/low</td>
 <td>Channel 0 request</td>
-<td>Demand/single/block/cascade mode select</td>
+<td>Demand/single/block/cascade mode select (D7–D6)</td>
 <td>Not used</td>
 <td>Not used</td>
 </tr>
 <tr>
-<td><strong>D7</strong></td>
+<td>D7</td>
 <td>DACK sense active high/low</td>
 <td>Channel 0 request</td>
-<td>(Demand/single/block/cascade mode select)</td>
+<td>↑</td>
 <td>Not used</td>
 <td>Not used</td>
 </tr>
 </tbody>
 </table></div>
+<p><img loading="lazy" src="img/c5-p030.jpg" alt="ตาราง Intel 8237A Registers" /></p>
 <blockquote class="callout">
-<p class="c-warn">⚠️ ในตาราง <strong>Status D4–D7 เขียนว่า &quot;Channel 0 request&quot; ทุกบิต</strong> ตามต้นฉบับ แต่จริง ๆ น่าจะเป็น request ของ channel 0, 1, 2, 3 ตามลำดับ <em>(ข้อสังเกตเสริม)</em></p>
+<p class="c-warn">⚠️ ในสไลด์ ช่อง Status ของ D4–D7 เขียน &quot;Channel 0 request&quot; ซ้ำทั้ง 4 แถว (ไม่ได้ไล่เป็น channel 1–3)</p>
 </blockquote>
 <hr />
-<h2 id="14-direct-cache-access-dca">14. Direct Cache Access (DCA)</h2>
-<h3 id="141-ทำไมต้องมี-dca">14.1 ทำไมต้องมี DCA</h3>
+<h2 id="9-direct-cache-access-dca-สไลด์-3137">9. Direct Cache Access (DCA) (สไลด์ 31–37)</h2>
+<h3 id="91-ทำไมต้องมี-dca-สไลด์-31">9.1 ทำไมต้องมี DCA (สไลด์ 31)</h3>
 <ul>
-<li><strong>DMA ไม่สามารถ scale รองรับความต้องการ</strong> ที่เพิ่มขึ้นมากของอัตราข้อมูลบน <strong>network I/O</strong>
+<li><strong>DMA ไม่สามารถ scale</strong> ได้ทันกับ data rate ของ network I/O ที่เพิ่มขึ้นมาก</li>
+<li>ความต้องการมาจาก Ethernet switch <strong>10-Gbps และ 100-Gbps</strong> ที่รับส่งข้อมูลจำนวนมากกับ database servers และระบบสมรรถนะสูง</li>
+<li>อีกแหล่งคือ <strong>Wi-Fi ระดับ gigabit</strong> — อุปกรณ์ 3.2 Gbps และ 6.76 Gbps เริ่มแพร่หลาย</li>
+</ul>
+<h3 id="92-xeon-e5-26004600-chip-architecture-สไลด์-32">9.2 Xeon E5-2600/4600 Chip Architecture (สไลด์ 32)</h3>
+<p>8 cores (Core 0–7) แต่ละตัวมี L1 (64 KB) และ L2 (256 KB), L3 cache แบ่งเป็นก้อนละ 2.5 MB รวม 8 ก้อน, เชื่อมด้วย ring, มี QPI (ไป processor chip อื่น), PCIe (ไป I/O devices), Memory Controller Hub (ไป DDR3 memory)</p>
+<h3 id="93-cache-related-performance-issues-สไลด์-3334">9.3 Cache-Related Performance Issues (สไลด์ 33–34)</h3>
 <ul>
-<li>สไลด์เขียนไว้ว่า <em>DMA ไม่ได้รองรับการ scale ในกรณีที่ต้องการ data rate มาก</em></li>
+<li>Network traffic ส่งเป็นลำดับ <strong>packets (protocol data units)</strong>
+<ul>
+<li>ระดับต่ำสุด (link) มักเป็น <strong>Ethernet</strong> — payload คือ packet ของ protocol ที่สูงกว่า</li>
+<li>ระดับสูงกว่ามักเป็น <strong>IP</strong> (บน Ethernet) และ <strong>TCP</strong> (บน IP)</li>
+<li>Ethernet payload = ข้อมูล + TCP header + IP header</li>
 </ul>
 </li>
-<li>ความต้องการส่วนใหญ่มาจาก <strong>Ethernet switch 10-Gbps และ 100-Gbps</strong> ที่ใช้โอนข้อมูลปริมาณมหาศาลกับ database server และระบบสมรรถนะสูง</li>
-<li>อีกแหล่งคือ <strong>Wi-Fi ระดับ gigabit</strong>
-<ul>
-<li>อุปกรณ์ Wi-Fi <strong>3.2 Gbps และ 6.76 Gbps</strong> เริ่มแพร่หลาย และสร้างภาระให้ระบบองค์กร</li>
+<li><strong>ขาออก:</strong> Ethernet packet ถูกสร้างใน I/O controller หรือ <strong>NIC</strong></li>
+<li><strong>ขาเข้า:</strong> I/O controller ตัดส่วน Ethernet ออก แล้วส่ง TCP/IP packet ให้ CPU</li>
+<li>ทั้งขาเข้าและขาออก core, main memory และ cache เกี่ยวข้องทั้งหมด</li>
+<li><strong>ใน DMA scheme (ขาออก):</strong> application วางข้อมูลใน application buffer ใน main memory → core ย้ายไป system buffer และสร้าง TCP/IP headers (เก็บใน system memory) → NIC ดึง packet ผ่าน DMA → กิจกรรมนี้ใช้ทั้ง main memory และ cache; ขาเข้าก็ต้องย้ายระหว่าง system buffer กับ application buffer เช่นกัน</li>
 </ul>
-</li>
-</ul>
-<h3 id="142-xeon-e5-26004600-chip-architecture">14.2 Xeon E5-2600/4600 Chip Architecture</h3>
-<p><img loading="lazy" src="img/c5-p032.jpg" alt="Xeon E5-2600/4600: 8 cores แต่ละ core มี L1, L2 และ L3 cache ร่วม" /></p>
-<ul>
-<li><strong>8 cores</strong> (Core 0–7)
-<ul>
-<li>แต่ละ core มี <strong>L1 cache 64 KB</strong> (32 KB instruction + 32 KB data ตามภาพ) และ <strong>L2 cache 256 KB</strong></li>
-</ul>
-</li>
-<li><strong>L3 Cache ร่วม</strong> (บล็อกละ 2.5 MB ตรงกลาง)</li>
-<li>เชื่อมออกนอกชิปด้วย:
-<ul>
-<li><strong>QPI</strong> → To other processor chip</li>
-<li><strong>PCIe</strong> → To I/O devices</li>
-<li><strong>Memory Controller Hub</strong> → <strong>To DDR3 memory</strong></li>
-</ul>
-</li>
-</ul>
-<h3 id="143-cache-related-performance-issues-1">14.3 Cache-Related Performance Issues (1)</h3>
-<ul>
-<li><strong>network traffic ส่งเป็นลำดับของ protocol blocks</strong> เรียกว่า <strong>packets หรือ protocol data units</strong></li>
-<li><strong>protocol ระดับล่างสุด (link) มักเป็น Ethernet</strong> แต่ละ block ข้อมูลคือ <strong>Ethernet packet ที่มี packet ของ protocol ระดับสูงกว่าเป็น payload</strong></li>
-<li><strong>protocol ระดับสูงกว่า</strong> มักเป็น <strong>IP</strong> (บน Ethernet) และ <strong>TCP</strong> (บน IP)</li>
-<li><strong>payload ของ Ethernet</strong> = block ข้อมูลที่มี <strong>TCP header และ IP header</strong></li>
-<li><strong>ข้อมูลขาออก:</strong> Ethernet packet ถูกสร้างใน <strong>I/O controller หรือ NIC (network interface controller)</strong></li>
-<li><strong>ข้อมูลขาเข้า:</strong> I/O controller <strong>ตัดข้อมูล Ethernet ออก</strong> แล้วส่ง <strong>TCP/IP packet</strong> ให้ host CPU</li>
-</ul>
-<h3 id="144-cache-related-performance-issues-2">14.4 Cache-Related Performance Issues (2)</h3>
-<ul>
-<li><strong>ทั้งขาออกและขาเข้า core, main memory และ cache ต่างเกี่ยวข้องทั้งหมด</strong></li>
-<li><strong>ในแบบ DMA</strong> เมื่อแอปจะส่งข้อมูล:
-<ol>
-<li>แอป <strong>วางข้อมูลใน application buffer ใน main memory</strong></li>
-<li><strong>core คัดลอกไปยัง system buffer</strong> ใน main memory และ <strong>สร้าง TCP/IP headers</strong> ซึ่งถูกพักไว้ใน system memory ด้วย</li>
-<li><strong>packet ถูกหยิบไปด้วย DMA</strong> เพื่อส่งผ่าน <strong>NIC</strong></li>
-<li>กิจกรรมนี้ <strong>ใช้ทั้ง main memory และ cache</strong></li>
-<li><strong>ขาเข้าก็ต้องคัดลอกระหว่าง system buffer กับ application buffer ในทำนองเดียวกัน</strong></li>
-</ol>
-</li>
-</ul>
-<h3 id="145-packet-traffic-steps">14.5 Packet Traffic Steps ⭐</h3>
+<h3 id="94-packet-traffic-steps-สไลด์-35">9.4 Packet Traffic Steps (สไลด์ 35)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th><strong>Incoming</strong></th>
-<th><strong>Outgoing</strong></th>
+<th>Incoming</th>
+<th>Outgoing</th>
 </tr>
 </thead>
 <tbody>
@@ -930,7 +615,7 @@
 <td>4. DMA transfer</td>
 </tr>
 <tr>
-<td>5. <strong>Cache miss occurs</strong></td>
+<td>5. Cache miss occurs</td>
 <td>5. NIC signals completion</td>
 </tr>
 <tr>
@@ -943,76 +628,60 @@
 </tr>
 </tbody>
 </table></div>
-<blockquote class="callout">
-<p class="c-tip">💡 ปัญหาอยู่ที่ขั้น <strong>&quot;Cache miss occurs&quot;</strong> เพราะข้อมูลเพิ่งถูก DMA ลง main memory แต่ยังไม่อยู่ใน cache ของ core พอ core จะใช้จึงต้องไปดึงจาก memory ที่ช้า</p>
-</blockquote>
-<h3 id="146-direct-cache-access-strategies">14.6 Direct Cache Access Strategies ⭐</h3>
-<p><strong>กลยุทธ์ที่ 1: แบบง่ายที่สุด</strong> (ทำเป็น prototype บน <strong>Intel Xeon หลายรุ่นระหว่างปี 2006–2010</strong>)</p>
+<h3 id="95-direct-cache-access-strategies-สไลด์-36">9.5 Direct Cache Access Strategies (สไลด์ 36)</h3>
 <ul>
-<li><strong>ใช้ได้กับ incoming network traffic เท่านั้น</strong></li>
-<li><strong>DCA function ใน memory controller ส่ง prefetch hint ให้ core</strong> ทันทีที่ข้อมูลพร้อมใน system memory</li>
-<li>core จึง <strong>prefetch data packet จาก system buffer</strong> ได้ล่วงหน้า</li>
-<li>สไลด์สรุปไว้ว่า:
+<li><strong>กลยุทธ์ง่ายที่สุด:</strong> ทำเป็น prototype บน Intel Xeon หลายรุ่น <strong>ระหว่างปี 2006–2010</strong>
 <ul>
-<li><em>DCA เกี่ยวเฉพาะ &quot;incoming network traffic&quot;</em></li>
-<li><em>DCA function อยู่ใน mem. Controller</em></li>
-<li><em>Core จะ prefetch &quot;data packet จาก system buffer&quot;</em></li>
+<li>ใช้กับ <strong>incoming network traffic เท่านั้น</strong></li>
+<li><strong>DCA function อยู่ใน memory controller</strong> ส่ง <strong>prefetch hint</strong> ให้ core ทันทีที่ข้อมูลอยู่ใน system memory</li>
+<li>core จึง <strong>prefetch data packet จาก system buffer</strong> ได้</li>
 </ul>
 </li>
-</ul>
-<p><strong>กลยุทธ์ที่ 2: ได้ผลดีกว่ามาก = เลี่ยง system buffer ใน main memory ไปเลย</strong></p>
+<li>ได้ประโยชน์มากกว่านั้นถ้า <strong>เลี่ยง system buffer ใน main memory ไปเลย</strong>
 <ul>
-<li><strong>packet และ packet descriptor ถูก core เข้าถึงใน system buffer แค่ครั้งเดียว</strong></li>
-<li>ขาเข้า core <strong>อ่านข้อมูลจาก buffer แล้วโอน payload ไป application buffer</strong>
-<ul>
-<li><strong>ไม่ต้องเข้าถึงข้อมูลนั้นใน system buffer อีก</strong></li>
+<li>packet และ descriptor ถูก core เข้าถึงใน system buffer <strong>ครั้งเดียว</strong></li>
+<li>ขาเข้า core อ่านจาก buffer แล้วย้าย payload ไป application buffer — ไม่ต้องเข้าถึงใน system buffer อีก</li>
 </ul>
 </li>
-<li><strong>Cache injection</strong> — ใส่ข้อมูลลง cache โดยตรง</li>
-<li><strong>ทำจริงใน Intel Xeon</strong> เรียกว่า <strong>Direct Data I/O (DDIO)</strong></li>
+<li><strong>Cache injection:</strong> ทำใน Intel Xeon เรียกว่า <strong>Direct Data I/O (DDIO)</strong></li>
 </ul>
-<h3 id="147-comparison-of-dma-and-ddio">14.7 Comparison of DMA and DDIO</h3>
-<p><img loading="lazy" src="img/c5-p037.jpg" alt="เปรียบเทียบเส้นทางข้อมูล normal DMA กับ DDIO" /></p>
+<h3 id="96-comparison-of-dma-and-ddio-สไลด์-37">9.6 Comparison of DMA and DDIO (สไลด์ 37)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>กรณี</th>
+<th></th>
 <th>Normal DMA</th>
 <th>DDIO</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>ขาเข้า (to memory / to cache)</strong></td>
-<td>(a) I/O controller → <strong>main memory</strong> → แล้ว core ค่อยดึงขึ้น <strong>last level cache</strong> (หลายขั้น)</td>
-<td>(b) I/O controller → <strong>last level cache โดยตรง</strong></td>
+<td><strong>ขาเข้า (to memory/cache)</strong></td>
+<td>(a) I/O controller → <strong>main memory</strong> → core อ่าน → ผ่าน last level cache</td>
+<td>(b) I/O controller → <strong>last level cache โดยตรง</strong> → core</td>
 </tr>
 <tr>
 <td><strong>ขาออก (to I/O)</strong></td>
-<td>(c) ข้อมูลจาก cache → <strong>main memory</strong> → I/O controller</td>
-<td>(d) I/O controller <strong>ดึงจาก last level cache โดยตรง</strong></td>
+<td>(c) core เขียน → main memory → I/O controller อ่านจาก main memory</td>
+<td>(d) core เขียนใน last level cache → I/O controller อ่านจาก cache โดยตรง</td>
 </tr>
 </tbody>
 </table></div>
 <blockquote class="callout">
-<p class="c-tip">💡 DDIO ตัดทางอ้อมผ่าน main memory จึง <strong>ลด cache miss และจำนวนการคัดลอก</strong></p>
+<p class="c-tip">💡 DDIO ข้าม main memory ไปใช้ last level cache โดยตรง</p>
 </blockquote>
 <hr />
-<h2 id="15-evolution-of-the-io-function-และ-io-channel-architecture">15. Evolution of the I/O Function และ I/O Channel Architecture</h2>
-<h3 id="151-evolution-of-the-io-function">15.1 Evolution of the I/O Function ⭐</h3>
+<h2 id="10-evolution-of-the-io-function-และ-io-channel-สไลด์-3839">10. Evolution of the I/O Function และ I/O Channel (สไลด์ 38–39)</h2>
+<h3 id="101-evolution-สไลด์-38">10.1 Evolution (สไลด์ 38)</h3>
 <ol>
-<li><strong>CPU ควบคุมอุปกรณ์ต่อพ่วงโดยตรง</strong></li>
-<li><strong>เพิ่ม controller หรือ I/O module</strong> CPU ใช้ <strong>programmed I/O แบบไม่มี interrupt</strong></li>
-<li><strong>โครงสร้างเหมือนข้อ 2 แต่ใช้ interrupt</strong> CPU <strong>ไม่ต้องเสียเวลารอ</strong> I/O จึงมีประสิทธิภาพมากขึ้น</li>
-<li><strong>I/O module เข้าถึง memory ได้โดยตรงด้วย DMA</strong> ย้ายข้อมูลเป็น block โดย <strong>ไม่ต้องใช้ CPU ยกเว้นตอนเริ่มและตอนจบ</strong></li>
-<li><strong>I/O module ถูกพัฒนาเป็น processor ของตัวเอง</strong> มี <strong>instruction set เฉพาะสำหรับ I/O</strong></li>
-<li><strong>I/O module มี local memory ของตัวเอง</strong> เท่ากับเป็น <strong>คอมพิวเตอร์อีกเครื่องหนึ่ง</strong> ควบคุมอุปกรณ์ I/O จำนวนมากได้โดย <strong>CPU แทบไม่ต้องยุ่ง</strong></li>
+<li><strong>CPU ควบคุม peripheral โดยตรง</strong></li>
+<li>เพิ่ม <strong>controller หรือ I/O module</strong> — CPU ใช้ programmed I/O ไม่มี interrupt</li>
+<li>เหมือนขั้น 2 แต่ใช้ <strong>interrupt</strong> — CPU ไม่ต้องรอ I/O → มีประสิทธิภาพขึ้น</li>
+<li>I/O module ได้ <strong>เข้าถึง memory โดยตรงผ่าน DMA</strong> — ย้าย block ข้อมูลได้โดยไม่ต้องใช้ CPU ยกเว้นตอนเริ่มและจบ</li>
+<li>I/O module ถูกพัฒนาเป็น <strong>processor ในตัวเอง</strong> มี instruction set เฉพาะสำหรับ I/O</li>
+<li>I/O module มี <strong>local memory ของตัวเอง</strong> — เป็นคอมพิวเตอร์ในตัวเอง → ควบคุม I/O devices จำนวนมากได้โดยใช้ CPU น้อยมาก</li>
 </ol>
-<blockquote class="callout">
-<p class="c-tip">💡 แนวโน้มคือ <strong>ย้ายงาน I/O ออกจาก CPU ไปเรื่อย ๆ</strong> (ขั้น 5–6 คือ <strong>I/O channel</strong>)</p>
-</blockquote>
-<h3 id="152-io-channel-architecture">15.2 I/O Channel Architecture</h3>
-<p><img loading="lazy" src="img/c5-p039.jpg" alt="(a) Selector channel (b) Multiplexor channel" /></p>
+<h3 id="102-io-channel-architecture-สไลด์-39">10.2 I/O Channel Architecture (สไลด์ 39)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1023,33 +692,26 @@
 <tbody>
 <tr>
 <td><strong>(a) Selector channel</strong></td>
-<td>รับ <strong>Data and address channel to main memory</strong> และ <strong>Control signal path to CPU</strong> ต่อ I/O Controller หลายตัว แต่ <strong>ให้บริการทีละตัว</strong> (เหมาะกับอุปกรณ์เร็ว) <em>(คำอธิบายเสริม)</em></td>
+<td>ต่อกับ main memory (data and address channel) และ CPU (control signal path) — มี I/O controllers หลายตัว (แต่ละตัวมีอุปกรณ์) บนสายเดียว</td>
 </tr>
 <tr>
 <td><strong>(b) Multiplexor channel</strong></td>
-<td>ต่อ I/O Controller หลายตัว และ <strong>สลับให้บริการหลายตัวพร้อมกัน</strong> (เหมาะกับอุปกรณ์ช้า) <em>(คำอธิบายเสริม)</em></td>
+<td>Multiplexor channel ต่อ I/O controllers หลายตัว แต่ละตัวมีอุปกรณ์หนึ่งหรือหลายตัว</td>
 </tr>
 </tbody>
 </table></div>
 <hr />
-<h2 id="16-assignment-และหัวข้อ-interface-9-เรื่อง">16. Assignment และหัวข้อ Interface 9 เรื่อง</h2>
-<h3 id="161-assignment">16.1 Assignment</h3>
+<h2 id="11-assignment-และ-9-หัวข้อ-interface-สไลด์-4048">11. Assignment และ 9 หัวข้อ Interface (สไลด์ 40–48)</h2>
+<h3 id="111-assignment-สไลด์-40">11.1 Assignment (สไลด์ 40)</h3>
 <ul>
-<li><strong>กลุ่มละ 6–7 คน แบ่งให้ได้ 9 กลุ่ม 9 เรื่อง</strong></li>
-<li><strong>จับฉลากเรื่อง</strong> ที่จะไปทำรายงานกลุ่ม</li>
-<li><strong>สิ่งที่ต้องส่ง:</strong>
-<ul>
-<li><strong>เอกสารรายงานสรุป</strong> ใส่ชื่อสมาชิกและรหัส น.ศ. ให้ครบถ้วน</li>
-<li><strong>นำเสนอกลุ่มละ 10–15 นาที</strong> ในชั้นเรียนของคาบสัปดาห์ถัดไป (<strong>8, 10 กันยายน 2569</strong>)</li>
+<li>กลุ่มละ <strong>6–7 คน</strong> แบ่งให้ได้ <strong>9 กลุ่ม 9 เรื่อง</strong> — จับฉลากเรื่อง</li>
+<li>ส่ง: <strong>เอกสารรายงานสรุป</strong> (ใส่ชื่อสมาชิกและรหัส น.ศ. ให้ครบ)</li>
+<li><strong>นำเสนอกลุ่มละ 10–15 นาที</strong> ในชั้นเรียนคาบสัปดาห์ถัดไป (<strong>8, 10 กันยายน 2569</strong>)</li>
 </ul>
-</li>
-</ul>
-<h3 id="162-1-universal-serial-bus-usb">16.2 (1) Universal Serial Bus (USB)</h3>
+<h3 id="112-หัวข้อ-19">11.2 หัวข้อ 1–9</h3>
+<p><strong>1. Universal Serial Bus (USB) (สไลด์ 41)</strong></p>
 <ul>
-<li><strong>ใช้ต่ออุปกรณ์ต่อพ่วงแพร่หลาย</strong></li>
-<li><strong>เป็น interface มาตรฐานของอุปกรณ์ความเร็วต่ำ</strong></li>
-<li><strong>ใช้กับ I/O ความเร็วสูงทั่วไปด้วย</strong></li>
-<li><strong>ผ่านมาหลายรุ่น:</strong></li>
+<li>ใช้กว้างขวางเชื่อมอุปกรณ์ต่อพ่วง, เป็น interface ปกติของอุปกรณ์ความเร็วต่ำ, ใช้กับ I/O ความเร็วสูงด้วย, มีหลายรุ่น</li>
 </ul>
 <div class="table-wrap"><table>
 <thead>
@@ -1060,155 +722,108 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>USB 1.0</strong></td>
-<td><strong>Low Speed 1.5 Mbps</strong>, <strong>Full Speed 12 Mbps</strong></td>
+<td>USB 1.0</td>
+<td>Low Speed 1.5 Mbps, Full Speed 12 Mbps</td>
 </tr>
 <tr>
-<td><strong>USB 2.0</strong></td>
-<td><strong>480 Mbps</strong></td>
+<td>USB 2.0</td>
+<td>480 Mbps</td>
 </tr>
 <tr>
-<td><strong>USB 3.0 = USB 3.1 (Gen1) = USB 3.2 (Gen1)</strong></td>
-<td>bus ความเร็วสูง <strong>SuperSpeed</strong> ทำงานขนานกับ bus ของ USB 2.0; signaling <strong>5 Gbps</strong> แต่ใช้งานจริงได้ <strong>สูงสุด 4 Gbps</strong> (เพราะ signaling overhead)</td>
+<td>USB 3.0 = USB3.1 (Gen1) = USB3.2 (Gen1)</td>
+<td><strong>SuperSpeed</strong> (ขนานกับ bus USB 2.0) — signaling 5 Gbps, ใช้ได้จริงถึง 4 Gbps</td>
 </tr>
 <tr>
-<td><strong>USB 3.1 (Gen2) = USB 3.2 (Gen2)</strong></td>
-<td>โหมด <strong>SuperSpeed+</strong> signaling <strong>10 Gbps</strong>, ใช้งานได้ตามทฤษฎี <strong>9.7 Gbps</strong></td>
+<td>USB 3.1 (Gen2) = USB3.2 (Gen2)</td>
+<td><strong>SuperSpeed+</strong> — signaling 10 Gbps, ใช้ได้ตามทฤษฎี 9.7 Gbps</td>
 </tr>
 <tr>
-<td><strong>USB 3.2 (Gen2x2)</strong></td>
-<td><strong>20 Gbps</strong></td>
+<td>USB3.2 (Gen2x2)</td>
+<td>20 Gbps</td>
 </tr>
 </tbody>
 </table></div>
 <ul>
-<li><strong>ควบคุมโดย root host controller</strong> ต่ออุปกรณ์เป็นเครือข่ายเฉพาะที่แบบ <strong>hierarchical tree topology</strong></li>
+<li>ควบคุมโดย <strong>root host controller</strong> ต่ออุปกรณ์เป็นเครือข่ายแบบ <strong>hierarchical tree topology</strong></li>
 </ul>
-<h3 id="163-2-firewire-serial-bus-19992000">16.3 (2) FireWire Serial Bus (1999–2000)</h3>
+<p><strong>2. FireWire Serial Bus (1999–2000) (สไลด์ 42)</strong></p>
 <ul>
-<li>พัฒนาเป็น <strong>ทางเลือกแทน SCSI</strong> สำหรับระบบขนาดเล็ก เช่น PC, workstation, server</li>
-<li>เป้าหมาย: <strong>รองรับ I/O rate สูงขึ้น</strong> โดย <strong>ไม่ต้องใช้ I/O channel ที่ใหญ่และแพง</strong> แบบ mainframe/supercomputer</li>
-<li><strong>IEEE standard 1394</strong> (High Performance Serial Bus)</li>
-<li>ใช้ <strong>daisy chain</strong> ต่ออุปกรณ์ได้ <strong>สูงสุด 63 ตัวจาก port เดียว</strong></li>
-<li><strong>ต่อ FireWire bus ได้ 1022 bus ผ่าน bridge</strong></li>
-<li>รองรับ <strong>hot plugging</strong> (เสียบ/ถอดได้โดยไม่ต้องปิดเครื่องหรือตั้งค่าใหม่)</li>
-<li><strong>ตั้งค่าอัตโนมัติ (automatic configuration)</strong></li>
-<li><strong>ไม่ต้องมี terminator</strong> ระบบกำหนด address ให้เอง</li>
+<li>พัฒนาเป็นทางเลือกแทน <strong>SCSI</strong> สำหรับระบบเล็ก (PC, workstation, server)</li>
+<li>เป้าหมาย: รองรับ I/O rate สูง โดยเลี่ยง I/O channel ที่ใหญ่และแพงของ mainframe/supercomputer</li>
+<li><strong>IEEE 1394</strong> High Performance Serial Bus</li>
+<li><strong>Daisy chain</strong> ต่ออุปกรณ์ได้ <strong>63 ตัว</strong> จาก port เดียว, เชื่อม FireWire bus ได้ <strong>1022 bus</strong> ด้วย bridges</li>
+<li><strong>Hot plugging</strong> (ต่อ/ถอดโดยไม่ต้องปิดเครื่องหรือ reconfigure), <strong>automatic configuration</strong>, ไม่ต้องมี terminations และระบบกำหนด address เอง</li>
 </ul>
-<h3 id="164-3-scsi">16.4 (3) SCSI</h3>
+<p><strong>3. SCSI (สไลด์ 43)</strong></p>
 <ul>
-<li><strong>Small Computer System Interface</strong></li>
-<li><strong>เคยเป็นมาตรฐานยอดนิยม</strong> สำหรับต่ออุปกรณ์กับคอมพิวเตอร์ขนาดเล็กและกลาง</li>
-<li><strong>เสียความนิยมให้ USB และ FireWire</strong> ในระบบเล็ก</li>
-<li><strong>รุ่นความเร็วสูงยังนิยม</strong> ใช้กับ mass memory ในระบบองค์กร</li>
-<li>โครงสร้างเป็น <strong>shared bus</strong> รองรับ <strong>16 หรือ 32 อุปกรณ์</strong> (ตามรุ่น)</li>
-<li>ส่งข้อมูลแบบ <strong>ขนาน (parallel)</strong> ไม่ใช่ serial; bus กว้าง <strong>16 บิต (รุ่นแรก) และ 32 บิต (รุ่นหลัง)</strong></li>
-<li>ความเร็ว <strong>5 Mbps (SCSI-1)</strong> ถึง <strong>160 Mbps (SCSI-3 U3)</strong></li>
+<li><strong>Small Computer System Interface</strong> — เคยเป็นมาตรฐานเชื่อมอุปกรณ์กับคอมพิวเตอร์เล็กและกลาง</li>
+<li>เสียความนิยมให้ USB และ FireWire ในระบบเล็ก แต่รุ่นความเร็วสูงยังนิยมสำหรับ mass memory ใน enterprise</li>
+<li>โครงสร้าง <strong>shared bus</strong> รองรับ <strong>16 หรือ 32 อุปกรณ์</strong> ตามรุ่น</li>
+<li>ส่งแบบ <strong>parallel</strong> (ไม่ใช่ serial) — bus กว้าง 16 bit (รุ่นแรก) และ 32 bit (รุ่นหลัง)</li>
+<li>ความเร็ว <strong>5 Mbps (SCSI-1) ถึง 160 Mbps (SCSI-3 U3)</strong></li>
 </ul>
-<h3 id="165-4-thunderbolt">16.5 (4) Thunderbolt</h3>
+<p><strong>4. Thunderbolt (สไลด์ 44)</strong></p>
 <ul>
-<li><strong>เทคโนโลยีต่อพ่วงใหม่และเร็วที่สุด</strong> สำหรับงานทั่วไป (ณ ตอนที่ตำราเขียน)</li>
-<li><strong>Intel พัฒนาร่วมกับ Apple</strong></li>
-<li><strong>รวม data, video, audio และ power ในสายเดียว</strong> สำหรับอุปกรณ์อย่าง hard drive, RAID arrays, video-capture box, network interface</li>
-<li><strong>throughput สูงสุด 10 Gbps ต่อทิศทาง</strong> และจ่ายไฟได้ <strong>สูงสุด 10 Watts</strong></li>
+<li>เทคโนโลยีเชื่อมต่อพ่วงที่ใหม่และเร็วที่สุดสำหรับใช้ทั่วไป</li>
+<li>พัฒนาโดย <strong>Intel ร่วมกับ Apple</strong></li>
+<li>รวม <strong>data, video, audio, power</strong> ในการเชื่อมต่อเดียว สำหรับ hard drives, RAID arrays, video-capture boxes, network interfaces</li>
+<li><strong>throughput สูงสุด 10 Gbps ต่อทิศทาง</strong> และจ่ายไฟได้ <strong>ถึง 10 Watts</strong></li>
 </ul>
-<h3 id="166-5-infiniband">16.6 (5) InfiniBand</h3>
+<p><strong>5. InfiniBand (สไลด์ 45)</strong></p>
 <ul>
-<li><strong>I/O specification สำหรับตลาด server ระดับสูง</strong></li>
-<li><strong>รุ่นแรกออกต้นปี 2001</strong></li>
-<li><strong>IBM zEnterprise mainframe ใช้มาก</strong></li>
-<li>กำหนดสถาปัตยกรรมการไหลของข้อมูลระหว่าง processor กับ intelligent I/O devices</li>
-<li><strong>นิยมใช้กับ storage area networking</strong> และ storage ขนาดใหญ่</li>
-<li>ต่อ server, remote storage และอุปกรณ์เครือข่ายเข้ากับ <strong>central fabric ของ switch และ link</strong></li>
-<li><strong>สถาปัตยกรรมแบบ switch ต่อได้ถึง 64,000</strong> server, storage และอุปกรณ์เครือข่าย</li>
+<li>I/O specification สำหรับตลาด <strong>high-end server</strong></li>
+<li>รุ่นแรกออกต้นปี <strong>2001</strong> — IBM zEnterprise mainframes พึ่งพามาก</li>
+<li>อธิบายสถาปัตยกรรมการไหลข้อมูลระหว่าง processors กับ intelligent I/O devices</li>
+<li>นิยมใช้กับ <strong>storage area networking</strong> และ storage ขนาดใหญ่</li>
+<li>ต่อ servers, remote storage, network devices เข้ากับ <strong>central fabric of switches and links</strong></li>
+<li><strong>switch-based</strong> ต่อได้ถึง <strong>64,000</strong> อุปกรณ์</li>
 </ul>
-<h3 id="167-6-pci-express-และ-7-sata">16.7 (6) PCI Express และ (7) SATA</h3>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th></th>
-<th><strong>PCI Express</strong></th>
-<th><strong>SATA</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>คืออะไร</td>
-<td><strong>bus ความเร็วสูง</strong> ต่ออุปกรณ์ต่อพ่วงได้หลายชนิดหลายความเร็ว</td>
-<td><strong>Serial Advanced Technology Attachment</strong> — interface สำหรับ <strong>disk storage</strong></td>
-</tr>
-<tr>
-<td>ความเร็ว</td>
-<td>–</td>
-<td><strong>สูงสุด 6 Gbps</strong>, <strong>สูงสุดต่ออุปกรณ์ 300 Mbps</strong></td>
-</tr>
-<tr>
-<td>การใช้งาน</td>
-<td>–</td>
-<td><strong>คอมพิวเตอร์ตั้งโต๊ะ, งานอุตสาหกรรม และ embedded</strong></td>
-</tr>
-</tbody>
-</table></div>
-<h3 id="168-8-ethernet">16.8 (8) Ethernet</h3>
+<p><strong>6. PCI Express (สไลด์ 46)</strong></p>
 <ul>
-<li><strong>เทคโนโลยีเครือข่ายแบบมีสายที่ใช้มากที่สุด</strong></li>
-<li>รองรับ <strong>สูงสุด 100 Gbps</strong> และระยะ <strong>ไม่กี่เมตรถึงหลายสิบกิโลเมตร</strong></li>
-<li>จำเป็นกับ PC, workstation, server และ storage ขนาดใหญ่ในองค์กรทุกขนาด</li>
-<li><strong>เริ่มจากระบบทดลองแบบ bus 3 Mbps</strong></li>
-<li><strong>เปลี่ยนจาก bus-based เป็น switch-based</strong>
-<ul>
-<li>มี <strong>central switch</strong> ที่ทุกอุปกรณ์ต่อตรง</li>
+<li>bus ความเร็วสูงสำหรับเชื่อม peripherals หลายประเภทและหลายความเร็ว</li>
 </ul>
-</li>
-<li><strong>ความเร็วเพิ่มขึ้นทีละ 10 เท่าเป็นระยะ</strong></li>
-<li>ปัจจุบันมีถึง <strong>100 Gbps</strong></li>
-</ul>
-<h3 id="169-9-wi-fi">16.9 (9) Wi-Fi</h3>
+<p><strong>7. SATA (สไลด์ 46)</strong></p>
 <ul>
-<li><strong>เทคโนโลยีเข้าอินเทอร์เน็ตไร้สายที่ใช้มากที่สุด</strong></li>
-<li>ต่อคอมพิวเตอร์, แท็บเล็ต, สมาร์ทโฟน และอุปกรณ์อื่น เช่น กล้อง, ทีวี, thermostat</li>
-<li>ในองค์กร <strong>ช่วยเพิ่ม productivity</strong> และประสิทธิภาพเครือข่าย</li>
-<li><strong>Public hotspot</strong> ขยายตัวมาก ให้เน็ตฟรีในที่สาธารณะส่วนใหญ่</li>
-<li>เมื่อเทคโนโลยีเสาอากาศ การส่งสัญญาณ และ protocol พัฒนาขึ้น <strong>คณะกรรมการ IEEE 802.11</strong> จึงออกมาตรฐานความเร็วสูงขึ้นเรื่อย ๆ</li>
-<li><strong>รุ่นปัจจุบัน (ตามสไลด์): 802.11ac (2014) สูงสุด 3.2 Gbps</strong></li>
+<li><strong>Serial Advanced Technology Attachment</strong> — interface สำหรับ disk storage</li>
+<li>data rate สูงสุด <strong>6 Gbps</strong>, สูงสุดต่ออุปกรณ์ <strong>300 Mbps</strong></li>
+<li>ใช้แพร่หลายใน desktop และงาน industrial/embedded</li>
+</ul>
+<p><strong>8. Ethernet (สไลด์ 47)</strong></p>
+<ul>
+<li>เทคโนโลยีเครือข่ายแบบสายที่ใช้มากที่สุด</li>
+<li>รองรับถึง <strong>100 Gbps</strong> และระยะตั้งแต่ไม่กี่เมตรถึงหลายสิบ km</li>
+<li>เริ่มจากระบบทดลอง <strong>bus-based 3-Mbps</strong> → เปลี่ยนเป็น <strong>switch-based</strong> (central switch ที่อุปกรณ์ทุกตัวต่อตรง)</li>
+<li>data rate เพิ่มขึ้นทีละ 10 เท่าเป็นระยะ</li>
+</ul>
+<p><strong>9. Wi-Fi (สไลด์ 48)</strong></p>
+<ul>
+<li>เทคโนโลยีเข้าถึง Internet แบบไร้สายที่ใช้มากที่สุด — ต่อคอมพิวเตอร์, tablet, smartphone, กล้อง, TV, thermostat</li>
+<li>ในองค์กรช่วยเพิ่ม productivity, hotspot สาธารณะขยายมาก</li>
+<li>คณะกรรมการ <strong>IEEE 802.11</strong> ออกมาตรฐานรุ่นใหม่ที่เร็วขึ้นเรื่อย ๆ</li>
+<li>รุ่นปัจจุบัน (ตามสไลด์) <strong>802.11ac (2014)</strong> สูงสุด <strong>3.2 Gbps</strong></li>
 </ul>
 <hr />
-<h2 id="17-ibm-zec12-io-structure">17. IBM zEC12 I/O Structure</h2>
-<h3 id="171-ibm-ec12-io-channel-subsystem-structure">17.1 IBM EC12 I/O Channel Subsystem Structure</h3>
-<p><img loading="lazy" src="img/c5-p049.jpg" alt="partition, channel subsystem และ channel ของ IBM zEC12" /></p>
+<h2 id="12-ibm-zec12-io-สไลด์-4951">12. IBM zEC12 I/O (สไลด์ 49–51)</h2>
+<h3 id="121-ibm-ec12-io-channel-subsystem-structure-สไลด์-49">12.1 IBM EC12 I/O Channel Subsystem Structure (สไลด์ 49)</h3>
 <ul>
-<li><strong>≤ 60 partitions per system</strong></li>
-<li><strong>≤ 15 partitions per channel subsystem</strong> (แต่ละ partition มี subchannels)</li>
+<li><strong>≤ 60 partitions ต่อระบบ</strong>, <strong>≤ 15 partitions ต่อ channel subsystem</strong></li>
+<li>แต่ละ partition มี subchannels</li>
 <li><strong>4 channel subsystems</strong></li>
-<li><strong>≤ 256 channels per channel subsystem</strong></li>
-<li><strong>≤ 1024 partitions per system</strong> <em>(ตัวเลขตามภาพในสไลด์)</em></li>
-</ul>
-<h3 id="172-figure-720-ibm-zec12-io-frames-front-view">17.2 Figure 7.20 — IBM zEC12 I/O Frames, Front View</h3>
-<p><img loading="lazy" src="img/c5-p050.jpg" alt="ด้านหน้าตู้ IBM zEC12" /></p>
-<p>ส่วนประกอบที่ชี้ในภาพ:</p>
-<ul>
-<li><strong>Internal Batteries (optional)</strong></li>
-<li><strong>Power Supplies</strong></li>
-<li><strong>Support Elements</strong></li>
-<li><strong>I/O cage Carried Forward</strong></li>
-<li><strong>PCIe I/O drawer</strong></li>
-<li><strong>Flexible Service Processor (FSP) controller cards</strong></li>
-<li><strong>Processor Books with Memory, HCA- and PCIe-Fanout cards</strong></li>
-<li><strong>InfiniBand and PCIe I/O Interconnects</strong></li>
-<li><strong>N+1 Water Cooling Units</strong></li>
-</ul>
-<h3 id="173-ibm-ec12-io-system-structure">17.3 IBM EC12 I/O System Structure</h3>
-<p><img loading="lazy" src="img/c5-p051.jpg" alt="Book 1–4 ต่อ PCIe I/O drawer และ I/O cage &amp; I/O drawer" /></p>
-<ul>
-<li><strong>Book 1–4</strong> แต่ละ book มี <strong>Memory, PU (processor units), SC1/SC0</strong> และ <strong>PCIe (8x)</strong> หรือ <strong>HCA2 (8x)</strong></li>
-<li><strong>PCIe I/O Drawer:</strong> PCIe switch → <strong>Fibre Channel controller</strong>, <strong>10-Gbps Ethernet controller</strong></li>
-<li><strong>I/O Cage &amp; I/O Drawer:</strong> InfiniBand multiplexor → <strong>ESCON</strong> (Channels), <strong>1-Gbps Ethernet controller</strong> (Ports)</li>
+<li><strong>≤ 256 channels ต่อ channel subsystem</strong>, <strong>≤ 1024 partitions ต่อระบบ</strong> (ตามที่สไลด์เขียน)</li>
 </ul>
 <blockquote class="callout">
-<p>Q &amp; A (สไลด์สุดท้าย)</p>
+<p class="c-warn">⚠️ สไลด์ใช้คำว่า &quot;partitions&quot; ในบรรทัดล่างสุด (≤ 1024) ซึ่งอยู่ใต้ช่องที่เป็น &quot;Channel&quot; — อาจหมายถึง channels ต่อระบบ (4 × 256 = 1024) ควรตรวจกับอาจารย์</p>
 </blockquote>
+<h3 id="122-ibm-zec12-io-frames-front-view-สไลด์-50">12.2 IBM zEC12 I/O Frames — Front View (สไลด์ 50)</h3>
+<p>ส่วนประกอบที่ชี้ในภาพ: Internal Batteries (optional), Power Supplies, Support Elements, I/O cage Carried Forward, PCIe I/O drawer, Flexible Service Processor (FSP) controller cards, Processor Books with Memory/HCA-and PCIe-Fanout cards, InfiniBand and PCIe I/O Interconnects, N+1 Water Cooling Units</p>
+<h3 id="123-ibm-ec12-io-system-structure-สไลด์-51">12.3 IBM EC12 I/O System Structure (สไลด์ 51)</h3>
+<ul>
+<li><strong>Book 1–4</strong> แต่ละ book มี Memory, PU หลายตัว, SC1/SCO</li>
+<li>Book 1–2 ต่อผ่าน <strong>PCIe (8X)</strong> → PCIe switches → <strong>PCIe I/O Drawer</strong> (Fibre Channel controller, 10-Gbps Ethernet controller)</li>
+<li>Book 3–4 ต่อผ่าน <strong>HCA2 (8X)</strong> → InfiniBand multiplexors → <strong>I/O Cage &amp; I/O Drawer</strong> (ESCON channels, 1-Gbps Ethernet controller ports)</li>
+</ul>
 <hr />
-<h2 id="18-คำศัพท์สำคัญ">18. คำศัพท์สำคัญ</h2>
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1221,223 +836,113 @@
 <tr>
 <td><strong>I/O module</strong></td>
 <td>ตัวกลางระหว่าง system bus กับอุปกรณ์</td>
-<td>ล่าม</td>
-</tr>
-<tr>
-<td><strong>Human readable / Machine readable / Communication</strong></td>
-<td>3 ประเภทของ external device</td>
-<td>คน / เครื่อง / ระยะไกล</td>
+<td>5 หน้าที่</td>
 </tr>
 <tr>
 <td><strong>Transducer</strong></td>
-<td>ตัวแปลงสัญญาณในอุปกรณ์</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Data buffering</strong></td>
-<td>พักข้อมูลชดเชยความเร็ว</td>
+<td>ตัวแปลงสัญญาณ ในอุปกรณ์ภายนอก</td>
 <td></td>
 </tr>
 <tr>
 <td><strong>Programmed I/O</strong></td>
-<td>CPU สั่งแล้ววนรอ</td>
-<td>ยืนเฝ้า</td>
+<td>CPU สั่งแล้วรอเอง</td>
+<td>เสียเวลา CPU</td>
 </tr>
 <tr>
 <td><strong>Interrupt-driven I/O</strong></td>
-<td>CPU ทำงานอื่น แล้ว I/O interrupt ตอนพร้อม</td>
-<td>รอกริ่ง</td>
+<td>CPU สั่งแล้วไปทำอย่างอื่น รอ interrupt</td>
+<td></td>
 </tr>
 <tr>
 <td><strong>DMA</strong></td>
-<td>I/O module กับ memory โอนข้อมูลตรง</td>
-<td>จ้างคนรับของ</td>
+<td>I/O ↔ memory โดยตรง</td>
+<td>CPU ยุ่งแค่ตอนเริ่มและจบ</td>
 </tr>
 <tr>
 <td><strong>Control / Test / Read / Write</strong></td>
-<td>4 ประเภทของ I/O command</td>
+<td>4 I/O commands</td>
 <td></td>
 </tr>
 <tr>
 <td><strong>Memory-mapped I/O</strong></td>
-<td>ใช้ address space ร่วม ไม่มีคำสั่งพิเศษ</td>
-<td></td>
+<td>address space ร่วมกับ memory</td>
+<td>ไม่มีคำสั่ง I/O พิเศษ</td>
 </tr>
 <tr>
 <td><strong>Isolated I/O</strong></td>
-<td>แยก address space มีคำสั่ง I/O เฉพาะ</td>
-<td></td>
+<td>address space แยก</td>
+<td>มีคำสั่ง I/O พิเศษ (จำกัด)</td>
 </tr>
 <tr>
 <td><strong>PSW</strong></td>
-<td>Program Status Word (status register)</td>
-<td>ถูก push พร้อม PC</td>
-</tr>
-<tr>
-<td><strong>ISR</strong></td>
-<td>Interrupt Service Routine</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Multiple interrupt lines</strong></td>
-<td>หลายสาย interrupt</td>
-<td>ง่ายสุด</td>
+<td>Program status word (status register)</td>
+<td>push พร้อม PC ตอน interrupt</td>
 </tr>
 <tr>
 <td><strong>Software poll</strong></td>
-<td>ISR ถามทีละ module</td>
+<td>ISR ถามทุก module</td>
 <td>ช้า</td>
 </tr>
 <tr>
 <td><strong>Daisy chain</strong></td>
-<td>สาย acknowledge ต่อผ่านทุก module (hardware poll, vectored)</td>
-<td>ส่งกระดาษตามแถว</td>
+<td>acknowledge ส่งต่อเป็นโซ่</td>
+<td>vectored</td>
 </tr>
 <tr>
-<td><strong>Bus arbitration</strong></td>
-<td>ได้ bus ก่อนแล้วจึง interrupt (vectored)</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Vector / Vectored interrupt</strong></td>
-<td>address ของ module ใช้ชี้ไป device-service routine</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>82C59A</strong></td>
-<td>Interrupt controller (IR0–IR7, cascade)</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>8255A</strong></td>
-<td>Programmable Peripheral Interface (Port A, B, C)</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>8237</strong></td>
-<td>DMA controller 4 channels</td>
-<td></td>
+<td><strong>Vector</strong></td>
+<td>address ของ I/O module / unique ID</td>
+<td>ชี้ไป service routine</td>
 </tr>
 <tr>
 <td><strong>DREQ / DACK / HRQ / HLDA</strong></td>
-<td>DMA request / DMA ack / HOLD request / HOLD ack</td>
-<td></td>
+<td>สัญญาณของ 8237 DMA</td>
+<td>request / ack / hold req / hold ack</td>
 </tr>
 <tr>
 <td><strong>Fly-by DMA</strong></td>
-<td>ข้อมูลไม่ผ่านชิป DMA</td>
-<td></td>
+<td>ข้อมูลไม่ผ่าน DMA chip</td>
+<td>8237 มี 4 channels</td>
 </tr>
 <tr>
-<td><strong>TC</strong></td>
-<td>Terminal count</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>DCA</strong></td>
-<td>Direct Cache Access</td>
-<td>ขาเข้า network</td>
+<td><strong>DCA / DDIO</strong></td>
+<td>ส่งข้อมูล network เข้า cache โดยตรง</td>
+<td>Intel Xeon</td>
 </tr>
 <tr>
 <td><strong>NIC</strong></td>
-<td>Network Interface Controller</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Cache injection / DDIO</strong></td>
-<td>ใส่ข้อมูลลง cache ตรง (Intel Direct Data I/O)</td>
+<td>Network interface controller</td>
 <td></td>
 </tr>
 <tr>
 <td><strong>Selector / Multiplexor channel</strong></td>
-<td>I/O channel บริการทีละตัว / สลับหลายตัว</td>
-<td></td>
-</tr>
-<tr>
-<td><strong>USB, FireWire (IEEE 1394), SCSI, Thunderbolt, InfiniBand, PCIe, SATA, Ethernet, Wi-Fi (802.11)</strong></td>
-<td>interface 9 หัวข้อ</td>
+<td>แบบของ I/O channel</td>
 <td></td>
 </tr>
 </tbody>
 </table></div>
 <hr />
-<h2 id="19-สรุปท้ายบท-จุดที่มักออกสอบ">19. สรุปท้ายบท / จุดที่มักออกสอบ</h2>
-<p><strong>เรื่องที่ต้องจำ</strong></p>
+<h2 id="สรุปท้ายบท-จุดที่ควรจำ">สรุปท้ายบท / จุดที่ควรจำ</h2>
 <ul>
-<li><strong>External devices 3 ประเภท:</strong> human readable, machine readable, communication</li>
-<li><strong>หน้าที่ I/O module 5 ข้อ:</strong> control and timing, processor communication, device communication, data buffering, error detection</li>
-<li><strong>3 เทคนิค I/O</strong> และตาราง <strong>No Interrupts / Use of Interrupts</strong></li>
-<li><strong>I/O commands 4 แบบ:</strong> Control, Test, Read, Write</li>
-<li><strong>flowchart รับ block ข้อมูล 3 แบบ</strong> — programmed วนรอ, interrupt ไปทำอย่างอื่น, DMA สั่งทั้ง block</li>
-<li><strong>Memory-mapped vs Isolated I/O</strong> (address space, select lines, คำสั่งพิเศษ, limited set)</li>
-<li><strong>ขั้นตอน interrupt:</strong> ทำคำสั่งปัจจุบันให้เสร็จ → acknowledge → <strong>push PSW, PC</strong> → load PC ใหม่ → save state → process → restore state → restore PSW, PC</li>
-<li><strong>2 design issues:</strong> ใคร interrupt / ใครทำก่อน</li>
-<li><strong>4 เทคนิคระบุอุปกรณ์:</strong> multiple lines, software poll (ช้า), daisy chain (vectored), bus arbitration (vectored)</li>
-<li><strong>82C59A</strong> cascade master/slave → 80386</li>
-<li><strong>8255A control word:</strong> D7 = 1 mode set, D7 = 0 bit set/reset port C</li>
-<li><strong>ข้อเสีย 2 ข้อของ programmed/interrupt I/O</strong> → DMA</li>
-<li><strong>DMA breakpoint แทรกได้หลายจุดใน instruction cycle; interrupt breakpoint มีจุดเดียวตอนจบคำสั่ง</strong></li>
-<li><strong>DMA configuration 3 แบบ</strong> และสัญญาณ <strong>DREQ, HRQ, HLDA, DACK</strong> ของ 8237</li>
-<li><strong>Fly-by DMA:</strong> 4 channels (0–3), ข้อมูลไม่ผ่านชิป, I/O ↔ memory เท่านั้น</li>
-<li><strong>DCA:</strong> DMA scale ไม่ไหวกับ 10/100 Gbps; แบบแรกใช้ prefetch hint (ขาเข้าเท่านั้น, 2006–2010); แบบดีกว่า = <strong>cache injection = DDIO</strong></li>
-<li><strong>Packet traffic steps</strong> ขาเข้า 7 ขั้น (มี cache miss) และขาออก 6 ขั้น</li>
-<li><strong>Evolution of I/O 6 ขั้น</strong></li>
-<li><strong>Selector vs Multiplexor channel</strong></li>
-<li><strong>ตัวเลข interface:</strong>
-<ul>
-<li><strong>USB:</strong> 1.5/12 Mbps, 480 Mbps, 5 Gbps (ใช้ได้ 4), 10 Gbps (9.7), 20 Gbps</li>
-<li><strong>FireWire:</strong> 63 devices, 1022 buses</li>
-<li><strong>SCSI:</strong> 16/32 devices, 5 → 160 Mbps</li>
-<li><strong>Thunderbolt:</strong> 10 Gbps, 10 W</li>
-<li><strong>InfiniBand:</strong> 64,000 devices</li>
-<li><strong>SATA:</strong> 6 Gbps</li>
-<li><strong>Ethernet:</strong> 100 Gbps</li>
-<li><strong>Wi-Fi 802.11ac:</strong> 3.2 Gbps</li>
+<li>External devices 3 ประเภท: <strong>human readable, machine readable, communication</strong></li>
+<li>I/O module 5 หน้าที่: <strong>control &amp; timing, processor communication, device communication, data buffering, error detection</strong></li>
+<li><strong>3 เทคนิค:</strong> Programmed (รอเอง) | Interrupt-driven (ทำอย่างอื่นแล้วรอ interrupt) | DMA (I/O ↔ memory ตรง)</li>
+<li>ตาราง: ผ่าน processor + ไม่มี interrupt = programmed | ผ่าน processor + มี interrupt = interrupt-driven | ตรงถึง memory = DMA</li>
+<li><strong>4 I/O commands:</strong> Control, Test, Read, Write</li>
+<li><strong>Memory-mapped</strong> (address ร่วม, ไม่มีคำสั่งพิเศษ, คำสั่งมาก) vs <strong>Isolated</strong> (address แยก, ต้อง select lines, คำสั่งพิเศษจำกัด)</li>
+<li>Interrupt: hardware push <strong>PSW + PC</strong> ลง control stack → โหลด PC ใหม่ → software save state → process → restore</li>
+<li><strong>Device identification 4 แบบ:</strong> multiple lines, software poll (ช้า), daisy chain (vectored), bus arbitration (vectored)</li>
+<li>ข้อเสียของ programmed/interrupt: transfer rate ถูกจำกัดด้วย CPU, CPU ถูกผูกไว้ → ใช้ <strong>DMA</strong> กับข้อมูลปริมาณมาก</li>
+<li>DMA: data count, data register, address register, control logic | DMA breakpoint แทรกได้ถี่กว่า interrupt (interrupt รอจบคำสั่ง)</li>
+<li>DMA configurations: single-bus detached, single-bus integrated, I/O bus</li>
+<li>8237: DREQ → HRQ → HLDA → DACK | fly-by | <strong>4 channels (0–3)</strong></li>
+<li><strong>DCA:</strong> DMA scale ไม่ทัน network 10/100 Gbps → prefetch hint (2006–2010, incoming only) → <strong>DDIO (cache injection)</strong> เข้า last level cache โดยตรง</li>
+<li><strong>Evolution 6 ขั้น:</strong> CPU คุมเอง → I/O module + programmed → + interrupt → DMA → I/O processor → I/O มี local memory (คอมพิวเตอร์ในตัว)</li>
+<li>Assignment: กลุ่ม 6–7 คน 9 เรื่อง นำเสนอ 10–15 นาที (8, 10 ก.ย. 2569)</li>
+<li>ตัวเลข interface: USB 2.0 480 Mbps, USB3 5 Gbps (ใช้ได้ 4), Gen2 10 Gbps (9.7), Gen2x2 20 Gbps | FireWire 63 อุปกรณ์/port, 1022 bus | SCSI 16/32 อุปกรณ์, 5–160 Mbps | Thunderbolt 10 Gbps + 10 W | InfiniBand 64,000 อุปกรณ์ | SATA 6 Gbps | Ethernet 100 Gbps | Wi-Fi 802.11ac 3.2 Gbps</li>
 </ul>
-</li>
-</ul>
-<p><strong>คู่ที่มักสับสน</strong></p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>คู่</th>
-<th>ต่างกันที่</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Programmed vs Interrupt-driven I/O</td>
-<td>วนรอ vs ทำงานอื่นแล้วรอ interrupt</td>
-</tr>
-<tr>
-<td>Interrupt-driven vs DMA</td>
-<td>CPU ย้ายข้อมูลทีละ word vs I/O module ย้ายเข้า memory เองทั้ง block</td>
-</tr>
-<tr>
-<td>Memory-mapped vs Isolated I/O</td>
-<td>address space ร่วม ไม่มีคำสั่งพิเศษ vs แยก address space มีคำสั่งพิเศษ</td>
-</tr>
-<tr>
-<td>Software poll vs Daisy chain</td>
-<td>ถามด้วย software (ช้า) vs hardware poll + vector</td>
-</tr>
-<tr>
-<td>DMA breakpoint vs Interrupt breakpoint</td>
-<td>กลางคำสั่งได้หลายจุด vs ท้ายคำสั่งจุดเดียว</td>
-</tr>
-<tr>
-<td>DCA (prefetch hint) vs DDIO (cache injection)</td>
-<td>ยังผ่าน system buffer vs ข้าม system buffer ไปลง cache</td>
-</tr>
-<tr>
-<td>Selector vs Multiplexor channel</td>
-<td>ทีละอุปกรณ์ vs สลับหลายอุปกรณ์</td>
-</tr>
-</tbody>
-</table></div>
 </article>
       <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
-      <nav class="pager"><a class="pg prev" href="../chapter04/index.html"><small>← บทก่อนหน้า</small><span>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</span></a><a class="pg next" href="../chapter06/index.html"><small>บทถัดไป →</small><span>Chapter VI — Storage Systems (External Memory)</span></a></nav>
+      <nav class="pager"><a class="pg prev" href="../chapter04/index.html"><small>← บทก่อนหน้า</small><span>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</span></a><a class="pg next" href="../chapter06/index.html"><small>บทถัดไป →</small><span>Chapter 06 — Storage Systems (External Memory)</span></a></nav>
     </main>
   </div>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>

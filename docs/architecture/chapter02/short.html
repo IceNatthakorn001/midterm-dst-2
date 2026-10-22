@@ -25,500 +25,294 @@
       <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
       <div class="toc-inner">
         <a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a>
-        <ol><li><a href="#1-von-neumann-vs-harvard">1. Von Neumann vs Harvard ⭐</a></li><li><a href="#2-bus-bus-arbitration">2. Bus &amp;amp; Bus Arbitration</a></li><li><a href="#3-hardware-vs-software-approach">3. Hardware vs Software Approach</a></li><li><a href="#4-registers-สำหรับ-memory-และ-io">4. Registers สำหรับ Memory และ I/O ⭐</a></li><li><a href="#5-instruction-cycle">5. Instruction Cycle</a></li><li><a href="#6-example-of-program-execution">6. Example of Program Execution ⭐</a></li><li><a href="#7-instruction-cycle-state-diagram">7. Instruction Cycle State Diagram</a></li><li><a href="#8-marie-registers-architecture-data-path">8. MARIE — Registers, Architecture, Data Path</a></li><li><a href="#9-marie-isa-instruction-format">9. MARIE ISA &amp;amp; Instruction Format ⭐</a></li><li><a href="#10-rtl-register-transfer-language">10. RTL (Register Transfer Language) ⭐</a></li><li><a href="#11-fetch-decode-execute-flowchart">11. Fetch-Decode-Execute Flowchart</a></li><li><a href="#12-interrupts">12. Interrupts ⭐</a></li><li><a href="#13-marie-io-simple-program">13. MARIE I/O &amp;amp; Simple Program</a></li><li><a href="#14-classes-of-interrupts-program-flow">14. Classes of Interrupts &amp;amp; Program Flow</a></li><li><a href="#15-multiple-interrupts">15. Multiple Interrupts ⭐</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li><li><a href="#โจทย์ที่ต้องทำได้">โจทย์ที่ต้องทำได้</a></li></ol>
+        <ol><li><a href="#von-neumann-vs-harvard">⭐ Von Neumann vs Harvard</a></li><li><a href="#bus">Bus</a></li><li><a href="#hardware-vs-software-approach">Hardware vs Software approach</a></li><li><a href="#registers">Registers</a></li><li><a href="#instruction-cycle">Instruction cycle</a></li><li><a href="#marie">⭐ MARIE</a></li><li><a href="#fetch-decode-execute-marie">⭐ Fetch-decode-execute (MARIE)</a></li><li><a href="#interrupts">⭐ Interrupts</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
       </div>
     </aside>
     <main class="lesson">
       <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter02</div>
       <h1 class="lesson-title">⚡ สรุปสั้น · Chapter 02 — Computer Systems, Computer Functions, Processor Structure and Function</h1>
       <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
-      <article class="prose"><h2 id="1-von-neumann-vs-harvard">1. Von Neumann vs Harvard ⭐</h2>
+      <article class="prose"><h2 id="von-neumann-vs-harvard">⭐ Von Neumann vs Harvard</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th></th>
-<th><strong>Von Neumann</strong> (John Von Neumann, Princeton)</th>
-<th><strong>Harvard</strong></th>
+<th>Von Neumann</th>
+<th>Harvard</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Memory</td>
-<td><strong>รวม</strong> program + data</td>
-<td><strong>แยก</strong> instruction memory / data memory</td>
+<td>เดียว เก็บ program + data (stored program)</td>
+<td>แยก instruction / data</td>
 </tr>
 <tr>
 <td>Bus</td>
-<td>ชุดเดียว</td>
-<td>แยกกัน</td>
+<td>ร่วมกัน</td>
+<td>แยก</td>
 </tr>
 <tr>
-<td>ข้อดี</td>
-<td>เรียบง่าย ยืดหยุ่น</td>
-<td>ไม่มีคอขวด ดึงคำสั่ง+ข้อมูลพร้อมกัน</td>
-</tr>
-<tr>
-<td>ข้อเสีย</td>
-<td><strong>Von Neumann bottleneck</strong></td>
-<td>ซับซ้อนกว่า</td>
-</tr>
-<tr>
-<td>ใช้ที่</td>
-<td>คอมพิวเตอร์ทั่วไป (ดั้งเดิม/พบมากสุด)</td>
-<td>DSP, microcontroller</td>
+<td>อื่น ๆ</td>
+<td>ดั้งเดิม พบมากสุด, อ้างด้วย address, sequential</td>
+<td>DSP, microcontroller, ลด bottleneck แต่ซับซ้อน</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Stored program concept:</strong> memory เก็บทั้ง program + data / อ้างด้วย <strong>address ไม่ใช่ชนิดข้อมูล</strong> / ทำงานและเข้าถึงแบบ <strong>sequential (linear)</strong>
-<strong>Hybrid:</strong> Harvard ที่ระดับ <strong>L1 cache</strong> + Von Neumann ที่ <strong>main memory</strong></p>
-<h2 id="2-bus-bus-arbitration">2. Bus &amp; Bus Arbitration</h2>
 <ul>
-<li>2 แบบ: <strong>point-to-point</strong> (2 อุปกรณ์) / <strong>multipoint</strong> (หลายอุปกรณ์ใช้ร่วม = shared resource คุมด้วย protocol ในฮาร์ดแวร์)</li>
-<li>3 สาย: <strong>Data lines</strong> = ส่งบิตข้อมูล | <strong>Control lines</strong> = ทิศทางการไหล + เมื่อไหร่ใครใช้ได้ | <strong>Address lines</strong> = ตำแหน่งต้นทาง/ปลายทาง</li>
-<li><strong>Bus arbitration 4 แบบ</strong> (เมื่อมี bus master หลายตัว):</li>
+<li>Hybrid: <strong>Harvard ที่ L1 cache</strong>, <strong>Von Neumann ที่ main memory</strong></li>
 </ul>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>แบบ</th>
-<th>วิธี</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Daisy chain</strong></td>
-<td>ส่งต่อสิทธิ์จาก priority สูงสุด → ต่ำสุด</td>
-</tr>
-<tr>
-<td><strong>Centralized parallel</strong></td>
-<td>แต่ละอุปกรณ์ต่อตรงกับวงจรตัดสิน</td>
-</tr>
-<tr>
-<td><strong>Distributed self-detection</strong></td>
-<td>อุปกรณ์ตกลงกันเอง</td>
-</tr>
-<tr>
-<td><strong>Distributed collision-detection</strong></td>
-<td>ลองส่งเลย ชนแล้วลองใหม่</td>
-</tr>
-</tbody>
-</table></div>
-<h2 id="3-hardware-vs-software-approach">3. Hardware vs Software Approach</h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th><strong>(a) Programming in hardware</strong></th>
-<th><strong>(b) Programming in software</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Data → sequence of arithmetic/logic functions (วงจรเฉพาะ) → Results</td>
-<td>Instruction codes → <strong>instruction interpreter</strong> → control signals → general-purpose ALU functions ← Data → Results</td>
-</tr>
-<tr>
-<td>เปลี่ยนงาน = <strong>เดินสายใหม่ (rewire)</strong></td>
-<td>เปลี่ยนงาน = <strong>เปลี่ยนชุดคำสั่ง</strong></td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>CPU = instruction interpreter + module ของ arithmetic/logic functions แบบอเนกประสงค์</strong> | <strong>I/O components</strong> = รับข้อมูล/คำสั่งแปลงเป็นสัญญาณ + ช่องทางรายงานผล</p>
-<h2 id="4-registers-สำหรับ-memory-และ-io">4. Registers สำหรับ Memory และ I/O ⭐</h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Register</th>
-<th>หน้าที่</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>MAR</strong> (Memory Address Register)</td>
-<td>ระบุ <strong>address</strong> สำหรับอ่าน/เขียนครั้งถัดไป</td>
-</tr>
-<tr>
-<td><strong>MBR</strong> (Memory Buffer Register)</td>
-<td>เก็บ <strong>ข้อมูล</strong> ที่จะเขียนลง / อ่านจาก memory</td>
-</tr>
-<tr>
-<td><strong>I/OAR</strong></td>
-<td>ระบุ <strong>อุปกรณ์ I/O</strong> ที่ต้องการ</td>
-</tr>
-<tr>
-<td><strong>I/OBR</strong></td>
-<td>แลกเปลี่ยนข้อมูลระหว่าง I/O module กับ CPU</td>
-</tr>
-</tbody>
-</table></div>
-<p class="c-warn">⚠️ <strong>MAR = &quot;ที่ไหน&quot; / MBR = &quot;อะไร&quot;</strong>
-<strong>Top-level view:</strong> CPU (PC, IR, MAR, MBR, I/O AR, I/O BR, execution unit) ⇄ <strong>System Bus</strong> ⇄ Main Memory (0 … n−1, เก็บ instruction + data) และ I/O Module (buffers)</p>
-<h2 id="5-instruction-cycle">5. Instruction Cycle</h2>
-<p><strong>START → Fetch Next Instruction → Execute Instruction → วน → HALT</strong>
-<strong>Fetch cycle:</strong> PC เก็บ address คำสั่งถัดไป → ดึงคำสั่ง → <strong>PC เพิ่มค่า</strong> → โหลดลง <strong>IR</strong> → แปลความหมาย → ทำตาม</p>
-<h2 id="6-example-of-program-execution">6. Example of Program Execution ⭐</h2>
-<p><strong>รูปแบบเครื่องสมมติ 16 บิต:</strong> opcode บิต 0–3 (4 บิต) + address บิต 4–15 (12 บิต) | integer: บิต 0 = S (sign), 1–15 = magnitude | registers: PC, IR, <strong>AC (Accumulator)</strong>
-<strong>Opcodes:</strong> <code>0001</code> = Load AC from Memory, <code>0010</code> = Store AC to Memory, <code>0101</code> = Add to AC from Memory</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Addr</th>
-<th>Content</th>
-<th>ความหมาย</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>300</td>
-<td>1940</td>
-<td>Load AC จาก 940</td>
-</tr>
-<tr>
-<td>301</td>
-<td>5941</td>
-<td>Add ค่าที่ 941</td>
-</tr>
-<tr>
-<td>302</td>
-<td>2941</td>
-<td>Store AC ไปที่ 941</td>
-</tr>
-<tr>
-<td>940 / 941</td>
-<td>0003 / 0002</td>
-<td>ข้อมูล</td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>6 ขั้น:</strong> fetch 300 (IR=1940, PC=301) → exec Load (AC=0003) → fetch 301 (IR=5941, PC=302) → exec Add (AC=0005) → fetch 302 (IR=2941, PC=303) → exec Store → <strong>941 = 0005</strong>
-<em>ทุกคำสั่ง = 1 fetch + 1 execute, PC เพิ่มตอน fetch เสมอ</em></p>
-<h2 id="7-instruction-cycle-state-diagram">7. Instruction Cycle State Diagram</h2>
-<p>Instruction address calculation → Instruction fetch → Instruction operation decoding → Operand address calculation → Operand fetch (<em>multiple operands</em>) → Data operation → Operand store (<em>multiple results</em>)</p>
+<h2 id="bus">Bus</h2>
 <ul>
-<li>ลูกศร <strong>&quot;Return for string or vector data&quot;</strong> = ข้อมูลชุด วนซ้ำ | <strong>&quot;Instruction complete, fetch next instruction&quot;</strong> = วนคำสั่งถัดไป</li>
-<li><strong>แถวบน</strong> (instruction fetch, operand fetch, operand store) = ต้องติดต่อ memory/I/O | <strong>แถวล่าง</strong> = ทำภายใน CPU</li>
+<li>2 ประเภท: <strong>point-to-point, multipoint</strong> | multipoint = shared resource คุมด้วย protocol ใน hardware</li>
+<li><strong>Data lines</strong> ส่ง bits | <strong>Control lines</strong> ทิศทาง + เมื่อไรใช้ bus ได้ | <strong>Address lines</strong> ตำแหน่งต้นทาง/ปลายทาง</li>
+<li>⭐ Bus arbitration (master-slave หลาย master):
+<ul>
+<li><strong>Daisy chain</strong> — ส่งสิทธิ์จาก priority สูง → ต่ำ</li>
+<li><strong>Centralized parallel</strong> — ทุกตัวต่อตรงกับ arbitration circuit</li>
+<li><strong>Distributed self-detection</strong> — ตกลงกันเอง</li>
+<li><strong>Distributed collision-detection</strong> — ลองใช้ ถ้าชนก็ลองใหม่</li>
 </ul>
-<h2 id="8-marie-registers-architecture-data-path">8. MARIE — Registers, Architecture, Data Path</h2>
-<p><strong>MARIE</strong> = Machine Architecture that is Really Intuitive and Easy (เครื่องจำลองสอนหลักการ)</p>
+</li>
+</ul>
+<h2 id="hardware-vs-software-approach">Hardware vs Software approach</h2>
+<ul>
+<li>Hardware: Data → sequence of arithmetic/logic functions → Results</li>
+<li>Software: Instruction codes → <strong>instruction interpreter</strong> → control signals → general-purpose functions → Results; โปรแกรมใหม่ = code ใหม่ ไม่ต้องเดินสายใหม่</li>
+<li>CPU = interpreter + general-purpose arithmetic/logic | I/O = รับเข้า แปลงสัญญาณ รายงานผล</li>
+</ul>
+<h2 id="registers">Registers</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>Register</th>
-<th>ขนาด</th>
-<th>หน้าที่</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><strong>AC</strong></td>
-<td>16-bit</td>
-<td>conditional operator หรือ operand หนึ่งของคำสั่ง 2 operand</td>
-</tr>
 <tr>
 <td><strong>MAR</strong></td>
-<td><strong>12-bit</strong></td>
-<td>memory address ของคำสั่ง/operand</td>
+<td>address ใน memory สำหรับ read/write ถัดไป</td>
 </tr>
 <tr>
 <td><strong>MBR</strong></td>
-<td>16-bit</td>
-<td>ข้อมูลหลังดึงจาก / ก่อนวางลง memory</td>
+<td>ข้อมูลที่จะเขียน / ที่อ่านมา</td>
 </tr>
 <tr>
-<td><strong>PC</strong></td>
-<td><strong>12-bit</strong></td>
+<td><strong>I/OAR</strong></td>
+<td>ระบุ I/O device</td>
+</tr>
+<tr>
+<td><strong>I/OBR</strong></td>
+<td>แลกข้อมูล I/O module ↔ CPU</td>
+</tr>
+<tr>
+<td><strong>PC / IR / AC</strong></td>
+<td>address คำสั่งถัดไป / คำสั่งที่ทำ / ที่เก็บชั่วคราว</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="instruction-cycle">Instruction cycle</h2>
+<ul>
+<li>Basic: START → <strong>Fetch</strong> → <strong>Execute</strong> → วน → HALT</li>
+<li>⭐ Fetch: PC = address คำสั่งถัดไป → fetch → <strong>PC + 1</strong> → โหลดเข้า <strong>IR</strong> → ตีความ/ทำ</li>
+<li>ตัวอย่าง (opcode 0001 Load, 0010 Store, 0101 Add): 300:1940, 301:5941, 302:2941, 940:3, 941:2 → AC = 3 → 3+2 = 5 → store ลง 941 = <strong>0005</strong></li>
+<li>State diagram: instruction address calc → instruction fetch → decoding → operand address calc ↔ operand fetch (multiple operands) → data operation → operand address calc ↔ operand store (multiple results) → กลับ (หรือ return for string/vector data)</li>
+</ul>
+<h2 id="marie">⭐ MARIE</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reg</th>
+<th>bit</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AC</td>
+<td>16</td>
+<td>operand / conditional operator</td>
+</tr>
+<tr>
+<td>MAR</td>
+<td>12</td>
+<td>address</td>
+</tr>
+<tr>
+<td>MBR</td>
+<td>16</td>
+<td>ข้อมูลเข้า/ออก memory</td>
+</tr>
+<tr>
+<td>PC</td>
+<td>12</td>
 <td>address คำสั่งถัดไป</td>
 </tr>
 <tr>
-<td><strong>IR</strong></td>
-<td>16-bit</td>
-<td>คำสั่งก่อนถูกรัน</td>
+<td>IR</td>
+<td>—</td>
+<td>คำสั่งที่จะ execute</td>
 </tr>
 <tr>
-<td><strong>InREG</strong></td>
-<td><strong>8-bit</strong></td>
-<td>ข้อมูลจาก input device</td>
-</tr>
-<tr>
-<td><strong>OutREG</strong></td>
-<td><strong>8-bit</strong></td>
-<td>ข้อมูลส่งไป output device</td>
-</tr>
-</tbody>
-</table></div>
-<p><em>MAR/PC = 12 บิต เพราะ memory มี 2¹² = <strong>4096</strong> ช่อง (0–4095)</em></p>
-<ul>
-<li>register + main memory เชื่อมผ่าน <strong>common data bus</strong>, อุปกรณ์แต่ละตัวมีหมายเลขเฉพาะตั้งบน control lines</li>
-<li>มี <strong>ทางเชื่อมแยก</strong> AC↔MBR และ ALU↔AC/MBR → ส่งข้อมูลได้โดยไม่ใช้ main data bus</li>
-<li><strong>Data path 16-bit bus, bus address:</strong> 0 = Main Memory, 1 = MAR, 2 = PC, 3 = MBR, 4 = AC, 5 = InReg, 6 = OutReg, 7 = IR</li>
-</ul>
-<h2 id="9-marie-isa-instruction-format">9. MARIE ISA &amp; Instruction Format ⭐</h2>
-<ul>
-<li><strong>ISA</strong> = รูปแบบคำสั่ง + operation พื้นฐานที่เครื่องทำได้ = <strong>interface ระหว่าง hardware กับ software</strong> | บาง ISA มีหลายร้อยคำสั่ง แต่ <strong>MARIE มี 13 คำสั่ง</strong></li>
-<li><strong>Format:</strong> บิต 15–12 = <strong>Opcode</strong> (4 บิต), บิต 11–0 = <strong>Address</strong> (12 บิต)</li>
-</ul>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Bin</th>
-<th>Hex</th>
-<th>Instruction</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0001</td>
-<td>1</td>
-<td><strong>Load X</strong></td>
-<td>โหลดค่าที่ X ลง AC</td>
-</tr>
-<tr>
-<td>0010</td>
-<td>2</td>
-<td><strong>Store X</strong></td>
-<td>เก็บ AC ไปที่ X</td>
-</tr>
-<tr>
-<td>0011</td>
-<td>3</td>
-<td><strong>Add X</strong></td>
-<td>บวกค่าที่ X เข้า AC</td>
-</tr>
-<tr>
-<td>0100</td>
-<td>4</td>
-<td><strong>Subt X</strong></td>
-<td>ลบค่าที่ X ออกจาก AC</td>
-</tr>
-<tr>
-<td>0101</td>
-<td>5</td>
-<td><strong>Input</strong></td>
-<td>รับค่าจาก keyboard ลง AC</td>
-</tr>
-<tr>
-<td>0110</td>
-<td>6</td>
-<td><strong>Output</strong></td>
-<td>แสดงค่าใน AC</td>
-</tr>
-<tr>
-<td>0111</td>
-<td>7</td>
-<td><strong>Halt</strong></td>
-<td>จบโปรแกรม</td>
-</tr>
-<tr>
-<td>1000</td>
+<td>InREG</td>
 <td>8</td>
-<td><strong>Skipcond</strong></td>
-<td>ข้ามคำสั่งถัดไปตามเงื่อนไข</td>
+<td>ข้อมูลจาก input</td>
 </tr>
 <tr>
-<td>1001</td>
-<td>9</td>
-<td><strong>Jump X</strong></td>
-<td>PC ← X</td>
+<td>OutREG</td>
+<td>8</td>
+<td>ข้อมูลไป output</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>ตัวอย่าง bit pattern:</strong> <code>0001 000000000011</code> = Load address 3 | <code>1000 100000000000</code> = Skipcond บิต 11–10 = 10 → ข้ามถ้า <strong>AC &gt; 0</strong></p>
-<h2 id="10-rtl-register-transfer-language">10. RTL (Register Transfer Language) ⭐</h2>
-<p>แต่ละคำสั่งประกอบด้วย <strong>microoperations</strong> ระบุลำดับด้วย RTL | <strong>M[X]</strong> = ค่าใน memory ตำแหน่ง X | <strong>←</strong> = โอนข้อมูล</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th><strong>LOAD X</strong></th>
-<th><strong>ADD X</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>MAR ← X</code></td>
-<td><code>MAR ← X</code></td>
-</tr>
-<tr>
-<td><code>MBR ← M[MAR]</code></td>
-<td><code>MBR ← M[MAR]</code></td>
-</tr>
-<tr>
-<td><code>AC ← MBR</code></td>
-<td><code>AC ← AC + MBR</code></td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>SKIPCOND</strong> (ซับซ้อนที่สุด) — &quot;ข้าม&quot; = <code>PC ← PC + 1</code></p>
-<pre><code>IR[11-10] = 00 → ถ้า AC &lt; 0 then PC ← PC + 1
-IR[11-10] = 01 → ถ้า AC = 0 then PC ← PC + 1
-IR[11-10] = 11 → ถ้า AC &gt; 0 then PC ← PC + 1
-</code></pre>
-<p class="c-warn">⚠️ สไลด์ไม่ตรงกันเอง: หน้า bit pattern ใช้ <strong>10</strong> = AC &gt; 0 แต่หน้า RTL เขียน <strong>11</strong> (ตำรามาตรฐานใช้ 10) — ควรถามอาจารย์ว่ายึดแบบไหน</p>
-<h2 id="11-fetch-decode-execute-flowchart">11. Fetch-Decode-Execute Flowchart</h2>
-<p><code>MAR ← PC</code> → <code>IR ← M[MAR]</code>, <code>PC ← PC + 1</code> → decode + <code>MAR ← IR[11-0]</code> → <strong>ต้องใช้ operand?</strong> ถ้าใช่ <code>MBR ← M[MAR]</code> → <strong>Execute</strong> → วนกลับ</p>
-<h2 id="12-interrupts">12. Interrupts ⭐</h2>
 <ul>
-<li><strong>เกิดเมื่อ:</strong> ผู้ใช้กด user break (<strong>Ctrl + C</strong>) / ผู้ใช้หรือโปรแกรม<strong>ขอ I/O</strong> / เกิด <strong>critical error</strong></li>
-<li><strong>แหล่งที่มา:</strong> <strong>Hardware interrupt</strong> / <strong>Software interrupt</strong> (เรียก <strong>OS system call</strong>)</li>
-<li>ก่อนเริ่มแต่ละรอบถาม <strong>&quot;Has an interrupt been issued?&quot;</strong> → Yes = process the interrupt / No = ทำ fetch-decode-execute</li>
-<li><strong>ขั้นตอนประมวลผล (ISR = Interrupt Service Routine):</strong>
-<ol>
-<li>detect interrupt signal → 2. <strong>save variables &amp; registers</strong> → 3. <strong>ค้น address ของ ISR ใน interrupt vector table</strong> → 4. ใส่ address ลง <strong>PC</strong> → 5. <strong>branch to ISR</strong> (ทำงานเฉพาะของ interrupt นั้น) → 6. <strong>restore registers &amp; variables</strong> → 7. กลับไปต้น fetch-decode-execute</li>
-</ol>
+<li>Memory 0–4095 | common data bus 16-bit | bus no.: 0 Mem, 1 MAR, 2 PC, 3 MBR, 4 AC, 5 InReg, 6 OutReg, 7 IR</li>
+<li>ทางเชื่อมแยก AC↔MBR, ALU↔AC/MBR (ไม่ต้องใช้ main bus)</li>
+<li>ISA = interface hardware/software | <strong>MARIE มี 13 คำสั่ง</strong> | opcode bit 15–12, address bit 11–0</li>
+<li>คำสั่ง: <strong>1 Load, 2 Store, 3 Add, 4 Subt, 5 Input, 6 Output, 7 Halt, 8 Skipcond, 9 Jump</strong></li>
+<li>LOAD ใน IR <code>0001 000000000011</code> = Load จาก address 3 | SKIPCOND <code>1000 10...</code> = skip ถ้า AC &gt; 0</li>
+<li>RTL: M[X] = ค่าใน memory X, ← = โอน
+<ul>
+<li>LOAD: MAR←X, MBR←M[MAR], AC←MBR | ADD: MAR←X, MBR←M[MAR], AC←AC+MBR</li>
+<li>SKIPCOND: 00 → AC&lt;0, 01 → AC=0, 11 → AC&gt;0 (⚠️ สไลด์ 24 บอก 10 = AC&gt;0 — สไลด์ขัดกัน)</li>
+</ul>
 </li>
-<li><strong>Maskable</strong> = เพิกเฉยได้ระหว่างประมวลผล interrupt (ตั้งบิตใน <strong>flags register</strong> ปิด interrupt ทั้งหมด) | <strong>Nonmaskable</strong> = ต้องประมวลผลเสมอ เพื่อให้ระบบเสถียร</li>
 </ul>
-<h2 id="13-marie-io-simple-program">13. MARIE I/O &amp; Simple Program</h2>
-<ul>
-<li>interrupt มีประโยชน์มากกับ I/O แต่ <strong>interrupt-driven I/O ซับซ้อน อยู่นอกขอบเขตบทนี้</strong> → MARIE ใช้ <strong>programmed I/O แบบดัดแปลง</strong>: output ใส่ <strong>OutREG</strong>, CPU <strong>poll InREG</strong> จนมี input แล้วคัดลอกลง AC</li>
-</ul>
+<h2 id="fetch-decode-execute-marie">⭐ Fetch-decode-execute (MARIE)</h2>
+<p>MAR←PC → IR←M[MAR], PC+1 → MAR←IR[11-0], decode IR[15-12] → (มี operand?) MBR←M[MAR] → execute</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>Addr</th>
-<th>Instruction</th>
-<th>Hex</th>
+<th>ADD 105</th>
+<th>PC</th>
+<th>IR</th>
+<th>MAR</th>
+<th>MBR</th>
+<th>AC</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>100</td>
-<td>Load 104</td>
-<td>1104</td>
-</tr>
-<tr>
+<td>initial</td>
 <td>101</td>
-<td>Add 105</td>
-<td>3105</td>
+<td>1104</td>
+<td>104</td>
+<td>0023</td>
+<td>0023</td>
 </tr>
 <tr>
+<td>fetch จบ</td>
 <td>102</td>
-<td>Store 106</td>
-<td>4106</td>
+<td>3105</td>
+<td>101</td>
+<td>0023</td>
+<td>0023</td>
 </tr>
 <tr>
-<td>103</td>
-<td>Halt</td>
-<td>7000</td>
+<td>decode</td>
+<td>102</td>
+<td>3105</td>
+<td>105</td>
+<td>0023</td>
+<td>0023</td>
 </tr>
 <tr>
-<td>104 / 105 / 106</td>
-<td>ข้อมูล</td>
-<td>0023 / FFE9 / 0000</td>
+<td>get operand</td>
+<td>102</td>
+<td>3105</td>
+<td>105</td>
+<td>FFE9</td>
+<td>0023</td>
+</tr>
+<tr>
+<td>execute</td>
+<td>102</td>
+<td>3105</td>
+<td>105</td>
+<td>FFE9</td>
+<td><strong>000C</strong></td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>ทำอะไร:</strong> 0023₁₆ = 35 บวก FFE9₁₆ = −23 (two's complement) → เก็บที่ 106 = <strong>000C₁₆ = 12</strong>
-⚠️ Store 106 เข้ารหัสเป็น 4106 ทั้งที่ตาราง opcode ให้ Store = 2 (4 = Subt) — สไลด์พิมพ์ตามต้นฉบับ ให้ยึดตาราง opcode</p>
-<p><strong>Trace ADD 105:</strong> เริ่ม PC=101, IR=1104, MAR=104, MBR=0023, AC=0023
-<code>MAR←PC</code> (MAR=101) → <code>IR←M[MAR]</code> (IR=3105) → <code>PC←PC+1</code> (PC=102) → <code>MAR←IR[11-0]</code> (MAR=105) → decode IR[15-12] → <code>MBR←M[MAR]</code> (MBR=FFE9) → <code>AC←AC+MBR</code> (<strong>AC=000C</strong>)</p>
-<h2 id="14-classes-of-interrupts-program-flow">14. Classes of Interrupts &amp; Program Flow</h2>
+<ul>
+<li>โปรแกรม: 100 Load 104 (1104), 101 Add 105 (3105), 102 Store 106 (4106 ตามสไลด์), 103 Halt (7000), 104 = 0023, 105 = FFE9, 106 = 0000</li>
+</ul>
+<h2 id="interrupts">⭐ Interrupts</h2>
+<ul>
+<li>เกิดเมื่อ: user break (Ctrl+C), ขอ I/O, critical error | จาก <strong>hardware</strong> หรือ <strong>software</strong> (OS system call)</li>
+<li>เพิ่มขั้น &quot;มี interrupt ไหม?&quot; → Yes: process interrupt | No: fetch-decode-execute</li>
+<li><strong>ISR:</strong> detect → save variables/registers → หา ISR address ใน <strong>interrupt vector table</strong> → ใส่ PC → ทำ ISR → return → restore → กลับ fetch</li>
+<li><strong>Maskable</strong> = ถูกปิดได้ (ตั้ง bit ใน flags register) | <strong>Nonmaskable</strong> = ต้องจัดการเพื่อความเสถียร</li>
+<li>MARIE: programmed I/O แบบดัดแปลง — output ใส่ OutREG, CPU <strong>poll</strong> InREG แล้ว copy เข้า AC</li>
+</ul>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Class</th>
-<th>เกิดจาก</th>
+<th>ตัวอย่าง</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Program</strong></td>
-<td>arithmetic overflow, division by zero, คำสั่งไม่ถูกต้อง, อ้าง memory นอกพื้นที่</td>
+<td>Program</td>
+<td>overflow, หารศูนย์, illegal instruction, อ้าง memory นอกสิทธิ์</td>
 </tr>
 <tr>
-<td><strong>Timer</strong></td>
+<td>Timer</td>
 <td>timer ใน processor ให้ OS ทำงานเป็นระยะ</td>
 </tr>
 <tr>
-<td><strong>I/O</strong></td>
-<td>I/O controller แจ้งเสร็จปกติ / ขอบริการ / แจ้ง error</td>
+<td>I/O</td>
+<td>I/O controller แจ้งเสร็จ / ขอบริการ / error</td>
 </tr>
 <tr>
-<td><strong>Hardware failure</strong></td>
+<td>Hardware failure</td>
 <td>power failure, memory parity error</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Flow of control:</strong> (a) <strong>No interrupts</strong> = CPU รอจน I/O จบ | (b) <strong>short I/O wait</strong> = สั่ง I/O แล้วทำงานต่อได้เลย เสร็จแล้วค่อย interrupt ไป handler | (c) <strong>long I/O wait</strong> = ถึง WRITE ถัดไปแล้ว I/O ก่อนยังไม่เสร็จ ต้องรอ
-<strong>Transfer of control:</strong> ถูกขัดหลังคำสั่ง i → ทำ Interrupt Handler → กลับมาที่ <strong>คำสั่ง i + 1</strong>
-<strong>Instruction cycle with interrupts:</strong> Fetch → Execute → <strong>Interrupt Cycle</strong> (check + process) → วน | <em>Interrupts Disabled</em> = ข้ามกลับไป fetch เลย
-<strong>Program timing:</strong> ไม่มี interrupt = &quot;I/O operation; processor waits&quot; (CPU รอเปล่า) / มี interrupt = &quot;I/O operation concurrent with processor executing&quot; → เสร็จเร็วกว่า (แบบ long I/O ยังต้องรอบางส่วนแต่ยังเร็วกว่า)
-<strong>State diagram with interrupts:</strong> หลัง Operand store → <strong>Interrupt check</strong> → (No) กลับ Instruction address calculation / (มี) → Interrupt → แล้วกลับ</p>
-<h2 id="15-multiple-interrupts">15. Multiple Interrupts ⭐</h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th><strong>(a) Sequential</strong></th>
-<th><strong>(b) Nested</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ระหว่างทำ handler X <strong>ปิด interrupt</strong></td>
-<td><strong>เปิดให้ priority สูงกว่าเข้าได้</strong></td>
-</tr>
-<tr>
-<td>Y ต้องรอจน X จบ</td>
-<td>Y ขัด X ได้ทันที เสร็จแล้วกลับไปทำ X ต่อ</td>
-</tr>
-<tr>
-<td>ง่าย ไม่สนความเร่งด่วน</td>
-<td>ตอบสนองงานเร่งด่วน แต่ซับซ้อน</td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>Timeline ตัวอย่าง</strong> (priority: communication &gt; disk &gt; printer):
-t=0 user program → <strong>t=10</strong> printer interrupt → <strong>t=15</strong> communication ขัด printer ISR → (t=20 disk เข้ามารอ) → <strong>t=25</strong> communication จบ → ทำ disk ISR → <strong>t=35</strong> disk จบ → กลับทำ printer ISR → <strong>t=40</strong> จบ กลับ user program</p>
-<hr />
+<ul>
+<li>Instruction cycle with interrupts: Fetch → Execute → (enabled) <strong>Interrupt cycle</strong> / (disabled) กลับ fetch</li>
+<li>Transfer of control: interrupt หลังคำสั่ง i → handler → กลับที่ i+1</li>
+<li>Timing: ไม่มี interrupt = processor รอ I/O | มี interrupt = I/O ทำพร้อมกับ processor (long wait ยังต้องรอบ้าง)</li>
+<li>Multiple: <strong>sequential</strong> (ทีละตัว) vs <strong>nested</strong> (ขัดซ้อน) | ตัวอย่าง t=0 → 10 printer → 15 comm → 25 กลับ printer/ไป disk → 35 กลับ printer → 40 กลับ user</li>
+</ul>
 <h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>คู่</th>
-<th>ต่างกันที่</th>
+<th>ข้อ</th>
+<th>จำให้ถูก</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Von Neumann / Harvard</td>
-<td>memory รวม / แยก</td>
+<td>MAR vs MBR</td>
+<td>address vs data</td>
 </tr>
 <tr>
-<td>MAR / MBR</td>
-<td>address / data</td>
+<td>MARIE MAR/PC</td>
+<td>12-bit (AC, MBR 16-bit; In/Out 8-bit)</td>
 </tr>
 <tr>
-<td>PC / IR</td>
-<td>ที่อยู่คำสั่งถัดไป / คำสั่งที่กำลังรัน</td>
+<td>Hybrid</td>
+<td>L1 = Harvard, main memory = Von Neumann</td>
 </tr>
 <tr>
-<td>LOAD / ADD (RTL)</td>
-<td>AC ← MBR / AC ← AC + MBR</td>
+<td>Maskable vs Nonmaskable</td>
+<td>ปิดได้ vs ต้องทำ</td>
 </tr>
 <tr>
-<td>Hardware / Software interrupt</td>
-<td>จากอุปกรณ์ / จาก system call</td>
+<td>Sequential vs Nested</td>
+<td>ทำทีละตัว vs ขัดซ้อน</td>
 </tr>
 <tr>
-<td>Maskable / Nonmaskable</td>
-<td>ปิดได้ / ต้องทำเสมอ</td>
-</tr>
-<tr>
-<td>Sequential / Nested</td>
-<td>ปิด interrupt ระหว่างทำ / ให้ priority สูงกว่าขัดได้</td>
-</tr>
-<tr>
-<td>Programmed I/O / Interrupt-driven I/O</td>
-<td>CPU คอยถาม / อุปกรณ์เรียกเอง</td>
+<td>opcode ตัวอย่างข้อ 6 vs MARIE</td>
+<td>0101 = Add (ตัวอย่าง) แต่ MARIE 0101 = Input</td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="โจทย์ที่ต้องทำได้">โจทย์ที่ต้องทำได้</h2>
-<ul>
-<li><strong>แปลง hex เป็นคำสั่ง:</strong> ตัวแรก = opcode, 3 ตัวหลัง = address (3105 = Add 105)</li>
-<li><strong>Trace ตาราง register</strong> (PC, IR, MAR, MBR, AC) ทีละ microoperation</li>
-<li><strong>อ่าน bit pattern SKIPCOND:</strong> opcode 8 แล้วดูบิต 11–10</li>
-<li><strong>อธิบายลำดับ multiple interrupts</strong> ตาม priority</li>
-</ul>
 </article>
       <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
       <nav class="pager"><a class="pg prev" href="../chapter01/short.html"><small>← บทก่อนหน้า</small><span>Chapter 01 — Basic Computer Components &amp; Introduction to Computer Architecture</span></a><a class="pg next" href="../chapter03/short.html"><small>บทถัดไป →</small><span>Chapter 03 — Data Representation, ISA &amp; Assembly Language (RISC-V)</span></a></nav>
