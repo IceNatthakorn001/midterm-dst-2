@@ -161,7 +161,15 @@ def find_lessons(subj):
         m = re.search(r"^#\s+(.+)$", text, re.M)
         title = m.group(1).strip() if m else mds[0].stem
         title = re.sub(r"^สรุป\s*[:：]\s*", "", title)
-        lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title,
+        # interactive animations that belong to this lesson: <folder>/animation-*.html
+        anims = []
+        for p in sorted(f.glob("animation-*.html")):
+            ah = p.read_text(encoding="utf-8")
+            am = re.search(r"<h1[^>]*>(.*?)</h1>", ah, re.S)
+            atitle = re.sub(r"<[^>]+>", "", am.group(1)).strip() if am else p.stem
+            anims.append({"name": p.name, "title": atitle, "short": atitle.split(":")[0].strip(), "html": ah,
+                          "heads": [re.sub(r"<[^>]+>", "", x).strip() for x in re.findall(r"<h2[^>]*>(.*?)</h2>", ah, re.S)]})
+        lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title, "anims": anims,
                         "md": text, "quiz": quizzes[0] if quizzes else None,
                         "quiz2": quizzes2[0] if quizzes2 else None,
                         "quiz3": quizzes3[0] if quizzes3 else None,
@@ -188,6 +196,15 @@ def find_reviews(subj, prefix="Review-"):
 
 REVIEW_BAR = """<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
 <a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← {subject}</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>"""
+
+
+ANIM_BAR = """<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป {lesson}</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">{subject}</a>
 <span style="color:#999">|</span>
 <a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
 </div>"""
@@ -298,6 +315,9 @@ def build():
               pager += (f'<a class="pg next" href="../{next_l["slug"]}/{nb(next_l)}"><small>บทถัดไป →</small>'
                         f'<span>{esc(next_l["title"])}</span></a>' if next_l else "<span></span>")
               pager += "</nav>"
+              anim_box = ('<div class="anim-box"><strong>🎬 แอนิเมชันของบทนี้</strong>'
+                          + "".join(f'<a class="chip chip-quiz" href="{a["name"]}">▶ {esc(a["title"])}</a>' for a in les["anims"])
+                          + '</div>' if les["anims"] else "")
               quiz_end = (f'<div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong>'
                           f'<p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div>{quiz_btn}</div>'
                           if les["quiz"] else "")
@@ -313,7 +333,7 @@ def build():
     <main class="lesson">
       <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">{esc(subj['icon'])} {esc(subj['code'])}</a> / {esc(les['label'])}</div>
       <h1 class="lesson-title">{"⚡ สรุปสั้น · " if is_short else ""}{esc(les['title'])}</h1>
-      <div class="lesson-actions">{switch_btn}{quiz_btn}</div>
+      <div class="lesson-actions">{switch_btn}{quiz_btn}</div>{anim_box}
       <article class="prose">{body}</article>
       {quiz_end}
       {pager}
@@ -333,6 +353,13 @@ def build():
 
             search_index.append({"s": subj["code"], "t": les["title"], "u": f"{subj['slug']}/{les['slug']}/index.html",
                                  "h": [t for _, t in full_toc]})
+
+            for a in les["anims"]:
+                bar = ANIM_BAR.format(lesson=esc(les["label"]), subject=esc(f"{subj['icon']} {subj['code']}"))
+                ah = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, a["html"], count=1)
+                (ldir / a["name"]).write_text(ah, encoding="utf-8")
+                search_index.append({"s": subj["code"], "t": "🎬 " + a["title"],
+                                     "u": f"{subj['slug']}/{les['slug']}/{a['name']}", "h": a["heads"]})
 
         reviews = find_reviews(subj)
         anims = find_reviews(subj, "Animation-")
@@ -393,6 +420,8 @@ def build():
             if les["quiz3"]:
                 qlink += f'<a class="chip chip-quiz" href="{les["slug"]}/quiz3.html">📝 Quiz 3</a>'
             slink = (f'<a class="chip" href="{les["slug"]}/short.html">⚡ สรุปสั้น</a>' if les["short"] else "")
+            qlink += "".join(f'<a class="chip chip-quiz" href="{les["slug"]}/{a["name"]}">🎬 {esc(a["short"])}</a>'
+                             for a in les["anims"])
             rows += (f'<li class="lesson-row"><span class="num">{n:02d}</span>'
                      f'<a class="lesson-link" href="{les["slug"]}/index.html"><small>{esc(les["label"])}</small>'
                      f'<span>{esc(les["title"])}</span></a>'
