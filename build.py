@@ -274,7 +274,19 @@ def arch_track_script(slug, href, title):
     """remember which chapter was opened last (localStorage) for the 'อ่านต่อ' banner"""
     return ("<script>try{var k=%s,d=JSON.parse(localStorage.getItem(k)||'{}');d.v=d.v||{};d.v[%s]=1;"
             "d.last={h:%s,t:%s};localStorage.setItem(k,JSON.stringify(d));}catch(e){}</script>"
-            % tuple(json.dumps(x, ensure_ascii=False) for x in (ARCH_KEY, slug, href, title)))
+            % tuple(json.dumps(x, ensure_ascii=False) for x in (ARCH_KEY, slug, href, title))) + ARCH_TOC_JS
+
+
+# collapsible sidebar on ITDS211 lesson pages (state kept in localStorage)
+ARCH_TOC_JS = """<script>
+(function(){var K='itds211-toc',r=document.documentElement;
+try{if(localStorage.getItem(K)==='0')r.classList.add('toc-hidden');}catch(e){}
+function set(h){r.classList.toggle('toc-hidden',h);try{localStorage.setItem(K,h?'0':'1');}catch(e){}}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-toc-collapse]');
+if(b)set(!r.classList.contains('toc-hidden'));});
+document.addEventListener('keydown',function(e){var t=e.target.tagName;
+if(e.key==='['&&t!=='INPUT'&&t!=='TEXTAREA'&&!e.ctrlKey&&!e.metaKey)set(!r.classList.contains('toc-hidden'));});
+})();</script>"""
 
 
 def arch_topic(label):
@@ -390,7 +402,12 @@ def build():
                   full_toc = toc
               prev_l = lessons[i - 1] if i > 0 else None
               next_l = lessons[i + 1] if i + 1 < len(lessons) else None
-              toc_html = "".join(f'<li><a href="#{a}">{esc(t)}</a></li>' for a, t in toc)
+              is_arch = subj["slug"] == "architecture"
+              # toc labels are already HTML-escaped by the renderer; unescape first so "&" isn't shown as "&amp;"
+              toc_html = "".join(f'<li><a href="#{a}">{esc(html.unescape(t)) if is_arch else esc(t)}</a></li>' for a, t in toc)
+              collapse_btn = ('<button class="toc-collapse" data-toc-collapse title="ซ่อนสารบัญ (กด [)">«</button>'
+                              '<button class="toc-rail" data-toc-collapse title="แสดงสารบัญ (กด [)"><span>☰</span>'
+                              '<span class="toc-rail-label">สารบัญ</span></button>' if is_arch else "")
               quiz_btn = ('<a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a>' if les["quiz"] else "")
               if les["quiz2"]:
                   quiz_btn += '<a class="btn btn-quiz" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a>'
@@ -416,9 +433,9 @@ def build():
               content = f"""
   <div class="lesson-layout">
     <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>{collapse_btn}
       <div class="toc-inner">
-        <a class="toc-back" href="../index.html">← {esc(subj['code'])} ทุกบท</a>
+        <div class="toc-top"><a class="toc-back" href="../index.html">← {esc(subj['code'])} ทุกบท</a></div>
         <ol>{toc_html}</ol>
       </div>
     </aside>
