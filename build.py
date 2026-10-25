@@ -266,6 +266,98 @@ QUIZ_BAR = """<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20
 </div>"""
 
 
+# ---------------------------------------------------------------- ITDS211 subject page (card layout)
+ARCH_KEY = "itds211-progress"
+
+
+def arch_track_script(slug, href, title):
+    """remember which chapter was opened last (localStorage) for the 'อ่านต่อ' banner"""
+    return ("<script>try{var k=%s,d=JSON.parse(localStorage.getItem(k)||'{}');d.v=d.v||{};d.v[%s]=1;"
+            "d.last={h:%s,t:%s};localStorage.setItem(k,JSON.stringify(d));}catch(e){}</script>"
+            % tuple(json.dumps(x, ensure_ascii=False) for x in (ARCH_KEY, slug, href, title)))
+
+
+def arch_topic(label):
+    label = re.sub(r"\s*\(สไลด์[^)]*\)\s*$", "", html.unescape(label))
+    return re.sub(r"^\d+\.\s*", "", label).strip()
+
+
+ARCH_SKIP = ("คำศัพท์", "สรุปท้ายบท", "Course Outline", "Agenda", "Class Schedule", "Chapter Overview",
+             "Course Logistics", "Summary")
+
+
+def arch_subject_page(subj, lessons, nq):
+    groups = [("arch", "🖥️", "ส่วนที่ 1 · Computer Architecture", "Chapter 00–08 · ฮาร์ดแวร์ ตัวเลข หน่วยความจำ I/O pipeline"),
+              ("os", "⚙️", "ส่วนที่ 2 · Operating Systems", "Lecture 1–3 · OS, Process, CPU Scheduling")]
+    data, cards = [], {"arch": "", "os": ""}
+    n_anim = sum(len(l["anims"]) for l in lessons)
+    for les in lessons:
+        g = "os" if les["label"].startswith("Lecture") else "arch"
+        m = re.search(r"\d+", les["label"])
+        num = (m.group(0).zfill(2) if g == "arch" else m.group(0)) if m else "•"
+        title = re.sub(r"^(Chapter|Lecture)\s*\d+\s*[—–-]\s*", "", les["title"])
+        topics = [(a, arch_topic(t)) for a, t in les["toc"]]
+        shown = [t for _, t in topics if not any(s in t for s in ARCH_SKIP)][:5]
+        s = les["slug"]
+        btns = f'<a class="ax-btn ax-primary" href="{s}/index.html" data-l="{s}"><i>📖</i> อ่านเต็ม</a>'
+        if les["short"]:
+            btns += f'<a class="ax-btn" href="{s}/short.html" data-l="{s}"><i>⚡</i> สรุปสั้น</a>'
+        for key, name, lbl in (("quiz", "quiz.html", "<i>📝</i> Quiz"), ("quiz2", "quiz2.html", "<i>📝</i> Quiz 2"),
+                               ("quiz3", "quiz3.html", "<i>📝</i> Quiz 3")):
+            if les[key]:
+                btns += f'<a class="ax-btn ax-quiz" href="{s}/{name}" data-l="{s}">{lbl}</a>'
+        anims = "".join(f'<a href="{s}/{a["name"]}" data-l="{s}" title="{esc(a["title"])}">▶ {esc(a["short"])}</a>'
+                        for a in les["anims"])
+        anim_row = f'<div class="ax-anims"><span>🎬 แอนิเมชัน</span>{anims}</div>' if anims else ""
+        cards[g] += f"""
+<li class="ax-card" data-g="{g}" data-s="{s}">
+  <div class="ax-head">
+    <span class="ax-num"><small>{"CH" if g == "arch" else "LEC"}</small>{num}</span>
+    <a class="ax-title" href="{s}/index.html" data-l="{s}">{esc(title)}</a>
+    <span class="ax-done" title="เคยเปิดบทนี้แล้ว">✓</span>
+  </div>
+  <p class="ax-topics">{esc(" · ".join(shown))}</p>
+  <ul class="ax-hits"></ul>
+  <div class="ax-actions">{btns}</div>
+  {anim_row}
+</li>"""
+        data.append({"s": s, "f": " ".join([les["label"], les["title"]] + [t for _, t in topics]
+                                         + [a["title"] for a in les["anims"]]).lower(),
+                     "toc": [[a, t] for a, t in topics]})
+    n_os = sum(1 for l in lessons if l["label"].startswith("Lecture"))
+    sections = "".join(
+        f'<section class="ax-group" data-g="{g}"><div class="ax-ghead"><span class="ax-gicon">{ic}</span>'
+        f'<div><h2>{h}</h2><p>{esc(sub)}</p></div></div><ol class="ax-grid">{cards[g]}</ol></section>'
+        for g, ic, h, sub in groups if cards[g])
+    return f"""
+<main class="wrap ax-wrap">
+  <div class="crumbs"><a href="../index.html">หน้าแรก</a> / {esc(subj['code'])}</div>
+  <section class="subject-hero">
+    <div class="big-icon">{subj['icon']}</div>
+    <div>
+      <div class="code">{esc(subj['code'])}</div>
+      <h1>{esc(subj['name'])}</h1>
+      <p>{esc(subj['th'])}</p>
+      <div class="ax-stats"><span>📖 {len(lessons)} บท</span><span>📝 {nq} แบบทดสอบ</span><span>🎬 {n_anim} แอนิเมชัน</span></div>
+    </div>
+  </section>
+  <a class="ax-continue" id="axContinue" hidden><span class="ax-play">▶</span><span><small>อ่านต่อจากครั้งก่อน</small><strong id="axContTitle"></strong></span></a>
+  <div class="ax-tools">
+    <div class="ax-search"><span>🔍</span><input id="axQ" type="search" placeholder="ค้นหาหัวข้อ เช่น cache, RAID, fork, IEEE 754…" autocomplete="off"><kbd>/</kbd></div>
+    <div class="ax-tabs" role="tablist">
+      <button class="on" data-f="all">ทั้งหมด <b>{len(lessons)}</b></button>
+      <button data-f="arch">🖥️ Architecture <b>{len(lessons) - n_os}</b></button>
+      <button data-f="os">⚙️ OS <b>{n_os}</b></button>
+    </div>
+  </div>
+  <div class="ax-legend"><span><i class="ax-dot p"></i>อ่านเต็ม = ฉบับละเอียด มีรูปสไลด์</span><span><i class="ax-dot"></i>สรุปสั้น = ทบทวนก่อนสอบ</span><span><i class="ax-dot q"></i>Quiz = ทดสอบ 4 ตัวเลือก</span></div>
+  {sections}
+  <p class="ax-empty" id="axEmpty" hidden>ไม่พบบทที่ตรงกับคำค้น — ลองคำอื่น เช่น "cache" หรือ "process"</p>
+</main>
+<script>window.ARCH = {json.dumps(data, ensure_ascii=False)};window.ARCH_KEY = {json.dumps(ARCH_KEY)};</script>
+<script src="../assets/arch.js"></script>"""
+
+
 def build():
     if OUT.exists():
         for p in OUT.iterdir():  # keep compressed images cache in place
@@ -339,8 +431,12 @@ def build():
       {pager}
     </main>
   </div>"""
+              track = (arch_track_script(les["slug"], f'{les["slug"]}/{page_name}',
+                                         ("⚡ สรุปสั้น · " if is_short else "📖 ") + les["title"])
+                       if subj["slug"] == "architecture" else "")
               (ldir / page_name).write_text(
-                  page(f"{'สรุปสั้น · ' if is_short else ''}{les['title']} · {subj['code']}", content, 2, subj["accent"]), encoding="utf-8")
+                  page(f"{'สรุปสั้น · ' if is_short else ''}{les['title']} · {subj['code']}", content, 2, subj["accent"], track), encoding="utf-8")
+            les["toc"] = full_toc
 
             for key, out_name in (("quiz", "quiz.html"), ("quiz2", "quiz2.html"), ("quiz3", "quiz3.html")):
                 if not les[key]:
@@ -427,7 +523,10 @@ def build():
                      f'<span>{esc(les["title"])}</span></a>'
                      f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
         nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons) + sum(1 + qp["quiz2"] for qp in quizpages)
-        sbody = f"""
+        if subj["slug"] == "architecture":
+            sbody = arch_subject_page(subj, lessons, nq)
+        else:
+            sbody = f"""
 <main class="wrap">
   <div class="crumbs"><a href="../index.html">หน้าแรก</a> / {esc(subj['code'])}</div>
   <section class="subject-hero">
