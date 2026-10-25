@@ -1,0 +1,361 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Disk Access Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.dk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center}
+#disk{width:100%;max-width:440px;height:auto;display:block;margin:0 auto}
+#plat{transform-origin:200px 200px;transition:transform 1.4s cubic-bezier(.4,0,.2,1)}
+#arm{transform-origin:385px 385px;transition:transform 1.1s cubic-bezier(.5,0,.3,1)}
+.ph{display:flex;flex-direction:column;gap:6px}
+.phx{border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-size:14px;transition:all .3s}
+.phx b{display:block;font-size:15px}
+.phx.on{border-color:var(--accent);background:var(--accent-soft)}
+.phx.done{opacity:.6}
+.inp{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0;font-size:15px}
+.inp label{display:flex;gap:6px;align-items:center}
+.bars{margin:10px 0}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:14px}
+.bar .lab{width:150px;flex:none}
+.bar .trk{flex:1;background:var(--slot);border-radius:6px;height:24px;position:relative;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px;transition:width .6s}
+.bar .v{width:110px;text-align:right;font-family:"JetBrains Mono",monospace;flex:none}
+.calc{font-family:"JetBrains Mono",monospace;font-size:15px;background:var(--code);padding:8px 12px;border-radius:8px;overflow-x:auto}
+.z2{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center}
+.z2 svg{width:100%;max-width:280px;height:auto}
+@media (max-width:720px){.dk{grid-template-columns:1fr}.z2{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>Disk: Seek · Rotational delay · Transfer</h1>
+<p class="lead">Chapter 06 — External Memory (+ ตัวอย่างคำนวณจาก Chapter 04) · ดูหัวอ่านเลื่อนหา track แล้วรอ sector หมุนมา</p>
+<ul class="toc"><li><a href="#s1">1. การอ่าน 1 sector</a></li><li><a href="#s2">2. คำนวณเวลา</a></li><li><a href="#s3">3. CAV vs Multiple zone</a></li></ul>
+
+<h2 id="s1">1. การอ่าน 1 sector</h2>
+<div class="card">
+<div id="cases"></div>
+<div class="cap" id="cap"></div>
+<div class="dk">
+  <svg id="disk" viewBox="0 0 440 420"></svg>
+  <div class="ph" id="ph"></div>
+</div>
+<div id="player"></div>
+<p class="tip">💡 <b>Access time = seek + rotational delay</b> (ยังไม่รวม transfer) · ลำดับเต็ม: wait for device → wait for channel → seek → rotational delay → data transfer (device busy นับตั้งแต่ wait for channel)</p>
+</div>
+
+<h2 id="s2">2. คำนวณเวลาอ่าน 1 sector (ตัวอย่าง Chapter 04)</h2>
+<div class="card">
+<div class="inp">
+  <label>sector <input id="sz" type="number" value="512" style="width:80px"> B</label>
+  <label>rpm <input id="rpm" type="number" value="15000" style="width:90px"></label>
+  <label>avg seek <input id="sk" type="number" value="4" step="0.5" style="width:70px"> ms</label>
+  <label>transfer rate <input id="tr" type="number" value="100" style="width:70px"> MB/s</label>
+  <label>controller <input id="ct" type="number" value="0.2" step="0.1" style="width:70px"> ms</label>
+</div>
+<div class="bars" id="bars"></div>
+<div class="calc" id="calc"></div>
+<p class="note">ค่าในสไลด์: 4 + ½ / (15000/60) + 512B / 100MB/s + 0.2 = 4 + 2 + 0.005 + 0.2 = <b>6.2 ms</b> · ถ้า seek จริงแค่ 1 ms (ค่า seek ของผู้ผลิตคิดจากทุกแบบที่เป็นไปได้ ของจริงมักน้อยกว่า) → <b>3.2 ms</b> · rotational delay เฉลี่ย = รอครึ่งรอบ</p>
+</div>
+
+<h2 id="s3">3. CAV vs Multiple zone recording</h2>
+<div class="card">
+<div class="z2">
+  <div><svg id="zA" viewBox="0 0 260 260"></svg><b>CAV (constant angular velocity)</b><p class="kbd">ทุก track มี sector เท่ากัน → วงในอัดแน่น วงนอกห่าง (ความหนาแน่นไม่สม่ำเสมอ) · ระบบง่าย แต่ความจุต่ำกว่า</p></div>
+  <div><svg id="zB" viewBox="0 0 260 260"></svg><b>Multiple zone recording</b><p class="kbd">แบ่งเป็นโซน วงนอกมี sector มากกว่า → ความหนาแน่นใกล้เคียงกันทุกโซน ความจุสูงกว่า แต่ซับซ้อน (หลาย data rate) · HDD ปัจจุบันส่วนใหญ่ใช้แบบนี้</p></div>
+</div>
+</div>
+</main>
+<script>
+// ===== disk drawing =====
+const CX = 200, CY = 200, NT = 6, NS = 12; // tracks, sectors (CAV for the animation)
+const rT = t => 60 + t * 22; // track radius (t=0 inner)
+function sectorPath(t, s, n = NS, r0 = rT(t) - 10, r1 = rT(t) + 10) {
+  const a0 = (s / n) * 2 * Math.PI - Math.PI / 2, a1 = ((s + 1) / n) * 2 * Math.PI - Math.PI / 2;
+  const p = (r, a) => `${CX + r * Math.cos(a)},${CY + r * Math.sin(a)}`;
+  return `M${p(r0, a0)} L${p(r1, a0)} A${r1},${r1} 0 0 1 ${p(r1, a1)} L${p(r0, a1)} A${r0},${r0} 0 0 0 ${p(r0, a0)}Z`;
+}
+// arm pivots at (385,385); head angle so that head sits on track t at the top-right of the platter
+const armLen = 300;
+function armAngleFor(t) {
+  // find angle where distance from pivot to platter point at radius rT(t) equals armLen
+  const r = rT(t), d = Math.hypot(385 - CX, 385 - CY);
+  const cosB = (armLen * armLen + d * d - r * r) / (2 * armLen * d);
+  const base = Math.atan2(CY - 385, CX - 385);
+  return (base + Math.acos(Math.max(-1, Math.min(1, cosB)))) * 180 / Math.PI;
+}
+function headPoint(t) { const a = armAngleFor(t) * Math.PI / 180; return [385 + armLen * Math.cos(a), 385 + armLen * Math.sin(a)]; }
+function headSectorAngle(t) { const [x, y] = headPoint(t); return Math.atan2(y - CY, x - CX) * 180 / Math.PI; }
+const SC = [
+  { name: "อ่าน track 4 · sector 9", from: 1, t: 4, s: 9 },
+  { name: "อ่าน track 2 · sector 3", from: 4, t: 2, s: 3 },
+  { name: "track เดิม (ไม่ต้อง seek)", from: 3, t: 3, s: 6 },
+];
+let cur, ROT = 0;
+const cases = Cases($("#cases"), SC.map(s => s.name), k => { cur = SC[k]; player.reset(); });
+function drawDisk() {
+  let s = `<g id="plat">`;
+  s += `<circle cx="${CX}" cy="${CY}" r="${rT(NT - 1) + 16}" fill="var(--slot)" stroke="var(--muted)"/>`;
+  for (let t = 0; t < NT; t++) for (let k = 0; k < NS; k++) {
+    const target = cur && t === cur.t && k === cur.s;
+    s += `<path d="${sectorPath(t, k)}" fill="${target ? "var(--wait)" : "var(--card)"}" stroke="var(--line)" stroke-width="1"/>`;
+  }
+  s += `<circle cx="${CX}" cy="${CY}" r="34" fill="var(--muted)"/><text x="${CX}" y="${CY + 4}" text-anchor="middle" font-size="11" fill="var(--bg)">spindle</text>`;
+  s += `<line x1="${CX}" y1="${CY - 34}" x2="${CX}" y2="${CY - rT(NT - 1) - 16}" stroke="var(--bad)" stroke-width="2" opacity=".5"/></g>`;
+  s += `<g id="arm"><line x1="385" y1="385" x2="${385 + armLen}" y2="385" stroke="var(--ink)" stroke-width="7" stroke-linecap="round"/><rect x="${385 + armLen - 10}" y="377" width="20" height="16" rx="3" fill="var(--accent)"/></g>`;
+  s += `<circle cx="385" cy="385" r="14" fill="var(--ink)"/>`;
+  s += `<text x="10" y="412" font-size="12" fill="var(--muted)">มองจากด้านบน · ส้ม = sector ที่ต้องการ</text>`;
+  $("#disk").innerHTML = s;
+}
+const PH = [["seek", "Seek", "เลื่อนแขน (arm) ให้หัวอ่านไปอยู่บน track ที่ต้องการ"], ["rot", "Rotational delay", "รอให้ sector ที่ต้องการหมุนมาถึงใต้หัวอ่าน"], ["xfer", "Data transfer", "sector วิ่งผ่านใต้หัว → อ่าน/เขียนข้อมูล"]];
+function setArm(t) { $("#arm").style.transform = `rotate(${armAngleFor(t)}deg)`; }
+function setRot(deg) { ROT = deg; $("#plat").style.transform = `rotate(${deg}deg)`; }
+function rotToBring(t, s, extra = 0) {
+  // platter rotation so that the middle (or end, extra=1) of sector s is under the head
+  const secMid = ((s + 0.5 + extra * 0.5) / NS) * 360 - 90;
+  let need = headSectorAngle(t) - secMid;
+  need = ((need % 360) + 360) % 360;
+  return need;
+}
+function show(i) {
+  drawDisk();
+  const plat = $("#plat"), arm = $("#arm");
+  plat.style.transition = "none"; arm.style.transition = "none";
+  // compute state for steps: 0 start, 1 seek, 2 rotational, 3 transfer, 4 done
+  const base = 40; // initial rotation so the target is away from the head
+  const states = [
+    { arm: cur.from, rot: base },
+    { arm: cur.t, rot: base + 40 },
+    { arm: cur.t, rot: base + 40 + (((rotToBring(cur.t, cur.s, 1) - (base + 40)) % 360) + 360) % 360 },
+  ];
+  states.push({ arm: cur.t, rot: states[2].rot + 360 / NS });
+  states.push(states[3]);
+  const prev = states[Math.max(0, i - 1)], st = states[i];
+  setArm(prev.arm); setRot(prev.rot);
+  void plat.getBoundingClientRect();
+  plat.style.transition = ""; arm.style.transition = "";
+  if (i === 3) plat.style.transition = "transform .9s linear";
+  requestAnimationFrame(() => { setArm(st.arm); setRot(st.rot); });
+  const phase = ["", "seek", "rot", "xfer", "done"][i];
+  $("#ph").innerHTML = PH.map(([id, n, d], k) => `<div class="phx ${id === phase ? "on" : ["seek", "rot", "xfer", "done"].indexOf(phase) > k ? "done" : ""}"><b>${k + 1}. ${n}</b>${d}</div>`).join("");
+  const caps = [
+    `หัวอ่านอยู่ที่ track ${cur.from} · ต้องการ track ${cur.t}, sector ${cur.s}`,
+    cur.from === cur.t ? `หัวอ่านอยู่บน track ${cur.t} แล้ว → seek time ≈ 0 (ไม่ต้องเลื่อนแขน) — platter หมุนตลอดเวลา` : `<b>Seek</b>: แขนเลื่อนจาก track ${cur.from} ไป track ${cur.t} (platter หมุนอยู่ตลอดเวลา)`,
+    `<b>Rotational delay</b>: รอ sector ${cur.s} หมุนมาถึงใต้หัว — เฉลี่ยรอครึ่งรอบ`,
+    `<b>Data transfer</b>: sector ${cur.s} วิ่งผ่านใต้หัวอ่าน → อ่านข้อมูล`,
+    `เสร็จ — <b>access time = seek + rotational delay</b> · เวลาทั้งหมด = access time + transfer time`,
+  ];
+  $("#cap").innerHTML = caps[i]; $("#cap").className = "cap" + (i === 4 ? " good" : "");
+}
+const player = Player($("#player"), { count: () => 5, show, delay: 1900 });
+LABS.push({ name: "disk", cases, player });
+cases.pick(0);
+// ===== 2. calc =====
+function calc() {
+  const sz = +$("#sz").value || 512, rpm = +$("#rpm").value || 15000, sk = +$("#sk").value || 0, tr = +$("#tr").value || 100, ct = +$("#ct").value || 0;
+  const rot = 0.5 / (rpm / 60) * 1000, xf = sz / (tr * 1e6) * 1000, tot = sk + rot + xf + ct;
+  const parts = [["Seek", sk, "var(--c1)"], ["Rotational delay", rot, "var(--c3)"], ["Transfer", xf, "var(--c5)"], ["Controller", ct, "var(--c2)"]];
+  $("#bars").innerHTML = parts.map(([n, v, c]) => `<div class="bar"><span class="lab">${n}</span><span class="trk"><span class="fill" style="display:block;width:${Math.max(0.6, v / tot * 100)}%;background:${c}"></span></span><span class="v">${fmt(v, 3)} ms</span></div>`).join("");
+  $("#calc").innerHTML = `rotational = ½ รอบ / (${rpm}/60 รอบต่อวินาที) = ${fmt(rot, 3)} ms<br>transfer = ${sz} B / ${tr} MB/s = ${fmt(xf, 4)} ms<br><b>รวม = ${sk} + ${fmt(rot, 3)} + ${fmt(xf, 4)} + ${ct} = ${fmt(tot, 3)} ms</b>`;
+}
+["sz", "rpm", "sk", "tr", "ct"].forEach(id => $("#" + id).oninput = calc); calc();
+// ===== 3. zones =====
+function zone(el, zoneMode) {
+  const c = 130; let s = `<circle cx="${c}" cy="${c}" r="118" fill="var(--slot)" stroke="var(--muted)"/>`;
+  for (let t = 0; t < 5; t++) {
+    const r0 = 40 + t * 16, r1 = r0 + 14;
+    const n = zoneMode ? [8, 8, 12, 12, 16][t] : 8;
+    for (let k = 0; k < n; k++) {
+      const a0 = k / n * 2 * Math.PI, a1 = (k + 1) / n * 2 * Math.PI - 0.06;
+      const p = (r, a) => `${c + r * Math.cos(a)},${c + r * Math.sin(a)}`;
+      s += `<path d="M${p(r0, a0)} L${p(r1, a0)} A${r1},${r1} 0 0 1 ${p(r1, a1)} L${p(r0, a1)} A${r0},${r0} 0 0 0 ${p(r0, a0)}Z" fill="${zoneMode ? ["var(--c1s)", "var(--c1s)", "var(--c3s)", "var(--c3s)", "var(--c2s)"][t] : "var(--c1s)"}" stroke="var(--line)"/>`;
+    }
+  }
+  s += `<circle cx="${c}" cy="${c}" r="24" fill="var(--muted)"/>`;
+  el.innerHTML = s;
+}
+zone($("#zA"), false); zone($("#zB"), true);
+</script>
+
+</body></html>

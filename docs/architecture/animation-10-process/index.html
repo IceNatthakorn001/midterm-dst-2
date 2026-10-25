@@ -1,0 +1,489 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Process Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.p0{--pc:var(--c1);--ps:var(--c1s)} .p1{--pc:var(--c3);--ps:var(--c3s)} .p2{--pc:var(--c2);--ps:var(--c2s)}
+.sd{position:relative;max-width:640px;margin:0 auto}
+.sd svg{width:100%;height:auto;display:block}
+.tok{position:absolute;transform:translate(-50%,-50%);padding:3px 10px;border-radius:99px;font-weight:700;font-size:14px;background:var(--ps);border:2px solid var(--pc);color:var(--pc);
+  transition:left .8s cubic-bezier(.5,0,.3,1),top .8s cubic-bezier(.5,0,.3,1),opacity .4s;white-space:nowrap;z-index:2}
+.tok.gone{opacity:.25}
+.ttab td,.ttab th{text-align:center;padding:3px 6px;font-size:14px}
+.ttab td.Running{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.ttab td.Ready{background:var(--accent-soft);color:var(--accent)}
+.ttab td.Blocked{background:var(--wait-soft);color:var(--wait)}
+.ttab tr.now td{outline:2px solid var(--bad);outline-offset:-2px}
+.ttab tr.future td{opacity:.2}
+/* context switch */
+.cs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.col{border:1.5px solid var(--line);border-radius:12px;padding:8px;background:var(--slot);min-height:120px}
+.col h4{margin:0 0 6px;font-size:14px}
+.col .act{font-size:14px;padding:6px 8px;border-radius:8px;background:var(--card);border:1px solid var(--line);margin:4px 0}
+.col .act.hot{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.col .act.old{opacity:.45}
+.mem{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+.mbox{border:2px solid var(--line);border-radius:10px;padding:6px;text-align:center;background:var(--card);min-height:66px;font-size:13px;transition:border-color .3s,background .3s}
+.mbox b{display:block;font-size:13px;margin-bottom:4px}
+.mbox.hot{border-color:var(--accent);background:var(--accent-soft)}
+.val{display:inline-block;padding:1px 8px;border-radius:7px;font-weight:700;font-family:"JetBrains Mono",monospace;font-size:13px}
+.val.A{background:var(--c1s);color:var(--c1);border:1.5px solid var(--c1)} .val.B{background:var(--c3s);color:var(--c3);border:1.5px solid var(--c3)}
+.fly{position:absolute;z-index:5;pointer-events:none;transition:left .85s cubic-bezier(.5,0,.3,1),top .85s cubic-bezier(.5,0,.3,1)}
+.mode{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:14px}
+.mode.user{background:var(--ok-soft);color:var(--ok)} .mode.kernel{background:var(--bad-soft);color:var(--bad)}
+/* fork */
+.fk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.proc{border:2px solid var(--pc);border-radius:12px;padding:8px 10px;background:var(--card);transition:opacity .4s}
+.proc.off{opacity:.15}
+.proc h4{margin:0 0 4px;color:var(--pc);font-size:15px}
+.proc .meta{font-size:13px;color:var(--muted);margin-bottom:4px}
+pre.src{margin:0;font-size:12.5px;line-height:1.55;background:var(--code);border-radius:8px;padding:6px 0;overflow-x:auto}
+pre.src span{display:block;padding:0 10px}
+pre.src span.pc{background:var(--wait-soft);box-shadow:inset 3px 0 0 var(--wait)}
+.console{background:#111;color:#d6f5d6;font-family:"JetBrains Mono",monospace;font-size:13px;border-radius:8px;padding:8px 12px;min-height:110px;margin-top:10px;white-space:pre-wrap}
+.console .new{color:#fff;font-weight:700}
+.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;margin-left:6px;font-weight:600}
+.badge.run{background:var(--ok-soft);color:var(--ok)} .badge.blk{background:var(--wait-soft);color:var(--wait)} .badge.end{background:var(--slot);color:var(--muted)}
+/* syscall */
+.sc{display:grid;grid-template-columns:1fr;gap:6px}
+.lane{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:56px}
+.lane h4{margin:0 8px 0 0;font-size:14px;width:110px}
+.lane.user{background:var(--ok-soft)} .lane.kern{background:var(--bad-soft)}
+.stp{font-size:13px;padding:4px 9px;border-radius:8px;background:var(--card);border:1px solid var(--line);opacity:.25;transition:opacity .3s}
+.stp.done{opacity:.7} .stp.hot{opacity:1;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);font-weight:600}
+@media (max-width:640px){.cs{grid-template-columns:minmax(0,1fr)}.mem{grid-template-columns:repeat(3,minmax(0,1fr))}.fk{grid-template-columns:minmax(0,1fr)}}
+</style>
+<main>
+<h1>Process: States · Context Switch · fork() · System call</h1>
+<p class="lead">Lecture 2 — Process · กด ▶ เล่น หรือ ถัดไป ในแต่ละหัวข้อ</p>
+<ul class="toc"><li><a href="#s1">1. Process states</a></li><li><a href="#s2">2. Context switch</a></li><li><a href="#s3">3. fork() / wait()</a></li><li><a href="#s4">4. System call (trap)</a></li></ul>
+
+<h2 id="s1">1. Process states</h2>
+<div class="card">
+<div id="stCases"></div>
+<div class="cap" id="stCap"></div>
+<div class="sd" id="sd"><svg viewBox="0 0 640 300" id="sdSvg"></svg></div>
+<div class="tw"><table class="ttab" id="ttab"></table></div>
+<div id="stPlayer"></div>
+</div>
+<p class="tip">⚠️ Blocked → <b>Ready</b> เมื่อ I/O เสร็จ (ไม่ได้กลับไป Running ทันที ต้องรอ scheduler เลือกอีกครั้ง)</p>
+
+<h2 id="s2">2. Context switch (timer interrupt)</h2>
+<div class="card">
+<p class="desc">OS ได้ CPU คืนเมื่อ process yield, ถูก block, รอ child, จบ — แต่ถ้า process <b>วนลูปไม่รู้จบ</b>? → <b>timer interrupt</b> ทุกไม่กี่ ms (สไลด์ 39–41)</p>
+<div class="cap" id="csCap"></div>
+<div style="margin:4px 0 8px">โหมด CPU: <span class="mode user" id="csMode">user mode</span></div>
+<div class="mem" id="csMem"></div>
+<div class="cs" id="cs"></div>
+<div id="csPlayer"></div>
+</div>
+<p class="tip">💡 save registers <b>2 ครั้ง</b>: hardware save ลง <b>kernel stack</b> ตอน interrupt · OS save ลง <b>proc_t (PCB)</b> ตอนเรียก switch()</p>
+
+<h2 id="s3">3. fork() / wait()</h2>
+<div class="card">
+<p class="desc">โค้ดตัวอย่างสไลด์ 23 · child เริ่มเป็น<b>สำเนา</b>ของ parent ทุกอย่าง (มี address space + PCB ของตัวเอง) · fork() คืน <b>PID ของ child ให้ parent</b> และ <b>0 ให้ child</b></p>
+<div class="cap" id="fkCap"></div>
+<div class="fk" id="fk"></div>
+<div class="console" id="console"></div>
+<div id="fkPlayer"></div>
+</div>
+
+<h2 id="s4">4. System call: read() กับ trap</h2>
+<div class="card">
+<p class="desc">user mode ทำ privileged operation เองไม่ได้ → เรียก <b>system call</b> ซึ่งใช้ <b>trap</b> สลับเข้า kernel mode (สไลด์ 33–36)</p>
+<div class="cap" id="scCap"></div>
+<div class="sc" id="sc"></div>
+<div id="scPlayer"></div>
+</div>
+</main>
+<script>
+// ===== 1. states =====
+(function () {
+  const N = { Running: [130, 70], Ready: [510, 70], Blocked: [320, 240] };
+  const svg = $("#sdSvg");
+  const arrows = {
+    sch: { d: "M445,58 C380,20 260,20 195,58", lab: "Scheduled", lx: 320, ly: 26 },
+    des: { d: "M195,86 C260,124 380,124 445,86", lab: "Descheduled", lx: 320, ly: 128 },
+    io: { d: "M150,104 C175,170 220,215 255,232", lab: "I/O: initiate", lx: 150, ly: 190 },
+    done: { d: "M385,232 C420,215 465,170 490,104", lab: "I/O: done", lx: 495, ly: 190 },
+  };
+  function drawSvg(hot) {
+    let s = `<defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="context-stroke"/></marker></defs>`;
+    for (const k in arrows) {
+      const a = arrows[k], on = hot === k;
+      s += `<path d="${a.d}" fill="none" stroke="${on ? "var(--bad)" : "var(--muted)"}" stroke-width="${on ? 4 : 2}" marker-end="url(#sa)"/>`;
+      s += `<text x="${a.lx}" y="${a.ly}" text-anchor="middle" font-size="14" font-weight="${on ? 700 : 400}" fill="${on ? "var(--bad)" : "var(--muted)"}">${a.lab}</text>`;
+    }
+    for (const n in N) {
+      const [x, y] = N[n];
+      s += `<ellipse cx="${x}" cy="${y}" rx="68" ry="34" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>`;
+      s += `<text x="${x}" y="${y - 40}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">${n}</text>`;
+    }
+    svg.innerHTML = s;
+  }
+  const SCN = [
+    { name: "ตัวอย่างสไลด์ 15 (2 process)", procs: ["Process₀", "Process₁"],
+      rows: [["Running", "Ready"], ["Running", "Ready"], ["Running", "Ready", "Process₀ initiates I/O"], ["Blocked", "Running", "Process₀ is blocked, so Process₁ runs"], ["Blocked", "Running"], ["Blocked", "Running"],
+        ["Ready", "Running", "I/O done"], ["Ready", "Running", "Process₁ now done"], ["Running", "–"], ["Running", "–"]] },
+    { name: "มี timer (descheduled) — ตัวอย่างสมมติ", procs: ["P0", "P1", "P2"],
+      rows: [["Running", "Ready", "Ready"], ["Ready", "Running", "Ready", "timer interrupt → OS deschedule P0, schedule P1"], ["Ready", "Blocked", "Running", "P1 ขอ I/O → blocked, OS เลือก P2"],
+        ["Running", "Blocked", "Ready", "timer → P2 descheduled, P0 scheduled"], ["Running", "Ready", "Ready", "I/O ของ P1 เสร็จ → P1 ไป Ready (ยังไม่ได้รันทันที)"], ["Ready", "Running", "Ready", "timer → P0 descheduled, P1 scheduled"]] },
+  ];
+  let sc;
+  const box = $("#sd");
+  const toks = [];
+  const cases = Cases($("#stCases"), SCN.map(s => s.name), k => {
+    sc = SCN[k];
+    toks.forEach(t => t.remove()); toks.length = 0;
+    sc.procs.forEach((p, i) => { const t = h("div", { class: "tok p" + i }, p); box.append(t); toks.push(t); });
+    let tb = `<tr><th>Time</th>${sc.procs.map(p => `<th>${p}</th>`).join("")}<th>Notes</th></tr>`;
+    sc.rows.forEach((r, i) => tb += `<tr data-i="${i}"><td>${i + 1}</td>${sc.procs.map((_, j) => `<td class="${r[j]}">${r[j]}</td>`).join("")}<td style="text-align:left">${r[sc.procs.length] || ""}</td></tr>`);
+    $("#ttab").innerHTML = tb;
+    p.reset();
+  });
+  function trans(a, b) {
+    if (a === "Ready" && b === "Running") return "sch"; if (a === "Running" && b === "Ready") return "des";
+    if (a === "Running" && b === "Blocked") return "io"; if (a === "Blocked" && b === "Ready") return "done"; return null;
+  }
+  function show(i) {
+    const r = sc.rows[i], prev = i > 0 ? sc.rows[i - 1] : null;
+    let hot = null, msgs = [];
+    sc.procs.forEach((pn, j) => {
+      const st = r[j], tk = toks[j];
+      if (st === "–") { tk.classList.add("gone"); } else tk.classList.remove("gone");
+      const where = N[st] || N[prev ? prev[j] : "Running"] || N.Running;
+      const same = sc.procs.map((_, q) => q).filter(q => q < j && r[q] === st).length;
+      tk.style.left = (where[0] / 640 * 100) + "%";
+      tk.style.top = ((where[1] + 4 + same * 26 - (st === "Running" || st === "Ready" || st === "Blocked" ? 0 : 0)) / 300 * 100) + "%";
+      if (prev && prev[j] !== st) { const tr = trans(prev[j], st); if (tr) { hot = tr; msgs.push(`<b>${pn}</b>: ${prev[j]} → ${st} (${arrows[tr].lab})`); } else if (st === "–") msgs.push(`<b>${pn}</b> จบการทำงาน`); }
+    });
+    drawSvg(hot);
+    $$("#ttab tr[data-i]").forEach(tr => { const k = +tr.dataset.i; tr.className = k === i ? "now" : k > i ? "future" : ""; });
+    const note = r[sc.procs.length];
+    $("#stCap").innerHTML = `Time ${i + 1}${note ? " — " + note : ""}` + `<small>${msgs.join(" · ") || "ไม่มีการเปลี่ยนสถานะ"}</small>`;
+    $("#stCap").className = "cap" + (hot === "io" ? " warn" : hot === "done" ? " good" : "");
+  }
+  const p = Player($("#stPlayer"), { count: () => sc ? sc.rows.length : 1, show, delay: 1500 });
+  LABS.push({ name: "states", cases, player: p });
+  cases.pick(0);
+})();
+
+// ===== shared: flying chip =====
+function fly(container, fromEl, toEl, html) {
+  if (!fromEl || !toEl) return;
+  const c = container.getBoundingClientRect(), a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const f = h("div", { class: "fly", html });
+  container.append(f);
+  f.style.left = (a.left - c.left + a.width / 2 - 30) + "px"; f.style.top = (a.top - c.top + a.height / 2 - 10) + "px";
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.left = (b.left - c.left + b.width / 2 - 30) + "px"; f.style.top = (b.top - c.top + b.height / 2 - 10) + "px"; }));
+  setTimeout(() => f.remove(), 950);
+}
+
+// ===== 2. context switch =====
+(function () {
+  const MEM = [["cpu", "CPU registers"], ["ksA", "k-stack(A)"], ["ptA", "proc_t(A)"], ["ptB", "proc_t(B)"], ["ksB", "k-stack(B)"]];
+  $("#csMem").innerHTML = MEM.map(([id, nm]) => `<div class="mbox" id="m-${id}"><b>${nm}</b><div class="v"></div></div>`).join("");
+  $("#cs").innerHTML = `<div class="col"><h4>OS @ kernel mode</h4><div id="c-os"></div></div><div class="col"><h4>Hardware</h4><div id="c-hw"></div></div><div class="col"><h4>Program @ user mode</h4><div id="c-us"></div></div>`;
+  // state per step: mem contents, mode, actions
+  const V = { A: '<span class="val A">regs(A)</span>', B: '<span class="val B">regs(B)</span>' };
+  const S = [
+    { col: "os", t: "<b>@ boot:</b> initialize trap table", hw: null, cap: "ตอน boot OS ตั้ง trap table บอก hardware ว่า interrupt/system call แต่ละแบบต้องไปรันโค้ดไหน", mem: { ptB: "B" }, mode: "kernel" },
+    { col: "hw", t: "remember addresses of syscall handler, timer handler", cap: "hardware จำที่อยู่ของ handler ไว้", mem: { ptB: "B" }, mode: "kernel" },
+    { col: "os", t: "start interrupt timer", cap: "OS เริ่ม timer", mem: { ptB: "B" }, mode: "kernel" },
+    { col: "hw", t: "start timer — interrupt CPU in X ms", cap: "timer จะ interrupt CPU ทุก X ms", mem: { ptB: "B" }, mode: "kernel" },
+    { col: "us", t: "<b>Process A</b> … กำลังรัน", cap: "Process A รันใน user mode — registers ของ CPU เป็นของ A (ส่วน B ถูกเก็บไว้ใน proc_t(B) ตั้งแต่ครั้งก่อน)", mem: { cpu: "A", ptB: "B" }, mode: "user" },
+    { col: "hw", t: "<b>timer interrupt</b>: save regs(A) → k-stack(A)", cap: "ครบเวลา → timer interrupt: <b>hardware</b> เซฟ registers ของ A ลง kernel stack ของ A", mem: { cpu: "A", ksA: "A", ptB: "B" }, mode: "user", fly: ["cpu", "ksA", "A"] },
+    { col: "hw", t: "move to kernel mode, jump to trap handler", cap: "สลับเป็น <b>kernel mode</b> แล้วกระโดดไป trap handler ของ OS", mem: { cpu: "A", ksA: "A", ptB: "B" }, mode: "kernel" },
+    { col: "os", t: "Handle the trap → call <b>switch()</b>: save regs(A) → proc_t(A)", cap: "OS ตัดสินใจสลับไป B → <b>switch()</b> เซฟ registers ของ A ลง <b>proc_t(A)</b> (PCB)", mem: { cpu: "A", ksA: "A", ptA: "A", ptB: "B" }, mode: "kernel", fly: ["cpu", "ptA", "A"] },
+    { col: "os", t: "restore regs(B) ← proc_t(B)", cap: "โหลด registers ของ B จาก proc_t(B) เข้า CPU", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B" }, mode: "kernel", fly: ["ptB", "cpu", "B"] },
+    { col: "os", t: "switch to k-stack(B)", cap: "เปลี่ยนไปใช้ kernel stack ของ B (ซึ่งมี registers ของ B ที่ hardware เซฟไว้ตอน B ถูก interrupt ครั้งก่อน)", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B", ksB: "B" }, mode: "kernel" },
+    { col: "os", t: "<b>return-from-trap</b> (into B)", cap: "OS สั่ง return-from-trap — แต่ตอนนี้จะกลับเข้า <b>B</b> แทน A", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B", ksB: "B" }, mode: "kernel" },
+    { col: "hw", t: "restore regs(B) ← k-stack(B)", cap: "hardware คืนค่า registers ของ B จาก k-stack(B)", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B" }, mode: "kernel", fly: ["ksB", "cpu", "B"] },
+    { col: "hw", t: "move to user mode, jump to B's PC", cap: "สลับกลับเป็น <b>user mode</b> แล้วกระโดดไปที่ PC ของ B", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B" }, mode: "user" },
+    { col: "us", t: "<b>Process B</b> … กำลังรัน", cap: "Process B รันต่อจากจุดที่ค้างไว้ — context switch เสร็จ (A ถูกเก็บไว้ใน proc_t(A) รอรอบหน้า)", mem: { cpu: "B", ksA: "A", ptA: "A", ptB: "B" }, mode: "user", good: true },
+  ];
+  let last = -1;
+  function show(i) {
+    const st = S[i];
+    const cols = { os: [], hw: [], us: [] };
+    S.slice(0, i + 1).forEach((s, k) => cols[s.col].push(`<div class="act ${k === i ? "hot fade-in" : "old"}">${s.t}</div>`));
+    $("#c-os").innerHTML = cols.os.join(""); $("#c-hw").innerHTML = cols.hw.join(""); $("#c-us").innerHTML = cols.us.join("");
+    const mem = { ...st.mem }; if (i < 11) mem.ksB = "B"; // B was interrupted earlier, its regs wait on k-stack(B)
+    MEM.forEach(([id]) => { const el = $("#m-" + id); $(".v", el).innerHTML = mem[id] ? V[mem[id]] : '<span class="kbd">—</span>'; el.classList.toggle("hot", !!(st.fly && (st.fly[0] === id || st.fly[1] === id))); });
+    const m = $("#csMode"); m.className = "mode " + st.mode; m.textContent = st.mode + " mode";
+    $("#csCap").innerHTML = st.cap; $("#csCap").className = "cap" + (st.good ? " good" : st.fly ? " warn" : "");
+    if (st.fly && i === last + 1) fly($("#csMem"), $("#m-" + st.fly[0]), $("#m-" + st.fly[1]), V[st.fly[2]]);
+    last = i;
+  }
+  $("#csMem").style.position = "relative";
+  const p = Player($("#csPlayer"), { count: () => S.length, show, delay: 1700 });
+  LABS.push({ name: "cs", cases: null, player: p });
+  p.go(0);
+})();
+
+// ===== 3. fork =====
+(function () {
+  const SRC = [
+    "x = getpid();",
+    'printf(" PID of this process is %d\\n", x);',
+    'printf(" create a process \\n");',
+    "pid = fork();",
+    "if (pid > 0) {",
+    '    printf(" I am a parent process with PID = %d of child process %d\\n", getpid(), pid);',
+    "    wait (NULL);",
+    "    exit (0);",
+    "} else {",
+    '    printf(" I am a child process with PID = %d\\n", getpid());',
+    '    printf(" My parent process with PID = %d\\n", getppid());',
+    "    exit(0);",
+    "}",
+  ];
+  // steps: parent line, child line (null = not exist), vars, states, output lines, caption
+  const S = [
+    { P: 0, C: null, pv: "x = ?, pid = ?", cv: "", ps: "run", cs: null, out: 0, cap: "มี process เดียว (parent) PID = 2326 — กำลังจะเรียก getpid()" },
+    { P: 1, C: null, pv: "x = 2326, pid = ?", ps: "run", out: 1, cap: "getpid() คืน 2326 แล้วพิมพ์ออกมา" },
+    { P: 2, C: null, pv: "x = 2326, pid = ?", ps: "run", out: 2, cap: "พิมพ์ \"create a process\"" },
+    { P: 3, C: 3, pv: "x = 2326, pid = <b>2327</b>", cv: "x = 2326, pid = <b>0</b>", ps: "run", cs: "run", out: 2, cap: "<b>fork()</b> สร้าง child เป็นสำเนาของ parent (ค่า x ก็ถูกคัดลอกไปด้วย) → parent ได้ค่า <b>2327</b> (PID ของ child), child ได้ <b>0</b> · ทั้งคู่ทำต่อจากบรรทัดหลัง fork" },
+    { P: 4, C: 4, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "run", cs: "run", out: 2, cap: "ทั้งสอง process ตรวจ <code>pid > 0</code> — parent: จริง · child: เท็จ → ไป else" },
+    { P: 5, C: 8, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "run", cs: "run", out: 3, cap: "parent พิมพ์ PID ตัวเอง (2326) และ PID ของ child (2327)" },
+    { P: 6, C: 8, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "blk", cs: "run", out: 3, cap: "parent เรียก <b>wait(NULL)</b> → ถูก block รอจน child จบ" },
+    { P: 6, C: 9, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "blk", cs: "run", out: 4, cap: "child พิมพ์ PID ของตัวเอง = 2327 (getpid)" },
+    { P: 6, C: 10, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "blk", cs: "run", out: 5, cap: "child พิมพ์ PID ของ parent ด้วย <b>getppid()</b> = 2326" },
+    { P: 6, C: 11, pv: "x = 2326, pid = 2327", cv: "x = 2326, pid = 0", ps: "blk", cs: "end", out: 5, cap: "child เรียก exit(0) → จบการทำงาน" },
+    { P: 7, C: null, pv: "x = 2326, pid = 2327", ps: "run", cs: "end", out: 5, cap: "wait() คืนค่าเพราะ child จบแล้ว → parent exit(0) — ผลลัพธ์ตรงกับสไลด์", good: true },
+  ];
+  const OUT = ["PID of this process is 2326", "Create a Process", "I am a parent process with PID = 2326 of child process 2327", "I am a child process with PID = 2327", "My parent process with PID = 2326"];
+  const src = pc => `<pre class="src">${SRC.map((l, k) => `<span class="${k === pc ? "pc" : ""}">${l.replace(/</g, "&lt;")}</span>`).join("")}</pre>`;
+  const badge = s => s === "run" ? '<span class="badge run">Running/Ready</span>' : s === "blk" ? '<span class="badge blk">Blocked (wait)</span>' : '<span class="badge end">จบแล้ว</span>';
+  let lastC = null;
+  function show(i) {
+    const st = S[i];
+    const childOn = S.slice(0, i + 1).some(s => s.C != null);
+    lastC = st.C != null ? st.C : lastC;
+    $("#fk").innerHTML = `<div class="proc p0"><h4>Parent · PID 2326 ${badge(st.ps)}</h4><div class="meta">${st.pv}</div>${src(st.P)}</div>` +
+      `<div class="proc p1 ${childOn ? "" : "off"}"><h4>Child · PID 2327 ${childOn ? badge(st.cs) : ""}</h4><div class="meta">${childOn ? (st.cv || "x = 2326, pid = 0") + " · parent = 2326" : "ยังไม่ถูกสร้าง"}</div>${src(childOn && st.cs !== "end" ? st.C : -1)}</div>`;
+    $("#console").innerHTML = OUT.slice(0, st.out).map((l, k) => `<div class="${k === st.out - 1 && (i === 0 || S[i - 1].out < st.out) ? "new" : ""}">${l}</div>`).join("") || '<span style="opacity:.5">$ ./fork</span>';
+    $("#fkCap").innerHTML = st.cap; $("#fkCap").className = "cap" + (st.good ? " good" : i === 3 ? " warn" : "");
+  }
+  const p = Player($("#fkPlayer"), { count: () => S.length, show, delay: 1800 });
+  LABS.push({ name: "fork", cases: null, player: p });
+  p.go(0);
+})();
+
+// ===== 4. system call =====
+(function () {
+  const U = [["u1", "push parameters"], ["u2", "call read (library)"], ["u3", "ใส่หมายเลข system call ลง register"], ["u4", "<b>trap</b> to kernel"]];
+  const K = [["k1", "kernel stack เก็บข้อมูลผู้เรียก"], ["k2", "dispatch (ดูตาราง trap table)"], ["k3", "system call handler ทำงาน (อ่านข้อมูล)"], ["k4", "<b>return-from-trap</b>"]];
+  const U2 = [["u5", "return to caller"], ["u6", "increment SP (ล้าง parameters)"]];
+  $("#sc").innerHTML = `<div class="lane user"><h4>User mode<br><small>(user program + library)</small></h4>${U.map(([id, t]) => `<span class="stp" id="${id}">${t}</span>`).join("→")}</div>` +
+    `<div class="lane kern"><h4>Kernel mode<br><small>(OS)</small></h4>${K.map(([id, t]) => `<span class="stp" id="${id}">${t}</span>`).join("→")}</div>` +
+    `<div class="lane user"><h4>User mode</h4>${U2.map(([id, t]) => `<span class="stp" id="${id}">${t}</span>`).join("→")}</div>`;
+  const order = ["u1", "u2", "u3", "u4", "k1", "k2", "k3", "k4", "u5", "u6"];
+  const caps = {
+    u1: "โปรแกรมเรียก <code>read(fd, nbytes, buffer)</code> (ตามสไลด์) → push parameters ลง stack",
+    u2: "เรียกฟังก์ชัน read ใน library (library ห่อ system call ไว้ให้เรียกเหมือนฟังก์ชันธรรมดา)",
+    u3: "library ใส่รหัสของ system call read ลงใน register",
+    u4: "คำสั่ง <b>trap</b> = สัญญาณ software ที่ตั้งใจ → เพิ่มสิทธิ์เป็น <b>kernel mode</b>",
+    k1: "hardware/OS เก็บ registers ของผู้เรียกไว้ใน <b>kernel stack</b>",
+    k2: "ใช้ trap table (ตั้งไว้ตอน boot) หา handler ที่ถูกต้อง",
+    k3: "system call handler ทำงานจริง (privileged operation เช่นอ่านไฟล์)",
+    k4: "<b>return-from-trap</b> → ลดสิทธิ์กลับเป็น user mode",
+    u5: "กลับมาที่ library แล้วกลับไปที่ผู้เรียก",
+    u6: "increment SP เพื่อล้าง parameters ที่ push ไว้ — เสร็จ",
+  };
+  function show(i) {
+    order.forEach((id, k) => { const e = $("#" + id); e.className = "stp" + (k === i ? " hot" : k < i ? " done" : ""); });
+    const id = order[i];
+    $("#scCap").innerHTML = caps[id] + `<small>${id[0] === "k" ? "🔴 kernel mode" : "🟢 user mode"}</small>`;
+    $("#scCap").className = "cap" + (id === "u4" || id === "k4" ? " warn" : i === order.length - 1 ? " good" : "");
+  }
+  const p = Player($("#scPlayer"), { count: () => order.length, show, delay: 1500 });
+  LABS.push({ name: "sc", cases: null, player: p });
+  p.go(0);
+})();
+</script>
+
+</body></html>

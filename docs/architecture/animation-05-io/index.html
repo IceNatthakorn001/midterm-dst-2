@@ -1,0 +1,416 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I/O Techniques Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.k-io{--kc:var(--c3);--ks:var(--c3s)} .k-wait{--kc:var(--bad);--ks:var(--bad-soft)} .k-free{--kc:var(--ok);--ks:var(--ok-soft)} .k-dma{--kc:var(--c5);--ks:var(--c5s)}
+.t3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.t3 h4{margin:0 0 6px;font-size:15px}
+.fc{display:flex;flex-direction:column;gap:4px}
+.fcb{font-size:13px;padding:5px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);transition:all .25s;position:relative}
+.fcb.dec{border-radius:16px;border-style:dashed}
+.fcb.on{border-color:var(--kc);background:var(--ks);color:var(--kc);font-weight:700;transform:scale(1.03)}
+.fcb small{color:var(--muted);font-weight:400}
+.cpuSt{font-size:14px;margin:6px 0;padding:6px 8px;border-radius:8px;background:var(--ks);color:var(--kc);font-weight:700;min-height:2.4em}
+.tlr{display:flex;gap:1px;margin:6px 0}
+.tlr div{flex:1;height:18px;border-radius:2px;background:var(--slot)}
+.tlr div.k-io,.tlr div.k-wait,.tlr div.k-free,.tlr div.k-dma{background:var(--kc)}
+.cnt3{font-size:13px;color:var(--muted)}
+.cnt3 b{color:var(--ink)}
+.dev{font-size:13px;color:var(--muted);margin:4px 0}
+.mem2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+.mcol{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;font-family:"JetBrains Mono",monospace;font-size:13px}
+.mcol div{padding:4px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;transition:background .3s}
+.mcol div.sec{background:var(--slot);font-family:"IBM Plex Sans Thai",sans-serif;font-weight:700;font-size:12px;color:var(--muted)}
+.mcol div.pc{background:var(--wait-soft);box-shadow:inset 4px 0 0 var(--wait)}
+.mcol div.new{background:var(--c5s)}
+.regs{display:flex;flex-wrap:wrap;gap:8px}
+.reg{border:2px solid var(--line);border-radius:10px;padding:4px 12px;text-align:center;min-width:86px;background:var(--card);transition:all .3s}
+.reg b{display:block;font-size:12px;color:var(--muted)} .reg span{font-family:"JetBrains Mono",monospace;font-size:18px;font-weight:700}
+.reg.chg{border-color:var(--ok);background:var(--ok-soft)}
+.hwsw{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.hwsw ol{margin:0;padding-left:22px;font-size:14px}
+.hwsw li{padding:2px 4px;border-radius:6px;color:var(--muted)}
+.hwsw li.on{background:var(--wait-soft);color:var(--wait);font-weight:700} .hwsw li.done{color:var(--ink)}
+#dmaSvg,#dcSvg{width:100%;height:auto;display:block}
+.inp{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0;font-size:15px}
+.inp label{display:flex;gap:6px;align-items:center}
+@media (max-width:760px){.t3{grid-template-columns:1fr}.mem2,.hwsw{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>I/O: Programmed · Interrupt-driven · DMA</h1>
+<p class="lead">Chapter 05 — I/O Systems · กด ▶ เล่น เพื่อดู CPU ทำงานทีละช่วงเวลา</p>
+<ul class="toc"><li><a href="#s1">1. 3 เทคนิคเทียบกัน</a></li><li><a href="#s2">2. Interrupt processing</a></li><li><a href="#s3">3. 8237 DMA</a></li><li><a href="#s4">4. ระบุว่าใครส่ง interrupt</a></li></ul>
+
+<h2 id="s1">1. อ่านข้อมูล 1 block (3 words) ด้วย 3 เทคนิค</h2>
+<div class="card">
+<p class="desc">flowchart ตามสไลด์ 11 · สมมติว่าอุปกรณ์ใช้เวลาเตรียมข้อมูล <b>3 ช่วงเวลาต่อ 1 word</b> และ CPU ทำได้ 1 ขั้นต่อ 1 ช่วงเวลา (ตัวเลขสมมติเพื่อให้เห็นความต่าง)</p>
+<div class="legend"><span><i style="background:var(--c3);border-color:var(--c3)"></i>CPU ทำงาน I/O เอง</span><span><i style="background:var(--bad);border-color:var(--bad)"></i>CPU วนรอ (เสียเปล่า)</span><span><i style="background:var(--ok);border-color:var(--ok)"></i>CPU ว่างไปทำงานอื่น</span><span><i style="background:var(--c5);border-color:var(--c5)"></i>DMA ย้ายข้อมูลเอง (CPU ว่าง)</span></div>
+<div class="cap" id="cap1"></div>
+<div class="t3" id="t3"></div>
+<div id="p1"></div>
+<p class="tip">💡 Programmed: CPU <b>วนเช็ก status เอง</b> · Interrupt-driven: CPU ไปทำอย่างอื่น แต่ยัง<b>ย้ายข้อมูลเองทุก word</b> · DMA: CPU สั่งครั้งเดียวทั้ง block แล้วรอ interrupt ตอนจบ — เหมาะกับข้อมูลปริมาณมาก</p>
+</div>
+
+<h2 id="s2">2. Interrupt processing — เกิดอะไรกับ memory และ register</h2>
+<div class="card">
+<div class="cap" id="cap2"></div>
+<div class="hwsw"><div><b>Hardware</b><ol id="hw"></ol></div><div><b>Software</b><ol id="sw" start="6"></ol></div></div>
+<div class="mem2"><div class="mcol" id="mc"></div><div><div class="regs" id="rg"></div><p class="kbd" style="margin-top:10px">PSW = program status word (status register) · control stack โตลง: SP จาก T เป็น T − M</p></div></div>
+<div id="p2"></div>
+</div>
+
+<h2 id="s3">3. 8237 DMA ใช้ system bus</h2>
+<div class="card">
+<p class="desc">สัญญาณ: <b>DREQ</b> = DMA request · <b>HRQ</b> = HOLD request · <b>HLDA</b> = HOLD acknowledge · <b>DACK</b> = DMA acknowledge · แบบ <b>fly-by</b>: ข้อมูลไม่ผ่านชิป DMA วิ่งตรง I/O ↔ memory</p>
+<div class="cap" id="cap3"></div>
+<svg id="dmaSvg" viewBox="0 0 1000 330"></svg>
+<div id="p3"></div>
+</div>
+
+<h2 id="s4">4. ระบุอุปกรณ์ที่ส่ง interrupt</h2>
+<div class="card">
+<div id="cases4"></div>
+<div class="inp"><label>อุปกรณ์ที่ขอ interrupt: <select id="req4"><option value="0">Module 1</option><option value="1">Module 2</option><option value="2" selected>Module 3</option><option value="3">Module 4</option></select></label></div>
+<div class="cap" id="cap4"></div>
+<svg id="dcSvg" viewBox="0 0 1000 260"></svg>
+<div id="p4"></div>
+<p class="tip">💡 Software poll: ISR ถามทีละ module (ช้า) · Daisy chain: สาย acknowledge ส่งต่อเป็นโซ่ module ที่ขอจะส่ง <b>vector</b> กลับ (hardware poll, vectored) → กระโดดไป service routine ของอุปกรณ์นั้นได้ทันที · ยังมีแบบ multiple interrupt lines และ bus arbitration (vectored)</p>
+</div>
+</main>
+<script>
+// ===== 1 =====
+(function () {
+  const W = 3, PREP = 3;
+  const FC = {
+    prog: { n: "(a) Programmed I/O", boxes: [["issue", "Issue Read command <small>CPU → I/O</small>"], ["status", "Read status <small>I/O → CPU</small>"], ["check", "Check status: ready?", 1], ["read", "Read word <small>I/O → CPU</small>"], ["write", "Write word into memory <small>CPU → memory</small>"], ["done", "Done?", 1], ["next", "Next instruction"]] },
+    intr: { n: "(b) Interrupt-driven I/O", boxes: [["issue", "Issue Read command <small>CPU → I/O</small>"], ["else", "Do something else"], ["int", "← Interrupt: Read status"], ["check", "Check status", 1], ["read", "Read word <small>I/O → CPU</small>"], ["write", "Write word into memory"], ["done", "Done?", 1], ["next", "Next instruction"]] },
+    dma: { n: "(c) DMA", boxes: [["issue", "Issue Read block command to DMA <small>CPU → DMA</small>"], ["else", "Do something else"], ["int", "← Interrupt: Read status of DMA"], ["next", "Next instruction"]] },
+  };
+  // build per-tick timelines
+  function prog() { const T = []; for (let w = 0; w < W; w++) { T.push(["issue", "io", `สั่ง I/O อ่าน word ${w + 1}`]); for (let k = 1; k <= PREP; k++) T.push(["check", "wait", k < PREP ? `อ่าน status: ยังไม่พร้อม → วนอ่านใหม่` : `อ่าน status: พร้อมแล้ว`]); T.push(["read", "io", `อ่าน word ${w + 1} จาก I/O เข้า CPU`]); T.push(["write", "io", `เขียน word ${w + 1} ลง memory` + (w < W - 1 ? " → ยังไม่ครบ วนกลับ" : " → ครบแล้ว")]); } return T; }
+  function intr() { const T = []; for (let w = 0; w < W; w++) { T.push(["issue", "io", `สั่ง I/O อ่าน word ${w + 1}`]); for (let k = 1; k < PREP; k++) T.push(["else", "free", "ไปทำงานอื่นระหว่างรอ"]); T.push(["int", "io", `I/O พร้อม → ส่ง interrupt → อ่าน status`]); T.push(["read", "io", `อ่าน word ${w + 1} เข้า CPU`]); T.push(["write", "io", `เขียน word ${w + 1} ลง memory` + (w < W - 1 ? " → วนกลับ" : " → ครบแล้ว")]); } return T; }
+  function dma() { const T = [["issue", "io", "บอก DMA: อ่านทั้ง block (address, จำนวน word)"]]; let t = 1; for (let w = 0; w < W; w++) { for (let k = 1; k < PREP; k++) T.push(["else", "free", "CPU ทำงานอื่น · อุปกรณ์กำลังเตรียมข้อมูล"]); T.push(["else", "dma", `DMA ย้าย word ${w + 1} จาก I/O ลง memory ตรง ๆ (CPU ไม่ต้องแตะ)`]); } T.push(["int", "io", "DMA ส่ง interrupt ตอนจบ block → CPU อ่าน status ของ DMA"]); return T; }
+  const TL = { prog: prog(), intr: intr(), dma: dma() };
+  const N = Math.max(...Object.values(TL).map(t => t.length));
+  for (const k in TL) while (TL[k].length < N) TL[k].push(["next", "free", "เสร็จแล้ว → ทำคำสั่งถัดไป / งานอื่น"]);
+  const KN = { io: "ทำ I/O เอง", wait: "วนรอ", free: "ว่าง", dma: "ว่าง (DMA ทำงาน)" };
+  function show(i) {
+    const t = i - 1;
+    $("#t3").innerHTML = Object.entries(FC).map(([key, fc]) => {
+      const cur = t >= 0 ? TL[key][t] : null;
+      const cnt = { io: 0, wait: 0, free: 0, dma: 0 }; TL[key].slice(0, t + 1).forEach(e => cnt[e[1]]++);
+      return `<div><h4>${fc.n}</h4><div class="fc">${fc.boxes.map(([id, txt, dec]) => `<div class="fcb ${dec ? "dec" : ""} ${cur && (cur[0] === id || (id === "status" && cur[0] === "check" && cur[1] === "wait")) ? "on k-" + cur[1] : ""}">${txt}</div>`).join("")}</div>` +
+        `<div class="cpuSt ${cur ? "k-" + cur[1] : ""}">${cur ? cur[2] : "รอเริ่ม"}</div>` +
+        `<div class="tlr">${TL[key].map((e, k) => `<div class="${k <= t ? "k-" + e[1] : ""}" title="t=${k}"></div>`).join("")}</div>` +
+        `<div class="cnt3">ทำ I/O <b>${cnt.io}</b> · วนรอ <b>${cnt.wait}</b> · ว่าง <b>${cnt.free + cnt.dma}</b></div></div>`;
+    }).join("");
+    const done = t >= N - 1;
+    $("#cap1").innerHTML = t < 0 ? "ทั้ง 3 แบบต้องอ่านข้อมูล 3 words จากอุปกรณ์เดียวกัน" : `ช่วงเวลาที่ ${t + 1} / ${N}` + (done ? `<small>CPU ว่างไปทำงานอื่นได้: Programmed ${TL.prog.filter(e => e[1] === "free" || e[1] === "dma").length} · Interrupt ${TL.intr.filter(e => e[1] === "free").length} · DMA ${TL.dma.filter(e => e[1] === "free" || e[1] === "dma").length} ช่วง (ของ Programmed ที่ว่างคือหลังทำเสร็จแล้วเท่านั้น)</small>` : "");
+    $("#cap1").className = "cap" + (done ? " good" : "");
+  }
+  const p = Player($("#p1"), { count: () => N + 1, show, delay: 700 });
+  LABS.push({ name: "three", cases: null, player: p }); p.go(0);
+})();
+// ===== 2 =====
+(function () {
+  const HW = ["Device controller ส่ง interrupt", "Processor ทำคำสั่งปัจจุบันให้เสร็จ", "Processor ส่งสัญญาณ acknowledge", "Push PSW และ PC ลง control stack", "โหลด PC ใหม่ตาม interrupt"];
+  const SW = ["Save state ที่เหลือ (registers)", "Process interrupt", "Restore state", "Restore old PSW และ PC"];
+  $("#hw").innerHTML = HW.map((t, k) => `<li id="hw${k}">${t}</li>`).join(""); $("#sw").innerHTML = SW.map((t, k) => `<li id="sw${k}">${t}</li>`).join("");
+  const S = [
+    { on: null, pc: "N", sp: "T", stack: [], cur: "N", cap: "user program กำลังทำคำสั่งที่ address N (PC = N)" },
+    { on: "hw0", pc: "N", sp: "T", stack: [], cur: "N", cap: "อุปกรณ์ส่ง interrupt เข้ามาระหว่างทำคำสั่ง N", cls: "warn" },
+    { on: "hw1", pc: "N + 1", sp: "T", stack: [], cur: "N", cap: "CPU ไม่หยุดกลางคำสั่ง — ทำคำสั่ง N ให้จบก่อน (PC ชี้ N + 1 แล้ว)" },
+    { on: "hw2", pc: "N + 1", sp: "T", stack: [], cur: "N", cap: "CPU ส่ง acknowledge ให้อุปกรณ์" },
+    { on: "hw3", pc: "N + 1", sp: "T − M", stack: ["PSW", "N + 1"], cur: "N", cap: "<b>push PSW และ PC (= N + 1)</b> ลง control stack → SP ลดจาก T เป็น T − M", chg: ["sp"] },
+    { on: "hw4", pc: "Y", sp: "T − M", stack: ["PSW", "N + 1"], cur: "Y", cap: "โหลด PC = <b>Y</b> = จุดเริ่มของ interrupt service routine", chg: ["pc"] },
+    { on: "sw0", pc: "Y", sp: "T − M", stack: ["PSW", "N + 1", "registers"], cur: "Y", cap: "ISR เก็บ registers อื่นที่จะใช้ลง stack ด้วย (save remainder of state)" },
+    { on: "sw1", pc: "Y + …", sp: "T − M", stack: ["PSW", "N + 1", "registers"], cur: "Y+", cap: "ทำงานของ interrupt จริง ๆ (เช่น อ่านข้อมูลจากอุปกรณ์)" },
+    { on: "sw2", pc: "Y + L", sp: "T − M", stack: ["PSW", "N + 1"], cur: "Y+L", cap: "ถึงคำสั่ง Return ที่ Y + L → คืนค่า registers จาก stack" },
+    { on: "sw3", pc: "N + 1", sp: "T", stack: [], cur: "N+1", cap: "<b>restore PSW และ PC</b> → PC = N + 1, SP กลับเป็น T → user program ทำต่อจากจุดเดิมเหมือนไม่มีอะไรเกิดขึ้น", cls: "good", chg: ["pc", "sp"] },
+  ];
+  const ord = ["hw0", "hw1", "hw2", "hw3", "hw4", "sw0", "sw1", "sw2", "sw3"];
+  function show(i) {
+    const st = S[i];
+    ord.forEach((id, k) => { const e = $("#" + id); e.className = id === st.on ? "on" : ord.indexOf(st.on) > k ? "done" : ""; });
+    const row = (a, txt, key) => `<div class="${st.cur === key ? "pc" : ""}"><span>${a}</span><span>${txt}</span></div>`;
+    let m = `<div class="sec"><span>User program</span></div>` + row("N", "คำสั่ง N", "N") + row("N + 1", "คำสั่ง N + 1", "N+1");
+    m += `<div class="sec"><span>Interrupt service routine</span></div>` + row("Y", "เริ่ม ISR", "Y") + row("…", "…", "Y+") + row("Y + L", "Return", "Y+L");
+    m += `<div class="sec"><span>Control stack</span></div>`;
+    const stk = [...st.stack].reverse();
+    if (!stk.length) m += `<div><span>T</span><span class="kbd">(ว่าง) ← SP</span></div>`;
+    else stk.forEach((v, k) => m += `<div class="new"><span>${k === 0 ? "T − M" : ""}</span><span>${v}${k === 0 ? " ← SP" : ""}</span></div>`);
+    $("#mc").innerHTML = m;
+    $("#rg").innerHTML = [["PC", st.pc, "pc"], ["SP", st.sp, "sp"]].map(([n, v, k]) => `<div class="reg ${(st.chg || []).includes(k) ? "chg" : ""}"><b>${n}</b><span>${v}</span></div>`).join("");
+    $("#cap2").innerHTML = st.cap; $("#cap2").className = "cap" + (st.cls ? " " + st.cls : "");
+  }
+  const p = Player($("#p2"), { count: () => S.length, show, delay: 1700 });
+  LABS.push({ name: "intr", cases: null, player: p }); p.go(0);
+})();
+// ===== 3 =====
+(function () {
+  const svg = $("#dmaSvg");
+  const B = { CPU: [40, 20, 180, 80], MEM: [760, 20, 200, 80], DMA: [300, 220, 200, 80], DISK: [620, 220, 220, 80] };
+  const S = [
+    { cap: "CPU ตั้งค่า 8237 ก่อน: address ปลายทางใน memory, จำนวน word (data count), ทิศทาง (read/write)", on: ["CPU", "DMA"], sig: [], bus: "CPU", count: 3 },
+    { cap: "disk controller มีข้อมูลพร้อม → ส่ง <b>DREQ</b> ไปที่ 8237", on: ["DISK"], sig: ["DREQ"], bus: "CPU", count: 3 },
+    { cap: "8237 ขอใช้ bus จาก CPU → ส่ง <b>HRQ</b> (HOLD request)", on: ["DMA"], sig: ["DREQ", "HRQ"], bus: "CPU", count: 3 },
+    { cap: "CPU ปล่อย bus แล้วตอบ <b>HLDA</b> (HOLD acknowledge) — CPU พักการใช้ bus ชั่วคราว (DMA แทรกได้ถี่กว่า interrupt เพราะไม่ต้องรอจบคำสั่ง)", on: ["CPU"], sig: ["DREQ", "HRQ", "HLDA"], bus: "DMA", count: 3, cls: "warn" },
+    { cap: "8237 ส่ง <b>DACK</b> ให้ disk controller และวาง address บน address bus", on: ["DMA", "DISK"], sig: ["HRQ", "HLDA", "DACK"], bus: "DMA", count: 3 },
+    { cap: "<b>fly-by</b>: ข้อมูลวิ่งจาก disk controller ลง memory ตรง ๆ ทาง data bus — ไม่ผ่านชิป 8237 · data count ลดลงทีละ 1", on: ["DISK", "MEM"], sig: ["HRQ", "HLDA", "DACK"], bus: "DMA", count: 2, data: true },
+    { cap: "ทำซ้ำจนครบทุก word …", on: ["DISK", "MEM"], sig: ["HRQ", "HLDA", "DACK"], bus: "DMA", count: 0, data: true },
+    { cap: "data count = 0 (terminal count) → 8237 ปล่อย HRQ, CPU ได้ bus คืน และได้รับ <b>interrupt</b> ว่าโอนเสร็จแล้ว", on: ["CPU", "DMA"], sig: ["INT"], bus: "CPU", count: 0, cls: "good" },
+  ];
+  function box(k, lab, on) { const [x, y, w, hh] = B[k]; return `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="12" fill="${on ? "var(--accent-soft)" : "var(--card)"}" stroke="${on ? "var(--accent)" : "var(--muted)"}" stroke-width="2"/><text x="${x + w / 2}" y="${y + hh / 2 + 6}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">${lab}</text>`; }
+  function sig(name, d, lx, ly, on) { return `<path d="${d}" fill="none" stroke="${on ? "var(--bad)" : "var(--line)"}" stroke-width="${on ? 4 : 2}" marker-end="url(#da${on ? 1 : 0})"/><text x="${lx}" y="${ly}" text-anchor="middle" font-size="14" font-weight="700" fill="${on ? "var(--bad)" : "var(--muted)"}">${name}</text>`; }
+  function show(i) {
+    const st = S[i];
+    let s = `<defs><marker id="da1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--bad)"/></marker><marker id="da0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--line)"/></marker></defs>`;
+    s += `<rect x="20" y="150" width="960" height="26" rx="6" fill="${st.data ? "var(--c5s)" : "var(--slot)"}" stroke="var(--muted)"/><text x="500" y="168" text-anchor="middle" font-size="13" fill="var(--muted)">system bus (data / address / control) — ผู้คุม bus ตอนนี้: <tspan font-weight="700" fill="var(--ink)">${st.bus === "CPU" ? "CPU" : "8237 DMA"}</tspan></text>`;
+    s += `<line x1="130" x2="130" y1="100" y2="150" stroke="var(--muted)" stroke-width="2"/><line x1="860" x2="860" y1="100" y2="150" stroke="var(--muted)" stroke-width="2"/><line x1="400" x2="400" y1="176" y2="220" stroke="var(--muted)" stroke-width="2"/><line x1="730" x2="730" y1="176" y2="220" stroke="var(--muted)" stroke-width="2"/>`;
+    s += box("CPU", "CPU", st.on.includes("CPU")) + box("MEM", "Main memory", st.on.includes("MEM")) + box("DMA", `8237 DMA · count = ${st.count}`, st.on.includes("DMA")) + box("DISK", "Disk controller", st.on.includes("DISK"));
+    s += sig("DREQ", "M620,240 L500,240", 560, 232, st.sig.includes("DREQ"));
+    s += sig("DACK", "M500,285 L620,285", 560, 278, st.sig.includes("DACK"));
+    s += sig("HRQ", "M330,220 C300,140 260,120 200,100", 300, 120, st.sig.includes("HRQ"));
+    s += sig("HLDA", "M160,100 C190,170 260,210 300,240", 200, 200, st.sig.includes("HLDA"));
+    s += sig("INT", "M300,280 C120,300 60,200 80,100", 70, 230, st.sig.includes("INT"));
+    if (st.data) s += `<path d="M730,220 L730,163 L860,163 L860,100" fill="none" stroke="var(--c5)" stroke-width="6" marker-end="url(#da1)" stroke-dasharray="10 6"><animate attributeName="stroke-dashoffset" from="32" to="0" dur=".6s" repeatCount="indefinite"/></path><text x="790" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="var(--c5)">data (fly-by)</text>`;
+    svg.innerHTML = s;
+    $("#cap3").innerHTML = st.cap; $("#cap3").className = "cap" + (st.cls ? " " + st.cls : "");
+  }
+  const p = Player($("#p3"), { count: () => S.length, show, delay: 1800 });
+  LABS.push({ name: "dma", cases: null, player: p }); p.go(0);
+})();
+// ===== 4 =====
+(function () {
+  let mode = "chain", S = [];
+  const cases = Cases($("#cases4"), ["Daisy chain (vectored)", "Software poll"], k => { mode = k ? "poll" : "chain"; build(); });
+  $("#req4").onchange = build;
+  function build() {
+    const r = +$("#req4").value; S = [];
+    S.push({ cap: `Module ${r + 1} ส่ง interrupt ทางสาย INTR (สายร่วมกัน — CPU ยังไม่รู้ว่าใครส่ง)`, intr: true, req: r });
+    if (mode === "chain") {
+      S.push({ cap: "CPU ตอบ <b>INTA</b> (interrupt acknowledge) ส่งเข้า module ตัวแรกในโซ่", req: r, ack: 0 });
+      for (let k = 0; k < r; k++) S.push({ cap: `Module ${k + 1} ไม่ได้ขอ → ส่ง INTA ต่อให้ module ถัดไป`, req: r, ack: k + 1, pass: k });
+      S.push({ cap: `Module ${r + 1} เป็นตัวที่ขอ → <b>หยุดโซ่</b> แล้ววาง <b>vector</b> (ID / address ของ module) บน data lines`, req: r, ack: r, vec: true });
+      S.push({ cap: `CPU ใช้ vector ชี้ไปที่ <b>device-service routine</b> ของ Module ${r + 1} โดยตรง — ใช้ ${r + 2} ขั้นทาง hardware`, req: r, ack: r, vec: true, done: true, cls: "good" });
+    } else {
+      S.push({ cap: "CPU กระโดดไป ISR กลาง (general ISR) เพื่อหาว่าใครส่ง", req: r, isr: true });
+      for (let k = 0; k <= r; k++) S.push({ cap: `ISR อ่าน status ของ Module ${k + 1} (TEST I/O) → ${k === r ? "<b>เจอแล้ว!</b>" : "ไม่ใช่ ถามตัวถัดไป"}`, req: r, poll: k, found: k === r, cls: k === r ? "good" : "" });
+      S.push({ cap: `ต้องถาม ${r + 1} ครั้งด้วย software กว่าจะเจอ → <b>ช้า</b> (ยิ่ง module เยอะยิ่งช้า)`, req: r, poll: r, found: true, cls: "warn" });
+    }
+    p && p.reset();
+  }
+  function show(i) {
+    const st = S[i];
+    let s = `<defs><marker id="dc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--bad)"/></marker></defs>`;
+    s += `<rect x="20" y="20" width="160" height="80" rx="12" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="100" y="66" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">CPU</text>`;
+    s += `<line x1="180" x2="980" y1="40" y2="40" stroke="${st.intr ? "var(--bad)" : "var(--line)"}" stroke-width="${st.intr ? 4 : 2}"/><text x="960" y="32" text-anchor="end" font-size="13" fill="var(--muted)">INTR (สายร่วม)</text>`;
+    s += `<line x1="180" x2="980" y1="230" y2="230" stroke="${st.vec ? "var(--ok)" : "var(--line)"}" stroke-width="${st.vec ? 5 : 2}"/><text x="960" y="250" text-anchor="end" font-size="13" fill="var(--muted)">data lines</text>`;
+    for (let k = 0; k < 4; k++) {
+      const x = 240 + k * 185, isReq = k === st.req;
+      const hot = st.poll === k || (st.ack === k && mode === "chain" && st.ack != null);
+      s += `<rect x="${x}" y="110" width="150" height="80" rx="12" fill="${isReq ? "var(--wait-soft)" : "var(--card)"}" stroke="${hot ? "var(--accent)" : isReq ? "var(--wait)" : "var(--muted)"}" stroke-width="${hot ? 4 : 2}"/>`;
+      s += `<text x="${x + 75}" y="145" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">Module ${k + 1}</text><text x="${x + 75}" y="168" text-anchor="middle" font-size="12" fill="var(--muted)">${isReq ? "ขอ interrupt" : ""}${st.poll === k ? (st.found ? " ✓ ใช่" : " ✗ ไม่ใช่") : ""}</text>`;
+      s += `<line x1="${x + 75}" x2="${x + 75}" y1="40" y2="110" stroke="${isReq && st.intr ? "var(--bad)" : "var(--line)"}" stroke-width="2"/>`;
+      s += `<line x1="${x + 75}" x2="${x + 75}" y1="190" y2="230" stroke="${isReq && st.vec ? "var(--ok)" : "var(--line)"}" stroke-width="2"/>`;
+      if (mode === "chain") {
+        const x0 = k === 0 ? 180 : x - 35, lit = st.ack != null && k <= st.ack;
+        s += `<path d="M${x0},${k === 0 ? 85 : 150} L${x},150" fill="none" stroke="${lit ? "var(--bad)" : "var(--line)"}" stroke-width="${lit ? 4 : 2}" ${lit ? 'marker-end="url(#dc)"' : ""}/>`;
+        if (k === 0) s += `<text x="205" y="${lit ? 140 : 140}" font-size="12" font-weight="700" fill="${lit ? "var(--bad)" : "var(--muted)"}">INTA</text>`;
+      }
+    }
+    if (st.vec) s += `<text x="${240 + st.req * 185 + 75}" y="215" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ok)">vector →</text>`;
+    if (mode === "poll" && st.poll != null) s += `<path d="M180,80 L${240 + st.poll * 185 + 20},115" fill="none" stroke="var(--accent)" stroke-width="3" marker-end="url(#dc)"/>`;
+    $("#dcSvg").innerHTML = s;
+    $("#cap4").innerHTML = st.cap; $("#cap4").className = "cap" + (st.cls ? " " + st.cls : "");
+  }
+  var p = Player($("#p4"), { count: () => S.length || 1, show, delay: 1300 });
+  LABS.push({ name: "dc", cases, player: p }); cases.pick(0);
+})();
+</script>
+
+</body></html>

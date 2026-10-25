@@ -1,0 +1,403 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cache Memory Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.inp{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0;font-size:15px}
+.inp label{display:flex;gap:6px;align-items:center}
+.inp input.seq{width:260px}
+.field{display:flex;margin:10px 0;max-width:720px;font-family:"JetBrains Mono",monospace}
+.field div{padding:8px 4px;text-align:center;border:2px solid;font-weight:700;font-size:15px;transition:all .4s}
+.field small{display:block;font-family:"IBM Plex Sans Thai",sans-serif;font-weight:400;font-size:12px}
+.f-tag{background:var(--c1s);border-color:var(--c1);color:var(--c1);border-radius:8px 0 0 8px}
+.f-idx{background:var(--c3s);border-color:var(--c3);color:var(--c3)}
+.f-off{background:var(--c5s);border-color:var(--c5);color:var(--c5);border-radius:0 8px 8px 0}
+.calc{font-family:"JetBrains Mono",monospace;font-size:16px;line-height:2}
+.calc .step{opacity:.18;transition:opacity .4s}.calc .step.on{opacity:1}
+.ct{border-collapse:collapse;width:auto;font-family:"JetBrains Mono",monospace;font-size:14px}
+.ct td,.ct th{border:1px solid var(--line);padding:4px 12px;text-align:center;transition:background .35s}
+.ct th{font-family:"IBM Plex Sans Thai",sans-serif;font-size:13px}
+.ct tr.sel td{background:var(--wait-soft)}
+.ct tr.hit td{background:var(--ok-soft)}
+.ct tr.miss td{background:var(--bad-soft)}
+.ct td.new{font-weight:700;color:var(--bad)}
+.ct td.setlab{background:var(--slot);font-weight:700}
+.hm{display:inline-block;padding:1px 10px;border-radius:99px;font-weight:700;font-size:14px}
+.hm.H{background:var(--ok-soft);color:var(--ok)} .hm.M{background:var(--bad-soft);color:var(--bad)}
+.seqv{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.seqv span{min-width:44px;padding:3px 8px;border-radius:8px;border:2px solid var(--line);text-align:center;font-family:"JetBrains Mono",monospace;font-weight:700;background:var(--card)}
+.seqv span small{display:block;font-size:11px;font-family:"IBM Plex Sans Thai",sans-serif}
+.seqv span.cur{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.seqv span.H{border-color:var(--ok);color:var(--ok)} .seqv span.M{border-color:var(--bad);color:var(--bad)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.three h4{margin:0 0 4px;font-size:15px}
+.score{font-size:14px;margin:6px 0}
+@media (max-width:760px){.three{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>Cache: แบ่ง address · Direct mapped · Associativity</h1>
+<p class="lead">Chapter 04 — Memory Hierarchy & Cache · ใส่ address หรือลำดับการอ้างอิงเองได้</p>
+<ul class="toc"><li><a href="#s1">1. แบ่ง address</a></li><li><a href="#s2">2. Direct mapped ทีละครั้ง</a></li><li><a href="#s3">3. Direct vs 2-way vs Fully</a></li></ul>
+
+<h2 id="s1">1. แบ่ง address เป็น tag | index | offset</h2>
+<div class="card">
+<div class="inp">
+  <label>byte address <input id="ad" type="number" value="1200" min="0"></label>
+  <label>จำนวน block <select id="nb"><option>8</option><option>16</option><option selected>64</option><option>256</option><option>1024</option></select></label>
+  <label>block size <select id="bs"><option value="4">4 B</option><option value="8">8 B</option><option value="16" selected>16 B</option><option value="32">32 B</option><option value="64">64 B</option></select></label>
+  <label>address <select id="ab"><option>32</option><option>64</option></select> bit</label>
+</div>
+<div class="cap" id="cap1"></div>
+<div class="calc" id="calc1"></div>
+<div class="field" id="field1"></div>
+<div id="p1"></div>
+<p class="tip">💡 ตัวอย่างสไลด์: 64 blocks × 16 B, address 1200 → block address = ⌊1200 / 16⌋ = 75 → index = 75 mod 64 = <b>11</b> · offset 4 bit, index 6 bit, tag 22 bit</p>
+</div>
+
+<h2 id="s2">2. Direct mapped cache ทีละการอ้างอิง</h2>
+<div class="card">
+<div id="cases2"></div>
+<div class="inp"><label>ลำดับ address (word) <input id="seq2" class="seq" value="22, 26, 22, 26, 16, 3, 16, 18"></label><label>block <select id="nb2"><option>4</option><option selected>8</option><option>16</option></select></label></div>
+<div class="seqv" id="sv2"></div>
+<div class="cap" id="cap2"></div>
+<div class="tw"><table class="ct" id="ct2"></table></div>
+<div id="p2"></div>
+<p class="kbd">index = block address mod จำนวน block (= bit ต่ำ) · tag = bit ที่เหลือด้านบน · valid bit เริ่มต้นเป็น 0</p>
+</div>
+
+<h2 id="s3">3. เทียบ Direct mapped · 2-way set associative · Fully associative</h2>
+<div class="card">
+<div id="cases3"></div>
+<div class="inp"><label>ลำดับ block address <input id="seq3" class="seq" value="0, 8, 0, 6, 8"></label><label>จำนวน block <select id="nb3"><option selected>4</option><option>8</option></select></label></div>
+<div class="seqv" id="sv3"></div>
+<div class="cap" id="cap3"></div>
+<div class="three" id="three"></div>
+<div id="p3"></div>
+<p class="tip">💡 ตัวอย่างสไลด์ (4 blocks, 0, 8, 0, 6, 8): direct <b>5 miss</b> · 2-way <b>4 miss 1 hit</b> · fully <b>3 miss 2 hit</b> · แทนที่แบบ <b>LRU</b> (ตัวที่ไม่ได้ใช้นานที่สุดออก)<br>associativity สูง → conflict miss ลด แต่ต้องมี comparator มากขึ้น (direct 1 ตัว, n-way n ตัว, fully = ทุก entry)</p>
+</div>
+</main>
+<script>
+const bin = (v, w) => w <= 0 ? "" : (v >>> 0).toString(2).padStart(w, "0").slice(-w);
+const log2 = n => Math.round(Math.log2(n));
+// ===== 1 =====
+(function () {
+  let S = [];
+  function build() {
+    const A = Math.max(0, Math.round(+$("#ad").value || 0)), nb = +$("#nb").value, bs = +$("#bs").value, AB = +$("#ab").value;
+    const ob = log2(bs), ib = log2(nb), tb = AB - ob - ib;
+    const ba = Math.floor(A / bs), idx = ba % nb, tag = Math.floor(ba / nb), off = A % bs;
+    S = [
+      { cap: `byte address = ${A} · cache มี ${nb} blocks · block ละ ${bs} bytes`, on: 0 },
+      { cap: `<b>block address</b> = ⌊address / block size⌋ = ⌊${A} / ${bs}⌋ = <b>${ba}</b> (byte ที่ ${off} ใน block)`, on: 1 },
+      { cap: `<b>index</b> = block address mod จำนวน block = ${ba} mod ${nb} = <b>${idx}</b> → ไปลงช่องที่ ${idx}`, on: 2 },
+      { cap: `<b>tag</b> = ⌊block address / จำนวน block⌋ = ⌊${ba} / ${nb}⌋ = <b>${tag}</b> → เก็บไว้เทียบว่าใช่ block นี้จริงไหม`, on: 3 },
+      { cap: `จำนวน bit: offset = log₂(${bs}) = <b>${ob}</b> · index = log₂(${nb}) = <b>${ib}</b> · tag = ${AB} − ${ob} − ${ib} = <b>${tb}</b>`, on: 4, good: true },
+    ];
+    S.v = { A, ba, idx, tag, off, ob, ib, tb, bs, nb, AB };
+    p.reset();
+  }
+  function show(i) {
+    const st = S[i], v = S.v;
+    $("#cap1").innerHTML = st.cap; $("#cap1").className = "cap" + (st.good ? " good" : "");
+    $("#calc1").innerHTML = [
+      `address = ${v.A}  =  ${bin(v.A, Math.max(16, v.ob + v.ib + 4))}₂ (บิตล่าง)`,
+      `block address = ⌊${v.A} / ${v.bs}⌋ = ${v.ba}`,
+      `index = ${v.ba} mod ${v.nb} = ${v.idx}`,
+      `tag = ⌊${v.ba} / ${v.nb}⌋ = ${v.tag}`,
+    ].map((t, k) => `<div class="step ${k <= st.on ? "on" : ""}">${t}</div>`).join("");
+    const show = st.on >= 4 ? 1 : 0;
+    const tw = Math.max(18, Math.min(60, v.tb * 1.6)), iw = Math.max(16, v.ib * 3.2), ow = Math.max(14, v.ob * 3.2);
+    const tagStr = v.tag.toString(2), lowBits = bin(v.A, v.ob + v.ib);
+    $("#field1").innerHTML = `<div class="f-tag" style="flex:${tw}">${st.on >= 3 ? `…${tagStr}` : "?"}<small>tag ${show ? v.tb + " bit" : ""} = ${st.on >= 3 ? v.tag : "?"}</small></div>` +
+      `<div class="f-idx" style="flex:${iw}">${st.on >= 2 ? lowBits.slice(0, v.ib) : "?"}<small>index ${show ? v.ib + " bit" : ""} = ${st.on >= 2 ? v.idx : "?"}</small></div>` +
+      `<div class="f-off" style="flex:${ow}">${st.on >= 1 ? lowBits.slice(v.ib) : "?"}<small>offset ${show ? v.ob + " bit" : ""} = ${st.on >= 1 ? v.off : "?"}</small></div>`;
+  }
+  const p = Player($("#p1"), { count: () => S.length || 1, show, delay: 1500 });
+  ["ad", "nb", "bs", "ab"].forEach(id => $("#" + id).onchange = build);
+  LABS.push({ name: "addr", cases: null, player: p }); build();
+})();
+// ===== cache simulator (LRU) =====
+function simCache(seq, blocks, ways) {
+  const sets = blocks / ways;
+  const C = Array.from({ length: sets }, () => []); // each: [{tag, blk, last}]
+  const out = [];
+  seq.forEach((a, t) => {
+    const s = a % sets, tag = Math.floor(a / sets);
+    const set = C[s];
+    let e = set.find(x => x.tag === tag), hit = !!e, victim = null;
+    if (hit) e.last = t;
+    else {
+      if (set.length < ways) set.push(e = { tag, blk: a, last: t, way: set.length });
+      else { victim = set.reduce((m, x) => x.last < m.last ? x : m); const w = victim.way; const old = { ...victim }; Object.assign(victim, { tag, blk: a, last: t, way: w }); victim = old; e = set.find(x => x.way === w); }
+    }
+    out.push({ a, s, tag, hit, way: e.way, victim, snap: C.map(st => st.map(x => ({ ...x }))) });
+  });
+  return { out, sets, ways };
+}
+const parseSeq = s => String(s).split(/[,\s]+/).filter(Boolean).map(x => Math.max(0, Math.round(+x || 0))).slice(0, 24);
+function seqView(el, seq, out, i) {
+  el.innerHTML = seq.map((a, k) => `<span class="${k === i ? "cur " : ""}${k <= i ? (out[k].hit ? "H" : "M") : ""}">${a}<small>${k <= i ? (out[k].hit ? "hit" : "miss") : "&nbsp;"}</small></span>`).join("");
+}
+// ===== 2 =====
+(function () {
+  let R, seq, nb;
+  const PRE = [["ตัวอย่างสไลด์ (8 blocks)", "22, 26, 22, 26, 16, 3, 16, 18", 8], ["ชนกันวนไปมา", "1, 9, 1, 9, 17, 1", 8], ["ลองเอง", "0, 4, 8, 12, 0, 4, 1, 5", 4]];
+  const cases = Cases($("#cases2"), PRE.map(p => p[0]), k => { $("#seq2").value = PRE[k][1]; $("#nb2").value = PRE[k][2]; build(); });
+  function build() { seq = parseSeq($("#seq2").value); nb = +$("#nb2").value; R = simCache(seq, nb, 1); p.reset(); }
+  function show(i) {
+    const k = i - 1, ib = log2(nb), aw = Math.max(5, (Math.max(...seq, 1)).toString(2).length);
+    const cur = k >= 0 ? R.out[k] : null;
+    const snap = cur ? cur.snap : Array.from({ length: nb }, () => []);
+    let t = `<tr><th>Index</th><th>V</th><th>Tag</th><th>Data</th></tr>`;
+    for (let s = 0; s < nb; s++) {
+      const e = snap[s][0];
+      const cls = cur && cur.s === s ? (cur.hit ? "hit" : "miss") : "";
+      t += `<tr class="${cls}"><td>${bin(s, ib)}</td><td>${e ? "Y" : "N"}</td><td class="${cls === "miss" ? "new" : ""}">${e ? bin(e.tag, aw - ib) : ""}</td><td class="${cls === "miss" ? "new" : ""}">${e ? `Mem[${bin(e.blk, aw)}]` : ""}</td></tr>`;
+    }
+    $("#ct2").innerHTML = t;
+    seqView($("#sv2"), seq, R.out, k);
+    const cap = $("#cap2");
+    if (!cur) { cap.className = "cap"; cap.innerHTML = `cache ว่าง (valid = N ทุกช่อง) · ${nb} blocks → index ${ib} bit`; return; }
+    const ab = bin(cur.a, aw);
+    let msg = `address ${cur.a} = <b>${ab.slice(0, aw - ib)}</b><span class="hl">${ab.slice(aw - ib)}</span>₂ → index = <b>${bin(cur.s, ib)}</b> (${cur.a} mod ${nb} = ${cur.s}), tag = ${bin(cur.tag, aw - ib)} → `;
+    if (cur.hit) msg += `<span class="hm H">HIT</span> ช่องนี้ valid และ tag ตรงกัน`;
+    else if (cur.victim) msg += `<span class="hm M">MISS</span> ช่องนี้มี tag ${bin(cur.victim.tag, aw - ib)} (address ${cur.victim.blk}) อยู่ → <b>ถูกแทนที่</b> (conflict)`;
+    else msg += `<span class="hm M">MISS</span> ช่องยังว่าง (valid = N) → โหลด block จาก memory มาใส่`;
+    const hits = R.out.slice(0, k + 1).filter(o => o.hit).length;
+    cap.innerHTML = msg + `<small>hit ${hits} / ${k + 1} · hit ratio = ${fmt(hits / (k + 1) * 100, 1)}% · miss ratio = 1 − hit ratio</small>`;
+    cap.className = "cap " + (cur.hit ? "good" : "bad");
+  }
+  const p = Player($("#p2"), { count: () => seq ? seq.length + 1 : 1, show, delay: 1500 });
+  $("#seq2").onchange = build; $("#nb2").onchange = build;
+  LABS.push({ name: "dm", cases, player: p }); cases.pick(0);
+})();
+// ===== 3 =====
+(function () {
+  let seq, nb, RS;
+  const PRE = [["ตัวอย่างสไลด์", "0, 8, 0, 6, 8", 4], ["วนลูป 3 block", "0, 4, 8, 0, 4, 8, 0", 4], ["ลองเอง", "1, 2, 3, 4, 1, 2, 5, 1, 2, 3", 4]];
+  const cases = Cases($("#cases3"), PRE.map(p => p[0]), k => { $("#seq3").value = PRE[k][1]; $("#nb3").value = PRE[k][2]; build(); });
+  function build() {
+    seq = parseSeq($("#seq3").value); nb = +$("#nb3").value;
+    RS = [["Direct mapped", 1], ["2-way set associative", 2], ["Fully associative", nb]].map(([n, w]) => ({ n, w, R: simCache(seq, nb, w) }));
+    p.reset();
+  }
+  function table(R, k) {
+    const cur = k >= 0 ? R.out[k] : null, snap = cur ? cur.snap : Array.from({ length: R.sets }, () => []);
+    let t = `<table class="ct"><tr><th>${R.ways === 1 ? "Index" : "Set"}</th>${Array.from({ length: R.ways }, (_, w) => `<th>${R.ways > 1 ? "way " + w : "block"}</th>`).join("")}</tr>`;
+    for (let s = 0; s < R.sets; s++) {
+      t += `<tr><td class="setlab">${s}</td>`;
+      for (let w = 0; w < R.ways; w++) {
+        const e = snap[s].find(x => x.way === w);
+        const isCur = cur && cur.s === s && cur.way === w;
+        t += `<td style="background:${isCur ? (cur.hit ? "var(--ok-soft)" : "var(--bad-soft)") : ""}" class="${isCur && !cur.hit ? "new" : ""}">${e ? "Mem[" + e.blk + "]" : ""}</td>`;
+      }
+      t += "</tr>";
+    }
+    return t + "</table>";
+  }
+  function show(i) {
+    const k = i - 1;
+    $("#three").innerHTML = RS.map(({ n, R }) => {
+      const hits = R.out.slice(0, k + 1).filter(o => o.hit).length, cur = k >= 0 ? R.out[k] : null;
+      const why = cur ? (cur.hit ? `<span class="hm H">HIT</span>` : `<span class="hm M">MISS</span>${cur.victim ? ` แทน Mem[${cur.victim.blk}]` : ""}`) : "";
+      return `<div><h4>${n}</h4><div class="score">${cur ? `block ${cur.a} → ${R.ways === nb ? "ที่ไหนก็ได้" : (R.ways === 1 ? "index " : "set ") + cur.a + " mod " + R.sets + " = " + cur.s} ${why}` : "&nbsp;"}</div><div class="tw">${table(R, k)}</div><div class="score">miss <b>${k + 1 - hits}</b> · hit <b>${hits}</b></div></div>`;
+    }).join("");
+    $("#sv3").innerHTML = seq.map((a, j) => `<span class="${j === k ? "cur" : ""}">${a}<small>${j < k ? "✓" : j === k ? "ตอนนี้" : "&nbsp;"}</small></span>`).join("");
+    const cap = $("#cap3");
+    if (k < 0) { cap.className = "cap"; cap.innerHTML = `cache ${nb} blocks ทั้ง 3 แบบเริ่มว่าง — ดูว่าแต่ละแบบวาง block ไว้ที่ไหน`; }
+    else {
+      const res = RS.map(r => `${r.n.split(" ")[0]}: ${r.R.out[k].hit ? "hit" : "miss"}`).join(" · ");
+      cap.className = "cap" + (k === seq.length - 1 ? " good" : "");
+      cap.innerHTML = `อ้างอิง block <b>${seq[k]}</b> — ${res}` + (k === seq.length - 1 ? `<small>สรุป miss: ${RS.map(r => `${r.n.split(" ")[0]} ${r.R.out.filter(o => !o.hit).length}`).join(" · ")}</small>` : "");
+    }
+  }
+  const p = Player($("#p3"), { count: () => seq ? seq.length + 1 : 1, show, delay: 1600 });
+  $("#seq3").onchange = build; $("#nb3").onchange = build;
+  LABS.push({ name: "assoc", cases, player: p }); cases.pick(0);
+})();
+</script>
+
+</body></html>

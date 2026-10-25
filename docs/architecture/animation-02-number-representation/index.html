@@ -1,0 +1,423 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Number Representation Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.bits{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.bit{width:34px;height:40px;border-radius:8px;border:2px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:20px;font-weight:700;transition:transform .45s,background .3s,border-color .3s;transform-style:preserve-3d}
+.bit.flip{transform:rotateX(360deg);background:var(--wait-soft);border-color:var(--wait)}
+.bit.hot{background:var(--wait-soft);border-color:var(--wait)}
+.bit.ok{background:var(--ok-soft);border-color:var(--ok)}
+.bit.dim{opacity:.35}
+.bit.s{background:var(--c4s);border-color:var(--c4)} .bit.e{background:var(--c2s);border-color:var(--c2)} .bit.m{background:var(--c1s);border-color:var(--c1)}
+.bit.sm{width:22px;height:30px;font-size:14px;border-radius:5px}
+.rowlab{width:150px;font-size:14px;color:var(--muted);flex:none}
+.carry{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--bad);width:34px;text-align:center}
+.inp{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0;font-size:15px}
+.inp label{display:flex;gap:6px;align-items:center}
+.interp td,.interp th{text-align:center;font-size:14px}
+.interp td.hl2{background:var(--ok-soft);font-weight:700}
+.fr{font-family:"JetBrains Mono",monospace;font-size:14px;border-collapse:collapse;width:auto}
+.fr td{padding:2px 10px;border:1px solid var(--line)}
+.fr tr.hot td{background:var(--wait-soft)}
+.seg3{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.seg3 > div small{display:block;text-align:center;font-size:12px;color:var(--muted)}
+</style>
+<main>
+<h1>Data Representation: เลขลบ · การบวก · IEEE 754</h1>
+<p class="lead">Chapter 03 — Data Representation · ใส่ตัวเลขเองได้ทุกหัวข้อ แล้วกด ▶ เล่น</p>
+<ul class="toc"><li><a href="#s1">1. แปลงเป็น 2's complement</a></li><li><a href="#s2">2. บวกเลข 1's vs 2's</a></li><li><a href="#s3">3. IEEE 754 single precision</a></li></ul>
+
+<h2 id="s1">1. แปลงเลขลบเป็น 1's / 2's complement</h2>
+<div class="card">
+<div class="inp">
+  <label>เลขฐานสิบ <input id="n1" type="number" value="-5"></label>
+  <label>จำนวน bit <select id="w1"><option>4</option><option selected>8</option><option>16</option></select></label>
+  <label><input type="checkbox" id="short1"> แสดงวิธีลัด (หา 1 ตัวแรกจาก LSB)</label>
+</div>
+<div class="cap" id="cap1"></div>
+<div id="v1"></div>
+<div class="tw"><table class="interp" id="t1"></table></div>
+<div id="p1"></div>
+</div>
+
+<h2 id="s2">2. บวกเลขแบบ 1's complement vs 2's complement</h2>
+<div class="card">
+<div id="cases2"></div>
+<div class="inp">
+  <label>A = <input id="a2" type="number" value="6"></label>
+  <label>B = <input id="b2" type="number" value="-5"></label>
+  <label>bit <select id="w2"><option selected>4</option><option>8</option></select></label>
+  <label>แบบ <select id="m2"><option value="2">2's complement</option><option value="1">1's complement</option></select></label>
+</div>
+<div class="cap" id="cap2"></div>
+<div id="v2"></div>
+<div id="p2"></div>
+<p class="tip">💡 <b>2's</b>: carry ที่หลุดจาก MSB → <b>ทิ้ง</b> · <b>1's</b>: carry ที่หลุด → <b>บวกกลับที่ LSB</b> (end-around carry) · overflow เกิดเมื่อบวกเลขเครื่องหมายเดียวกันแล้วได้ผลเครื่องหมายตรงข้าม</p>
+</div>
+
+<h2 id="s3">3. IEEE 754 single precision (32 bit)</h2>
+<div class="card">
+<p class="desc"><b>N = (−1)<sup>S</sup> × 1.M × 2<sup>(E − 127)</sup></b> · Sign 1 bit · Exponent 8 bit (เก็บ E = e + 127) · Mantissa 23 bit (ไม่เก็บเลข 1 หน้าจุด)</p>
+<div id="cases3"></div>
+<div class="inp"><label>เลขฐานสิบ <input id="x3" type="text" value="17.15" style="width:120px"></label><button class="primary" id="go3">แปลง</button></div>
+<div class="cap" id="cap3"></div>
+<div id="v3"></div>
+<div id="p3"></div>
+</div>
+</main>
+<script>
+const bitsOf = (v, w) => Array.from({ length: w }, (_, k) => (v >> (w - 1 - k)) & 1);
+const bitBox = (b, cls = "") => `<div class="bit ${cls}">${b}</div>`;
+const row = (lab, bits, clsFn = () => "") => `<div class="bits"><div class="rowlab">${lab}</div>${bits.map((b, k) => bitBox(b, clsFn(k, b))).join("")}</div>`;
+const str = a => a.join("").replace(/(.{4})(?=.)/g, "$1 ");
+// ===== 1 =====
+(function () {
+  let S = [];
+  function build() {
+    const w = +$("#w1").value; let n = Math.round(+$("#n1").value || 0);
+    const lo = -(2 ** (w - 1)), hi = 2 ** (w - 1) - 1;
+    if (n < lo) n = lo; if (n > hi) n = hi; $("#n1").value = n;
+    const mag = Math.abs(n), mb = bitsOf(mag, w);
+    S = [];
+    S.push({ cap: `${n} → ขนาด (magnitude) = ${mag} → เขียนเป็น binary ${w} bit`, rows: [["|" + n + "|", mb, () => ""]] });
+    if (n >= 0) {
+      S.push({ cap: `${n} เป็นบวก → ทั้ง S&M, 1's, 2's เขียนเหมือนกัน = <b>${str(mb)}</b>`, rows: [["|" + n + "|", mb, () => "ok"]], done: true, good: true });
+    } else if ($("#short1").checked) {
+      const first = mb.lastIndexOf(1);
+      S.push({ cap: `วิธีลัด: หา <b>1 ตัวแรก</b>นับจากขวา (LSB) — เก็บมันกับ bit ทางขวาไว้เหมือนเดิม`, rows: [["|" + n + "|", mb, k => k >= first ? "hot" : ""]] });
+      const r = mb.map((b, k) => k < first ? 1 - b : b);
+      S.push({ cap: `กลับทุก bit ที่อยู่ทาง<b>ซ้าย</b>ของ 1 ตัวนั้น → ได้ 2's complement = <b>${str(r)}</b>`, rows: [["|" + n + "|", mb, k => k >= first ? "hot" : ""], ["2's complement", r, k => k < first ? "flip" : "ok"]], done: true, good: true });
+    } else {
+      const inv = mb.map(b => 1 - b);
+      S.push({ cap: `<b>1's complement</b>: กลับทุก bit (0 ↔ 1) = (2ⁿ − 1) − m → <b>${str(inv)}</b>`, rows: [["|" + n + "|", mb], ["1's complement", inv, () => "flip"]] });
+      // +1 ripple
+      let c = 1, cur = [...inv];
+      for (let k = w - 1; k >= 0 && c; k--) {
+        const s = cur[k] + c; cur = [...cur]; cur[k] = s & 1; c = s >> 1;
+        const snap = [...cur], kk = k, carry = c;
+        S.push({ cap: `<b>+1</b> ที่ bit ${w - 1 - kk} (นับจากขวา): ${inv[kk]} + 1 = ${inv[kk] + 1 >= 2 ? "10 → เขียน 0 ทด 1" : "1 → ไม่มีทด หยุด"}`, rows: [["|" + n + "|", mb], ["1's complement", inv], ["+ 1", snap, j => j === kk ? "hot" : j > kk ? "ok" : "dim"]] });
+      }
+      S.push({ cap: `<b>2's complement</b> = 1's + 1 = <b>${str(cur)}</b>`, rows: [["|" + n + "|", mb], ["1's complement", inv], ["2's complement", cur, () => "ok"]], done: true, good: true });
+    }
+    // interpretation table of the final pattern
+    const fin = S[S.length - 1].rows[S[S.length - 1].rows.length - 1][1];
+    S.fin = fin; S.n = n; S.w = w;
+    p.reset();
+  }
+  function interp(bits) {
+    const w = bits.length, u = parseInt(bits.join(""), 2), msb = bits[0];
+    const sm = msb ? -(u - 2 ** (w - 1)) : u;
+    const one = msb ? -((2 ** w - 1) - u) : u;
+    const two = msb ? u - 2 ** w : u;
+    const bias = u - (2 ** (w - 1) - 1);
+    return { u, sm: sm === 0 && msb ? "−0" : sm, one: one === 0 && msb ? "−0" : one, two, bias };
+  }
+  function show(i) {
+    const st = S[i];
+    $("#v1").innerHTML = st.rows.map(r => row(r[0], r[1], r[2] || (() => ""))).join("");
+    $("#cap1").innerHTML = st.cap; $("#cap1").className = "cap" + (st.good ? " good" : "");
+    if (st.done) {
+      const I = interp(S.fin), w = S.w;
+      $("#t1").innerHTML = `<tr><th>ถ้าอ่าน ${str(S.fin)} เป็น…</th><th>Unsigned</th><th>Sign & Magnitude</th><th>1's complement</th><th>2's complement</th><th>Bias ${2 ** (w - 1) - 1}</th></tr>` +
+        `<tr><td>ค่า</td><td>${I.u}</td><td>${I.sm}</td><td>${I.one}</td><td class="hl2">${I.two}</td><td>${I.bias}</td></tr>` +
+        `<tr><td>ช่วงของ ${w} bit</td><td>0..${2 ** w - 1}</td><td>±${2 ** (w - 1) - 1} (มี ±0)</td><td>±${2 ** (w - 1) - 1} (มี ±0)</td><td>${-(2 ** (w - 1))}..${2 ** (w - 1) - 1}</td><td>${-(2 ** (w - 1) - 1)}..${2 ** (w - 1)}</td></tr>`;
+    } else $("#t1").innerHTML = "";
+  }
+  const p = Player($("#p1"), { count: () => S.length || 1, show, delay: 1300 });
+  ["n1", "w1", "short1"].forEach(id => $("#" + id).onchange = build);
+  LABS.push({ name: "twos", cases: null, player: p });
+  build();
+})();
+// ===== 2 =====
+(function () {
+  let S = [];
+  const PRE = [["6 + (−5) สไลด์", 6, -5, 4, "2"], ["6 + (−5) แบบ 1's", 6, -5, 4, "1"], ["(−3) + (−4)", -3, -4, 4, "2"], ["5 + 4 (overflow)", 5, 4, 4, "2"]];
+  const cases = Cases($("#cases2"), PRE.map(p => p[0]), k => { const [, a, b, w, m] = PRE[k]; $("#a2").value = a; $("#b2").value = b; $("#w2").value = w; $("#m2").value = m; build(); });
+  function enc(v, w, m) { if (v >= 0) return bitsOf(v, w); const mb = bitsOf(-v, w); return m === "1" ? mb.map(b => 1 - b) : bitsOf((2 ** w + v), w); }
+  function dec(bits, m) { const w = bits.length, u = parseInt(bits.join(""), 2); if (!bits[0]) return u; return m === "1" ? -((2 ** w - 1) - u) : u - 2 ** w; }
+  function build() {
+    const w = +$("#w2").value, m = $("#m2").value;
+    const lim = m === "1" ? 2 ** (w - 1) - 1 : 2 ** (w - 1);
+    let a = Math.round(+$("#a2").value || 0), b = Math.round(+$("#b2").value || 0);
+    a = Math.max(-lim, Math.min(2 ** (w - 1) - 1, a)); b = Math.max(-lim, Math.min(2 ** (w - 1) - 1, b)); $("#a2").value = a; $("#b2").value = b;
+    const A = enc(a, w, m), B = enc(b, w, m);
+    S = [{ cap: `เขียน A = ${a} และ B = ${b} เป็น ${m}'s complement ${w} bit`, A, B, sum: Array(w).fill(""), car: Array(w + 1).fill(""), k: -1 }];
+    let c = 0; const sum = Array(w).fill(""), car = Array(w + 1).fill("");
+    let cinMSB = 0;
+    for (let k = w - 1; k >= 0; k--) {
+      const s = A[k] + B[k] + c; if (k === 0) cinMSB = c;
+      sum[k] = s & 1; const cout = s >> 1; car[k] = cout ? 1 : "";
+      S.push({ cap: `bit ${w - 1 - k}: ${A[k]} + ${B[k]}${c ? " + 1 (ทด)" : ""} = ${s} → เขียน <b>${s & 1}</b>${cout ? " ทด 1" : ""}`, A, B, sum: [...sum], car: [...car], k });
+      c = cout;
+    }
+    let res = [...sum], extra = "";
+    if (c) {
+      if (m === "2") { S.push({ cap: `มี carry หลุดออกจาก MSB → <b>2's complement: ทิ้ง carry</b>`, A, B, sum: [...sum], car: [...car], k: -2, out: 1, drop: true }); }
+      else {
+        let cc = 1; res = [...sum];
+        for (let k = w - 1; k >= 0 && cc; k--) { const s = res[k] + cc; res[k] = s & 1; cc = s >> 1; }
+        S.push({ cap: `มี carry หลุดออกจาก MSB → <b>1's complement: นำ carry ไปบวกกลับที่ LSB</b> (end-around carry)`, A, B, sum: [...sum], car: [...car], k: -2, out: 1, around: res });
+      }
+    }
+    const val = dec(res, m), ovf = cinMSB !== c;
+    const real = a + b;
+    S.push({ cap: ovf ? `ผลลัพธ์ ${str(res)} = ${val} แต่ ${a} + ${b} = ${real} → <b>overflow!</b> (เกินช่วงของ ${w} bit — บวกเลขบวก 2 ตัวได้ผลเป็นลบ หรือกลับกัน)` : `ผลลัพธ์ = <b>${str(res)}</b> = ${val} ✓ (${a} + ${b} = ${real})`,
+      A, B, sum: [...sum], car: [...car], k: -3, out: c, res, around: S[S.length - 1].around, drop: S[S.length - 1].drop, bad: ovf, good: !ovf });
+    p.reset();
+  }
+  function show(i) {
+    const st = S[i], w = st.A.length;
+    // carries are written above the next column (to the left)
+    const cr = Array(w).fill(""); for (let k = 1; k < w; k++) if (st.car[k] === 1) cr[k - 1] = "1";
+    let html = `<div class="bits"><div class="rowlab">ทด (carry)</div>${cr.map(c => `<div class="carry">${c}</div>`).join("")}${st.car[0] === 1 ? `<div class="carry" style="width:auto">← carry ออก</div>` : ""}</div>`;
+    html += row("A", st.A, k => k === st.k ? "hot" : "") + row("+ B", st.B, k => k === st.k ? "hot" : "");
+    html += `<div class="bits"><div class="rowlab">ผลบวก</div>${st.sum.map((b, k) => bitBox(b === "" ? "" : b, b === "" ? "dim" : k === st.k ? "flip" : "ok")).join("")}${st.out ? `<div class="bit ${st.drop ? "dim" : "hot"}" style="margin-left:8px;text-decoration:${st.drop ? "line-through" : "none"}">1</div><span class="kbd">${st.drop ? "ทิ้ง" : "carry"}</span>` : ""}</div>`;
+    if (st.around) html += row("+1 ที่ LSB →", st.around, () => "ok");
+    $("#v2").innerHTML = html;
+    $("#cap2").innerHTML = st.cap; $("#cap2").className = "cap" + (st.bad ? " bad" : st.good ? " good" : st.out ? " warn" : "");
+  }
+  const p = Player($("#p2"), { count: () => S.length || 1, show, delay: 1300 });
+  ["a2", "b2", "w2", "m2"].forEach(id => $("#" + id).onchange = build);
+  LABS.push({ name: "add", cases, player: p });
+  cases.pick(0);
+})();
+// ===== 3 =====
+(function () {
+  let S = [];
+  const PRE = [["17.15 (สไลด์)", "17.15"], ["5.8125", "5.8125"], ["−6.75", "-6.75"], ["0.1", "0.1"]];
+  const cases = Cases($("#cases3"), PRE.map(p => p[0]), k => { $("#x3").value = PRE[k][1]; build(); });
+  function f32bits(x) { const b = new DataView(new ArrayBuffer(4)); b.setFloat32(0, x); return bitsOf(b.getUint32(0) >>> 0, 32).map((_, k) => (b.getUint32(0) >>> (31 - k)) & 1); }
+  function build() {
+    const x = parseFloat(String($("#x3").value).replace("−", "-"));
+    S = [];
+    if (!isFinite(x) || x === 0 || Math.abs(x) > 1e30 || Math.abs(x) < 1e-30) { S.push({ cap: "ใส่ตัวเลขที่ไม่ใช่ 0 (ระหว่าง ±1e-30 ถึง ±1e30)", html: "" }); p.reset(); return; }
+    const sgn = x < 0 ? 1 : 0, ax = Math.abs(x);
+    const ip = Math.floor(ax); let fp = ax - ip;
+    const ib = ip.toString(2);
+    S.push({ cap: `<b>1. Sign</b>: ${x} ${sgn ? "เป็นลบ → S = 1" : "เป็นบวก → S = 0"}`, html: row("S", [sgn], () => "s") });
+    S.push({ cap: `<b>2. ส่วนจำนวนเต็ม</b> ${ip} → binary = <b>${ib}</b>`, html: `<p class="mono" style="font-size:18px">${ip} = ${ib}₂</p>` });
+    // fraction by repeated *2 using exact decimal string arithmetic is overkill; use float with a cap
+    const rows = []; const fb = [];
+    let f = fp;
+    for (let k = 0; k < 24 && f > 0; k++) { const t = f * 2; const bit = t >= 1 ? 1 : 0; rows.push([f, t, bit]); fb.push(bit); f = t - bit; if (Math.abs(f) < 1e-12) f = 0; }
+    const shownRows = rows.slice(0, 12);
+    const frTable = (n) => `<table class="fr"><tr><td>เศษ</td><td>× 2</td><td>bit</td></tr>${shownRows.slice(0, n).map((r, k) => `<tr class="${k === n - 1 ? "hot" : ""}"><td>${+r[0].toFixed(6)}</td><td>${+r[1].toFixed(6)}</td><td><b>${r[2]}</b></td></tr>`).join("")}${n >= 12 && rows.length > 12 ? "<tr><td colspan=3>… (ทำต่อไปเรื่อย ๆ)</td></tr>" : ""}</table>`;
+    if (fp === 0) S.push({ cap: "<b>3. ส่วนทศนิยม</b> = 0 → ไม่มี bit หลังจุด", html: "" });
+    else for (let n = 1; n <= Math.min(shownRows.length, 12); n++) S.push({ cap: `<b>3. ส่วนทศนิยม</b>: คูณ 2 ไปเรื่อย ๆ — ได้ ≥ 1 เขียน 1 แล้วลบ 1 ออก, ได้ < 1 เขียน 0 · ตอนนี้ได้ .${fb.slice(0, n).join("")}`, html: frTable(n) });
+    const fstr = fb.join("");
+    const full = ib + "." + (fstr || "0");
+    S.push({ cap: `<b>4. รวมกัน</b>: ${ax} = <b>${ib}.${fstr.slice(0, 16)}${fstr.length > 16 ? "…" : ""}</b>₂`, html: `<p class="mono" style="font-size:18px">${ib}.${fstr.slice(0, 24)}${rows.length >= 24 ? "…" : ""}</p>` });
+    // normalize
+    let e, after;
+    if (ip >= 1) { e = ib.length - 1; after = ib.slice(1) + fstr; }
+    else { const first = fstr.indexOf("1"); e = -(first + 1); after = fstr.slice(first + 1); }
+    S.push({ cap: `<b>5. Normalize</b>: เลื่อนจุดให้เหลือ 1 หน้าจุด → 1.${after.slice(0, 16)}${after.length > 16 ? "…" : ""} × 2<sup>${e}</sup> → e = <b>${e}</b>`, html: `<p class="mono" style="font-size:18px">1.${after.slice(0, 23)}${after.length > 23 ? "…" : ""} × 2<sup>${e}</sup></p>` });
+    const E = e + 127, Eb = bitsOf(E, 8);
+    S.push({ cap: `<b>6. Exponent</b>: E = e + 127 = ${e} + 127 = <b>${E}</b> = ${str(Eb)}`, html: row("E (8 bit)", Eb, () => "e") });
+    const mant = (after + "0".repeat(23)).slice(0, 23).split("").map(Number);
+    S.push({ cap: `<b>7. Mantissa</b>: เอา bit หลังจุด 23 ตัว (ไม่เก็บเลข 1 หน้าจุด) แล้วเติม 0 ให้ครบ`, html: row("M (23 bit)", mant, () => "m sm") });
+    const real = f32bits(x);
+    const mine = [sgn, ...Eb, ...mant];
+    const hex = parseInt(real.join(""), 2).toString(16).toUpperCase().padStart(8, "0");
+    const diff = real.join("") !== mine.join("");
+    let note = "";
+    if (diff) note = `<p class="kbd">หมายเหตุ: hardware จริงจะ<b>ปัด</b> bit สุดท้ายของ mantissa (round to nearest) จึงอาจต่างจากการตัดทิ้งตรงนี้ 1 หน่วย: ค่าจริง = ${str(real.slice(9))}</p>`;
+    if (String($("#x3").value).trim() === "17.15") note += `<p class="warnbox">ในสไลด์เขียน 17.15 = 10001.0010011 (ใช้ทศนิยมแค่ 7 bit) แล้วเติม 0 → mantissa = 0001 0010 0110 0000… · ค่าจริง 0.15 เป็นทศนิยมซ้ำไม่รู้จบ (.0010011001100110011…) จึงได้ mantissa = 0001 0010 0110 0110 0110 011 — แต่วิธีคิดเหมือนกัน</p>`;
+    S.push({ cap: `<b>8. รวม 32 bit</b>: S | E | M = ${sgn} | ${str(Eb)} | ${str(mant)} · hex = <b>${hex}</b>`, good: true,
+      html: `<div class="seg3"><div>${row("", [sgn], () => "s sm").replace('<div class="rowlab"></div>', "")}<small>S</small></div><div>${row("", Eb, () => "e sm").replace('<div class="rowlab"></div>', "")}<small>Exponent (8)</small></div><div>${row("", mant, () => "m sm").replace('<div class="rowlab"></div>', "")}<small>Mantissa (23)</small></div></div>${note}` });
+    p.reset();
+  }
+  function show(i) { const st = S[i]; $("#cap3").innerHTML = st.cap; $("#cap3").className = "cap" + (st.good ? " good" : ""); $("#v3").innerHTML = st.html; }
+  const p = Player($("#p3"), { count: () => S.length || 1, show, delay: 1300 });
+  $("#go3").onclick = build; $("#x3").onchange = build;
+  LABS.push({ name: "ieee", cases, player: p });
+  cases.pick(0);
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,609 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipelining Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.st-IF{--sc:var(--c1);--ss:var(--c1s)} .st-ID{--sc:var(--c2);--ss:var(--c2s)} .st-EX{--sc:var(--c3);--ss:var(--c3s)}
+.st-MEM{--sc:var(--c4);--ss:var(--c4s)} .st-WB{--sc:var(--c5);--ss:var(--c5s)}
+.grid{border-collapse:separate;border-spacing:3px;width:auto;background:none;font-size:13px}
+.grid th,.grid td{border:none;padding:0;text-align:center}
+.grid th{font-weight:600;color:var(--muted);font-size:12px;min-width:38px;padding:2px 0;border-radius:5px}
+.grid th.now{background:var(--accent);color:#fff}
+.grid td.lbl{text-align:left;padding:0 10px 0 2px;white-space:nowrap;font-family:"JetBrains Mono",monospace;font-size:13px}
+.grid td.lbl.flushed{text-decoration:line-through;color:var(--muted)}
+.grid td.lbl.bub{color:var(--muted);font-style:italic}
+.cell{height:28px;min-width:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;
+  background:var(--ss);color:var(--sc);border:1.5px solid var(--sc);transition:opacity .2s}
+.cell.stall{background:repeating-linear-gradient(135deg,var(--ss) 0 5px,transparent 5px 10px);border-style:dashed}
+.cell.nop{background:var(--slot);color:var(--muted);border:1.5px dashed var(--line)}
+.cell.hide{opacity:0}
+.cell.cur{box-shadow:0 0 0 2px var(--accent)}
+.cell.fwdsrc{outline:2px solid var(--ok);outline-offset:1px}
+.cell.fwddst{outline:2px solid var(--ok);outline-offset:1px}
+.regrow td{font-size:12px;color:var(--muted)}
+#pipeSvg{width:100%;height:auto;display:block}
+.opts{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:15px;margin:6px 0}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.opts select{font:inherit;font-size:14px;padding:3px 8px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+pre.code{background:var(--code);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:13.5px;overflow-x:auto;line-height:1.55}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.stat{background:var(--slot);border-radius:8px;padding:4px 12px;font-size:14px}
+.stat b{font-family:"JetBrains Mono",monospace}
+#tSvg{width:100%;height:auto;display:block}
+</style>
+<main>
+<h1>Pipelining: ดูทีละ clock cycle</h1>
+<p class="lead">Chapter 07 — Computing Unit · กด ▶ เล่น หรือ ถัดไป เพื่อเดิน pipeline ทีละ clock cycle (ใช้ปุ่ม ← → บนคีย์บอร์ดได้)</p>
+<ul class="toc"><li><a href="#s1">1. Single-cycle vs Pipelined</a></li><li><a href="#s2">2. Pipeline diagram + Hazards</a></li><li><a href="#s3">3. สรุปกฎที่ต้องจำ</a></li></ul>
+
+<h2 id="s1">1. Single-cycle vs Pipelined</h2>
+<div class="card">
+<p class="desc">คำสั่ง <code>ld</code> 3 คำสั่ง แต่ละขั้นใช้เวลา: IF 200 · Reg read 100 · ALU 200 · MEM 200 · Reg write 100 ps (ตารางในสไลด์)<br>
+Single-cycle: clock ต้องยาวเท่าคำสั่งที่ช้าที่สุด = <b>800 ps</b> · Pipelined: clock = ขั้นที่ช้าที่สุด = <b>200 ps</b></p>
+<div class="cap" id="tCap"></div>
+<svg id="tSvg" viewBox="0 0 1000 330" role="img" aria-label="เทียบเวลา single-cycle กับ pipelined"></svg>
+<div id="tPlayer"></div>
+</div>
+
+<h2 id="s2">2. Pipeline diagram + Hazards</h2>
+<div class="card">
+<div id="cases"></div>
+<div class="desc" id="desc"></div>
+<div class="opts">
+  <label><input type="checkbox" id="optFwd"> เปิด forwarding</label>
+  <label>ตัดสิน branch ในขั้น <select id="optBr"><option value="MEM">MEM (flush 3)</option><option value="ID">ID (flush 1)</option></select></label>
+</div>
+<div class="cap" id="cap"></div>
+<svg id="pipeSvg" viewBox="0 0 1000 215" role="img" aria-label="สถานะ pipeline ใน cycle ปัจจุบัน"></svg>
+<div class="legend">
+  <span><i style="background:var(--c1s);border-color:var(--c1)"></i>IF</span><span><i style="background:var(--c2s);border-color:var(--c2)"></i>ID</span>
+  <span><i style="background:var(--c3s);border-color:var(--c3)"></i>EX</span><span><i style="background:var(--c4s);border-color:var(--c4)"></i>MEM</span>
+  <span><i style="background:var(--c5s);border-color:var(--c5)"></i>WB</span>
+  <span><i style="background:repeating-linear-gradient(135deg,var(--c2s) 0 3px,transparent 3px 6px);border-color:var(--c2);border-style:dashed"></i>stall (ค้างอยู่ขั้นเดิม)</span>
+  <span><i style="background:var(--slot);border-color:var(--line);border-style:dashed"></i>bubble / nop</span>
+  <span>A / B ในกล่อง EX = ค่า mux ForwardA / ForwardB (00 register, 10 EX/MEM, 01 MEM/WB)</span>
+</div>
+<div class="tw"><table class="grid" id="grid"></table></div>
+<div class="stats" id="stats"></div>
+<div id="player"></div>
+</div>
+
+<h2 id="s3">3. สรุปกฎที่ต้องจำ</h2>
+<div class="tw"><table>
+<thead><tr><th>สถานการณ์</th><th>ไม่มี forwarding</th><th>มี forwarding</th></tr></thead>
+<tbody>
+<tr><td>ALU → ALU ติดกัน (<code>add x19</code> → <code>sub ..x19..</code>)</td><td>bubble 2 รอบ (รอ WB; เขียนครึ่งแรก อ่านครึ่งหลังของ cycle)</td><td>ไม่ต้อง stall — forward จาก EX/MEM (mux = 10)</td></tr>
+<tr><td>ห่างกัน 1 คำสั่ง</td><td>bubble 1 รอบ</td><td>forward จาก MEM/WB (mux = 01)</td></tr>
+<tr><td>Load-use (<code>ld x1</code> → ใช้ x1 ทันที)</td><td>bubble 2 รอบ</td><td><b>ยัง stall 1 รอบ</b> แล้ว forward ("can't forward backward in time")</td></tr>
+<tr><td>Branch taken</td><td colspan="2">ตัดสินใน MEM → flush 3 คำสั่ง · ย้ายไปตัดสินใน ID → flush 1 คำสั่ง (IF.Flush)</td></tr>
+</tbody></table></div>
+<p class="tip">💡 Forward เฉพาะเมื่อ <b>RegWrite = 1</b> และ <b>Rd ≠ x0</b> · ถ้าทั้ง EX/MEM และ MEM/WB เขียน register เดียวกัน (double data hazard) ให้ใช้ค่าใหม่สุด คือจาก EX/MEM<br>
+Load-use ตรวจในขั้น ID: <code>ID/EX.MemRead and (ID/EX.Rd = IF/ID.Rs1 or ID/EX.Rd = IF/ID.Rs2)</code> → control ใน ID/EX = 0 และไม่อัปเดต PC กับ IF/ID</p>
+</main>
+<script>
+// ================= 1. timing lab =================
+(function () {
+  const svg = $("#tSvg"), cap = $("#tCap");
+  const STG = [["IF", 200, "c1"], ["Reg", 100, "c2"], ["ALU", 200, "c3"], ["MEM", 200, "c4"], ["Reg", 100, "c5"]];
+  const X0 = 160, SC = 0.34; // px per ps
+  const xs = t => X0 + t * SC;
+  const names = ["ld x1, 100(x0)", "ld x2, 200(x0)", "ld x3, 300(x0)"];
+  function bars(y0, pipelined, t) {
+    let s = "";
+    names.forEach((nm, k) => {
+      const start = pipelined ? k * 200 : k * 800;
+      let tt = start;
+      const y = y0 + k * 34;
+      s += `<text x="${X0 - 8}" y="${y + 18}" text-anchor="end" font-size="13" fill="var(--ink)" font-family="JetBrains Mono,monospace">${nm}</text>`;
+      STG.forEach(([lab, d, c]) => {
+        const slot = pipelined ? 200 : d;
+        const w = d * SC;
+        const x = xs(tt);
+        const vis = t >= tt + d ? 1 : t > tt ? (t - tt) / d : 0;
+        if (vis > 0) s += `<rect x="${x}" y="${y}" width="${w * vis}" height="26" rx="4" fill="var(--${c}s)" stroke="var(--${c})"/>` +
+          (vis === 1 ? `<text x="${x + w / 2}" y="${y + 17}" text-anchor="middle" font-size="11" fill="var(--${c})" font-weight="600">${lab}</text>` : "");
+        else s += `<rect x="${x}" y="${y}" width="${w}" height="26" rx="4" fill="none" stroke="var(--line)" stroke-dasharray="3 3"/>`;
+        tt += slot;
+      });
+    });
+    return s;
+  }
+  const TMAX = 2400, N = TMAX / 100 + 1;
+  function show(i) {
+    const t = i * 100;
+    let s = "";
+    for (let g = 0; g <= TMAX; g += 200) s += `<line x1="${xs(g)}" x2="${xs(g)}" y1="20" y2="320" stroke="var(--line)"/>` +
+      `<text x="${xs(g)}" y="14" text-anchor="middle" font-size="11" fill="var(--muted)">${g}</text>`;
+    s += `<text x="8" y="40" font-size="14" font-weight="700" fill="var(--ink)">Single-cycle <tspan font-size="12" font-weight="400" fill="var(--muted)">(Tc = 800 ps)</tspan></text>`;
+    s += bars(50, false, t);
+    s += `<text x="8" y="183" font-size="14" font-weight="700" fill="var(--ink)">Pipelined <tspan font-size="12" font-weight="400" fill="var(--muted)">(Tc = 200 ps)</tspan></text>`;
+    s += bars(193, true, t);
+    s += `<line x1="${xs(t)}" x2="${xs(t)}" y1="20" y2="320" stroke="var(--bad)" stroke-width="2"/>`;
+    svg.innerHTML = s;
+    const doneS = Math.min(3, Math.floor(t / 800)), doneP = t >= 800 ? Math.min(3, Math.floor((t - 800) / 200) + 1) : 0;
+    let msg = `เวลา ${t} ps — Single-cycle เสร็จ ${doneS}/3 คำสั่ง · Pipelined เสร็จ ${doneP}/3 คำสั่ง`;
+    let sub = "";
+    if (t === 0) sub = "ใน pipelined แต่ละขั้นต้องรอให้ครบ 200 ps (ขั้น Reg ใช้จริง 100 ps แต่ต้องรอ slot) เพราะทุกขั้นเดินพร้อมกันตาม clock เดียว";
+    else if (t === 1400) sub = "Pipelined จบทั้ง 3 คำสั่งที่ 1400 ps = (5 + 2) × 200 ps";
+    else if (t === 2400) sub = "Single-cycle จบที่ 2400 ps = 3 × 800 ps · ถ้าคำสั่งเยอะมาก เวลาต่อคำสั่ง 800 → 200 ps ⇒ เร็วขึ้นราว 4 เท่า (= จำนวนขั้นเมื่อขั้นสมดุล) · latency ของ 1 คำสั่งไม่ได้ลดลง (pipelined = 1000 ps) แต่ throughput เพิ่ม";
+    else if (t > 1400) sub = "Pipelined เสร็จแล้ว — single-cycle ยังทำอยู่";
+    cap.innerHTML = msg + (sub ? `<small>${sub}</small>` : "");
+    cap.className = "cap" + (t === 2400 ? " good" : "");
+  }
+  const p = Player($("#tPlayer"), { count: () => N, show, delay: 450 });
+  LABS.push({ name: "timing", cases: null, player: p });
+  p.go(0);
+})();
+
+// ================= 2. pipeline engine =================
+const STAGES = ["IF", "ID", "EX", "MEM", "WB"];
+function parse(line) {
+  let m, addr = null, s = line.trim();
+  if ((m = s.match(/^(\d+):?\s+(.*)$/))) { addr = +m[1]; s = m[2]; }
+  const op = s.split(/\s+/)[0];
+  const args = s.slice(op.length).split(",").map(a => a.trim());
+  const reg = a => (a.match(/x\d+/) || [null])[0];
+  let ins = { txt: line.trim(), op, addr, rd: null, rs1: null, rs2: null, type: "R" };
+  if (op === "ld") { ins.type = "ld"; ins.rd = reg(args[0]); ins.rs1 = reg(args[1]); }
+  else if (op === "sd") { ins.type = "sd"; ins.rs2 = reg(args[0]); ins.rs1 = reg(args[1]); }
+  else if (op === "beq" || op === "bne") { ins.type = "br"; ins.rs1 = reg(args[0]); ins.rs2 = reg(args[1]); }
+  else if (/i$/.test(op) && !/x\d+/.test(args[2] || "")) { ins.rd = reg(args[0]); ins.rs1 = reg(args[1]); }
+  else { ins.rd = reg(args[0]); ins.rs1 = reg(args[1]); ins.rs2 = reg(args[2]); }
+  if (ins.rd === "x0") ins.rd = null; // writes to x0 never forward
+  return ins;
+}
+const short = t => t.replace(/^\d+:?\s+/, "").split(",")[0];
+
+// prog: [{txt, ...}] ; branch: {taken:true, wrong:[lines], target:[lines]}
+function schedule(lines, opt) {
+  const list = [];
+  lines.forEach(l => list.push({ ...parse(l), path: "main" }));
+  const rows = []; // {ins, IF, IDs, EX, flushed, flushAt}
+  const ev = {}; // cycle -> [ {t, cls} ]
+  const add = (c, t, cls = "") => { ev[c] = ev[c] || []; if (!ev[c].some(e => e.t === t)) ev[c].push({ t, cls }); };
+  let redirect = 0;
+  const done = [];
+  function place(ins, wrong) {
+    const prev = rows[rows.length - 1];
+    const IF = Math.max(prev ? prev.IDs : 1, redirect || 1, 1);
+    let IDs = Math.max(IF + 1, prev ? prev.EX : 0);
+    let EX = Math.max(IDs + 1, prev ? prev.EX + 1 : 0);
+    const need = []; // reasons for waiting
+    const fw = {};
+    if (!wrong) for (const k of ["rs1", "rs2"]) {
+      const r = ins[k]; if (!r || r === "x0") continue;
+      let j = -1;
+      for (let q = rows.length - 1; q >= 0; q--) if (!rows[q].flushed && rows[q].ins.rd === r) { j = q; break; }
+      if (j < 0) continue;
+      const P = rows[j];
+      const useID = ins.type === "br" && opt.br === "ID"; // branch compares registers in ID
+      let req;
+      if (!opt.fwd) req = P.EX + 3; // read in last ID cycle (EX-1), must be >= producer WB (P.EX+2)
+      else {
+        const ready = P.EX + (P.ins.type === "ld" ? 1 : 0); // value exists at the end of this cycle
+        req = useID ? ready + 2 : ready + 1;                // needed at start of EX (or of the ID cycle)
+      }
+      if (req > EX) { need.push({ r, P, req }); EX = req; }
+      fw[k] = { r, P };
+    }
+    const row = { ins, IF, IDs, EX, wrong, fw, need, flushed: false };
+    rows.push(row);
+    return row;
+  }
+  for (let k = 0; k < list.length; k++) {
+    const row = place(list[k], false);
+    if (row.ins.type === "br" && opt.branch) {
+      const R = opt.br === "MEM" ? row.EX + 1 : row.EX - 1; // resolve cycle
+      row.resolve = R;
+      // wrong-path instructions fetched before the redirect
+      for (const w of opt.branch.wrong) {
+        const prev = rows[rows.length - 1];
+        const IFw = prev.IDs;
+        if (IFw > R) break;
+        const r2 = place({ ...parse(w), path: "wrong" }, true);
+        r2.flushed = true; r2.flushAt = R;
+      }
+      redirect = R + 1;
+      for (const t of opt.branch.target) {
+        const r3 = place({ ...parse(t), path: "target" }, false);
+        redirect = 0;
+      }
+    }
+  }
+  // build table rows with bubbles
+  const out = [];
+  let lastEX = null;
+  for (const r of rows) {
+    const cells = {};
+    // IF (with stall repeats)
+    for (let c = r.IF; c < r.IDs; c++) cells[c] = { st: "IF", k: c === r.IF ? "" : "stall" };
+    for (let c = r.IDs; c < r.EX; c++) cells[c] = { st: "ID", k: c === r.IDs ? "" : "stall" };
+    cells[r.EX] = { st: "EX" }; cells[r.EX + 1] = { st: "MEM" }; cells[r.EX + 2] = { st: "WB" };
+    if (r.flushed) for (const c in cells) if (+c > r.flushAt) cells[c].k = "nop";
+    // bubbles caused by hazards (gap in EX sequence between consecutive non-wrong rows)
+    if (lastEX != null && r.need.length && r.EX - lastEX > 1) {
+      for (let b = lastEX + 1; b < r.EX; b++) out.push({ bubble: true, label: "bubble (nop)", cells: { [b]: { st: "EX", k: "nop" }, [b + 1]: { st: "MEM", k: "nop" }, [b + 2]: { st: "WB", k: "nop" } } });
+    }
+    lastEX = r.EX;
+    out.push({ r, label: r.ins.txt, cells });
+  }
+  const total = Math.max(...rows.map(r => r.EX + 2));
+  // ---------- events ----------
+  for (const r of rows) {
+    const nm = short(r.ins.txt);
+    if (r.need.length) {
+      for (let c = r.IDs + 1; c < r.EX; c++) {
+        const n = r.need[r.need.length - 1];
+        add(c, `<b>stall:</b> <code>${nm}</code> ค้างอยู่ใน ID เพราะยังไม่มีค่า <b>${n.r}</b> จาก <code>${short(n.P.ins.txt)}</code> → ใส่ bubble เข้า EX, ไม่อัปเดต PC กับ IF/ID`, "warn");
+      }
+    }
+    if (r.flushed) continue;
+    for (const k of ["rs1", "rs2"]) {
+      const f = r.fw[k]; if (!f) continue;
+      const P = f.P;
+      const useC = r.ins.type === "br" && opt.br === "ID" ? r.EX - 1 : r.EX;
+      const mux = k === "rs1" ? "ForwardA" : "ForwardB";
+      if (opt.fwd) {
+        const d = useC - P.EX;
+        if (d === 1 && P.ins.type !== "ld") { add(useC, `<b>forward ${f.r}</b> จาก <b>EX/MEM</b> (ผล ALU ของ <code>${short(P.ins.txt)}</code>) → ALU ของ <code>${nm}</code> · ${mux} = 10`, "good"); r.fwSrc = r.fwSrc || []; r.fwSrc.push({ c: useC, from: "EXMEM", P, k }); }
+        else if (d === 2) { add(useC, `<b>forward ${f.r}</b> จาก <b>MEM/WB</b> (${P.ins.type === "ld" ? "ข้อมูลที่ load มา" : "ผล ALU"} ของ <code>${short(P.ins.txt)}</code>) → ALU ของ <code>${nm}</code> · ${mux} = 01`, "good"); r.fwSrc = r.fwSrc || []; r.fwSrc.push({ c: useC, from: "MEMWB", P, k }); }
+        else if (d === 3) add(r.EX - 1, `<code>${nm}</code> อ่าน ${f.r} จาก register file ได้ทัน (<code>${short(P.ins.txt)}</code> เขียนในครึ่งแรกของ cycle, อ่านในครึ่งหลัง)`);
+      } else {
+        if (r.EX - 1 === P.EX + 2) add(r.EX - 1, `<code>${short(P.ins.txt)}</code> เขียน ${f.r} ในครึ่งแรกของ cycle → <code>${nm}</code> อ่านได้ในครึ่งหลัง (ไม่มี forwarding จึงต้องรอถึงตอนนี้)`);
+      }
+    }
+    if (r.resolve) {
+      const n = rows.filter(q => q.flushed && q.flushAt === r.resolve).length;
+      const tgt = opt.branch.target[0];
+      add(r.resolve, `<b>${short(r.ins.txt)}</b> ตัดสินผลในขั้น <b>${opt.br}</b>: taken → flush ${n} คำสั่งที่ fetch มาผิด (ตั้ง control = 0 กลายเป็น nop) และเปลี่ยน PC ไปที่ ${parse(tgt).addr ?? "target"}`, "bad");
+    }
+  }
+  return { rows, out, total, ev };
+}
+
+// ================= scenarios =================
+const SC = [
+  { name: "Pipeline ปกติ", fwd: true, br: "MEM",
+    prog: ["ld x10, 40(x1)", "sub x11, x2, x3", "add x12, x3, x4", "ld x13, 48(x1)", "add x14, x5, x6"],
+    desc: `<p><b>5 คำสั่งที่ไม่พึ่งกัน</b> (ตัวอย่างสไลด์) — ทุก cycle คำสั่งใหม่เข้า IF แล้วทุกตัวเลื่อนไป 1 ขั้น ไม่มี hazard</p><p>ดู <b>CC5</b>: pipeline เต็มทั้ง 5 ขั้น — add x14 (IF), ld x13 (ID), add x12 (EX), sub x11 (MEM), ld x10 (WB) · รวม 5 + (5 − 1) = 9 cycles</p>`,
+    notes: { 5: "CC5: ครบ 5 ขั้นพร้อมกัน = single-clock-cycle diagram ของ cycle นี้" } },
+  { name: "Data hazard (ไม่มี forwarding)", fwd: false, br: "MEM",
+    prog: ["add x19, x0, x1", "sub x2, x19, x3"],
+    desc: `<p><code>sub</code> ต้องใช้ <b>x19</b> ที่ <code>add</code> ยังไม่ได้เขียนลง register</p><p>ถ้าไม่มี forwarding ต้องรอให้ add ถึง WB (เขียนครึ่งแรก อ่านครึ่งหลังของ cycle) → <b>bubble 2 รอบ</b> · ลองติ๊ก "เปิด forwarding" ดู</p>` },
+  { name: "Forwarding", fwd: true, br: "MEM",
+    prog: ["add x19, x0, x1", "sub x2, x19, x3"],
+    desc: `<p>โจทย์เดิม แต่เปิด <b>forwarding (bypassing)</b> — ส่งผล ALU ของ add จาก pipeline register <b>EX/MEM</b> ตรงเข้า ALU ของ sub ทันทีที่คำนวณเสร็จ ไม่ต้องรอเขียน register → <b>ไม่ต้อง stall</b> (แลกกับสายเชื่อมเพิ่ม)</p>` },
+  { name: "Load-use", fwd: true, br: "MEM",
+    prog: ["ld x1, 0(x2)", "sub x4, x1, x5"],
+    desc: `<p><code>ld</code> ได้ข้อมูลหลังขั้น <b>MEM</b> แต่ <code>sub</code> ต้องใช้ตอนต้น EX ซึ่งเป็น cycle เดียวกัน → ส่งย้อนเวลาไม่ได้ ("can't forward backward in time")</p><p>ถึงจะมี forwarding ก็ต้อง <b>stall 1 รอบ</b> แล้วค่อย forward จาก MEM/WB</p>` },
+  { name: "ตรวจจับ forwarding (sub x2)", fwd: true, br: "MEM",
+    prog: ["sub x2, x1, x3", "and x12, x2, x5", "or x13, x6, x2", "add x14, x2, x2", "sd x15, 100(x2)"],
+    reg: { r: "x2", before: "10", after: "−20" },
+    desc: `<p>ทุกคำสั่งหลัง <code>sub</code> ใช้ <b>x2</b> (ค่าเดิม 10, ค่าใหม่ −20 ถูกเขียนใน CC5)</p><p><code>and</code> → กรณี <b>1a</b> (EX/MEM.Rd = ID/EX.Rs1) · <code>or</code> → กรณี <b>2b</b> (MEM/WB.Rd = ID/EX.Rs2) · <code>add</code>, <code>sd</code> อ่านจาก register ได้ทันเอง</p>` },
+  { name: "Code scheduling: ก่อน (13 cycles)", fwd: true, br: "MEM",
+    prog: ["ld x1, 0(x0)", "ld x2, 8(x0)", "add x3, x1, x2", "sd x3, 24(x0)", "ld x4, 16(x0)", "add x5, x1, x4", "sd x5, 32(x0)"],
+    desc: `<p>C code: <code>a = b + e; c = b + f;</code> (มี forwarding) — <code>add</code> ทั้ง 2 ตัวใช้ผลของ <code>ld</code> ที่อยู่ติดกัน → load-use stall 2 ครั้ง → <b>13 cycles</b></p>` },
+  { name: "Code scheduling: หลัง (11 cycles)", fwd: true, br: "MEM",
+    prog: ["ld x1, 0(x0)", "ld x2, 8(x0)", "ld x4, 16(x0)", "add x3, x1, x2", "sd x3, 24(x0)", "add x5, x1, x4", "sd x5, 32(x0)"],
+    desc: `<p>ย้าย <code>ld x4</code> ขึ้นไปก่อน → ไม่มีคำสั่งไหนใช้ผล load ทันที → <b>ไม่ต้อง stall</b> เหลือ <b>11 cycles</b> (compiler จัดลำดับโค้ดเลี่ยง hazard ได้)</p>` },
+  { name: "Branch ตัดสินใน MEM", fwd: true, br: "MEM",
+    prog: ["40 beq x1, x0, 16"],
+    branch: { wrong: ["44 and x12, x2, x5", "48 or x13, x6, x2", "52 add x14, x2, x2", "56 sub x15, x6, x7"], target: ["72 ld x4, 100(x7)"] },
+    desc: `<p>ผล branch รู้ในขั้น <b>MEM</b> (สไลด์ 49) — ระหว่างนั้นคำสั่ง 44, 48, 52 ถูก fetch เข้ามาแล้ว → ถ้า taken ต้อง <b>flush 3 คำสั่ง</b> (ตั้ง control = 0) แล้วไป fetch ที่ 72</p><p>ลองเปลี่ยนเป็น "ID" ด้านบน</p>` },
+  { name: "Branch ตัดสินใน ID", fwd: true, br: "ID",
+    prog: ["36 sub x10, x4, x8", "40 beq x1, x3, 16"],
+    branch: { wrong: ["44 and x12, x2, x5", "48 or x13, x2, x6", "52 add x14, x4, x2", "56 sub x15, x6, x7"], target: ["72 ld x4, 50(x7)"] },
+    desc: `<p>ย้าย <b>target address adder</b> + <b>register comparator</b> ไปไว้ในขั้น ID (สไลด์ 50) · target = 40 + 16 × 2 = <b>72</b></p><p>Clock 3: beq อยู่ใน ID → IF.Flush · Clock 4: fetch <code>ld x4, 50(x7)</code>, <code>and</code> กลายเป็น bubble → เสียแค่ <b>1 bubble</b></p><p class="kbd">หมายเหตุ: สไลด์พิมพ์ <code>orr x13, x2, x6</code> (น่าจะหมายถึง or)</p>` },
+];
+
+const cases = Cases($("#cases"), SC.map(s => s.name), pick);
+const optFwd = $("#optFwd"), optBr = $("#optBr");
+let cur = null, SCH = null;
+function pick(k) {
+  cur = SC[k];
+  optFwd.checked = cur.fwd; optBr.value = cur.br;
+  optBr.parentElement.style.display = cur.branch ? "" : "none";
+  rebuild();
+}
+function rebuild() {
+  const opt = { fwd: optFwd.checked, br: optBr.value, branch: cur.branch };
+  SCH = schedule(cur.prog, opt);
+  const code = [...cur.prog, ...(cur.branch ? ["   ...  (ถ้า taken กระโดดไป)", ...cur.branch.target] : [])].join("\n");
+  $("#desc").innerHTML = cur.desc + `<pre class="code">${code}</pre>`;
+  player.reset();
+}
+optFwd.onchange = rebuild; optBr.onchange = rebuild;
+
+function drawGrid(c) {
+  const T = SCH.total;
+  let s = `<tr><th></th>${Array.from({ length: T }, (_, k) => `<th class="${k + 1 === c ? "now" : ""}">CC${k + 1}</th>`).join("")}</tr>`;
+  // forwarding highlight cells
+  const fwdCells = new Set();
+  for (const r of SCH.rows) for (const f of r.fwSrc || []) if (f.c === c) { fwdCells.add(r.ins.txt + "@" + c); fwdCells.add(f.P.ins.txt + "@" + c); }
+  for (const row of SCH.out) {
+    const cls = row.bubble ? "bub" : row.r.flushed ? "flushed" : "";
+    s += `<tr><td class="lbl ${cls}">${row.label}</td>`;
+    for (let k = 1; k <= T; k++) {
+      const cell = row.cells[k];
+      if (!cell) { s += "<td></td>"; continue; }
+      const hide = k > c ? " hide" : "";
+      const now = k === c ? " cur" : "";
+      const fw = !row.bubble && fwdCells.has(row.label + "@" + k) && k <= c ? " fwdsrc" : "";
+      const lab = cell.k === "nop" ? (cell.st === "EX" && row.bubble ? "nop" : cell.st) : cell.st;
+      s += `<td><div class="cell st-${cell.st} ${cell.k || ""}${hide}${now}${fw}">${lab}</div></td>`;
+    }
+    s += "</tr>";
+  }
+  if (cur.reg) {
+    const P = SCH.rows[0];
+    const wb = P.EX + 2;
+    s += `<tr class="regrow"><td class="lbl">ค่าใน ${cur.reg.r}</td>` + Array.from({ length: T }, (_, k) => {
+      const cc = k + 1; const v = cc < wb ? cur.reg.before : cc === wb ? cur.reg.before + "/" + cur.reg.after : cur.reg.after;
+      return `<td style="opacity:${cc <= c ? 1 : .25}">${v}</td>`;
+    }).join("") + "</tr>";
+  }
+  $("#grid").innerHTML = s;
+}
+function occupancy(c) {
+  const occ = {};
+  for (const row of SCH.out) {
+    const cell = row.cells[c]; if (!cell) continue;
+    occ[cell.st] = { txt: row.bubble ? "bubble" : short(row.label), nop: row.bubble || cell.k === "nop", stall: cell.k === "stall", row };
+  }
+  return occ;
+}
+function drawSvg(c) {
+  const svg = $("#pipeSvg");
+  const occ = c ? occupancy(c) : {};
+  const W = 150, G = 46, X = 15, Y = 40, H = 66;
+  const xOf = k => X + k * (W + G);
+  let s = `<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--ok)"/></marker></defs>`;
+  STAGES.forEach((st, k) => {
+    const o = occ[st]; const x = xOf(k);
+    const col = `var(--c${k + 1})`, soft = `var(--c${k + 1}s)`;
+    s += `<rect x="${x}" y="${Y}" width="${W}" height="${H}" rx="10" fill="${o && !o.nop ? soft : "var(--slot)"}" stroke="${o && !o.nop ? col : "var(--line)"}" stroke-width="2" ${o && o.stall ? 'stroke-dasharray="6 4"' : ""}/>`;
+    s += `<text x="${x + W / 2}" y="${Y - 10}" text-anchor="middle" font-size="15" font-weight="700" fill="${col}">${st}</text>`;
+    const t = o ? o.txt : "—";
+    s += `<text x="${x + W / 2}" y="${Y + 30}" text-anchor="middle" font-size="14" font-weight="600" fill="${o && !o.nop ? "var(--ink)" : "var(--muted)"}" font-family="JetBrains Mono,monospace">${t}</text>`;
+    if (o && o.stall) s += `<text x="${x + W / 2}" y="${Y + 48}" text-anchor="middle" font-size="12" fill="var(--wait)" font-weight="700">stall</text>`;
+    else if (o && o.nop) s += `<text x="${x + W / 2}" y="${Y + 52}" text-anchor="middle" font-size="12" fill="var(--muted)">nop</text>`;
+    if (k < 4) {
+      const rx = x + W + 12;
+      s += `<rect x="${rx}" y="${Y - 6}" width="${G - 24}" height="${H + 12}" rx="4" fill="var(--card)" stroke="var(--muted)"/>`;
+      s += `<text x="${rx + (G - 24) / 2}" y="${Y + H + 24}" text-anchor="middle" font-size="10" fill="var(--muted)">${STAGES[k]}/${STAGES[k + 1]}</text>`;
+    }
+  });
+  // forwarding arcs
+  let muxA = "00", muxB = "00";
+  if (c) for (const r of SCH.rows) for (const f of r.fwSrc || []) if (f.c === c) {
+    const fromReg = f.from === "EXMEM" ? 2 : 3; // register after stage index
+    const sx = xOf(fromReg) + W + 12 + (G - 24) / 2;
+    const tx = xOf(2) + 30 + (f.k === "rs2" ? 50 : 0);
+    const isID = r.ins.type === "br" && optBr.value === "ID";
+    const tx2 = isID ? xOf(1) + W / 2 : tx;
+    const y1 = Y + H + 6, depth = 66 + (f.from === "MEMWB" ? 16 : 0);
+    s += `<path d="M${sx},${y1} C${sx},${y1 + depth} ${tx2},${y1 + depth} ${tx2},${Y + H + 2}" fill="none" stroke="var(--ok)" stroke-width="3" marker-end="url(#ar)"/>`;
+    s += `<text x="${(sx + tx2) / 2}" y="${y1 + depth - 4}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ok)">${r.fw[f.k].r} ← ${f.from === "EXMEM" ? "EX/MEM" : "MEM/WB"}</text>`;
+    const code = f.from === "EXMEM" ? "10" : "01";
+    if (f.k === "rs1") muxA = code; else muxB = code;
+  }
+  if (optFwd.checked && c && occ.EX && !occ.EX.nop) s += `<text x="${xOf(2) + W / 2}" y="${Y + H - 6}" text-anchor="middle" font-size="10.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">A=${muxA} B=${muxB}</text>`;
+  // hazard / flush markers
+  const evs = (SCH.ev[c] || []);
+  if (evs.some(e => e.cls === "warn")) s += `<text x="${xOf(1) + W / 2}" y="${Y + H + 40}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--wait)">Hazard detection unit: PCWrite=0, IF/IDWrite=0</text>`;
+  if (evs.some(e => e.cls === "bad")) s += `<text x="${xOf(0) + W / 2}" y="${Y + H + 40}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--bad)">IF.Flush</text>`;
+  svg.innerHTML = s;
+}
+function show(i) {
+  const c = i; // step 0 = before start
+  drawGrid(c); drawSvg(c);
+  const cap = $("#cap");
+  if (c === 0) { cap.className = "cap"; cap.innerHTML = `ยังไม่เริ่ม — กด ▶ เล่น หรือ ถัดไป<small>${optFwd.checked ? "forwarding: เปิด" : "forwarding: ปิด"}${cur.branch ? " · ตัดสิน branch ใน " + optBr.value : ""}</small>`; }
+  else {
+    const evs = SCH.ev[c] || [];
+    const occ = occupancy(c);
+    const occTxt = STAGES.map(st => `${st}: ${occ[st] ? occ[st].txt : "—"}`).join(" · ");
+    let main = evs.map(e => e.t).join("<br>");
+    if (cur.notes && cur.notes[c]) main = (main ? main + "<br>" : "") + cur.notes[c];
+    if (c === SCH.total) main = (main ? main + "<br>" : "") + `<b>จบ: ${SCH.total} cycles</b>`;
+    if (!main) main = `CC${c}`;
+    cap.innerHTML = main + `<small>${occTxt}</small>`;
+    const cls = evs.find(e => e.cls) ? evs.find(e => e.cls === "bad") ? "bad" : evs.find(e => e.cls === "warn") ? "warn" : "good" : (c === SCH.total ? "good" : "");
+    cap.className = "cap " + cls;
+  }
+  const n = SCH.rows.filter(r => !r.flushed).length;
+  const stalls = SCH.out.filter(r => r.bubble).length;
+  const fl = SCH.rows.filter(r => r.flushed).length;
+  $("#stats").innerHTML = `<span class="stat">จำนวนคำสั่ง <b>${n}</b></span><span class="stat">cycles ทั้งหมด <b>${SCH.total}</b></span>` +
+    `<span class="stat">bubble จาก stall <b>${stalls}</b></span>` + (cur.branch ? `<span class="stat">flush <b>${fl}</b></span>` : "") +
+    `<span class="stat">สูตร: 5 + (n − 1) + stall + flush = <b>${5 + n - 1}</b> + <b>${SCH.total - (5 + n - 1)}</b></span>`;
+}
+const player = Player($("#player"), { count: () => SCH ? SCH.total + 1 : 1, show, delay: 1300 });
+LABS.push({ name: "pipe", cases, player });
+cases.pick(0);
+</script>
+
+</body></html>

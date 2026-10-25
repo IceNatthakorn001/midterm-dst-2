@@ -1,0 +1,321 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual Memory Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.va{display:flex;max-width:520px;margin:8px 0;font-family:"JetBrains Mono",monospace;font-weight:700}
+.va div{padding:6px 10px;text-align:center;border:2px solid}
+.va small{display:block;font-family:"IBM Plex Sans Thai",sans-serif;font-weight:400;font-size:12px}
+.vpn{flex:2;background:var(--c1s);border-color:var(--c1);color:var(--c1);border-radius:8px 0 0 8px}
+.ppn{flex:2;background:var(--c2s);border-color:var(--c2);color:var(--c2);border-radius:8px 0 0 8px}
+.off{flex:1.4;background:var(--c5s);border-color:var(--c5);color:var(--c5);border-radius:0 8px 8px 0}
+.vm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr) minmax(0,.8fr);gap:12px;align-items:start;margin:10px 0}
+.pane{border:2px solid var(--line);border-radius:12px;padding:8px;background:var(--card);transition:border-color .3s,box-shadow .3s}
+.pane.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.pane h4{margin:0 0 6px;font-size:14px}
+.vt{border-collapse:collapse;width:100%;font-family:"JetBrains Mono",monospace;font-size:13px}
+.vt td,.vt th{border:1px solid var(--line);padding:3px 5px;text-align:center;transition:background .3s}
+.vt th{font-family:"IBM Plex Sans Thai",sans-serif;font-size:12px;font-weight:600}
+.vt tr.look td{background:var(--wait-soft)}
+.vt tr.hit td{background:var(--ok-soft)}
+.vt tr.miss td{background:var(--bad-soft)}
+.vt tr.chg td{background:var(--c5s)}
+.vt td.disk{color:var(--muted)}
+.frame{border:1.5px solid var(--line);border-radius:8px;padding:5px 8px;margin:4px 0;font-size:13px;display:flex;justify-content:space-between;transition:background .3s}
+.frame.look{background:var(--wait-soft);border-color:var(--wait)} .frame.hit{background:var(--ok-soft);border-color:var(--ok)} .frame.out{background:var(--bad-soft);border-color:var(--bad)} .frame.in{background:var(--c5s);border-color:var(--c5)}
+.disk{border:1.5px dashed var(--line);border-radius:8px;padding:5px 8px;margin:4px 0;font-size:13px;transition:background .3s}
+.disk.on{background:var(--wait-soft);border-color:var(--wait)}
+.flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:13px;margin:6px 0}
+.flow span{padding:3px 9px;border-radius:99px;background:var(--slot);color:var(--muted)}
+.flow span.done{background:var(--accent-soft);color:var(--accent)} .flow span.cur{background:var(--accent);color:#fff;font-weight:700}
+@media (max-width:820px){.vm{grid-template-columns:1fr 1fr}}
+</style>
+<main>
+<h1>Virtual Memory: แปล address ผ่าน TLB และ Page table</h1>
+<p class="lead">Chapter 04 — Virtual Memory · main memory ทำหน้าที่เป็น "cache" ของ disk · block = <b>page</b>, miss = <b>page fault</b></p>
+<div class="note">Virtual address = <b>virtual page number (VPN)</b> + <b>page offset</b> · page 4 KB → offset 12 bit (= hex 3 หลักขวา) · แปลเฉพาะ VPN → physical page number (PPN) ส่วน offset ใช้เหมือนเดิม<br>
+<b>TLB</b> = cache ของ page table entry (16–512 entries, hit 0.5–1 cycle, miss 10–100 cycles)</div>
+
+<h2 id="s1">จำลองการแปล address</h2>
+<div class="card">
+<div id="cases"></div>
+<div class="flow" id="flow"></div>
+<div class="cap" id="cap"></div>
+<div class="va" id="va"></div>
+<div class="vm">
+  <div class="pane" id="pTLB"><h4>TLB</h4><table class="vt" id="tlb"></table></div>
+  <div class="pane" id="pPT"><h4>Page table (ใน memory)</h4><table class="vt" id="pt"></table></div>
+  <div class="pane" id="pMEM"><h4>Physical memory</h4><div id="mem"></div></div>
+  <div class="pane" id="pDISK"><h4>Disk (swap)</h4><div id="disk"></div></div>
+</div>
+<div class="va" id="pa"></div>
+<div id="player"></div>
+<p class="kbd">ตัวเลข page/frame ในตัวอย่างนี้สมมติขึ้นเพื่อสาธิต (หน่วยความจำมีแค่ 4 frames ให้ดูง่าย)</p>
+</div>
+
+<h2 id="s2">สรุป</h2>
+<div class="tw"><table>
+<thead><tr><th>เหตุการณ์</th><th>เกิดอะไรขึ้น</th></tr></thead>
+<tbody>
+<tr><td>TLB hit</td><td>ได้ PPN ทันที → ต่อ offset → physical address</td></tr>
+<tr><td>TLB miss, page อยู่ใน memory</td><td>อ่าน PTE จาก page table มาใส่ TLB (โดย hardware หรือ software exception) แล้ว retry</td></tr>
+<tr><td>Page fault</td><td>OS: หาที่อยู่ page บน disk → เลือก page ที่จะแทน (ถ้า dirty ต้องเขียนกลับก่อน) → อ่าน page เข้า + update page table → restart คำสั่ง</td></tr>
+<tr><td>Write policy</td><td>VM ใช้ <b>write-back เท่านั้น</b> + dirty bit</td></tr>
+<tr><td>Replacement</td><td>LRU โดยประมาณผ่าน <b>reference bit</b> (OS clear เป็นระยะ) · page fault แพงหลายล้าน cycles จึงใช้ fully associative</td></tr>
+</tbody></table></div>
+</main>
+<script>
+const BASE = () => ({
+  tlb: [{ v: 1, vpn: 1, ppn: 3, d: 0, r: 1 }, { v: 1, vpn: 4, ppn: 0, d: 1, r: 0 }, { v: 1, vpn: 0, ppn: 1, d: 0, r: 0 }],
+  pt: [{ v: 1, ppn: 1, d: 0, r: 0 }, { v: 1, ppn: 3, d: 0, r: 1 }, { v: 0, disk: "D2" }, { v: 1, ppn: 2, d: 0, r: 1 }, { v: 1, ppn: 0, d: 1, r: 0 }, { v: 0, disk: "D5" }, { v: 0, disk: "D6" }, { v: 0, disk: "D7" }],
+  frames: [4, 0, 3, 1], // frame -> vpn
+  disk: [2, 5, 6, 7],
+});
+const hx = (n, d) => n.toString(16).toUpperCase().padStart(d, "0");
+// each step: {flow, cap, cls, hl:{tlbRow, tlbCls, ptRow, ptCls, frame, frameCls, disk, panes:[]}, mut(state)}
+const SC = [
+  { name: "TLB hit", va: 0x1A2C, steps: [
+    { f: 0, cap: "CPU ส่ง virtual address 0x1A2C → แบ่ง VPN = <b>1</b>, offset = <b>A2C</b>", hl: { panes: [] } },
+    { f: 1, cap: "ค้น TLB หา VPN 1", hl: { panes: ["pTLB"], tlbAll: true } },
+    { f: 2, cap: "<b>TLB hit!</b> VPN 1 → PPN <b>3</b> · set reference bit", cls: "good", hl: { panes: ["pTLB"], tlbVpn: 1, tlbCls: "hit" }, mut: s => s.tlb.find(e => e.vpn === 1).r = 1 },
+    { f: 5, cap: "physical address = PPN 3 ต่อด้วย offset A2C = <b>0x3A2C</b> → อ่านข้อมูลจาก frame 3 (ไม่ต้องแตะ page table เลย)", cls: "good", hl: { panes: ["pMEM"], frame: 3, frameCls: "hit" }, pa: [3, 0xA2C] },
+  ] },
+  { name: "TLB miss (page อยู่ใน memory)", va: 0x3123, steps: [
+    { f: 0, cap: "virtual address 0x3123 → VPN = <b>3</b>, offset = <b>123</b>", hl: {} },
+    { f: 1, cap: "ค้น TLB หา VPN 3 …", hl: { panes: ["pTLB"], tlbAll: true } },
+    { f: 1, cap: "<b>TLB miss</b> — ไม่มี VPN 3 ใน TLB", cls: "bad", hl: { panes: ["pTLB"], tlbAll: true, tlbMiss: true } },
+    { f: 3, cap: "เปิด page table (page table register ชี้ที่อยู่) แถวที่ VPN 3 → valid = 1 → page อยู่ใน memory ที่ PPN <b>2</b>", hl: { panes: ["pPT"], pt: 3, ptCls: "hit" } },
+    { f: 4, cap: "โหลด PTE เข้า TLB — TLB เต็ม เลือกแทนตัวที่ reference bit = 0 (VPN 0)", cls: "warn", hl: { panes: ["pTLB", "pPT"], pt: 3, ptCls: "hit", tlbVpn: 3, tlbCls: "chg" },
+      mut: s => { const e = s.tlb.find(x => x.vpn === 0); Object.assign(e, { v: 1, vpn: 3, ppn: 2, d: 0, r: 1 }); } },
+    { f: 2, cap: "retry คำสั่ง → คราวนี้ <b>TLB hit</b> VPN 3 → PPN 2", cls: "good", hl: { panes: ["pTLB"], tlbVpn: 3, tlbCls: "hit" } },
+    { f: 5, cap: "physical address = <b>0x2123</b>", cls: "good", hl: { panes: ["pMEM"], frame: 2, frameCls: "hit" }, pa: [2, 0x123] },
+  ] },
+  { name: "Page fault (victim dirty)", va: 0x6FF0, steps: [
+    { f: 0, cap: "virtual address 0x6FF0 → VPN = <b>6</b>, offset = <b>FF0</b>", hl: {} },
+    { f: 1, cap: "ค้น TLB → <b>miss</b>", cls: "bad", hl: { panes: ["pTLB"], tlbAll: true, tlbMiss: true } },
+    { f: 3, cap: "page table แถว VPN 6 → <b>valid = 0</b> → page อยู่บน disk (D6) ไม่ได้อยู่ใน memory", cls: "bad", hl: { panes: ["pPT"], pt: 6, ptCls: "miss" } },
+    { f: 6, cap: "<b>Page fault!</b> → เกิด exception, OS (page fault handler) เข้ามาทำงาน — ใช้เวลาหลายล้าน cycles", cls: "bad", hl: { panes: ["pPT", "pDISK"], pt: 6, ptCls: "miss", disk: 6 } },
+    { f: 7, cap: "memory เต็มทั้ง 4 frames → เลือก page ที่จะแทน: frame 0 (VPN 4) reference bit = 0 คือไม่ได้ใช้เมื่อเร็ว ๆ นี้ (LRU โดยประมาณ)", cls: "warn", hl: { panes: ["pMEM", "pPT"], frame: 0, frameCls: "out", pt: 4, ptCls: "look" } },
+    { f: 7, cap: "VPN 4 มี <b>dirty bit = 1</b> (ถูกแก้ไข) → ต้อง<b>เขียนกลับลง disk ก่อน</b> (write-back) แล้ว PTE ของ VPN 4 กลายเป็น valid = 0",
+      cls: "warn", hl: { panes: ["pMEM", "pDISK", "pPT"], frame: 0, frameCls: "out", pt: 4, ptCls: "chg", disk: 4 },
+      mut: s => { s.pt[4] = { v: 0, disk: "D4" }; s.disk.push(4); s.frames[0] = null; const t = s.tlb.find(e => e.vpn === 4); if (t) t.v = 0; } },
+    { f: 8, cap: "อ่าน VPN 6 จาก disk เข้า frame 0 แล้ว update page table: VPN 6 → PPN 0, valid = 1", hl: { panes: ["pDISK", "pMEM", "pPT"], frame: 0, frameCls: "in", pt: 6, ptCls: "chg", disk: 6 },
+      mut: s => { s.frames[0] = 6; s.pt[6] = { v: 1, ppn: 0, d: 0, r: 1 }; s.disk = s.disk.filter(d => d !== 6); } },
+    { f: 4, cap: "ใส่ PTE ใหม่ลง TLB (แทนช่องที่ invalid ของ VPN 4)", hl: { panes: ["pTLB"], tlbVpn: 6, tlbCls: "chg" },
+      mut: s => { const e = s.tlb.find(x => x.v === 0); Object.assign(e, { v: 1, vpn: 6, ppn: 0, d: 0, r: 1 }); } },
+    { f: 9, cap: "<b>restart</b> คำสั่งที่ทำให้เกิด page fault → TLB hit → physical address = <b>0x0FF0</b>", cls: "good", hl: { panes: ["pTLB", "pMEM"], tlbVpn: 6, tlbCls: "hit", frame: 0, frameCls: "hit" }, pa: [0, 0xFF0] },
+  ] },
+];
+const FLOW = ["Virtual address", "ค้น TLB", "TLB hit", "ค้น page table", "อัปเดต TLB", "Physical address", "Page fault", "เลือก page แทน", "โหลดจาก disk", "Restart"];
+let cur, STATES;
+const cases = Cases($("#cases"), SC.map(s => s.name), k => {
+  cur = SC[k]; const s = BASE(); STATES = [];
+  cur.steps.forEach(st => { if (st.mut) st.mut(s); STATES.push(JSON.parse(JSON.stringify(s))); });
+  player.reset();
+});
+function show(i) {
+  const st = cur.steps[i], S = STATES[i], hl = st.hl || {};
+  const vpn = cur.va >> 12, off = cur.va & 0xfff;
+  $("#va").innerHTML = `<div class="vpn">${vpn}<small>VPN (virtual page number)</small></div><div class="off">${hx(off, 3)}<small>page offset 12 bit</small></div>`;
+  $("#pa").innerHTML = st.pa ? `<div class="ppn fade-in">${st.pa[0]}<small>PPN</small></div><div class="off fade-in">${hx(st.pa[1], 3)}<small>page offset (เหมือนเดิม)</small></div><span style="align-self:center;margin-left:10px;font-size:18px">= 0x${hx(st.pa[0], 1)}${hx(st.pa[1], 3)}</span>` : "";
+  $("#tlb").innerHTML = `<tr><th>V</th><th>VPN</th><th>PPN</th><th>D</th><th>R</th></tr>` + S.tlb.map(e => {
+    const c = hl.tlbVpn === e.vpn && e.v ? hl.tlbCls : hl.tlbAll ? (hl.tlbMiss ? "miss" : "look") : "";
+    return `<tr class="${c}"><td>${e.v}</td><td>${e.v ? e.vpn : "–"}</td><td>${e.v ? e.ppn : "–"}</td><td>${e.d}</td><td>${e.r}</td></tr>`;
+  }).join("");
+  $("#pt").innerHTML = `<tr><th>VPN</th><th>V</th><th>PPN / disk</th><th>D</th><th>R</th></tr>` + S.pt.map((e, k) => `<tr class="${hl.pt === k ? hl.ptCls : ""}"><td>${k}</td><td>${e.v}</td><td class="${e.v ? "" : "disk"}">${e.v ? e.ppn : e.disk}</td><td>${e.v ? e.d : ""}</td><td>${e.v ? e.r : ""}</td></tr>`).join("");
+  $("#mem").innerHTML = S.frames.map((v, f) => `<div class="frame ${hl.frame === f ? hl.frameCls : ""}"><span>frame ${f}</span><b>${v == null ? "ว่าง" : "VPN " + v}</b></div>`).join("");
+  $("#disk").innerHTML = [...new Set([...S.disk])].sort().map(d => `<div class="disk ${hl.disk === d ? "on" : ""}">page D${d}</div>`).join("");
+  ["pTLB", "pPT", "pMEM", "pDISK"].forEach(p => $("#" + p).classList.toggle("on", (hl.panes || []).includes(p)));
+  const seen = new Set(cur.steps.slice(0, i + 1).map(s => s.f));
+  $("#flow").innerHTML = FLOW.map((f, k) => (cur.steps.some(s => s.f === k) ? `<span class="${k === st.f ? "cur" : seen.has(k) ? "done" : ""}">${f}</span>` : "")).join("");
+  $("#cap").innerHTML = st.cap; $("#cap").className = "cap" + (st.cls ? " " + st.cls : "");
+}
+const player = Player($("#player"), { count: () => cur ? cur.steps.length : 1, show, delay: 1900 });
+LABS.push({ name: "vm", cases, player });
+cases.pick(0);
+</script>
+
+</body></html>

@@ -1,0 +1,448 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CPU Scheduling Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1f;--muted:#5d5d66;--line:#dcdad2;--accent:#2f5bd3;--accent-soft:#e7edff;
+--ok:#1e7a4c;--ok-soft:#dff3e8;--wait:#b26a00;--wait-soft:#fff0d6;--bad:#c0392b;--bad-soft:#fde5e2;--rej:#7a4fc4;--rej-soft:#efe7ff;--slot:#f0efe9;--code:#f0efe9;
+--c1:#2f6fd3;--c1s:#dde8fb;--c2:#1e8a6e;--c2s:#d8f1e9;--c3:#c27a00;--c3s:#fdecc8;--c4:#b0457b;--c4s:#f8dceb;--c5:#6b55c4;--c5s:#e7e1fa;--c6:#3d8a2a;--c6s:#e0f0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1e2026;--ink:#ecebe6;--muted:#a3a3ad;--line:#33353d;--accent:#8fb0ff;--accent-soft:#233052;
+--ok:#6fd6a0;--ok-soft:#173327;--wait:#ffb54d;--wait-soft:#3b2a10;--bad:#ff8a7a;--bad-soft:#3d1c1a;--rej:#c3a5ff;--rej-soft:#2c2342;--slot:#26282f;--code:#26282f;
+--c1:#8fb0ff;--c1s:#22314f;--c2:#6fd6b5;--c2s:#163a31;--c3:#ffc061;--c3s:#3d2c10;--c4:#f59ac6;--c4s:#3e1f30;--c5:#b9a6ff;--c5s:#2c2546;--c6:#9fdc84;--c6s:#203517}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif;line-height:1.65;font-size:16px}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:27px;line-height:1.3;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+h2{font-size:22px;margin:40px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+code,.mono{font-family:"JetBrains Mono",Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.toc a{display:inline-block;font-size:14px;padding:4px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.cases button{font:inherit;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.cases button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.ctl button,.ctl select,.inp select,.inp input,.inp button{font:inherit;font-size:15px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.inp input{cursor:text;width:90px}
+.inp input[type=checkbox],.inp input[type=radio]{width:auto;cursor:pointer}
+.ctl button.primary,.inp button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.ctl label{font-size:14px;color:var(--muted)}
+.prog{width:100%;margin:2px 0 6px;accent-color:var(--accent)}
+.desc{margin:4px 0 8px}
+.desc p{margin:4px 0}
+.cap{font-weight:600;min-height:3.3em;margin:8px 0 6px;padding:9px 13px;border-radius:8px;background:var(--accent-soft);transition:background .25s}
+.cap.bad{background:var(--bad-soft);color:var(--bad)}
+.cap.good{background:var(--ok-soft);color:var(--ok)}
+.cap.warn{background:var(--wait-soft);color:var(--wait)}
+.cap small{display:block;font-weight:400;color:var(--muted)}
+.cap.bad small,.cap.good small,.cap.warn small{color:inherit;opacity:.85}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid;vertical-align:-1px;margin-right:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+thead th{background:var(--accent-soft)}
+ul{padding-left:22px}
+.tip{background:var(--wait-soft);border-left:4px solid var(--wait);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.warnbox{background:var(--bad-soft);border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>*{flex:1 1 280px;min-width:0}
+.hl{background:var(--wait-soft);color:var(--wait);border-radius:4px;padding:0 3px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 8px transparent}}
+.pulse{animation:pulse .7s ease-out}
+.kbd{font-size:13px;color:var(--muted);margin:2px 0 0}
+svg text{font-family:"IBM Plex Sans Thai","Leelawadee UI",system-ui,sans-serif}
+@media (max-width:600px){h1{font-size:23px}.ctl .cnt{margin-left:0;width:100%}}
+</style>
+<script>
+// ---------- shared helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const fmt = (x, d = 2) => (Math.round(x * 10 ** d) / 10 ** d).toString();
+
+// ---------- step player ----------
+// Player(root, {count:()=>n, show:(i)=>{}, delay:ms})
+const PLAYERS = [];
+let ACTIVE = null;
+function Player(root, opt) {
+  const delay = opt.delay || 1200;
+  root.classList.add("player");
+  root.innerHTML = `<div class="ctl">
+    <button data-a="first" title="เริ่มใหม่ (Home)">⏮</button>
+    <button data-a="prev" title="ย้อน (←)">◀ ย้อน</button>
+    <button data-a="play" class="primary" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <button data-a="next" title="ถัดไป (→)">ถัดไป ▶</button>
+    <label>ความเร็ว <select><option value="2">ช้า</option><option value="1" selected>ปกติ</option><option value="0.45">เร็ว</option><option value="0.15">เร็วมาก</option></select></label>
+    <span class="cnt"></span></div>
+    <input type="range" class="prog" min="0" max="0" value="0" aria-label="เลื่อนไปขั้นที่ต้องการ">`;
+  const bPlay = $('[data-a="play"]', root), bPrev = $('[data-a="prev"]', root), bNext = $('[data-a="next"]', root);
+  const cnt = $(".cnt", root), prog = $(".prog", root), spd = $("select", root);
+  let i = 0, t = null;
+  const n = () => Math.max(1, opt.count());
+  function go(k) {
+    i = Math.max(0, Math.min(n() - 1, k));
+    try { opt.show(i); } catch (e) { reportErr(e); }
+    cnt.textContent = `ขั้นที่ ${i + 1} / ${n()}`;
+    prog.max = n() - 1; prog.value = i;
+    bPrev.disabled = i === 0; bNext.disabled = i >= n() - 1;
+    if (i >= n() - 1 && t) stop();
+  }
+  function tick() { if (i >= n() - 1) { stop(); return; } go(i + 1); t = setTimeout(tick, delay * +spd.value); }
+  function play() { if (i >= n() - 1) go(0); bPlay.textContent = "⏸ หยุด"; t = setTimeout(tick, Math.min(500, delay * +spd.value)); }
+  function stop() { clearTimeout(t); t = null; bPlay.textContent = "▶ เล่น"; }
+  root.addEventListener("click", e => {
+    ACTIVE = api;
+    const a = e.target.closest("button")?.dataset.a; if (!a) return;
+    if (a === "play") t ? stop() : play();
+    if (a === "first") { stop(); go(0); }
+    if (a === "prev") { stop(); go(i - 1); }
+    if (a === "next") { stop(); go(i + 1); }
+  });
+  prog.addEventListener("input", () => { ACTIVE = api; stop(); go(+prog.value); });
+  const api = { go, stop, reset() { stop(); go(0); }, get i() { return i; }, n, root, key(k) {
+    if (k === "ArrowRight") { stop(); go(i + 1); } else if (k === "ArrowLeft") { stop(); go(i - 1); }
+    else if (k === " ") { t ? stop() : play(); } else if (k === "Home") { stop(); go(0); } } };
+  PLAYERS.push(api);
+  if (!ACTIVE) ACTIVE = api;
+  return api;
+}
+document.addEventListener("keydown", e => {
+  if (!ACTIVE || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return;
+  if (["ArrowRight", "ArrowLeft", " ", "Home"].includes(e.key)) {
+    // only steer the player that is on screen
+    const r = ACTIVE.root.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    e.preventDefault(); ACTIVE.key(e.key);
+  }
+});
+
+// ---------- scenario chips ----------
+// Cases(el, names, onPick) -> {pick(i)}
+function Cases(el, names, onPick) {
+  el.classList.add("cases");
+  el.innerHTML = "";
+  const bs = names.map((nm, k) => h("button", { onclick: () => pick(k) }, nm));
+  el.append(...bs);
+  let cur = -1;
+  function pick(k) { cur = k; bs.forEach((b, j) => b.classList.toggle("on", j === k)); onPick(k); }
+  return { pick, get cur() { return cur; }, count: names.length };
+}
+
+// ---------- error report + self test (open page with #selftest) ----------
+const ERRS = [];
+function reportErr(e) { ERRS.push(String(e && e.stack || e)); console.error(e); }
+window.addEventListener("error", e => reportErr(e.error || e.message));
+const LABS = []; // {name, cases: Cases|null, player}
+window.addEventListener("load", () => {
+  const dm = location.hash.match(/^#demo=(\d+)\.(\d+)\.(\d+)/);
+  if (dm) { const lab = LABS[+dm[1]]; if (lab.cases) lab.cases.pick(+dm[2]); lab.player.go(+dm[3]); const card = lab.player.root.closest(".card"); const main = card && card.parentElement;
+    if (main) [...main.children].forEach(el => { if (el !== card && el !== card.previousElementSibling) el.style.display = "none"; }); return; }
+  if (location.hash !== "#selftest") return;
+  let steps = 0;
+  for (const lab of LABS) {
+    const nc = lab.cases ? lab.cases.count : 1;
+    for (let c = 0; c < nc; c++) {
+      try { if (lab.cases) lab.cases.pick(c); } catch (e) { reportErr(e); }
+      const n = lab.player.n();
+      for (let k = 0; k < n; k++) { lab.player.go(k); steps++; }
+      for (let k = n - 1; k >= 0; k--) lab.player.go(k);
+    }
+  }
+  const ovf = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+  const out = h("pre", { id: "selftest-result" }, `SELFTEST labs=${LABS.length} steps=${steps} errors=${ERRS.length} overflowX=${ovf}\n` + ERRS.join("\n"));
+  document.body.prepend(out);
+});
+</script>
+</head><body>
+<div style="padding:8px 16px;background:#eef0f7;border-bottom:1px solid #dcdfe9;font-size:.92rem;display:flex;gap:12px;flex-wrap:wrap">
+<a href="../index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← 🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+<style>
+.j0{--jc:var(--c1);--js:var(--c1s)} .j1{--jc:var(--c3);--js:var(--c3s)} .j2{--jc:var(--c2);--js:var(--c2s)}
+.j3{--jc:var(--c4);--js:var(--c4s)} .j4{--jc:var(--c5);--js:var(--c5s)} .j5{--jc:var(--c6);--js:var(--c6s)}
+.setup{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:8px 0}
+.setup label{font-size:15px;display:flex;gap:6px;align-items:center}
+.setup select,.setup input{font:inherit;font-size:15px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.setup input{width:64px}
+.jobs{width:auto}.jobs td,.jobs th{padding:4px 10px;text-align:center}
+.jobs input{width:64px;font:inherit;font-size:14px;padding:2px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center}
+.jobs .nm{font-weight:700;color:var(--jc)}
+.jobs button{font:inherit;font-size:13px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.stage{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:stretch;margin:10px 0}
+.box{border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--slot);min-height:84px}
+.box h4{margin:0 0 6px;font-size:13px;color:var(--muted);font-weight:600}
+.cpu{display:flex;flex-direction:column}
+.chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;padding:4px 8px;border-radius:9px;
+  background:var(--js);border:2px solid var(--jc);color:var(--jc);font-weight:700;margin:2px;font-size:15px;line-height:1.2}
+.chip small{font-size:11px;font-weight:400;color:var(--muted)}
+.chip.big{font-size:22px;min-width:90px;padding:8px}
+.queue{display:flex;flex-wrap:wrap;align-items:center;gap:2px}
+.queue .arrow{color:var(--muted);font-size:13px;margin-right:4px}
+.gantt{position:relative;height:46px;margin:22px 0 26px;border-left:1px solid var(--muted)}
+.seg{position:absolute;top:0;height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+  background:var(--js);border:2px solid var(--jc);color:var(--jc);overflow:hidden;transform-origin:left}
+.seg.idle{background:none;border:1px dashed var(--line);color:var(--muted)}
+.seg.grow{animation:grow .6s ease-out}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.tick{position:absolute;top:50px;font-size:12px;color:var(--muted);transform:translateX(-50%);font-family:"JetBrains Mono",monospace}
+.arr{position:absolute;top:-20px;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.now{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--bad)}
+.metrics td,.metrics th{text-align:center;padding:4px 6px}
+.metrics tr.avg td{font-weight:700;background:var(--accent-soft)}
+.metrics .f{font-size:12px;color:var(--muted);font-weight:400;display:block}
+.answer{font-size:14px;color:var(--muted)}
+@media (max-width:600px){.stage{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>CPU Scheduling: FIFO · SJF · STCF · Priority · RR</h1>
+<p class="lead">Lecture 3 — Process Scheduling · เลือกตัวอย่างจากสไลด์ แล้วกด ▶ เล่น · <b>แก้ตารางงานหรือเปลี่ยนอัลกอริทึมได้ทุกตัวอย่าง</b> เพื่อเทียบผล</p>
+<div class="note"><b>สูตร:</b> Turnaround = เวลาเสร็จ − เวลามาถึง (= CPU time + waiting) · Response = เวลาได้รันครั้งแรก − เวลามาถึง · Waiting = เวลาที่รออยู่ใน ready queue (= turnaround − burst)</div>
+
+<h2 id="s1">1. จำลองการจัดคิว</h2>
+<div class="card">
+<div id="cases"></div>
+<div class="desc" id="desc"></div>
+<div class="setup">
+  <label>อัลกอริทึม <select id="alg">
+    <option value="FIFO">FIFO / FCFS</option><option value="SJF">SJF (non-preemptive)</option><option value="STCF">STCF (preemptive SJF)</option>
+    <option value="PRIO">Priority (non-preemptive, เลขน้อย = สำคัญ)</option><option value="RR">Round Robin</option></select></label>
+  <label id="qWrap">quantum q = <input id="q" type="number" min="1" value="1"></label>
+</div>
+<div class="tw"><table class="jobs" id="jobs"></table></div>
+<div class="cap" id="cap"></div>
+<div class="stage">
+  <div class="box cpu"><h4>CPU (กำลังรัน)</h4><div id="cpu"></div></div>
+  <div class="box"><h4>Ready queue (รอ CPU) — ซ้ายสุด = หัวคิว</h4><div class="queue" id="queue"></div></div>
+</div>
+<div class="gantt" id="gantt"></div>
+<div class="tw"><table class="metrics" id="metrics"></table></div>
+<div id="player"></div>
+</div>
+
+<h2 id="s2">2. เทียบให้จำ</h2>
+<div class="tw"><table>
+<thead><tr><th>อัลกอริทึม</th><th>หลักการ</th><th>preempt?</th><th>ข้อดี / ข้อเสีย</th></tr></thead>
+<tbody>
+<tr><td>FIFO / FCFS</td><td>มาก่อนได้ก่อน</td><td>ไม่</td><td>ง่าย · งานยาวมาก่อนทำให้งานสั้นรอนาน = <b>convoy effect</b></td></tr>
+<tr><td>SJF</td><td>งานสั้นสุดก่อน</td><td>ไม่</td><td>turnaround ดี (ถ้ามาพร้อมกัน) · งานสั้นที่มาทีหลังต้องรองานยาวที่เริ่มไปแล้ว</td></tr>
+<tr><td>STCF</td><td>งานที่<b>เหลือเวลา</b>น้อยสุดก่อน</td><td>ได้</td><td>แก้ปัญหา late arrival ของ SJF · ต้องรู้ run time (OS มักไม่รู้)</td></tr>
+<tr><td>Priority</td><td>เลขน้อย = สำคัญก่อน</td><td>ได้ทั้งสองแบบ</td><td>งาน priority ต่ำอาจไม่ได้รันเลย = <b>starvation</b></td></tr>
+<tr><td>Round Robin</td><td>สลับทุก quantum q</td><td>ได้</td><td>response ดี, fair · turnaround แย่ · q ใหญ่ → กลายเป็น FIFO, q เล็ก → context switch overhead สูง</td></tr>
+</tbody></table></div>
+</main>
+<script>
+const SC = [
+  { name: "FIFO 10/10/10", alg: "FIFO", jobs: [["A", 0, 10], ["B", 0, 10], ["C", 0, 10]],
+    desc: "A, B, C มาถึง T = 0 ใช้ตัวละ 10s → รัน A, B, C ตามลำดับ", ans: "สไลด์: average turnaround = (10 + 20 + 30) / 3 = <b>20</b>" },
+  { name: "FIFO 100/10/10 (convoy)", alg: "FIFO", jobs: [["A", 0, 100], ["B", 0, 10], ["C", 0, 10]],
+    desc: "A ใช้ 100s มาก่อน B, C ที่ใช้ 10s → งานสั้นต้องรองานยาว = <b>convoy effect</b>", ans: "สไลด์: average turnaround = (100 + 110 + 120) / 3 = <b>110</b>" },
+  { name: "SJF 100/10/10", alg: "SJF", jobs: [["A", 0, 100], ["B", 0, 10], ["C", 0, 10]],
+    desc: "ทุกงานมา T = 0 → เลือกงานสั้นก่อน: B, C แล้วค่อย A", ans: "สไลด์: average turnaround = (10 + 20 + 120) / 3 = <b>50</b>" },
+  { name: "SJF มาไม่พร้อมกัน", alg: "SJF", jobs: [["A", 0, 100], ["B", 10, 10], ["C", 10, 10]],
+    desc: "B, C มาถึง T = 10 แต่ A เริ่มไปแล้ว — SJF เป็น <b>non-preemptive</b> จึงต้องรอ A จบ", ans: "สไลด์: average turnaround = (100 + (110 − 10) + (120 − 10)) / 3 = <b>103.33</b>" },
+  { name: "STCF", alg: "STCF", jobs: [["A", 0, 100], ["B", 10, 10], ["C", 10, 10]],
+    desc: "กรณีเดียวกัน แต่ STCF <b>preempt</b> ได้: เมื่อ B, C มาถึง เทียบเวลาที่เหลือ → หยุด A ไว้ก่อน", ans: "สไลด์: average turnaround = ((120 − 0) + (20 − 10) + (30 − 10)) / 3 = <b>50</b>" },
+  { name: "Priority P1–P5", alg: "PRIO", jobs: [["P1", 0, 10, 3], ["P2", 0, 1, 1], ["P3", 0, 2, 4], ["P4", 0, 1, 5], ["P5", 0, 5, 2]],
+    desc: "ทุก process มา T = 0 · เลข priority น้อย = สำคัญกว่า → ลำดับ P2, P5, P1, P3, P4", ans: "สไลด์ทิ้งเป็นคำถาม (ไม่ได้เฉลย) — คำนวณได้ (1 + 6 + 16 + 18 + 19) / 5 = <b>12</b>" },
+  { name: "Round Robin q = 1", alg: "RR", q: 1, jobs: [["A", 0, 5], ["B", 0, 5], ["C", 0, 5]],
+    desc: "A, B, C มาพร้อมกัน q = 1s → ABCABC… · ⚠️ สไลด์เขียนว่า \"each needs 15s\" แต่กราฟและคำตอบตรงกับงานละ <b>5s</b>",
+    ans: "สไลด์: avg response = (0 + 1 + 2) / 3 = <b>1</b> · avg turnaround = (13 + 14 + 15) / 3 = <b>14</b>" },
+  { name: "เทียบ: SJF งานละ 5", alg: "SJF", jobs: [["A", 0, 5], ["B", 0, 5], ["C", 0, 5]],
+    desc: "งานเดียวกับตัวอย่าง RR แต่ใช้ SJF → A(0–5), B(5–10), C(10–15)",
+    ans: "สไลด์: avg response = (0 + 5 + 10) / 3 = <b>5</b> · avg turnaround = (5 + 10 + 15) / 3 = <b>10</b> → RR ชนะ response, SJF ชนะ turnaround" },
+  { name: "✏️ กำหนดเอง", alg: "RR", q: 2, jobs: [["A", 0, 6], ["B", 1, 3], ["C", 2, 4], ["D", 4, 2]],
+    desc: "แก้ตัวเลขในตารางได้เลย (เพิ่ม/ลบงานได้) แล้วเลือกอัลกอริทึม", ans: "" },
+];
+const NAMES = "ABCDEF";
+let JOBS = [], ALG = "FIFO", Q = 1, SIM = null, curSc = null;
+
+function simulate(jobs, alg, q) {
+  const J = jobs.map((j, i) => ({ i, n: j[0], a: +j[1], b: +j[2], p: j[3] == null ? 0 : +j[3], rem: +j[2], first: null, done: null }));
+  const segs = []; let t = 0, ready = [], run = null, used = 0, guard = 0;
+  const order = [...J].sort((x, y) => x.a - y.a || x.i - y.i);
+  let pend = [...order];
+  const notes = {}; // time -> text list
+  const note = (tm, s) => (notes[tm] = notes[tm] || []).push(s);
+  while (J.some(j => j.done == null) && guard++ < 5000) {
+    const arr = pend.filter(j => j.a === t); pend = pend.filter(j => j.a !== t);
+    // RR: the job whose quantum expired goes behind the new arrivals
+    if (run && alg === "RR" && used >= q) {
+      ready.push(...arr);
+      if (ready.length) { note(t, `หมด quantum → <b>${run.n}</b> ไปต่อท้ายคิว`); ready.push(run); run = null; } else used = 0;
+    } else ready.push(...arr);
+    if (arr.length && t > 0) note(t, `t = ${t}: <b>${arr.map(j => j.n).join(", ")}</b> มาถึง`);
+    if (run && alg === "STCF") {
+      const best = [...ready].sort((x, y) => x.rem - y.rem || x.a - y.a || x.i - y.i)[0];
+      if (best && best.rem < run.rem) { note(t, `STCF เทียบเวลาที่เหลือ: ${[run, ...ready].map(j => `${j.n} = ${j.rem}`).join(", ")} → <b>preempt ${run.n}</b>`); ready.push(run); run = null; }
+    }
+    let decided = false, snap = null;
+    if (!run && ready.length) {
+      snap = ready.map(j => ({ n: j.n, i: j.i, rem: j.rem, p: j.p }));
+      let pickJ;
+      if (alg === "FIFO" || alg === "RR") pickJ = ready[0];
+      else if (alg === "SJF" || alg === "STCF") pickJ = [...ready].sort((x, y) => x.rem - y.rem || x.a - y.a || x.i - y.i)[0];
+      else pickJ = [...ready].sort((x, y) => x.p - y.p || x.a - y.a || x.i - y.i)[0];
+      ready = ready.filter(j => j !== pickJ); run = pickJ; used = 0; decided = true;
+      const why = {
+        FIFO: `FIFO: เลือกตัวที่อยู่หัวคิว (มาก่อน) → <b>${pickJ.n}</b>`,
+        RR: `RR: เลือกหัวคิว → <b>${pickJ.n}</b> ได้รัน ${q} หน่วย`,
+        SJF: `SJF: เลือกงานที่สั้นที่สุด (${snap.map(j => `${j.n} = ${j.rem}`).join(", ")}) → <b>${pickJ.n}</b>`,
+        STCF: `STCF: เลือกงานที่เหลือเวลาน้อยสุด (${snap.map(j => `${j.n} = ${j.rem}`).join(", ")}) → <b>${pickJ.n}</b>`,
+        PRIO: `Priority: เลือกเลขน้อยสุด (${snap.map(j => `${j.n} = ${j.p}`).join(", ")}) → <b>${pickJ.n}</b>`,
+      }[alg];
+      if (snap.length > 1 || alg !== "RR") note(t, why); else note(t, `เหลือ <b>${pickJ.n}</b> ตัวเดียวในคิว → รันต่อ`);
+      if (pickJ.first == null) pickJ.first = t;
+    }
+    if (!decided && run && arr.length) {
+      if (alg === "STCF") note(t, `STCF เทียบเวลาที่เหลือ: ${[run, ...ready].map(j => `${j.n} = ${j.rem}`).join(", ")} → <b>${run.n}</b> ยังน้อยสุด รันต่อ`);
+      else if (alg !== "RR") note(t, `<b>${run.n}</b> รันต่อ — ${alg === "PRIO" ? "Priority แบบนี้" : alg} เป็น <b>non-preemptive</b> (ถือ CPU จนจบ)`);
+    }
+    if (!run) { // idle
+      const last = segs[segs.length - 1];
+      if (last && last.j == null) last.e++; else segs.push({ j: null, s: t, e: t + 1, notes: notes[t] || [], queue: [] });
+      t++; continue;
+    }
+    const last = segs[segs.length - 1];
+    if (!decided && last && last.j === run.i && last.e === t && !notes[t]) last.e++;
+    else segs.push({ j: run.i, s: t, e: t + 1, notes: notes[t] || [], queue: ready.map(j => j.i) });
+    run.rem--; used++; t++;
+    // keep the queue picture in sync with arrivals during this segment
+    if (run.rem === 0) { run.done = t; segs[segs.length - 1].fin = run.i; run = null; }
+  }
+  // queue during each segment = queue at its end (includes jobs that arrived meanwhile)
+  return { J, segs, T: t };
+}
+
+function renderJobs() {
+  const pri = ALG === "PRIO" || JOBS.some(j => j[3] != null);
+  let s = `<tr><th>งาน</th><th>มาถึง</th><th>burst</th>${pri ? "<th>priority</th>" : ""}<th></th></tr>`;
+  JOBS.forEach((j, k) => {
+    s += `<tr class="j${k % 6}"><td class="nm">${j[0]}</td><td><input type="number" min="0" data-k="${k}" data-f="1" value="${j[1]}"></td>` +
+      `<td><input type="number" min="1" data-k="${k}" data-f="2" value="${j[2]}"></td>` +
+      (pri ? `<td><input type="number" min="0" data-k="${k}" data-f="3" value="${j[3] ?? 1}"></td>` : "") +
+      `<td>${JOBS.length > 1 ? `<button data-del="${k}" title="ลบงาน">✕</button>` : ""}</td></tr>`;
+  });
+  if (JOBS.length < 6) s += `<tr><td colspan="${pri ? 5 : 4}"><button id="addJob">+ เพิ่มงาน</button></td></tr>`;
+  $("#jobs").innerHTML = s;
+}
+$("#jobs").addEventListener("change", e => {
+  const k = e.target.dataset.k; if (k == null) return;
+  const v = Math.max(+e.target.dataset.f === 2 ? 1 : 0, Math.round(+e.target.value || 0));
+  JOBS[+k][+e.target.dataset.f] = v; rebuild(false);
+});
+$("#jobs").addEventListener("click", e => {
+  if (e.target.dataset.del != null) { JOBS.splice(+e.target.dataset.del, 1); JOBS.forEach((j, i) => j[0] = curSc.name.startsWith("Priority") ? "P" + (i + 1) : NAMES[i]); rebuild(); }
+  if (e.target.id === "addJob") { const i = JOBS.length; JOBS.push([curSc.name.startsWith("Priority") ? "P" + (i + 1) : NAMES[i], 0, 3, 1]); rebuild(); }
+});
+$("#alg").onchange = () => { ALG = $("#alg").value; rebuild(); };
+$("#q").onchange = () => { Q = Math.max(1, Math.round(+$("#q").value || 1)); $("#q").value = Q; rebuild(false); };
+
+const cases = Cases($("#cases"), SC.map(s => s.name), k => {
+  curSc = SC[k]; JOBS = curSc.jobs.map(j => [...j]); ALG = curSc.alg; Q = curSc.q || 1;
+  $("#alg").value = ALG; $("#q").value = Q; rebuild();
+});
+function rebuild(redrawTable = true) {
+  if (redrawTable) renderJobs();
+  $("#qWrap").style.display = ALG === "RR" ? "" : "none";
+  SIM = simulate(JOBS, ALG, Q);
+  const changed = curSc.alg !== ALG || JSON.stringify(curSc.jobs) !== JSON.stringify(JOBS) || (ALG === "RR" && (curSc.q || 1) !== Q);
+  $("#desc").innerHTML = `<p>${curSc.desc}</p>` + (curSc.ans ? `<p class="answer">${changed ? "⚙️ คุณแก้ค่าจากตัวอย่างในสไลด์แล้ว — คำตอบด้านล่างคำนวณใหม่ · ต้นฉบับ: " : ""}${curSc.ans}</p>` : "");
+  player.reset();
+}
+const job = i => SIM.J[i];
+function show(step) {
+  const S = SIM.segs, T = SIM.T;
+  const k = step - 1; // segment index shown as "running"; step 0 = start, step S.length+1 = summary
+  const final = step > S.length;
+  const tNow = step === 0 ? 0 : final ? T : S[k].e;
+  // CPU + queue
+  const seg = !final && k >= 0 ? S[k] : null;
+  $("#cpu").innerHTML = seg && seg.j != null ? `<span class="chip big j${seg.j % 6}">${job(seg.j).n}<small>t ${seg.s}–${seg.e}</small></span>` : `<span class="answer">${final ? "เสร็จทุกงาน" : step === 0 ? "ยังว่าง" : "ว่าง (idle)"}</span>`;
+  let q = [];
+  if (seg) { // order like the simulator queue, then anyone who arrived during the segment
+    const base = seg.queue.map(i => job(i));
+    q = base.concat(SIM.J.filter(j => j.a > seg.s && j.a < seg.e && !base.includes(j)));
+  } else if (step === 0) q = SIM.J.filter(j => j.a === 0);
+  const remAt = (j, tm) => j.b - S.filter(s => s.j === j.i && s.s < tm).reduce((a, s) => a + Math.min(s.e, tm) - s.s, 0);
+  $("#queue").innerHTML = q.length ? `<span class="arrow">หัวคิว →</span>` + q.map(j => `<span class="chip j${j.i % 6}">${j.n}<small>เหลือ ${remAt(j, seg ? seg.s : 0)}${ALG === "PRIO" ? " · p" + j.p : ""}</small></span>`).join("") : `<span class="answer">ว่าง</span>`;
+  // gantt
+  let g = "";
+  const pct = x => (x / T * 100) + "%";
+  const shown = final ? S.length : Math.max(0, k + 1);
+  S.slice(0, shown).forEach((s, idx) => {
+    const cls = s.j == null ? "idle" : "j" + (s.j % 6);
+    g += `<div class="seg ${cls} ${idx === k ? "grow" : ""}" style="left:${pct(s.s)};width:calc(${pct(s.e - s.s)} - 2px)">${s.j == null ? "idle" : job(s.j).n}</div>`;
+  });
+  const ticks = new Set([0, T, ...S.slice(0, shown).map(s => s.e)]);
+  const dense = T > 40;
+  [...ticks].forEach(x => { if (!dense || x === 0 || x === T || S.slice(0, shown).some(s => s.e === x && s.e - s.s >= T / 25)) g += `<span class="tick" style="left:${pct(x)}">${x}</span>`; });
+  // arrivals markers
+  const arrs = {}; SIM.J.forEach(j => { if (j.a > 0) (arrs[j.a] = arrs[j.a] || []).push(j.n); });
+  for (const a in arrs) g += `<span class="arr" style="left:${pct(+a)}">↓ ${arrs[a].join(",")} มา</span>`;
+  if (!final) g += `<div class="now" style="left:${pct(tNow)}"></div>`;
+  $("#gantt").innerHTML = g;
+  // caption
+  const cap = $("#cap");
+  if (step === 0) { cap.className = "cap"; cap.innerHTML = `t = 0 — ${SIM.J.filter(j => j.a === 0).map(j => j.n).join(", ")} อยู่ใน ready queue<small>กด ▶ เล่น หรือ ถัดไป</small>`; }
+  else if (final) {
+    cap.className = "cap good";
+    const avg = f => SIM.J.reduce((a, j) => a + f(j), 0) / SIM.J.length;
+    cap.innerHTML = `จบที่ t = ${T} — avg turnaround = <b>${fmt(avg(j => j.done - j.a))}</b> · avg response = <b>${fmt(avg(j => j.first - j.a))}</b> · avg waiting = <b>${fmt(avg(j => j.done - j.a - j.b))}</b>`;
+  } else {
+    const parts = [...seg.notes];
+    if (seg.j != null && !parts.length) parts.push(`<b>${job(seg.j).n}</b> รันต่อ`);
+    if (seg.fin != null) { const J = job(seg.fin); parts.push(`<b>${J.n}</b> เสร็จที่ t = ${J.done} → turnaround = ${J.done} − ${J.a} = <b>${J.done - J.a}</b>`); }
+    cap.className = "cap" + (seg.notes.some(n => /<b>preempt|quantum/.test(n)) ? " warn" : seg.fin != null ? " good" : "");
+    cap.innerHTML = parts.join("<br>") + `<small>ช่วงเวลา t = ${seg.s} → ${seg.e}</small>`;
+  }
+  // metrics table
+  const pri = ALG === "PRIO";
+  let m = `<tr><th>งาน</th><th>มาถึง</th><th>burst</th>${pri ? "<th>priority</th>" : ""}<th>รันครั้งแรก</th><th>เสร็จ</th><th>Turnaround</th><th>Response</th><th>Waiting</th></tr>`;
+  const known = (v) => v != null && v < tNow;
+  SIM.J.forEach(j => {
+    const f = known(j.first) ? j.first : null, d = j.done != null && j.done <= tNow ? j.done : null;
+    m += `<tr class="j${j.i % 6}"><td class="nm" style="color:var(--jc);font-weight:700">${j.n}</td><td>${j.a}</td><td>${j.b}</td>${pri ? `<td>${j.p}</td>` : ""}` +
+      `<td>${f ?? "–"}</td><td>${d ?? "–"}</td><td>${d != null ? `${d - j.a}<span class="f">${d} − ${j.a}</span>` : "–"}</td>` +
+      `<td>${f != null ? `${f - j.a}<span class="f">${f} − ${j.a}</span>` : "–"}</td><td>${d != null ? `${d - j.a - j.b}<span class="f">${d - j.a} − ${j.b}</span>` : "–"}</td></tr>`;
+  });
+  if (final) {
+    const n = SIM.J.length, sum = f => SIM.J.reduce((a, j) => a + f(j), 0);
+    const cell = f => `${fmt(sum(f) / n)}<span class="f">(${SIM.J.map(f).join(" + ")}) / ${n}</span>`;
+    m += `<tr class="avg"><td colspan="${pri ? 6 : 5}">ค่าเฉลี่ย</td><td>${cell(j => j.done - j.a)}</td><td>${cell(j => j.first - j.a)}</td><td>${cell(j => j.done - j.a - j.b)}</td></tr>`;
+  }
+  $("#metrics").innerHTML = m;
+}
+const player = Player($("#player"), { count: () => SIM ? SIM.segs.length + 2 : 1, show, delay: 1300 });
+LABS.push({ name: "sched", cases, player });
+cases.pick(0);
+</script>
+
+</body></html>
