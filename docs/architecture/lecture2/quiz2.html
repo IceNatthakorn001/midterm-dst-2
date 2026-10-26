@@ -223,6 +223,73 @@
 const TAG_LABEL = { match: "จับคู่", mcq: "เลือกตอบ", open: "ตอบเอง" };
 const questions = [
  {
+  "type": "mcq",
+  "num": 1,
+  "q": "โครงสร้างของ Process ใน memory ส่วนไหนเก็บข้อมูลชั่วคราว",
+  "choices": [
+   "Heap",
+   "Text",
+   "Stack",
+   "Data"
+  ],
+  "correct": 2,
+  "answer": "คำตอบ: c. Stack",
+  "explain": "Stack เก็บข้อมูลชั่วคราว เช่น ค่าที่ส่งเข้าฟังก์ชัน (parameter), ตัวแปรในฟังก์ชัน (local variable) และที่อยู่ที่ต้องกลับไปหลังฟังก์ชันจบ (return address) พอฟังก์ชันทำงานเสร็จ ข้อมูลพวกนี้ก็หายไป\n\nส่วนอื่นเก็บอะไร:\n\nHeap เก็บข้อมูลที่ขอหน่วยความจำเพิ่มตอนโปรแกรมรัน (เช่น new ใน Java)\nText เก็บโค้ดของโปรแกรม\nData เก็บตัวแปร global"
+ },
+ {
+  "type": "mcq",
+  "q": "Standard library ที่ใช้ทั่วไป เช่น printf() ทำงานภายใต้ mode ใด",
+  "choices": [
+   "Kernel mode",
+   "User mode"
+  ],
+  "correct": 1,
+  "answer": "คำตอบ: b. User mode",
+  "explain": "printf() เป็นฟังก์ชันของ library ซึ่งอยู่ฝั่งเดียวกับโปรแกรมของผู้ใช้ จึงทำงานใน user mode\n\nตอนจะเขียนข้อมูลออกจอจริง printf() จะเรียก system call (write) ซึ่งใช้ trap สลับเข้า kernel mode ให้ OS ทำงานแทน แล้วค่อยกลับมา user mode",
+  "note": "เฉลยข้อนี้ไม่ได้ให้มากับข้อสอบ — เขียนเพิ่มจากสไลด์ Lecture 2 (dual mode, library ห่อ system call)"
+ },
+ {
+  "type": "open",
+  "q": "fork() ทำหน้าที่อะไร",
+  "answer": "คำตอบ: d. สร้าง process ใหม่",
+  "explain": "fork() คือ system call ที่ใช้สร้าง process ใหม่ โดย \"ก๊อปปี้\" process เดิมออกมาอีกตัว\n\nprocess เดิม เรียกว่า parent (แม่)\nprocess ใหม่ เรียกว่า child (ลูก)\n\nลูกจะได้โค้ดและข้อมูลเหมือนแม่ แล้วทั้งคู่ทำงานต่อจากบรรทัดหลัง fork() พร้อมกัน\n\nวิธีแยกว่าใครเป็นใคร ให้ดูค่าที่ fork() ส่งกลับมา:\n\n0 = นี่คือ child\nมากกว่า 0 = นี่คือ parent (ค่านี้คือเลข PID ของลูก)\n-1 = สร้างไม่สำเร็จ\n\nเชื่อมกับข้อก่อน: parent มักเรียก wait() เพื่อรอ child ทำงานเสร็จ",
+  "note": "ต้นฉบับมีแค่คำตอบ ไม่มีโจทย์และตัวเลือก a–c"
+ },
+ {
+  "type": "open",
+  "q": "โครงสร้างที่ OS เก็บข้อมูลของ Process ที่กำลังทำงาน เรียกว่าอะไร",
+  "answer": "คำตอบ: PCB (Process Control Block)",
+  "explain": "PCB คือ \"บัตรประจำตัว\" ของ process แต่ละตัว OS จะสร้าง PCB ให้ทุก process ที่เกิดขึ้น\n\nใน PCB เก็บข้อมูลเหล่านี้:\n\nสถานะ (state) เช่น Ready, Running, Waiting\nเลข PID ของ process\nProgram counter คือบรรทัดคำสั่งถัดไปที่จะทำ\nค่าใน register ของ CPU\nข้อมูล memory ที่ process ใช้\nไฟล์ที่เปิดอยู่ และอุปกรณ์ I/O ที่ใช้\nข้อมูลการจัดคิว เช่น ลำดับความสำคัญ (priority)\n\nPCB สำคัญมากตอนสลับ process (context switch) OS จะบันทึกค่าของตัวเก่าลง PCB ก่อน แล้วโหลดค่าจาก PCB ของตัวใหม่ขึ้นมา พอกลับมาทำตัวเก่า ก็ทำต่อจากจุดเดิมได้เลย\n\nถ้าเป็นข้อตัวเลือก และมีคำว่า Task Control Block ก็คือสิ่งเดียวกัน"
+ },
+ {
+  "type": "mcq",
+  "num": 8,
+  "q": "สถานะใดของ process ที่บอกว่าพร้อมจะทำงานแต่ CPU ยังไม่ว่าง",
+  "choices": [
+   "Running",
+   "Blocked",
+   "Ready",
+   "Waiting"
+  ],
+  "correct": 2,
+  "answer": "คำตอบ: c. Ready",
+  "explain": "Ready คือ process พร้อมทำงานแล้ว มีทุกอย่างครบ แค่รอคิวใช้ CPU อยู่\n\nข้ออื่นหมายถึงอะไร:\n\nRunning: กำลังใช้ CPU ทำงานอยู่ตอนนี้\nBlocked / Waiting: สองคำนี้คือสถานะเดียวกัน process หยุดรอบางอย่าง เช่น รอ I/O หรือรออ่านไฟล์ ถึง CPU ว่าง ก็ยังทำงานไม่ได้\n\nจุดที่ต้องแยกให้ออก:\n\nReady รอ CPU\nWaiting รอ เหตุการณ์อื่น (เช่น I/O)\n\nเชื่อมกับข้อ 5: ตอน process รอ I/O มันจะเปลี่ยนเป็น Waiting พอ I/O เสร็จ มันจะกลับไปเป็น Ready ก่อน ยังไม่ได้ Running ทันที ต้องรอ OS เลือกให้อีกที"
+ },
+ {
+  "type": "mcq",
+  "num": 10,
+  "q": "ข้อใดที่ไม่ได้แสดงโดยคำสั่ง top ใน Linux",
+  "choices": [
+   "ขนาดของ process",
+   "ขนาดของ Memory",
+   "เวลาที่ CPU ทำงาน",
+   "จำนวน process"
+  ],
+  "correct": 0,
+  "answer": "คำตอบที่น่าจะถูก: a. ขนาดของ process",
+  "explain": "top แสดงข้อมูลแบบ real-time แบ่งเป็น 2 ส่วน\n\nส่วนบน (ภาพรวมระบบ):\n\nจำนวน process เช่น Tasks: 200 total, 1 running (ข้อ d)\nขนาด memory เช่น MiB Mem: 7800 total, 2100 free (ข้อ b)\n\nส่วนล่าง (ทีละ process):\n\nเวลาที่ CPU ทำงาน คือคอลัมน์ TIME+ (ข้อ c)\n%CPU, %MEM, PID, ชื่อคำสั่ง"
+ },
+ {
   "type": "match",
   "q": "จับคู่คำอธิบายกับคำที่ถูกต้อง (เลือกจาก dropdown)",
   "options": [
@@ -277,70 +344,6 @@ const questions = [
    }
   ],
   "note": "ข้อนี้มาจากรูปในโฟลเดอร์ exam (ต้นฉบับไม่มีเฉลย) — เฉลยและเหตุผลเขียนจากสไลด์ ตัวที่ไม่ได้ใช้: Fetch, Batch system, Cache memory, Main memory, Disk"
- },
- {
-  "type": "mcq",
-  "q": "โครงสร้างของ Process ใน memory ส่วนไหนเก็บข้อมูลชั่วคราว",
-  "choices": [
-   "Heap",
-   "Text",
-   "Stack",
-   "Data"
-  ],
-  "correct": 2,
-  "answer": "คำตอบ: c. Stack",
-  "explain": "Stack เก็บข้อมูลชั่วคราว เช่น ค่าที่ส่งเข้าฟังก์ชัน (parameter), ตัวแปรในฟังก์ชัน (local variable) และที่อยู่ที่ต้องกลับไปหลังฟังก์ชันจบ (return address) พอฟังก์ชันทำงานเสร็จ ข้อมูลพวกนี้ก็หายไป\n\nส่วนอื่นเก็บอะไร:\n\nHeap เก็บข้อมูลที่ขอหน่วยความจำเพิ่มตอนโปรแกรมรัน (เช่น new ใน Java)\nText เก็บโค้ดของโปรแกรม\nData เก็บตัวแปร global"
- },
- {
-  "type": "mcq",
-  "q": "Standard library ที่ใช้ทั่วไป เช่น printf() ทำงานภายใต้ mode ใด",
-  "choices": [
-   "Kernel mode",
-   "User mode"
-  ],
-  "correct": 1,
-  "answer": "คำตอบ: b. User mode",
-  "explain": "printf() เป็นฟังก์ชันของ library ซึ่งอยู่ฝั่งเดียวกับโปรแกรมของผู้ใช้ จึงทำงานใน user mode\n\nตอนจะเขียนข้อมูลออกจอจริง printf() จะเรียก system call (write) ซึ่งใช้ trap สลับเข้า kernel mode ให้ OS ทำงานแทน แล้วค่อยกลับมา user mode",
-  "note": "เฉลยข้อนี้ไม่ได้ให้มากับข้อสอบ — เขียนเพิ่มจากสไลด์ Lecture 2 (dual mode, library ห่อ system call)"
- },
- {
-  "type": "open",
-  "q": "fork() ทำหน้าที่อะไร",
-  "answer": "คำตอบ: d. สร้าง process ใหม่",
-  "explain": "fork() คือ system call ที่ใช้สร้าง process ใหม่ โดย \"ก๊อปปี้\" process เดิมออกมาอีกตัว\n\nprocess เดิม เรียกว่า parent (แม่)\nprocess ใหม่ เรียกว่า child (ลูก)\n\nลูกจะได้โค้ดและข้อมูลเหมือนแม่ แล้วทั้งคู่ทำงานต่อจากบรรทัดหลัง fork() พร้อมกัน\n\nวิธีแยกว่าใครเป็นใคร ให้ดูค่าที่ fork() ส่งกลับมา:\n\n0 = นี่คือ child\nมากกว่า 0 = นี่คือ parent (ค่านี้คือเลข PID ของลูก)\n-1 = สร้างไม่สำเร็จ\n\nเชื่อมกับข้อก่อน: parent มักเรียก wait() เพื่อรอ child ทำงานเสร็จ",
-  "note": "ต้นฉบับมีแค่คำตอบ ไม่มีโจทย์และตัวเลือก a–c"
- },
- {
-  "type": "open",
-  "q": "โครงสร้างที่ OS เก็บข้อมูลของ Process ที่กำลังทำงาน เรียกว่าอะไร",
-  "answer": "คำตอบ: PCB (Process Control Block)",
-  "explain": "PCB คือ \"บัตรประจำตัว\" ของ process แต่ละตัว OS จะสร้าง PCB ให้ทุก process ที่เกิดขึ้น\n\nใน PCB เก็บข้อมูลเหล่านี้:\n\nสถานะ (state) เช่น Ready, Running, Waiting\nเลข PID ของ process\nProgram counter คือบรรทัดคำสั่งถัดไปที่จะทำ\nค่าใน register ของ CPU\nข้อมูล memory ที่ process ใช้\nไฟล์ที่เปิดอยู่ และอุปกรณ์ I/O ที่ใช้\nข้อมูลการจัดคิว เช่น ลำดับความสำคัญ (priority)\n\nPCB สำคัญมากตอนสลับ process (context switch) OS จะบันทึกค่าของตัวเก่าลง PCB ก่อน แล้วโหลดค่าจาก PCB ของตัวใหม่ขึ้นมา พอกลับมาทำตัวเก่า ก็ทำต่อจากจุดเดิมได้เลย\n\nถ้าเป็นข้อตัวเลือก และมีคำว่า Task Control Block ก็คือสิ่งเดียวกัน"
- },
- {
-  "type": "mcq",
-  "q": "สถานะใดของ process ที่บอกว่าพร้อมจะทำงานแต่ CPU ยังไม่ว่าง",
-  "choices": [
-   "Running",
-   "Blocked",
-   "Ready",
-   "Waiting"
-  ],
-  "correct": 2,
-  "answer": "คำตอบ: c. Ready",
-  "explain": "Ready คือ process พร้อมทำงานแล้ว มีทุกอย่างครบ แค่รอคิวใช้ CPU อยู่\n\nข้ออื่นหมายถึงอะไร:\n\nRunning: กำลังใช้ CPU ทำงานอยู่ตอนนี้\nBlocked / Waiting: สองคำนี้คือสถานะเดียวกัน process หยุดรอบางอย่าง เช่น รอ I/O หรือรออ่านไฟล์ ถึง CPU ว่าง ก็ยังทำงานไม่ได้\n\nจุดที่ต้องแยกให้ออก:\n\nReady รอ CPU\nWaiting รอ เหตุการณ์อื่น (เช่น I/O)\n\nเชื่อมกับข้อ 5: ตอน process รอ I/O มันจะเปลี่ยนเป็น Waiting พอ I/O เสร็จ มันจะกลับไปเป็น Ready ก่อน ยังไม่ได้ Running ทันที ต้องรอ OS เลือกให้อีกที"
- },
- {
-  "type": "mcq",
-  "q": "ข้อใดที่ไม่ได้แสดงโดยคำสั่ง top ใน Linux",
-  "choices": [
-   "ขนาดของ process",
-   "ขนาดของ Memory",
-   "เวลาที่ CPU ทำงาน",
-   "จำนวน process"
-  ],
-  "correct": 0,
-  "answer": "คำตอบที่น่าจะถูก: a. ขนาดของ process",
-  "explain": "top แสดงข้อมูลแบบ real-time แบ่งเป็น 2 ส่วน\n\nส่วนบน (ภาพรวมระบบ):\n\nจำนวน process เช่น Tasks: 200 total, 1 running (ข้อ d)\nขนาด memory เช่น MiB Mem: 7800 total, 2100 free (ข้อ b)\n\nส่วนล่าง (ทีละ process):\n\nเวลาที่ CPU ทำงาน คือคอลัมน์ TIME+ (ข้อ c)\n%CPU, %MEM, PID, ชื่อคำสั่ง"
  }
 ];
 
@@ -377,7 +380,7 @@ function render() {
   if (current >= questions.length) return renderScore();
   const qd = questions[current];
   let h = '<div class="card"><div class="progress-row">';
-  h += '<div class="progress">ข้อ ' + (current + 1) + ' / ' + questions.length + '</div>';
+  h += '<div class="progress">ข้อ ' + (current + 1) + ' / ' + questions.length + (qd.num ? ' · ข้อสอบข้อ ' + qd.num : '') + '</div>';
   h += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div></div>';
   h += '<div class="question">' + qd.q + '</div>';
 
