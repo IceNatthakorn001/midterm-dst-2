@@ -298,7 +298,7 @@ ARCH_SKIP = ("คำศัพท์", "สรุปท้ายบท", "Course 
              "Course Logistics", "Summary")
 
 
-def arch_subject_page(subj, lessons, nq):
+def arch_subject_page(subj, lessons, nq, quizpages=()):
     groups = [("arch", "🖥️", "ส่วนที่ 1 · Computer Architecture", "Chapter 00–08 · ฮาร์ดแวร์ ตัวเลข หน่วยความจำ I/O pipeline"),
               ("os", "⚙️", "ส่วนที่ 2 · Operating Systems", "Lecture 1–3 · OS, Process, CPU Scheduling")]
     data, cards = [], {"arch": "", "os": ""}
@@ -336,6 +336,28 @@ def arch_subject_page(subj, lessons, nq):
         data.append({"s": s, "f": " ".join([les["label"], les["title"]] + [t for _, t in topics]
                                          + [a["title"] for a in les["anims"]]).lower(),
                      "toc": [[a, t] for a, t in topics]})
+    # real-exam quizzes: <sum by claude>/Quiz-*/ -> own group + filter tab
+    quiz_cards = ""
+    for qp in quizpages:
+        s = qp["slug"]
+        m = re.search(r"\d+", qp["label"])
+        title = re.sub(r"^ข้อสอบจริง\s*", "", qp["title"])
+        sm = re.search(r'<div class="sub">(.*?)</div>', qp["html"], re.S)
+        info = re.sub(r"<[^>]+>", "", sm.group(1)).split(" — ")[0] if sm else ""
+        quiz_cards += f"""
+<li class="ax-card" data-g="quiz" data-s="{s}">
+  <div class="ax-head">
+    <span class="ax-num"><small>QUIZ</small>{m.group(0) if m else "•"}</span>
+    <a class="ax-title" href="{s}/index.html" data-l="{s}">{esc(title)}</a>
+    <span class="ax-done" title="เคยเปิดแล้ว">✓</span>
+  </div>
+  <p class="ax-topics">{esc(info)}</p>
+  <ul class="ax-hits"></ul>
+  <div class="ax-actions"><a class="ax-btn ax-quiz" href="{s}/index.html" data-l="{s}"><i>📝</i> ทำ Quiz</a></div>
+</li>"""
+        data.append({"s": s, "f": " ".join(["quiz", qp["label"], title, info]).lower(), "toc": []})
+    cards["quiz"] = quiz_cards
+    groups.append(("quiz", "📝", "Quiz · ข้อสอบจริง", "โจทย์จากการสอบ Quiz จริง แยกตามครั้ง"))
     n_os = sum(1 for l in lessons if l["label"].startswith("Lecture"))
     sections = "".join(
         f'<section class="ax-group" data-g="{g}"><div class="ax-ghead"><span class="ax-gicon">{ic}</span>'
@@ -357,9 +379,10 @@ def arch_subject_page(subj, lessons, nq):
   <div class="ax-tools">
     <div class="ax-search"><span>🔍</span><input id="axQ" type="search" placeholder="ค้นหาหัวข้อ เช่น cache, RAID, fork, IEEE 754…" autocomplete="off"><kbd>/</kbd></div>
     <div class="ax-tabs" role="tablist">
-      <button class="on" data-f="all">ทั้งหมด <b>{len(lessons)}</b></button>
+      <button class="on" data-f="all">ทั้งหมด <b>{len(lessons) + len(quizpages)}</b></button>
       <button data-f="arch">🖥️ Architecture <b>{len(lessons) - n_os}</b></button>
       <button data-f="os">⚙️ OS <b>{n_os}</b></button>
+      {f'<button data-f="quiz">📝 Quiz <b>{len(quizpages)}</b></button>' if quizpages else ""}
     </div>
   </div>
   <div class="ax-legend"><span><i class="ax-dot p"></i>อ่านเต็ม = ฉบับละเอียด มีรูปสไลด์</span><span><i class="ax-dot"></i>สรุปสั้น = ทบทวนก่อนสอบ</span><span><i class="ax-dot q"></i>Quiz = ทดสอบ 4 ตัวเลือก</span></div>
@@ -541,7 +564,7 @@ def build():
                      f'<div class="row-actions"><a class="chip" href="{les["slug"]}/index.html">📖 อ่าน</a>{slink}{qlink}</div></li>')
         nq = sum(bool(l["quiz"]) + bool(l["quiz2"]) + bool(l["quiz3"]) for l in lessons) + sum(1 + qp["quiz2"] for qp in quizpages)
         if subj["slug"] == "architecture":
-            sbody = arch_subject_page(subj, lessons, nq)
+            sbody = arch_subject_page(subj, lessons, nq, quizpages)
         else:
             sbody = f"""
 <main class="wrap">
