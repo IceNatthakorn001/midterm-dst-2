@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Quiz: ข้อสอบจริง Quiz 3 — Lecture 3</title>
+<style>
+  body {
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background: #f5f6fa;
+    color: #1a1a1a;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .progress { color: #888; font-size: 0.9rem; }
+  .tag {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.recall { background: #e8eaf6; color: #3f51b5; }
+  .tag.understand { background: #fff3e0; color: #ef6c00; }
+  .tag.apply { background: #e0f2f1; color: #00796b; }
+  .tag.calc { background: #fce4ec; color: #c2185b; }
+  .tag.fill { background: #ede7f6; color: #5e35b1; }
+  .fill-text { font-size: 1.05rem; line-height: 2.5; margin-bottom: 14px; }
+  .slot {
+    display: inline-block;
+    min-width: 84px;
+    padding: 0 10px;
+    margin: 0 3px;
+    line-height: 1.9;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px dashed #b9b9c9;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .slot.filled { border-style: solid; border-color: #5e35b1; background: #ede7f6; cursor: grab; touch-action: none; user-select: none; }
+  .slot.over { border-color: #3f51b5; background: #e8eaf6; }
+  .slot.target { border-color: #3f51b5; cursor: pointer; }
+  .slot.correct { border-style: solid; border-color: #4caf50; background: #e3f7e8; cursor: default; }
+  .slot.wrong { border-style: solid; border-color: #e57373; background: #fdeaea; cursor: default; }
+  .slot-ans { color: #2e7d32; font-weight: 600; font-size: 0.95rem; }
+  .bank-label { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f6fa;
+    border: 1px solid #e3e3ec;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    font-size: 1rem;
+  }
+  .chip.sel { background: #5e35b1; color: #fff; }
+  .chip.used { visibility: hidden; }
+  .chip.ghost {
+    position: fixed;
+    z-index: 99;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #ede7f6;
+  }
+  .fill-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .fill-actions button {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid #5e35b1;
+    background: #5e35b1;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .fill-actions button.ghost-btn { background: #fff; color: #5e35b1; }
+  .fill-actions button:disabled { background: #bbb; border-color: #bbb; cursor: not-allowed; }
+  .question { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #1a1a1a;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice:hover { background: #f0f0f0; }
+  .choice.correct { background: #e3f7e8; border-color: #4caf50; }
+  .choice.wrong { background: #fdeaea; border-color: #e57373; }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .explain.correct-bg { background: #e3f7e8; border: 1px solid #4caf50; }
+  .explain.wrong-bg { background: #fdeaea; border: 1px solid #e57373; }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button.nav-btn:disabled { background: #bbb; cursor: not-allowed; }
+  .score-box {
+    text-align: center;
+    padding: 24px;
+  }
+  .score-box .big { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+  .breakdown {
+    text-align: left;
+    max-width: 320px;
+    margin: 16px auto 0;
+    font-size: 0.95rem;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  #restartBtn {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #3f51b5;
+    color: #fff;
+    cursor: pointer;
+  }
+  .jumpgrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .jumpgrid button {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .jumpgrid button.current { border-color: #3f51b5; font-weight: 700; }
+  .jumpgrid button.done-correct { background: #e3f7e8; border-color: #4caf50; }
+  .jumpgrid button.done-wrong { background: #fdeaea; border-color: #e57373; }
+
+  .tag.mcq { background: #e8eaf6; color: #3f51b5; }
+  .tag.open { background: #fff3e0; color: #ef6c00; }
+  .tag.short { background: #fce4ec; color: #c2185b; }
+  .question.after { font-weight: 400; white-space: pre-line; margin-top: 14px; }
+  .qtable { border-collapse: collapse; margin: 4px 0 8px; }
+  .qtable th, .qtable td { border: 1px solid #555; padding: 4px 16px; text-align: center; }
+  .short-row { display: flex; align-items: center; gap: 10px; }
+  .short-row input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #bbb; border-radius: 8px; }
+  .tag.match { background: #ede7f6; color: #5e35b1; }
+  .mrow { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; }
+  .mrow.mok { background: #e3f7e8; border-color: #4caf50; }
+  .mrow.mbad { background: #fdeaea; border-color: #e57373; }
+  .mtext { white-space: pre-line; margin-bottom: 8px; }
+  .mrow select { width: 100%; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid #bbb; background: #fff; }
+  .mwhy { margin-top: 6px; font-size: 0.9rem; }
+  .explain .body { white-space: pre-line; }
+  .explain.neutral-bg { background: #eef1fb; border: 1px solid #9fa8da; }
+  .verdict { font-weight: 700; margin-bottom: 4px; }
+  .ans { font-weight: 700; margin-bottom: 8px; }
+  .note { margin-top: 10px; font-size: 0.85rem; color: #666; }
+  .hint { color: #777; font-size: 0.95rem; margin-bottom: 8px; }
+  .selfmark { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .selfmark button { padding: 8px 14px; border-radius: 8px; border: 1px solid; cursor: pointer; font-size: 0.95rem; }
+  .selfmark .okb { background: #e3f7e8; border-color: #4caf50; }
+  .selfmark .nob { background: #fdeaea; border-color: #e57373; }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;margin:-24px -16px 20px;padding:10px 16px;background:rgba(245,246,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e3e5ee;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.92rem">
+<a href="index.html" style="color:#3f51b5;text-decoration:none;font-weight:600">← กลับไปอ่านสรุป</a>
+<span style="color:#999">|</span>
+<a href="../index.html" style="color:#555;text-decoration:none">🖥️ ITDS211</a>
+<span style="color:#999">|</span>
+<a href="../../index.html" style="color:#555;text-decoration:none">หน้าแรก</a>
+</div>
+
+<h1>Quiz: ข้อสอบจริง Quiz 3 — Lecture 3</h1>
+<div class="sub">1 ข้อ จากข้อสอบจริง (ข้อความตามต้นฉบับ) — เติมคำตอบ 1 ข้อ: พิมพ์คำตอบแล้วกดตรวจ (หรือกด Enter) — คะแนนนับจากครั้งแรกของแต่ละข้อ</div>
+
+<div class="jumpgrid" id="jumpGrid"></div>
+<div id="quizArea"></div>
+
+<script>
+const TAG_LABEL = { match: "จับคู่", mcq: "เลือกตอบ", short: "เติมคำตอบ", open: "ตอบเอง" };
+const questions = [
+ {
+  "type": "short",
+  "num": 1,
+  "q": "Consider the following set of processes, with the length of the CPU burst given in milliseconds.",
+  "table": {
+   "head": [
+    "Process",
+    "Burst Time",
+    "Priority"
+   ],
+   "rows": [
+    [
+     "P1",
+     "5",
+     "2"
+    ],
+    [
+     "P2",
+     "1",
+     "1"
+    ],
+    [
+     "P3",
+     "3",
+     "4"
+    ],
+    [
+     "P4",
+     "4",
+     "2"
+    ],
+    [
+     "P5",
+     "1",
+     "3"
+    ]
+   ]
+  },
+  "after": "The processes are assumed to have arrived in the order P1, P2, P3, P4, P5, all at time 0.\nUsing the FCFS scheduling, compute the turnaround time for P4.",
+  "accept": [
+   "13"
+  ],
+  "answer": "คำตอบ: 13 (ms)",
+  "explain": "FCFS = มาก่อนได้ก่อน ทำตามลำดับที่มาถึง P1 → P2 → P3 → P4 → P5 (ไม่สน priority)\n\nลำดับการทำงาน (Gantt chart):\nP1: 0 → 5\nP2: 5 → 6\nP3: 6 → 9\nP4: 9 → 13\nP5: 13 → 14\n\nP4 เริ่มที่ 9 และเสร็จที่ 9 + 4 = 13\n\nTurnaround time = เวลาเสร็จ − เวลามาถึง = 13 − 0 = 13 ms",
+  "note": "เฉลยข้อนี้ไม่ได้ให้มากับข้อสอบ — คำนวณเองตามสูตรในสไลด์ Lecture 3"
+ }
+];
+
+let current = 0;
+const shown = new Array(questions.length).fill(null);   // mcq: ตัวเลือกที่แสดงอยู่ / open: true เมื่อกดดูเฉลย
+const first = new Array(questions.length).fill(null);   // ผลครั้งแรก: true/false
+
+function buildJumpGrid() {
+  document.getElementById('jumpGrid').innerHTML =
+    questions.map((q, i) => '<button onclick="jumpTo(' + i + ')">' + (i + 1) + '</button>').join('');
+  updateJumpGrid();
+}
+function updateJumpGrid() {
+  Array.from(document.getElementById('jumpGrid').children).forEach((b, i) => {
+    b.className = '';
+    if (i === current) b.classList.add('current');
+    if (first[i] !== null) b.classList.add(first[i] ? 'done-correct' : 'done-wrong');
+  });
+}
+function jumpTo(i) { current = i; render(); }
+
+function answerBox(qd, ok) {
+  let h = '<div class="explain ' + (ok === null ? 'neutral-bg' : ok ? 'correct-bg' : 'wrong-bg') + '">';
+  if (ok !== null) h += '<div class="verdict">' + (ok ? '✓ ถูก' : '✗ ผิด') + '</div>';
+  h += '<div class="ans">' + qd.answer + '</div>';
+  h += '<div class="body">' + qd.explain + '</div>';
+  if (qd.note) h += '<div class="note">หมายเหตุ: ' + qd.note + '</div>';
+  return h + '</div>';
+}
+
+function render() {
+  updateJumpGrid();
+  const area = document.getElementById('quizArea');
+  if (current >= questions.length) return renderScore();
+  const qd = questions[current];
+  let h = '<div class="card"><div class="progress-row">';
+  h += '<div class="progress">ข้อ ' + (current + 1) + ' / ' + questions.length + (qd.num ? ' · ข้อสอบข้อ ' + qd.num : '') + '</div>';
+  h += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div></div>';
+  h += '<div class="question">' + qd.q + '</div>';
+  if (qd.table) {
+    h += '<table class="qtable"><tr>' + qd.table.head.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+    qd.table.rows.forEach(r => { h += '<tr>' + r.map(c => '<td>' + c + '</td>').join('') + '</tr>'; });
+    h += '</table>';
+  }
+  if (qd.after) h += '<div class="question after">' + qd.after + '</div>';
+
+  if (qd.type === 'match') {
+    const st = matchState[current];
+    qd.items.forEach((it, k) => {
+      const v = st.pick[k];
+      const ok = v === it.answer;
+      h += '<div class="mrow' + (st.checked ? (ok ? ' mok' : ' mbad') : '') + '"><div class="mtext">' + it.text + '</div>';
+      h += '<select ' + (st.checked ? 'disabled ' : '') + 'onchange="setPick(' + k + ', this.value)"><option value="">Choose...</option>';
+      qd.options.forEach(o => { h += '<option' + (o === v ? ' selected' : '') + '>' + o + '</option>'; });
+      h += '</select>';
+      if (st.checked) h += '<div class="mwhy">' + (ok ? '✓ ' : '✗ คำตอบ: <b>' + it.answer + '</b> — ') + it.why + '</div>';
+      h += '</div>';
+    });
+    if (st.checked) {
+      const n = qd.items.filter((it, k) => st.pick[k] === it.answer).length;
+      h += '<div class="explain ' + (n === qd.items.length ? 'correct-bg' : 'wrong-bg') + '"><div class="verdict">ถูก ' + n + ' / ' + qd.items.length + ' ช่อง</div>';
+      if (qd.note) h += '<div class="note">หมายเหตุ: ' + qd.note + '</div>';
+      h += '</div><div class="fill-actions"><button class="ghost-btn" onclick="resetMatch()">ลองใหม่</button></div>';
+    } else {
+      h += '<div class="fill-actions"><button onclick="checkMatch()" ' + (st.pick.includes('') ? 'disabled' : '') + '>ตรวจคำตอบ</button></div>';
+    }
+  } else if (qd.type === 'short') {
+    const st = shortState[current];
+    h += '<div class="short-row"><label for="shortIn">Answer:</label><input id="shortIn" type="text" autocomplete="off" value="' + st.val.replace(/"/g, "&quot;") + '" ' + (st.checked ? 'disabled ' : '') + 'oninput="shortState[current].val = this.value" onkeydown="if (event.key === \x27Enter\x27) checkShort()"></div>';
+    if (st.checked) {
+      h += answerBox(qd, isShortRight(qd, st.val));
+      h += '<div class="fill-actions"><button class="ghost-btn" onclick="resetShort()">ลองใหม่</button></div>';
+    } else {
+      h += '<div class="fill-actions"><button onclick="checkShort()">ตรวจคำตอบ</button></div>';
+    }
+  } else if (qd.type === 'mcq') {
+    const c = shown[current];
+    qd.choices.forEach((ch, i) => {
+      let cls = 'choice';
+      if (c !== null) { if (i === qd.correct) cls += ' correct'; else if (i === c) cls += ' wrong'; }
+      h += '<button class="' + cls + '" onclick="pick(' + i + ')">' + 'abcd'[i] + '. ' + ch + '</button>';
+    });
+    if (c !== null) h += answerBox(qd, c === qd.correct);
+  } else {
+    if (!shown[current]) {
+      h += '<div class="hint">ต้นฉบับไม่มีตัวเลือก — คิดคำตอบในใจก่อน แล้วกดดูเฉลย</div>';
+      h += '<div class="fill-actions"><button onclick="reveal()">ดูเฉลย</button></div>';
+    } else {
+      h += answerBox(qd, null);
+      if (first[current] === null) {
+        h += '<div class="selfmark">ตอบถูกไหม? <button class="okb" onclick="mark(true)">ตอบถูก</button><button class="nob" onclick="mark(false)">ตอบผิด</button></div>';
+      } else {
+        h += '<div class="selfmark">ให้คะแนนตัวเองแล้ว: ' + (first[current] ? 'ตอบถูก' : 'ตอบผิด') + '</div>';
+      }
+    }
+  }
+  h += '<div class="nav"><button class="nav-btn" onclick="prevQ()" ' + (current === 0 ? 'disabled' : '') + '>ก่อนหน้า</button>';
+  h += '<button class="nav-btn" onclick="nextQ()">' + (current === questions.length - 1 ? 'ดูสรุปคะแนน' : 'ถัดไป') + '</button></div></div>';
+  area.innerHTML = h;
+}
+
+function pick(i) {
+  if (first[current] === null) first[current] = i === questions[current].correct;
+  shown[current] = i; render();
+}
+const newMatch = q => q.type === 'match' ? { pick: q.items.map(() => ''), checked: false } : null;
+const matchState = questions.map(newMatch);
+function setPick(k, v) { matchState[current].pick[k] = v; render(); }
+function checkMatch() {
+  const qd = questions[current], st = matchState[current];
+  st.checked = true;
+  if (first[current] === null) {
+    first[current] = qd.items.every((it, k) => st.pick[k] === it.answer);
+    firstItems[current] = qd.items.filter((it, k) => st.pick[k] === it.answer).length;
+  }
+  render();
+}
+const firstItems = new Array(questions.length).fill(null); // ข้อจับคู่: จำนวนช่องที่ถูกในการตรวจครั้งแรก
+function resetMatch() { matchState[current] = newMatch(questions[current]); render(); }
+const newShort = q => q.type === 'short' ? { val: '', checked: false } : null;
+const shortState = questions.map(newShort);
+// เทียบคำตอบ: ไม่สนช่องว่าง/ตัวพิมพ์ และตัดหน่วย ms ท้ายคำตอบ
+function isShortRight(qd, v) { return qd.accept.includes(v.toLowerCase().replace(/\s+/g, '').replace(/(ms|milliseconds?)$/, '')); }
+function checkShort() {
+  const qd = questions[current], st = shortState[current];
+  if (!st.val.trim()) return;
+  st.checked = true;
+  if (first[current] === null) first[current] = isShortRight(qd, st.val);
+  render();
+}
+function resetShort() { shortState[current] = newShort(questions[current]); render(); }
+function reveal() { shown[current] = true; render(); }
+function mark(ok) { if (first[current] === null) first[current] = ok; render(); }
+function nextQ() { current = current < questions.length - 1 ? current + 1 : questions.length; render(); }
+function prevQ() { if (current > 0) current--; render(); }
+
+function renderScore() {
+  const by = { match: [0, 0], mcq: [0, 0], short: [0, 0], open: [0, 0] };
+  questions.forEach((q, i) => { by[q.type][1]++; if (first[i]) by[q.type][0]++; });
+  const score = Object.values(by).reduce((a, b) => a + b[0], 0);
+  let h = '<div class="card score-box"><div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
+  // ควิซที่มีแค่ข้อจับคู่ข้อเดียว: คะแนนใหญ่ = จำนวนช่องที่ถูก
+  const onlyMatch = questions.length === 1 && questions[0].type === 'match';
+  h += '<div class="big">' + (onlyMatch ? (firstItems[0] || 0) + ' / ' + questions[0].items.length + ' ช่อง' : score + ' / ' + questions.length) + '</div><div class="breakdown">';
+  if (onlyMatch) { h += '</div><button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button></div>'; document.getElementById('quizArea').innerHTML = h; return; }
+  Object.keys(by).forEach(t => { if (by[t][1]) h += '<div><span>' + TAG_LABEL[t] + '</span><span>' + by[t][0] + ' / ' + by[t][1] + '</span></div>'; });
+  questions.forEach((q, i) => {
+    if (q.type === 'match') h += '<div><span>' + (questions.length > 1 ? 'ข้อ ' + (i + 1) + ' ' : '') + 'จับคู่ถูก (ช่อง)</span><span>' + (firstItems[i] || 0) + ' / ' + q.items.length + '</span></div>';
+  });
+  h += '</div><button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button></div>';
+  document.getElementById('quizArea').innerHTML = h;
+}
+function restart() { current = 0; shown.fill(null); first.fill(null); firstItems.fill(null); questions.forEach((q, i) => { matchState[i] = newMatch(q); shortState[i] = newShort(q); }); render(); }
+
+buildJumpGrid();
+render();
+</script>
+
+</body>
+</html>

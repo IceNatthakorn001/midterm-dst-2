@@ -185,6 +185,12 @@
 
   .tag.mcq { background: #e8eaf6; color: #3f51b5; }
   .tag.open { background: #fff3e0; color: #ef6c00; }
+  .tag.short { background: #fce4ec; color: #c2185b; }
+  .question.after { font-weight: 400; white-space: pre-line; margin-top: 14px; }
+  .qtable { border-collapse: collapse; margin: 4px 0 8px; }
+  .qtable th, .qtable td { border: 1px solid #555; padding: 4px 16px; text-align: center; }
+  .short-row { display: flex; align-items: center; gap: 10px; }
+  .short-row input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #bbb; border-radius: 8px; }
   .tag.match { background: #ede7f6; color: #5e35b1; }
   .mrow { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; }
   .mrow.mok { background: #e3f7e8; border-color: #4caf50; }
@@ -220,7 +226,7 @@
 <div id="quizArea"></div>
 
 <script>
-const TAG_LABEL = { match: "จับคู่", mcq: "เลือกตอบ", open: "ตอบเอง" };
+const TAG_LABEL = { match: "จับคู่", mcq: "เลือกตอบ", short: "เติมคำตอบ", open: "ตอบเอง" };
 const questions = [
  {
   "type": "match",
@@ -316,6 +322,12 @@ function render() {
   h += '<div class="progress">ข้อ ' + (current + 1) + ' / ' + questions.length + (qd.num ? ' · ข้อสอบข้อ ' + qd.num : '') + '</div>';
   h += '<div class="tag ' + qd.type + '">' + TAG_LABEL[qd.type] + '</div></div>';
   h += '<div class="question">' + qd.q + '</div>';
+  if (qd.table) {
+    h += '<table class="qtable"><tr>' + qd.table.head.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+    qd.table.rows.forEach(r => { h += '<tr>' + r.map(c => '<td>' + c + '</td>').join('') + '</tr>'; });
+    h += '</table>';
+  }
+  if (qd.after) h += '<div class="question after">' + qd.after + '</div>';
 
   if (qd.type === 'match') {
     const st = matchState[current];
@@ -336,6 +348,15 @@ function render() {
       h += '</div><div class="fill-actions"><button class="ghost-btn" onclick="resetMatch()">ลองใหม่</button></div>';
     } else {
       h += '<div class="fill-actions"><button onclick="checkMatch()" ' + (st.pick.includes('') ? 'disabled' : '') + '>ตรวจคำตอบ</button></div>';
+    }
+  } else if (qd.type === 'short') {
+    const st = shortState[current];
+    h += '<div class="short-row"><label for="shortIn">Answer:</label><input id="shortIn" type="text" autocomplete="off" value="' + st.val.replace(/"/g, "&quot;") + '" ' + (st.checked ? 'disabled ' : '') + 'oninput="shortState[current].val = this.value" onkeydown="if (event.key === \x27Enter\x27) checkShort()"></div>';
+    if (st.checked) {
+      h += answerBox(qd, isShortRight(qd, st.val));
+      h += '<div class="fill-actions"><button class="ghost-btn" onclick="resetShort()">ลองใหม่</button></div>';
+    } else {
+      h += '<div class="fill-actions"><button onclick="checkShort()">ตรวจคำตอบ</button></div>';
     }
   } else if (qd.type === 'mcq') {
     const c = shown[current];
@@ -381,15 +402,27 @@ function checkMatch() {
 }
 const firstItems = new Array(questions.length).fill(null); // ข้อจับคู่: จำนวนช่องที่ถูกในการตรวจครั้งแรก
 function resetMatch() { matchState[current] = newMatch(questions[current]); render(); }
+const newShort = q => q.type === 'short' ? { val: '', checked: false } : null;
+const shortState = questions.map(newShort);
+// เทียบคำตอบ: ไม่สนช่องว่าง/ตัวพิมพ์ และตัดหน่วย ms ท้ายคำตอบ
+function isShortRight(qd, v) { return qd.accept.includes(v.toLowerCase().replace(/\s+/g, '').replace(/(ms|milliseconds?)$/, '')); }
+function checkShort() {
+  const qd = questions[current], st = shortState[current];
+  if (!st.val.trim()) return;
+  st.checked = true;
+  if (first[current] === null) first[current] = isShortRight(qd, st.val);
+  render();
+}
+function resetShort() { shortState[current] = newShort(questions[current]); render(); }
 function reveal() { shown[current] = true; render(); }
 function mark(ok) { if (first[current] === null) first[current] = ok; render(); }
 function nextQ() { current = current < questions.length - 1 ? current + 1 : questions.length; render(); }
 function prevQ() { if (current > 0) current--; render(); }
 
 function renderScore() {
-  const by = { match: [0, 0], mcq: [0, 0], open: [0, 0] };
+  const by = { match: [0, 0], mcq: [0, 0], short: [0, 0], open: [0, 0] };
   questions.forEach((q, i) => { by[q.type][1]++; if (first[i]) by[q.type][0]++; });
-  const score = by.match[0] + by.mcq[0] + by.open[0];
+  const score = Object.values(by).reduce((a, b) => a + b[0], 0);
   let h = '<div class="card score-box"><div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
   // ควิซที่มีแค่ข้อจับคู่ข้อเดียว: คะแนนใหญ่ = จำนวนช่องที่ถูก
   const onlyMatch = questions.length === 1 && questions[0].type === 'match';
@@ -402,7 +435,7 @@ function renderScore() {
   h += '</div><button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button></div>';
   document.getElementById('quizArea').innerHTML = h;
 }
-function restart() { current = 0; shown.fill(null); first.fill(null); firstItems.fill(null); questions.forEach((q, i) => matchState[i] = newMatch(q)); render(); }
+function restart() { current = 0; shown.fill(null); first.fill(null); firstItems.fill(null); questions.forEach((q, i) => { matchState[i] = newMatch(q); shortState[i] = newShort(q); }); render(); }
 
 buildJumpGrid();
 render();
