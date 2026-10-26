@@ -493,9 +493,13 @@ function setPick(k, v) { matchState[current].pick[k] = v; render(); }
 function checkMatch() {
   const qd = questions[current], st = matchState[current];
   st.checked = true;
-  if (first[current] === null) first[current] = qd.items.every((it, k) => st.pick[k] === it.answer);
+  if (first[current] === null) {
+    first[current] = qd.items.every((it, k) => st.pick[k] === it.answer);
+    firstItems[current] = qd.items.filter((it, k) => st.pick[k] === it.answer).length;
+  }
   render();
 }
+const firstItems = new Array(questions.length).fill(null); // ข้อจับคู่: จำนวนช่องที่ถูกในการตรวจครั้งแรก
 function resetMatch() { matchState[current] = newMatch(questions[current]); render(); }
 function reveal() { shown[current] = true; render(); }
 function mark(ok) { if (first[current] === null) first[current] = ok; render(); }
@@ -507,12 +511,18 @@ function renderScore() {
   questions.forEach((q, i) => { by[q.type][1]++; if (first[i]) by[q.type][0]++; });
   const score = by.match[0] + by.mcq[0] + by.open[0];
   let h = '<div class="card score-box"><div>คุณทำแบบทดสอบเสร็จแล้ว</div>';
-  h += '<div class="big">' + score + ' / ' + questions.length + '</div><div class="breakdown">';
+  // ควิซที่มีแค่ข้อจับคู่ข้อเดียว: คะแนนใหญ่ = จำนวนช่องที่ถูก
+  const onlyMatch = questions.length === 1 && questions[0].type === 'match';
+  h += '<div class="big">' + (onlyMatch ? (firstItems[0] || 0) + ' / ' + questions[0].items.length + ' ช่อง' : score + ' / ' + questions.length) + '</div><div class="breakdown">';
+  if (onlyMatch) { h += '</div><button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button></div>'; document.getElementById('quizArea').innerHTML = h; return; }
   Object.keys(by).forEach(t => { if (by[t][1]) h += '<div><span>' + TAG_LABEL[t] + '</span><span>' + by[t][0] + ' / ' + by[t][1] + '</span></div>'; });
+  questions.forEach((q, i) => {
+    if (q.type === 'match') h += '<div><span>' + (questions.length > 1 ? 'ข้อ ' + (i + 1) + ' ' : '') + 'จับคู่ถูก (ช่อง)</span><span>' + (firstItems[i] || 0) + ' / ' + q.items.length + '</span></div>';
+  });
   h += '</div><button id="restartBtn" onclick="restart()">ทำใหม่อีกครั้ง</button></div>';
   document.getElementById('quizArea').innerHTML = h;
 }
-function restart() { current = 0; shown.fill(null); first.fill(null); questions.forEach((q, i) => matchState[i] = newMatch(q)); render(); }
+function restart() { current = 0; shown.fill(null); first.fill(null); firstItems.fill(null); questions.forEach((q, i) => matchState[i] = newMatch(q)); render(); }
 
 buildJumpGrid();
 render();
