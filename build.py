@@ -163,7 +163,7 @@ def page(title, body, depth, accent="#2f5d46", extra_head="", crumbs="", body_cl
   </button>
 </header>
 {body}
-<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
 <script>window.SN_BASE = {jsn(base)};</script>
 {scripts}
 <script src="{base}assets/app.js"></script>
