@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 10 – Implementation &amp; Code Review · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-programming-paradigms-มีกี่แบบ-สไลด์-4">1. Programming paradigms มีกี่แบบ? (สไลด์ 4)</a></li><li><a href="#2-no-code-low-code-vibe-coding-ต่างกันยังไง-สไลด์-57">2. No-code, Low-code, Vibe coding ต่างกันยังไง? (สไลด์ 5–7)</a></li><li><a href="#3-implementation-คืออะไร-และโค้ดที่ดีต้องมีอะไร-สไลด์-912">3. Implementation คืออะไร และโค้ดที่ดีต้องมีอะไร? (สไลด์ 9–12)</a></li><li><a href="#4-ทำไมต้องมี-style-guide-และมีกฎแบบไหนบ้าง-สไลด์-1322-software-engineering-at-google-บทที่-8">4. ทำไมต้องมี style guide และมีกฎแบบไหนบ้าง? (สไลด์ 13–22, Software Engineering at Google บทที่ 8)</a></li><li><a href="#5-good-implementation-practices-มีอะไรบ้าง-สไลด์-23">5. Good implementation practices มีอะไรบ้าง? (สไลด์ 23)</a></li><li><a href="#6-เขียน-code-comment-ยังไงให้ดี-9-rules-สไลด์-2435-ellen-spertus-stack-overflow-blog-2021">6. เขียน code comment ยังไงให้ดี? (9 rules) (สไลด์ 24–35, Ellen Spertus, Stack Overflow Blog 2021)</a></li><li><a href="#7-debug-อย่างเป็นระบบทำยังไง-สไลด์-3637">7. Debug อย่างเป็นระบบทำยังไง? (สไลด์ 36–37)</a></li><li><a href="#8-refactoring-คืออะไร-สไลด์-3843">8. Refactoring คืออะไร? (สไลด์ 38–43)</a></li><li><a href="#9-code-inspection-fagan-ทำยังไง-สไลด์-4448">9. Code inspection (Fagan) ทำยังไง? (สไลด์ 44–48)</a></li><li><a href="#10-modern-code-review-ต่างจาก-inspection-ยังไง-และได้ประโยชน์อะไร-สไลด์-4952">10. Modern code review ต่างจาก inspection ยังไง และได้ประโยชน์อะไร? (สไลด์ 49–52)</a></li><li><a href="#11-code-review-checklist-ต้องดูอะไรบ้าง-สไลด์-5356-michaela-g-2019">11. Code review checklist ต้องดูอะไรบ้าง? (สไลด์ 53–56, Michaela G. 2019)</a></li><li><a href="#12-discussion-code-review-ในสถานการณ์จริง-สไลด์-57">12. Discussion: code review ในสถานการณ์จริง (สไลด์ 57)</a></li><li><a href="#13-conclusion-สไลด์-58">13. Conclusion (สไลด์ 58)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L10</div>
+      <h1 class="lesson-title">Lecture 10 – Implementation &amp; Code Review</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> L9 จบที่ detailed design บทนี้คือขั้นถัดไป <strong>implementation</strong> แปลง design เป็นโปรแกรมจริง และทำให้โค้ด <strong>คนอ่านเข้าใจ ดูแลต่อได้ และไว้ใจได้</strong></p>
+<p>เนื้อหาตาม Topics: <strong>Programming paradigms</strong> (รวม no-code / low-code / vibe coding), <strong>Implementation</strong> (คุณสมบัติโค้ดที่ดี, style guide, good practices), <strong>Code comments</strong> (9 rules), debugging, refactoring และ <strong>Code review</strong> (code inspection ของ Fagan → modern code review + checklist)</p>
+<p>เนื้อหา style, code review, documentation ส่วนใหญ่มาจากหนังสือ <em>Software Engineering at Google</em> (อ่านฟรีที่ abseil.io/resources/swe-book) บางสไลด์ดัดแปลงจาก COMPGS04, UCL (Dr. Jens Krinke)</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L10-00-overview.png" alt="แผนผังภาพรวม Lecture 10" /></p>
+<h2 id="1-programming-paradigms-มีกี่แบบ-สไลด์-4">1. Programming paradigms มีกี่แบบ? <sub>(สไลด์ 4)</sub></h2>
+<p><strong>แก่น: มี 4 แบบ: imperative บอก &quot;ทำยังไง&quot; ทีละขั้น, declarative บอก &quot;อยากได้อะไร&quot;, object-oriented มองเป็น object ที่มีข้อมูล + พฤติกรรม และ logic บอก &quot;ปัญหาคืออะไร&quot;</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Paradigm</th>
+<th>หลักคิด</th>
+<th>ตัวอย่างภาษา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Imperative</strong></td>
+<td>บอกคอมพิวเตอร์ <strong>ว่าต้องทำยังไง ทีละขั้น</strong> (how)</td>
+<td>C, Python, Java, JavaScript</td>
+</tr>
+<tr>
+<td><strong>Declarative</strong></td>
+<td>บอก <strong>ว่าอยากให้โปรแกรมได้ผลอะไร</strong> ไม่บอกวิธี (what, not how)</td>
+<td>SQL</td>
+</tr>
+<tr>
+<td><strong>Object-oriented</strong></td>
+<td>มองซอฟต์แวร์เป็น <strong>กลุ่มของ object</strong> ที่มี <strong>data (attributes)</strong> และ <strong>behavior (methods)</strong></td>
+<td>Java, Python, C++, C#, Ruby</td>
+</tr>
+<tr>
+<td><strong>Logic</strong></td>
+<td>กำหนด <strong>ว่าปัญหาคืออะไร</strong> ไม่บอกวิธีแก้</td>
+<td>Prolog</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>บางภาษารองรับหลาย paradigm เรียกว่า <strong>multi-paradigm languages</strong> (สังเกตว่า Python, Java อยู่ทั้งในแถว imperative และ OOP)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสั่งอาหาร: imperative = บอกสูตรทีละขั้น (&quot;ตั้งกระทะ ใส่น้ำมัน...&quot;) ส่วน declarative = บอกแค่ &quot;ขอข้าวผัดหนึ่งจาน&quot;</p>
+</blockquote>
+<hr />
+<h2 id="2-no-code-low-code-vibe-coding-ต่างกันยังไง-สไลด์-57">2. No-code, Low-code, Vibe coding ต่างกันยังไง? <sub>(สไลด์ 5–7)</sub></h2>
+<p><strong>แก่น: เป็น 3 แนวทางพัฒนาแบบใหม่ (emerging) ที่ลดการเขียนโค้ดเอง: no-code ไม่เขียนเลย, low-code เขียนบ้างเมื่อจำเป็น, vibe coding บอกสิ่งที่ต้องการเป็นภาษาธรรมชาติให้ AI ช่วย ทุกแบบต้องพึ่ง platform/tool</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>No-code</th>
+<th>Low-code</th>
+<th>Vibe coding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>คืออะไร</strong></td>
+<td>สร้างแอป <strong>โดยไม่เขียนโค้ดแบบเดิมเลย</strong></td>
+<td>สร้างแอปโดย <strong>เขียนโค้ดน้อยที่สุด</strong></td>
+<td>สร้างโปรแกรมโดย <strong>อธิบายสิ่งที่ต้องการด้วยภาษาธรรมชาติ</strong></td>
+</tr>
+<tr>
+<td><strong>วิธี</strong></td>
+<td>graphical interface, drag-and-drop, predefined logic blocks</td>
+<td>visual tools (drag-and-drop) + <strong>เขียนโค้ดเพิ่มได้เมื่อจำเป็น</strong></td>
+<td>โต้ตอบกับ interface โดยตรง ผสม <strong>AI assistance, visual design, live feedback</strong></td>
+</tr>
+<tr>
+<td><strong>Benefits</strong></td>
+<td>พัฒนาเร็ว, ไม่ต้องมีพื้นเทคนิคมาก, ทดลอง/ทำ prototype ง่าย</td>
+<td>เร็วกว่าเขียนเองแบบเดิม, <strong>สมดุลระหว่างใช้ง่ายกับยืดหยุ่น</strong></td>
+<td>ไม่ต้องมีพื้นเทคนิคมาก, พัฒนาเร็วและโต้ตอบได้</td>
+</tr>
+<tr>
+<td><strong>Limitations</strong></td>
+<td>ยืดหยุ่นน้อยกับ logic ซับซ้อน, <strong>พึ่ง platform/tool</strong>, scale หรือ customize ลึกยากกว่า</td>
+<td><strong>ต้องมีความรู้เทคนิคบ้าง</strong>, customize ซับซ้อนแล้วดูแลยาก, <strong>พึ่ง platform/tool</strong></td>
+<td>ยืดหยุ่นน้อยกับ logic ซับซ้อน, <strong>พึ่ง platform/tool</strong>, <strong>พึ่ง AI มากเกินไป (overreliance on AI)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ตัวอย่าง low-code ในสไลด์: Mendix (mendix.com)</li>
+<li>สไลด์ vibe coding อ้างอิง <em>Rapid Prototyping with AI-assisted Programming</em> โดย ผศ.ชัยยงค์ รักขิตเวชสกุล คณะ ICT มหิดล (21 ก.ค. 2025)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ จุดที่ทั้ง 3 แบบมีเหมือนกันคือ <strong>&quot;Dependence on platform/tool&quot;</strong> ส่วน <strong>&quot;Overreliance on AI&quot;</strong> มีเฉพาะ vibe coding และ <strong>&quot;Requires some technical knowledge&quot;</strong> มีเฉพาะ low-code</p>
+</blockquote>
+<hr />
+<h2 id="3-implementation-คืออะไร-และโค้ดที่ดีต้องมีอะไร-สไลด์-912">3. Implementation คืออะไร และโค้ดที่ดีต้องมีอะไร? <sub>(สไลด์ 9–12)</sub></h2>
+<p><strong>แก่น: implementation = แปลง detailed design เป็นโปรแกรมที่ใช้ได้ ประกอบด้วยเขียนโค้ด → unit test → debug → configuration management และโค้ดที่ดีต้องสมดุล 6 คุณสมบัติ</strong></p>
+<blockquote class="callout">
+<p><em>&quot;Any fool can write code that a computer can understand. Good programmers write code that humans can understand.&quot;</em> — M. Fowler (1999)</p>
+</blockquote>
+<p><strong>นิยาม:</strong> <em>Transforming detailed designs into a valid program</em></p>
+<p><img loading="lazy" src="diagrams/L10-01-implementation.png" alt="ขั้นตอน Implementation" /></p>
+<p><strong>Good implementations</strong> (สไลด์ 12 วาดเป็นวงซ้อนกัน 6 วง แสดงว่าต้องได้หลายอย่างพร้อมกัน):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คุณสมบัติ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Readability</strong></td>
+<td>อ่านเข้าใจง่าย</td>
+</tr>
+<tr>
+<td><strong>Maintainability</strong></td>
+<td>ดูแล แก้ไขต่อได้ง่าย</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>ทำงานได้มีประสิทธิภาพ</td>
+</tr>
+<tr>
+<td><strong>Traceability</strong></td>
+<td>ตามรอยกลับไปหา requirement/design ได้</td>
+</tr>
+<tr>
+<td><strong>Correctness</strong></td>
+<td>ทำงานถูกต้อง</td>
+</tr>
+<tr>
+<td><strong>Completeness</strong></td>
+<td>ครบตามที่ต้องทำ</td>
+</tr>
+</tbody>
+</table></div>
+<p>(สไลด์ให้แค่ชื่อ 6 คำ คอลัมน์ความหมายคือคำแปลของแต่ละคำ)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ 6 คำ: <strong>R-M-P-T-C-C</strong> (Readability, Maintainability, Performance, Traceability, Correctness, Completeness)</p>
+</blockquote>
+<hr />
+<h2 id="4-ทำไมต้องมี-style-guide-และมีกฎแบบไหนบ้าง-สไลด์-1322-software-engineering-at-google-บทที่-8">4. ทำไมต้องมี style guide และมีกฎแบบไหนบ้าง? <sub>(สไลด์ 13–22, <em>Software Engineering at Google</em> บทที่ 8)</sub></h2>
+<p><strong>แก่น: องค์กรตั้งกฎเพื่อส่งเสริมพฤติกรรม &quot;ดี&quot; และกันพฤติกรรม &quot;ไม่ดี&quot; (ซึ่งแต่ละองค์กรนิยามต่างกัน) กฎใน style guide มี 3 กลุ่ม: กันอันตราย, บังคับ best practice และทำให้สม่ำเสมอ</strong></p>
+<h3 id="41-style-guide-และกฎคืออะไร-สไลด์-14">4.1 Style guide และกฎคืออะไร? <sub>(สไลด์ 14)</sub></h3>
+<ul>
+<li>องค์กรวิศวกรรมส่วนใหญ่ <strong>มีกฎควบคุม codebase</strong> เช่น
+<ul>
+<li>กฎว่า <strong>source file เก็บที่ไหน</strong></li>
+<li>กฎ <strong>การจัดรูปแบบ (formatting)</strong> ของโค้ด</li>
+<li>กฎเรื่อง <strong>naming, patterns, exceptions, threads</strong></li>
+</ul>
+</li>
+<li>software engineer ส่วนใหญ่ทำงานภายใต้ <strong>นโยบาย (policies)</strong> ที่กำหนดวิธีทำงาน</li>
+<li>องค์กรควร <strong>มี style guide</strong> ที่เขียนกฎเหล่านี้ไว้</li>
+</ul>
+<h3 id="42-ทำไมต้องมีกฎ-สไลด์-15">4.2 ทำไมต้องมีกฎ? <sub>(สไลด์ 15)</sub></h3>
+<ul>
+<li>เป้าหมาย: <strong>ส่งเสริมพฤติกรรม &quot;ดี&quot;</strong> และ <strong>กันพฤติกรรม &quot;ไม่ดี&quot;</strong></li>
+<li>&quot;ดี&quot; หรือ &quot;ไม่ดี&quot; <strong>ขึ้นกับว่าองค์กรให้ความสำคัญกับอะไร</strong> เช่น
+<ul>
+<li>&quot;ดี&quot; อาจหมายถึงรูปแบบที่ <strong>ใช้ memory น้อย</strong> หรือเน้น <strong>runtime optimization</strong></li>
+<li>&quot;ดี&quot; อาจหมายถึงการใช้ <strong>feature ใหม่ของภาษา</strong></li>
+<li>บางองค์กรสนใจ <strong>ความสม่ำเสมอ (consistency)</strong> ที่สุด อะไรที่ไม่ตรงกับ pattern เดิมถือว่า &quot;ไม่ดี&quot;</li>
+</ul>
+</li>
+</ul>
+<h3 id="43-กฎใน-style-guide-มี-3-กลุ่ม-สไลด์-1622">4.3 กฎใน style guide มี 3 กลุ่ม <sub>(สไลด์ 16–22)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>จุดประสงค์</th>
+<th>ตัวอย่างในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rules to avoid dangers</strong></td>
+<td>กันการใช้ภาษาแบบที่เสี่ยงพลาด</td>
+<td>static members/variables, lambda, <strong>การจัดการ exception</strong>, threading, access control, class inheritance, vocabulary types ที่ใช้ได้, สิ่งที่ใช้ยากหรือใช้ให้ถูกยาก</td>
+</tr>
+<tr>
+<td><strong>Rules to enforce best practices</strong></td>
+<td>ทำให้ codebase <strong>healthy และ maintainable</strong></td>
+<td>เช่นกำหนด <strong>ว่าต้องเขียน comment ที่ไหน อย่างไร</strong></td>
+</tr>
+<tr>
+<td><strong>Rules to ensure consistency</strong></td>
+<td>ให้คนเขียนและคนอ่าน <strong>โฟกัสที่สิ่งที่โค้ดทำ ไม่ใช่วิธีนำเสนอ</strong></td>
+<td>formatting เช่น empty block, indentation</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง: กันอันตราย</strong> (สไลด์ 18, Google Java Style Guide §6.2 <em>Caught exceptions: not ignored</em>)</p>
+<ul>
+<li><strong>แทบไม่มีกรณีที่ถูก</strong> ถ้า catch exception แล้วไม่ทำอะไรเลย ปกติให้ <strong>log</strong> หรือถ้าคิดว่า &quot;เป็นไปไม่ได้&quot; ให้ <strong>rethrow เป็น <code>AssertionError</code></strong></li>
+<li>ถ้าไม่ทำอะไรใน catch จริง ๆ ต้อง <strong>เขียน comment อธิบายเหตุผล</strong></li>
+</ul>
+<pre><code class="language-java">try {
+  int i = Integer.parseInt(response);
+  return handleNumericResponse(i);
+} catch (NumberFormatException ok) {
+  // it's not numeric; that's fine, just continue
+}
+return handleTextResponse(response);
+</code></pre>
+<ul>
+<li><strong>ข้อยกเว้น:</strong> ใน test ถ้าชื่อ exception คือหรือขึ้นต้นด้วย <code>expected</code> ไม่ต้องมี comment (เป็น idiom ที่ใช้เช็กว่าโค้ด throw exception ที่คาดไว้จริง)</li>
+</ul>
+<pre><code class="language-java">try {
+  emptyStack.pop();
+  fail();
+} catch (NoSuchElementException expected) {
+}
+</code></pre>
+<p><strong>ตัวอย่าง: บังคับ best practice</strong> (สไลด์ 20, Google C++ Style Guide – Comments)</p>
+<ul>
+<li>comment <strong>สำคัญมาก</strong> ต่อการอ่านโค้ด แต่ <strong>โค้ดที่ดีที่สุดอธิบายตัวเองได้ (self-documenting)</strong> ตั้งชื่อ type/ตัวแปรให้สื่อความหมาย ดีกว่าใช้ชื่อคลุมเครือแล้วต้องมา comment อธิบาย</li>
+<li>เขียน comment <strong>สำหรับคนที่จะมาอ่านโค้ดต่อ</strong> (&quot;Be generous — the next one may be you!&quot;)</li>
+<li><strong>Comment style:</strong> ใช้ <code>//</code> หรือ <code>/* */</code> ก็ได้ ขอให้ <strong>สม่ำเสมอ</strong> (<code>//</code> ใช้บ่อยกว่ามาก)</li>
+<li><strong>File comments:</strong> เริ่มทุกไฟล์ด้วย license boilerplate ถ้าไฟล์ประกาศหลาย abstraction ให้มี comment อธิบายภาพรวมของกลุ่มนั้น</li>
+</ul>
+<p><strong>ตัวอย่าง: ความสม่ำเสมอ</strong> (สไลด์ 22, Google Java Style Guide)</p>
+<ul>
+<li>§4.1.3 <strong>Empty blocks:</strong> block ว่างเขียนสั้น <code>{}</code> ได้ <strong>ยกเว้น</strong> อยู่ใน multi-block statement (<code>if/else</code>, <code>try/catch/finally</code>)</li>
+</ul>
+<pre><code class="language-java">// This is acceptable
+void doNothing() {}
+
+// This is equally acceptable
+void doNothingElse() {
+}
+
+// This is not acceptable: No concise empty blocks in a multi-block statement
+try {
+  doSomething();
+} catch (Exception e) {}
+</code></pre>
+<ul>
+<li>§4.2 <strong>Block indentation: +2 spaces</strong> เปิด block ใหม่เพิ่ม indent 2 ช่อง ปิด block แล้วกลับระดับเดิม</li>
+</ul>
+<h3 id="44-consistency-ได้ประโยชน์อะไร-สไลด์-21">4.4 Consistency ได้ประโยชน์อะไร? <sub>(สไลด์ 21)</sub></h3>
+<ol>
+<li><strong>Enables scaling</strong> – สร้าง tool มาช่วย developer ได้ง่ายขึ้น</li>
+<li><strong>Human scaling</strong> – คนย้ายข้ามโปรเจกต์ได้คล่องขึ้น</li>
+<li><strong>Resilience to time</strong> – โค้ดทนต่อกาลเวลา</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ หัวสไลด์ 16 เขียนว่า &quot;The <strong>Syle</strong> Guide&quot; (พิมพ์ผิด ที่ถูกคือ Style)</p>
+</blockquote>
+<hr />
+<h2 id="5-good-implementation-practices-มีอะไรบ้าง-สไลด์-23">5. Good implementation practices มีอะไรบ้าง? <sub>(สไลด์ 23)</sub></h2>
+<p><strong>แก่น: function เล็กทำเรื่องเดียว, ไม่เขียนซ้ำ, เขียนให้คนอ่าน, จัดการ error ให้เห็นชัด, commit เล็กและบ่อย, test ไปพร้อมเขียน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>ทำไม (ตามสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Keep functions small and focused</strong></td>
+<td>1 function ทำ 1 อย่าง ถ้าต้อง scroll อ่าน แสดงว่าทำมากเกินไป (ดู <em>Extract Method</em> refactoring)</td>
+</tr>
+<tr>
+<td><strong>Do not repeat yourself (DRY)</strong></td>
+<td>logic ซ้ำเป็นต้นเหตุ bug บ่อย ถ้าต้องแก้ 3 ที่ คนมักแก้แค่ 2 แล้วลืมที่ 3</td>
+</tr>
+<tr>
+<td><strong>Write code for the reader, not the compiler</strong></td>
+<td>compiler ไม่สนชื่อหรือโครงสร้าง แต่เพื่อนร่วมทีมที่มาแก้ bug ตอนตี 2 สนใจ</td>
+</tr>
+<tr>
+<td><strong>Handle errors explicitly</strong></td>
+<td>ห้ามเงียบใส่ exception หรือ return null โดยไม่บอก ทุก error path คือการตัดสินใจที่ต้องมองเห็นได้</td>
+</tr>
+<tr>
+<td><strong>Commit small and often</strong></td>
+<td>commit เล็ก review ง่าย ตามหา bug ง่าย และลดความเสี่ยงงานหาย</td>
+</tr>
+<tr>
+<td><strong>Test as you write, not after</strong></td>
+<td>test ทีหลังมักกลายเป็น test ว่าโค้ด <strong>ทำอะไร</strong> แทนที่จะ test ว่า <strong>ควรทำอะไร</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ L9: &quot;function เล็กทำเรื่องเดียว&quot; คือ <strong>high cohesion</strong> และ &quot;ไม่ทำซ้ำ&quot; ช่วยลดจุดที่ต้องแก้หลายที่</p>
+</blockquote>
+<hr />
+<h2 id="6-เขียน-code-comment-ยังไงให้ดี-9-rules-สไลด์-2435-ellen-spertus-stack-overflow-blog-2021">6. เขียน code comment ยังไงให้ดี? (9 rules) <sub>(สไลด์ 24–35, Ellen Spertus, Stack Overflow Blog 2021)</sub></h2>
+<p><strong>แก่น: comment ต้องไม่ซ้ำกับโค้ด, ไม่ใช่ข้ออ้างให้โค้ดอ่านยาก, ต้องลดความสับสน และใช้บอกสิ่งที่โค้ดบอกเองไม่ได้: โค้ดที่แปลก, ที่มาของโค้ด, reference, bug ที่แก้ และงานที่ยังไม่เสร็จ</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>ใจความ</th>
+<th>ตัวอย่างในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Comments should not duplicate the code</strong></td>
+<td>อย่าเขียน comment ที่แค่พูดซ้ำสิ่งที่โค้ดบอกอยู่แล้ว</td>
+<td><code>} // if</code>, <code>i = i + 1; // Add one to i</code> และ for loop ที่ comment ทุก token (<code>// start for loop</code>, <code>// round bracket</code>, ...)</td>
+</tr>
+<tr>
+<td><strong>2. Good comments do not excuse unclear code</strong></td>
+<td>ตั้งชื่อให้ชัดแทนการพึ่ง comment</td>
+<td>ดูโค้ดด้านล่าง</td>
+</tr>
+<tr>
+<td><strong>3. If you can't write a clear comment, there may be a problem with the code</strong></td>
+<td>อธิบายไม่ได้ = โค้ดอาจซับซ้อนเกิน</td>
+<td><strong>Kernighan's Law:</strong> <em>&quot;Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>4. Comments should dispel confusion, not cause it</strong></td>
+<td>comment ต้องทำให้เข้าใจขึ้น ไม่ใช่งงขึ้น</td>
+<td>เรื่องจาก <em>Hackers</em> (Steven Levy): Peter Samson เขียน comment เดียวว่า <strong>RIPJSB</strong> ข้างเลข 1750 คนงงกันอยู่นาน จนมีคนรู้ว่า 1750 คือปีที่ Bach ตาย และ RIPJSB = Rest In Peace Johann Sebastian Bach</td>
+</tr>
+<tr>
+<td><strong>5. Explain unidiomatic code in comments</strong></td>
+<td>โค้ดที่ดูแปลกหรือไม่เป็นไปตามปกติ ต้องบอกเหตุผล</td>
+<td><code>// Note that JSONTokener.nextValue() may return a value equals() to null.</code> ก่อน <code>if (value == null || value.equals(null))</code></td>
+</tr>
+<tr>
+<td><strong>6. Provide links to the original source of copied code</strong></td>
+<td>ถ้า copy โค้ดมา ให้ใส่ลิงก์ที่มา</td>
+<td><code>/** Converts a Drawable to Bitmap. via https://stackoverflow.com/a/46018816/2219998. */</code></td>
+</tr>
+<tr>
+<td><strong>7. Include links to external references where they will be most helpful</strong></td>
+<td>ลิงก์มาตรฐาน/เอกสารที่อธิบายว่าทำไมทำแบบนี้</td>
+<td><code>// http://tools.ietf.org/html/rfc4180 suggests that CSV lines should be terminated by CRLF, hence the \r\n.</code></td>
+</tr>
+<tr>
+<td><strong>8. Add comments when fixing bugs</strong></td>
+<td>บอกว่าแก้ bug อะไร ทำไมโค้ดเป็นแบบนี้</td>
+<td><code>// NOTE: At least in Firefox 2, if the user drags outside of the browser window, mouse-move ... events will not be received ...</code> และ <code>// Use the name as the title if the properties did not include one (issue #1425)</code></td>
+</tr>
+<tr>
+<td><strong>9. Use comments to mark incomplete implementations</strong></td>
+<td>ใช้ <code>TODO</code> บอกสิ่งที่ยังไม่เสร็จ</td>
+<td><code>// TODO(hal): We are making the decimal separator be a period, regardless of the locale of the phone. We need to think about how to allow comma as decimal separator, ...</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Rule 2 – ตัวอย่างในสไลด์</strong> (ก่อน: ชื่อสั้น ต้องพึ่ง comment / หลัง: ตั้งชื่อให้ชัด ไม่ต้องมี comment)</p>
+<pre><code class="language-java">// ก่อน
+private static Node getBestChildNode(Node node) {
+    Node n; // best child node candidate
+    for (Node node: node.getChildren()) {
+        // update n if the current state is better
+        if (n == null || utility(node) &gt; utility(n)) {
+            n = node;
+        }
+    }
+    return n;
+}
+
+// หลัง
+private static Node getBestChildNode(Node node) {
+    Node bestNode;
+    for (Node currentNode: node.getChildren()) {
+        if (bestNode == null || utility(currentNode) &gt; utility(bestNode)) {
+            bestNode = currentNode;
+        }
+    }
+    return bestNode;
+}
+</code></pre>
+<p><strong>Rule 6 – ลิงก์ที่มาช่วยให้คนอ่านรู้</strong> (สไลด์ 32):</p>
+<ul>
+<li>what problem was being solved — แก้ปัญหาอะไร</li>
+<li>who provided the code — ใครเขียน</li>
+<li>why the solution is recommended — ทำไมวิธีนี้ถูกแนะนำ</li>
+<li>what commenters thought of it — คนอื่นคิดเห็นยังไง</li>
+<li>whether it still works — ยังใช้ได้อยู่ไหม</li>
+<li>how it can be improved — ปรับปรุงได้ยังไง</li>
+<li>ตัวอย่างให้เครดิต: <code>// Many thanks to Chris Veness at http://www.movable-type.co.uk/scripts/latlong.html for a great reference and examples.</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ 9 rules เป็น 2 กลุ่ม: <strong>ข้อ 1–4 = อย่าใช้ comment ผิดวิธี</strong> | <strong>ข้อ 5–9 = ใช้ comment บอกสิ่งที่โค้ดบอกเองไม่ได้</strong> (โค้ดแปลก, ที่มา, reference, bug fix, TODO)</p>
+</blockquote>
+<hr />
+<h2 id="7-debug-อย่างเป็นระบบทำยังไง-สไลด์-3637">7. Debug อย่างเป็นระบบทำยังไง? <sub>(สไลด์ 36–37)</sub></h2>
+<p><strong>แก่น: debugging = หาและแก้ error ใน code ทำ 4 phase: ทำให้เกิดซ้ำ → หาตำแหน่ง → แก้ → ยืนยัน และใช้ heuristics กับ tools ช่วย</strong></p>
+<ul>
+<li><strong>Debugging:</strong> locating and fixing errors in code</li>
+<li>error ถูกพบจาก <strong>testing, inspection, use</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-02-debugging.png" alt="4 phases ของ debugging" /></p>
+<p><strong>Heuristics</strong> (ข้อสังเกตจากประสบการณ์):</p>
+<ul>
+<li>บาง routine จะมี error เยอะ</li>
+<li>routine ที่มี error แล้ว <strong>มักมี error อีก</strong></li>
+<li><strong>โค้ดใหม่มักมี error มากกว่า</strong></li>
+<li>บางอย่างเฉพาะ: บางภาษา บางส่วนของระบบ บางคนเขียน</li>
+</ul>
+<p><strong>Tools:</strong></p>
+<ul>
+<li>Code comparators</li>
+<li>Extended checkers (<strong>lint</strong>)</li>
+<li>Interactive debuggers</li>
+<li>Special libraries</li>
+<li>อื่น ๆ: <strong>profilers, pre/post conditions, test coverage</strong></li>
+</ul>
+<hr />
+<h2 id="8-refactoring-คืออะไร-สไลด์-3843">8. Refactoring คืออะไร? <sub>(สไลด์ 38–43)</sub></h2>
+<p><strong>แก่น: refactoring = เปลี่ยนโครงสร้างภายในของโค้ดให้ดีขึ้น โดยไม่เปลี่ยนพฤติกรรมภายนอก เริ่มจากเจอ code smell แล้วเลือก refactoring action ที่เหมาะ</strong></p>
+<h3 id="81-นิยาม-สไลด์-39">8.1 นิยาม <sub>(สไลด์ 39)</sub></h3>
+<ul>
+<li><em>Refactoring is the art of <strong>safely improving the design of existing code</strong>.</em></li>
+<li><em>&quot;Refactoring is the process of changing a software system in such a way that it <strong>does not alter the external behavior</strong> of the code yet <strong>improves its internal structure</strong>.&quot;</em> — Martin Fowler</li>
+<li>หนังสืออ้างอิง (สไลด์ 38): <em>Refactoring 2nd Edition</em> (Martin Fowler) และ <em>Refactoring in Ruby</em> (Wake &amp; Rutherford)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 39 สะกดชื่อผู้พูดว่า &quot;Martin <strong>Folwer</strong>&quot; (พิมพ์ผิด ที่ถูกคือ Fowler เหมือนสไลด์ 9)</p>
+</blockquote>
+<h3 id="82-สิ่งที่ตามมาจากนิยาม-a-few-implications-สไลด์-40">8.2 สิ่งที่ตามมาจากนิยาม (A Few Implications) <sub>(สไลด์ 40)</sub></h3>
+<ul>
+<li>refactoring <strong>ไม่ใช่การเปลี่ยนแปลงอะไรก็ได้</strong> ในระบบ</li>
+<li>refactoring <strong>ไม่ใช่การเขียนใหม่ทั้งหมด (rewriting from scratch)</strong></li>
+<li>refactoring <strong>ไม่ใช่การปรับโครงสร้างใด ๆ ก็ได้</strong> ที่ตั้งใจให้โค้ดดีขึ้น</li>
+<li>refactoring <strong>รองรับ emergent design</strong> (สไลด์ไม่ได้อธิบายคำนี้เพิ่ม)</li>
+<li>refactoring มี <strong>ทั้งเล็กและใหญ่</strong></li>
+</ul>
+<h3 id="83-code-smells-refactoring-actions-สไลด์-41">8.3 Code smells → Refactoring actions <sub>(สไลด์ 41)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Code Smells (สัญญาณว่าโค้ดมีปัญหา)</th>
+<th>Refactoring Actions (วิธีแก้)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Duplicated code</td>
+<td>Extract method</td>
+</tr>
+<tr>
+<td>Long method</td>
+<td>Substitute algorithm</td>
+</tr>
+<tr>
+<td>Large class</td>
+<td>Move method</td>
+</tr>
+<tr>
+<td>Switch statement</td>
+<td>Extract class</td>
+</tr>
+<tr>
+<td>Feature envy</td>
+<td>… and many more</td>
+</tr>
+<tr>
+<td>Intimacy</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ดู catalog เพิ่มได้ที่ refactoring.com/catalog/</li>
+<li>⚠️ สไลด์วาง 2 คอลัมน์ไว้ข้างกันโดยมีลูกศรใหญ่ชี้จาก smells ไป actions ไม่ได้จับคู่ทีละแถว</li>
+</ul>
+<h3 id="84-ตัวอย่าง-refactoring-สไลด์-4243">8.4 ตัวอย่าง refactoring <sub>(สไลด์ 42–43)</sub></h3>
+<p><strong>ตัวอย่างที่ 1 (สไลด์ 42):</strong> เงื่อนไขยาวใน <code>if</code> → แยกเป็นตัวแปรที่มีชื่อบอกความหมาย</p>
+<pre><code class="language-java">// ก่อน
+void renderBanner() {
+  if ((platform.toUpperCase().indexOf(&quot;MAC&quot;) &gt; -1) &amp;&amp;
+       (browser.toUpperCase().indexOf(&quot;IE&quot;) &gt; -1) &amp;&amp;
+        wasInitialized() &amp;&amp; resize &gt; 0 )
+  {
+    // do something
+  }
+}
+
+// หลัง
+void renderBanner() {
+  final boolean isMacOs = platform.toUpperCase().indexOf(&quot;MAC&quot;) &gt; -1;
+  final boolean isIE = browser.toUpperCase().indexOf(&quot;IE&quot;) &gt; -1;
+  final boolean wasResized = resize &gt; 0;
+
+  if (isMacOs &amp;&amp; isIE &amp;&amp; wasInitialized() &amp;&amp; wasResized) {
+    // do something
+</code></pre>
+<p>→ พฤติกรรมเหมือนเดิม แต่ <code>if</code> อ่านแล้วรู้ทันทีว่าเช็กอะไร</p>
+<p><strong>ตัวอย่างที่ 2 (สไลด์ 43):</strong> ตัดตัวแปรชั่วคราวออก ลดจำนวน parameter</p>
+<pre><code class="language-java">// ก่อน
+int basePrice = quantity * itemPrice;
+double seasonDiscount = this.getSeasonalDiscount();
+double fees = this.getFees();
+double finalPrice = discountedPrice(basePrice, seasonDiscount, fees);
+
+// หลัง
+int basePrice = quantity * itemPrice;
+double finalPrice = discountedPrice(basePrice);
+</code></pre>
+<p>→ <code>discountedPrice</code> เหลือ parameter เดียว (seasonDiscount และ fees ไม่ต้องส่งเข้ามาแล้ว)</p>
+<hr />
+<h2 id="9-code-inspection-fagan-ทำยังไง-สไลด์-4448">9. Code inspection (Fagan) ทำยังไง? <sub>(สไลด์ 44–48)</sub></h2>
+<p><strong>แก่น: code inspection เสนอโดย Fagan (IBM) ปี 1976 เพื่อเพิ่มคุณภาพและ productivity เป็นกระบวนการ 6 ขั้นแบบมีบทบาทชัดเจน ใช้ได้กับทั้งโค้ด design requirement เอกสาร และ test</strong></p>
+<h3 id="91-ทำไมต้อง-review-โค้ด-สไลด์-45">9.1 ทำไมต้อง review โค้ด? <sub>(สไลด์ 45)</sub></h3>
+<p>ผลสำรวจ <em>&quot;What do you believe is the number one thing a company can do to improve code quality?&quot;</em> (n = 508) — <strong>Widely used steps to improve code quality</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>อันดับ</th>
+<th>วิธี</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Code Review</strong></td>
+<td><strong>27%</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Unit Testing</td>
+<td>19%</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Functional Testing</td>
+<td>13%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Continuous Integration</td>
+<td>12%</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Integration Testing</td>
+<td>9%</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Detailed Requirements</td>
+<td>7%</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Other</td>
+<td>5%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Static Analysis</td>
+<td>3%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Training / On-boarding</td>
+<td>3%</td>
+</tr>
+<tr>
+<td>10</td>
+<td>User Stories</td>
+<td>2%</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Demo Days</td>
+<td>1%</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="92-code-inspection-คืออะไร-สไลด์-46">9.2 Code inspection คืออะไร? <sub>(สไลด์ 46)</sub></h3>
+<ul>
+<li>แนวคิดเสนอโดย <strong>Michael Fagan (IBM) ตั้งแต่ปี 1976</strong>
+<ul>
+<li>เพื่อ <strong>ปรับปรุงคุณภาพซอฟต์แวร์</strong></li>
+<li>เพื่อ <strong>เพิ่ม productivity ของโปรแกรมเมอร์</strong></li>
+</ul>
+</li>
+<li><strong>หา defect ได้ดี</strong> และใช้แพร่หลายที่ IBM</li>
+<li>ทำได้กับ <strong>code, design artifacts, requirements, user information, documentation, test plans และ test cases</strong></li>
+</ul>
+<h3 id="93-inspection-ช่วยเรื่องทรัพยากรยังไง-สไลด์-47-fagan-1986-the-software-quality-problem">9.3 Inspection ช่วยเรื่องทรัพยากรยังไง? <sub>(สไลด์ 47, Fagan 1986 — &quot;The Software Quality Problem&quot;)</sub></h3>
+<p>กราฟ <strong>Development people resource and schedule</strong> (แกนตั้ง = people resource, แกนนอน = schedule: planning, requirements → design → coding → testing → ship):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Without inspections</th>
+<th>With inspections</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ช่วง design/coding</td>
+<td>ใช้คนน้อยกว่า</td>
+<td><strong>ใช้คนมากกว่า</strong> (ลงแรงตรวจตั้งแต่ต้น)</td>
+</tr>
+<tr>
+<td>ช่วง testing</td>
+<td><strong>ใช้คนพุ่งสูงมาก</strong></td>
+<td>ยอดต่ำกว่า</td>
+</tr>
+<tr>
+<td>เวลาจบ (ship)</td>
+<td><strong>ช้ากว่า</strong></td>
+<td><strong>เร็วกว่า</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="94-inspection-process-6-ขั้น-สไลด์-48-fagan-1986">9.4 Inspection process 6 ขั้น <sub>(สไลด์ 48, Fagan 1986)</sub></h3>
+<p><img loading="lazy" src="diagrams/L10-03-inspection.png" alt="Inspection process" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Objective</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Planning</strong></td>
+<td>ของที่จะตรวจต้องผ่าน <strong>entry criteria</strong>, จัดหาผู้เข้าร่วมที่เหมาะสม, จัดสถานที่และเวลา</td>
+</tr>
+<tr>
+<td><strong>2. Overview</strong></td>
+<td><strong>อธิบายให้กลุ่มเข้าใจ</strong> สิ่งที่จะตรวจ, <strong>มอบหมาย role</strong> ให้ผู้เข้าร่วม</td>
+</tr>
+<tr>
+<td><strong>3. Preparation</strong></td>
+<td>ผู้เข้าร่วม <strong>ศึกษาเนื้อหา</strong> และเตรียมทำตาม role ของตัวเอง</td>
+</tr>
+<tr>
+<td><strong>4. Inspection</strong></td>
+<td><strong>หา defect</strong> (ไม่สนับสนุนให้หาทางแก้หรือถกทางเลือก design ในขั้นนี้)</td>
+</tr>
+<tr>
+<td><strong>5. Rework</strong></td>
+<td><strong>ผู้เขียน (author) แก้ทุก defect</strong></td>
+</tr>
+<tr>
+<td><strong>6. Follow-up</strong></td>
+<td><strong>moderator</strong> หรือทั้งทีม <strong>ตรวจยืนยัน</strong> ว่าแก้ได้ผลจริง และไม่เกิด defect ใหม่ (secondary defects)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ขั้น <strong>Inspection มีหน้าที่แค่ &quot;หา&quot; defect</strong> ไม่ได้แก้ การแก้อยู่ในขั้น <strong>Rework</strong> และคนแก้คือ <strong>author</strong></p>
+</blockquote>
+<hr />
+<h2 id="10-modern-code-review-ต่างจาก-inspection-ยังไง-และได้ประโยชน์อะไร-สไลด์-4952">10. Modern code review ต่างจาก inspection ยังไง และได้ประโยชน์อะไร? <sub>(สไลด์ 49–52)</sub></h2>
+<p><strong>แก่น: modern code review ทำใน code review tools (เช่น GitHub, Gerrit, Phabricator) วนระหว่าง author กับ reviewer จนโค้ดถูก accept ประโยชน์มีมากกว่าหา bug เช่นแชร์ความรู้และสร้างความเป็นเจ้าของร่วม</strong></p>
+<h3 id="101-modern-code-review-สไลด์-4950">10.1 Modern code review <sub>(สไลด์ 49–50)</sub></h3>
+<ul>
+<li><strong>ต่างจาก code inspection:</strong> modern code review ทำ <strong>ภายใน code review tools</strong></li>
+<li>มี tool ให้เลือกหลายแบบ ในสไลด์มี <strong>GitHub, Gerrit Code Review, Phabricator</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-04-modern-review.png" alt="Modern code review flow" /></p>
+<ul>
+<li><strong>ตัวอย่าง (สไลด์ 50):</strong> หน้า <strong>Pull Request</strong> ที่มีคำอธิบาย PR, <strong>Suggested Changes</strong> (เสนอแก้โค้ดเป็นบรรทัด) และ <strong>Feedback</strong> (ความเห็นด้าน maintainability, performance, variable naming) จาก CodeAnt-AI</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Code inspection (Fagan)</th>
+<th>Modern code review</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ทำที่ไหน</td>
+<td>ประชุมตามขั้นตอน (planning → follow-up)</td>
+<td>ใน <strong>code review tools</strong></td>
+</tr>
+<tr>
+<td>รูปแบบ</td>
+<td>6 ขั้น มี role และ moderator</td>
+<td>วน author ↔ reviewers จน accepted</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-แรงจูงใจในการทำ-code-review-สไลด์-51-michaela-g-2019">10.2 แรงจูงใจในการทำ code review <sub>(สไลด์ 51, Michaela G. 2019)</sub></h3>
+<p>กราฟแท่งเรียงจากมากไปน้อย:</p>
+<ol>
+<li><strong>Code improvements</strong></li>
+<li><strong>Find defects</strong></li>
+<li>Increase knowledge transfer</li>
+<li>Find alternative solutions</li>
+<li>Improve development process</li>
+<li>Avoid breaking builds</li>
+<li>Build team awareness</li>
+<li>Lead to shared code ownership</li>
+<li>Team assessment</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต: เหตุผลอันดับ 1 คือ <strong>ปรับปรุงโค้ด</strong> ไม่ใช่ <strong>หา bug</strong> (หา bug มาอันดับ 2)</p>
+</blockquote>
+<h3 id="103-ประโยชน์ของ-code-review-google-สไลด์-52">10.3 ประโยชน์ของ code review (Google) <sub>(สไลด์ 52)</sub></h3>
+<p>กระบวนการ review ที่ออกแบบดี + วัฒนธรรมที่ให้ความสำคัญกับ review ให้ประโยชน์ 6 ข้อ:</p>
+<ol>
+<li><strong>ตรวจความถูกต้อง</strong> ของโค้ด (code correctness)</li>
+<li>ทำให้ <strong>คนอื่นเข้าใจ</strong> code change ได้ (comprehensible)</li>
+<li>บังคับ <strong>ความสม่ำเสมอ</strong> ทั่ว codebase (consistency)</li>
+<li>ส่งเสริม <strong>ความเป็นเจ้าของร่วมของทีม</strong> ทางจิตใจ (team ownership)</li>
+<li><strong>แชร์ความรู้</strong> (knowledge sharing)</li>
+<li>เป็น <strong>บันทึกประวัติ</strong> ของการ review (historical record)</li>
+</ol>
+<hr />
+<h2 id="11-code-review-checklist-ต้องดูอะไรบ้าง-สไลด์-5356-michaela-g-2019">11. Code review checklist ต้องดูอะไรบ้าง? <sub>(สไลด์ 53–56, Michaela G. 2019)</sub></h2>
+<p><strong>แก่น: มี 10 หมวด: implementation, dependencies, security &amp; privacy, logic errors, error handling &amp; logging, testing, readability, usability, performance และ experts opinion</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หมวด</th>
+<th>คำถามที่ต้องถาม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Implementation</strong></td>
+<td>code change ทำสิ่งที่ควรทำไหม? ทำให้ง่ายกว่านี้ได้ไหม? เพิ่ม dependency ตอน compile/run ที่ไม่ต้องการไหม?</td>
+</tr>
+<tr>
+<td><strong>Dependencies</strong></td>
+<td>ถ้าต้องอัปเดตนอกโค้ด (documentation, configuration, readme) ทำแล้วหรือยัง? กระทบส่วนอื่นของระบบหรือ <strong>backward compatibility</strong> ไหม?</td>
+</tr>
+<tr>
+<td><strong>Security and Data Privacy</strong></td>
+<td>เปิดช่องโหว่ไหม? จัดการ <strong>authorization/authentication</strong> ถูกต้องไหม? ข้อมูลอ่อนไหว (user data, บัตรเครดิต) จัดการ/เก็บอย่างปลอดภัยไหม?</td>
+</tr>
+<tr>
+<td><strong>Logic Errors and Bugs</strong></td>
+<td>มี use case ไหนที่โค้ดทำงานผิดไหม? มี input หรือ event ภายนอกไหนที่ทำให้พังได้ไหม?</td>
+</tr>
+<tr>
+<td><strong>Error Handling and Logging</strong></td>
+<td>จัดการ error ถูกวิธีไหม? ควรเพิ่ม/ลบ logging หรือ debug info ไหม? error message <strong>เป็นมิตรกับผู้ใช้</strong> ไหม?</td>
+</tr>
+<tr>
+<td><strong>Testing and Testability</strong></td>
+<td>โค้ด <strong>test ได้</strong> ไหม? มี automated test พอไหม (unit/integration/system)?</td>
+</tr>
+<tr>
+<td><strong>Readability</strong></td>
+<td>อ่านเข้าใจง่ายไหม? ส่วนไหนงงและเพราะอะไร? แยก method ให้เล็กลงแล้วอ่านง่ายขึ้นไหม?</td>
+</tr>
+<tr>
+<td><strong>Usability and Accessibility</strong></td>
+<td>ออกแบบดีในมุม usability ไหม? <strong>API มีเอกสารดี</strong> ไหม?</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>ทำให้ performance แย่ลงไหม? มีจุดปรับให้เร็วขึ้นไหม?</td>
+</tr>
+<tr>
+<td><strong>Experts Opinion</strong></td>
+<td>ควรให้ผู้เชี่ยวชาญ (security, usability) ดูก่อน commit ไหม? กระทบทีมอื่นไหม? ทีมนั้นควรมีสิทธิ์ออกความเห็นด้วยไหม?</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="12-discussion-code-review-ในสถานการณ์จริง-สไลด์-57">12. Discussion: code review ในสถานการณ์จริง <sub>(สไลด์ 57)</sub></h2>
+<p><strong>แก่น: โค้ดทำงานถูกไม่ได้แปลว่าผ่าน review ต้องดูความอ่านง่าย การทำซ้ำ และ test ด้วย</strong></p>
+<p><strong>Scenario:</strong> junior developer ส่ง pull request แก้ bug <strong>โค้ดทำงานถูกต้อง</strong> แต่ reviewer เห็นว่า:</p>
+<ul>
+<li>ตัวแปรชื่อ <strong><code>x</code></strong> เก็บ <strong>ยอดเงินในบัญชีผู้ใช้</strong></li>
+<li><strong>ไม่มี comment</strong> อธิบายว่าทำไม fix นี้ได้ผล</li>
+<li><strong>logic เดียวกันอยู่ในอีก 2 method</strong></li>
+<li><strong>ไม่มี unit test</strong> สำหรับ bug fix นี้</li>
+</ul>
+<p><strong>คำถามในสไลด์:</strong></p>
+<ol>
+<li>reviewer ควร approve PR นี้ไหม? เพราะอะไร?</li>
+<li>ข้อไหนใน checklist ที่เกี่ยว?</li>
+<li>จะเขียน review comment ถึง developer ยังไง? ใช้น้ำเสียงแบบไหน?</li>
+<li>อย่างน้อยต้องแก้อะไรก่อน PR จะ approve ได้?</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่มีเฉลย ตารางด้านล่างคือแนวคิดที่จับคู่ปัญหากับเนื้อหาในบทนี้ ไม่ใช่เฉลยของอาจารย์</p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ปัญหาที่เห็น</th>
+<th>เนื้อหาในบทที่เกี่ยว</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ตัวแปรชื่อ <code>x</code></td>
+<td>checklist <strong>Readability</strong> (สไลด์ 55), &quot;Write code for the reader&quot; (สไลด์ 23), comment Rule 2 – ตั้งชื่อดีแทน comment (สไลด์ 28)</td>
+</tr>
+<tr>
+<td>ไม่มี comment อธิบาย fix</td>
+<td>comment <strong>Rule 8: Add comments when fixing bugs</strong> (สไลด์ 34)</td>
+</tr>
+<tr>
+<td>logic ซ้ำ 2 method</td>
+<td><strong>DRY</strong> (สไลด์ 23), code smell <strong>Duplicated code</strong> → Extract method (สไลด์ 41)</td>
+</tr>
+<tr>
+<td>ไม่มี unit test</td>
+<td>checklist <strong>Testing and Testability</strong> (สไลด์ 55), &quot;Test as you write&quot; (สไลด์ 23)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-conclusion-สไลด์-58">13. Conclusion <sub>(สไลด์ 58)</sub></h2>
+<p><strong>แก่น: good implementation ไม่ใช่แค่เขียนโค้ดที่รันได้ แต่คือเขียนโค้ดที่คนอื่นอ่าน ดูแล และไว้ใจได้</strong></p>
+<ul>
+<li>good implementation <strong>สมดุล</strong> readability, correctness, maintainability, performance, traceability, completeness</li>
+<li><strong>style guide และ coding rules</strong> ทำให้ codebase สม่ำเสมอและจัดการได้ข้ามทีม</li>
+<li><strong>comment ควรอธิบายเจตนา (intent)</strong> ไม่ใช่พูดซ้ำโค้ด</li>
+<li><strong>refactoring</strong> ปรับโครงสร้างภายในโดยไม่เปลี่ยนพฤติกรรม ทำให้โค้ดสะอาดเมื่อพัฒนาต่อ</li>
+<li><strong>debugging</strong> เป็นกระบวนการเป็นระบบ: stabilize → localize → correct → verify</li>
+<li><strong>code review เป็นความรับผิดชอบร่วม</strong> จับ bug, กระจายความรู้ และสร้างความเป็นเจ้าของ codebase ร่วมกัน</li>
+<li><strong>2 คำถามที่ developer ควรถามก่อน commit:</strong>
+<ul>
+<li>ถ้า team lead อ่านโค้ดนี้ตอนนี้ เราจะสบายใจไหม?</li>
+<li>อีก 6 เดือนเราจะเข้าใจโค้ดนี้ไหม ถ้าไม่มี context เลย?</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Imperative</td>
+<td>บอกวิธีทำทีละขั้น (how)</td>
+<td>สูตรอาหาร</td>
+</tr>
+<tr>
+<td>Declarative</td>
+<td>บอกผลที่ต้องการ (what) เช่น SQL</td>
+<td>สั่งเมนู</td>
+</tr>
+<tr>
+<td>Logic programming</td>
+<td>บอกว่าปัญหาคืออะไร เช่น Prolog</td>
+<td></td>
+</tr>
+<tr>
+<td>Multi-paradigm language</td>
+<td>ภาษาที่รองรับหลาย paradigm</td>
+<td>Python, Java</td>
+</tr>
+<tr>
+<td>No-code</td>
+<td>สร้างแอปโดยไม่เขียนโค้ด (drag-and-drop)</td>
+<td></td>
+</tr>
+<tr>
+<td>Low-code</td>
+<td>เขียนโค้ดน้อยที่สุด + visual tools</td>
+<td>Mendix</td>
+</tr>
+<tr>
+<td>Vibe coding</td>
+<td>อธิบายเป็นภาษาธรรมชาติ ให้ AI ช่วยสร้าง</td>
+<td>ระวัง overreliance on AI</td>
+</tr>
+<tr>
+<td>Implementation</td>
+<td>แปลง detailed design เป็นโปรแกรมที่ใช้ได้</td>
+<td></td>
+</tr>
+<tr>
+<td>Traceability</td>
+<td>ตามรอยโค้ดกลับไปหา requirement/design ได้</td>
+<td></td>
+</tr>
+<tr>
+<td>Style guide</td>
+<td>เอกสารกฎการเขียนโค้ดขององค์กร</td>
+<td></td>
+</tr>
+<tr>
+<td>DRY</td>
+<td>Do not repeat yourself</td>
+<td>ไม่เขียนซ้ำ</td>
+</tr>
+<tr>
+<td>Unidiomatic code</td>
+<td>โค้ดที่ไม่เป็นไปตามแบบปกติของภาษา</td>
+<td>ต้อง comment บอกเหตุผล</td>
+</tr>
+<tr>
+<td>TODO comment</td>
+<td>comment ที่บอกว่ายังทำไม่เสร็จ</td>
+<td>Rule 9</td>
+</tr>
+<tr>
+<td>Kernighan's Law</td>
+<td>debug ยากกว่าเขียน 2 เท่า อย่าเขียนโค้ดฉลาดเกินไป</td>
+<td></td>
+</tr>
+<tr>
+<td>Lint</td>
+<td>extended checker ตรวจโค้ด</td>
+<td></td>
+</tr>
+<tr>
+<td>Refactoring</td>
+<td>ปรับโครงสร้างภายใน ไม่เปลี่ยนพฤติกรรมภายนอก</td>
+<td>จัดบ้าน ไม่ย้ายบ้าน</td>
+</tr>
+<tr>
+<td>Code smell</td>
+<td>สัญญาณว่าโค้ดมีปัญหา เช่น duplicated code, long method</td>
+<td>กลิ่นไม่ดี</td>
+</tr>
+<tr>
+<td>Code inspection</td>
+<td>review แบบเป็นทางการ 6 ขั้นของ Fagan (1976)</td>
+<td>ประชุมตรวจ</td>
+</tr>
+<tr>
+<td>Moderator</td>
+<td>ผู้ตรวจยืนยันผลการแก้ในขั้น follow-up (คนเดียวหรือทั้งทีมก็ได้)</td>
+<td></td>
+</tr>
+<tr>
+<td>Secondary defect</td>
+<td>defect ใหม่ที่เกิดจากการแก้</td>
+<td></td>
+</tr>
+<tr>
+<td>Modern code review</td>
+<td>review ผ่าน tool (GitHub, Gerrit, Phabricator)</td>
+<td>Pull Request</td>
+</tr>
+<tr>
+<td>Pull request (PR)</td>
+<td>หน้าที่ใช้ review ใน tool (ตัวอย่างสไลด์ 50: description, suggested changes, feedback)</td>
+<td></td>
+</tr>
+<tr>
+<td>Backward compatibility</td>
+<td>ของเก่ายังใช้กับของใหม่ได้</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>4 paradigms</strong> + ภาษาตัวอย่าง (SQL = declarative, Prolog = logic)</li>
+<li>⭐ <strong>No-code vs Low-code vs Vibe coding</strong>: ข้อจำกัดเฉพาะของแต่ละแบบ (low-code ต้องมีความรู้เทคนิคบ้าง, vibe coding พึ่ง AI เกิน)</li>
+<li>⭐ <strong>Implementation 4 ขั้น:</strong> writing code → unit testing → debugging → configuration management</li>
+<li>⭐ <strong>Good implementation 6 อย่าง:</strong> readability, maintainability, performance, traceability, correctness, completeness</li>
+<li>⭐ <strong>Style guide 3 กลุ่มกฎ:</strong> avoid dangers / enforce best practices / ensure consistency + ประโยชน์ของ consistency 3 ข้อ</li>
+<li>⭐ <strong>9 rules ของ comment</strong> (Rule 1 ไม่ซ้ำโค้ด, Rule 8 comment ตอนแก้ bug, Rule 9 TODO)</li>
+<li>⭐ <strong>Debugging 4 phases:</strong> stabilization (reproduction) → localization → correction → verification</li>
+<li>⭐ <strong>Refactoring</strong> = ไม่เปลี่ยน external behavior + ปรับ internal structure <strong>ไม่ใช่ rewrite from scratch</strong></li>
+<li>⭐ <strong>Fagan inspection 6 ขั้น:</strong> planning → overview → preparation → inspection → rework → follow-up</li>
+<li>⭐ Code review คือคำตอบอันดับ 1 (27%) ในการปรับคุณภาพโค้ด</li>
+<li>⭐ <strong>ประโยชน์ code review (Google) 6 ข้อ</strong> และ <strong>checklist 10 หมวด</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Imperative</td>
+<td>Declarative</td>
+<td>บอก <strong>how</strong> ทีละขั้น vs บอก <strong>what</strong> ที่ต้องการ</td>
+</tr>
+<tr>
+<td>Declarative</td>
+<td>Logic</td>
+<td>บอกผลที่ต้องการ (SQL) vs บอกว่าปัญหาคืออะไร (Prolog)</td>
+</tr>
+<tr>
+<td>No-code</td>
+<td>Low-code</td>
+<td>ไม่เขียนเลย vs เขียนบ้างเมื่อจำเป็น (ต้องมีพื้นเทคนิค)</td>
+</tr>
+<tr>
+<td>Refactoring</td>
+<td>Rewriting</td>
+<td>ปรับข้างในโดยพฤติกรรมเดิม vs เขียนใหม่ทั้งหมด</td>
+</tr>
+<tr>
+<td>Code smell</td>
+<td>Refactoring action</td>
+<td>อาการ vs วิธีรักษา</td>
+</tr>
+<tr>
+<td>Code inspection</td>
+<td>Modern code review</td>
+<td>ประชุม 6 ขั้นของ Fagan vs review ใน tool</td>
+</tr>
+<tr>
+<td>Inspection (ขั้น 4)</td>
+<td>Rework (ขั้น 5)</td>
+<td>หา defect vs author แก้ defect</td>
+</tr>
+<tr>
+<td>Stabilization</td>
+<td>Localization</td>
+<td>ทำให้ bug เกิดซ้ำได้ vs หาว่าผิดตรงไหน</td>
+</tr>
+<tr>
+<td>Correction</td>
+<td>Verification</td>
+<td>แก้ vs ยืนยันว่าแก้ได้จริง</td>
+</tr>
+<tr>
+<td>Rule 6</td>
+<td>Rule 7</td>
+<td>ลิงก์ที่มาของโค้ดที่ copy vs ลิงก์ reference ภายนอกที่ช่วยอธิบาย</td>
+</tr>
+<tr>
+<td>Unit testing (implementation)</td>
+<td>Testing (ในกราฟ Fagan)</td>
+<td>ขั้นหนึ่งของ implementation vs ช่วงทดสอบในตาราง schedule</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l9/index.html"><small>← บทก่อนหน้า</small><span>Lecture 9 – Design Architecture and Methodology</span></a><a class="pg next" href="../l11/index.html"><small>บทถัดไป →</small><span>Lecture 11 – Version Control System</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

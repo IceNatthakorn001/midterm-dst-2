@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 9 – Design Architecture and Methodology · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-ทำไมต้องออกแบบ-สไลด์-46-9">1. ทำไมต้องออกแบบ? (สไลด์ 4–6, 9)</a></li><li><a href="#2-architectural-design-กับ-detailed-design-ต่างกันยังไง-สไลด์-713">2. Architectural design กับ Detailed design ต่างกันยังไง? (สไลด์ 7–13)</a></li><li><a href="#3-architectural-styles-มีแบบไหนบ้าง-สไลด์-1422">3. Architectural styles มีแบบไหนบ้าง? (สไลด์ 14–22)</a></li><li><a href="#4-แปลง-dfd-เป็นโครงสร้างโปรแกรมยังไง-structured-design-สไลด์-2331">4. แปลง DFD เป็นโครงสร้างโปรแกรมยังไง? (Structured design) (สไลด์ 23–31)</a></li><li><a href="#5-ตัวอย่าง-ระบบควบคุมหุ่นยนต์-สไลด์-3236">5. ตัวอย่าง: ระบบควบคุมหุ่นยนต์ (สไลด์ 32–36)</a></li><li><a href="#6-logical-module-กับ-physical-module-ต่างกันยังไง-สไลด์-3739">6. Logical module กับ Physical module ต่างกันยังไง? (สไลด์ 37–39)</a></li><li><a href="#7-กระบวนการออกแบบและ-design-principles-สไลด์-4043">7. กระบวนการออกแบบและ design principles (สไลด์ 40–43)</a></li><li><a href="#8-modularity-ทำไมต้องแบ่งเป็นโมดูล-และแบ่งยังไงให้ดี-สไลด์-4448">8. Modularity: ทำไมต้องแบ่งเป็นโมดูล และแบ่งยังไงให้ดี? (สไลด์ 44–48)</a></li><li><a href="#9-cohesion-กับ-coupling-สไลด์-4955">9. Cohesion กับ Coupling (สไลด์ 49–55)</a></li><li><a href="#10-แบบฝึกหัด-cohesion-coupling-สไลด์-5660">10. แบบฝึกหัด cohesion / coupling (สไลด์ 56–60)</a></li><li><a href="#11-implementability-กับ-aesthetic-principles-สไลด์-6163">11. Implementability กับ Aesthetic principles (สไลด์ 61–63)</a></li><li><a href="#12-หลักการต่าง-ๆ-เสริมกันหรือขัดกัน-สไลด์-64">12. หลักการต่าง ๆ เสริมกันหรือขัดกัน? (สไลด์ 64)</a></li><li><a href="#13-summary-ของบท-สไลด์-65">13. Summary ของบท (สไลด์ 65)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L9</div>
+      <h1 class="lesson-title">Lecture 9 – Design Architecture and Methodology</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> L3–L8 เป็นเรื่อง <strong>ระบบต้องทำอะไร</strong> (requirement, use case, DFD, UI) บทนี้ข้ามมาฝั่ง <strong>design</strong> คือ <strong>จะสร้างซอฟต์แวร์ให้มีโครงสร้างแบบไหน</strong></p>
+<p>เนื้อหามี 3 ส่วน: (1) <strong>architectural design กับ detailed design</strong> ต่างกันยังไง และมี <strong>architectural styles 6 แบบ</strong> (2) <strong>structured design</strong> แปลง DFD เป็น <strong>structure chart</strong> ด้วย transform mapping และ factoring มีตัวอย่างระบบควบคุมหุ่นยนต์กับระบบไปรษณีย์ (3) <strong>design principles</strong> ที่ใช้ตัดสินว่า design ไหนดีกว่า โดยเฉพาะ <strong>cohesion กับ coupling</strong> มีแบบฝึกหัดหลายข้อ</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L9-00-overview.png" alt="แผนผังภาพรวม Lecture 9" /></p>
+<h2 id="1-ทำไมต้องออกแบบ-สไลด์-46-9">1. ทำไมต้องออกแบบ? <sub>(สไลด์ 4–6, 9)</sub></h2>
+<p><strong>แก่น: ความต้องการเดียวกันสร้างได้หลายแบบ ก่อนลงมือเขียนโค้ดจึงต้องตัดสินใจว่าซอฟต์แวร์จะมี component อะไร และแต่ละอันสัมพันธ์กันยังไง</strong></p>
+<ul>
+<li><strong>สไลด์ 4 – สะพานหลายแบบ:</strong> beam, arch, truss, cantilever, suspension, cable-stayed &quot;and several more&quot; ทุกแบบทำหน้าที่เดียวกันคือข้ามแม่น้ำ แต่โครงสร้างต่างกัน</li>
+<li><strong>สไลด์ 5 – HelloWorld 3 แบบ:</strong> ทุกแบบพิมพ์ &quot;Hello World!&quot; เหมือนกัน แต่โครงสร้างต่างกัน</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>โครงสร้าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>class <code>HelloWorld</code> เดียว เรียก <code>System.out.println(&quot;Hello World!&quot;)</code> ใน <code>main</code> ตรง ๆ</td>
+</tr>
+<tr>
+<td>2</td>
+<td>แยก class <code>MessagePrinter</code> ที่มี <code>getMessage()</code> คืน <code>&quot;Hello World!&quot;</code> แล้ว <code>main</code> เรียกมาพิมพ์</td>
+</tr>
+<tr>
+<td>3</td>
+<td>แยกละเอียดขึ้นอีก: <code>HelloProvider.getHello()</code> คืน <code>&quot;Hello&quot;</code>, <code>WorldProvider.getWorld()</code> คืน <code>&quot;World&quot;</code> และ <code>MessagePrinter.printMessage()</code> เอามาต่อกันเป็น <code>&quot;Hello World!&quot;</code> แล้วพิมพ์</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>สไลด์ 6 – Design Architecture and Methodology</strong>
+<ul>
+<li><strong>เริ่มจาก requirements</strong></li>
+<li>ตอบคำถาม: <strong>ซอฟต์แวร์จะมีโครงสร้างอย่างไร?</strong> มี <strong>component อะไรบ้าง?</strong> และ <strong>component เหล่านั้นสัมพันธ์กันอย่างไร?</strong></li>
+<li>แบ่งเป็น <strong>2 ส่วน:</strong> <strong>Architectural (high-level) design</strong> และ <strong>Detailed design</strong></li>
+</ul>
+</li>
+<li><strong>สไลด์ 9 – An Architectural Design Method:</strong> ลูกค้าบอก requirement ว่า <em>&quot;four bedrooms, three baths, lots of glass ...&quot;</em> → <strong>architectural design</strong> → <strong>implementation</strong> ในสไลด์มีข้อความ <em>&quot;It's a miracle!&quot;</em> ประกอบด้วย</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสร้างบ้าน ลูกค้าบอกแค่ &quot;4 ห้องนอน 3 ห้องน้ำ&quot; สถาปนิกต้องออกแบบก่อนช่างจะสร้างได้</p>
+</blockquote>
+<hr />
+<h2 id="2-architectural-design-กับ-detailed-design-ต่างกันยังไง-สไลด์-713">2. Architectural design กับ Detailed design ต่างกันยังไง? <sub>(สไลด์ 7–13)</sub></h2>
+<p><strong>แก่น: architectural design = ภาพใหญ่ คือส่วนหลักของระบบกับความสัมพันธ์ระหว่างกัน ส่วน detailed design = ลงไปข้างในแต่ละส่วน คือ class, algorithm, data structure โดย detailed design มาจากทั้ง requirements และ architecture</strong></p>
+<h3 id="21-สองอย่างนี้สัมพันธ์กันยังไง-สไลด์-7">2.1 สองอย่างนี้สัมพันธ์กันยังไง? <sub>(สไลด์ 7)</sub></h3>
+<p><strong>แก่น: detailed design มาจาก requirements &amp; architecture</strong></p>
+<p><img loading="lazy" src="diagrams/L9-01-req-arch-detailed.png" alt="Requirement → Architecture → Detailed design" /></p>
+<ul>
+<li>requirement แต่ละข้อ (R1, R2, R3) ส่งผลต่อ architecture ก่อน</li>
+<li>จากนั้น requirement แต่ละข้อจะถูกทำจริงใน module (M1, M2, M3) ที่อยู่ใน detailed design</li>
+<li>detailed design จึงอยู่ในกรอบที่ architecture วางไว้</li>
+</ul>
+<h3 id="22-analysis-model-กลายเป็น-design-model-ยังไง-สไลด์-8-จาก-pressman">2.2 Analysis model กลายเป็น Design model ยังไง? <sub>(สไลด์ 8, จาก Pressman)</sub></h3>
+<p><strong>แก่น: model จากขั้น analysis ทั้ง 4 กลุ่ม เป็น input ของ design model ซึ่งมี 4 ชั้น</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Analysis Model (4 กลุ่ม element)</th>
+<th>ตัวอย่าง diagram ในกลุ่ม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scenario-based elements</strong></td>
+<td>use-cases (text), use-case diagrams, activity diagrams, swim lane diagrams</td>
+</tr>
+<tr>
+<td><strong>Class-based elements</strong></td>
+<td>class diagrams, analysis packages, CRC models, collaboration diagrams</td>
+</tr>
+<tr>
+<td><strong>Flow-oriented elements</strong></td>
+<td>data flow diagrams, control-flow diagrams, processing narratives</td>
+</tr>
+<tr>
+<td><strong>Behavioral elements</strong></td>
+<td>state diagrams, sequence diagrams</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Design Model</strong> เป็นพีระมิด 4 ชั้น (จากฐานขึ้นยอด):</p>
+<ol>
+<li><strong>Data/Class Design</strong> (ฐาน)</li>
+<li><strong>Architectural Design</strong></li>
+<li><strong>Interface Design</strong></li>
+<li><strong>Component-Level Design</strong> (ยอด)</li>
+</ol>
+<p>ในสไลด์มีลูกศรจาก analysis element หลายกลุ่มชี้ไปยังหลายชั้นของ design model</p>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับบทก่อน: use case (L4) และ DFD (L6–L7) ที่เรียนมา คือ analysis model ที่เอามาใช้ตอน design</p>
+</blockquote>
+<h3 id="23-architectural-design-คืออะไร-สไลด์-10">2.3 Architectural design คืออะไร? <sub>(สไลด์ 10)</sub></h3>
+<p><strong>แก่น: กำหนด &quot;ส่วนหลัก&quot; ของโปรแกรม: หน้าที่ คุณสมบัติ interface และความสัมพันธ์/การโต้ตอบระหว่างกัน</strong></p>
+<p>นิยาม: <em>an activity of specifying a program's major parts; their responsibilities, properties, and interfaces; and the relationships and interactions among them.</em></p>
+<p><strong>Key Components of Architectural Design</strong></p>
+<ul>
+<li><strong>Layers &amp; Modules</strong> – ระบบแบ่งเป็นชั้นหรือโมดูลใหญ่อะไรบ้าง</li>
+<li><strong>Components &amp; Services</strong> – มี component และ service อะไร</li>
+<li><strong>Data Flow &amp; Storage</strong> – ข้อมูลไหลและถูกเก็บที่ไหน</li>
+<li><strong>Security &amp; Performance</strong> – ความปลอดภัยและประสิทธิภาพระดับระบบ</li>
+<li><strong>Scalability &amp; Maintainability</strong> – ขยายระบบและดูแลต่อได้แค่ไหน</li>
+<li><strong>Integration &amp; APIs</strong> – เชื่อมกับระบบอื่นผ่าน API ยังไง</li>
+</ul>
+<h3 id="24-detailed-design-คืออะไร-สไลด์-11">2.4 Detailed design คืออะไร? <sub>(สไลด์ 11)</sub></h3>
+<p><strong>แก่น: ลงลึกในแต่ละ component ว่าข้างในมี element อะไร สัมพันธ์กันยังไง รวมถึงออกแบบ data structure และ algorithm</strong></p>
+<p><strong>Key Components of Detailed Design</strong></p>
+<ul>
+<li><strong>Module-Level Design</strong> – ออกแบบภายในแต่ละโมดูล</li>
+<li><strong>Class &amp; Object Design</strong> – class/object และความสัมพันธ์</li>
+<li><strong>Function &amp; Algorithm Design</strong> – function และ algorithm ที่ใช้</li>
+<li><strong>Database Schema</strong> – โครงสร้างตารางฐานข้อมูล</li>
+<li><strong>Interface &amp; API Design</strong> – รายละเอียด interface/API</li>
+<li><strong>Error Handling &amp; Logging</strong> – จัดการ error และบันทึก log</li>
+<li><strong>Security Considerations</strong> – เรื่องความปลอดภัยระดับรายละเอียด</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Architectural design</th>
+<th>Detailed design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ระดับ</td>
+<td>high-level ทั้งระบบ</td>
+<td>ข้างในแต่ละ component</td>
+</tr>
+<tr>
+<td>สนใจ</td>
+<td>ส่วนหลัก หน้าที่ คุณสมบัติ interface ความสัมพันธ์</td>
+<td>internal elements, class, data structure, algorithm</td>
+</tr>
+<tr>
+<td>ตัวอย่างหัวข้อ</td>
+<td>layers, services, data flow, scalability</td>
+<td>class design, algorithm, DB schema, error handling</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="25-แบบฝึก-ข้อไหนเป็น-architectural-หรือ-detailed-สไลด์-1213-จาก-christopher-fox">2.5 แบบฝึก: ข้อไหนเป็น Architectural หรือ Detailed? <sub>(สไลด์ 12–13, จาก Christopher Fox)</sub></h3>
+<p><strong>แก่น: ถ้าพูดถึงส่วนหลักของระบบหรือคุณสมบัติทั้งระบบ = architectural ถ้าพูดถึง algorithm, data structure หรือ class ตัวใดตัวหนึ่ง = detailed</strong></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่มีเฉลย คำตอบด้านล่างคิดจากนิยามในสไลด์ 10–11 ควรเช็กกับเฉลยในห้อง</p>
+</blockquote>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อ</th>
+<th>โจทย์</th>
+<th>แนวคำตอบ</th>
+<th>เหตุผล (อิงสไลด์ 10–11)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>find()</code> ต้องใช้ <strong>binary search</strong></td>
+<td>Detailed</td>
+<td>ระบุ algorithm (Function &amp; Algorithm Design)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ต้อง <strong>แยกโค้ด UI ออกจากโค้ดส่วนอื่น</strong></td>
+<td>Architectural</td>
+<td>แบ่งส่วนหลักของโปรแกรม (Layers &amp; Modules)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>client ต้องประมวลผลไม่เกิน 1 วินาที และ server ไม่เกินครึ่งวินาที</td>
+<td>Architectural</td>
+<td>กำหนด property ของส่วนหลัก (client, server) ด้าน performance</td>
+</tr>
+<tr>
+<td>4</td>
+<td>class <code>Register</code> ต้องเก็บ client ใน <strong>hash table</strong></td>
+<td>Detailed</td>
+<td>ระบุ data structure ใน class หนึ่ง</td>
+</tr>
+<tr>
+<td>5</td>
+<td>utilities ทุกตัวใน graphics library ต้อง <strong>thread-safe</strong></td>
+<td>Architectural</td>
+<td>กำหนด property ของส่วนหลัก (library ทั้งก้อน)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Car object ทุกตัวต้อง register กับ Clock object และ Clock จะแจ้ง Car ทุกวินาที</td>
+<td>Detailed</td>
+<td>การโต้ตอบระดับ object (Class &amp; Object Design)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>observer ทุกตัวของ class Clock ต้อง implement class <code>ClockUser</code></td>
+<td>Detailed</td>
+<td>ระดับ class/interface ของ class เฉพาะ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-architectural-styles-มีแบบไหนบ้าง-สไลด์-1422">3. Architectural styles มีแบบไหนบ้าง? <sub>(สไลด์ 14–22)</sub></h2>
+<p><strong>แก่น: มี 6 แบบ: batch sequential/pipe and filter, data-centered, layered, client-server, microservice และ call and return แต่ละแบบมีข้อดีข้อเสียต่างกัน</strong></p>
+<h3 id="31-batch-sequential-pipe-and-filter-ทำงานยังไง-สไลด์-1516">3.1 Batch sequential / Pipe and filter ทำงานยังไง? <sub>(สไลด์ 15–16)</sub></h3>
+<p><strong>แก่น: ข้อมูลเข้ามาแล้วผ่านการแปลง (filter) ทีละขั้นต่อกันด้วยท่อ (pipe) จนได้ output</strong></p>
+<p><strong>Batch sequential</strong> – filter ต่อกันเป็นสายตรง</p>
+<p><img loading="lazy" src="diagrams/L9-02a-batch-sequential.png" alt="Batch sequential" /></p>
+<p><strong>Pipe and filter</strong> – แตกแขนงและรวมกันได้</p>
+<p><img loading="lazy" src="diagrams/L9-02b-pipe-and-filter.png" alt="Pipe and filter" /></p>
+<p>(รูปในสไลด์มีเส้นย้อนกลับจาก filter ตัวหลังไปหาตัวก่อนหน้าด้วย 1 เส้น)</p>
+<ul>
+<li>ข้อมูลเข้าระบบ แล้วถูก <strong>transform ต่อกันหลายขั้น</strong> ก่อนได้ output</li>
+<li><strong>pipe</strong> = ตัวส่งข้อมูล, <strong>filter</strong> = ตัวแปลงข้อมูล</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ใช้ filter เดิมซ้ำเพื่อประกอบเป็น configuration ใหม่ได้ (<strong>reusability</strong>)</td>
+<td><strong>ไม่เหมาะกับ interactive application</strong> เพราะต้องรอผ่านการแปลงทุกขั้นจึงได้ output</td>
+</tr>
+<tr>
+<td>เหมาะกับงานที่ต้องคำนวณ <strong>เป็นลำดับขั้นที่อิสระต่อกัน</strong></td>
+<td>อาจต้องเพิ่ม filter เพื่อให้ component ที่อิสระต่อกันทำงานเข้ากันได้</td>
+</tr>
+<tr>
+<td></td>
+<td>ถ้า component ไม่ได้ออกแบบให้อิสระต่อกัน → อาจเกิด <strong>tight coupling</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสายพานโรงงาน ของเข้ามาแล้วผ่านทีละสถานี</p>
+</blockquote>
+<h3 id="32-data-centered-architecture-คืออะไร-สไลด์-17">3.2 Data-centered architecture คืออะไร? <sub>(สไลด์ 17)</sub></h3>
+<p><strong>แก่น: ข้อมูลกลางเก็บใน central repository ทุก subsystem เข้าถึง แก้ไข ลบ อัปเดตได้</strong></p>
+<p><img loading="lazy" src="diagrams/L9-03-data-centered.png" alt="Data-centered architecture" /></p>
+<p>(วาดตามสไลด์ ซึ่งตั้งชื่อ client ไว้ว่า Client A, B, C, C คือมี &quot;Client C&quot; ซ้ำ 2 ตัว)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แชร์ข้อมูลปริมาณมากได้อย่างมีประสิทธิภาพ</td>
+<td><strong>แก้ data model ยากและแพง</strong></td>
+</tr>
+<tr>
+<td>แต่ละ component ทำงานอิสระได้</td>
+<td>ทุก subsystem ต้องใช้ data model เดียวกัน ซึ่งมักต้องยอมประนีประนอม</td>
+</tr>
+<tr>
+<td>จัดการข้อมูลได้สม่ำเสมอ เพราะ backup ที่ศูนย์กลาง</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="33-layered-architecture-คืออะไร-สไลด์-18">3.3 Layered architecture คืออะไร? <sub>(สไลด์ 18)</sub></h3>
+<p><strong>แก่น: ระบบเป็นชั้นซ้อนกัน แต่ละชั้นพึ่งพาเฉพาะชั้นที่อยู่ล่างลงไป</strong></p>
+<p><img loading="lazy" src="diagrams/L9-04-layered.png" alt="Layered architecture" /></p>
+<p>ตัวอย่างชั้นในสไลด์ (บนลงล่าง): User Interface → Application → Utility → Core</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>portable</strong> ย้ายไปใช้ต่าง platform ได้</td>
+<td>แยกชั้นให้ชัดเจนจริง ๆ ทำได้ยาก</td>
+</tr>
+<tr>
+<td>แตกปัญหาซับซ้อนเป็นส่วนย่อยที่จัดการได้</td>
+<td><strong>ชั้นเยอะ → performance ลดลง</strong></td>
+</tr>
+<tr>
+<td><strong>เปลี่ยนชั้นได้</strong> ถ้า interface ของชั้นนั้นไม่เปลี่ยน</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="34-client-server-architecture-คืออะไร-สไลด์-19">3.4 Client-Server architecture คืออะไร? <sub>(สไลด์ 19)</sub></h3>
+<p><strong>แก่น: แบ่งเป็น 2 ฝั่ง: server = ผู้ให้บริการ, client = ผู้ขอบริการ ทั้งสองคุยกันแบบ request/reply</strong></p>
+<p><img loading="lazy" src="diagrams/L9-05-client-server.png" alt="Client-Server architecture" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ทำเป็น <strong>distributed system</strong> ได้</td>
+<td>จัดการยาก ถ้า server อยู่ในมือ third party</td>
+</tr>
+<tr>
+<td>เพิ่ม server ใหม่หรืออัปเกรดได้ง่าย</td>
+<td><strong>server รับ request เยอะเกินจนล่มได้</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="35-microservice-architecture-คืออะไร-สไลด์-20-จาก-martin-fowler">3.5 Microservice architecture คืออะไร? <sub>(สไลด์ 20, จาก Martin Fowler)</sub></h3>
+<p><strong>แก่น: แอปเดียวที่ประกอบจาก service เล็ก ๆ หลายตัว แต่ละตัวรันใน process ของตัวเองและ deploy แยกกันได้</strong></p>
+<ul>
+<li>พัฒนา <strong>single application</strong> เป็น <strong>ชุดของ service เล็ก ๆ</strong></li>
+<li>แต่ละ service:
+<ul>
+<li><strong>รันใน process ของตัวเอง</strong> และสื่อสารด้วยกลไกแบบเบา ๆ ส่วนมากเป็น <strong>HTTP resource API</strong></li>
+<li><strong>deploy แยกได้อิสระ</strong> ด้วยระบบ deploy อัตโนมัติเต็มรูปแบบ</li>
+</ul>
+</li>
+<li>รูปในสไลด์เทียบ 2 แบบ:
+<ul>
+<li><strong>monolith – single database:</strong> ทุกฟังก์ชันอยู่ในก้อนเดียว ใช้ฐานข้อมูลก้อนเดียว</li>
+<li><strong>microservices – application databases:</strong> แยกเป็นหลาย service แต่ละตัวมีฐานข้อมูลของตัวเอง</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์นี้ไม่มีตาราง Pros/Cons เหมือนแบบอื่น</p>
+</blockquote>
+<h3 id="36-call-and-return-architecture-คืออะไร-สไลด์-2122">3.6 Call and Return architecture คืออะไร? <sub>(สไลด์ 21–22)</sub></h3>
+<p><strong>แก่น: แตก main program เป็น component ย่อยที่เรียกต่อกันเป็นลำดับชั้น เป็นสถาปัตยกรรมที่ใช้มากที่สุดตั้งแต่เริ่มมีการพัฒนาซอฟต์แวร์</strong></p>
+<p><img loading="lazy" src="diagrams/L9-06-call-return.png" alt="Call and Return architecture" /></p>
+<ul>
+<li><strong>most dominant</strong> architecture ตั้งแต่ยุคแรกของการพัฒนาซอฟต์แวร์</li>
+<li>แตก main program เป็น program component หลายตัว ซึ่งเรียก component อื่นต่อได้</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จัดโค้ดเป็น <strong>modular</strong> ได้</td>
+<td>interface ไม่ชัด → <strong>tight coupling</strong> ระหว่างข้อมูล</td>
+</tr>
+<tr>
+<td>scale และแก้ไขได้ง่ายเมื่อจำเป็น</td>
+<td>แก้ data structure ภายใน อาจกระทบโมดูลอื่น</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="37-เทียบ-6-styles">3.7 เทียบ 6 styles</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Style</th>
+<th>หลักคิด 1 บรรทัด</th>
+<th>จุดเด่น</th>
+<th>จุดอ่อน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipe and filter</td>
+<td>แปลงข้อมูลต่อกันเป็นขั้น</td>
+<td>reuse filter</td>
+<td>ไม่เหมาะกับ interactive</td>
+</tr>
+<tr>
+<td>Data-centered</td>
+<td>ทุกส่วนใช้ข้อมูลกลาง</td>
+<td>แชร์ข้อมูลมาก, backup ที่เดียว</td>
+<td>แก้ data model แพง</td>
+</tr>
+<tr>
+<td>Layered</td>
+<td>ชั้นพึ่งชั้นล่างเท่านั้น</td>
+<td>portable, เปลี่ยนชั้นได้</td>
+<td>ชั้นเยอะ = ช้า</td>
+</tr>
+<tr>
+<td>Client-server</td>
+<td>ผู้ให้ vs ผู้ขอบริการ</td>
+<td>distributed, เพิ่ม server ง่าย</td>
+<td>server ล้นได้</td>
+</tr>
+<tr>
+<td>Microservice</td>
+<td>service เล็ก ๆ deploy แยก</td>
+<td>แยก process / deploy อิสระ</td>
+<td>(สไลด์ไม่ระบุ)</td>
+</tr>
+<tr>
+<td>Call and return</td>
+<td>main → controller → sub-program</td>
+<td>modular, scale ง่าย</td>
+<td>interface ไม่ชัด = coupling สูง</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-แปลง-dfd-เป็นโครงสร้างโปรแกรมยังไง-structured-design-สไลด์-2331">4. แปลง DFD เป็นโครงสร้างโปรแกรมยังไง? (Structured design) <sub>(สไลด์ 23–31)</sub></h2>
+<p><strong>แก่น: นำ DFD มา map เป็นสถาปัตยกรรมแบบ call and return ที่เขียนเป็น structure chart: ตัดเขตขาเข้า/ขาออก แล้วแตกเป็นโมดูล โมดูลบนตัดสินใจ โมดูลล่างทำงานจริง</strong></p>
+<h3 id="41-deriving-architectural-design-สไลด์-23">4.1 Deriving architectural design <sub>(สไลด์ 23)</sub></h3>
+<ul>
+<li>รูปในสไลด์: วง (bubble) ของ DFD ถูกตีเส้นแบ่งกลุ่ม แล้วแต่ละกลุ่มกลายเป็นกล่องใน <strong>Call and Return Architecture</strong> (กล่องบนสุด → กล่องชั้นกลาง → กล่องชั้นล่าง)</li>
+</ul>
+<h3 id="42-structured-design-คืออะไร-สไลด์-24">4.2 Structured design คืออะไร? <sub>(สไลด์ 24)</sub></h3>
+<p><strong>แก่น: วิธีได้ program architecture ที่แบ่งเป็นส่วน ๆ โดย map DFD เป็นโครงสร้างโปรแกรม แล้วเขียนออกมาเป็น structure chart</strong></p>
+<ul>
+<li><strong>Objective:</strong> ได้ program architecture ที่ <strong>partitioned</strong> (แบ่งเป็นส่วนชัดเจน)</li>
+<li><strong>Approach:</strong>
+<ul>
+<li><strong>map DFD</strong> เป็น program architecture</li>
+<li>ใช้ <strong>process specification (PSPEC)</strong> และ <strong>state transition diagram (STD)</strong> บอกว่าแต่ละโมดูลมีอะไรข้างใน</li>
+</ul>
+</li>
+<li><strong>Notation:</strong> <strong>structure chart</strong></li>
+</ul>
+<h3 id="43-transform-flow-กับ-transaction-flow-ต่างกันยังไง-สไลด์-25">4.3 Transform flow กับ Transaction flow ต่างกันยังไง? <sub>(สไลด์ 25)</sub></h3>
+<p><strong>แก่น: transform flow = ข้อมูลไหลผ่านการแปลงเป็นสายต่อเนื่อง ส่วน transaction flow = มีจุดศูนย์กลาง (transaction center) ที่แยกข้อมูลไปหลายเส้นทาง</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Transform flow</th>
+<th>Transaction flow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ลักษณะในรูป</td>
+<td>วงเรียงต่อกันเป็นสาย แยกออกบ้างเล็กน้อย</td>
+<td>มี <strong>วงกลางหนึ่งวง</strong> ที่แตกออกเป็น <strong>หลาย action path</strong></td>
+</tr>
+<tr>
+<td>จุดสังเกต</td>
+<td>ไหลจากขาเข้าไปขาออก</td>
+<td>มี <strong>transaction center</strong> (สไลด์ 26 ใช้คำนี้)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="44-ขั้นตอน-mapping-ทั่วไป-สไลด์-2627">4.4 ขั้นตอน mapping ทั่วไป <sub>(สไลด์ 26–27)</sub></h3>
+<p><strong>แก่น: ตัดเขต → map จากขอบออกไป → เพิ่ม control module → refine → factoring 2 ระดับ</strong></p>
+<ol>
+<li><strong>แยก incoming และ outgoing flow boundaries</strong> ถ้าเป็น transaction flow ให้ <strong>แยก transaction center</strong> ออกมา</li>
+<li><strong>map จาก boundary ออกไปด้านนอก:</strong> แต่ละ transform ใน DFD → โมดูลที่สอดคล้องกัน</li>
+<li><strong>เพิ่ม control module</strong> ตามที่จำเป็น</li>
+<li><strong>refine</strong> โครงสร้างที่ได้ ด้วยแนวคิด <strong>effective modularity</strong></li>
+<li>ทำ <strong>&quot;first-level factoring&quot;</strong>
+<ul>
+<li>โครงสร้างที่ได้มี <strong>การกระจาย control แบบ top-down</strong></li>
+<li><strong>โมดูลบน</strong> = ตัดสินใจ (<strong>decision-making</strong>)</li>
+<li><strong>โมดูลล่าง</strong> = ทำงาน input, computation, output ส่วนใหญ่</li>
+<li><strong>โมดูลกลาง</strong> = control บ้าง ทำงานปานกลาง</li>
+</ul>
+</li>
+<li>ทำ <strong>&quot;second-level factoring&quot;</strong></li>
+</ol>
+<h3 id="45-transform-mapping-หน้าตาเป็นยังไง-สไลด์-28">4.5 Transform mapping หน้าตาเป็นยังไง? <sub>(สไลด์ 28)</sub></h3>
+<p><strong>แก่น: DFD a→j ถูกแบ่งเป็น 3 ช่วง (ขาเข้า / กลาง / ขาออก) แต่ละช่วงกลายเป็นกิ่งใต้โมดูลบนสุด</strong></p>
+<p><img loading="lazy" src="diagrams/L9-07-transform-mapping.png" alt="Transform mapping จาก DFD เป็น structure chart" /></p>
+<ul>
+<li>DFD ถูกตีเส้นแบ่ง 2 เส้น: ช่วง a, b, c | ช่วง d, e, f | ช่วง g, h, i, j</li>
+<li><strong>x1</strong> อยู่บนสุด มีลูก 3 ตัว:
+<ul>
+<li><strong>x2</strong> คุมช่วงขาเข้า (b, c → a)</li>
+<li><strong>x3</strong> คุมช่วงกลาง (d, e, f)</li>
+<li><strong>x4</strong> คุมช่วงขาออก (g → h, i → j)</li>
+</ul>
+</li>
+</ul>
+<h3 id="46-factoring-คืออะไร-สไลด์-29">4.6 Factoring คืออะไร? <sub>(สไลด์ 29)</sub></h3>
+<p><strong>แก่น: ยิ่งอยู่สูงยิ่งตัดสินใจมาก ยิ่งอยู่ต่ำยิ่งเป็น &quot;worker&quot; ที่ทำงานจริง</strong></p>
+<ul>
+<li>โมดูลด้านบน = typical <strong>&quot;decision making&quot;</strong> modules</li>
+<li>โมดูลด้านล่าง (แรเงาในรูป) = typical <strong>&quot;worker&quot;</strong> modules</li>
+<li>ลูกศรขึ้นในรูป = <strong>direction of increasing decision making</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนบริษัท ผู้จัดการ (บน) ตัดสินใจ พนักงาน (ล่าง) ลงมือทำ</p>
+</blockquote>
+<h3 id="47-first-level-factoring-สไลด์-30">4.7 First-level factoring <sub>(สไลด์ 30)</sub></h3>
+<p><strong>แก่น: ชั้นแรกแตก main controller เป็น 3 ตัว: input, processing, output controller</strong></p>
+<p><img loading="lazy" src="diagrams/L9-08-first-level-factoring.png" alt="First-level factoring" /></p>
+<h3 id="48-second-level-mapping-สไลด์-31">4.8 Second-level mapping <sub>(สไลด์ 31)</sub></h3>
+<p><strong>แก่น: แตกต่อลงไปอีกชั้น โดย map วงใน DFD เป็นโมดูลใต้ control &quot;จาก flow boundary ออกไป&quot;</strong></p>
+<ul>
+<li>ตัวอย่างในสไลด์: วง D, C, B, A ใน DFD (อยู่ในขอบเขตเส้นโค้ง) → กลายเป็นโมดูล A, B, C, D ใต้ <strong>main → control</strong></li>
+<li>ข้อความในรูป: <em>&quot;mapping from the flow boundary outward&quot;</em></li>
+</ul>
+<hr />
+<h2 id="5-ตัวอย่าง-ระบบควบคุมหุ่นยนต์-สไลด์-3236">5. ตัวอย่าง: ระบบควบคุมหุ่นยนต์ <sub>(สไลด์ 32–36)</sub></h2>
+<p><strong>แก่น: เริ่มจาก DFD level 1 → แตกเป็น level 2 → แยก flow path → map เป็น structure chart → refine จนทุก action path แตกครบ</strong></p>
+<h3 id="51-level-1-dfd-สไลด์-32">5.1 Level 1 DFD <sub>(สไลด์ 32)</sub></h3>
+<p><img loading="lazy" src="diagrams/L9-09-robot-dfd-l1.png" alt="Level 1 DFD ระบบควบคุมหุ่นยนต์" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Process</th>
+<th>รับเข้า</th>
+<th>ส่งออก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Operator commands</td>
+<td>command (จาก operator)</td>
+<td>error message, valid command</td>
+</tr>
+<tr>
+<td>Determine Command type</td>
+<td>valid command</td>
+<td>fixture, selected report, control robot</td>
+</tr>
+<tr>
+<td>Analyze Fixture status</td>
+<td>fixture, status</td>
+<td>fixture setting → Fixture servos</td>
+</tr>
+<tr>
+<td>Generate report</td>
+<td>selected report, Assembly record (data store)</td>
+<td>report → Display screen</td>
+</tr>
+<tr>
+<td>Send Control value</td>
+<td>control robot</td>
+<td>robot control → Robot Control system</td>
+</tr>
+</tbody>
+</table></div>
+<p>(เส้นประในสไลด์ = control robot / robot control / Send Control value)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในแผนภาพนี้ data store <strong>Assembly record</strong> วาดเป็นกล่องเอียงเพื่อให้แยกออกง่าย แต่ในสไลด์ (และ DFD ที่ต้องวาดในข้อสอบ) data store เป็น <strong>เส้นขนาน 2 เส้น</strong> มีชื่ออยู่ระหว่างเส้น</p>
+</blockquote>
+<h3 id="52-level-2-dfd-และการแยก-flow-path-สไลด์-3334">5.2 Level 2 DFD และการแยก flow path <sub>(สไลด์ 33–34)</sub></h3>
+<p>Level 2 แตก process ละเอียดขึ้น:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่วง</th>
+<th>Process ใน level 2</th>
+<th>ข้อมูลที่ไหล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>รับคำสั่ง</td>
+<td>Read command → Valid command → Produce error msg</td>
+<td>command, invalid command, error message</td>
+</tr>
+<tr>
+<td>แยกประเภท</td>
+<td>Determine type</td>
+<td>valid command → fixture / selected report / robot control</td>
+</tr>
+<tr>
+<td>fixture</td>
+<td>Read fixture status → Determine setting → Format setting</td>
+<td>status, combined status, raw setting, fixture setting</td>
+</tr>
+<tr>
+<td>report</td>
+<td>Read record → Calculate output values → Format report</td>
+<td>Assembly record, record, values, report</td>
+</tr>
+<tr>
+<td>ควบคุม</td>
+<td>Send control value</td>
+<td>robot control, start/stop</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>สไลด์ 34 (<strong>Isolate Flow Paths</strong>) ใช้ DFD เดียวกับสไลด์ 33 เพื่อแยก flow path ออกจากกัน</li>
+</ul>
+<h3 id="53-map-เป็น-structure-chart-แล้ว-refine-สไลด์-3536">5.3 Map เป็น structure chart แล้ว refine <sub>(สไลด์ 35–36)</sub></h3>
+<p><strong>แก่น: บนสุด = process operator commands แตกเป็น command input controller กับ determine type แล้วแตกทุก action path ลงไปจนถึง worker</strong></p>
+<ul>
+<li><strong>สไลด์ 35 (Map the Flow Model):</strong> ได้ชั้นแรก ตัวใต้ determine type (fixture status controller, report generation controller, send control value) มีหมายเหตุ <em>&quot;each of the action paths must be expanded further&quot;</em></li>
+<li><strong>สไลด์ 36 (Refining the Program Architecture):</strong> แตกต่อจนครบ</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L9-10-robot-structure.png" alt="โครงสร้างโปรแกรมหลัง refine" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต: ชั้นบน (ฟ้า) ตัดสินใจ ชั้นกลาง (เหลือง) เป็น controller ชั้นล่าง (เขียว) เป็น worker ตรงกับหลัก factoring ในหัวข้อ 4.6</p>
+</blockquote>
+<hr />
+<h2 id="6-logical-module-กับ-physical-module-ต่างกันยังไง-สไลด์-3739">6. Logical module กับ Physical module ต่างกันยังไง? <sub>(สไลด์ 37–39)</sub></h2>
+<p><strong>แก่น: logical module = กิจกรรมทางธุรกิจ (ทำอะไร) ส่วน physical module = กระบวนการจริงที่ใช้ทำกิจกรรมนั้น (ทำยังไง)</strong></p>
+<ul>
+<li><strong>Logical module:</strong> กำหนด <strong>business activities</strong> ที่ประกอบเป็น business process</li>
+<li><strong>Physical module:</strong> กำหนด <strong>physical process</strong> ที่ใช้ทำ business activity นั้นจริง</li>
+<li><strong>ตัวอย่างในสไลด์ 37:</strong>
+<ul>
+<li>logical = <strong>Login</strong> (กล่องเดียว)</li>
+<li>physical = <strong>Two Factor Authentication</strong> ข้างในมี 2 ขั้น: External Password to <strong>First</strong> Authentication Server → External Password to <strong>Second</strong> Authentication Server</li>
+</ul>
+</li>
+</ul>
+<h3 id="61-structure-chart-ขั้น-analysis-logical-ระบบไปรษณีย์-สไลด์-38">6.1 Structure chart ขั้น Analysis (logical) – ระบบไปรษณีย์ <sub>(สไลด์ 38)</sub></h3>
+<p><strong>Functional decomposition:</strong> แตก Postal System เป็นฟังก์ชันย่อย</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โมดูลหลัก</th>
+<th>โมดูลย่อย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Create Parcel</td>
+<td>1.1 Log in, 1.3 Parcel detail, 1.4 Calculate weight, 1.5 Create tracking number, 1.6 Update Parcel History</td>
+</tr>
+<tr>
+<td>2. Update Parcel information</td>
+<td>2.1 Log in, 2.2 Get parcel information, 2.3 Get delivery information, 2.4 Update delivery information</td>
+</tr>
+<tr>
+<td>3. View history and status</td>
+<td>3.1 View history report, 3.2 View status report</td>
+</tr>
+<tr>
+<td>4. Feedback</td>
+<td>4.1 Get comment of customer, 4.1 Record comment</td>
+</tr>
+<tr>
+<td>5. Bank@post</td>
+<td>5.1 Log in, 5.2 Get Customer acc. &amp; Receiver acc., 5.3 Get Transaction Confirmation, 5.4 deduct balance</td>
+</tr>
+<tr>
+<td>6. Pay Online</td>
+<td>6.1 Log in, 6.2 Get Bill no., 6.3 Get Payment confirmation, 6.4 deduct balance</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 38 เลขข้อไม่ต่อเนื่อง: ข้าม 1.2 (จาก 1.1 ไป 1.3) และใน Feedback มี &quot;4.1&quot; ซ้ำ 2 ช่อง (ช่องที่ 2 น่าจะเป็น 4.2) ถ้าต้องอ้างเลขข้อให้ถามอาจารย์</p>
+</blockquote>
+<h3 id="62-structure-chart-ขั้น-design-physical-สไลด์-39">6.2 Structure chart ขั้น Design (physical) <sub>(สไลด์ 39)</sub></h3>
+<p><strong>แก่น: ขั้น design รวมงานที่ซ้ำกันเป็นโมดูลกลางตัวเดียว เช่น Login และ Deduct Balance ที่หลายโมดูลเรียกใช้ร่วมกัน แล้วเขียนเป็นโค้ดได้</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โมดูลหลัก</th>
+<th>โมดูลย่อยใน physical chart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create Parcel</td>
+<td>Fill Parcel Detail, Create Tracking Number, Calculate Weight, Update Parcel History</td>
+</tr>
+<tr>
+<td>Update Parcel Info</td>
+<td>Get Delivery Info, Update Delivery Info</td>
+</tr>
+<tr>
+<td>Bank@Post</td>
+<td>Get Transaction Confirmation, Get Cust. &amp; Receiver Acc</td>
+</tr>
+<tr>
+<td>Pay Online</td>
+<td>Get Bill Info, Get Customer Confirmation</td>
+</tr>
+<tr>
+<td>View History and Status</td>
+<td>View History Report, View Status Report</td>
+</tr>
+<tr>
+<td>Feedback</td>
+<td>Record Customer Comment, Get Customer Comment</td>
+</tr>
+<tr>
+<td><strong>โมดูลที่ใช้ร่วม</strong></td>
+<td><strong>Login</strong> และ <strong>Deduct Balance</strong> (มีเส้นจากหลายโมดูลมาที่กล่องเดียว)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>เทียบกับ analysis chart: ในขั้น analysis &quot;Log in&quot; ปรากฏแยกในหลายโมดูล (1.1, 2.1, 5.1, 6.1) และ &quot;deduct balance&quot; อยู่ทั้งใน 5.4 และ 6.4 แต่ในขั้น design เหลือกล่อง <strong>Login</strong> กับ <strong>Deduct Balance</strong> อย่างละกล่องเดียว</li>
+</ul>
+<p>โค้ดตัวอย่างในสไลด์ที่ได้จาก structure chart:</p>
+<pre><code>Create_Parcel() {
+  parcelDetail = Fill_Parcel_Detail();
+  trackNo = Create_Tracking_Number();
+  weight = Calculate_Weight(Parcel_Detail);
+  Update_Parcel_History(parcelDetail, trackNo, weight);
+}
+Fill_Parcel_Detail() {
+  If not login_status {
+    login();
+  }
+  …
+  return(parcelDetail);
+}
+</code></pre>
+<ul>
+<li><code>Create_Parcel()</code> เรียกโมดูลลูกทั้ง 4 ตัวตามลำดับ (ตรงกับกิ่งใน chart)</li>
+<li><code>Fill_Parcel_Detail()</code> เรียก <code>login()</code> ถ้ายังไม่ได้ login (นี่คือเส้นที่ลากไปหากล่อง Login)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในโค้ดสไลด์ <code>Calculate_Weight(Parcel_Detail)</code> ใช้ <code>Parcel_Detail</code> ขณะที่ตัวแปรที่ประกาศคือ <code>parcelDetail</code> เขียนไม่ตรงกัน</p>
+</blockquote>
+<hr />
+<h2 id="7-กระบวนการออกแบบและ-design-principles-สไลด์-4043">7. กระบวนการออกแบบและ design principles <sub>(สไลด์ 40–43)</sub></h2>
+<p><strong>แก่น: design เริ่มจาก SRS → สร้าง architecture ทางเลือกหลายแบบ → ประเมิน → ได้ design document โดยใช้ design principles เป็นเกณฑ์ตัดสินว่าแบบไหนดีกว่า</strong></p>
+<h3 id="71-software-engineering-design-process-สไลด์-40">7.1 Software Engineering Design Process <sub>(สไลด์ 40)</sub></h3>
+<ol>
+<li><strong>เริ่มจาก SRS</strong> (Software Requirements Specification)</li>
+<li><strong>สร้าง candidate architectures หลายแบบ</strong></li>
+<li><strong>ประเมิน candidates</strong></li>
+<li>ได้ <strong>design document</strong></li>
+</ol>
+<h3 id="72-design-principles-มีกลุ่มอะไรบ้าง-สไลด์-4143">7.2 Design principles มีกลุ่มอะไรบ้าง? <sub>(สไลด์ 41–43)</sub></h3>
+<p><strong>แก่น: design principles = ข้อความที่บอกว่าอะไรทำให้ design ดีขึ้น แบ่ง 2 กลุ่ม: Basic (ตอบโจทย์ stakeholder) และ Constructive (จากประสบการณ์)</strong></p>
+<p><img loading="lazy" src="diagrams/L9-12-design-principles.png" alt="ต้นไม้ Engineering Design Principles" /></p>
+<p><strong>Basic principles:</strong> คุณลักษณะที่ทำให้ design ตอบ <strong>ความต้องการของ stakeholder</strong> ได้ดีขึ้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลัก</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Feasibility</strong></td>
+<td>design ยอมรับได้ <strong>ก็ต่อเมื่อสร้างได้จริง</strong></td>
+</tr>
+<tr>
+<td><strong>Adequacy</strong></td>
+<td>ตอบความต้องการ stakeholder ได้มากกว่า (ภายใต้ข้อจำกัด) = ดีกว่า</td>
+</tr>
+<tr>
+<td><strong>Economy</strong></td>
+<td>สร้างได้ <strong>ถูกกว่า เร็วกว่า เสี่ยงน้อยกว่า</strong> = ดีกว่า</td>
+</tr>
+<tr>
+<td><strong>Changeability</strong></td>
+<td>ทำให้โปรแกรม <strong>แก้ไขง่ายกว่า</strong> = ดีกว่า</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Constructive principles:</strong> จาก <strong>ประสบการณ์</strong> ว่าลักษณะบางอย่างทำให้ design ดีขึ้น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลัก</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Modularity</strong></td>
+<td>design ที่ดีเป็น modular หลักกลุ่มนี้ใช้ประเมินว่าโมดูลดีไหม</td>
+</tr>
+<tr>
+<td><strong>Implementability</strong></td>
+<td>design ที่ดี <strong>สร้างง่าย</strong> หลักกลุ่มนี้ใช้ประเมินว่าจะ implement ง่ายไหม</td>
+</tr>
+<tr>
+<td><strong>Aesthetic</strong></td>
+<td>design ที่ดี <strong>สวยงาม</strong> หลักกลุ่มนี้ใช้เลือก design ที่สวย</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-modularity-ทำไมต้องแบ่งเป็นโมดูล-และแบ่งยังไงให้ดี-สไลด์-4448">8. Modularity: ทำไมต้องแบ่งเป็นโมดูล และแบ่งยังไงให้ดี? <sub>(สไลด์ 44–48)</sub></h2>
+<p><strong>แก่น: โปรแกรม modular ประกอบด้วยหน่วยที่ชัดเจน เรียบง่าย อิสระ และคุยกันผ่าน interface ที่ชัดเจน ทำให้เข้าใจ แก้ไข และทดสอบง่าย</strong></p>
+<h3 id="81-modular-program-คืออะไร-สไลด์-44">8.1 Modular program คืออะไร? <sub>(สไลด์ 44)</sub></h3>
+<p>นิยาม: <em>composed of <strong>well-defined, conceptually simple, and independent units</strong> that communicate through <strong>well-defined interfaces</strong></em></p>
+<p>ระดับของ &quot;หน่วย&quot; ในโปรแกรม (ใหญ่ → เล็ก):</p>
+<ul>
+<li>Sub-programs หรือ sub-systems</li>
+<li>Packages, compilation units</li>
+<li>Classes, functions</li>
+<li>Attributes, operations, blocks</li>
+<li>Lines of code</li>
+</ul>
+<h3 id="82-ข้อดีของ-modularity-สไลด์-45">8.2 ข้อดีของ modularity <sub>(สไลด์ 45)</sub></h3>
+<ul>
+<li>เข้าใจและอธิบายง่ายกว่า</li>
+<li>ทำเอกสารง่ายกว่า</li>
+<li>แก้ไขง่ายกว่า</li>
+<li>test และ debug ง่ายกว่า</li>
+<li>tune (ปรับแต่งประสิทธิภาพ) ง่ายกว่า</li>
+</ul>
+<h3 id="83-software-modularity-มีระดับไหนบ้าง-สไลด์-46">8.3 Software modularity มีระดับไหนบ้าง? <sub>(สไลด์ 46)</sub></h3>
+<p>รูปในสไลด์เป็นชั้นซ้อน (บนลงล่าง): <strong>Services → Components → Objects → Modules</strong></p>
+<h3 id="84-modularity-principles-มี-5-ข้อ-สไลด์-4749">8.4 Modularity principles มี 5 ข้อ <sub>(สไลด์ 47–49)</sub></h3>
+<p><strong>แก่น: โมดูลเล็ก ซ่อนรายละเอียดข้างใน ได้สิทธิ์เท่าที่ต้องใช้ cohesion สูง และ coupling ต่ำ</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลัก</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Small modules</strong></td>
+<td>โมดูล <strong>เล็ก</strong> ดีกว่า</td>
+</tr>
+<tr>
+<td><strong>Information hiding</strong></td>
+<td>แต่ละโมดูล <strong>ซ่อนรายละเอียดโครงสร้างและการทำงานภายใน</strong> จากโมดูลอื่น</td>
+</tr>
+<tr>
+<td><strong>Least privilege</strong></td>
+<td>โมดูล <strong>ไม่ควรเข้าถึง resource ที่ไม่จำเป็น</strong></td>
+</tr>
+<tr>
+<td><strong>Cohesion</strong></td>
+<td><strong>&quot;degree of relatedness&quot;</strong> ระดับความเกี่ยวข้องกัน <strong>ภายใน</strong> หน่วย/โมดูล/object/component</td>
+</tr>
+<tr>
+<td><strong>Coupling</strong></td>
+<td><strong>&quot;degree of dependence&quot;</strong> ระดับการพึ่งพากัน <strong>ระหว่าง</strong> หน่วย/โมดูล/component</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-cohesion-กับ-coupling-สไลด์-4955">9. Cohesion กับ Coupling <sub>(สไลด์ 49–55)</sub></h2>
+<p><strong>แก่น: cohesion = ของในโมดูลเกี่ยวกันแค่ไหน (ยิ่งสูงยิ่งดี) ส่วน coupling = โมดูลพึ่งกันแค่ไหน (ยิ่งต่ำยิ่งดี) เป้าหมายคือ high cohesion + low coupling</strong></p>
+<h3 id="91-cohesion-ดูยังไง-สไลด์-5051">9.1 Cohesion ดูยังไง? <sub>(สไลด์ 50–51)</sub></h3>
+<p><strong>แก่น: โมดูลที่ทำหน้าที่เดียวเรื่องเดียว = cohesion สูง ส่วนโมดูลที่ทำหลายเรื่องไม่เกี่ยวกัน = cohesion ต่ำ</strong></p>
+<p>ตัวอย่างในสไลด์ (class <code>Staff</code> 2 แบบ):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Low cohesion 👎</th>
+<th>High cohesion 👍</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>checkEmail()</code>, <code>sendEmail()</code>, <code>emailValidate()</code>, <code>printLetter()</code></td>
+<td>attribute <code>-salary</code>, <code>-email</code> + <code>setSalary()</code>, <code>getSalary()</code>, <code>setEmail()</code>, <code>getEmail()</code></td>
+</tr>
+<tr>
+<td>method หลายเรื่องที่ไม่ได้เกี่ยวกับข้อมูลของ Staff</td>
+<td>ทุก method จัดการข้อมูลของ Staff เอง</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ระดับ cohesion</strong> (สไลด์ 51) – <strong>&quot;The higher the better&quot;</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functional</strong> (สูงสุด)</td>
+<td>ทำ <strong>หน้าที่เดียว</strong> (performing 1 single function)</td>
+</tr>
+<tr>
+<td>⋮</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Coincidental</strong> (ต่ำสุด)</td>
+<td>ทำ <strong>มากกว่า 1 หน้าที่ที่ไม่เกี่ยวกัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="92-coupling-ดูยังไง-สไลด์-5254">9.2 Coupling ดูยังไง? <sub>(สไลด์ 52–54)</sub></h3>
+<p><strong>แก่น: coupling สูงทำให้แก้ระบบยาก เพราะแก้ component เดียวกระทบทุกตัวที่เชื่อมอยู่</strong></p>
+<p>รูปในสไลด์ 52 มี 3 แบบ:</p>
+<ul>
+<li><strong>No dependencies</strong> – กล่องไม่เชื่อมกันเลย</li>
+<li><strong>Loosely coupled</strong> – some dependencies มีลูกศรบ้าง</li>
+<li><strong>Highly coupled</strong> – many dependencies ลูกศรเต็มไปหมด</li>
+</ul>
+<blockquote class="callout">
+<p><em>&quot;High coupling makes modifying parts of the system difficult, e.g., modifying a component affects all the components to which the component is connected.&quot;</em></p>
+</blockquote>
+<p><strong>ระดับ coupling</strong> (สไลด์ 53) – <strong>&quot;The lower the better&quot;</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Content coupling</strong> (สูงสุด)</td>
+<td><strong>เข้าถึงข้อมูลภายใน หรือข้อมูลขั้นตอนการทำงาน</strong> ของอีกโมดูลโดยตรง</td>
+</tr>
+<tr>
+<td>⋮</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Data coupling</strong></td>
+<td>ส่ง <strong>เฉพาะข้อมูลที่จำเป็น</strong></td>
+</tr>
+<tr>
+<td><strong>No coupling</strong></td>
+<td>ในอุดมคติ แต่ทำจริงไม่ได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 53: ลูกศรเขียนว่า &quot;data coupling is lowest&quot; แต่ในรูปมี No Coupling อยู่ใต้ Data Coupling อีกช่อง และคำว่า &quot;Ideal, but not practical&quot; วางอยู่ข้าง Data Coupling ทั้งที่น่าจะหมายถึง No Coupling ถ้าเจอข้อสอบถามว่าระดับไหนต่ำสุด ให้เช็กกับอาจารย์</p>
+</blockquote>
+<p><strong>Data coupling</strong> (สไลด์ 54):</p>
+<ul>
+<li><strong>นิยาม:</strong> 2 component เป็น data coupled ถ้าส่ง data item ที่เป็นเนื้อเดียวกัน (homogeneous)</li>
+<li>ทุก argument เป็น <strong>argument ธรรมดา</strong> หรือ <strong>data structure ที่ใช้ทุก element</strong></li>
+<li><strong>ดี ถ้าทำได้</strong></li>
+<li>เขียน contract ได้ง่าย และแก้ component แยกกันได้อิสระ</li>
+</ul>
+<h3 id="93-cohesion-กับ-coupling-สัมพันธ์กันยังไง-สไลด์-55">9.3 Cohesion กับ Coupling สัมพันธ์กันยังไง? <sub>(สไลด์ 55)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ระดับ</th>
+<th>Cohesion</th>
+<th>Coupling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>High level</strong></td>
+<td><strong>Strong</strong></td>
+<td><strong>Tight</strong></td>
+</tr>
+<tr>
+<td><strong>Low level</strong></td>
+<td><strong>Weak</strong></td>
+<td><strong>Loose</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ: <strong>อยากได้ Strong cohesion + Loose coupling</strong> (cohesion ยิ่งสูงยิ่งดี ส่วน coupling ยิ่งต่ำยิ่งดี)</p>
+<p>เปรียบเหมือนทีมงาน: คนในทีมทำงานเรื่องเดียวกัน (cohesion สูง) และแต่ละทีมไม่ต้องรอกันตลอดเวลา (coupling ต่ำ)</p>
+</blockquote>
+<hr />
+<h2 id="10-แบบฝึกหัด-cohesion-coupling-สไลด์-5660">10. แบบฝึกหัด cohesion / coupling <sub>(สไลด์ 56–60)</sub></h2>
+<p><strong>แก่น: ดู 2 คำถาม: ข้างในโมดูลทำเรื่องเดียวไหม (cohesion) และโมดูลรู้ไส้ในหรือพึ่งกันมากไหม (coupling)</strong></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่มีเฉลย แนวคำตอบด้านล่างอิงนิยามในสไลด์ 50–55 ควรเช็กกับเฉลยในห้อง</p>
+</blockquote>
+<h3 id="101-เติมคำ-สไลด์-56">10.1 เติมคำ (สไลด์ 56)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อ</th>
+<th>สถานการณ์</th>
+<th>แนวคำตอบ</th>
+<th>อิงสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>โมดูลหนึ่งทำหลายหน้าที่ เช่น อ่านไฟล์ แสดงผล และคำนวณข้อมูล</td>
+<td><strong>Low cohesion</strong></td>
+<td>51: หลายหน้าที่ไม่เกี่ยวกัน</td>
+</tr>
+<tr>
+<td>2</td>
+<td>โมดูลหนึ่งเรียกใช้ตัวแปรภายในของอีกโมดูลโดยตรง</td>
+<td><strong>High coupling</strong> (content coupling)</td>
+<td>53: เข้าถึง internal data</td>
+</tr>
+<tr>
+<td>3</td>
+<td>แต่ละโมดูลมีหน้าที่เฉพาะและไม่ซ้ำซ้อนกัน</td>
+<td><strong>High cohesion</strong></td>
+<td>51</td>
+</tr>
+<tr>
+<td>4</td>
+<td>โมดูลต่าง ๆ ติดต่อกันผ่าน interface ที่ชัดเจน</td>
+<td><strong>Low coupling</strong></td>
+<td>44, 54</td>
+</tr>
+<tr>
+<td>5</td>
+<td>เปลี่ยนโค้ดในโมดูลหนึ่งแล้วมักต้องแก้โมดูลอื่นด้วย</td>
+<td><strong>High coupling</strong></td>
+<td>52</td>
+</tr>
+<tr>
+<td>6</td>
+<td>โค้ดของโมดูลเป็นเอกภาพ เน้นทำงานเดียวให้สมบูรณ์</td>
+<td><strong>High cohesion</strong> (functional)</td>
+<td>51</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-ข้อไหนออกแบบดีกว่า-และดีกว่าด้านไหน-สไลด์-5760">10.2 ข้อไหนออกแบบดีกว่า และดีกว่าด้านไหน? (สไลด์ 57–60)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สไลด์</th>
+<th>Design A</th>
+<th>Design B</th>
+<th>แนวคำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>57</td>
+<td>print routine รับ <strong>name, address, billing info</strong> เป็น argument แยกกัน</td>
+<td>print routine รับ <strong>customer data structure</strong> ก้อนเดียว</td>
+<td>ด้าน <strong>coupling</strong>: A ส่งเฉพาะข้อมูลที่ใช้ ตรงกับ <strong>data coupling</strong> (สไลด์ 53–54) ส่วน B จะเป็น data coupling ก็ต่อเมื่อใช้ทุก element ใน structure</td>
+</tr>
+<tr>
+<td>58</td>
+<td>2 โมดูลส่ง <strong>Customer ID / Customer Address</strong> ให้กันโดยตรง</td>
+<td>Module A และ B ใช้ <strong>global data variable</strong> ร่วมกัน</td>
+<td><strong>A ดีกว่าด้าน coupling</strong>: ส่งเฉพาะข้อมูลที่จำเป็น ส่วน B พึ่งตัวแปรกลางร่วมกัน แก้ตัวแปรนั้นแล้วกระทบทั้งคู่ (สไลด์ 52)</td>
+</tr>
+<tr>
+<td>59</td>
+<td><code>FileReader</code> ทำแค่ open / read / close file</td>
+<td><code>DataProcessor</code> อ่านไฟล์ + คำนวณ + ส่ง email</td>
+<td><strong>A ดีกว่าด้าน cohesion</strong>: ทำหน้าที่เดียว ส่วน B ทำหลายเรื่องไม่เกี่ยวกัน</td>
+</tr>
+<tr>
+<td>60</td>
+<td><code>Utility</code> เป็น catch-all: file, คำนวณ, UI, data processing</td>
+<td><code>EmployeeDatabase</code> ทุก method เกี่ยวกับข้อมูลพนักงาน</td>
+<td><strong>B ดีกว่าด้าน cohesion</strong>: ทุกอย่างเกี่ยวกับเรื่องเดียว ส่วน A ทำหลายเรื่องไม่เกี่ยวกัน (coincidental)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 57: ถ้า customer data structure ใน Design B ใช้ทุก element จริง ก็นับเป็น data coupling ได้ตามนิยามสไลด์ 54 ข้อนี้จึงตีความได้ 2 ทาง ควรฟังเฉลยในห้อง</p>
+</blockquote>
+<hr />
+<h2 id="11-implementability-กับ-aesthetic-principles-สไลด์-6163">11. Implementability กับ Aesthetic principles <sub>(สไลด์ 61–63)</sub></h2>
+<p><strong>แก่น: design ที่ดีต้องสร้างง่าย (เรียบง่าย ใช้ของเดิมซ้ำ และสร้างของที่ใช้ซ้ำได้) และต้องสวย (เรียบ สม่ำเสมอ สมดุล ขนาดพอดี)</strong></p>
+<h3 id="111-implementability-principles-สไลด์-61">11.1 Implementability principles <sub>(สไลด์ 61)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลัก</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Simplicity</strong></td>
+<td>design ที่ <strong>ง่ายกว่า</strong> ดีกว่า</td>
+</tr>
+<tr>
+<td><strong>Design with reuse</strong></td>
+<td>design ที่ <strong>นำของที่มีอยู่แล้วมาใช้ซ้ำ</strong> ดีกว่า</td>
+</tr>
+<tr>
+<td><strong>Design for reuse</strong></td>
+<td>design ที่ <strong>สร้างของที่ใช้ซ้ำได้</strong> ดีกว่า</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 with = <strong>ใช้ของเก่า</strong> | for = <strong>ทำของใหม่ให้คนอื่นใช้ต่อ</strong></p>
+</blockquote>
+<h3 id="112-aesthetic-principles-สไลด์-62">11.2 Aesthetic principles <sub>(สไลด์ 62)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลัก</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Beauty</strong></td>
+<td>เรียบง่าย ชัดเจน ไม่ซับซ้อนเกินจำเป็น ไม่ซ้ำซ้อน ไม่มีโครงสร้างที่ดูขัด ๆ หรือ logic ที่ซับซ้อนเกิน <strong>ไม่ได้หมายถึง user interface</strong></td>
+</tr>
+<tr>
+<td><strong>Symmetry</strong></td>
+<td>สม่ำเสมอทั้งระบบ <strong>component ที่คล้ายกันออกแบบคล้ายกัน</strong></td>
+</tr>
+<tr>
+<td><strong>Balance</strong></td>
+<td><strong>กระจายหน้าที่และความซับซ้อนเท่า ๆ กัน</strong> หลีกเลี่ยง <strong>&quot;God classes&quot;</strong> (class เดียวทำทุกอย่าง)</td>
+</tr>
+<tr>
+<td><strong>Proportion</strong></td>
+<td><strong>ขนาดเหมาะกับหน้าที่</strong> ไม่ใหญ่เกิน (ซับซ้อน) และไม่เล็กเกิน (กระจัดกระจาย)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ Beauty ในที่นี้คือความสวยของ <strong>design/โค้ด</strong> ไม่ใช่ความสวยของหน้าจอ</p>
+</blockquote>
+<h3 id="113-ตัวอย่าง-beauty-principle-สไลด์-63">11.3 ตัวอย่าง Beauty principle <sub>(สไลด์ 63)</sub></h3>
+<p>แบบที่ไม่ดี: if-else ตาม string</p>
+<pre><code class="language-java">public int calc(int a, int b, String op) {
+    if (op.equals(&quot;add&quot;)) {
+        return a + b;
+    } else if (op.equals(&quot;sub&quot;)) {
+        return a - b;
+    } else if (op.equals(&quot;mul&quot;)) {
+        return a * b;
+    } else {
+        return 0;
+    }
+}
+</code></pre>
+<p>→ <strong>Hardcoded logic, Not extensible, Low readability</strong></p>
+<p>แบบที่ดี: แยกแต่ละ operation เป็น class ที่ implement interface เดียวกัน</p>
+<pre><code class="language-java">interface Operation {
+    int execute(int a, int b);
+}
+class Add implements Operation {
+    public int execute(int a, int b) { return a + b; }
+}
+class Multiply implements Operation {
+    public int execute(int a, int b) { return a * b; }
+}
+</code></pre>
+<p>→ <strong>Simple, Extensible, Clear separation of concerns</strong></p>
+<ul>
+<li>เพิ่ม operation ใหม่ = เพิ่ม class ใหม่ ไม่ต้องแก้ <code>if-else</code> เดิม (นี่คือความหมายของ extensible)</li>
+</ul>
+<hr />
+<h2 id="12-หลักการต่าง-ๆ-เสริมกันหรือขัดกัน-สไลด์-64">12. หลักการต่าง ๆ เสริมกันหรือขัดกัน? <sub>(สไลด์ 64)</sub></h2>
+<p><strong>แก่น: บางคู่เสริมกัน บางคู่ขัดกัน และจะเสริมหรือขัดขึ้นกับสถานการณ์</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>มักเสริมกัน ✅</th>
+<th>มักขัดกัน ⚔️</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cohesion, Coupling, Information Hiding</td>
+<td>Simplicity ↔ Design for Reuse</td>
+</tr>
+<tr>
+<td>Simplicity, Beauty</td>
+<td>Small Modules ↔ Design for Reuse</td>
+</tr>
+<tr>
+<td>Simplicity, Small Modules</td>
+<td>Cohesion ↔ Small Modules</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>จะเสริมหรือขัด ขึ้นอยู่กับกรณี</strong> (depend on the case at hand)</li>
+</ul>
+<hr />
+<h2 id="13-summary-ของบท-สไลด์-65">13. Summary ของบท <sub>(สไลด์ 65)</sub></h2>
+<p><strong>แก่น: design คือการใช้ principles, concepts, practices สร้าง model ที่ทำได้ครบทุก requirement ของลูกค้า architecture ให้ภาพรวม ส่วน design principles บอกว่าควรออกแบบ component ยังไง</strong></p>
+<ul>
+<li>เป้าหมายของ software design: ใช้ <strong>principles, concepts, practices</strong> เพื่อพัฒนาระบบ <strong>คุณภาพสูง</strong> โดยสร้าง <strong>model ของซอฟต์แวร์ที่ implement requirement ของลูกค้าได้ครบ</strong></li>
+<li><strong>Software architecture</strong> ให้ <strong>holistic view</strong> (ภาพรวม) ของระบบ: โครงสร้างและการจัดวาง component, property ของแต่ละตัว และการเชื่อมต่อระหว่างกัน</li>
+<li><strong>Engineering design principles</strong> เป็นแนวทางออกแบบ component</li>
+</ul>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architectural design</td>
+<td>ออกแบบส่วนหลัก หน้าที่ property interface และความสัมพันธ์</td>
+<td>ผังบ้าน</td>
+</tr>
+<tr>
+<td>Detailed design</td>
+<td>ออกแบบข้างใน component: class, algorithm, data structure</td>
+<td>แบบละเอียดแต่ละห้อง</td>
+</tr>
+<tr>
+<td>Architectural style</td>
+<td>รูปแบบโครงสร้างระบบ เช่น layered, client-server</td>
+<td>แบบสะพาน</td>
+</tr>
+<tr>
+<td>Pipe / Filter</td>
+<td>pipe = ท่อส่งข้อมูล, filter = ตัวแปลงข้อมูล</td>
+<td>สายพาน + สถานี</td>
+</tr>
+<tr>
+<td>Central repository</td>
+<td>ที่เก็บข้อมูลกลางของ data-centered</td>
+<td>โกดังกลาง</td>
+</tr>
+<tr>
+<td>Microservice</td>
+<td>service เล็ก รันใน process ตัวเอง deploy แยก</td>
+<td>ร้านเล็กหลายร้าน</td>
+</tr>
+<tr>
+<td>Structured design</td>
+<td>map DFD → program architecture (structure chart)</td>
+<td>DFD → ผังโมดูล</td>
+</tr>
+<tr>
+<td>PSPEC / STD</td>
+<td>process specification / state transition diagram ใช้บอกเนื้อในโมดูล</td>
+<td></td>
+</tr>
+<tr>
+<td>Structure chart</td>
+<td>แผนภาพลำดับชั้นของโมดูล</td>
+<td>ผังองค์กรของโค้ด</td>
+</tr>
+<tr>
+<td>Transform flow</td>
+<td>ข้อมูลไหลผ่านการแปลงเป็นสาย</td>
+<td>สายตรง</td>
+</tr>
+<tr>
+<td>Transaction flow</td>
+<td>มี transaction center แยกไปหลาย action path</td>
+<td>วงเวียน</td>
+</tr>
+<tr>
+<td>Factoring</td>
+<td>แตกโมดูลบน (ตัดสินใจ) → ล่าง (worker)</td>
+<td>ผู้จัดการ → พนักงาน</td>
+</tr>
+<tr>
+<td>Logical module</td>
+<td>business activity (ทำอะไร)</td>
+<td>&quot;Login&quot;</td>
+</tr>
+<tr>
+<td>Physical module</td>
+<td>กระบวนการจริงที่ใช้ทำ (ทำยังไง)</td>
+<td>&quot;2FA 2 server&quot;</td>
+</tr>
+<tr>
+<td>Modularity</td>
+<td>แบ่งเป็นหน่วยอิสระ คุยผ่าน interface ชัด</td>
+<td>ตัวต่อเลโก้</td>
+</tr>
+<tr>
+<td>Information hiding</td>
+<td>ซ่อนไส้ในจากโมดูลอื่น</td>
+<td></td>
+</tr>
+<tr>
+<td>Least privilege</td>
+<td>เข้าถึงเฉพาะ resource ที่จำเป็น</td>
+<td></td>
+</tr>
+<tr>
+<td>Cohesion</td>
+<td>degree of relatedness ภายในโมดูล</td>
+<td><strong>ยิ่งสูงยิ่งดี</strong></td>
+</tr>
+<tr>
+<td>Coupling</td>
+<td>degree of dependence ระหว่างโมดูล</td>
+<td><strong>ยิ่งต่ำยิ่งดี</strong></td>
+</tr>
+<tr>
+<td>Functional cohesion</td>
+<td>ทำหน้าที่เดียว (สูงสุด)</td>
+<td></td>
+</tr>
+<tr>
+<td>Coincidental cohesion</td>
+<td>ทำหลายหน้าที่ไม่เกี่ยวกัน (ต่ำสุด)</td>
+<td></td>
+</tr>
+<tr>
+<td>Content coupling</td>
+<td>เข้าถึงข้อมูลภายในของอีกโมดูล (สูงสุด)</td>
+<td></td>
+</tr>
+<tr>
+<td>Data coupling</td>
+<td>ส่งเฉพาะข้อมูลที่จำเป็น</td>
+<td></td>
+</tr>
+<tr>
+<td>God class</td>
+<td>class เดียวทำทุกอย่าง (ผิดหลัก balance)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>Architectural vs Detailed:</strong> แยกให้ออกจากโจทย์ (สไลด์ 12–13) ถ้าพูดถึง algorithm/data structure/class = detailed ถ้าพูดถึงส่วนหลัก/คุณสมบัติทั้งระบบ = architectural</li>
+<li>⭐ <strong>6 architectural styles</strong> พร้อม pros/cons โดยเฉพาะ: pipe&amp;filter ไม่เหมาะกับ interactive, layered ชั้นเยอะแล้วช้า, client-server ที่ server ล้นได้, data-centered ที่แก้ data model แพง</li>
+<li>⭐ <strong>Factoring:</strong> บน = decision-making, ล่าง = worker (input/computation/output), กลาง = control บ้าง</li>
+<li>⭐ <strong>First-level factoring</strong> = input / processing / output controller</li>
+<li>⭐ <strong>Design principles:</strong> Basic 4 (Feasibility, Adequacy, Economy, Changeability) / Constructive 3 (Modularity, Implementability, Aesthetic)</li>
+<li>⭐ <strong>Modularity principles 5:</strong> small modules, information hiding, least privilege, cohesion, coupling</li>
+<li>⭐ <strong>Cohesion สูง (functional) + coupling ต่ำ (data)</strong> = ดี</li>
+<li>⭐ <strong>Aesthetic 4:</strong> beauty (ไม่ใช่ UI), symmetry, balance (ไม่มี God class), proportion</li>
+<li>คู่ที่ขัดกัน: Simplicity ↔ Design for reuse, Small modules ↔ Design for reuse, Cohesion ↔ Small modules</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architectural design</td>
+<td>Detailed design</td>
+<td>ภาพใหญ่ระดับระบบ vs ข้างใน component</td>
+</tr>
+<tr>
+<td>Cohesion</td>
+<td>Coupling</td>
+<td>ความเกี่ยวกัน <strong>ภายใน</strong> โมดูล (สูงดี) vs การพึ่งกัน <strong>ระหว่าง</strong> โมดูล (ต่ำดี)</td>
+</tr>
+<tr>
+<td>Strong / Weak</td>
+<td>Tight / Loose</td>
+<td>ใช้กับ cohesion vs ใช้กับ coupling</td>
+</tr>
+<tr>
+<td>Functional cohesion</td>
+<td>Coincidental cohesion</td>
+<td>หน้าที่เดียว (ดีสุด) vs หลายหน้าที่ไม่เกี่ยวกัน (แย่สุด)</td>
+</tr>
+<tr>
+<td>Content coupling</td>
+<td>Data coupling</td>
+<td>เข้าถึงไส้ในโมดูลอื่น (แย่สุด) vs ส่งเฉพาะข้อมูลจำเป็น (ดี)</td>
+</tr>
+<tr>
+<td>Transform flow</td>
+<td>Transaction flow</td>
+<td>ไหลเป็นสาย vs มี transaction center แตกหลายทาง</td>
+</tr>
+<tr>
+<td>Logical module</td>
+<td>Physical module</td>
+<td>ทำอะไร (business activity) vs ทำยังไง (physical process)</td>
+</tr>
+<tr>
+<td>Design with reuse</td>
+<td>Design for reuse</td>
+<td>ใช้ของเดิมซ้ำ vs สร้างของให้ใช้ซ้ำได้</td>
+</tr>
+<tr>
+<td>Layered</td>
+<td>Call and return</td>
+<td>ชั้นพึ่งเฉพาะชั้นล่าง vs main เรียก component ย่อยเป็นลำดับชั้น</td>
+</tr>
+<tr>
+<td>Basic principles</td>
+<td>Constructive principles</td>
+<td>ตอบความต้องการ stakeholder vs ลักษณะที่ดีจากประสบการณ์</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l8/index.html"><small>← บทก่อนหน้า</small><span>Lecture 8 – User Interface Design</span></a><a class="pg next" href="../l10/index.html"><small>บทถัดไป →</small><span>Lecture 10 – Implementation &amp; Code Review</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 13 – Unit Testing, Integration Testing, and System Testing · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-testing-phases-สไลด์-45">1. Testing &amp; phases (สไลด์ 4–5)</a></li><li><a href="#2-good-unit-test-สไลด์-6">2. Good unit test (สไลด์ 6)</a></li><li><a href="#3-junit-สไลด์-714">3. JUnit (สไลด์ 7–14)</a></li><li><a href="#4-integration-สไลด์-1517">4. Integration (สไลด์ 15–17)</a></li><li><a href="#5-system-สไลด์-1819">5. System (สไลด์ 18–19)</a></li><li><a href="#6-เอกสาร-สไลด์-2022">6. เอกสาร (สไลด์ 20–22)</a></li><li><a href="#7-regression-สไลด์-2324">7. Regression (สไลด์ 23–24)</a></li><li><a href="#8-quality-model-usability-สไลด์-2527">8. Quality model &amp; usability (สไลด์ 25–27)</a></li><li><a href="#9-usability-testing-สไลด์-2830">9. Usability testing (สไลด์ 28–30)</a></li><li><a href="#10-best-practices-สไลด์-31">10. Best practices (สไลด์ 31)</a></li><li><a href="#11-exercises-สไลด์-3340">11. Exercises (สไลด์ 33–40)</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L13</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 13 – Unit Testing, Integration Testing, and System Testing</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a></div>
+      <article class="prose"><h2 id="1-testing-phases-สไลด์-45">1. Testing &amp; phases (สไลด์ 4–5)</h2>
+<ul>
+<li>testing = หาว่าโค้ด (method, class, program) ทำงานตามที่ตั้งใจ | ประเมิน correctness, completeness, quality | หา bug เร็ว ลดต้นทุน | เพิ่มความมั่นใจ</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>⭐ Phase</th>
+<th>ทดสอบ</th>
+<th>ต้นทุน / ความถี่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>ส่วนเล็กสุดที่ test ได้</td>
+<td>เร็วสุด ถูกสุด <strong>ทำบ่อย</strong></td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>กลุ่ม module</td>
+<td>ปานกลาง รันน้อยลง</td>
+</tr>
+<tr>
+<td>System</td>
+<td>ระบบครบ เทียบ requirement</td>
+<td><strong>แพงสุด รันไม่บ่อย</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="2-good-unit-test-สไลด์-6">2. Good unit test (สไลด์ 6)</h2>
+<ul>
+<li>⭐ ทีละ function (ไม่พึ่งส่วนอื่น) | <strong>รันเร็ว</strong> | <strong>อัตโนมัติใน CI/CD</strong> | <strong>ผลเหมือนเดิมทุกครั้ง</strong></li>
+</ul>
+<h2 id="3-junit-สไลด์-714">3. JUnit (สไลด์ 7–14)</h2>
+<ul>
+<li>กลางยุค 90 | <strong>มาตรฐาน TDD ใน Java</strong> | JAR ตอน compile | annotation + assert + test runners | Eclipse, Ant, Maven</li>
+<li>tools อื่น: Jmockit, Cactus, Cobertura, Dbunit, dJUnit (&gt; 30)</li>
+<li>⭐ Checklist: Initialize → Write test cases → Write test suite → Execute test suite</li>
+<li>⭐ <strong><code>@Test</code></strong> = method นี้รันเป็น test ได้</li>
+<li>⭐ Assert: <strong>assertEquals</strong> (ค่าเท่า) | assertTrue | assertFalse | assertNotNull | assertNull | <strong>assertSame</strong> (object เดียวกัน) | assertNotSame | assertArrayEquals</li>
+<li>ตัวอย่าง Student: <code>getDisplayName()</code> = first + &quot; &quot; + last → test Space ✓ | test Nospace ✗</li>
+</ul>
+<h2 id="4-integration-สไลด์-1517">4. Integration (สไลด์ 15–17)</h2>
+<ul>
+<li>⭐ ทดสอบ interaction → หาปัญหา <strong>interface, data flow, dependency</strong> | เช่น function ที่พึ่ง DB | สะพาน unit ↔ system</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Unit</th>
+<th>Integration</th>
+<th>System</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spec</td>
+<td>module interface</td>
+<td>interface specs, module breakdown</td>
+<td>requirements spec</td>
+</tr>
+<tr>
+<td>Visible</td>
+<td>coding details</td>
+<td>architecture</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Scaffolding</td>
+<td>some</td>
+<td><strong>often extensive</strong></td>
+<td>some</td>
+</tr>
+<tr>
+<td>Faults in</td>
+<td>modules</td>
+<td><strong>interactions, compatibility</strong></td>
+<td>system functionality</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ unit = รากฐาน (controllability + visibility สูงสุด) | <strong>integration ทดแทน unit ไม่ได้</strong> | เจอ module fault ตอน integration = unit test ไม่พอ | fault ที่ interface ระหว่าง module ที่ถูก = ปัญหา module breakdown / interface spec</li>
+</ul>
+<h2 id="5-system-สไลด์-1819">5. System (สไลด์ 18–19)</h2>
+<ul>
+<li>⭐ ระบบครบ ตรง <strong>functional + non-functional req</strong> ในสถานการณ์จริง</li>
+<li>⭐ Functional | Non-functional (<strong>performance, usability, reliability</strong>) | Security</li>
+<li>V&amp;V: Requirements↔Acceptance (validation) | HLD↔System, DD↔Integration, Coding↔Unit (verification)</li>
+</ul>
+<h2 id="6-เอกสาร-สไลด์-2022">6. เอกสาร (สไลด์ 20–22)</h2>
+<ul>
+<li>Test case: ID, priority, module, title, description, designed/executed by/date, pre-conditions, dependencies, steps, data, expected, actual, status, post-conditions</li>
+<li>Test report: passed/failed → executed, pending/in progress/blocked → planned | ต่อ function: % executed, % passed, pending, priority</li>
+<li>⭐ <strong>RTM</strong>: Business Req → Functional Req → Test Case ID (เช่น BR_1 → FR_1 → TC#001, #002)</li>
+</ul>
+<h2 id="7-regression-สไลด์-2324">7. Regression (สไลด์ 23–24)</h2>
+<ul>
+<li>⭐ เช็กว่าการแก้ล่าสุด <strong>ไม่สร้าง bug ใหม่/ไม่ทำของเดิมพัง</strong></li>
+<li>⭐ ใช้: after bug fixes | after new features/enhancement | after performance improvements | routine maintenance</li>
+</ul>
+<h2 id="8-quality-model-usability-สไลด์-2527">8. Quality model &amp; usability (สไลด์ 25–27)</h2>
+<ul>
+<li>⭐ 8 ด้าน: Functional Suitability | Performance Efficiency | Compatibility | Usability | Reliability | Security | Maintainability | Portability</li>
+<li>Usability = ใช้ง่ายและมีประสิทธิภาพแค่ไหน → ถูกนำไปใช้มากขึ้น + productivity</li>
+<li>⭐ 5 components: <strong>Learnability</strong> (ทำ task ได้ง่าย) | <strong>Efficiency</strong> (เร็ว) | <strong>Memorability</strong> (กลับมาคล่อง) | <strong>Errors</strong> (ผิดกี่ครั้ง) | <strong>Satisfaction</strong> (รู้สึกดี)</li>
+</ul>
+<h2 id="9-usability-testing-สไลด์-2830">9. Usability testing (สไลด์ 28–30)</h2>
+<ul>
+<li>ทดสอบกับ <strong>ผู้ใช้ในอนาคต</strong> → ตรงเป้า/requirement ไหม</li>
+<li>⭐ <strong>Task-based</strong> (หา pain points) | <strong>A/B</strong> (เทียบ 2 design) | <strong>Surveys/Questionnaires</strong></li>
+<li>Performance measurement (เชิงปริมาณ): เวลาทำ task, จำนวน task ในเวลาจำกัด, success:error, เวลากู้ error, จำนวน error, feature ที่ไม่เคยใช้, การเปิด manual/help</li>
+</ul>
+<h2 id="10-best-practices-สไลด์-31">10. Best practices (สไลด์ 31)</h2>
+<ul>
+<li>⭐ modular &amp; isolated | test ใน CI/CD | test สม่ำเสมอ | <strong>simulate dependencies</strong> | coverage ที่มีความหมาย <strong>ไม่ใช่ไล่ 100%</strong></li>
+</ul>
+<h2 id="11-exercises-สไลด์-3340">11. Exercises (สไลด์ 33–40)</h2>
+<ul>
+<li>Ex5 BVA ตั๋ว: reduced −1 Error | 0, 11 Free | 12, 17 → 100 | 18, 60 → 200 | 61 → 100 (⚠️ class &quot;&gt; 61&quot;)</li>
+<li>⭐ Ex6 ECP ส่วนลด: ≤0 (−5) invalid | 1–500 (450) ไม่ลด | 501–999 (658) 5% | 1,000–4,999 (2,599) 10% | 5,000–100,000 (45,100) 20% | &gt;100,000 (111,111) invalid</li>
+<li>⭐ Ex7 BVA ส่วนลด reduced: −1 | 1, 500 | 501, 999 | 1000, 4999 | 5000, 100000 | 100001</li>
+<li>⚠️ เฉลย Ex6–7 ขัดโจทย์ที่ 500 (โจทย์ &lt; 500 ไม่ลด, 500–999 ลด 5%) และ 5,000 (โจทย์ &gt; 5,000)</li>
+<li>Ex8 Zoo <code>get_ticket_price</code>: 4 decision → <strong>5 independent paths</strong> (สไลด์ไม่มีเฉลย คิดตามสูตร L12)</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>Integration</td>
+<td>module เดียว vs interaction</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>System</td>
+<td>interaction vs system functionality</td>
+</tr>
+<tr>
+<td>Functional</td>
+<td>Non-functional</td>
+<td>ทำ function ได้ vs performance/usability/reliability</td>
+</tr>
+<tr>
+<td>assertEquals</td>
+<td>assertSame</td>
+<td>ค่าเท่า vs object เดียวกัน</td>
+</tr>
+<tr>
+<td>Test case</td>
+<td>Test report</td>
+<td>test 1 อัน vs สรุปทั้งรอบ</td>
+</tr>
+<tr>
+<td>Learnability</td>
+<td>Memorability</td>
+<td>ครั้งแรก vs กลับมาใช้ใหม่</td>
+</tr>
+<tr>
+<td>Usability Efficiency</td>
+<td>Performance Efficiency</td>
+<td>ผู้ใช้เร็ว vs ระบบใช้ทรัพยากร</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l12/short.html"><small>← บทก่อนหน้า</small><span>Lecture 12 – Testing</span></a><a class="pg next" href="../l14/short.html"><small>บทถัดไป →</small><span>Lecture 14 – Agentic Software Engineering</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

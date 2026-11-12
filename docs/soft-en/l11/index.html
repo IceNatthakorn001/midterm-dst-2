@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 11 – Version Control System · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-software-configuration-management-cm-คืออะไร-สไลด์-45">1. Software Configuration Management (CM) คืออะไร? (สไลด์ 4–5)</a></li><li><a href="#2-configuration-item-คืออะไร-สไลด์-6">2. Configuration item คืออะไร? (สไลด์ 6)</a></li><li><a href="#3-ระบุเวอร์ชันยังไง-version-identification-สไลด์-7">3. ระบุเวอร์ชันยังไง? (Version identification) (สไลด์ 7)</a></li><li><a href="#4-ทำไมต้องมี-version-control-system-สไลด์-811">4. ทำไมต้องมี Version Control System? (สไลด์ 8–11)</a></li><li><a href="#5-cvs-subversion-git-ต่างกันยังไง-สไลด์-1214">5. CVS, Subversion, Git ต่างกันยังไง? (สไลด์ 12–14)</a></li><li><a href="#6-git-และ-distributed-version-control-สไลด์-1516">6. Git และ distributed version control (สไลด์ 15–16)</a></li><li><a href="#7-staging-area-และ-file-status-lifecycle-สไลด์-1719">7. Staging area และ file status lifecycle (สไลด์ 17–19)</a></li><li><a href="#8-add-commit-pull-push-ทำอะไร-สไลด์-2023">8. Add, Commit, Pull, Push ทำอะไร? (สไลด์ 20–23)</a></li><li><a href="#9-decentralized-but-centralized-สไลด์-24">9. Decentralized but Centralized (สไลด์ 24)</a></li><li><a href="#10-branch-ใช้เมื่อไหร่-และควรระวังอะไร-สไลด์-2527">10. Branch: ใช้เมื่อไหร่ และควรระวังอะไร? (สไลด์ 25–27)</a></li><li><a href="#11-git-branching-model-สไลด์-2833-จาก-nviecom-a-successful-git-branching-model">11. Git Branching Model (สไลด์ 28–33, จาก nvie.com &quot;A successful Git branching model&quot;)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L11</div>
+      <h1 class="lesson-title">Lecture 11 – Version Control System</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> L10 บอกว่า implementation มีขั้น <strong>configuration management</strong> บทนี้ลงรายละเอียดเรื่องนั้น: <strong>ควบคุมการเปลี่ยนแปลง</strong> ของซอฟต์แวร์ และเครื่องมือหลักคือ <strong>Version Control System (VCS)</strong></p>
+<p>เนื้อหามี 2 ส่วนตาม Topics: (1) <strong>Software configuration management</strong> – configuration item, version identification (2) <strong>Version control</strong> – จาก CVS/Subversion สู่ <strong>Git</strong>: staging area, add/commit/pull/push, branch และ <strong>Git branching model</strong> (master, develop, feature, release, hotfix)</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L11-00-overview.png" alt="แผนผังภาพรวม Lecture 11" /></p>
+<h2 id="1-software-configuration-management-cm-คืออะไร-สไลด์-45">1. Software Configuration Management (CM) คืออะไร? <sub>(สไลด์ 4–5)</sub></h2>
+<p><strong>แก่น: CM = ศาสตร์และเทคนิคในการเริ่ม ประเมิน และควบคุมการเปลี่ยนแปลงของผลิตภัณฑ์ซอฟต์แวร์ ทั้งระหว่างและหลังกระบวนการพัฒนา</strong></p>
+<ul>
+<li>นิยาม: <em>encompasses the disciplines and techniques of <strong>initiating, evaluating and controlling change</strong> to software products <strong>during and after</strong> the software engineering process</em></li>
+<li><strong>มาตรฐาน:</strong>
+<ul>
+<li><strong>IEEE 828:</strong> Software Configuration Management Plans</li>
+<li><strong>IEEE 1042:</strong> Guide to Software Configuration Management</li>
+</ul>
+</li>
+</ul>
+<p><strong>Configuration management process</strong> (สไลด์ 5, Elliando Dias 2008): CM เป็นกระบวนการที่เชื่อมกับอีก 2 กลุ่มกระบวนการ</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ทิศทาง</th>
+<th>ข้อมูลที่ไหล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CM ↔ <strong>Project Management Processes</strong> (Project Formulation, Project Planning, Project Startup, Project Monitoring &amp; Control, Project Closeout)</td>
+<td>รับ <strong>Planning Data</strong> / ส่ง <strong>CM Plan</strong>, <strong>Status reports; audit results</strong></td>
+</tr>
+<tr>
+<td><strong>Product Development Processes</strong> (Systems Engineering → Requirements Engineering → Design → Implementation → Testing → Product Release → Sustaining Engineering &amp; Maintenance) → CM</td>
+<td>ส่ง <strong>Work products; change requests</strong> เข้า CM</td>
+</tr>
+<tr>
+<td>CM → Product Development Processes</td>
+<td>ส่ง <strong>Controlled work products; approved change requests</strong> กลับ</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต: ทุกขั้นของการพัฒนา (ไม่ใช่แค่ implementation) ส่ง work product และ change request ผ่าน CM</p>
+</blockquote>
+<hr />
+<h2 id="2-configuration-item-คืออะไร-สไลด์-6">2. Configuration item คืออะไร? <sub>(สไลด์ 6)</sub></h2>
+<p><strong>แก่น: configuration item = อะไรก็ตามที่เปลี่ยนแปลงได้และเราต้องการติดตาม/ควบคุม ไม่ใช่แค่โค้ด แต่รวมเอกสาร test และ config ของระบบ/ฮาร์ดแวร์ด้วย</strong></p>
+<ul>
+<li>ซอฟต์แวร์ เอกสาร ฮาร์ดแวร์ หรือ work product <strong>ที่เปลี่ยนแปลงได้</strong> = configuration item</li>
+<li>คือ &quot;สิ่งของ&quot; ที่เรา <strong>อยากติดตามและควบคุม</strong></li>
+<li><strong>แทบทุกอย่าง</strong> เป็น configuration item ได้ ไม่ใช่แค่โค้ด:
+<ul>
+<li>เอกสารทุกประเภทตามการพัฒนา</li>
+<li>code file ทุกชนิด</li>
+<li>drivers for tests</li>
+<li>เอกสาร requirement, analysis, design</li>
+<li>คู่มือผู้ใช้ / คู่มือนักพัฒนา</li>
+<li>system configurations (เช่น เวอร์ชันของ compiler ที่ใช้)</li>
+<li>hardware configuration items (CPU, ความถี่ bus)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="3-ระบุเวอร์ชันยังไง-version-identification-สไลด์-7">3. ระบุเวอร์ชันยังไง? (Version identification) <sub>(สไลด์ 7)</sub></h2>
+<p><strong>แก่น: ต้องมีวิธีระบุเวอร์ชันของ component ที่ไม่กำกวม มี 2 เทคนิค: ใส่เลขเวอร์ชัน (ง่ายแต่ชื่อไม่สื่อความหมาย) และระบุด้วย attribute</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เทคนิค</th>
+<th>วิธี</th>
+<th>ตัวอย่าง</th>
+<th>หมายเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Version numbering</strong></td>
+<td>ตั้งชื่อเรียงต่อกันเป็นเส้นตรง (linear derivation)</td>
+<td>V1, V1.1, V1.2, V2.1, V2.2</td>
+<td><strong>ชื่อไม่สื่อความหมาย</strong></td>
+</tr>
+<tr>
+<td><strong>2. Attribute-based identification</strong></td>
+<td>ผูก attribute หลายตัวกับเวอร์ชัน ใช้ <strong>ชุดของ attribute</strong> ระบุเวอร์ชัน</td>
+<td>Date, Creator, Programming Language, Customer, Status</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-ทำไมต้องมี-version-control-system-สไลด์-811">4. ทำไมต้องมี Version Control System? <sub>(สไลด์ 8–11)</sub></h2>
+<p><strong>แก่น: ถ้าไม่มี VCS จะหลงว่าไฟล์ไหนคือล่าสุด VCS เป็นส่วนหนึ่งของ CM มีจุดประสงค์ 3 ข้อ: ย้อนกลับไป configuration เก่าได้ ประสานการเปลี่ยนแปลง และระบุเวอร์ชัน/component</strong></p>
+<ul>
+<li><strong>สไลด์ 9 &quot;Losing track of your changes?&quot;</strong> ภาพประกอบ:
+<ul>
+<li>การ์ตูน &quot;FINAL.doc&quot; ที่ชื่อไฟล์ค่อย ๆ กลายเป็น <code>FINAL_rev.2.doc</code> → … → <code>FINAL_rev.22.comments49.corrections.10.#@$%WHYDID ICOMETOGRADSCHOOL????.doc</code></li>
+<li>หน้าต่างไฟล์ที่มี <code>final-project.doc</code>, <code>final-project-v2.doc</code>, <code>final-project-v2-update.doc</code>, <code>final-project-v2-FINAL.doc</code>, <code>final-project-v2-FINALFINAL.doc</code></li>
+<li>ภาพจรวดระเบิดจาก NASA</li>
+</ul>
+</li>
+<li><strong>VCS เป็น component หนึ่งใน configuration management</strong></li>
+<li><strong>Purposes:</strong>
+<ol>
+<li><strong>Restoring previous configurations</strong> – ย้อนกลับไปสถานะเก่าได้</li>
+<li><strong>Coordinating changes</strong> – ประสานการแก้ไขของหลายคน</li>
+<li><strong>Identifying versions and components</strong> – รู้ว่าเวอร์ชันไหนประกอบด้วยอะไร</li>
+</ol>
+</li>
+<li><strong>สไลด์ 11:</strong> VCS บันทึกโปรเจกต์ตามเวลา: v-0.1 (24 Feb'17) สร้างไฟล์ใหม่ → v-0.2 (20 Mar'17) สร้างไฟล์ใหม่ + แก้ไฟล์เดิม → v-0.3 (07 Apr'17) สร้างและแก้อีกหลายไฟล์ VCS ติดตามสถานะ <strong>Created / Modified</strong> ของแต่ละเวอร์ชัน</li>
+</ul>
+<hr />
+<h2 id="5-cvs-subversion-git-ต่างกันยังไง-สไลด์-1214">5. CVS, Subversion, Git ต่างกันยังไง? <sub>(สไลด์ 12–14)</sub></h2>
+<p><strong>แก่น: CVS และ Subversion มี repository กลางที่เดียว ทุกคน checkout/update จากที่นั่นและ checkin/commit กลับ ส่วน Git ทุกคนมี repository ของตัวเอง (distributed) มี staging area แล้ว push/pull กับ repository อื่น</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>CVS (สไลด์ 12)</th>
+<th>Subversion (สไลด์ 13)</th>
+<th>Git (สไลด์ 14)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repository</td>
+<td><strong>ที่เดียว (กลาง)</strong></td>
+<td><strong>ที่เดียว (กลาง)</strong></td>
+<td><strong>หลายที่ (distributed)</strong> ทุกคนมี repository ในเครื่อง</td>
+</tr>
+<tr>
+<td>เอาโค้ดลงเครื่อง</td>
+<td><strong>checkout</strong></td>
+<td><strong>update</strong></td>
+<td><strong>pull</strong> จาก repository อื่น</td>
+</tr>
+<tr>
+<td>ส่งโค้ดกลับ</td>
+<td><strong>checkin</strong></td>
+<td><strong>commit</strong></td>
+<td><strong>commit</strong> เข้า repository ในเครื่อง แล้ว <strong>push</strong> ไป repository อื่น</td>
+</tr>
+<tr>
+<td>ในเครื่องผู้ใช้</td>
+<td>ไฟล์ A, B, C</td>
+<td>ไฟล์ A, B, C + โฟลเดอร์ <strong><code>.svn</code></strong> (สำเนา A, B, C)</td>
+<td>ไฟล์ A, B, C + <strong>staging</strong> + <strong>Repository</strong> ของตัวเอง</td>
+</tr>
+</tbody>
+</table></div>
+<p>(ทุกรูปใช้ตัวอย่างผู้ใช้ Alice และ Bob กับไฟล์ A, B, C)</p>
+<hr />
+<h2 id="6-git-และ-distributed-version-control-สไลด์-1516">6. Git และ distributed version control <sub>(สไลด์ 15–16)</sub></h2>
+<p><strong>แก่น: Git = distributed VCS ฟรีและ open-source ทำงานเร็ว เกือบทุกอย่างอยู่ในเครื่อง ทำงาน offline ได้ และทุก clone มีประวัติครบจึงเป็น backup ไปในตัว</strong></p>
+<p><strong>Git</strong> (git-scm.com): <em>free and open-source distributed version control system designed to handle everything from small to very large projects with speed and efficiency</em></p>
+<ul>
+<li>เรียนรู้ง่าย</li>
+<li><strong>tiny footprint</strong> และเร็วมาก</li>
+<li>เหนือกว่า SCM tool อื่นอย่าง <strong>Subversion และ CVS</strong></li>
+<li><strong>local branching ราคาถูก</strong>, มี <strong>staging area</strong> สะดวก และรองรับหลาย <strong>workflow</strong></li>
+</ul>
+<p><strong>Distributed Version Control:</strong></p>
+<ul>
+<li>Almost <strong>everything is local</strong> – เกือบทุกอย่างอยู่ในเครื่อง</li>
+<li>Almost every operation is <strong>fast</strong></li>
+<li>Almost every <strong>cloned repository is a backup</strong></li>
+<li>Almost every operation <strong>works offline</strong></li>
+<li>Almost all repositories have the <strong>full history</strong></li>
+</ul>
+<hr />
+<h2 id="7-staging-area-และ-file-status-lifecycle-สไลด์-1719">7. Staging area และ file status lifecycle <sub>(สไลด์ 17–19)</sub></h2>
+<p><strong>แก่น: staging area (index) คือที่พักการเปลี่ยนแปลงที่จะถูก commit เป็นจุดเด่นของ Git ไฟล์จะวนผ่านสถานะ untracked → staged → unmodified → modified → staged</strong></p>
+<p><strong>Staging area (index):</strong></p>
+<ul>
+<li><strong>ต่างจาก VCS อื่น</strong> Git มีแนวคิด staging area</li>
+<li>คือ <strong>การเปลี่ยนแปลงที่จะถูก commit</strong></li>
+<li>ใช้ <strong>เตรียมตัวก่อน commit</strong> ได้</li>
+</ul>
+<p><strong>File status lifecycle + คำสั่ง Git:</strong></p>
+<p><img loading="lazy" src="diagrams/L11-01-file-status.png" alt="File status lifecycle" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จาก</th>
+<th>การกระทำ</th>
+<th>ไป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>untracked</td>
+<td><strong>add</strong> (<code>git add &lt;file&gt;</code>)</td>
+<td>staged</td>
+</tr>
+<tr>
+<td>staged</td>
+<td><strong>remove</strong></td>
+<td>untracked</td>
+</tr>
+<tr>
+<td>staged</td>
+<td><strong>commit</strong> (<code>git commit -m &quot;message&quot;</code>)</td>
+<td>unmodified</td>
+</tr>
+<tr>
+<td>unmodified</td>
+<td><strong>edit</strong></td>
+<td>modified</td>
+</tr>
+<tr>
+<td>modified</td>
+<td><strong>add</strong> (<code>git add &lt;file&gt;</code>)</td>
+<td>staged</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในรูปสไลด์ 18–19 สะกดว่า &quot;<strong>modifed</strong>&quot; (ที่ถูกคือ modified)</p>
+</blockquote>
+<hr />
+<h2 id="8-add-commit-pull-push-ทำอะไร-สไลด์-2023">8. Add, Commit, Pull, Push ทำอะไร? <sub>(สไลด์ 20–23)</sub></h2>
+<p><strong>แก่น: add = working directory → staging, commit = staging → local repo, pull = remote → local (fetch + merge), push = local commits → remote</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>จาก → ไป</th>
+<th>รายละเอียดตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Add</strong></td>
+<td>working directory → <strong>staging area</strong></td>
+<td>เลือกว่าการเปลี่ยนแปลงไหนจะอยู่ใน commit ถัดไป และ <strong>review ก่อน commit ได้</strong></td>
+</tr>
+<tr>
+<td><strong>Commit</strong></td>
+<td>staging area → <strong>local repository</strong></td>
+<td>สร้าง <strong>เวอร์ชันใหม่ (commit)</strong> ของโปรเจกต์ พร้อม <strong>commit message</strong> อธิบายการเปลี่ยนแปลง</td>
+</tr>
+<tr>
+<td><strong>Pull</strong></td>
+<td>remote repository → <strong>local repository</strong></td>
+<td><strong>fetch</strong> การเปลี่ยนแปลงจาก remote แล้ว <strong>merge</strong> เข้า branch ปัจจุบัน ปกติ merge อัตโนมัติ ถ้ามี <strong>conflict</strong> ก็จัดการได้ไม่ยาก</td>
+</tr>
+<tr>
+<td><strong>Push</strong></td>
+<td>local commits → <strong>remote repository</strong></td>
+<td>ทำให้คนอื่นเห็นการเปลี่ยนแปลง <strong>อาจถูก reject</strong> ถ้า remote มีการเปลี่ยนแปลงที่ local ยังไม่มี</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>นอกเหนือจาก push/pull:</strong> Git <strong>สร้าง patch</strong> และ <strong>นำ patch มารวม</strong> ได้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำทิศ: <strong>pull = ดึงเข้ามา</strong> (remote → local) | <strong>push = ดันออกไป</strong> (local → remote)</p>
+<p class="c-warn">⚠️ push ถูก reject เมื่อ remote มีของใหม่ที่เรายังไม่มี</p>
+</blockquote>
+<hr />
+<h2 id="9-decentralized-but-centralized-สไลด์-24">9. Decentralized but Centralized <sub>(สไลด์ 24)</sub></h2>
+<p><strong>แก่น: Git เป็น distributed ก็จริง แต่ในทางปฏิบัติมักมี repository กลาง (origin) ที่ทุกคน push/pull และทีมย่อยยัง fetch กันเองได้</strong></p>
+<ul>
+<li>รูปในสไลด์: <strong>origin</strong> อยู่ตรงกลาง → alice, bob, clair, david ต่างก็ <strong>push/pull</strong> กับ origin</li>
+<li>ระหว่างคู่ alice–bob, alice–david และ david–clair ยังมี <strong>subteam fetches</strong> ดึงงานกันเองโดยไม่ผ่าน origin</li>
+</ul>
+<hr />
+<h2 id="10-branch-ใช้เมื่อไหร่-และควรระวังอะไร-สไลด์-2527">10. Branch: ใช้เมื่อไหร่ และควรระวังอะไร? <sub>(สไลด์ 25–27)</sub></h2>
+<p><strong>แก่น: branch หลักคือ master ซึ่งต้อง deploy ได้และเสถียรเสมอ ห้าม push สิ่งที่ยังไม่ test ขึ้น master ส่วนงานใหม่ แก้ bug หรือทดลอง ให้แตก branch แยก</strong></p>
+<h3 id="101-master-branch-สไลด์-25">10.1 Master branch <sub>(สไลด์ 25)</sub></h3>
+<ul>
+<li>Git มี default branch ชื่อ <strong>&quot;master&quot;</strong></li>
+<li>master <strong>deploy ได้</strong> = production code พร้อมปล่อยใช้จริง</li>
+<li>master ต้อง <strong>เสถียร (stable)</strong></li>
+<li>เป็น <strong>social contract</strong> ของ open-source: <strong>ห้าม push สิ่งที่ยังไม่ test หรือทำให้ build พังขึ้น master เด็ดขาด</strong></li>
+<li>GitHub ทำงานได้เพราะ <strong>ทำงานจาก master ได้อย่างปลอดภัยเสมอ</strong></li>
+</ul>
+<h3 id="102-เมื่อไหร่ควรสร้าง-branch-ใหม่-สไลด์-26">10.2 เมื่อไหร่ควรสร้าง branch ใหม่? <sub>(สไลด์ 26)</sub></h3>
+<ul>
+<li>เพิ่ม <strong>feature ใหม่</strong></li>
+<li>ทำ <strong>release ใหม่</strong> ของซอฟต์แวร์</li>
+<li><strong>ทดลอง</strong> การเปลี่ยนแปลงใหม่</li>
+<li><strong>แก้ bug</strong></li>
+</ul>
+<h3 id="103-branching-and-merging-สไลด์-27">10.3 Branching and merging <sub>(สไลด์ 27)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ข้อดี</th>
+<th>ข้อควรระวัง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>branch และ merge ใน Git <strong>ง่าย</strong></td>
+<td>branch ทำให้เกิด <strong>conflict ตอน merge</strong> ได้</td>
+</tr>
+<tr>
+<td>branch มักเป็น <strong>ของชั่วคราว</strong></td>
+<td><strong>แก้ conflict โดยไม่มี tool ช่วยนั้นลำบาก</strong></td>
+</tr>
+<tr>
+<td><strong>สนับสนุนให้แตก branch</strong></td>
+<td>ควรใช้ <strong>workflow ที่กำหนดไว้ชัดเจน</strong></td>
+</tr>
+<tr>
+<td>merge ส่วนใหญ่ <strong>อัตโนมัติ</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 27 เขียนว่า &quot;Branches <strong>of</strong> often temporary&quot; (น่าจะหมายถึง &quot;are often temporary&quot;)</p>
+</blockquote>
+<hr />
+<h2 id="11-git-branching-model-สไลด์-2833-จาก-nviecom-a-successful-git-branching-model">11. Git Branching Model <sub>(สไลด์ 28–33, จาก nvie.com &quot;A successful Git branching model&quot;)</sub></h2>
+<p><strong>แก่น: มี main branches 2 ตัวที่อยู่ตลอด (master = พร้อม production, develop = รวมงานล่าสุดสำหรับ release ถัดไป) และ supporting branches 3 แบบ (feature, release, hotfix) ที่สร้างตามงาน</strong></p>
+<h3 id="111-main-branches-สไลด์-28">11.1 Main branches <sub>(สไลด์ 28)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Branch</th>
+<th>สะท้อนสถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>master</strong></td>
+<td>โค้ด <strong>production-ready</strong> เสมอ</td>
+</tr>
+<tr>
+<td><strong>develop</strong></td>
+<td>โค้ดที่มี <strong>การเปลี่ยนแปลงล่าสุดสำหรับ release ถัดไป</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>รูปในสไลด์: develop แตกจาก master ตอน &quot;Initial production version&quot; แล้วมี commit สะสม (&quot;Work in progress on 'next release'&quot;) จากนั้น merge กลับเข้า master เป็น &quot;Next production release&quot; เป็นระยะ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 28 เขียนว่า &quot;The main branches <strong>alwasy</strong> include&quot; (พิมพ์ผิด ที่ถูกคือ always)</p>
+</blockquote>
+<h3 id="112-supporting-branches-สไลด์-2932">11.2 Supporting branches <sub>(สไลด์ 29–32)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Branch</th>
+<th>ใช้ทำอะไร</th>
+<th>แตกจาก → merge กลับ (ตามรูปในสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Feature</strong> (หรือ <strong>topic</strong> branch)</td>
+<td>พัฒนา <strong>feature ใหม่</strong> สำหรับ release ถัดไปหรือ release ในอนาคตไกล</td>
+<td>develop → <strong>develop</strong></td>
+</tr>
+<tr>
+<td><strong>Release</strong></td>
+<td><strong>เตรียม production release ใหม่</strong> ทำให้ develop <strong>ว่างไว้รับ feature ของ release ใหญ่ถัดไป</strong></td>
+<td>develop → <strong>master</strong> (ติด tag เช่น 1.0) และ <strong>develop</strong></td>
+</tr>
+<tr>
+<td><strong>Hotfix</strong></td>
+<td>ต้อง <strong>แก้ทันที</strong> เมื่อ production version ที่ใช้งานจริงมีปัญหา (critical bug)</td>
+<td><strong>tag บน master</strong> ที่เป็น production version → <strong>master</strong> (tag ใหม่) และ <strong>develop</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Feature branch</strong> (สไลด์ 30)</p>
+<p><img loading="lazy" src="diagrams/L11-02-feature.png" alt="Feature branch" /></p>
+<p><strong>Release branch</strong> (สไลด์ 31) – ระหว่างอยู่บน release branch ทำได้ <strong>แค่แก้ bug (&quot;Only bugfixes!&quot;)</strong> และ bugfix จาก release branch <strong>merge กลับเข้า develop ได้ต่อเนื่อง</strong></p>
+<p><img loading="lazy" src="diagrams/L11-03-release.png" alt="Release branch" /></p>
+<p><strong>Hotfix branch</strong> (สไลด์ 32) – ตัวอย่างในสไลด์: แตกจาก tag <strong>1.2</strong> บน master แก้ &quot;Severe bug fixed for production: hotfix 1.2.1&quot; แล้ว merge เข้า master เป็น tag <strong>1.2.1</strong> และ merge เข้า develop ด้วย</p>
+<p><img loading="lazy" src="diagrams/L11-04-hotfix.png" alt="Hotfix branch" /></p>
+<h3 id="113-the-whole-picture-สไลด์-33">11.3 The Whole Picture <sub>(สไลด์ 33)</sub></h3>
+<p>รูปรวม 5 branch: <strong>feature branches – develop – release branches – hotfixes – master</strong> (เวลาไหลจากบนลงล่าง)</p>
+<ul>
+<li>master มี tag <strong>0.1 → 0.2 → 1.0</strong></li>
+<li>hotfix 0.2 แก้ &quot;Severe bug fixed for production&quot; แล้ว merge เข้า master (tag 0.2) และ &quot;Incorporate bugfix in develop&quot;</li>
+<li>feature branches: &quot;Feature for future release&quot; และ &quot;Major feature for next release&quot; merge เข้า develop</li>
+<li>release branch 1.0: &quot;Start of release branch for 1.0&quot; → &quot;Only bugfixes!&quot; → &quot;Bugfixes from rel. branch may be continuously merged back into develop&quot; → merge เข้า master (tag 1.0)</li>
+<li>หลังเริ่ม release branch 1.0: &quot;From this point on, 'next release' means the release after 1.0&quot;</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำง่าย: <strong>feature วนอยู่กับ develop</strong> | <strong>release = develop → master</strong> | <strong>hotfix = master → master</strong> (และส่งต่อให้ develop ด้วยเสมอ)</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Software Configuration Management (CM)</td>
+<td>initiating, evaluating, controlling change ระหว่างและหลังการพัฒนา</td>
+<td>คุมการเปลี่ยนแปลง</td>
+</tr>
+<tr>
+<td>IEEE 828 / IEEE 1042</td>
+<td>มาตรฐาน SCM Plans / Guide to SCM</td>
+<td>828 = Plan</td>
+</tr>
+<tr>
+<td>Configuration item</td>
+<td>สิ่งที่เปลี่ยนแปลงได้และต้องติดตาม</td>
+<td>เกือบทุกอย่าง</td>
+</tr>
+<tr>
+<td>Version numbering</td>
+<td>V1, V1.1, … (ชื่อไม่สื่อความหมาย)</td>
+<td></td>
+</tr>
+<tr>
+<td>Attribute-based identification</td>
+<td>ระบุเวอร์ชันด้วยชุด attribute (Date, Creator, …)</td>
+<td></td>
+</tr>
+<tr>
+<td>VCS</td>
+<td>ระบบควบคุมเวอร์ชัน ส่วนหนึ่งของ CM</td>
+<td></td>
+</tr>
+<tr>
+<td>Repository</td>
+<td>ที่เก็บประวัติเวอร์ชัน</td>
+<td></td>
+</tr>
+<tr>
+<td>Distributed VCS</td>
+<td>ทุกคนมี repository ครบประวัติในเครื่อง</td>
+<td>Git</td>
+</tr>
+<tr>
+<td>Staging area (index)</td>
+<td>ที่พักการเปลี่ยนแปลงที่จะ commit</td>
+<td>ตะกร้าก่อนจ่ายเงิน</td>
+</tr>
+<tr>
+<td>Untracked / Staged / Unmodified / Modified</td>
+<td>สถานะของไฟล์ใน Git</td>
+<td></td>
+</tr>
+<tr>
+<td>Commit</td>
+<td>บันทึก staged changes เป็นเวอร์ชันใหม่ใน local repo</td>
+<td></td>
+</tr>
+<tr>
+<td>Pull</td>
+<td>fetch + merge จาก remote</td>
+<td>ดึงเข้า</td>
+</tr>
+<tr>
+<td>Push</td>
+<td>ส่ง local commits ไป remote</td>
+<td>ดันออก</td>
+</tr>
+<tr>
+<td>Conflict</td>
+<td>merge แล้วการแก้ไขชนกัน</td>
+<td></td>
+</tr>
+<tr>
+<td>Patch</td>
+<td>ไฟล์การเปลี่ยนแปลงที่ Git สร้าง/รวมได้</td>
+<td></td>
+</tr>
+<tr>
+<td>origin</td>
+<td>repository กลางในรูป &quot;Decentralized but Centralized&quot;</td>
+<td></td>
+</tr>
+<tr>
+<td>master</td>
+<td>branch production-ready, ต้อง stable</td>
+<td></td>
+</tr>
+<tr>
+<td>develop</td>
+<td>branch รวมงานล่าสุดสำหรับ release ถัดไป</td>
+<td></td>
+</tr>
+<tr>
+<td>Feature (topic) branch</td>
+<td>พัฒนา feature ใหม่</td>
+<td></td>
+</tr>
+<tr>
+<td>Release branch</td>
+<td>เตรียม production release (แก้แค่ bug)</td>
+<td></td>
+</tr>
+<tr>
+<td>Hotfix branch</td>
+<td>แก้ด่วน production จาก tag บน master</td>
+<td></td>
+</tr>
+<tr>
+<td>Tag</td>
+<td>ป้ายเวอร์ชันบน master เช่น 1.0, 1.2.1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>นิยาม CM</strong>: initiating, evaluating, controlling change <strong>during and after</strong> SE process + มาตรฐาน <strong>IEEE 828, IEEE 1042</strong></li>
+<li>⭐ <strong>Configuration item</strong> มีมากกว่าโค้ด: เอกสาร, test drivers, manual, compiler version, hardware config</li>
+<li>⭐ <strong>Version identification 2 แบบ</strong>: numbering (ชื่อไม่สื่อความหมาย) vs attribute-based</li>
+<li>⭐ <strong>VCS purposes 3 ข้อ</strong>: restore, coordinate, identify</li>
+<li>⭐ <strong>CVS (checkout/checkin) และ SVN (update/commit) = repo กลาง</strong> vs <strong>Git = distributed</strong></li>
+<li>⭐ <strong>Distributed 5 ข้อ</strong>: local, fast, clone = backup, offline, full history</li>
+<li>⭐ <strong>File status lifecycle</strong> และคำสั่ง <code>git add &lt;file&gt;</code>, <code>git commit -m &quot;message&quot;</code></li>
+<li>⭐ <strong>add / commit / pull / push</strong> ทำอะไร จากไหนไปไหน (push ถูก reject ได้)</li>
+<li>⭐ <strong>ห้าม push สิ่งที่ยังไม่ test หรือทำ build พังขึ้น master</strong></li>
+<li>⭐ <strong>เมื่อไหร่ควร branch</strong> 4 กรณี: feature, release, experiment, bug fix</li>
+<li>⭐ <strong>Branching model</strong>: main (master, develop) + supporting (feature, release, hotfix)</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CM</td>
+<td>VCS</td>
+<td>กระบวนการควบคุมการเปลี่ยนแปลงทั้งหมด vs เครื่องมือที่เป็นส่วนหนึ่งของ CM</td>
+</tr>
+<tr>
+<td>Version numbering</td>
+<td>Attribute-based</td>
+<td>เลขเรียงต่อกัน (ไม่สื่อความหมาย) vs ชุด attribute</td>
+</tr>
+<tr>
+<td>Centralized (CVS, SVN)</td>
+<td>Distributed (Git)</td>
+<td>repo กลางที่เดียว vs ทุกคนมี repo ครบประวัติ</td>
+</tr>
+<tr>
+<td>CVS checkout/checkin</td>
+<td>SVN update/commit</td>
+<td>คำเรียกของแต่ละระบบ (ทั้งคู่คุยกับ repo กลาง)</td>
+</tr>
+<tr>
+<td>Add</td>
+<td>Commit</td>
+<td>working dir → staging vs staging → local repo</td>
+</tr>
+<tr>
+<td>Commit</td>
+<td>Push</td>
+<td>บันทึกใน local vs ส่งไป remote</td>
+</tr>
+<tr>
+<td>Pull</td>
+<td>Push</td>
+<td>remote → local (fetch + merge) vs local → remote</td>
+</tr>
+<tr>
+<td>Untracked</td>
+<td>Modified</td>
+<td>Git ยังไม่เคยติดตาม vs เคย commit แล้วถูกแก้</td>
+</tr>
+<tr>
+<td>master</td>
+<td>develop</td>
+<td>production-ready vs งานล่าสุดสำหรับ release ถัดไป</td>
+</tr>
+<tr>
+<td>Release branch</td>
+<td>Hotfix branch</td>
+<td>แตกจาก develop เตรียม release vs แตกจาก tag บน master แก้ด่วน</td>
+</tr>
+<tr>
+<td>Feature branch</td>
+<td>Release branch</td>
+<td>merge กลับ develop เท่านั้น vs merge เข้า master + develop</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l10/index.html"><small>← บทก่อนหน้า</small><span>Lecture 10 – Implementation &amp; Code Review</span></a><a class="pg next" href="../l12/index.html"><small>บทถัดไป →</small><span>Lecture 12 – Testing</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

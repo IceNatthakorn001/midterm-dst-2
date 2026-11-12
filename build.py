@@ -39,7 +39,7 @@ SUBJECTS = [
         "th": "วิศวกรรมซอฟต์แวร์",
         "icon": "🧩",
         "accent": "#7c3aed",
-        "order": None,
+        "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10", "L11", "L12", "L13", "L14"],
     },
     {
         "slug": "architecture",
@@ -427,7 +427,7 @@ def build():
               next_l = lessons[i + 1] if i + 1 < len(lessons) else None
               is_arch = subj["slug"] == "architecture"
               # toc labels are already HTML-escaped by the renderer; unescape first so "&" isn't shown as "&amp;"
-              toc_html = "".join(f'<li><a href="#{a}">{esc(html.unescape(t)) if is_arch else esc(t)}</a></li>' for a, t in toc)
+              toc_html = "".join(f'<li><a href="#{a}">{esc(html.unescape(t))}</a></li>' for a, t in toc)
               collapse_btn = ('<button class="toc-collapse" data-toc-collapse title="ซ่อนสารบัญ (กด [)">«</button>'
                               '<button class="toc-rail" data-toc-collapse title="แสดงสารบัญ (กด [)"><span>☰</span>'
                               '<span class="toc-rail-label">สารบัญ</span></button>' if is_arch else "")

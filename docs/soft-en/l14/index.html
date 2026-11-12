@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 14 – Agentic Software Engineering · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-agentic-software-engineering-ase-คืออะไร-สไลด์-45">1. Agentic Software Engineering (ASE) คืออะไร? (สไลด์ 4–5)</a></li><li><a href="#2-llm-กับ-ai-coding-agent-ต่างกันยังไง-สไลด์-67">2. LLM กับ AI coding agent ต่างกันยังไง? (สไลด์ 6–7)</a></li><li><a href="#3-taxonomy-of-ai-assisted-se-มีกี่ระดับ-สไลด์-89-arxiv-250906216">3. Taxonomy of AI-assisted SE มีกี่ระดับ? (สไลด์ 8–9, arxiv 2509.06216)</a></li><li><a href="#4-ai-coding-agent-มีกี่ประเภท-สไลด์-1014">4. AI coding agent มีกี่ประเภท? (สไลด์ 10–14)</a></li><li><a href="#5-ai-coding-agent-ประกอบด้วยอะไร-สไลด์-1519">5. AI coding agent ประกอบด้วยอะไร? (สไลด์ 15–19)</a></li><li><a href="#6-agentic-sdlc-ทำงานยังไง-สไลด์-2028">6. Agentic SDLC ทำงานยังไง? (สไลด์ 20–28)</a></li><li><a href="#7-key-practices-for-ase-pattern-vs-anti-pattern-สไลด์-2934-hassan-2025">7. Key practices for ASE (pattern vs anti-pattern) (สไลด์ 29–34, Hassan 2025)</a></li><li><a href="#8-productivity-vs-risk-สไลด์-3536">8. Productivity vs Risk (สไลด์ 35–36)</a></li><li><a href="#9-summary-สไลด์-37">9. Summary (สไลด์ 37)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L14</div>
+      <h1 class="lesson-title">Lecture 14 – Agentic Software Engineering</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทสุดท้ายของวิชา พูดถึงการทำงาน software engineering ร่วมกับ <strong>AI coding agent</strong> ซึ่งเปลี่ยน <strong>วิธีจัดงาน</strong> ไม่ใช่แค่เพิ่มเครื่องมือใหม่ เนื้อหามี 5 ส่วนตาม Topics: (1) <strong>ASE คืออะไร</strong> (LLM vs agent, taxonomy 6 ระดับ, ประเภท agent) (2) <strong>ส่วนประกอบของ agent</strong> (tools, skills, connectors, memory) (3) <strong>Agentic SDLC</strong> (Spec → Generate → Verify → Refine) (4) <strong>Key practices</strong> 5 คู่ (5) <strong>Productivity vs Risk</strong></p>
+<p>บทนี้ดัดแปลงจาก book.agentic-swe.dev (chapter 6) และเชื่อมกับบทก่อน ๆ หลายเรื่อง เช่น requirement (spec), code review, testing, commit</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L14-00-overview.png" alt="แผนผังภาพรวม Lecture 14" /></p>
+<h2 id="1-agentic-software-engineering-ase-คืออะไร-สไลด์-45">1. Agentic Software Engineering (ASE) คืออะไร? <sub>(สไลด์ 4–5)</sub></h2>
+<p><strong>แก่น: ASE ใช้ AI coding agent วางแผน เขียน ทดสอบ และวนแก้งานพัฒนาซอฟต์แวร์ เป็นการเปลี่ยนวิธีจัดงาน ไม่ใช่แค่เครื่องมือใหม่ และ developer ยังต้องรักษามาตรฐาน คุณภาพ และการกำกับดูแล</strong></p>
+<ul>
+<li>ASE ใช้ <strong>AI coding agents</strong> เพื่อ <strong>plan, implement, test และ iterate</strong> งานพัฒนาซอฟต์แวร์</li>
+<li>เป็น <strong>การเปลี่ยนวิธีจัดระเบียบงาน SE</strong> ไม่ใช่แค่ programming tool ใหม่</li>
+<li>AI agent <strong>เพิ่ม productivity ได้</strong> แต่ developer <strong>ยังต้องรักษา engineering standards, quality และ oversight</strong></li>
+</ul>
+<p><strong>Traditional AI-assisted coding vs Agentic development</strong> (สไลด์ 5):</p>
+<p><img loading="lazy" src="diagrams/L14-01-trad-vs-agentic.png" alt="Traditional vs Agentic" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Traditional AI-assisted coding</th>
+<th>Agentic development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ใครตัดสินใจ/วางแผน</td>
+<td><strong>Developer</strong> ตัดสินใจ</td>
+<td>Developer <strong>บอก task</strong> แล้ว <strong>agent วางแผนเอง</strong></td>
+</tr>
+<tr>
+<td>AI ทำอะไร</td>
+<td><strong>แนะนำโค้ด</strong></td>
+<td><strong>plan + implement + รัน test + iterate</strong></td>
+</tr>
+<tr>
+<td>Developer ทำอะไรตอนท้าย</td>
+<td><strong>accept / reject</strong> คำแนะนำ</td>
+<td><strong>review และ verify</strong> ผลงาน</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-llm-กับ-ai-coding-agent-ต่างกันยังไง-สไลด์-67">2. LLM กับ AI coding agent ต่างกันยังไง? <sub>(สไลด์ 6–7)</sub></h2>
+<p><strong>แก่น: LLM แค่ทำนายข้อความต่อ ไม่มี state ทำ action จริงไม่ได้ และไม่รู้ว่าโค้ดที่เขียนรันได้ไหม ส่วน agent ใช้ LLM เป็นสมองบวกกับ tools จึงอ่านไฟล์ รันคำสั่ง รัน test และวนปรับแผนได้เอง</strong></p>
+<p><strong>LLM ≠ AI coding agent</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>LLM (Large Language Model)</th>
+<th>AI coding agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>นิยาม</td>
+<td>neural network ที่ฝึกจากข้อความ <strong>ทำนายข้อความต่อที่น่าจะเป็นที่สุด</strong></td>
+<td>ทำงาน SE ได้ <strong>อัตโนมัติ (autonomously)</strong></td>
+</tr>
+<tr>
+<td>สมอง</td>
+<td>—</td>
+<td>ใช้ <strong>LLM เป็น reasoning engine</strong> + <strong>tools</strong> โต้ตอบกับ environment</td>
+</tr>
+<tr>
+<td>State</td>
+<td><strong>ไม่มี persistent state</strong> ระหว่างการเรียกแต่ละครั้ง</td>
+<td></td>
+</tr>
+<tr>
+<td>Action</td>
+<td><strong>ทำ action ในโลกจริงโดยตรงไม่ได้</strong></td>
+<td>อ่านโค้ด, แก้ไฟล์, รันคำสั่ง, รัน test</td>
+</tr>
+<tr>
+<td>รู้ผลไหม</td>
+<td><strong>ไม่รู้ว่าโค้ดที่สร้างถูกรันหรือใช้ได้จริง</strong></td>
+<td><strong>plan, execute, observe ผล และ iterate</strong> ไปหาเป้าหมาย</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตารางความสามารถ</strong> (สไลด์ 7):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>LLM alone</th>
+<th>AI coding agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generate code</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Read files from disk</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Execute shell commands</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Run tests and read results</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Maintain state across steps</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Adapt plan based on results</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Take irreversible actions</td>
+<td><strong>No</strong></td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต: สิ่งเดียวที่ LLM ทำได้เหมือน agent คือ <strong>generate code</strong> ส่วน &quot;take irreversible actions&quot; ที่ agent ทำได้ คือเหตุผลที่ต้องระวังเรื่องความเสี่ยงในหัวข้อ 8</p>
+</blockquote>
+<hr />
+<h2 id="3-taxonomy-of-ai-assisted-se-มีกี่ระดับ-สไลด์-89-arxiv-250906216">3. Taxonomy of AI-assisted SE มีกี่ระดับ? <sub>(สไลด์ 8–9, arxiv 2509.06216)</sub></h2>
+<p><strong>แก่น: มี 6 ระดับ (0–5) จากเขียนเองล้วนไปจนถึง AI อิสระเต็มที่ เทียบได้กับระดับรถขับเคลื่อนอัตโนมัติของ SAE</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Name</th>
+<th>Core Function</th>
+<th>Representative Technologies</th>
+<th>SAE Parallel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>Manual Coding</td>
+<td>คนแปลงไอเดียเป็นโค้ดเอง <strong>ไม่มี AI</strong></td>
+<td>Plain text editors (Notepad, vi, Emacs)</td>
+<td>Level 0: No Automation</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>Token Assistance</td>
+<td><strong>ทำนาย token ถัดไป</strong> จาก context ที่กำลังแก้</td>
+<td>IDE autocomplete (IntelliSense, basic tab-completion)</td>
+<td>Level 1: Driver Assistance</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Task-Agentic</td>
+<td>สร้าง <strong>code block, test หรือ artefact ทั้งชิ้น</strong> จากคำอธิบาย task</td>
+<td>GitHub Copilot, Amazon CodeWhisperer, Tabnine</td>
+<td>Level 2: Partial Automation</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Goal-Agentic</td>
+<td><strong>วางแผนหลายขั้นและลงมือทำ</strong> จาก technical goal</td>
+<td>Claude Code, Cognition's Devin, Google Jules, OpenAI Codex</td>
+<td>Level 3: Conditional Automation</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Specialised Domain Autonomy</td>
+<td>แปลง <strong>mandate กว้าง ๆ เป็นเป้าหมายจริง</strong> ใน <strong>technical domain ที่กำหนด</strong></td>
+<td>GPT-5 (frontend web development), specialised security agents</td>
+<td>Level 4: High Driving Automation</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>General Domain Autonomy</td>
+<td>อิสระสูงใน <strong>ทุก technical domain</strong> ทุกขนาด</td>
+<td><strong>Conceptual — ยังไม่มีระบบ production ณ 2025</strong></td>
+<td>Level 5: Full Driving Automation</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ: <strong>0 เขียนเอง → 1 เดา token → 2 ทำ task → 3 ทำ goal → 4 ทั้ง domain → 5 ทุก domain (ยังไม่มีจริง)</strong></p>
+</blockquote>
+<hr />
+<h2 id="4-ai-coding-agent-มีกี่ประเภท-สไลด์-1014">4. AI coding agent มีกี่ประเภท? <sub>(สไลด์ 10–14)</sub></h2>
+<p><strong>แก่น: มี 2 ประเภท: agent ใน terminal ที่ใช้ file system กับ shell เป็นสภาพแวดล้อมหลัก และ AI-native IDE ที่ฝัง agent ไว้ใน code editor</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ลักษณะ</th>
+<th>ตัวอย่างในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AI coding agent in the terminal</strong></td>
+<td>ทำงาน <strong>ใน terminal โดยตรง</strong> ใช้ <strong>file system และ shell</strong> เป็นสภาพแวดล้อมหลัก</td>
+<td><strong>Claude Code:</strong> CLI ที่รันใน terminal อ่านไฟล์ที่เกี่ยวข้อง เขียนโค้ด รัน test และวนแก้ <strong>โดยไม่ต้องเปิด browser หรือ IDE</strong><br><strong>Gemini CLI:</strong> agent ใน terminal ที่ใช้ <strong>Gemini model family</strong> ของ Google</td>
+</tr>
+<tr>
+<td><strong>AI-native IDEs</strong></td>
+<td><strong>ฝัง agentic AI ใน code editor</strong></td>
+<td><strong>Cursor:</strong> agent เห็น <strong>codebase ทั้งหมด</strong>, เข้าใจไฟล์ที่เปิดอยู่, รันคำสั่งใน terminal ในตัว และแก้ไฟล์ที่เปิดอยู่ได้ทันที ผู้ใช้คุยผ่าน <strong>chat panel ข้าง editor</strong><br><strong>Windsurf:</strong> agent <strong>สังเกตเชิงรุก</strong> ว่าผู้ใช้ทำอะไร แล้ว <strong>เสนอแนะเองโดยไม่ต้องสั่ง</strong> เหมือน pair programmer ที่เห็นว่าเราติด</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ความต่าง Cursor vs Windsurf ตามสไลด์: Cursor = คุยผ่าน chat panel | Windsurf = <strong>proactive</strong> เสนอเองโดยไม่ต้อง prompt</p>
+</blockquote>
+<hr />
+<h2 id="5-ai-coding-agent-ประกอบด้วยอะไร-สไลด์-1519">5. AI coding agent ประกอบด้วยอะไร? <sub>(สไลด์ 15–19)</sub></h2>
+<p><strong>แก่น: 4 ส่วน: tools (action พื้นฐาน), skills (ความสามารถที่ประกอบจากหลาย tool ใช้ซ้ำได้), connectors (เชื่อมระบบภายนอก) และ memory (ข้อมูลที่จำข้ามขั้น/session/agent)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>นิยาม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1) Tools</strong></td>
+<td><strong>primitive actions</strong> ที่ agent ทำได้ มี input/output ชัดเจน</td>
+</tr>
+<tr>
+<td><strong>2) Skills</strong></td>
+<td><strong>ความสามารถที่ใช้ซ้ำได้</strong> ประกอบจาก tool call หลายครั้ง</td>
+</tr>
+<tr>
+<td><strong>3) Connectors</strong></td>
+<td>การเชื่อมที่ให้ agent เข้าถึง <strong>ระบบภายนอกนอกเหนือ file system</strong> (เช่น database, API)</td>
+</tr>
+<tr>
+<td><strong>4) Memory</strong></td>
+<td>ข้อมูลที่ <strong>คงอยู่ข้าม step, session และ agent</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="51-tools-สไลด์-16">5.1 Tools <sub>(สไลด์ 16)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_file</code></td>
+<td>อ่านเนื้อหาไฟล์ที่ path ที่กำหนด</td>
+</tr>
+<tr>
+<td><code>write_file</code></td>
+<td>เขียนหรือเขียนทับไฟล์ที่ path ที่กำหนด</td>
+</tr>
+<tr>
+<td><code>run_command</code></td>
+<td>รัน shell command แล้วคืน stdout/stderr</td>
+</tr>
+<tr>
+<td><code>search_code</code></td>
+<td>ค้น codebase หา pattern หรือ symbol</td>
+</tr>
+<tr>
+<td><code>fetch_url</code></td>
+<td>ดึงเนื้อหาจาก URL</td>
+</tr>
+<tr>
+<td><code>create_branch</code></td>
+<td>สร้าง git branch ใหม่</td>
+</tr>
+<tr>
+<td><code>submit_pr</code></td>
+<td>เปิด pull request พร้อม diff และ description</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-skills-สไลด์-17">5.2 Skills <sub>(สไลด์ 17)</sub></h3>
+<ul>
+<li>มักนิยามเป็น <strong>reusable prompts หรือ prompt templates</strong> เก็บไว้กับโปรเจกต์</li>
+<li>ใน <strong>Claude Code</strong> เรียก skill ด้วย <strong>slash commands</strong> (เช่น <code>/review</code>, <code>/test</code>)</li>
+<li>ตัวอย่าง skill:
+<ul>
+<li><strong>code-review:</strong> อ่าน diff, เช็กกับ checklist, คืน review แบบมีโครงสร้าง</li>
+<li><strong>write-tests:</strong> รับ function signature + docstring แล้วสร้าง unit test suite</li>
+<li><strong>security-scan:</strong> ไล่ codebase หาช่องโหว่ <strong>OWASP Top 10</strong></li>
+<li><strong>refactor-rename:</strong> เปลี่ยนชื่อ symbol ให้ตรงกันทุกไฟล์</li>
+</ul>
+</li>
+</ul>
+<h3 id="53-connectors-สไลด์-18">5.3 Connectors <sub>(สไลด์ 18)</sub></h3>
+<ul>
+<li><strong>LLM เองสร้างได้แค่ข้อความ</strong> ต้องเข้าถึง resource ภายนอกจึงทำงาน SE ได้</li>
+<li>ตัวอย่างงาน:
+<ul>
+<li>อ่านโค้ดจาก GitHub</li>
+<li>เข้าถึงไฟล์ในโปรเจกต์</li>
+<li>สร้าง GitHub issue</li>
+<li>ดึงข้อมูลจาก database</li>
+<li>ทำงานกับระบบ CI/CD</li>
+<li>สร้าง pull request</li>
+<li>เข้าถึง documentation หรือ API</li>
+</ul>
+</li>
+</ul>
+<h3 id="54-memory-4-ประเภท-สไลด์-19">5.4 Memory 4 ประเภท <sub>(สไลด์ 19)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Memory type</th>
+<th>Scope</th>
+<th>Persistence</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>In-context</strong></td>
+<td>Single session</td>
+<td>Until session ends</td>
+<td>บทสนทนาปัจจุบัน, ไฟล์ที่เปิดอยู่</td>
+</tr>
+<tr>
+<td><strong>External</strong></td>
+<td>Across sessions</td>
+<td>Indefinite</td>
+<td>ไฟล์ <code>CLAUDE.md</code>, vector database</td>
+</tr>
+<tr>
+<td><strong>Episodic</strong></td>
+<td>Across tasks</td>
+<td>Configurable</td>
+<td>สรุปงานที่ agent เคยทำ</td>
+</tr>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>Across agents</td>
+<td>Configurable</td>
+<td>ข้อเท็จจริงร่วมเรื่อง codebase หรือ team conventions</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ scope ไล่จากแคบไปกว้าง: <strong>session เดียว → ข้าม session → ข้าม task → ข้าม agent</strong></p>
+</blockquote>
+<hr />
+<h2 id="6-agentic-sdlc-ทำงานยังไง-สไลด์-2028">6. Agentic SDLC ทำงานยังไง? <sub>(สไลด์ 20–28)</sub></h2>
+<p><strong>แก่น: วนซ้ำ 4 ขั้น: Spec (บอกให้ชัดว่าต้องได้อะไร) → Generate (ให้ agent สร้าง) → Verify (เช็กว่าตรง spec ซึ่งต้องใช้วิจารณญาณคนมากที่สุด) → Refine (เอาผลไปปรับ spec)</strong></p>
+<p><img loading="lazy" src="diagrams/L14-02-sdlc.png" alt="Agentic SDLC" /></p>
+<ul>
+<li>สไลด์ถามทวน &quot;What is a traditional SDLC?&quot; (เชื่อมกับ process models ใน L2) แล้วบอกว่า <strong>agentic SDLC วนซ้ำ (iterative) 4 process</strong></li>
+</ul>
+<h3 id="61-spec-สไลด์-2124">6.1 Spec <sub>(สไลด์ 21–24)</sub></h3>
+<p><strong>แก่น: spec บอกว่า agent ต้องสร้างอะไร ต้องแม่นยำและครบ จึงจะได้ output ที่ถูก</strong></p>
+<p><strong>spec ที่ครบสำหรับ AI agent มี 6 ส่วน:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ตอบคำถาม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context</strong></td>
+<td>component นี้คืออะไร อยู่ตรงไหนของระบบ</td>
+</tr>
+<tr>
+<td><strong>Inputs and outputs</strong></td>
+<td>function รับอะไร ต้องคืนอะไร</td>
+</tr>
+<tr>
+<td><strong>Behaviour rules</strong></td>
+<td><strong>อย่างน้อย 5 ข้อ</strong> ที่เป็นพฤติกรรมชัดเจน</td>
+</tr>
+<tr>
+<td><strong>Constraints</strong></td>
+<td>function <strong>ต้องไม่ทำ</strong> อะไร</td>
+</tr>
+<tr>
+<td><strong>Examples</strong></td>
+<td>คู่ input-output ครอบคลุม <strong>normal case, edge case, error case</strong></td>
+</tr>
+<tr>
+<td><strong>Quality attributes</strong></td>
+<td>performance, security, style conventions</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง: <code>calculate_average()</code></strong> (สไลด์ 22–24)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context</strong></td>
+<td>คำนวณคะแนนเฉลี่ยของนักศึกษา เป็นส่วนหนึ่งของ grading component ในระบบจัดการนักศึกษา</td>
+</tr>
+<tr>
+<td><strong>Inputs</strong></td>
+<td>list ของคะแนนตัวเลข 0–100</td>
+</tr>
+<tr>
+<td><strong>Outputs</strong></td>
+<td>ค่าเฉลี่ยเลขคณิต (arithmetic mean) เป็นตัวเลข</td>
+</tr>
+<tr>
+<td><strong>Behavior rules</strong></td>
+<td>1. คำนวณค่าเฉลี่ยเลขคณิตของทุกคะแนน 2. รับทั้งจำนวนเต็มและทศนิยม 3. คืนผลเป็นทศนิยม 4. รับคะแนน 0–100 (รวมขอบ) 5. ปฏิเสธคะแนน &lt; 0 หรือ &gt; 100 6. ปฏิเสธ list ว่าง (หาค่าเฉลี่ยไม่ได้) 7. ไม่แก้ list คะแนนต้นฉบับ</td>
+</tr>
+<tr>
+<td><strong>Constraints</strong></td>
+<td>ห้ามเปลี่ยน input list, ห้ามปัดผลถ้าไม่ได้สั่ง, ห้ามเงียบใส่คะแนนที่ผิด, ห้ามรับค่าที่ไม่ใช่ตัวเลข, ห้ามใช้ external services หรือ database</td>
+</tr>
+<tr>
+<td><strong>Error</strong></td>
+<td>คืน error ที่เหมาะสมถ้า input ผิดหรือว่าง</td>
+</tr>
+<tr>
+<td><strong>Quality attributes</strong></td>
+<td><strong>Performance:</strong> O(n)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Examples:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Expected output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[80, 90, 70]</code></td>
+<td>80.0</td>
+</tr>
+<tr>
+<td><code>[0, 100]</code></td>
+<td>50.0</td>
+</tr>
+<tr>
+<td><code>[75.5, 80.5]</code></td>
+<td>78.0</td>
+</tr>
+<tr>
+<td><code>[]</code></td>
+<td>Error</td>
+</tr>
+<tr>
+<td><code>[-10, 60]</code></td>
+<td>Error</td>
+</tr>
+<tr>
+<td><code>[80, &quot;70&quot;]</code></td>
+<td>Error</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ L12–13: examples ใน spec ครอบคลุม <strong>normal / edge (<code>[0, 100]</code> = ขอบ) / error case</strong> คล้ายการทำ ECP + BVA</p>
+<p class="c-warn">⚠️ สไลด์ 22 สะกดหัวข้อว่า &quot;<strong>Bahavior</strong> rules&quot; (ที่ถูกคือ Behavior)</p>
+</blockquote>
+<h3 id="62-generate-สไลด์-25">6.2 Generate <sub>(สไลด์ 25)</sub></h3>
+<p><strong>แก่น: เรียก agent พร้อม spec ให้สร้างโค้ด test เอกสาร หรือ artefact อื่น โดยต้องตัดสินใจ 3 เรื่อง: model ไหน, agent ไหน, ใส่ context อะไร</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>การตัดสินใจ</th>
+<th>หลัก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Which model</strong></td>
+<td>เลือกตามความยากของงาน: <strong>model ที่เก่งกว่า</strong> สำหรับงาน security-critical หรือ reasoning ซับซ้อน, <strong>model ที่เร็ว</strong> สำหรับ boilerplate และ scaffolding</td>
+</tr>
+<tr>
+<td><strong>Which agent</strong></td>
+<td><strong>terminal agent หรือ AI-native IDE</strong> ตามงานและบริบท</td>
+</tr>
+<tr>
+<td><strong>What context to include</strong></td>
+<td>agent ต้องรู้ <strong>ไฟล์ไหน, conventions อะไร, background อะไร</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="63-verify-สไลด์-2627">6.3 Verify <sub>(สไลด์ 26–27)</sub></h3>
+<p><strong>แก่น: ตรวจว่า output ตรง spec ไหม เป็นขั้นที่ต้องใช้วิจารณญาณทางวิศวกรรมของคนมากที่สุด ใช้ checklist 8 หมวด</strong></p>
+<p><strong>Structured verification checklist for AI-generated code:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Questions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functional correctness</strong></td>
+<td>โค้ดทำตามที่ spec บอกครบทุก case ไหม</td>
+</tr>
+<tr>
+<td><strong>Edge cases</strong></td>
+<td>จัดการ input ว่าง, null, boundary ได้ไหม</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>มี injection risk, auth พัง หรือ unsafe defaults ไหม</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>error ถูกแสดงออกมา ไม่ใช่เงียบหายไปไหม</td>
+</tr>
+<tr>
+<td><strong>Type correctness</strong></td>
+<td>type ตรงไหม type checker ผ่านไหม</td>
+</tr>
+<tr>
+<td><strong>Test coverage</strong></td>
+<td>test ที่สร้างมา test พฤติกรรมตาม spec จริงไหม</td>
+</tr>
+<tr>
+<td><strong>Conventions</strong></td>
+<td>ตาม style, naming, structure ของโปรเจกต์ไหม</td>
+</tr>
+<tr>
+<td><strong>No accidental side effects</strong></td>
+<td>แก้ state ที่ไม่ควรแตะไหม</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ L10: หลายหมวดคล้าย <strong>code review checklist</strong> (security, error handling, testing, readability/conventions)</p>
+</blockquote>
+<h3 id="64-refine-สไลด์-28">6.4 Refine <sub>(สไลด์ 28)</sub></h3>
+<p><strong>แก่น: ใช้ผล verify หาจุดที่ implementation ไม่ตรง spec แล้วปรับ เป้าหมายของขั้นนี้คือ &quot;ปรับ spec ให้ดีขึ้น&quot;</strong></p>
+<ul>
+<li>agent ปรับส่วนที่ผิดหรือไม่ตรง ก่อนสร้างเวอร์ชันถัดไป</li>
+<li><strong>Refinement triggers ที่พบบ่อย:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เกิดอะไรขึ้น</th>
+<th>แก้ยังไง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>test fail</strong></td>
+<td>เพิ่ม case ที่ fail เป็น <strong>example ใน spec</strong></td>
+</tr>
+<tr>
+<td>agent ใช้ <strong>library ที่ deprecated</strong></td>
+<td>เพิ่ม <strong>constraint</strong> (&quot;do not use X, use Y&quot;)</td>
+</tr>
+<tr>
+<td>output <strong>เข้าใจ domain concept ผิด</strong></td>
+<td>เพิ่ม <strong>นิยามอธิบาย</strong></td>
+</tr>
+<tr>
+<td>โค้ดถูกแต่ <strong>ผิด convention</strong></td>
+<td>เพิ่ม convention ลงใน <strong>context</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ <strong>เป้าหมายของ Refine คือปรับปรุง specification</strong> (ไม่ใช่แค่แก้โค้ด)</li>
+</ul>
+<hr />
+<h2 id="7-key-practices-for-ase-pattern-vs-anti-pattern-สไลด์-2934-hassan-2025">7. Key practices for ASE (pattern vs anti-pattern) <sub>(สไลด์ 29–34, Hassan 2025)</sub></h2>
+<p><strong>แก่น: Hassan (2025) ระบุ 5 pattern ที่แยก AI-native engineer ที่เก่งออกจากคนที่แค่ใช้ tool ใหม่โดยไม่เปลี่ยนวิธีทำงาน แต่ละ pattern มี anti-pattern (failure mode) คู่กัน</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pattern (ควรทำ)</th>
+<th>Anti-pattern ที่มันแก้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Specification-first development</strong></td>
+<td><strong>Prompt-and-pray</strong></td>
+</tr>
+<tr>
+<td><strong>Verification-driven generation</strong></td>
+<td><strong>Confidence by plausibility</strong></td>
+</tr>
+<tr>
+<td><strong>Context file discipline</strong></td>
+<td><strong>Context starvation</strong></td>
+</tr>
+<tr>
+<td><strong>Incremental delegation</strong></td>
+<td><strong>Overlong agentic sessions</strong></td>
+</tr>
+<tr>
+<td><strong>Commit granularity</strong></td>
+<td><strong>Ownership transfer</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="71-specification-first-vs-prompt-and-pray-สไลด์-30">7.1 Specification-first vs Prompt-and-pray <sub>(สไลด์ 30)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Specification-first development</th>
+<th>❌ Prompt-and-pray</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เขียน <strong>spec ให้ครบก่อน</strong> สั่ง agent implement</td>
+<td>ให้ <strong>prompt คลุมเครือ</strong> รับ output แล้ว <strong>ship เลยโดยไม่ verify อย่างเป็นระบบ</strong></td>
+</tr>
+<tr>
+<td>คิด requirement ให้จบก่อน แทนการแก้ prompt ไปเรื่อย ๆ ระหว่าง agent ทำงาน</td>
+<td><strong>test ผ่านไม่ได้รับประกัน</strong> ว่าตรง spec หรือ security requirement</td>
+</tr>
+<tr>
+<td>spec ชัดและครบ มักได้ผลดีกว่า</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72-verification-driven-generation-vs-confidence-by-plausibility-สไลด์-31">7.2 Verification-driven generation vs Confidence by plausibility <sub>(สไลด์ 31)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Verification-driven generation</th>
+<th>❌ Confidence by plausibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>กำหนดวิธีเช็กความถูกต้องก่อน</strong> generate โค้ด</td>
+<td><strong>คิดเอาว่าโค้ดถูก</strong> เพราะดูมืออาชีพ คุ้นตา ไม่มี error</td>
+</tr>
+<tr>
+<td>เตรียม <strong>test case, behavioral requirements, security checks</strong> ไว้ล่วงหน้า</td>
+<td><strong>Plausible ≠ Correct</strong>: โค้ดจาก AI ยังต้อง verify</td>
+</tr>
+<tr>
+<td>เกณฑ์ verify เป็นตัว <strong>นิยามว่า &quot;ถูก&quot; คืออะไร</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="73-context-file-discipline-vs-context-starvation-สไลด์-32">7.3 Context file discipline vs Context starvation <sub>(สไลด์ 32)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Context file discipline</th>
+<th>❌ Context starvation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ดูแล <strong>context file ระดับโปรเจกต์</strong> (เช่น <code>CLAUDE.md</code>, <code>.cursorrules</code>)</td>
+<td>ให้ agent รู้ <strong>context น้อยเกินไป</strong> เรื่องโปรเจกต์ conventions หรือ architecture</td>
+</tr>
+<tr>
+<td>ข้อมูลต้อง <strong>ถูกต้องและอัปเดต</strong></td>
+<td>ได้โค้ดที่ <strong>ไม่เข้ากับระบบเดิม</strong></td>
+</tr>
+<tr>
+<td>ข้อมูลเก่าทำให้ agent ใช้ library, dependency หรือแนวทางผิด</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="74-incremental-delegation-vs-overlong-agentic-sessions-สไลด์-33">7.4 Incremental delegation vs Overlong agentic sessions <sub>(สไลด์ 33)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Incremental delegation</th>
+<th>❌ Overlong agentic sessions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เริ่มจาก <strong>งานเล็กที่นิยามชัด</strong></td>
+<td>ปล่อย agent แก้หลายอย่างใน <strong>session ยาวต่อเนื่อง</strong></td>
+</tr>
+<tr>
+<td>ค่อย ๆ มอบงานใหญ่ขึ้นเมื่อมั่นใจขึ้น</td>
+<td><strong>ผิดตั้งแต่ต้น → กลายเป็นฐานของการเปลี่ยนแปลงต่อ ๆ มา</strong></td>
+</tr>
+<tr>
+<td><strong>ความไว้ใจขึ้นกับประเภทงาน ไม่ใช่ agent ทั้งตัว</strong> เช่น agent อาจเก่งเรื่อง test แต่เขียน authentication ไม่ปลอดภัย</td>
+<td>แก้ทีหลังอาจต้อง <strong>ย้อนหรือทำใหม่หลายขั้น</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="75-commit-granularity-vs-ownership-transfer-สไลด์-34">7.5 Commit granularity vs Ownership transfer <sub>(สไลด์ 34)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>✅ Commit granularity</th>
+<th>❌ Ownership transfer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>commit โค้ดจาก AI <strong>บ่อยและเป็นชิ้นเล็กที่ review ได้</strong></td>
+<td>มองว่าโค้ดที่ AI สร้างเป็น <strong>&quot;ความรับผิดชอบของ AI&quot;</strong></td>
+</tr>
+<tr>
+<td><strong>อย่า commit ก้อนเดียวหลายร้อยหลายพันบรรทัด</strong></td>
+<td>ที่ถูกคือ <strong>developer ยังรับผิดชอบโค้ดที่ตัวเอง review, accept และ commit</strong> ไม่ว่าใครเป็นคนสร้าง</td>
+</tr>
+<tr>
+<td>commit เล็ก review, เข้าใจ, verify และ undo ง่ายกว่า</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับ L10: &quot;Commit small and often&quot; เป็น good implementation practice เหมือนกัน</p>
+</blockquote>
+<hr />
+<h2 id="8-productivity-vs-risk-สไลด์-3536">8. Productivity vs Risk <sub>(สไลด์ 35–36)</sub></h2>
+<p><strong>แก่น: AI เพิ่ม productivity ได้มากกับงาน routine ที่นิยามชัด แต่ได้น้อยกับ logic ใหม่ architecture และการตัดสินใจกับ stakeholder และมีความเสี่ยง 5 ด้าน</strong></p>
+<h3 id="81-productivity-สไลด์-35">8.1 Productivity <sub>(สไลด์ 35)</sub></h3>
+<ul>
+<li>AI coding agent <strong>เพิ่ม productivity ได้มาก</strong></li>
+<li>AI ได้ผลดีเป็นพิเศษกับ:
+<ul>
+<li>Routine code generation</li>
+<li>Test scaffolding</li>
+<li>Documentation</li>
+<li>Boilerplate code</li>
+<li>Code translation</li>
+</ul>
+</li>
+<li><strong>ผลขึ้นกับประเภทงาน:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภทงาน</th>
+<th>Productivity gain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Routine, well-defined tasks</strong></td>
+<td><strong>อาจเพิ่มมาก</strong></td>
+</tr>
+<tr>
+<td><strong>Novel logic, architecture, stakeholder decisions</strong></td>
+<td><strong>เพิ่มได้จำกัด</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>AI ช่วยหลัก ๆ กับงานที่มันทำได้ดี ส่วนงานที่ต้องใช้ <strong>วิจารณญาณของคน ความรู้ domain และการสื่อสาร</strong> ยังพึ่งคนเป็นหลัก</li>
+</ul>
+<h3 id="82-risk-5-ด้าน-สไลด์-36">8.2 Risk 5 ด้าน <sub>(สไลด์ 36)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ความเสี่ยง</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Overreliance &amp; skill loss</strong></td>
+<td>พึ่ง AI มากเกินไป → <strong>ทักษะและวิจารณญาณของ developer ลดลง</strong> จนตรวจงาน AI ได้ยากขึ้น</td>
+</tr>
+<tr>
+<td><strong>Responsibility &amp; accountability</strong></td>
+<td>developer และองค์กร <strong>ยังต้องรับผิดชอบ</strong> โค้ดจาก AI และผลที่ตามมา</td>
+</tr>
+<tr>
+<td><strong>Intellectual property</strong></td>
+<td>โค้ดจาก AI อาจ <strong>คล้ายโค้ดที่มีลิขสิทธิ์หรือ open-source</strong> ต้องดู licensing และนโยบายองค์กร</td>
+</tr>
+<tr>
+<td><strong>Increasing impact of mistakes</strong></td>
+<td>agent อิสระมากขึ้น → <strong>&quot;blast radius&quot; ใหญ่ขึ้น</strong> เมื่อผิดพลาด ให้ <strong>ปรับระดับอิสระตามว่า action ย้อนกลับได้แค่ไหน</strong></td>
+</tr>
+<tr>
+<td><strong>Security risks</strong></td>
+<td>agent ที่ต่อกับระบบภายนอกอาจโดน <strong>prompt injection</strong> และการโจมตีอื่นผ่าน <strong>เนื้อหาที่ไม่น่าเชื่อถือ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-summary-สไลด์-37">9. Summary <sub>(สไลด์ 37)</sub></h2>
+<p><strong>แก่น: review ทุกอย่าง, เข้าใจสิ่งที่ commit, และกำหนดขอบเขตการมอบงาน: action ที่ย้อนได้มอบได้แต่ต้อง review ส่วน action ที่ย้อนไม่ได้ต้องให้คนอนุมัติก่อน</strong></p>
+<ul>
+<li><strong>Review everything:</strong> มองโค้ดจาก AI เป็น <strong>first draft</strong> review ให้ดีก่อน commit</li>
+<li><strong>Understand what you commit:</strong> <strong>ห้าม commit โค้ดที่ตัวเองไม่เข้าใจ</strong> ให้ agent อธิบาย อ่าน documentation และ verify เอง</li>
+<li><strong>Set delegation boundaries:</strong> ตัดสินใจว่างานไหนมอบได้ งานไหนต้องให้คนอนุมัติ</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท action</th>
+<th>ทำยังไง</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reversible</strong></td>
+<td><strong>มอบได้ + review</strong></td>
+<td>แก้ไฟล์, เขียน test</td>
+</tr>
+<tr>
+<td><strong>Irreversible</strong></td>
+<td><strong>ต้องให้คนอนุมัติก่อนรัน</strong></td>
+<td>database migration, production deployment</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ASE</td>
+<td>ใช้ AI coding agent plan, implement, test, iterate</td>
+<td>เปลี่ยนวิธีจัดงาน</td>
+</tr>
+<tr>
+<td>LLM</td>
+<td>neural network ทำนายข้อความต่อ</td>
+<td>สมองอย่างเดียว</td>
+</tr>
+<tr>
+<td>AI coding agent</td>
+<td>LLM (reasoning engine) + tools ทำงานอัตโนมัติ</td>
+<td>สมอง + มือ</td>
+</tr>
+<tr>
+<td>Taxonomy 0–5</td>
+<td>Manual → Token → Task-Agentic → Goal-Agentic → Specialised → General</td>
+<td>เทียบ SAE</td>
+</tr>
+<tr>
+<td>AI-native IDE</td>
+<td>ฝัง agent ใน editor (Cursor, Windsurf)</td>
+<td></td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>primitive action มี input/output ชัด</td>
+<td>read_file</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td>reusable prompt/template ประกอบจากหลาย tool</td>
+<td><code>/review</code></td>
+</tr>
+<tr>
+<td>Connector</td>
+<td>เชื่อมระบบภายนอก (DB, API, GitHub)</td>
+<td></td>
+</tr>
+<tr>
+<td>In-context memory</td>
+<td>จำใน session เดียว</td>
+<td></td>
+</tr>
+<tr>
+<td>External memory</td>
+<td>ข้าม session (CLAUDE.md, vector DB)</td>
+<td></td>
+</tr>
+<tr>
+<td>Episodic memory</td>
+<td>ข้าม task (สรุปงานเก่า)</td>
+<td></td>
+</tr>
+<tr>
+<td>Semantic memory</td>
+<td>ข้าม agent (ข้อเท็จจริงร่วม)</td>
+<td></td>
+</tr>
+<tr>
+<td>Agentic SDLC</td>
+<td>Spec → Generate → Verify → Refine</td>
+<td>วนซ้ำ</td>
+</tr>
+<tr>
+<td>Spec</td>
+<td>context, I/O, behaviour rules (≥5), constraints, examples, quality attributes</td>
+<td>6 ส่วน</td>
+</tr>
+<tr>
+<td>Prompt-and-pray</td>
+<td>prompt คลุมเครือแล้ว ship ไม่ verify</td>
+<td>anti-pattern</td>
+</tr>
+<tr>
+<td>Confidence by plausibility</td>
+<td>เชื่อเพราะดูดี (plausible ≠ correct)</td>
+<td>anti-pattern</td>
+</tr>
+<tr>
+<td>Context starvation</td>
+<td>ให้ context น้อยไป</td>
+<td>anti-pattern</td>
+</tr>
+<tr>
+<td>Overlong agentic session</td>
+<td>session ยาว ผิดแต่ต้นลามไปหมด</td>
+<td>anti-pattern</td>
+</tr>
+<tr>
+<td>Ownership transfer</td>
+<td>โยนความรับผิดชอบให้ AI</td>
+<td>anti-pattern</td>
+</tr>
+<tr>
+<td>Blast radius</td>
+<td>ขอบเขตความเสียหายเมื่อผิด</td>
+<td></td>
+</tr>
+<tr>
+<td>Prompt injection</td>
+<td>โจมตีผ่านเนื้อหาที่ไม่น่าเชื่อถือ</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>ASE</strong> = เปลี่ยนวิธีจัดงาน ไม่ใช่แค่ tool + <strong>traditional vs agentic flow</strong></li>
+<li>⭐ <strong>LLM vs agent</strong> และ <strong>ตาราง 7 capabilities</strong> (LLM ทำได้แค่ generate code)</li>
+<li>⭐ <strong>Taxonomy 6 levels</strong> + ตัวอย่าง (Claude Code อยู่ level 3, level 5 ยังไม่มีจริง)</li>
+<li>⭐ <strong>2 ประเภท agent</strong>: terminal (Claude Code, Gemini CLI) vs AI-native IDE (Cursor, Windsurf)</li>
+<li>⭐ <strong>4 components</strong>: tools, skills, connectors, memory + <strong>memory 4 ประเภท</strong></li>
+<li>⭐ <strong>Agentic SDLC 4 ขั้น</strong>, <strong>spec 6 ส่วน</strong>, <strong>Generate 3 decisions</strong>, <strong>Verify checklist 8 หมวด</strong>, <strong>Refine triggers 4 แบบ</strong> (เป้าหมาย = ปรับ spec)</li>
+<li>⭐ <strong>5 patterns vs 5 anti-patterns</strong> (จับคู่ให้ถูก)</li>
+<li>⭐ <strong>Productivity</strong>: routine ได้มาก / novel logic ได้น้อย + <strong>5 risks</strong></li>
+<li>⭐ <strong>Reversible = มอบได้ + review | Irreversible = ต้องคนอนุมัติ</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM</td>
+<td>AI coding agent</td>
+<td>ทำนายข้อความ vs LLM + tools ลงมือทำได้</td>
+</tr>
+<tr>
+<td>Traditional AI-assisted</td>
+<td>Agentic development</td>
+<td>AI แนะนำ คนตัดสิน vs agent plan+implement+test คน review</td>
+</tr>
+<tr>
+<td>Task-Agentic (L2)</td>
+<td>Goal-Agentic (L3)</td>
+<td>สร้างชิ้นงานจาก task vs วางแผนหลายขั้นจาก goal</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>Skill</td>
+<td>action พื้นฐาน vs ความสามารถที่ประกอบจากหลาย tool</td>
+</tr>
+<tr>
+<td>Connector</td>
+<td>Tool</td>
+<td>เชื่อมระบบภายนอก vs action พื้นฐานใน environment</td>
+</tr>
+<tr>
+<td>External memory</td>
+<td>Semantic memory</td>
+<td>ข้าม session vs ข้าม agent</td>
+</tr>
+<tr>
+<td>Episodic memory</td>
+<td>Semantic memory</td>
+<td>สรุปงานที่เคยทำ (ข้าม task) vs ข้อเท็จจริงร่วม (ข้าม agent)</td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td>Windsurf</td>
+<td>chat panel vs proactive เสนอเอง</td>
+</tr>
+<tr>
+<td>Verify</td>
+<td>Refine</td>
+<td>เช็กว่าตรง spec vs ปรับ spec จากผล verify</td>
+</tr>
+<tr>
+<td>Prompt-and-pray</td>
+<td>Confidence by plausibility</td>
+<td>ไม่มี spec / ไม่ verify vs เชื่อเพราะดูดี</td>
+</tr>
+<tr>
+<td>Reversible action</td>
+<td>Irreversible action</td>
+<td>มอบได้ + review vs ต้องคนอนุมัติก่อน</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l13/index.html"><small>← บทก่อนหน้า</small><span>Lecture 13 – Unit Testing, Integration Testing, and System Testing</span></a><span></span></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

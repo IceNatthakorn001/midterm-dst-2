@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 11 – Version Control System · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-cm-สไลด์-45">1. CM (สไลด์ 4–5)</a></li><li><a href="#2-configuration-item-สไลด์-6">2. Configuration item (สไลด์ 6)</a></li><li><a href="#3-version-identification-สไลด์-7">3. Version identification (สไลด์ 7)</a></li><li><a href="#4-vcs-สไลด์-911">4. VCS (สไลด์ 9–11)</a></li><li><a href="#5-cvs-svn-git-สไลด์-1214">5. CVS / SVN / Git (สไลด์ 12–14)</a></li><li><a href="#6-git-สไลด์-1516">6. Git (สไลด์ 15–16)</a></li><li><a href="#7-staging-lifecycle-สไลด์-1719">7. Staging &amp; lifecycle (สไลด์ 17–19)</a></li><li><a href="#8-add-commit-pull-push-สไลด์-2023">8. Add / Commit / Pull / Push (สไลด์ 20–23)</a></li><li><a href="#9-decentralized-but-centralized-สไลด์-24">9. Decentralized but Centralized (สไลด์ 24)</a></li><li><a href="#10-branch-สไลด์-2527">10. Branch (สไลด์ 25–27)</a></li><li><a href="#11-branching-model-สไลด์-2833-nvie">11. Branching model (สไลด์ 28–33, nvie)</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L11</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 11 – Version Control System</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a></div>
+      <article class="prose"><h2 id="1-cm-สไลด์-45">1. CM (สไลด์ 4–5)</h2>
+<p><strong>แก่น: initiating, evaluating, controlling change ระหว่างและหลังการพัฒนา</strong></p>
+<ul>
+<li>⭐ มาตรฐาน <strong>IEEE 828</strong> (SCM Plans) | <strong>IEEE 1042</strong> (Guide to SCM)</li>
+<li>CM ↔ Project Management (รับ planning data / ส่ง CM plan, status reports, audit results) | Product Development ส่ง work products + change requests → CM ส่ง controlled work products + approved change requests กลับ</li>
+</ul>
+<h2 id="2-configuration-item-สไลด์-6">2. Configuration item (สไลด์ 6)</h2>
+<p><strong>แก่น: อะไรที่เปลี่ยนได้และต้องติดตาม</strong></p>
+<ul>
+<li>⭐ โค้ดทุกชนิด, เอกสาร (req/analysis/design), test drivers, user/dev manuals, system config (compiler version), hardware config (CPU, bus speed)</li>
+</ul>
+<h2 id="3-version-identification-สไลด์-7">3. Version identification (สไลด์ 7)</h2>
+<ul>
+<li>⭐ <strong>Version numbering</strong> (V1, V1.1, V2.1 — linear, <strong>ชื่อไม่สื่อความหมาย</strong>) | <strong>Attribute-based</strong> (Date, Creator, Language, Customer, Status)</li>
+</ul>
+<h2 id="4-vcs-สไลด์-911">4. VCS (สไลด์ 9–11)</h2>
+<p><strong>แก่น: ส่วนหนึ่งของ CM</strong></p>
+<ul>
+<li>⭐ Purposes: <strong>1 Restore previous configurations | 2 Coordinate changes | 3 Identify versions &amp; components</strong></li>
+<li>ไม่มี VCS → FINAL_rev.22…doc, final-project-v2-FINALFINAL.doc</li>
+</ul>
+<h2 id="5-cvs-svn-git-สไลด์-1214">5. CVS / SVN / Git (สไลด์ 12–14)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>CVS</th>
+<th>Subversion</th>
+<th>Git</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>repo</td>
+<td>กลาง</td>
+<td>กลาง (+ <code>.svn</code> ในเครื่อง)</td>
+<td><strong>distributed</strong> (+ staging + repo ในเครื่อง)</td>
+</tr>
+<tr>
+<td>ลง/ขึ้น</td>
+<td>⭐ checkout / <strong>checkin</strong></td>
+<td>⭐ <strong>update</strong> / commit</td>
+<td>⭐ pull / commit + push</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="6-git-สไลด์-1516">6. Git (สไลด์ 15–16)</h2>
+<ul>
+<li>free, open-source, distributed | easy, tiny footprint, เร็ว | เหนือ SVN/CVS | cheap local branching, staging, หลาย workflow</li>
+<li>⭐ Distributed: <strong>everything local | fast | clone = backup | offline | full history</strong></li>
+</ul>
+<h2 id="7-staging-lifecycle-สไลด์-1719">7. Staging &amp; lifecycle (สไลด์ 17–19)</h2>
+<ul>
+<li>⭐ staging area (<strong>index</strong>) = การเปลี่ยนแปลงที่จะ commit (Git มี ระบบอื่นไม่มี)</li>
+<li>⭐ untracked →add→ staged →commit→ unmodified →edit→ modified →add→ staged | staged →remove→ untracked</li>
+<li><code>git add &lt;file&gt;</code> | <code>git commit -m &quot;message&quot;</code> | ⚠️ สไลด์สะกด &quot;modifed&quot;</li>
+</ul>
+<h2 id="8-add-commit-pull-push-สไลด์-2023">8. Add / Commit / Pull / Push (สไลด์ 20–23)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>จาก → ไป</th>
+<th>จุดสำคัญ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ Add</td>
+<td>working dir → staging</td>
+<td>เลือกว่าอะไรเข้า commit, review ก่อนได้</td>
+</tr>
+<tr>
+<td>⭐ Commit</td>
+<td>staging → local repo</td>
+<td>เวอร์ชันใหม่ + message</td>
+</tr>
+<tr>
+<td>⭐ Pull</td>
+<td>remote → local</td>
+<td><strong>fetch + merge</strong>, ปกติอัตโนมัติ, conflict จัดการไม่ยาก</td>
+</tr>
+<tr>
+<td>⭐ Push</td>
+<td>local → remote</td>
+<td><strong>ถูก reject ได้</strong> ถ้า remote มีของที่ local ไม่มี</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>นอก push/pull: สร้าง / integrate <strong>patch</strong></li>
+</ul>
+<h2 id="9-decentralized-but-centralized-สไลด์-24">9. Decentralized but Centralized (สไลด์ 24)</h2>
+<ul>
+<li><strong>origin</strong> กลาง ↔ alice, bob, clair, david (push/pull) + <strong>subteam fetches</strong> ระหว่างกันเอง</li>
+</ul>
+<h2 id="10-branch-สไลด์-2527">10. Branch (สไลด์ 25–27)</h2>
+<ul>
+<li>⭐ <strong>master</strong> = default, deployable, production, <strong>stable</strong> | ห้าม push ที่ไม่ test/ทำ build พัง</li>
+<li>⭐ สร้าง branch เมื่อ: <strong>feature ใหม่ | release ใหม่ | ทดลอง | แก้ bug</strong></li>
+<li>ง่าย, ชั่วคราว, สนับสนุนให้ branch, merge อัตโนมัติ | ⚠️ conflict ตอน merge, ไม่มี tool = เจ็บ → ใช้ <strong>defined workflow</strong></li>
+</ul>
+<h2 id="11-branching-model-สไลด์-2833-nvie">11. Branching model (สไลด์ 28–33, nvie)</h2>
+<ul>
+<li>⭐ Main: <strong>master</strong> (production-ready) | <strong>develop</strong> (latest changes for next release)</li>
+<li>⭐ Supporting:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Branch</th>
+<th>ใช้</th>
+<th>จาก → กลับ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feature (topic)</td>
+<td>feature ใหม่ (release ถัดไป/อนาคต)</td>
+<td>develop → develop</td>
+</tr>
+<tr>
+<td>Release</td>
+<td>เตรียม production release, ปล่อย develop รับ feature ถัดไป, <strong>only bugfixes</strong></td>
+<td>develop → master (tag) + develop</td>
+</tr>
+<tr>
+<td>Hotfix</td>
+<td>แก้ด่วน production (critical bug)</td>
+<td><strong>tag บน master</strong> → master (tag ใหม่ เช่น 1.2.1) + develop</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CM</td>
+<td>VCS</td>
+<td>กระบวนการ vs เครื่องมือ (ส่วนหนึ่งของ CM)</td>
+</tr>
+<tr>
+<td>Numbering</td>
+<td>Attribute-based</td>
+<td>เลขเรียง vs ชุด attribute</td>
+</tr>
+<tr>
+<td>Centralized</td>
+<td>Distributed</td>
+<td>repo กลาง vs ทุกคนมี repo ครบ</td>
+</tr>
+<tr>
+<td>Add</td>
+<td>Commit</td>
+<td>→ staging vs → local repo</td>
+</tr>
+<tr>
+<td>Commit</td>
+<td>Push</td>
+<td>local vs remote</td>
+</tr>
+<tr>
+<td>Pull</td>
+<td>Push</td>
+<td>remote→local vs local→remote</td>
+</tr>
+<tr>
+<td>master</td>
+<td>develop</td>
+<td>production vs next release</td>
+</tr>
+<tr>
+<td>Release</td>
+<td>Hotfix</td>
+<td>จาก develop vs จาก tag บน master</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l10/short.html"><small>← บทก่อนหน้า</small><span>Lecture 10 – Implementation &amp; Code Review</span></a><a class="pg next" href="../l12/short.html"><small>บทถัดไป →</small><span>Lecture 12 – Testing</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

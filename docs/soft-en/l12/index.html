@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 12 – Testing · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-qa-กับ-qc-ต่างกันยังไง-สไลด์-4">1. QA กับ QC ต่างกันยังไง? (สไลด์ 4)</a></li><li><a href="#2-วิธีหา-error-มีอะไรบ้าง-6-วิธี-สไลด์-511">2. วิธีหา error มีอะไรบ้าง? (6 วิธี) (สไลด์ 5–11)</a></li><li><a href="#3-quality-คืออะไร-และ-verification-กับ-validation-ต่างกันยังไง-สไลด์-1214">3. &quot;Quality&quot; คืออะไร และ Verification กับ Validation ต่างกันยังไง? (สไลด์ 12–14)</a></li><li><a href="#4-fault-error-failure-ต่างกันยังไง-สไลด์-15">4. Fault, Error, Failure ต่างกันยังไง? (สไลด์ 15)</a></li><li><a href="#5-testing-คืออะไร-และแบ่งได้กี่แบบ-สไลด์-1619">5. Testing คืออะไร และแบ่งได้กี่แบบ? (สไลด์ 16–19)</a></li><li><a href="#6-black-box-testing-คืออะไร-สไลด์-2021">6. Black-box testing คืออะไร? (สไลด์ 20–21)</a></li><li><a href="#7-equivalence-class-partitioning-ecp-ทำยังไง-สไลด์-2226">7. Equivalence Class Partitioning (ECP) ทำยังไง? (สไลด์ 22–26)</a></li><li><a href="#8-boundary-value-analysis-bva-ทำยังไง-สไลด์-2730">8. Boundary Value Analysis (BVA) ทำยังไง? (สไลด์ 27–30)</a></li><li><a href="#9-white-box-testing-คืออะไร-สไลด์-3132">9. White-box testing คืออะไร? (สไลด์ 31–32)</a></li><li><a href="#10-path-analysis-และ-linearly-independent-paths-สไลด์-3338">10. Path analysis และ linearly independent paths (สไลด์ 33–38)</a></li><li><a href="#11-เมื่อไหร่ควรหยุด-test-สไลด์-3940">11. เมื่อไหร่ควรหยุด test? (สไลด์ 39–40)</a></li><li><a href="#12-inspections-vs-testing-สไลด์-4142">12. Inspections vs Testing (สไลด์ 41–42)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L12</div>
+      <h1 class="lesson-title">Lecture 12 – Testing</h1>
+      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
+      <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> หลัง implementation (L10) และจัดการเวอร์ชัน (L11) ต้องตรวจว่าซอฟต์แวร์ <strong>มีคุณภาพ</strong> บทนี้ปูพื้น <strong>QA vs QC</strong>, <strong>6 วิธีหา error</strong>, <strong>verification vs validation</strong> และ fault/error/failure จากนั้นลงเทคนิค test 2 ฝั่ง: <strong>black-box</strong> (ECP, BVA) และ <strong>white-box</strong> (path analysis, cyclomatic number) ปิดด้วย <strong>เมื่อไหร่ควรหยุด test</strong> และ <strong>inspection vs testing</strong></p>
+<p>มีโจทย์ทำ test case หลายข้อ (ECP, BVA, นับ independent path)</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L12-00-overview.png" alt="แผนผังภาพรวม Lecture 12" /></p>
+<h2 id="1-qa-กับ-qc-ต่างกันยังไง-สไลด์-4">1. QA กับ QC ต่างกันยังไง? <sub>(สไลด์ 4)</sub></h2>
+<p><strong>แก่น: QA = ทุกกิจกรรมที่วัดและปรับปรุงคุณภาพของทั้ง product และ process ส่วน QC = กิจกรรมที่ตรวจคุณภาพของ product และหา fault ทั้งสองอย่างต้องมี process, tools และ team ที่ดี</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Quality Assurance (QA)</th>
+<th>Quality Control (QC)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>นิยาม</td>
+<td>all activities designed to <strong>measure and improve quality</strong></td>
+<td>activities designed to <strong>verify the quality</strong> and <strong>detect faults</strong></td>
+</tr>
+<tr>
+<td>ครอบคลุม</td>
+<td><strong>product และ process</strong></td>
+<td><strong>product</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ทั้งคู่ต้องการ <strong>process, tools และ team ที่ดี</strong></li>
+</ul>
+<hr />
+<h2 id="2-วิธีหา-error-มีอะไรบ้าง-6-วิธี-สไลด์-511">2. วิธีหา error มีอะไรบ้าง? (6 วิธี) <sub>(สไลด์ 5–11)</sub></h2>
+<p><strong>แก่น: code review และ static analysis ตรวจโดยไม่รันโปรแกรม ส่วน testing และ dynamic analysis ต้องรัน debugging หาสาเหตุหลังพบ error และ formal methods ใช้คณิตศาสตร์พิสูจน์</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>หลักคิด</th>
+<th>ตัวอย่าง / ประเภทย่อย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code Review</strong></td>
+<td>ตรวจ source code หา defect <strong>ก่อนรัน</strong></td>
+<td><strong>Code inspection</strong> (ตรวจเป็นระบบตามเกณฑ์), <strong>Peer review</strong> (developer อื่นตรวจ), <strong>Walkthrough</strong> (author อธิบายโค้ดทีละขั้นให้ reviewer), <strong>Static analysis</strong> (tool วิเคราะห์โดยไม่รัน)</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td><strong>รันซอฟต์แวร์</strong> แล้วดูว่าพฤติกรรมตรงที่คาดไหม</td>
+<td><strong>Unit</strong> (function/class), <strong>Integration</strong> (ปฏิสัมพันธ์ระหว่าง component), <strong>System</strong> (ทั้งระบบ), <strong>Acceptance</strong> (ตรง requirement ของผู้ใช้/ธุรกิจ), <strong>Regression</strong> (การเปลี่ยนแปลงใหม่ไม่ทำให้เกิด defect ใหม่)</td>
+</tr>
+<tr>
+<td><strong>Static Analysis</strong></td>
+<td>หาปัญหา <strong>โดยไม่รันโปรแกรม</strong></td>
+<td>syntax/type errors, unused variables, unreachable code, code smells, security vulnerabilities, potential null-pointer errors, violations of coding standards</td>
+</tr>
+<tr>
+<td><strong>Dynamic Analysis</strong></td>
+<td>หาปัญหา <strong>ขณะโปรแกรมรัน</strong></td>
+<td>runtime error detection, memory leak detection, performance monitoring, debugging, code coverage analysis, profiling</td>
+</tr>
+<tr>
+<td><strong>Debugging</strong></td>
+<td>หาตำแหน่งและสาเหตุของ failure <strong>หลังเห็น error แล้ว</strong></td>
+<td>breakpoints, step-by-step execution, variable inspection, logging/tracing, stack-trace analysis</td>
+</tr>
+<tr>
+<td><strong>Formal Methods</strong></td>
+<td>ใช้ <strong>คณิตศาสตร์</strong> แสดงว่าซอฟต์แวร์มีคุณสมบัติตามที่กำหนด</td>
+<td>formal specification, model checking, theorem proving, formal verification</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ขั้นตอน debugging</strong> (สไลด์ 10):</p>
+<p><img loading="lazy" src="diagrams/L12-01-debugging.png" alt="ขั้นตอน debugging" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Static vs Dynamic:</strong> static = <strong>ไม่รัน</strong> | dynamic = <strong>รันอยู่</strong> สังเกตว่า &quot;debugging&quot; อยู่ในรายการตัวอย่างของ dynamic analysis ด้วย</p>
+<p class="c-tip">💡 เชื่อมกับ L10: debugging ใน L10 มี 4 phase (stabilization → localization → correction → verification) ส่วนสไลด์นี้แบ่งเป็น 5 กล่อง</p>
+</blockquote>
+<hr />
+<h2 id="3-quality-คืออะไร-และ-verification-กับ-validation-ต่างกันยังไง-สไลด์-1214">3. &quot;Quality&quot; คืออะไร และ Verification กับ Validation ต่างกันยังไง? <sub>(สไลด์ 12–14)</sub></h2>
+<p><strong>แก่น: quality = ตรงตาม requirement และเหมาะกับการใช้งาน verification ถามว่า &quot;สร้างถูกวิธีไหม&quot; (ผลของแต่ละ phase ตรงกับ phase ก่อน) ส่วน validation ถามว่า &quot;สร้างของที่ใช่ไหม&quot; (ตอนจบตรงกับการใช้งานจริง)</strong></p>
+<p><strong>Quality</strong> (สไลด์ 12) มี 2 ด้าน: ✔ <strong>Conforms to requirements</strong> และ <strong>Fit to use</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Verification</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>นิยาม (Ammann &amp; Offutt)</td>
+<td>ตัดสินว่า <strong>ผลของ phase หนึ่ง</strong> ในกระบวนการพัฒนา <strong>ตรงตาม requirement ที่ตั้งไว้ใน phase ก่อนหน้า</strong> หรือไม่</td>
+<td>ประเมินซอฟต์แวร์ <strong>ตอนจบการพัฒนา</strong> ว่า <strong>ตรงกับการใช้งานที่ตั้งใจ (intended usage)</strong> หรือไม่</td>
+</tr>
+<tr>
+<td>คำถาม</td>
+<td><strong>&quot;Are we building the software right?&quot;</strong></td>
+<td><strong>&quot;Are we building the right software?&quot;</strong></td>
+</tr>
+<tr>
+<td>ด้าน quality ที่ตรงกัน</td>
+<td>conforms to requirements</td>
+<td>fit to use</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ: <strong>validation = &quot;right software&quot;</strong> คือของที่ใช่สำหรับผู้ใช้ไหม | <strong>verification = &quot;software right&quot;</strong> คือสร้างถูกตามที่ phase ก่อนกำหนดไหม</p>
+</blockquote>
+<p><strong>Validation and Verification Activities</strong> (สไลด์ 14, Naik &amp; Tripathy) – รูปตัว V: ฝั่งซ้ายเป็น Development ไล่ลงจาก Requirements ถึง Coding ฝั่งขวาเป็น Testing ไล่ขึ้นจาก Unit ถึง Acceptance แต่ละคู่จับกันดังนี้</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝั่ง Development</th>
+<th>↔</th>
+<th>ฝั่ง Testing</th>
+<th>ประเภทลูกศร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Requirements</td>
+<td>↔</td>
+<td>Acceptance</td>
+<td><strong>Validation</strong></td>
+</tr>
+<tr>
+<td>High-Level Design</td>
+<td>↔</td>
+<td>System</td>
+<td><strong>Verification</strong></td>
+</tr>
+<tr>
+<td>Detailed Design</td>
+<td>↔</td>
+<td>Integration</td>
+<td><strong>Verification</strong></td>
+</tr>
+<tr>
+<td>Coding</td>
+<td>↔</td>
+<td>Unit</td>
+<td><strong>Verification</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ในรูปสไลด์ยังมีลูกศร <strong>validation</strong> จาก High-Level Design, Detailed Design และ Coding ชี้ย้อนขึ้นไปหา <strong>Requirements</strong> ด้วย</li>
+</ul>
+<hr />
+<h2 id="4-fault-error-failure-ต่างกันยังไง-สไลด์-15">4. Fault, Error, Failure ต่างกันยังไง? <sub>(สไลด์ 15)</sub></h2>
+<p><strong>แก่น: fault = ข้อบกพร่องที่ฝังอยู่ในโค้ด (static), error = สถานะภายในที่ผิดเพราะ fault ทำงาน, failure = พฤติกรรมภายนอกที่ผิดจาก requirement</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำ</th>
+<th>นิยาม</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Software Fault</strong></td>
+<td><strong>static defect</strong> ในซอฟต์แวร์</td>
+<td>อยู่ในโค้ดเฉย ๆ</td>
+</tr>
+<tr>
+<td><strong>Software Error</strong></td>
+<td><strong>สถานะภายในที่ผิด (incorrect internal state)</strong> ที่เป็นผลจาก fault</td>
+<td>เกิดข้างในตอนรัน</td>
+</tr>
+<tr>
+<td><strong>Software Failure</strong></td>
+<td><strong>พฤติกรรมภายนอกที่ผิด</strong> เทียบกับ requirement หรือพฤติกรรมที่คาดไว้</td>
+<td>ผู้ใช้มองเห็น</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>fault ในซอฟต์แวร์ = design mistake ในฮาร์ดแวร์</strong></li>
+<li><strong>ซอฟต์แวร์ไม่เสื่อม (does not degrade)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ลำดับ: <strong>fault → error → failure</strong> (ข้างในโค้ด → ข้างในตอนรัน → ข้างนอกที่ผู้ใช้เห็น)</p>
+</blockquote>
+<hr />
+<h2 id="5-testing-คืออะไร-และแบ่งได้กี่แบบ-สไลด์-1619">5. Testing คืออะไร และแบ่งได้กี่แบบ? <sub>(สไลด์ 16–19)</sub></h2>
+<p><strong>แก่น: testing = ตรวจพฤติกรรมของโปรแกรมแบบ dynamic บน test case จำนวนจำกัด เพื่อประเมินคุณภาพและหา defect ก่อนปล่อย แต่พิสูจน์ไม่ได้ว่าทำงานถูก 100%</strong></p>
+<h3 id="51-testing-คืออะไร-สไลด์-16">5.1 Testing คืออะไร? <sub>(สไลด์ 16)</sub></h3>
+<ul>
+<li>เป็นกิจกรรมเพื่อ
+<ul>
+<li><strong>ประเมินคุณภาพ</strong> product</li>
+<li><strong>ปรับปรุง</strong> product ด้วยการหา defect แล้วแก้ <strong>ก่อน release</strong></li>
+</ul>
+</li>
+<li><strong>Dynamic (running-program) verification</strong> ของพฤติกรรมโปรแกรม บน <strong>ชุด test case จำนวนจำกัด</strong> ที่เลือกจาก execution domain</li>
+<li>⚠️ <strong>Testing พิสูจน์ไม่ได้ว่า product ทำงานถูก 100%</strong> แม้เราใช้ testing แสดงว่าบางส่วนทำงานได้</li>
+</ul>
+<h3 id="52-progression-of-testing-สไลด์-17">5.2 Progression of Testing <sub>(สไลด์ 17)</sub></h3>
+<p><img loading="lazy" src="diagrams/L12-03-progression.png" alt="Progression of testing" /></p>
+<ul>
+<li>Unit Test หลายตัว → Functional Test → Component Test → <strong>System / Regression Test</strong></li>
+</ul>
+<h3 id="53-testing-techniques-แบ่งตาม-4-คำถาม-สไลด์-1819">5.3 Testing techniques แบ่งตาม 4 คำถาม <sub>(สไลด์ 18–19)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำถาม</th>
+<th>คำตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Who tests</strong></td>
+<td>Programmers, Testers, Users</td>
+</tr>
+<tr>
+<td><strong>What is tested</strong></td>
+<td>Unit testing, Functional testing, Integration / system testing, User interface testing</td>
+</tr>
+<tr>
+<td><strong>Why test</strong></td>
+<td>Acceptance, Conformance, Configuration, Performance / stress</td>
+</tr>
+<tr>
+<td><strong>How (test cases)</strong></td>
+<td>Intuition, <strong>Specification based (black-box)</strong>, <strong>Code based (white-box)</strong>, Existing cases (regression), Faults</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-black-box-testing-คืออะไร-สไลด์-2021">6. Black-box testing คืออะไร? <sub>(สไลด์ 20–21)</sub></h2>
+<p><strong>แก่น: ทดสอบจาก functional requirement โดยไม่ดูโค้ดข้างใน ป้อน input แล้วดูผลที่ interface ใช้เทคนิค ECP และ BVA</strong></p>
+<ul>
+<li>ชื่ออื่น: <strong>behavioral testing</strong> หรือ <strong>functional testing</strong></li>
+<li>เน้น <strong>functional requirements</strong> ของซอฟต์แวร์</li>
+<li>สร้างชุด <strong>input conditions</strong> มาทดสอบกับ function ที่เกี่ยวข้อง</li>
+<li>ทดสอบที่ <strong>software interface</strong></li>
+<li>หา error ได้เรื่อง:
+<ul>
+<li><strong>function ผิดหรือขาด</strong></li>
+<li><strong>interface errors</strong></li>
+<li><strong>data structure / external database access errors</strong></li>
+<li><strong>behavior หรือ performance errors</strong></li>
+<li><strong>initialization และ termination errors</strong></li>
+</ul>
+</li>
+<li><strong>เทคนิค:</strong> Equivalence Class Partitioning และ Boundary Value Analysis</li>
+</ul>
+<hr />
+<h2 id="7-equivalence-class-partitioning-ecp-ทำยังไง-สไลด์-2226">7. Equivalence Class Partitioning (ECP) ทำยังไง? <sub>(สไลด์ 22–26)</sub></h2>
+<p><strong>แก่น: แบ่ง input เป็นกลุ่มที่ &quot;ถือว่าเหมือนกัน&quot; แล้วเลือกตัวแทน 1 ค่าต่อกลุ่มมา test เพราะถ้าโปรแกรมพังกับสมาชิกหนึ่งตัว ก็น่าจะพังกับทุกตัวในกลุ่มนั้น</strong></p>
+<ul>
+<li>เป็นเทคนิค <strong>specification-based, black-box</strong></li>
+<li><strong>แบ่ง input เป็นหลาย class</strong> ที่ถือว่าเท่ากันในแง่การหา error</li>
+<li>ใช้ <strong>ตัวแทน (representative)</strong> ของแต่ละ class มา test</li>
+<li>class กำหนดจาก <strong>intuition และ specs</strong></li>
+<li><em>&quot;If a program fails for one member of the class, then we expect to fail for all other members and vice versa&quot;</em></li>
+</ul>
+<p><strong>ตัวอย่าง: หาเลขที่มากกว่า (Finding the largest number)</strong> (สไลด์ 22)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Representative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First &gt; Second</td>
+<td>10, 7</td>
+</tr>
+<tr>
+<td>Second &gt; First</td>
+<td>8, 12</td>
+</tr>
+<tr>
+<td>First = Second</td>
+<td>6, 6</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตัวอย่าง: ช่อง Age รับ 18–56</strong> (สไลด์ 23)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>ช่วง</th>
+<th>เลือก test data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Valid</strong></td>
+<td>18 – 56</td>
+<td>ค่าใดก็ได้ใน 18–56</td>
+</tr>
+<tr>
+<td><strong>Invalid 1</strong></td>
+<td>≤ 17</td>
+<td>ค่าใดก็ได้ที่ ≤ 17</td>
+</tr>
+<tr>
+<td><strong>Invalid 2</strong></td>
+<td>≥ 57</td>
+<td>ค่าใดก็ได้ที่ ≥ 57</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Exercise 1</strong> (สไลด์ 24): ช่องรับเลข 1–1000</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>≤ 0</th>
+<th>1 – 1000</th>
+<th>≥ 1001</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invalid</td>
+<td><strong>Valid</strong></td>
+<td>Invalid</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Exercise 2</strong> (สไลด์ 25): ช่องรับเฉพาะเลข 75, 253, 414</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>75, 253, 414</th>
+<th>ค่าอื่นที่ไม่ใช่ 75, 253, 414</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Valid</strong></td>
+<td>Invalid</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Exercise 3</strong> (สไลด์ 26): ค่าตั๋วอุทยานตามอายุ</p>
+<ul>
+<li>เด็กอายุ <strong>ต่ำกว่า 12</strong>: ฟรี</li>
+<li>ผู้ใหญ่ <strong>18–60</strong>: 200 บาท</li>
+<li>อายุ <strong>ต่ำกว่า 18 และมากกว่า 60</strong>: 100 บาท</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>&lt; 0</th>
+<th>1 – 11</th>
+<th>12 – 17</th>
+<th>18 – 60</th>
+<th>&gt; 60</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invalid</td>
+<td>Valid: <strong>Free</strong></td>
+<td>Valid: <strong>100 Baht</strong></td>
+<td>Valid: <strong>200 Baht</strong></td>
+<td>Valid: <strong>100 Baht</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ เฉลยสไลด์ 26 แบ่งเป็น &quot;&lt; 0&quot; กับ &quot;1 – 11&quot; ทำให้ <strong>อายุ 0 ไม่อยู่ใน class ไหนเลย</strong> ส่วน Exercise 5 (สไลด์ 30) ใช้ class &quot;0–11&quot; ถ้าออกสอบให้เช็กกับอาจารย์ว่าอายุ 0 นับเป็น Free หรือ Invalid</p>
+</blockquote>
+<hr />
+<h2 id="8-boundary-value-analysis-bva-ทำยังไง-สไลด์-2730">8. Boundary Value Analysis (BVA) ทำยังไง? <sub>(สไลด์ 27–30)</sub></h2>
+<p><strong>แก่น: error มักเกิดที่ขอบ จึง test ที่ค่าขอบของแต่ละ class (boundary, +1, −1) ไม่ใช่แค่ค่าใดค่าหนึ่งใน class และใช้ได้กับค่าที่เรียงลำดับได้เท่านั้น</strong></p>
+<ul>
+<li><strong>ขอบ (boundaries) มักเกิด error ง่าย</strong></li>
+<li>BVA test <strong>ที่ขอบ</strong> แทนที่จะเลือกค่าใดก็ได้ใน class</li>
+<li><strong>วิธีออกแบบ test case:</strong>
+<ol>
+<li>ทำ <strong>ECP</strong> ก่อน</li>
+<li>เพิ่ม test case ที่ขอบ: <strong>boundary, +1, −1</strong></li>
+</ol>
+</li>
+<li><strong>Reduced cases:</strong> มองว่าขอบอยู่ <strong>ระหว่าง</strong> ตัวเลข
+<ul>
+<li>เช่น ขอบที่ 12: แบบปกติ = <strong>11, 12, 13</strong> | แบบ reduced = <strong>12, 13</strong> (ขอบอยู่ระหว่าง 12 กับ 13)</li>
+</ul>
+</li>
+<li>จำนวน case เยอะ (<strong>ประมาณ 3 ต่อ class</strong>)</li>
+<li>ใช้ได้ <strong>เฉพาะค่า ordinal</strong> (เรียงลำดับและแบ่งเป็นช่วงได้)</li>
+</ul>
+<h3 id="81-อ่านตาราง-bva-ยังไง">8.1 อ่านตาราง BVA ยังไง?</h3>
+<p>ตารางในสไลด์มี 4 คอลัมน์:</p>
+<ul>
+<li><strong>All Cases:</strong> ทุกค่ารอบขอบล่างและขอบบน (ขอบ −1, ขอบ, ขอบ +1)</li>
+<li><strong>Belonging Cases:</strong> เฉพาะค่าใน All Cases ที่ <strong>อยู่ใน class นั้นจริง</strong></li>
+<li><strong>Reduced Class:</strong> เหลือแค่ <strong>ค่าขอบของ class</strong> (ค่าต่ำสุดและสูงสุดของ class)</li>
+</ul>
+<p><strong>ตัวอย่าง: Age Classification Problem</strong> (สไลด์ 28)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>All Cases</th>
+<th>Belonging Cases</th>
+<th>Reduced Class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low</td>
+<td>−1, 0</td>
+<td>−1</td>
+<td>−1</td>
+</tr>
+<tr>
+<td>0–12</td>
+<td>−1, 0, 1 / 11, 12, 13</td>
+<td>0, 1, 11, 12</td>
+<td>0, 12</td>
+</tr>
+<tr>
+<td>13–19</td>
+<td>12, 13, 14 / 18, 19, 20</td>
+<td>13, 14, 18, 19</td>
+<td>13, 19</td>
+</tr>
+<tr>
+<td>20–35</td>
+<td>19, 20, 21 / 34, 35, 36</td>
+<td>20, 21, 34, 35</td>
+<td>20, 35</td>
+</tr>
+<tr>
+<td>36–120</td>
+<td>35, 36, 37 / 119, 120, 121</td>
+<td>36, 37, 119, 120</td>
+<td>36, 120</td>
+</tr>
+<tr>
+<td>High</td>
+<td>120, 121</td>
+<td>121</td>
+<td>121</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Exercise 4</strong> (สไลด์ 29): ช่องรับเลข 1–1000</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>All Cases</th>
+<th>Belonging Cases</th>
+<th>Reduced Class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 1</td>
+<td>0, 1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1 – 1000</td>
+<td>0, 1, 2 / 999, 1000, 1001</td>
+<td>1, 2, 999, 1000</td>
+<td>1, 1000</td>
+</tr>
+<tr>
+<td>&gt; 1000</td>
+<td>1000, 1001</td>
+<td>1001</td>
+<td>1001</td>
+</tr>
+</tbody>
+</table></div>
+<p>Test cases: <strong>0 → Invalid</strong>, <strong>1 → Valid</strong>, <strong>1000 → Valid</strong>, <strong>1001 → Invalid</strong></p>
+<p><strong>Exercise 5</strong> (สไลด์ 30): ตั๋วอุทยาน + expected result</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>All Cases</th>
+<th>Belonging Cases</th>
+<th>Reduced Class</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invalid (&lt; 0)</td>
+<td>−1, 0</td>
+<td>−1</td>
+<td>−1</td>
+<td>Error: Invalid Age</td>
+</tr>
+<tr>
+<td>0–11</td>
+<td>−1, 0, 1 / 10, 11, 12</td>
+<td>0, 1, 10, 11</td>
+<td>0, 11</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>12–17</td>
+<td>11, 12, 13 / 16, 17, 18</td>
+<td>12, 13, 16, 17</td>
+<td>12, 17</td>
+<td>100</td>
+</tr>
+<tr>
+<td>18–60</td>
+<td>17, 18, 19 / 59, 60, 61</td>
+<td>18, 19, 59, 60</td>
+<td>18, 60</td>
+<td>200</td>
+</tr>
+<tr>
+<td>&gt; 61</td>
+<td>60, 61</td>
+<td>61</td>
+<td>61</td>
+<td>100</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 30 ตั้งชื่อ class สุดท้ายว่า &quot;<strong>&gt; 61</strong>&quot; แต่ค่าที่ใช้ทดสอบคือ <strong>61</strong> (ซึ่งไม่ได้ &gt; 61) ตามโจทย์ควรเป็น &quot;&gt; 60&quot; หรือ &quot;≥ 61&quot;</p>
+</blockquote>
+<hr />
+<h2 id="9-white-box-testing-คืออะไร-สไลด์-3132">9. White-box testing คืออะไร? <sub>(สไลด์ 31–32)</sub></h2>
+<p><strong>แก่น: ทดสอบโดยดูโครงสร้างภายในของโค้ด ใช้ control structure สร้าง test case เพื่อให้ทุก path, ทุก decision, ทุก loop และ data structure ถูกทดสอบ</strong></p>
+<ul>
+<li>ชื่ออื่น: <strong>glass-box</strong> หรือ <strong>structural testing</strong></li>
+<li>ตรวจ <strong>รายละเอียดเชิง procedure</strong> อย่างใกล้ชิด (logical paths, การทำงานร่วมกันของ component)</li>
+<li>ใช้ <strong>control structure</strong> สร้าง test case</li>
+<li>สร้าง test case ที่:
+<ul>
+<li><strong>รับประกันว่าทุก independent path</strong> ใน module ถูกรันอย่างน้อย 1 ครั้ง</li>
+<li>ทดสอบ <strong>ทุก logical decision</strong> ทั้งฝั่ง <strong>true และ false</strong></li>
+<li>รัน <strong>ทุก loop</strong> ที่ขอบและภายในขอบเขตการทำงาน</li>
+<li>ทดสอบ <strong>internal data structures</strong> ว่าถูกต้อง</li>
+</ul>
+</li>
+</ul>
+<p><strong>Path analysis technique</strong> (สไลด์ 32)</p>
+<ul>
+<li>2 งาน: <strong>วิเคราะห์ว่ามีกี่ path</strong> และ <strong>ตัดสินใจว่าจะ test path ไหน</strong></li>
+<li><strong>Coverage จากมากไปน้อย (decreasing coverage):</strong>
+<ol>
+<li><strong>Logical paths</strong></li>
+<li><strong>Independent paths</strong></li>
+<li><strong>Branch coverage</strong></li>
+<li><strong>Statement coverage</strong></li>
+</ol>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Black-box</th>
+<th>White-box</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ชื่ออื่น</td>
+<td>behavioral / functional</td>
+<td>glass-box / structural</td>
+</tr>
+<tr>
+<td>ดูจาก</td>
+<td>functional requirements, interface</td>
+<td>control structure ของโค้ด</td>
+</tr>
+<tr>
+<td>เทคนิคในบทนี้</td>
+<td>ECP, BVA</td>
+<td>path analysis</td>
+</tr>
+<tr>
+<td>ฐาน test case (สไลด์ 19)</td>
+<td>specification based</td>
+<td>code based</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-path-analysis-และ-linearly-independent-paths-สไลด์-3338">10. Path analysis และ linearly independent paths <sub>(สไลด์ 33–38)</sub></h2>
+<p><strong>แก่น: จำนวน independent path = จำนวน decision node + 1 (cyclomatic number) และชุด path จะ linearly independent ถ้าแต่ละ path มี edge ใหม่อย่างน้อย 1 เส้นที่ path ก่อนหน้าไม่มี</strong></p>
+<h3 id="101-ตัวอย่างพื้นฐาน-if-เดียว-สไลด์-33">10.1 ตัวอย่างพื้นฐาน (if เดียว) <sub>(สไลด์ 33)</sub></h3>
+<p><img loading="lazy" src="diagrams/L12-04-path-simple.png" alt="Path analysis - if เดียว" /></p>
+<ul>
+<li>path1: S1 – C1 – S3 = segments <strong>(1, 4)</strong></li>
+<li>path2: S1 – C1 – S2 – S3 = segments <strong>(1, 2, 3)</strong></li>
+</ul>
+<h3 id="102-ตัวอย่าง-case-structure-สไลด์-34">10.2 ตัวอย่าง CASE structure <sub>(สไลด์ 34)</sub></h3>
+<p><img loading="lazy" src="diagrams/L12-05-path-case.png" alt="CASE structure" /></p>
+<p><strong>4 independent paths:</strong></p>
+<ul>
+<li>path1: S1-C1-S2-S5</li>
+<li>path2: S1-C1-C2-S3-S5</li>
+<li>path3: S1-C1-C2-C3-S4-S5</li>
+<li>path4: S1-C1-C2-C3-S5</li>
+</ul>
+<p>(3 decisions + 1 = 4)</p>
+<h3 id="103-ตัวอย่าง-loop-สไลด์-35">10.3 ตัวอย่าง Loop <sub>(สไลด์ 35)</sub></h3>
+<p><img loading="lazy" src="diagrams/L12-06-path-loop.png" alt="Simple loop" /></p>
+<p><strong>Linearly independent paths:</strong></p>
+<ul>
+<li>path1: S1-C1-S3 (segments <strong>1, 4</strong>)</li>
+<li>path2: S1-C1-S2-C1-S3 (segments <strong>1, 2, 3, 4</strong>)</li>
+</ul>
+<h3 id="104-วิธีหา-linearly-independent-set-สไลด์-36">10.4 วิธีหา linearly independent set <sub>(สไลด์ 36)</sub></h3>
+<ol>
+<li><strong>คำนวณจำนวน independent path = #Decision node + 1</strong></li>
+<li><strong>List ทุก path ที่เป็นไปได้</strong></li>
+<li><strong>เลือกชุด path ที่ linearly independent</strong></li>
+</ol>
+<blockquote class="callout">
+<p><strong>นิยาม:</strong> ชุด path เป็น <strong>linearly independent</strong> ถ้า <strong>แต่ละ path มี edge ใหม่อย่างน้อย 1 เส้น</strong> ที่ไม่อยู่ใน path ก่อนหน้า</p>
+</blockquote>
+<p>ตัวอย่างในสไลด์ (มี 2 decision คือ C1, C2) ตาราง path × edge:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>edge 1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path1</td>
+<td>✔</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>path2</td>
+<td>✔</td>
+<td></td>
+<td></td>
+<td>✔</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>path3</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>path4</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+<td></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>path1 ใช้ edge 1, 5, 6 | path2 เพิ่ม edge 4 | path3 เพิ่ม edge 2, 3 | path4 ใช้ 2, 3, 5, 6</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่ได้บอกว่าเลือก path ไหน แนวคิดตามขั้นตอนในสไลด์: ตารางนี้คือ <strong>ขั้น 2 (list ทุก path)</strong> ได้ 4 path ส่วนสูตรขั้น 1 ให้ 2 + 1 = <strong>3</strong> และ path4 ไม่มี edge ใหม่ (edge 2, 3 มีใน path3 และ 5, 6 มีใน path1) ชุดที่ linearly independent จึงเป็น path1–3 ควรเช็กในห้อง</p>
+</blockquote>
+<h3 id="105-total-paths-vs-linearly-independent-paths-สไลด์-37">10.5 Total paths vs Linearly independent paths <sub>(สไลด์ 37)</sub></h3>
+<p><img loading="lazy" src="diagrams/L12-07-path-three.png" alt="3 decisions เรียงกัน" /></p>
+<ul>
+<li>แต่ละ <strong>binary decision</strong> มี 2 ทาง และมี <strong>3 decision เรียงกัน</strong> → <strong>2³ = 8 &quot;logical&quot; paths</strong>:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>path</th>
+<th>ลำดับ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path1</td>
+<td>S1-C1-S2-C2-C3-S4</td>
+</tr>
+<tr>
+<td>path2</td>
+<td>S1-C1-S2-C2-C3-S5</td>
+</tr>
+<tr>
+<td>path3</td>
+<td>S1-C1-S2-C2-S3-C3-S4</td>
+</tr>
+<tr>
+<td>path4</td>
+<td>S1-C1-S2-C2-S3-C3-S5</td>
+</tr>
+<tr>
+<td>path5</td>
+<td>S1-C1-C2-C3-S4</td>
+</tr>
+<tr>
+<td>path6</td>
+<td>S1-C1-C2-C3-S5</td>
+</tr>
+<tr>
+<td>path7</td>
+<td>S1-C1-C2-S3-C3-S4</td>
+</tr>
+<tr>
+<td>path8</td>
+<td>S1-C1-C2-S3-C3-S5</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Linearly independent paths = Cyclomatic number = 3 decisions + 1 = 4</strong></li>
+<li><strong>ชุดหนึ่งที่ใช้ได้ (one set would be):</strong>
+<ul>
+<li>path1: segments (1, 2, 4, 6, 9)</li>
+<li>path2: segments (1, 2, 4, 6, 8)</li>
+<li>path3: segments (1, 2, 4, 5, 7, 9)</li>
+<li>path5: segments (1, 3, 6, 9)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>logical paths</strong> โตแบบ 2ⁿ ส่วน <strong>independent paths</strong> โตแบบ n + 1 จึงทดสอบ independent paths ได้ง่ายกว่ามาก (สอดคล้องกับลำดับ coverage ในสไลด์ 32)</p>
+</blockquote>
+<h3 id="106-exercise-findlar-3-สไลด์-38">10.6 Exercise: FindLar_3 <sub>(สไลด์ 38)</sub></h3>
+<p>&quot;Let's do it — Sorry…no flowchart&quot; ให้หา path จากโค้ดโดยตรง:</p>
+<pre><code class="language-java">class Largest {
+    Largest(){
+    };
+    public Double FindLar_3(Double n1, Double n2, Double n3) {
+        Double largest;
+        // checks if n1 is greater than or equal to n2
+        if (n1 &gt;= n2) {
+            if (n1 &gt;= n3) {
+                largest = n1;
+            }
+            else {
+                largest = n3;
+            }
+        }
+        else {
+            // checks if n2 is greater than or equal to n3
+            if (n2 &gt;= n3) {
+                largest = n2;
+            }
+            else {
+                largest = n3;
+            }
+        }
+        return largest;
+    }
+}
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่มีเฉลย ถ้าใช้สูตรในสไลด์ 36: มี decision 3 จุด (<code>n1 &gt;= n2</code>, <code>n1 &gt;= n3</code>, <code>n2 &gt;= n3</code>) → <strong>3 + 1 = 4 independent paths</strong> (ทางที่ได้ largest = n1, n3, n2, n3)</p>
+</blockquote>
+<hr />
+<h2 id="11-เมื่อไหร่ควรหยุด-test-สไลด์-3940">11. เมื่อไหร่ควรหยุด test? <sub>(สไลด์ 39–40)</sub></h2>
+<p><strong>แก่น: คำตอบง่าย ๆ คือหยุดเมื่อรัน test case ที่วางแผนไว้ครบและแก้ปัญหาที่เจอครบแล้ว หรือหยุดเมื่อหา error ใหม่ไม่เจอแล้ว (problem find rate ลดลง) หรือใช้ defect seeding</strong></p>
+<ul>
+<li><strong>คำตอบง่าย ๆ:</strong> หยุดเมื่อ
+<ul>
+<li>รัน <strong>test case ที่วางแผนไว้ครบ</strong></li>
+<li><strong>แก้ปัญหาที่เจอครบ</strong></li>
+</ul>
+</li>
+<li><strong>เทคนิคอื่น:</strong>
+<ul>
+<li>หยุดเมื่อ <strong>หา error ไม่เจออีกแล้ว</strong></li>
+<li><strong>Defect seeding</strong></li>
+</ul>
+</li>
+<li><strong>Problem Find Rate</strong> (สไลด์ 40): กราฟ &quot;# of problems found per hour&quot; ตามเวลา Day 1–5 ขึ้นสูงช่วง Day 1–2 แล้ว <strong>ค่อย ๆ ลดลง</strong> (Decreasing Problem Find Rate)</li>
+</ul>
+<hr />
+<h2 id="12-inspections-vs-testing-สไลด์-4142">12. Inspections vs Testing <sub>(สไลด์ 41–42)</sub></h2>
+<p><strong>แก่น: inspection คุ้มค่า ใช้กับเอกสารระหว่างทางได้ และจับ defect ได้เร็ว ส่วน testing หา error ได้ถูกกว่าแต่แก้แพง ใช้ได้แค่กับโค้ด และจับได้ช้า แต่จำเป็นต่อการวัดคุณภาพ</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Inspections</th>
+<th>Testing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cost-effective</strong></td>
+<td><strong>หา error ได้ถูกกว่า แต่แก้แพง</strong></td>
+</tr>
+<tr>
+<td>ใช้กับ <strong>intermediate artifacts</strong> ได้</td>
+<td>ใช้ได้ <strong>กับโค้ดเท่านั้น</strong></td>
+</tr>
+<tr>
+<td>จับ defect <strong>ได้เร็ว (early)</strong></td>
+<td>จับ defect <strong>ช้า (หลัง implementation)</strong></td>
+</tr>
+<tr>
+<td>ช่วย <strong>กระจายความรู้</strong> เรื่องโปรเจกต์และ best practices</td>
+<td><strong>จำเป็นต่อการวัดคุณภาพ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Summary (สไลด์ 42):</strong> แนวคิด verification &amp; validation, เทคนิค testing ต่าง ๆ และ <strong>ทั้ง testing และ inspection ใช้ทำ verification และ validation ได้</strong></p>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QA</td>
+<td>วัดและปรับคุณภาพ product + process</td>
+<td>กว้าง: product + process</td>
+</tr>
+<tr>
+<td>QC</td>
+<td>ตรวจคุณภาพ product + หา fault</td>
+<td>แคบ: product</td>
+</tr>
+<tr>
+<td>Code inspection</td>
+<td>ตรวจโค้ดเป็นระบบตามเกณฑ์</td>
+<td></td>
+</tr>
+<tr>
+<td>Peer review</td>
+<td>developer อื่นตรวจ</td>
+<td></td>
+</tr>
+<tr>
+<td>Walkthrough</td>
+<td>author อธิบายโค้ดทีละขั้น</td>
+<td></td>
+</tr>
+<tr>
+<td>Static analysis</td>
+<td>หาปัญหาโดยไม่รัน</td>
+<td></td>
+</tr>
+<tr>
+<td>Dynamic analysis</td>
+<td>หาปัญหาขณะรัน</td>
+<td></td>
+</tr>
+<tr>
+<td>Formal methods</td>
+<td>ใช้คณิตศาสตร์พิสูจน์</td>
+<td></td>
+</tr>
+<tr>
+<td>Regression testing</td>
+<td>เช็กว่าของใหม่ไม่ทำของเดิมพัง</td>
+<td></td>
+</tr>
+<tr>
+<td>Acceptance testing</td>
+<td>ตรง requirement ของผู้ใช้/ธุรกิจไหม</td>
+<td></td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>building the software right</td>
+<td>ตรงกับ phase ก่อน</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>building the right software</td>
+<td>ตรงกับการใช้งานจริง</td>
+</tr>
+<tr>
+<td>Fault</td>
+<td>static defect ในโค้ด</td>
+<td>ข้างใน (นิ่ง)</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>internal state ที่ผิด</td>
+<td>ข้างใน (ตอนรัน)</td>
+</tr>
+<tr>
+<td>Failure</td>
+<td>พฤติกรรมภายนอกที่ผิด</td>
+<td>ข้างนอก</td>
+</tr>
+<tr>
+<td>Black-box</td>
+<td>behavioral/functional testing จาก spec</td>
+<td>ไม่ดูโค้ด</td>
+</tr>
+<tr>
+<td>White-box</td>
+<td>glass-box/structural testing จาก code</td>
+<td>ดูโค้ด</td>
+</tr>
+<tr>
+<td>ECP</td>
+<td>แบ่ง input เป็น class ใช้ตัวแทน</td>
+<td></td>
+</tr>
+<tr>
+<td>BVA</td>
+<td>test ที่ขอบ (boundary, ±1)</td>
+<td></td>
+</tr>
+<tr>
+<td>Reduced cases</td>
+<td>ขอบอยู่ระหว่างตัวเลข เหลือค่าน้อยลง</td>
+<td>12, 13 แทน 11, 12, 13</td>
+</tr>
+<tr>
+<td>Ordinal values</td>
+<td>ค่าที่เรียงลำดับเป็นช่วงได้</td>
+<td>BVA ใช้ได้เฉพาะนี้</td>
+</tr>
+<tr>
+<td>Independent path</td>
+<td>path ที่มี edge ใหม่อย่างน้อย 1 เส้น</td>
+<td></td>
+</tr>
+<tr>
+<td>Cyclomatic number</td>
+<td>#decision + 1</td>
+<td></td>
+</tr>
+<tr>
+<td>Logical paths</td>
+<td>ทุก path ที่เป็นไปได้ (2ⁿ)</td>
+<td></td>
+</tr>
+<tr>
+<td>Defect seeding</td>
+<td>เทคนิคหนึ่งในการตัดสินใจหยุด test</td>
+<td></td>
+</tr>
+<tr>
+<td>Problem find rate</td>
+<td># problems ที่เจอต่อชั่วโมง</td>
+<td>ลดลงเรื่อย ๆ</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>QA vs QC</strong> (product + process vs product)</li>
+<li>⭐ <strong>6 error detection techniques</strong> และตัวอย่างของแต่ละอัน (โดยเฉพาะ static vs dynamic)</li>
+<li>⭐ <strong>Verification (&quot;software right&quot;) vs Validation (&quot;right software&quot;)</strong> + รูปตัว V</li>
+<li>⭐ <strong>Fault → Error → Failure</strong>; ซอฟต์แวร์ไม่เสื่อม</li>
+<li>⭐ <strong>Testing พิสูจน์ไม่ได้ว่าถูก 100%</strong></li>
+<li>⭐ <strong>Black-box หา error ได้ 5 แบบ</strong>; ชื่ออื่น behavioral/functional</li>
+<li>⭐ <strong>ECP</strong> แบ่ง valid/invalid class + ตัวแทน; ทำ Exercise 1–3 ให้คล่อง</li>
+<li>⭐ <strong>BVA</strong>: boundary, +1, −1; reduced; ordinal เท่านั้น; ทำตาราง All/Belonging/Reduced ให้เป็น</li>
+<li>⭐ <strong>White-box 4 สิ่งที่รับประกัน</strong> และ <strong>coverage: logical &gt; independent &gt; branch &gt; statement</strong></li>
+<li>⭐ <strong>Cyclomatic number = #decision + 1</strong>; logical paths = 2ⁿ</li>
+<li>⭐ <strong>When to stop testing</strong> และ <strong>Inspections vs Testing</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QA</td>
+<td>QC</td>
+<td>วัด/ปรับ product + process vs ตรวจ product + หา fault</td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>Validation</td>
+<td>ผลแต่ละ phase ตรง phase ก่อน vs ตอนจบตรงการใช้งาน</td>
+</tr>
+<tr>
+<td>Fault</td>
+<td>Failure</td>
+<td>defect นิ่งในโค้ด vs พฤติกรรมผิดที่มองเห็น</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>Failure</td>
+<td>สถานะภายในผิด vs พฤติกรรมภายนอกผิด</td>
+</tr>
+<tr>
+<td>Static analysis</td>
+<td>Dynamic analysis</td>
+<td>ไม่รัน vs รัน</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>Debugging</td>
+<td>หาว่ามี failure vs หาสาเหตุหลังเห็น error</td>
+</tr>
+<tr>
+<td>Black-box</td>
+<td>White-box</td>
+<td>spec / interface vs code / control structure</td>
+</tr>
+<tr>
+<td>ECP</td>
+<td>BVA</td>
+<td>ตัวแทน class vs ค่าขอบ class</td>
+</tr>
+<tr>
+<td>All Cases</td>
+<td>Reduced Class</td>
+<td>ทุกค่ารอบขอบ vs แค่ค่าขอบของ class</td>
+</tr>
+<tr>
+<td>Logical paths</td>
+<td>Independent paths</td>
+<td>2ⁿ vs #decision + 1</td>
+</tr>
+<tr>
+<td>Branch coverage</td>
+<td>Statement coverage</td>
+<td>อยู่ลำดับ 3 vs ลำดับ 4 (น้อยสุด) ใน decreasing coverage ของสไลด์ 32</td>
+</tr>
+<tr>
+<td>Inspection</td>
+<td>Testing</td>
+<td>เร็ว ใช้กับเอกสารได้ vs ช้า ใช้กับโค้ดเท่านั้น</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l11/index.html"><small>← บทก่อนหน้า</small><span>Lecture 11 – Version Control System</span></a><a class="pg next" href="../l13/index.html"><small>บทถัดไป →</small><span>Lecture 13 – Unit Testing, Integration Testing, and System Testing</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

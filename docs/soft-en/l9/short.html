@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 9 – Design Architecture and Methodology · ITDS261</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>:root{--accent:#7c3aed}</style>
+
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
+  </div>
+</header>
+
+  <div class="lesson-layout">
+    <aside class="toc" id="toc">
+      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
+      <div class="toc-inner">
+        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
+        <ol><li><a href="#1-ทำไมต้องออกแบบ-สไลด์-46-9">1. ทำไมต้องออกแบบ? (สไลด์ 4–6, 9)</a></li><li><a href="#2-architectural-vs-detailed-สไลด์-713">2. Architectural vs Detailed (สไลด์ 7–13)</a></li><li><a href="#3-architectural-styles-6-แบบ-สไลด์-1422">3. Architectural styles 6 แบบ (สไลด์ 14–22)</a></li><li><a href="#4-structured-design-สไลด์-2331">4. Structured design (สไลด์ 23–31)</a></li><li><a href="#5-ตัวอย่างหุ่นยนต์-สไลด์-3236">5. ตัวอย่างหุ่นยนต์ (สไลด์ 32–36)</a></li><li><a href="#6-logical-vs-physical-module-สไลด์-3739">6. Logical vs Physical module (สไลด์ 37–39)</a></li><li><a href="#7-design-process-principles-สไลด์-4043">7. Design process &amp; principles (สไลด์ 40–43)</a></li><li><a href="#8-modularity-สไลด์-4449">8. Modularity (สไลด์ 44–49)</a></li><li><a href="#9-cohesion-coupling-สไลด์-5055">9. Cohesion &amp; Coupling (สไลด์ 50–55)</a></li><li><a href="#10-แบบฝึก-สไลด์-5660-แนวคำตอบ">10. แบบฝึก (สไลด์ 56–60) — แนวคำตอบ</a></li><li><a href="#11-implementability-aesthetic-สไลด์-6163">11. Implementability &amp; Aesthetic (สไลด์ 61–63)</a></li><li><a href="#12-relationship-among-principles-สไลด์-64">12. Relationship among principles (สไลด์ 64)</a></li><li><a href="#13-summary-สไลด์-65">13. Summary (สไลด์ 65)</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      </div>
+    </aside>
+    <main class="lesson">
+      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L9</div>
+      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 9 – Design Architecture and Methodology</h1>
+      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a></div>
+      <article class="prose"><h2 id="1-ทำไมต้องออกแบบ-สไลด์-46-9">1. ทำไมต้องออกแบบ? (สไลด์ 4–6, 9)</h2>
+<p><strong>แก่น: requirement เดียวสร้างได้หลายแบบ ต้องตัดสินใจโครงสร้างก่อน: มี component อะไร สัมพันธ์กันยังไง</strong></p>
+<ul>
+<li>สะพาน 6 แบบ (beam, arch, truss, cantilever, suspension, cable-stayed) | HelloWorld 3 แบบ (1 class → MessagePrinter → HelloProvider+WorldProvider+MessagePrinter)</li>
+<li>เริ่มจาก requirements | 2 ส่วน: <strong>Architectural (high-level)</strong> + <strong>Detailed</strong></li>
+</ul>
+<h2 id="2-architectural-vs-detailed-สไลด์-713">2. Architectural vs Detailed (สไลด์ 7–13)</h2>
+<p><strong>แก่น: architectural = ส่วนหลัก + ความสัมพันธ์ | detailed = ข้างใน component | detailed มาจาก requirements &amp; architecture</strong></p>
+<ul>
+<li>Analysis model 4 กลุ่ม (scenario-based, class-based, flow-oriented, behavioral) → Design model พีระมิด (ฐาน→ยอด): <strong>Data/Class → Architectural → Interface → Component-level</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Architectural</th>
+<th>Detailed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>นิยาม</td>
+<td>major parts; responsibilities, properties, interfaces; relationships &amp; interactions</td>
+<td>internal elements ของ component + data structure + algorithm</td>
+</tr>
+<tr>
+<td>Key components</td>
+<td>Layers &amp; Modules, Components &amp; Services, Data Flow &amp; Storage, Security &amp; Performance, Scalability &amp; Maintainability, Integration &amp; APIs</td>
+<td>Module-level, Class &amp; Object, Function &amp; Algorithm, DB Schema, Interface &amp; API, Error Handling &amp; Logging, Security</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ แบบฝึก (แนวคำตอบ ไม่มีเฉลยในสไลด์): 1 binary search = <strong>D</strong> | 2 แยก UI = <strong>A</strong> | 3 เวลา client/server = <strong>A</strong> | 4 hash table = <strong>D</strong> | 5 thread-safe library = <strong>A</strong> | 6 Car register Clock = <strong>D</strong> | 7 implement ClockUser = <strong>D</strong></li>
+</ul>
+<h2 id="3-architectural-styles-6-แบบ-สไลด์-1422">3. Architectural styles 6 แบบ (สไลด์ 14–22)</h2>
+<p><strong>แก่น: pipe&amp;filter, data-centered, layered, client-server, microservice, call&amp;return</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Style</th>
+<th>หลักคิด</th>
+<th>⭐ Pros</th>
+<th>⭐ Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Batch seq. / Pipe&amp;filter</td>
+<td>data ผ่าน filter (แปลง) ต่อด้วย pipe</td>
+<td>reuse filter, งานคำนวณเป็นลำดับอิสระ</td>
+<td><strong>ไม่เหมาะ interactive</strong>, ต้องเพิ่ม filter ให้เข้ากัน, อาจ tight coupling</td>
+</tr>
+<tr>
+<td>Data-centered</td>
+<td>central repository ใครก็ CRUD ได้</td>
+<td>แชร์ข้อมูลมาก, component อิสระ, backup กลาง</td>
+<td><strong>แก้ data model ยาก/แพง</strong>, ต้องใช้ data model ร่วม</td>
+</tr>
+<tr>
+<td>Layered</td>
+<td>ชั้นพึ่งเฉพาะชั้นล่าง (UI→Application→Utility→Core)</td>
+<td>portable, แตกปัญหา, เปลี่ยนชั้นได้ถ้า interface เดิม</td>
+<td>แยกชั้นชัดยาก, <strong>ชั้นเยอะ = ช้า</strong></td>
+</tr>
+<tr>
+<td>Client-server</td>
+<td>server = provider, client = requester</td>
+<td>distributed, เพิ่ม/อัปเกรด server ง่าย</td>
+<td>third-party server จัดการยาก, <strong>server ล้น</strong></td>
+</tr>
+<tr>
+<td>Microservice</td>
+<td>suite of small services, process ของตัวเอง, HTTP API, deploy แยกอัตโนมัติ</td>
+<td>(สไลด์ไม่มีตาราง)</td>
+<td>(สไลด์ไม่มีตาราง)</td>
+</tr>
+<tr>
+<td>Call &amp; return</td>
+<td>main → controller → application program</td>
+<td>modular, scale/แก้ง่าย</td>
+<td>interface ไม่ชัด → tight coupling, แก้ data structure กระทบโมดูลอื่น</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Call &amp; return = <strong>most dominant</strong> ตั้งแต่ยุคแรก | Microservice เทียบ monolith (single DB) vs microservices (application DBs)</li>
+</ul>
+<h2 id="4-structured-design-สไลด์-2331">4. Structured design (สไลด์ 23–31)</h2>
+<p><strong>แก่น: DFD → call&amp;return (structure chart) | บน = ตัดสินใจ ล่าง = worker</strong></p>
+<ul>
+<li>Objective: partitioned architecture | Approach: map DFD + <strong>PSPEC &amp; STD</strong> บอกเนื้อในโมดูล | Notation: <strong>structure chart</strong></li>
+<li><strong>Transform flow</strong> = ไหลเป็นสาย | <strong>Transaction flow</strong> = มี transaction center แตกหลาย action path</li>
+<li>Mapping: แยก incoming/outgoing boundary (transaction → แยก center) → map จาก boundary ออกนอก → เพิ่ม control module → refine ด้วย modularity → ⭐ <strong>first-level factoring</strong> → <strong>second-level factoring</strong></li>
+<li>⭐ Factoring: <strong>บน = decision-making</strong>, <strong>ล่าง = input/computation/output (worker)</strong>, <strong>กลาง = control บ้าง ทำงานปานกลาง</strong>, control แบบ top-down</li>
+<li>Transform mapping: a…j → x1 (บน) → x2 (ขาเข้า b,c,a) | x3 (กลาง d,e,f) | x4 (ขาออก g,h,i,j)</li>
+<li>⭐ First-level = <strong>input / processing / output controller</strong> | Second-level = map จาก flow boundary ออกนอก</li>
+</ul>
+<h2 id="5-ตัวอย่างหุ่นยนต์-สไลด์-3236">5. ตัวอย่างหุ่นยนต์ (สไลด์ 32–36)</h2>
+<p><strong>แก่น: DFD L1 → L2 → isolate flow paths → map → refine</strong></p>
+<ul>
+<li>Top = process operator commands → <strong>command input controller</strong> (read / validate command / produce error message) + <strong>determine type</strong> → fixture status controller (read fixture status / determine setting / format setting), report generation controller (read record / calculate output values / format report), send control value</li>
+</ul>
+<h2 id="6-logical-vs-physical-module-สไลด์-3739">6. Logical vs Physical module (สไลด์ 37–39)</h2>
+<p><strong>แก่น: logical = business activity (ทำอะไร) | physical = physical process (ทำยังไง)</strong></p>
+<ul>
+<li>ตัวอย่าง: Login (logical) → Two Factor Authentication 2 server (physical)</li>
+<li>ระบบไปรษณีย์: analysis chart 6 โมดูล (Create Parcel, Update Parcel info, View history &amp; status, Feedback, Bank@post, Pay Online) | design chart: <strong>Login, Deduct Balance เป็นโมดูลกลางที่หลายตัวใช้ร่วม</strong> → เขียนโค้ด <code>Create_Parcel()</code> เรียก Fill/Create tracking/Calculate weight/Update history</li>
+<li>⚠️ สไลด์ 38 ข้าม 1.2 และมี 4.1 ซ้ำ</li>
+</ul>
+<h2 id="7-design-process-principles-สไลด์-4043">7. Design process &amp; principles (สไลด์ 40–43)</h2>
+<p><strong>แก่น: SRS → candidate หลายแบบ → ประเมิน → design document | principles = อะไรทำให้ design ดีขึ้น</strong></p>
+<ul>
+<li>⭐ <strong>Basic</strong> (ตอบ stakeholder): <strong>Feasibility</strong> (ต้องสร้างได้), <strong>Adequacy</strong> (ตอบความต้องการมากกว่า), <strong>Economy</strong> (ถูก/เร็ว/เสี่ยงน้อย), <strong>Changeability</strong> (แก้ง่าย)</li>
+<li>⭐ <strong>Constructive</strong> (จากประสบการณ์): <strong>Modularity</strong>, <strong>Implementability</strong> (สร้างง่าย), <strong>Aesthetic</strong> (สวย)</li>
+</ul>
+<h2 id="8-modularity-สไลด์-4449">8. Modularity (สไลด์ 44–49)</h2>
+<p><strong>แก่น: หน่วยที่ well-defined, simple, independent คุยผ่าน well-defined interface</strong></p>
+<ul>
+<li>หน่วย: sub-system → package → class/function → attribute/operation/block → lines of code</li>
+<li>ข้อดี: เข้าใจ, ทำเอกสาร, แก้, test/debug, tune ง่าย</li>
+<li>Software modularity: Services / Components / Objects / Modules</li>
+<li>⭐ 5 หลัก: <strong>Small modules | Information hiding | Least privilege | Cohesion (relatedness ภายใน) | Coupling (dependence ระหว่าง)</strong></li>
+</ul>
+<h2 id="9-cohesion-coupling-สไลด์-5055">9. Cohesion &amp; Coupling (สไลด์ 50–55)</h2>
+<p><strong>แก่น: cohesion ยิ่งสูงยิ่งดี | coupling ยิ่งต่ำยิ่งดี</strong></p>
+<ul>
+<li>Staff: email+printLetter = <strong>low cohesion</strong> | salary/email + get/set = <strong>high cohesion</strong></li>
+<li>⭐ Cohesion: <strong>Functional</strong> (1 หน้าที่, สูงสุด) … <strong>Coincidental</strong> (หลายหน้าที่ไม่เกี่ยวกัน, ต่ำสุด)</li>
+<li>⭐ Coupling: <strong>Content</strong> (เข้าถึง internal data, สูงสุด) … <strong>Data</strong> (ส่งเฉพาะที่จำเป็น) … No coupling (ideal แต่ทำไม่ได้)</li>
+<li>High coupling → แก้ตัวเดียวกระทบทุกตัวที่เชื่อม</li>
+<li>Data coupling: arg ธรรมดา หรือ structure ที่ใช้ทุก element | เขียน contract ง่าย แก้แยกได้</li>
+<li>⭐ High level = cohesion <strong>Strong</strong> / coupling <strong>Tight</strong> | Low level = <strong>Weak</strong> / <strong>Loose</strong></li>
+<li>⚠️ สไลด์ 53 วาง &quot;No coupling&quot; ใต้ &quot;Data coupling (lowest)&quot; ตีความกำกวม</li>
+</ul>
+<h2 id="10-แบบฝึก-สไลด์-5660-แนวคำตอบ">10. แบบฝึก (สไลด์ 56–60) — แนวคำตอบ</h2>
+<ul>
+<li>56: 1 low cohesion | 2 high coupling | 3 high cohesion | 4 low coupling | 5 high coupling | 6 high cohesion</li>
+<li>57: A ส่ง name/address/billing ตรงกับ data coupling (B เป็น data coupling ด้วยถ้าใช้ทุก element) ⚠️ กำกวม</li>
+<li>58: <strong>A ดีกว่า (coupling)</strong>: ส่ง ID/Address vs ใช้ global variable ร่วม</li>
+<li>59: <strong>A ดีกว่า (cohesion)</strong>: FileReader vs DataProcessor</li>
+<li>60: <strong>B ดีกว่า (cohesion)</strong>: EmployeeDatabase vs Utility catch-all</li>
+</ul>
+<h2 id="11-implementability-aesthetic-สไลด์-6163">11. Implementability &amp; Aesthetic (สไลด์ 61–63)</h2>
+<p><strong>แก่น: สร้างง่าย + สวย</strong></p>
+<ul>
+<li>⭐ Implementability: <strong>Simplicity | Design with reuse (ใช้ของเดิม) | Design for reuse (สร้างของให้ใช้ซ้ำ)</strong></li>
+<li>⭐ Aesthetic: <strong>Beauty</strong> (เรียบ ไม่ซ้ำซ้อน, ไม่ใช่ UI) | <strong>Symmetry</strong> (คล้ายกันออกแบบคล้ายกัน) | <strong>Balance</strong> (ไม่มี God class) | <strong>Proportion</strong> (ขนาดพอดี)</li>
+<li>Beauty: <code>calc(a,b,op)</code> if-else = hardcoded, not extensible, low readability | <code>interface Operation</code> + <code>Add</code>, <code>Multiply</code> = simple, extensible, separation of concerns</li>
+</ul>
+<h2 id="12-relationship-among-principles-สไลด์-64">12. Relationship among principles (สไลด์ 64)</h2>
+<ul>
+<li>เสริมกัน: Cohesion+Coupling+Information hiding | Simplicity+Beauty | Simplicity+Small modules</li>
+<li>⭐ ขัดกัน: <strong>Simplicity ↔ Design for reuse | Small modules ↔ Design for reuse | Cohesion ↔ Small modules</strong></li>
+<li>ขึ้นกับกรณี</li>
+</ul>
+<h2 id="13-summary-สไลด์-65">13. Summary (สไลด์ 65)</h2>
+<ul>
+<li>design = principles + concepts + practices → model ที่ implement ทุก requirement | architecture = holistic view | design principles = แนวทางออกแบบ component</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architectural</td>
+<td>Detailed</td>
+<td>ระดับระบบ vs ข้างใน component</td>
+</tr>
+<tr>
+<td>Cohesion</td>
+<td>Coupling</td>
+<td>ภายใน (สูงดี) vs ระหว่าง (ต่ำดี)</td>
+</tr>
+<tr>
+<td>Strong/Weak</td>
+<td>Tight/Loose</td>
+<td>คำของ cohesion vs คำของ coupling</td>
+</tr>
+<tr>
+<td>Functional</td>
+<td>Coincidental</td>
+<td>1 หน้าที่ vs หลายหน้าที่ไม่เกี่ยวกัน</td>
+</tr>
+<tr>
+<td>Content</td>
+<td>Data coupling</td>
+<td>เข้าถึงไส้ใน vs ส่งเฉพาะที่จำเป็น</td>
+</tr>
+<tr>
+<td>Transform flow</td>
+<td>Transaction flow</td>
+<td>สายตรง vs transaction center</td>
+</tr>
+<tr>
+<td>Logical</td>
+<td>Physical module</td>
+<td>ทำอะไร vs ทำยังไง</td>
+</tr>
+<tr>
+<td>Design with reuse</td>
+<td>Design for reuse</td>
+<td>ใช้ของเดิม vs สร้างให้ใช้ซ้ำ</td>
+</tr>
+<tr>
+<td>Basic</td>
+<td>Constructive</td>
+<td>ตอบ stakeholder vs จากประสบการณ์</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+      
+      <nav class="pager"><a class="pg prev" href="../l8/short.html"><small>← บทก่อนหน้า</small><span>Lecture 8 – User Interface Design</span></a><a class="pg next" href="../l10/short.html"><small>บทถัดไป →</small><span>Lecture 10 – Implementation &amp; Code Review</span></a></nav>
+    </main>
+  </div>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script src="../../assets/app.js"></script>
+</body>
+</html>
