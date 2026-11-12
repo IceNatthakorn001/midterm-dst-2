@@ -4,41 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>สรุปสั้น · Lecture 10 – Implementation &amp; Code Review · ITDS261</title>
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <style>:root{--accent:#7c3aed}</style>
 
 </head>
-<body>
-<div id="progress"></div>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
-  </div>
+  <a class="brand" href="../../index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS261</a><span>/</span><b>L10</b></nav>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
 </header>
 
-  <div class="lesson-layout">
-    <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
-      <div class="toc-inner">
-        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
-        <ol><li><a href="#1-programming-paradigms-สไลด์-4">1. Programming paradigms (สไลด์ 4)</a></li><li><a href="#2-no-code-low-code-vibe-coding-สไลด์-57">2. No-code / Low-code / Vibe coding (สไลด์ 5–7)</a></li><li><a href="#3-implementation-สไลด์-912">3. Implementation (สไลด์ 9–12)</a></li><li><a href="#4-style-guides-rules-สไลด์-1322-se-at-google-ch8">4. Style guides &amp; rules (สไลด์ 13–22, SE at Google ch.8)</a></li><li><a href="#5-good-practices-สไลด์-23">5. Good practices (สไลด์ 23)</a></li><li><a href="#6-code-comments-9-rules-สไลด์-2535-ellen-spertus">6. Code comments 9 rules (สไลด์ 25–35, Ellen Spertus)</a></li><li><a href="#7-debugging-สไลด์-3637">7. Debugging (สไลด์ 36–37)</a></li><li><a href="#8-refactoring-สไลด์-3843">8. Refactoring (สไลด์ 38–43)</a></li><li><a href="#9-code-inspection-สไลด์-4548">9. Code inspection (สไลด์ 45–48)</a></li><li><a href="#10-modern-code-review-สไลด์-4952">10. Modern code review (สไลด์ 49–52)</a></li><li><a href="#11-checklist-10-หมวด-สไลด์-5356">11. Checklist 10 หมวด (สไลด์ 53–56)</a></li><li><a href="#12-discussion-สไลด์-57">12. Discussion (สไลด์ 57)</a></li><li><a href="#13-conclusion-สไลด์-58">13. Conclusion (สไลด์ 58)</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
-      </div>
-    </aside>
-    <main class="lesson">
-      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L10</div>
-      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 10 – Implementation &amp; Code Review</h1>
-      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a></div>
-      <article class="prose"><h2 id="1-programming-paradigms-สไลด์-4">1. Programming paradigms (สไลด์ 4)</h2>
-<p><strong>แก่น: imperative = how | declarative = what | OOP = object (data + behavior) | logic = ปัญหาคืออะไร</strong></p>
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🧩 ITDS261</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/short.html"><span class="nl">L1</span>Software Engineering Foundation &amp; Software Project Management</a></li><li><a href="../l2/short.html"><span class="nl">L2</span>Software Process Models</a></li><li><a href="../l3/short.html"><span class="nl">L3</span>Requirement Engineering</a></li><li><a href="../l4/short.html"><span class="nl">L4</span>Requirements Analysis with Scenario-based Modeling I (Use Case Modeling)</a></li><li><a href="../l6/short.html"><span class="nl">L6</span>Requirements Modeling with Flow Modeling I (Data Flow Diagram)</a></li><li><a href="../l7/short.html"><span class="nl">L7</span>Requirements Modeling with Flow Modeling II</a></li><li><a href="../l8/short.html"><span class="nl">L8</span>User Interface Design</a></li><li><a href="../l9/short.html"><span class="nl">L9</span>Design Architecture and Methodology</a></li><li class='cur'><a href="../l10/short.html"><span class="nl">L10</span>Implementation &amp; Code Review</a></li><li><a href="../l11/short.html"><span class="nl">L11</span>Version Control System</a></li><li><a href="../l12/short.html"><span class="nl">L12</span>Testing</a></li><li><a href="../l13/short.html"><span class="nl">L13</span>Unit Testing, Integration Testing, and System Testing</a></li><li><a href="../l14/short.html"><span class="nl">L14</span>Agentic Software Engineering</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS261</a> · L10 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 10 – Implementation &amp; Code Review</h1>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div></div>
+    <article class="prose"><h2 id="1-programming-paradigms-สไลด์-4">1. Programming paradigms (สไลด์ 4)</h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>imperative = how | declarative = what | OOP = object (data + behavior) | logic = ปัญหาคืออะไร</strong></p>
 <ul>
 <li>⭐ Imperative (C, Python, Java, JS) | <strong>Declarative (SQL)</strong> | OOP (Java, Python, C++, C#, Ruby) | <strong>Logic (Prolog)</strong> | หลาย paradigm = multi-paradigm</li>
 </ul>
 <h2 id="2-no-code-low-code-vibe-coding-สไลด์-57">2. No-code / Low-code / Vibe coding (สไลด์ 5–7)</h2>
-<p><strong>แก่น: ลดการเขียนโค้ดเอง ทุกแบบ &quot;Dependence on platform/tool&quot;</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>ลดการเขียนโค้ดเอง ทุกแบบ &quot;Dependence on platform/tool&quot;</strong></p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -70,14 +71,14 @@
 </tbody>
 </table></div>
 <h2 id="3-implementation-สไลด์-912">3. Implementation (สไลด์ 9–12)</h2>
-<p><strong>แก่น: แปลง detailed design → valid program | โค้ดดีต้องสมดุล 6 อย่าง</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>แปลง detailed design → valid program | โค้ดดีต้องสมดุล 6 อย่าง</strong></p>
 <ul>
 <li>Fowler (1999): โค้ดที่ดีคือโค้ดที่ <strong>คน</strong> เข้าใจ</li>
 <li>⭐ Writing code → Unit testing → Debugging → Configuration management</li>
 <li>⭐ Good implementations: <strong>Readability, Maintainability, Performance, Traceability, Correctness, Completeness</strong></li>
 </ul>
 <h2 id="4-style-guides-rules-สไลด์-1322-se-at-google-ch8">4. Style guides &amp; rules (สไลด์ 13–22, SE at Google ch.8)</h2>
-<p><strong>แก่น: กฎส่งเสริม &quot;ดี&quot; กัน &quot;ไม่ดี&quot; (นิยามตามองค์กร) | 3 กลุ่มกฎ</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>กฎส่งเสริม &quot;ดี&quot; กัน &quot;ไม่ดี&quot; (นิยามตามองค์กร) | 3 กลุ่มกฎ</strong></p>
 <ul>
 <li>กฎเรื่อง: ที่เก็บ source file, formatting, naming/patterns/exceptions/threads | องค์กรควรมี style guide</li>
 <li>&quot;ดี&quot; อาจ = memory น้อย / runtime optimization / ใช้ feature ใหม่ / consistency</li>
@@ -90,7 +91,7 @@
 <li>⭐ Functions เล็ก ทำเรื่องเดียว (Extract Method) | <strong>DRY</strong> (แก้ 3 ที่ ลืม 1) | เขียนให้คนอ่าน | <strong>Handle errors explicitly</strong> | <strong>Commit small &amp; often</strong> | <strong>Test as you write</strong> (ไม่งั้น test ว่าทำอะไร แทน ควรทำอะไร)</li>
 </ul>
 <h2 id="6-code-comments-9-rules-สไลด์-2535-ellen-spertus">6. Code comments 9 rules (สไลด์ 25–35, Ellen Spertus)</h2>
-<p><strong>แก่น: ข้อ 1–4 อย่าใช้ผิด | ข้อ 5–9 บอกสิ่งที่โค้ดบอกไม่ได้</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>ข้อ 1–4 อย่าใช้ผิด | ข้อ 5–9 บอกสิ่งที่โค้ดบอกไม่ได้</strong></p>
 <ol>
 <li>⭐ ไม่ซ้ำโค้ด (<code>i = i + 1; // Add one to i</code> ✗)</li>
 <li>comment ไม่ใช่ข้ออ้างของโค้ดไม่ชัด (<code>n</code> → <code>bestNode</code>, <code>currentNode</code>)</li>
@@ -103,14 +104,14 @@
 <li>⭐ mark งานไม่เสร็จด้วย <code>TODO</code></li>
 </ol>
 <h2 id="7-debugging-สไลด์-3637">7. Debugging (สไลด์ 36–37)</h2>
-<p><strong>แก่น: หาและแก้ error | พบจาก testing, inspection, use</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>หาและแก้ error | พบจาก testing, inspection, use</strong></p>
 <ul>
 <li>⭐ <strong>Stabilization (reproduction) → Localization → Correction → Verification</strong></li>
 <li>Heuristics: บาง routine error เยอะ | มี error แล้วมักมีอีก | <strong>โค้ดใหม่ error มาก</strong> | บางภาษา/ส่วน/คน</li>
 <li>Tools: code comparators, <strong>lint</strong>, interactive debuggers, special libraries, profilers, pre/post conditions, test coverage</li>
 </ul>
 <h2 id="8-refactoring-สไลด์-3843">8. Refactoring (สไลด์ 38–43)</h2>
-<p><strong>แก่น: ปรับ internal structure โดยไม่เปลี่ยน external behavior (Fowler)</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>ปรับ internal structure โดยไม่เปลี่ยน external behavior (Fowler)</strong></p>
 <ul>
 <li>⭐ ไม่ใช่การเปลี่ยนอะไรก็ได้ | <strong>ไม่ใช่ rewrite from scratch</strong> | ไม่ใช่ restructuring ใด ๆ | รองรับ emergent design | เล็กหรือใหญ่ก็ได้</li>
 <li>⭐ Smells: duplicated code, long method, large class, switch statement, feature envy, intimacy</li>
@@ -118,7 +119,7 @@
 <li>ตัวอย่าง: <code>if</code> ยาว → <code>isMacOs</code>, <code>isIE</code>, <code>wasResized</code> | <code>discountedPrice(basePrice, seasonDiscount, fees)</code> → <code>discountedPrice(basePrice)</code></li>
 </ul>
 <h2 id="9-code-inspection-สไลด์-4548">9. Code inspection (สไลด์ 45–48)</h2>
-<p><strong>แก่น: Fagan (IBM) 1976 เพิ่มคุณภาพ + productivity | 6 ขั้น</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>Fagan (IBM) 1976 เพิ่มคุณภาพ + productivity | 6 ขั้น</strong></p>
 <ul>
 <li>⭐ ผลสำรวจ n=508: <strong>Code Review 27%</strong> &gt; Unit Testing 19% &gt; Functional 13% &gt; CI 12% &gt; Integration 9% &gt; Detailed Req 7% &gt; Other 5% &gt; Static Analysis 3% = Training 3% &gt; User Stories 2% &gt; Demo Days 1%</li>
 <li>ใช้ได้กับ code, design, requirements, user info, documentation, test plans/cases</li>
@@ -126,7 +127,7 @@
 <li>⭐ <strong>Planning</strong> (entry criteria, คน, ที่/เวลา) → <strong>Overview</strong> (อธิบาย, มอบ role) → <strong>Preparation</strong> (ศึกษา) → <strong>Inspection</strong> (หา defect, ไม่หาทางแก้) → <strong>Rework</strong> (author แก้) → <strong>Follow-up</strong> (moderator/ทีมยืนยัน ไม่มี secondary defect)</li>
 </ul>
 <h2 id="10-modern-code-review-สไลด์-4952">10. Modern code review (สไลด์ 49–52)</h2>
-<p><strong>แก่น: review ใน tool (GitHub, Gerrit, Phabricator) วน author ↔ reviewers จน accepted</strong></p>
+<p class="core"><span class="core-tag">แก่น</span><strong>review ใน tool (GitHub, Gerrit, Phabricator) วน author ↔ reviewers จน accepted</strong></p>
 <ul>
 <li>Initial code → Reviewers → Reviewed changes → Author → Reworked changes → Reviewers → Accepted</li>
 <li>Motivation (มาก→น้อย): <strong>Code improvements</strong> &gt; Find defects &gt; knowledge transfer &gt; alternative solutions &gt; improve process &gt; avoid breaking builds &gt; team awareness &gt; shared ownership &gt; team assessment</li>
@@ -203,11 +204,22 @@
 </tbody>
 </table></div>
 </article>
-      
-      <nav class="pager"><a class="pg prev" href="../l9/short.html"><small>← บทก่อนหน้า</small><span>Lecture 9 – Design Architecture and Methodology</span></a><a class="pg next" href="../l11/short.html"><small>บทถัดไป →</small><span>Lecture 11 – Version Control System</span></a></nav>
-    </main>
-  </div>
+    
+    <nav class="pager"><a class="pg prev" href="../l9/short.html"><small>← บทก่อนหน้า</small><span>Lecture 9 – Design Architecture and Methodology</span></a><a class="pg next" href="../l11/short.html"><small>บทถัดไป →</small><span>Lecture 11 – Version Control System</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-programming-paradigms-สไลด์-4">Programming paradigms</a></li><li><a href="#2-no-code-low-code-vibe-coding-สไลด์-57">No-code / Low-code / Vibe coding</a></li><li><a href="#3-implementation-สไลด์-912">Implementation</a></li><li><a href="#4-style-guides-rules-สไลด์-1322-se-at-google-ch8">Style guides &amp; rules</a></li><li><a href="#5-good-practices-สไลด์-23">Good practices</a></li><li><a href="#6-code-comments-9-rules-สไลด์-2535-ellen-spertus">Code comments 9 rules</a></li><li><a href="#7-debugging-สไลด์-3637">Debugging</a></li><li><a href="#8-refactoring-สไลด์-3843">Refactoring</a></li><li><a href="#9-code-inspection-สไลด์-4548">Code inspection</a></li><li><a href="#10-modern-code-review-สไลด์-4952">Modern code review</a></li><li><a href="#11-checklist-10-หมวด-สไลด์-5356">Checklist 10 หมวด</a></li><li><a href="#12-discussion-สไลด์-57">Discussion</a></li><li><a href="#13-conclusion-สไลด์-58">Conclusion</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "soft-en/l10", "u": "soft-en/l10/short.html", "t": "⚡ สรุปสั้น · Lecture 10 – Implementation & Code Review", "s": "ITDS261"};</script>
 <script src="../../assets/app.js"></script>
+
 </body>
 </html>

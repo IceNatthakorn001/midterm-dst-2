@@ -4,43 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter 07 — Computing Unit (Pipelining) · ITDS211</title>
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <style>:root{--accent:#c2410c}</style>
-<script>try{var k="itds211-progress",d=JSON.parse(localStorage.getItem(k)||'{}');d.v=d.v||{};d.v["chapter07"]=1;d.last={h:"chapter07/index.html",t:"📖 Chapter 07 — Computing Unit (Pipelining)"};localStorage.setItem(k,JSON.stringify(d));}catch(e){}</script><script>
-(function(){var K='itds211-toc',r=document.documentElement;
-try{if(localStorage.getItem(K)==='0')r.classList.add('toc-hidden');}catch(e){}
-function set(h){r.classList.toggle('toc-hidden',h);try{localStorage.setItem(K,h?'0':'1');}catch(e){}}
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-toc-collapse]');
-if(b)set(!r.classList.contains('toc-hidden'));});
-document.addEventListener('keydown',function(e){var t=e.target.tagName;
-if(e.key==='['&&t!=='INPUT'&&t!=='TEXTAREA'&&!e.ctrlKey&&!e.metaKey)set(!r.classList.contains('toc-hidden'));});
-})();</script>
+
 </head>
-<body>
-<div id="progress"></div>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
-  </div>
+  <a class="brand" href="../../index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Chapter07</b></nav>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
 </header>
 
-  <div class="lesson-layout">
-    <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button><button class="toc-collapse" data-toc-collapse title="ซ่อนสารบัญ (กด [)">«</button><button class="toc-rail" data-toc-collapse title="แสดงสารบัญ (กด [)"><span>☰</span><span class="toc-rail-label">สารบัญ</span></button>
-      <div class="toc-inner">
-        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a></div>
-        <ol><li><a href="#1-pipelining-analogy-สไลด์-3">1. Pipelining Analogy (สไลด์ 3)</a></li><li><a href="#2-risc-v-pipeline-และ-performance-สไลด์-46">2. RISC-V Pipeline และ Performance (สไลด์ 4–6)</a></li><li><a href="#3-pipelining-and-isa-design-สไลด์-7">3. Pipelining and ISA Design (สไลด์ 7)</a></li><li><a href="#4-hazards-สไลด์-89">4. Hazards (สไลด์ 8–9)</a></li><li><a href="#5-data-hazards-สไลด์-1013">5. Data Hazards (สไลด์ 10–13)</a></li><li><a href="#6-control-hazards-สไลด์-1417">6. Control Hazards (สไลด์ 14–17)</a></li><li><a href="#7-pipeline-summary-the-big-picture-สไลด์-18">7. Pipeline Summary — The BIG Picture (สไลด์ 18)</a></li><li><a href="#8-pipelined-datapath-และ-pipeline-registers-สไลด์-1920">8. Pipelined Datapath และ Pipeline Registers (สไลด์ 19–20)</a></li><li><a href="#9-pipeline-operation-สไลด์-2130">9. Pipeline Operation (สไลด์ 21–30)</a></li><li><a href="#10-pipeline-diagrams-และ-pipelined-control-สไลด์-3134">10. Pipeline Diagrams และ Pipelined Control (สไลด์ 31–34)</a></li><li><a href="#11-data-hazards-forwarding-vs-stalling-สไลด์-3543">11. Data Hazards: Forwarding vs Stalling (สไลด์ 35–43)</a></li><li><a href="#12-load-use-hazard-detection-และ-stall-สไลด์-4448">12. Load-Use Hazard Detection และ Stall (สไลด์ 44–48)</a></li><li><a href="#13-branch-hazards-สไลด์-4952">13. Branch Hazards (สไลด์ 49–52)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
-      </div>
-    </aside>
-    <main class="lesson">
-      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter07</div>
-      <h1 class="lesson-title">Chapter 07 — Computing Unit (Pipelining)</h1>
-      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div><div class="anim-box"><strong>🎬 แอนิเมชันของบทนี้</strong><a class="chip chip-quiz" href="animation-pipelining.html">▶ Pipelining: ดูทีละ clock cycle</a></div>
-      <article class="prose"><blockquote class="callout">
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/index.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/index.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/index.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/index.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/index.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li><a href="../chapter05/index.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/index.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li class='cur'><a href="../chapter07/index.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/index.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/index.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/index.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/index.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Chapter07</div>
+    <h1 class="lesson-title">Chapter 07 — Computing Unit (Pipelining)</h1>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost" href="quiz.html" data-l="chapter07">📝 แบบทดสอบ</a><a class="chip" href="animation-pipelining.html">🎬 Pipelining</a></div>
+    <article class="prose"><blockquote class="callout">
 <p><strong>ภาพรวมบทนี้:</strong> หัวข้อ &quot;computing units&quot; ในบทนี้คือ <strong>Pipelining</strong> — การทำคำสั่งหลายคำสั่งซ้อนกันเป็นช่วง ๆ เพื่อเพิ่ม <strong>throughput</strong></p>
 <p>เนื้อหา: pipeline 5 ขั้นของ RISC-V, การคำนวณ performance, <strong>hazards 3 แบบ</strong> (structure, data, control) และวิธีแก้ (separate memories, <strong>forwarding</strong>, <strong>stall</strong>, <strong>branch prediction</strong>), pipeline registers, การตรวจหา hazard และตัวอย่าง branch taken</p>
 <p>ต่อยอดจาก Chapter 1 (Eight Great Ideas — performance via pipelining / prediction) และ Chapter 3 (คำสั่ง RISC-V)</p>
@@ -810,11 +803,22 @@ add x9, x4, x2
 <li>Branch: ตัดสินใน MEM → flush 3 คำสั่ง | ย้ายไป ID (target adder + register comparator) → เสีย 1 bubble | target = 40 + 16×2 = <strong>72</strong></li>
 </ul>
 </article>
-      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
-      <nav class="pager"><a class="pg prev" href="../chapter06/index.html"><small>← บทก่อนหน้า</small><span>Chapter 06 — Storage Systems (External Memory)</span></a><a class="pg next" href="../chapter08/index.html"><small>บทถัดไป →</small><span>Chapter 08 — Parallel Processors from Client to Cloud</span></a></nav>
-    </main>
-  </div>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>ข้อสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที ยิ่งลองตอบเองก่อนยิ่งจำได้ดี</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">📝 แบบทดสอบ</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../chapter06/index.html"><small>← บทก่อนหน้า</small><span>Chapter 06 — Storage Systems (External Memory)</span></a><a class="pg next" href="../chapter08/index.html"><small>บทถัดไป →</small><span>Chapter 08 — Parallel Processors from Client to Cloud</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-pipelining-analogy-สไลด์-3">Pipelining Analogy</a></li><li><a href="#2-risc-v-pipeline-และ-performance-สไลด์-46">RISC-V Pipeline และ Performance</a></li><li><a href="#3-pipelining-and-isa-design-สไลด์-7">Pipelining and ISA Design</a></li><li><a href="#4-hazards-สไลด์-89">Hazards</a></li><li><a href="#5-data-hazards-สไลด์-1013">Data Hazards</a></li><li><a href="#6-control-hazards-สไลด์-1417">Control Hazards</a></li><li><a href="#7-pipeline-summary-the-big-picture-สไลด์-18">Pipeline Summary — The BIG Picture</a></li><li><a href="#8-pipelined-datapath-และ-pipeline-registers-สไลด์-1920">Pipelined Datapath และ Pipeline Registers</a></li><li><a href="#9-pipeline-operation-สไลด์-2130">Pipeline Operation</a></li><li><a href="#10-pipeline-diagrams-และ-pipelined-control-สไลด์-3134">Pipeline Diagrams และ Pipelined Control</a></li><li><a href="#11-data-hazards-forwarding-vs-stalling-สไลด์-3543">Data Hazards: Forwarding vs Stalling</a></li><li><a href="#12-load-use-hazard-detection-และ-stall-สไลด์-4448">Load-Use Hazard Detection และ Stall</a></li><li><a href="#13-branch-hazards-สไลด์-4952">Branch Hazards</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">📝 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/chapter07", "u": "architecture/chapter07/index.html", "t": "Chapter 07 — Computing Unit (Pipelining)", "s": "ITDS211"};</script>
 <script src="../../assets/app.js"></script>
+
 </body>
 </html>

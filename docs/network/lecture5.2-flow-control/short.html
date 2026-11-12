@@ -4,35 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>สรุปสั้น · Lecture 5.2 — Flow Control, ARQ, and HDLC · ITDS231</title>
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <style>:root{--accent:#0f766e}</style>
 
 </head>
-<body>
-<div id="progress"></div>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
-  </div>
+  <a class="brand" href="../../index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS231</a><span>/</span><b>Lecture5.2-Flow-Control</b></nav>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
 </header>
 
-  <div class="lesson-layout">
-    <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
-      <div class="toc-inner">
-        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS231 ทุกบท</a></div>
-        <ol><li><a href="#1-flow-control">1. Flow Control</a></li><li><a href="#2-stop-and-wait-arq">2. Stop-and-Wait ARQ ⭐</a></li><li><a href="#3-pipelining">3. Pipelining</a></li><li><a href="#4-go-back-n-arq">4. Go-Back-N ARQ ⭐⭐</a></li><li><a href="#5-selective-repeat-arq">5. Selective Repeat ARQ ⭐⭐</a></li><li><a href="#6-เปรียบเทียบ-3-แบบ">6. เปรียบเทียบ 3 แบบ ⭐</a></li><li><a href="#7-hdlc">7. HDLC</a></li><li><a href="#8-performance">8. Performance ⭐⭐</a></li><li><a href="#9-summary-ขนาด-window">9. Summary: ขนาด Window ⭐</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
-      </div>
-    </aside>
-    <main class="lesson">
-      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🌐 ITDS231</a> / Lecture5.2-Flow-Control</div>
-      <h1 class="lesson-title">⚡ สรุปสั้น · Lecture 5.2 — Flow Control, ARQ, and HDLC</h1>
-      <div class="lesson-actions"><a class="btn" href="index.html">📖 อ่านฉบับเต็ม</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a><a class="btn btn-quiz" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a></div>
-      <article class="prose"><p><em>ตอบคำถาม <strong>&quot;ผู้ส่งกับผู้รับประสานงานกันได้ไหม?&quot;</strong> (Delivery Control)</em></p>
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🌐 ITDS231</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../ch1-intro/short.html"><span class="nl">Ch1-Intro</span>Introduction to Computer Networks (ITDS231)</a></li><li><a href="../ch2-application-layer/short.html"><span class="nl">Ch2-Application-Layer</span>Application Layer (Lecture 3 &amp; 4)</a></li><li><a href="../network-topography/short.html"><span class="nl">Network-Topography</span>สถาปัตยกรรมแห่งการเชื่อมต่อ (Network Topography)</a></li><li><a href="../internet-architecture/short.html"><span class="nl">Internet-Architecture</span>โครงข่ายพิมพ์เขียว — สถาปัตยกรรมและฟิสิกส์ของอินเทอร์เน็ต (Internet Architecture)</a></li><li><a href="../lecture5.0-dlp-foundation/short.html"><span class="nl">Lecture5.0-DLP-Foundation</span>Introduction to the Data Link Layer</a></li><li><a href="../lecture5.1-error-detection/short.html"><span class="nl">Lecture5.1-Error-Detection</span>Error Detection and Correction</a></li><li class='cur'><a href="../lecture5.2-flow-control/short.html"><span class="nl">Lecture5.2-Flow-Control</span>Flow Control, ARQ, and HDLC</a></li><li><a href="../lecture6.1-mac/short.html"><span class="nl">Lecture6.1-MAC</span>Media Access Control Protocols</a></li><li><a href="../lecture6.2-ethernet/short.html"><span class="nl">Lecture6.2-Ethernet</span>Ethernet</a></li><li><a href="../lecture7-vlan/short.html"><span class="nl">Lecture7-VLAN</span>Lecture 7 (ฉบับใหม่) — ARP + Transparent Switches + VLAN</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS231</a> · Lecture5.2-Flow-Control · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 5.2 — Flow Control, ARQ, and HDLC</h1>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><details class="qm"><summary class="btn btn-ghost">📝 แบบทดสอบ <b>2</b><svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></summary><div class="qm-pop"><a href="quiz.html" data-l="lecture5.2-flow-control">📝 แบบทดสอบชุดที่ 1</a><a href="quiz2.html" data-l="lecture5.2-flow-control">📝 แบบทดสอบชุดที่ 2</a></div></details></div>
+    <article class="prose"><p><em>ตอบคำถาม <strong>&quot;ผู้ส่งกับผู้รับประสานงานกันได้ไหม?&quot;</strong> (Delivery Control)</em></p>
 <h2 id="1-flow-control">1. Flow Control</h2>
 <p><strong>ทำไมต้องมี:</strong> <strong>ส่งเร็วเกินไป</strong> → ผู้รับรับไม่ทัน <strong>buffer overflow / frame loss</strong> | <strong>ส่งช้าเกินไป</strong> → ผู้รับเสียเวลารอ <strong>ประสิทธิภาพลดลง</strong></p>
 <ul>
@@ -483,11 +484,22 @@ $$W_S \le 2^{m-1}, \quad W_R \le 2^{m-1}$$
 <li><strong>Bandwidth-delay product 1 Mbps × 20 ms = 20,000 bits</strong> → <strong>S&amp;W 5%, GBN 15 frames 75%</strong></li>
 </ol>
 </article>
-      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a><a class="btn btn-quiz" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a></div>
-      <nav class="pager"><a class="pg prev" href="../lecture5.1-error-detection/short.html"><small>← บทก่อนหน้า</small><span>Lecture 5.1 — Error Detection and Correction</span></a><a class="pg next" href="../lecture6.1-mac/short.html"><small>บทถัดไป →</small><span>Lecture 6.1 — Media Access Control Protocols</span></a></nav>
-    </main>
-  </div>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>ข้อสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที ยิ่งลองตอบเองก่อนยิ่งจำได้ดี</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">📝 แบบทดสอบชุดที่ 1</a><a class="btn btn-primary" href="quiz2.html">📝 แบบทดสอบชุดที่ 2</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../lecture5.1-error-detection/short.html"><small>← บทก่อนหน้า</small><span>Lecture 5.1 — Error Detection and Correction</span></a><a class="pg next" href="../lecture6.1-mac/short.html"><small>บทถัดไป →</small><span>Lecture 6.1 — Media Access Control Protocols</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-flow-control">Flow Control</a></li><li><a href="#2-stop-and-wait-arq">Stop-and-Wait ARQ ⭐</a></li><li><a href="#3-pipelining">Pipelining</a></li><li><a href="#4-go-back-n-arq">Go-Back-N ARQ ⭐⭐</a></li><li><a href="#5-selective-repeat-arq">Selective Repeat ARQ ⭐⭐</a></li><li><a href="#6-เปรียบเทียบ-3-แบบ">เปรียบเทียบ 3 แบบ ⭐</a></li><li><a href="#7-hdlc">HDLC</a></li><li><a href="#8-performance">Performance ⭐⭐</a></li><li><a href="#9-summary-ขนาด-window">Summary: ขนาด Window ⭐</a></li><li><a href="#จุดที่มักออกสอบ">จุดที่มักออกสอบ</a></li></ol>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">📝 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "network/lecture5.2-flow-control", "u": "network/lecture5.2-flow-control/short.html", "t": "⚡ สรุปสั้น · Lecture 5.2 — Flow Control, ARQ, and HDLC", "s": "ITDS231"};</script>
 <script src="../../assets/app.js"></script>
+
 </body>
 </html>

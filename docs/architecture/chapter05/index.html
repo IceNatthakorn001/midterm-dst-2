@@ -4,43 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter 05 — I/O Systems · ITDS211</title>
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <style>:root{--accent:#c2410c}</style>
-<script>try{var k="itds211-progress",d=JSON.parse(localStorage.getItem(k)||'{}');d.v=d.v||{};d.v["chapter05"]=1;d.last={h:"chapter05/index.html",t:"📖 Chapter 05 — I/O Systems"};localStorage.setItem(k,JSON.stringify(d));}catch(e){}</script><script>
-(function(){var K='itds211-toc',r=document.documentElement;
-try{if(localStorage.getItem(K)==='0')r.classList.add('toc-hidden');}catch(e){}
-function set(h){r.classList.toggle('toc-hidden',h);try{localStorage.setItem(K,h?'0':'1');}catch(e){}}
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-toc-collapse]');
-if(b)set(!r.classList.contains('toc-hidden'));});
-document.addEventListener('keydown',function(e){var t=e.target.tagName;
-if(e.key==='['&&t!=='INPUT'&&t!=='TEXTAREA'&&!e.ctrlKey&&!e.metaKey)set(!r.classList.contains('toc-hidden'));});
-})();</script>
+
 </head>
-<body>
-<div id="progress"></div>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
-  </div>
+  <a class="brand" href="../../index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Chapter05</b></nav>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
 </header>
 
-  <div class="lesson-layout">
-    <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button><button class="toc-collapse" data-toc-collapse title="ซ่อนสารบัญ (กด [)">«</button><button class="toc-rail" data-toc-collapse title="แสดงสารบัญ (กด [)"><span>☰</span><span class="toc-rail-label">สารบัญ</span></button>
-      <div class="toc-inner">
-        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS211 ทุกบท</a></div>
-        <ol><li><a href="#1-io-module-และ-external-devices-สไลด์-35">1. I/O Module และ External Devices (สไลด์ 3–5)</a></li><li><a href="#2-หน้าที่ของ-io-module-สไลด์-67">2. หน้าที่ของ I/O Module (สไลด์ 6–7)</a></li><li><a href="#3-3-เทคนิคของ-io-สไลด์-811">3. 3 เทคนิคของ I/O (สไลด์ 8–11)</a></li><li><a href="#4-io-instructions-และ-io-mapping-สไลด์-1214">4. I/O Instructions และ I/O Mapping (สไลด์ 12–14)</a></li><li><a href="#5-interrupt-driven-io-สไลด์-1517">5. Interrupt-Driven I/O (สไลด์ 15–17)</a></li><li><a href="#6-design-issues-และ-device-identification-สไลด์-1819">6. Design Issues และ Device Identification (สไลด์ 18–19)</a></li><li><a href="#7-ชิปตัวอย่างของ-intel-สไลด์-2023">7. ชิปตัวอย่างของ Intel (สไลด์ 20–23)</a></li><li><a href="#8-dma-direct-memory-access-สไลด์-2430">8. DMA — Direct Memory Access (สไลด์ 24–30)</a></li><li><a href="#9-direct-cache-access-dca-สไลด์-3137">9. Direct Cache Access (DCA) (สไลด์ 31–37)</a></li><li><a href="#10-evolution-of-the-io-function-และ-io-channel-สไลด์-3839">10. Evolution of the I/O Function และ I/O Channel (สไลด์ 38–39)</a></li><li><a href="#11-assignment-และ-9-หัวข้อ-interface-สไลด์-4048">11. Assignment และ 9 หัวข้อ Interface (สไลด์ 40–48)</a></li><li><a href="#12-ibm-zec12-io-สไลด์-4951">12. IBM zEC12 I/O (สไลด์ 49–51)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่ควรจำ">สรุปท้ายบท / จุดที่ควรจำ</a></li></ol>
-      </div>
-    </aside>
-    <main class="lesson">
-      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🖥️ ITDS211</a> / Chapter05</div>
-      <h1 class="lesson-title">Chapter 05 — I/O Systems</h1>
-      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div><div class="anim-box"><strong>🎬 แอนิเมชันของบทนี้</strong><a class="chip chip-quiz" href="animation-io.html">▶ I/O: Programmed · Interrupt-driven · DMA</a></div>
-      <article class="prose"><blockquote class="callout">
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/index.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/index.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/index.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/index.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/index.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li class='cur'><a href="../chapter05/index.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/index.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li><a href="../chapter07/index.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/index.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/index.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/index.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/index.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Chapter05</div>
+    <h1 class="lesson-title">Chapter 05 — I/O Systems</h1>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost" href="quiz.html" data-l="chapter05">📝 แบบทดสอบ</a><a class="chip" href="animation-io.html">🎬 I/O</a></div>
+    <article class="prose"><blockquote class="callout">
 <p><strong>ภาพรวมบทนี้:</strong> CPU คุยกับอุปกรณ์ภายนอก (keyboard, disk, network ฯลฯ) ผ่าน <strong>I/O module</strong> บทนี้อธิบายว่า I/O module ทำหน้าที่อะไร และมี <strong>3 เทคนิค</strong> ในการรับส่งข้อมูล: <strong>Programmed I/O, Interrupt-driven I/O, DMA</strong></p>
 <p>ต่อด้วยการระบุอุปกรณ์ที่ขอ interrupt, ชิปตัวอย่างของ Intel (82C59A, 8255A, 8237A), <strong>Direct Cache Access (DCA/DDIO)</strong> สำหรับ network ความเร็วสูง, วิวัฒนาการของ I/O, I/O channel</p>
 <p>ท้ายบทมี <strong>Assignment กลุ่ม 9 หัวข้อ</strong> (USB, FireWire, SCSI, Thunderbolt, InfiniBand, PCI, SATA, Ethernet, Wi-Fi) และระบบ I/O ของ IBM zEC12</p>
@@ -949,11 +942,22 @@ if(e.key==='['&&t!=='INPUT'&&t!=='TEXTAREA'&&!e.ctrlKey&&!e.metaKey)set(!r.class
 <li>ตัวเลข interface: USB 2.0 480 Mbps, USB3 5 Gbps (ใช้ได้ 4), Gen2 10 Gbps (9.7), Gen2x2 20 Gbps | FireWire 63 อุปกรณ์/port, 1022 bus | SCSI 16/32 อุปกรณ์, 5–160 Mbps | Thunderbolt 10 Gbps + 10 W | InfiniBand 64,000 อุปกรณ์ | SATA 6 Gbps | Ethernet 100 Gbps | Wi-Fi 802.11ac 3.2 Gbps</li>
 </ul>
 </article>
-      <div class="quiz-cta"><div><strong>อ่านจบแล้ว? ลองทดสอบความเข้าใจ</strong><p>แบบทดสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที</p></div><a class="btn btn-quiz" href="quiz.html">📝 ทำแบบทดสอบ</a></div>
-      <nav class="pager"><a class="pg prev" href="../chapter04/index.html"><small>← บทก่อนหน้า</small><span>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</span></a><a class="pg next" href="../chapter06/index.html"><small>บทถัดไป →</small><span>Chapter 06 — Storage Systems (External Memory)</span></a></nav>
-    </main>
-  </div>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>ข้อสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที ยิ่งลองตอบเองก่อนยิ่งจำได้ดี</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">📝 แบบทดสอบ</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../chapter04/index.html"><small>← บทก่อนหน้า</small><span>Chapter 04 — Memory System Organization, Hierarchy, Cache Memory</span></a><a class="pg next" href="../chapter06/index.html"><small>บทถัดไป →</small><span>Chapter 06 — Storage Systems (External Memory)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-io-module-และ-external-devices-สไลด์-35">I/O Module และ External Devices</a></li><li><a href="#2-หน้าที่ของ-io-module-สไลด์-67">หน้าที่ของ I/O Module</a></li><li><a href="#3-3-เทคนิคของ-io-สไลด์-811">3 เทคนิคของ I/O</a></li><li><a href="#4-io-instructions-และ-io-mapping-สไลด์-1214">I/O Instructions และ I/O Mapping</a></li><li><a href="#5-interrupt-driven-io-สไลด์-1517">Interrupt-Driven I/O</a></li><li><a href="#6-design-issues-และ-device-identification-สไลด์-1819">Design Issues และ Device Identification</a></li><li><a href="#7-ชิปตัวอย่างของ-intel-สไลด์-2023">ชิปตัวอย่างของ Intel</a></li><li><a href="#8-dma-direct-memory-access-สไลด์-2430">DMA — Direct Memory Access</a></li><li><a href="#9-direct-cache-access-dca-สไลด์-3137">Direct Cache Access (DCA)</a></li><li><a href="#10-evolution-of-the-io-function-และ-io-channel-สไลด์-3839">Evolution of the I/O Function และ I/O Channel</a></li><li><a href="#11-assignment-และ-9-หัวข้อ-interface-สไลด์-4048">Assignment และ 9 หัวข้อ Interface</a></li><li><a href="#12-ibm-zec12-io-สไลด์-4951">IBM zEC12 I/O</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่ควรจำ">สรุปท้ายบท / จุดที่ควรจำ</a></li></ol>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">📝 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/chapter05", "u": "architecture/chapter05/index.html", "t": "Chapter 05 — I/O Systems", "s": "ITDS211"};</script>
 <script src="../../assets/app.js"></script>
+
 </body>
 </html>

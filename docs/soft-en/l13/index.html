@@ -4,41 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lecture 13 – Unit Testing, Integration Testing, and System Testing · ITDS261</title>
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <style>:root{--accent:#7c3aed}</style>
 
 </head>
-<body>
-<div id="progress"></div>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../index.html">📚 <span>Study Notes</span></a>
-  <div class="topbar-right">
-    <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="toggle theme">◐</button>
-  </div>
+  <a class="brand" href="../../index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS261</a><span>/</span><b>L13</b></nav>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
 </header>
 
-  <div class="lesson-layout">
-    <aside class="toc" id="toc">
-      <button class="toc-toggle" id="tocToggle">☰ สารบัญ</button>
-      <div class="toc-inner">
-        <div class="toc-top"><a class="toc-back" href="../index.html">← ITDS261 ทุกบท</a></div>
-        <ol><li><a href="#1-testing-คืออะไร-และมี-test-phases-อะไรบ้าง-สไลด์-45">1. Testing คืออะไร และมี test phases อะไรบ้าง? (สไลด์ 4–5)</a></li><li><a href="#2-unit-test-ที่ดีเป็นยังไง-สไลด์-6">2. Unit test ที่ดีเป็นยังไง? (สไลด์ 6)</a></li><li><a href="#3-junit-ใช้ยังไง-สไลด์-714">3. JUnit ใช้ยังไง? (สไลด์ 7–14)</a></li><li><a href="#4-integration-testing-คืออะไร-และต่างจาก-unit-test-ยังไง-สไลด์-1517">4. Integration testing คืออะไร และต่างจาก unit test ยังไง? (สไลด์ 15–17)</a></li><li><a href="#5-system-testing-คืออะไร-สไลด์-1819">5. System testing คืออะไร? (สไลด์ 18–19)</a></li><li><a href="#6-เอกสาร-testing-test-case-test-report-traceability-สไลด์-2022">6. เอกสาร testing: test case, test report, traceability (สไลด์ 20–22)</a></li><li><a href="#7-regression-testing-ใช้เมื่อไหร่-สไลด์-2324">7. Regression testing ใช้เมื่อไหร่? (สไลด์ 23–24)</a></li><li><a href="#8-software-quality-model-และ-usability-สไลด์-2527">8. Software quality model และ usability (สไลด์ 25–27)</a></li><li><a href="#9-usability-testing-ทำยังไง-สไลด์-2830">9. Usability testing ทำยังไง? (สไลด์ 28–30)</a></li><li><a href="#10-best-practices-in-testing-สไลด์-31">10. Best practices in testing (สไลด์ 31)</a></li><li><a href="#11-exercises-58-สไลด์-3240">11. Exercises 5–8 (สไลด์ 32–40)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
-      </div>
-    </aside>
-    <main class="lesson">
-      <div class="crumbs"><a href="../../index.html">หน้าแรก</a> / <a href="../index.html">🧩 ITDS261</a> / L13</div>
-      <h1 class="lesson-title">Lecture 13 – Unit Testing, Integration Testing, and System Testing</h1>
-      <div class="lesson-actions"><a class="btn" href="short.html">⚡ อ่านสรุปสั้น</a></div>
-      <article class="prose"><blockquote class="callout">
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🧩 ITDS261</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Software Engineering Foundation &amp; Software Project Management</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Software Process Models</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Requirement Engineering</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Requirements Analysis with Scenario-based Modeling I (Use Case Modeling)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Requirements Modeling with Flow Modeling I (Data Flow Diagram)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>Requirements Modeling with Flow Modeling II</a></li><li><a href="../l8/index.html"><span class="nl">L8</span>User Interface Design</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>Design Architecture and Methodology</a></li><li><a href="../l10/index.html"><span class="nl">L10</span>Implementation &amp; Code Review</a></li><li><a href="../l11/index.html"><span class="nl">L11</span>Version Control System</a></li><li><a href="../l12/index.html"><span class="nl">L12</span>Testing</a></li><li class='cur'><a href="../l13/index.html"><span class="nl">L13</span>Unit Testing, Integration Testing, and System Testing</a></li><li><a href="../l14/index.html"><span class="nl">L14</span>Agentic Software Engineering</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS261</a> · L13</div>
+    <h1 class="lesson-title">Lecture 13 – Unit Testing, Integration Testing, and System Testing</h1>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div></div>
+    <article class="prose"><blockquote class="callout">
 <p><strong>ภาพรวมบทนี้:</strong> L12 ปูพื้นเรื่อง testing กับเทคนิค black-box/white-box บทนี้ลงรายละเอียด <strong>3 ระดับของการ test</strong> (test phases): <strong>unit</strong> (พร้อม JUnit), <strong>integration</strong> และ <strong>system</strong> ต่อด้วยเอกสารที่ใช้ (test case, test report, traceability), <strong>regression testing</strong>, <strong>software quality model</strong>, <strong>usability testing</strong> และ best practices</p>
 <p>ท้ายบทมี <strong>Exercises</strong> ทบทวน BVA, ECP และ path analysis (Exercise 5–8)</p>
 </blockquote>
 <p><img loading="lazy" src="diagrams/L13-00-overview.png" alt="แผนผังภาพรวม Lecture 13" /></p>
-<h2 id="1-testing-คืออะไร-และมี-test-phases-อะไรบ้าง-สไลด์-45">1. Testing คืออะไร และมี test phases อะไรบ้าง? <sub>(สไลด์ 4–5)</sub></h2>
-<p><strong>แก่น: testing คือการหาว่าโค้ดทำงานตามที่ตั้งใจไหม แบ่งเป็น 3 phase จากเล็กไปใหญ่: unit (เร็ว ถูก ทำบ่อย) → integration → system (ทั้งระบบ แพง ทำนาน ๆ ครั้ง)</strong></p>
+<h2 id="1-testing-คืออะไร-และมี-test-phases-อะไรบ้าง-สไลด์-45">1. Testing คืออะไร และมี test phases อะไรบ้าง? <span class="slide-ref">สไลด์ 4–5</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>testing คือการหาว่าโค้ดทำงานตามที่ตั้งใจไหม แบ่งเป็น 3 phase จากเล็กไปใหญ่: unit (เร็ว ถูก ทำบ่อย) → integration → system (ทั้งระบบ แพง ทำนาน ๆ ครั้ง)</strong></p>
 <p><strong>Testing</strong> (สไลด์ 4):</p>
 <ul>
 <li>กิจกรรมหาว่าโค้ดชิ้นหนึ่ง (method, class, program) <strong>ทำงานตามพฤติกรรมที่ตั้งใจ</strong> ไหม</li>
@@ -75,8 +76,8 @@
 </tbody>
 </table></div>
 <hr />
-<h2 id="2-unit-test-ที่ดีเป็นยังไง-สไลด์-6">2. Unit test ที่ดีเป็นยังไง? <sub>(สไลด์ 6)</sub></h2>
-<p><strong>แก่น: unit test ทำให้มั่นใจว่าแต่ละ function ทำงานถูกก่อนรวมกับส่วนอื่น และ test ที่ดีต้อง test ทีละ function, รันเร็ว, รันอัตโนมัติได้ และได้ผลเหมือนเดิมทุกครั้ง</strong></p>
+<h2 id="2-unit-test-ที่ดีเป็นยังไง-สไลด์-6">2. Unit test ที่ดีเป็นยังไง? <span class="slide-ref">สไลด์ 6</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>unit test ทำให้มั่นใจว่าแต่ละ function ทำงานถูกก่อนรวมกับส่วนอื่น และ test ที่ดีต้อง test ทีละ function, รันเร็ว, รันอัตโนมัติได้ และได้ผลเหมือนเดิมทุกครั้ง</strong></p>
 <ul>
 <li>จุดประสงค์: ให้แต่ละ function <strong>ทำงานตามที่ตั้งใจก่อน integrate</strong></li>
 <li><strong>Characteristics of good unit tests:</strong></li>
@@ -108,9 +109,9 @@
 </tbody>
 </table></div>
 <hr />
-<h2 id="3-junit-ใช้ยังไง-สไลด์-714">3. JUnit ใช้ยังไง? <sub>(สไลด์ 7–14)</sub></h2>
-<p><strong>แก่น: JUnit เป็น unit testing framework มาตรฐานของ Java ใช้ annotation <code>@Test</code> บอกว่า method ไหนเป็น test และใช้ assertion methods เช็กผลที่คาดไว้</strong></p>
-<h3 id="31-junit-คืออะไร-สไลด์-79">3.1 JUnit คืออะไร? <sub>(สไลด์ 7–9)</sub></h3>
+<h2 id="3-junit-ใช้ยังไง-สไลด์-714">3. JUnit ใช้ยังไง? <span class="slide-ref">สไลด์ 7–14</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>JUnit เป็น unit testing framework มาตรฐานของ Java ใช้ annotation <code>@Test</code> บอกว่า method ไหนเป็น test และใช้ assertion methods เช็กผลที่คาดไว้</strong></p>
+<h3 id="31-junit-คืออะไร-สไลด์-79">3.1 JUnit คืออะไร? <span class="slide-ref">สไลด์ 7–9</span></h3>
 <ul>
 <li>พัฒนาช่วง <strong>กลางยุค 90</strong></li>
 <li>เป็น <strong>เครื่องมือมาตรฐานของ Test-Driven Development (TDD) ใน Java</strong></li>
@@ -122,19 +123,19 @@
 <li>รวมกับ <strong>Eclipse, Ant, Maven</strong> ได้ง่าย</li>
 <li>tool unit testing ของ Java อื่น ๆ (สไลด์ 8): <strong>Jmockit, Cactus, Cobertura, Dbunit, dJUnit</strong> … มีมากกว่า 30 tools</li>
 </ul>
-<h3 id="32-junit-checklist-สไลด์-10">3.2 JUnit Checklist <sub>(สไลด์ 10)</sub></h3>
+<h3 id="32-junit-checklist-สไลด์-10">3.2 JUnit Checklist <span class="slide-ref">สไลด์ 10</span></h3>
 <ol>
 <li><strong>Initialize</strong></li>
 <li><strong>Write test cases</strong></li>
 <li><strong>Write a test suite</strong></li>
 <li><strong>Execute test suite</strong></li>
 </ol>
-<h3 id="33-annotation-สไลด์-11">3.3 Annotation <sub>(สไลด์ 11)</sub></h3>
+<h3 id="33-annotation-สไลด์-11">3.3 Annotation <span class="slide-ref">สไลด์ 11</span></h3>
 <ul>
 <li>tag ที่กำหนดไว้แล้ว ใส่ในโค้ดเพื่อ <strong>บอก JUnit ว่าจะรัน test method เมื่อไหร่</strong></li>
 <li><strong><code>@Test</code></strong> = บอก JUnit ว่า method นี้ <strong>รันเป็น test ได้</strong></li>
 </ul>
-<h3 id="34-assertion-methods-สไลด์-1213-tutorialspoint">3.4 Assertion methods <sub>(สไลด์ 12–13, tutorialspoint)</sub></h3>
+<h3 id="34-assertion-methods-สไลด์-1213-tutorialspoint">3.4 Assertion methods <span class="slide-ref">สไลด์ 12–13, tutorialspoint</span></h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -220,7 +221,7 @@ public void testAssertions() {
 <blockquote class="callout">
 <p class="c-warn">⚠️ <strong>assertEquals vs assertSame:</strong> <code>assertEquals</code> เช็กว่า <strong>ค่าเท่ากัน</strong> ส่วน <code>assertSame</code> เช็กว่า <strong>เป็น object เดียวกัน</strong> (reference เดียวกัน)</p>
 </blockquote>
-<h3 id="35-junit-example-สไลด์-14">3.5 JUnit Example <sub>(สไลด์ 14)</sub></h3>
+<h3 id="35-junit-example-สไลด์-14">3.5 JUnit Example <span class="slide-ref">สไลด์ 14</span></h3>
 <p>class ที่ถูก test:</p>
 <pre><code class="language-java">public class Student {
     public String firstName;
@@ -264,16 +265,16 @@ public class StudentTest {
 <li>ในรูปสไลด์ <code>testGetDisplayNameSpace</code> มีเครื่องหมาย <strong>✓ (ผ่าน)</strong> ส่วน <code>testGetDisplayNameNospace</code> มีเครื่องหมาย <strong>✗ (ไม่ผ่าน)</strong> เพราะ <code>getDisplayName()</code> ใส่ช่องว่างระหว่างชื่อกับนามสกุลเสมอ ผลจริงจึงเป็น <code>&quot;Morakot Choetkiertikul&quot;</code> ไม่ตรงกับที่คาด <code>&quot;MorakotChoetkiertikul&quot;</code></li>
 </ul>
 <hr />
-<h2 id="4-integration-testing-คืออะไร-และต่างจาก-unit-test-ยังไง-สไลด์-1517">4. Integration testing คืออะไร และต่างจาก unit test ยังไง? <sub>(สไลด์ 15–17)</sub></h2>
-<p><strong>แก่น: integration testing ทดสอบปฏิสัมพันธ์ระหว่าง unit/component ที่รวมกัน หาปัญหาที่ interface, data flow และ dependency แต่ทดแทน unit test ที่ไม่พอไม่ได้</strong></p>
-<h3 id="41-integration-testing-สไลด์-15">4.1 Integration testing <sub>(สไลด์ 15)</sub></h3>
+<h2 id="4-integration-testing-คืออะไร-และต่างจาก-unit-test-ยังไง-สไลด์-1517">4. Integration testing คืออะไร และต่างจาก unit test ยังไง? <span class="slide-ref">สไลด์ 15–17</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>integration testing ทดสอบปฏิสัมพันธ์ระหว่าง unit/component ที่รวมกัน หาปัญหาที่ interface, data flow และ dependency แต่ทดแทน unit test ที่ไม่พอไม่ได้</strong></p>
+<h3 id="41-integration-testing-สไลด์-15">4.1 Integration testing <span class="slide-ref">สไลด์ 15</span></h3>
 <ul>
 <li>ทดสอบ <strong>ปฏิสัมพันธ์ระหว่าง unit/component ที่รวมกัน</strong> เพื่อหาปัญหาการสื่อสาร</li>
 <li>หาปัญหาที่ <strong>interface, data flow และ dependency</strong> ระหว่าง component</li>
 <li>ตัวอย่าง: test function ที่ <strong>พึ่ง database connection</strong> ซึ่งต้องทำงานร่วมกันทั้งคู่</li>
 <li>เป็น <strong>สะพานเชื่อม</strong> ระหว่าง unit test กับ system test โดยเน้นที่ <strong>การเชื่อมต่อของ component</strong></li>
 </ul>
-<h3 id="42-เทียบ-3-ระดับ-สไลด์-16">4.2 เทียบ 3 ระดับ <sub>(สไลด์ 16)</sub></h3>
+<h3 id="42-เทียบ-3-ระดับ-สไลด์-16">4.2 เทียบ 3 ระดับ <span class="slide-ref">สไลด์ 16</span></h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -313,7 +314,7 @@ public class StudentTest {
 <blockquote class="callout">
 <p class="c-tip">💡 สังเกต: ยิ่งระดับสูง ยิ่งมองเห็นโครงสร้างภายในน้อยลง (coding details → architecture → ไม่เห็นเลย) และ integration ต้องใช้ scaffolding มากที่สุด</p>
 </blockquote>
-<h3 id="43-integration-vs-unit-testing-สไลด์-17">4.3 Integration vs Unit testing <sub>(สไลด์ 17)</sub></h3>
+<h3 id="43-integration-vs-unit-testing-สไลด์-17">4.3 Integration vs Unit testing <span class="slide-ref">สไลด์ 17</span></h3>
 <ul>
 <li><strong>Unit testing เป็นรากฐานที่ขาดไม่ได้</strong>
 <ul>
@@ -329,8 +330,8 @@ public class StudentTest {
 </li>
 </ul>
 <hr />
-<h2 id="5-system-testing-คืออะไร-สไลด์-1819">5. System testing คืออะไร? <sub>(สไลด์ 18–19)</sub></h2>
-<p><strong>แก่น: system testing ทดสอบระบบที่รวมครบแล้วว่าตรง functional และ non-functional requirements และทำงานได้ในสถานการณ์จริง แบ่งเป็น functional, non-functional และ security testing</strong></p>
+<h2 id="5-system-testing-คืออะไร-สไลด์-1819">5. System testing คืออะไร? <span class="slide-ref">สไลด์ 18–19</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>system testing ทดสอบระบบที่รวมครบแล้วว่าตรง functional และ non-functional requirements และทำงานได้ในสถานการณ์จริง แบ่งเป็น functional, non-functional และ security testing</strong></p>
 <ul>
 <li>ทดสอบ <strong>ระบบที่รวมครบ</strong> ว่าตรง <strong>functional และ non-functional requirements</strong></li>
 <li>ให้ระบบ <strong>ทำงานเป็นหนึ่งเดียว</strong> และทำงานตามคาดใน <strong>สถานการณ์จริง (real-world scenarios)</strong></li>
@@ -361,9 +362,9 @@ public class StudentTest {
 <li>สไลด์ 19 ใช้รูป <strong>Validation and Verification Activities</strong> (Naik &amp; Tripathy) เดียวกับ L12 สไลด์ 14: Requirements ↔ Acceptance (validation), High-Level Design ↔ System, Detailed Design ↔ Integration, Coding ↔ Unit (verification)</li>
 </ul>
 <hr />
-<h2 id="6-เอกสาร-testing-test-case-test-report-traceability-สไลด์-2022">6. เอกสาร testing: test case, test report, traceability <sub>(สไลด์ 20–22)</sub></h2>
-<p><strong>แก่น: test case บันทึกขั้นตอน ข้อมูล และผลที่คาดของการ test แต่ละอัน, test report สรุปผลการ test ทั้งรอบ และ traceability matrix โยง requirement ไปหา test case</strong></p>
-<h3 id="61-test-case-template-สไลด์-20-softwaretestinghelpcom">6.1 Test Case Template <sub>(สไลด์ 20, softwaretestinghelp.com)</sub></h3>
+<h2 id="6-เอกสาร-testing-test-case-test-report-traceability-สไลด์-2022">6. เอกสาร testing: test case, test report, traceability <span class="slide-ref">สไลด์ 20–22</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>test case บันทึกขั้นตอน ข้อมูล และผลที่คาดของการ test แต่ละอัน, test report สรุปผลการ test ทั้งรอบ และ traceability matrix โยง requirement ไปหา test case</strong></p>
+<h3 id="61-test-case-template-สไลด์-20-softwaretestinghelpcom">6.1 Test Case Template <span class="slide-ref">สไลด์ 20, softwaretestinghelp.com</span></h3>
 <p>ตัวอย่างในสไลด์:</p>
 <div class="table-wrap"><table>
 <thead>
@@ -457,7 +458,7 @@ public class StudentTest {
 <ul>
 <li><strong>Post-conditions:</strong> User is validated with database and successfully login to account. The account session details are logged in database.</li>
 </ul>
-<h3 id="62-test-report-สไลด์-21-guru99">6.2 Test Report <sub>(สไลด์ 21, guru99)</sub></h3>
+<h3 id="62-test-report-สไลด์-21-guru99">6.2 Test Report <span class="slide-ref">สไลด์ 21, guru99</span></h3>
 <p>ตัวอย่าง (Test Cycle: <strong>System Test</strong>):</p>
 <ul>
 <li>ส่วนสรุป: EXECUTED = PASSED <strong>130</strong> + FAILED <strong>0</strong> → (Total) TESTS EXECUTED <strong>130</strong>; PENDING 0, IN PROGRESS 0, BLOCKED 0 → (Sub-Total) TEST PLANNED <strong>130</strong></li>
@@ -467,7 +468,7 @@ public class StudentTest {
 </ul>
 </li>
 </ul>
-<h3 id="63-traceability-record-สไลด์-22">6.3 Traceability Record <sub>(สไลด์ 22)</sub></h3>
+<h3 id="63-traceability-record-สไลด์-22">6.3 Traceability Record <span class="slide-ref">สไลด์ 22</span></h3>
 <p><strong>Requirements Traceability Matrix (RTM)</strong> – ตัวอย่าง Online Flight Booking Application: โยง <strong>Business Requirement → Functional Requirement → Test Case</strong></p>
 <div class="table-wrap"><table>
 <thead>
@@ -535,8 +536,8 @@ public class StudentTest {
 <p class="c-tip">💡 เชื่อมกับ L10: &quot;Traceability&quot; เป็น 1 ใน 6 คุณสมบัติของ good implementation ตาราง RTM คือตัวอย่างการตามรอย requirement ไปถึง test case</p>
 </blockquote>
 <hr />
-<h2 id="7-regression-testing-ใช้เมื่อไหร่-สไลด์-2324">7. Regression testing ใช้เมื่อไหร่? <sub>(สไลด์ 23–24)</sub></h2>
-<p><strong>แก่น: regression testing เช็กว่าการแก้โค้ดล่าสุดไม่ได้สร้าง bug ใหม่หรือทำให้ของที่เคยใช้ได้พัง รันหลังแก้ bug, เพิ่ม feature, ปรับ performance และระหว่าง maintenance</strong></p>
+<h2 id="7-regression-testing-ใช้เมื่อไหร่-สไลด์-2324">7. Regression testing ใช้เมื่อไหร่? <span class="slide-ref">สไลด์ 23–24</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>regression testing เช็กว่าการแก้โค้ดล่าสุดไม่ได้สร้าง bug ใหม่หรือทำให้ของที่เคยใช้ได้พัง รันหลังแก้ bug, เพิ่ม feature, ปรับ performance และระหว่าง maintenance</strong></p>
 <ul>
 <li>ทดสอบว่า <strong>การเปลี่ยนโค้ดล่าสุดไม่ทำให้เกิด bug ใหม่</strong> หรือ <strong>ทำให้ functionality เดิมถอยหลัง (regress)</strong></li>
 <li>ยืนยันว่า update (bug fix, feature ใหม่) <strong>ไม่ทำให้ส่วนที่เคยทำงานได้พัง</strong></li>
@@ -551,9 +552,9 @@ public class StudentTest {
 <li><strong>During Routine Maintenance</strong></li>
 </ol>
 <hr />
-<h2 id="8-software-quality-model-และ-usability-สไลด์-2527">8. Software quality model และ usability <sub>(สไลด์ 25–27)</sub></h2>
-<p><strong>แก่น: คุณภาพซอฟต์แวร์มี 8 ด้าน (จาก iso25000) หนึ่งในนั้นคือ usability = ใช้ง่ายและมีประสิทธิภาพแค่ไหน มี 5 องค์ประกอบ: learnability, efficiency, memorability, errors, satisfaction</strong></p>
-<h3 id="81-software-quality-models-สไลด์-25-softwaremillcom-iso25000com">8.1 Software Quality Models <sub>(สไลด์ 25, softwaremill.com / iso25000.com)</sub></h3>
+<h2 id="8-software-quality-model-และ-usability-สไลด์-2527">8. Software quality model และ usability <span class="slide-ref">สไลด์ 25–27</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>คุณภาพซอฟต์แวร์มี 8 ด้าน (จาก iso25000) หนึ่งในนั้นคือ usability = ใช้ง่ายและมีประสิทธิภาพแค่ไหน มี 5 องค์ประกอบ: learnability, efficiency, memorability, errors, satisfaction</strong></p>
+<h3 id="81-software-quality-models-สไลด์-25-softwaremillcom-iso25000com">8.1 Software Quality Models <span class="slide-ref">สไลด์ 25, softwaremill.com / iso25000.com</span></h3>
 <p><strong>SOFTWARE PRODUCT QUALITY</strong> แบ่ง 8 ด้าน:</p>
 <div class="table-wrap"><table>
 <thead>
@@ -597,7 +598,7 @@ public class StudentTest {
 </tr>
 </tbody>
 </table></div>
-<h3 id="82-usability-in-software-สไลด์-2627">8.2 Usability in software <sub>(สไลด์ 26–27)</sub></h3>
+<h3 id="82-usability-in-software-สไลด์-2627">8.2 Usability in software <span class="slide-ref">สไลด์ 26–27</span></h3>
 <ul>
 <li><strong>Usability</strong> = วัดว่าซอฟต์แวร์ <strong>ใช้ง่ายและมีประสิทธิภาพ</strong> แค่ไหนสำหรับผู้ใช้ในการบรรลุเป้าหมาย</li>
 <li>ซอฟต์แวร์ที่ใช้ง่าย <strong>มีโอกาสถูกนำไปใช้มากกว่า</strong></li>
@@ -638,8 +639,8 @@ public class StudentTest {
 <p class="c-tip">💡 จำ 5 คำ: <strong>L-E-M-E-S</strong> (Learnability, Efficiency, Memorability, Errors, Satisfaction)</p>
 </blockquote>
 <hr />
-<h2 id="9-usability-testing-ทำยังไง-สไลด์-2830">9. Usability testing ทำยังไง? <sub>(สไลด์ 28–30)</sub></h2>
-<p><strong>แก่น: ให้ผู้ใช้ในอนาคตลองใช้จริงเพื่อดูว่าใช้งานยังไงและตรงเป้าหมายไหม ใช้วิธี task-based, A/B testing, survey และวัด performance เป็นตัวเลข</strong></p>
+<h2 id="9-usability-testing-ทำยังไง-สไลด์-2830">9. Usability testing ทำยังไง? <span class="slide-ref">สไลด์ 28–30</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ให้ผู้ใช้ในอนาคตลองใช้จริงเพื่อดูว่าใช้งานยังไงและตรงเป้าหมายไหม ใช้วิธี task-based, A/B testing, survey และวัด performance เป็นตัวเลข</strong></p>
 <ul>
 <li><strong>Usability testing:</strong> ประเมิน product โดย <strong>ทดสอบกับผู้ใช้ในอนาคต</strong> ได้ข้อมูลตรงว่าเขาใช้ระบบยังไง</li>
 <li>เช็กว่า product <strong>ตรงเป้าหมายและ requirement ที่ตั้งไว้</strong> ไหม</li>
@@ -678,8 +679,8 @@ public class StudentTest {
 <li>ความถี่ในการเปิดคู่มือ/help และเวลาที่ใช้</li>
 </ul>
 <hr />
-<h2 id="10-best-practices-in-testing-สไลด์-31">10. Best practices in testing <sub>(สไลด์ 31)</sub></h2>
-<p><strong>แก่น: เขียนโค้ดให้ modular เพื่อ test ง่าย, ใส่ test ใน CI/CD, test สม่ำเสมอ, จำลอง dependency และดู coverage ที่มีความหมายมากกว่าไล่ให้ถึง 100%</strong></p>
+<h2 id="10-best-practices-in-testing-สไลด์-31">10. Best practices in testing <span class="slide-ref">สไลด์ 31</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เขียนโค้ดให้ modular เพื่อ test ง่าย, ใส่ test ใน CI/CD, test สม่ำเสมอ, จำลอง dependency และดู coverage ที่มีความหมายมากกว่าไล่ให้ถึง 100%</strong></p>
 <ul>
 <li>ทำโค้ดให้ <strong>modular และ isolated</strong> เพื่อให้ test ง่าย</li>
 <li>รวม testing เข้า <strong>CI/CD pipeline</strong> เพื่อรักษาคุณภาพต่อเนื่อง</li>
@@ -688,9 +689,9 @@ public class StudentTest {
 <li>ใช้ <strong>coverage metrics</strong> ดูว่าโค้ดถูก test แค่ไหน โดยเน้น <strong>coverage ที่มีความหมาย มากกว่าไล่ให้ถึง 100%</strong></li>
 </ul>
 <hr />
-<h2 id="11-exercises-58-สไลด์-3240">11. Exercises 5–8 <sub>(สไลด์ 32–40)</sub></h2>
-<p><strong>แก่น: ทบทวน BVA (ตั๋วอุทยาน, ส่วนลด), ECP (ส่วนลด) และ path analysis (โค้ด Zoo)</strong></p>
-<h3 id="111-exercise-5-จาก-l12-bva-ตั๋วอุทยาน-สไลด์-3334">11.1 Exercise 5 (จาก L12) – BVA ตั๋วอุทยาน <sub>(สไลด์ 33–34)</sub></h3>
+<h2 id="11-exercises-58-สไลด์-3240">11. Exercises 5–8 <span class="slide-ref">สไลด์ 32–40</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทบทวน BVA (ตั๋วอุทยาน, ส่วนลด), ECP (ส่วนลด) และ path analysis (โค้ด Zoo)</strong></p>
+<h3 id="111-exercise-5-จาก-l12-bva-ตั๋วอุทยาน-สไลด์-3334">11.1 Exercise 5 (จาก L12) – BVA ตั๋วอุทยาน <span class="slide-ref">สไลด์ 33–34</span></h3>
 <p>โจทย์: เด็ก &lt; 12 ฟรี | ผู้ใหญ่ 18–60 จ่าย 200 | อายุ &lt; 18 และ &gt; 60 จ่าย 100</p>
 <div class="table-wrap"><table>
 <thead>
@@ -743,7 +744,7 @@ public class StudentTest {
 <blockquote class="callout">
 <p class="c-warn">⚠️ เหมือนใน L12: class สุดท้ายเขียน &quot;&gt; 61&quot; แต่ทดสอบด้วยค่า 61 ตามโจทย์ควรเป็น &quot;&gt; 60&quot;</p>
 </blockquote>
-<h3 id="112-exercise-6-ecp-ส่วนลดสมาชิก-สไลด์-3536">11.2 Exercise 6 – ECP ส่วนลดสมาชิก <sub>(สไลด์ 35–36)</sub></h3>
+<h3 id="112-exercise-6-ecp-ส่วนลดสมาชิก-สไลด์-3536">11.2 Exercise 6 – ECP ส่วนลดสมาชิก <span class="slide-ref">สไลด์ 35–36</span></h3>
 <p>โจทย์:</p>
 <ul>
 <li>ยอดซื้อ <strong>&lt; 500</strong>: ไม่มีส่วนลด</li>
@@ -802,7 +803,7 @@ public class StudentTest {
 </ol>
 <p>ถ้าออกสอบให้เช็กกับอาจารย์ว่ายึดโจทย์หรือเฉลย</p>
 </blockquote>
-<h3 id="113-exercise-7-bva-ส่วนลดสมาชิก-สไลด์-3738">11.3 Exercise 7 – BVA ส่วนลดสมาชิก <sub>(สไลด์ 37–38)</sub></h3>
+<h3 id="113-exercise-7-bva-ส่วนลดสมาชิก-สไลด์-3738">11.3 Exercise 7 – BVA ส่วนลดสมาชิก <span class="slide-ref">สไลด์ 37–38</span></h3>
 <p>โจทย์เดียวกับ Exercise 6 เฉลยในสไลด์:</p>
 <div class="table-wrap"><table>
 <thead>
@@ -863,7 +864,7 @@ public class StudentTest {
 <p class="c-warn">⚠️ ใช้ class เดียวกับเฉลย Exercise 6 จึงมีจุดขัดกับโจทย์เหมือนกัน (500 และ 5,000)</p>
 <p class="c-warn">⚠️ class &quot;≤ 0&quot; มี Belonging Case เป็น −1 แต่ 0 ก็อยู่ใน class &quot;≤ 0&quot; ด้วย (ต่างจากรูปแบบใน L12 ที่ class Low ใช้ −1 เพราะ 0 อยู่ class ถัดไป)</p>
 </blockquote>
-<h3 id="114-exercise-8-path-analysis-โค้ด-zoo-สไลด์-3940">11.4 Exercise 8 – Path analysis โค้ด Zoo <sub>(สไลด์ 39–40)</sub></h3>
+<h3 id="114-exercise-8-path-analysis-โค้ด-zoo-สไลด์-3940">11.4 Exercise 8 – Path analysis โค้ด Zoo <span class="slide-ref">สไลด์ 39–40</span></h3>
 <p>โจทย์: จาก source code ที่ให้</p>
 <ol>
 <li>เขียน <strong>flow chart</strong> ที่สะท้อนการทำงานของโค้ด</li>
@@ -1078,11 +1079,22 @@ public class StudentTest {
 </tbody>
 </table></div>
 </article>
-      
-      <nav class="pager"><a class="pg prev" href="../l12/index.html"><small>← บทก่อนหน้า</small><span>Lecture 12 – Testing</span></a><a class="pg next" href="../l14/index.html"><small>บทถัดไป →</small><span>Lecture 14 – Agentic Software Engineering</span></a></nav>
-    </main>
-  </div>
+    
+    <nav class="pager"><a class="pg prev" href="../l12/index.html"><small>← บทก่อนหน้า</small><span>Lecture 12 – Testing</span></a><a class="pg next" href="../l14/index.html"><small>บทถัดไป →</small><span>Lecture 14 – Agentic Software Engineering</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-testing-คืออะไร-และมี-test-phases-อะไรบ้าง-สไลด์-45">Testing คืออะไร และมี test phases อะไรบ้าง?</a></li><li><a href="#2-unit-test-ที่ดีเป็นยังไง-สไลด์-6">Unit test ที่ดีเป็นยังไง?</a></li><li><a href="#3-junit-ใช้ยังไง-สไลด์-714">JUnit ใช้ยังไง?</a></li><li><a href="#4-integration-testing-คืออะไร-และต่างจาก-unit-test-ยังไง-สไลด์-1517">Integration testing คืออะไร และต่างจาก unit test ยังไง?</a></li><li><a href="#5-system-testing-คืออะไร-สไลด์-1819">System testing คืออะไร?</a></li><li><a href="#6-เอกสาร-testing-test-case-test-report-traceability-สไลด์-2022">เอกสาร testing: test case, test report, traceability</a></li><li><a href="#7-regression-testing-ใช้เมื่อไหร่-สไลด์-2324">Regression testing ใช้เมื่อไหร่?</a></li><li><a href="#8-software-quality-model-และ-usability-สไลด์-2527">Software quality model และ usability</a></li><li><a href="#9-usability-testing-ทำยังไง-สไลด์-2830">Usability testing ทำยังไง?</a></li><li><a href="#10-best-practices-in-testing-สไลด์-31">Best practices in testing</a></li><li><a href="#11-exercises-58-สไลด์-3240">Exercises 5–8</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
 <footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2</footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "soft-en/l13", "u": "soft-en/l13/index.html", "t": "Lecture 13 – Unit Testing, Integration Testing, and System Testing", "s": "ITDS261"};</script>
 <script src="../../assets/app.js"></script>
+
 </body>
 </html>
