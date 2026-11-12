@@ -26,7 +26,7 @@ SUBJECTS = [
         "name": "Computer Networks",
         "th": "เครือข่ายคอมพิวเตอร์",
         "icon": "🌐",
-        "accent": "#0f766e",
+        "accent": "#2b7a73",
         "order": ["Ch1-Intro", "Ch2-Application-Layer", "Network-Topography", "Internet-Architecture",
                   "Lecture5.0-DLP-Foundation", "Lecture5.1-Error-Detection", "Lecture5.2-Flow-Control",
                   "Lecture6.1-MAC", "Lecture6.2-Ethernet", "Lecture7-VLAN"],
@@ -38,7 +38,7 @@ SUBJECTS = [
         "name": "Introduction to Software Engineering",
         "th": "วิศวกรรมซอฟต์แวร์",
         "icon": "🧩",
-        "accent": "#7c3aed",
+        "accent": "#5f7a32",
         "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10", "L11", "L12", "L13", "L14"],
     },
     {
@@ -48,7 +48,7 @@ SUBJECTS = [
         "name": "Computer Architecture & Operating Systems",
         "th": "สถาปัตยกรรมคอมพิวเตอร์และระบบปฏิบัติการ",
         "icon": "🖥️",
-        "accent": "#c2410c",
+        "accent": "#b0552c",
         "order": ["Chapter00", "Chapter01", "Chapter02", "Chapter03", "Chapter04", "Chapter05",
                   "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2", "Lecture3"],
     },
@@ -59,7 +59,7 @@ SUBJECTS = [
         "name": "Computer System Lab",
         "th": "ปฏิบัติการระบบคอมพิวเตอร์ (Linux)",
         "icon": "🐧",
-        "accent": "#1d4ed8",
+        "accent": "#3b6787",
         "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"],
     },
     {
@@ -69,7 +69,7 @@ SUBJECTS = [
         "name": "Web Technologies and Applications",
         "th": "เทคโนโลยีเว็บและการประยุกต์ (HTML/CSS/JavaScript)",
         "icon": "💻",
-        "accent": "#be185d",
+        "accent": "#94496a",
         "order": None,
     },
 ]
@@ -120,18 +120,22 @@ def short_title(title: str) -> str:
 # ---------------------------------------------------------------- templates
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-         '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700'
-         '&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">')
+         '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700'
+         '&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">')
 
 THEME_BOOT = ("<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;"
               "if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}"
               "catch(e){}</script>")
 
 ICON = ("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>"
-        "<text y='.9em' font-size='90'>📚</text></svg>")
+        "<text y='.9em' font-size='90'>🌿</text></svg>")
+
+LEAF = ('<svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'
+        '<path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/>'
+        '<path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>')
 
 
-def page(title, body, depth, accent="#2563eb", extra_head="", crumbs="", body_class="", scripts="", after=""):
+def page(title, body, depth, accent="#2f5d46", extra_head="", crumbs="", body_class="", scripts="", after=""):
     base = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="th">
@@ -143,13 +147,13 @@ def page(title, body, depth, accent="#2563eb", extra_head="", crumbs="", body_cl
 {FONTS}
 <link rel="stylesheet" href="{base}assets/style.css">
 <link rel="icon" href="{ICON}">
-<style>:root{{--accent:{accent}}}</style>
+<style>:root{{--accent-base:{accent}}}</style>
 {extra_head}
 </head>
 <body class="{body_class}">
 <div id="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="{base}index.html"><span class="brand-mark">📚</span><span>Study Notes</span></a>
+  <a class="brand" href="{base}index.html">{LEAF}<span>Study Notes</span></a>
   <nav class="topcrumbs">{crumbs}</nav>
   <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
     <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -169,14 +173,31 @@ def page(title, body, depth, accent="#2563eb", extra_head="", crumbs="", body_cl
 # bar injected into standalone pages (quiz / review / animation) that bring their own CSS
 def ext_bar(links, sticky=False):
     pos = "position:sticky;top:0;z-index:50;" if sticky else ""
-    sep = '<span style="color:#c9c5bb">/</span>'
+    sep = '<span style="color:#cfc6b2">/</span>'
     items = sep.join(
-        f'<a href="{h}" style="color:{"#1c1d1f" if i == 0 else "#5d6168"};text-decoration:none;'
+        f'<a href="{h}" style="color:{"#26302a" if i == 0 else "#6d7468"};text-decoration:none;'
         f'font-weight:{600 if i == 0 else 400}">{t}</a>' for i, (h, t) in enumerate(links))
     return (f'<div style="{pos}display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 18px;'
-            'background:rgba(247,245,240,.94);backdrop-filter:blur(8px);border-bottom:1px solid #e6e2d8;'
-            'font:500 .92rem/1.5 \'IBM Plex Sans Thai\',\'Segoe UI\',Tahoma,sans-serif">'
-            f'<a href="{links[-1][0]}" style="text-decoration:none;font-weight:700;color:#1c1d1f;margin-right:6px">📚</a>{items}</div>')
+            'background:rgba(245,241,232,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e3dccd;'
+            'font:500 .92rem/1.5 \'IBM Plex Sans Thai Looped\',\'IBM Plex Sans Thai\',\'Segoe UI\',Tahoma,sans-serif">'
+            f'<a href="{links[-1][0]}" style="text-decoration:none;font-weight:700;color:#2f5d46;margin-right:6px">🌿</a>{items}</div>')
+
+
+def quiz_bar(links):
+    items = '<span class="snq-sep">/</span>'.join(f'<a href="{h}">{t}</a>' for h, t in links)
+    return f'<nav class="snq-bar"><a class="snq-home" href="{links[-1][0]}" aria-label="หน้าแรก">{LEAF}</a>{items}</nav>'
+
+
+def inject_quiz(doc, bar, depth):
+    base = "../" * depth
+    head = (f'{THEME_BOOT}{FONTS}<link rel="stylesheet" href="{base}assets/quiz.css">'
+            f'<link rel="icon" href="{ICON}">')
+    doc = doc.replace("</head>", head + "\n</head>", 1)
+    doc = doc.replace("<html", '<html class="snq"', 1)
+    doc = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, doc, count=1)
+    if 'name="viewport"' not in doc:
+        doc = doc.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
+    return doc
 
 
 def inject_bar(doc, bar, margin_fix=False):
@@ -189,6 +210,37 @@ def inject_bar(doc, bar, margin_fix=False):
 
 
 # ---------------------------------------------------------------- content
+def md_plain(s: str) -> str:
+    s = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", s)
+    s = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", s)
+    s = re.sub(r"<[^>]+>", "", s)
+    return re.sub(r"[*_`#>|]", "", s).strip()
+
+
+def read_minutes(md_text: str) -> int:
+    """rough study-reading time: ~650 non-space characters per minute (Thai + tech terms)"""
+    body = re.sub(r"```.*?```", lambda m: m.group(0)[: len(m.group(0)) // 2], md_text, flags=re.S)
+    chars = len(re.sub(r"\s+", "", md_plain(body)))
+    return max(1, round(chars / 650))
+
+
+def lesson_desc(md_text: str, limit: int = 150) -> str:
+    """one-line description for cards: the 'ภาพรวม' paragraph, else the first real paragraph"""
+    m = re.search(r"^>\s*\*\*ภาพรวม[^*]*\*\*\s*[:：]?\s*(.+)$", md_text, re.M)
+    if m:
+        text = m.group(1)
+    else:
+        text = ""
+        for line in md_text.splitlines()[1:]:
+            ln = line.strip()
+            if ln and not re.match(r"^(#|\||!|-|\*|\d+\.|>|```|---)", ln) and len(ln) > 30:
+                text = ln
+                break
+    text = re.sub(r"\s+", " ", md_plain(text))
+    text = re.sub(r"^ภาพรวม(บทนี้)?\s*[:：]?\s*", "", text)
+    return text if len(text) <= limit else text[:limit].rstrip(" ,·(") + "…"
+
+
 def find_lessons(subj):
     folders = [p for p in subj["dir"].iterdir() if p.is_dir()]
     if subj["order"]:
@@ -224,11 +276,14 @@ def find_lessons(subj):
         quiz_list = [(k, n, l) for k, n, l, src in (
             ("quiz", "quiz.html", "ชุดที่ 1", quizzes), ("quiz2", "quiz2.html", "ชุดที่ 2", quizzes2),
             ("quiz3", "quiz3.html", "ชุดที่ 3", quizzes3)) if src]
+        short_text = short.read_text(encoding="utf-8") if short.exists() else None
         lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title, "anims": anims,
+                        "desc": lesson_desc(text), "mins": read_minutes(text),
+                        "short_mins": read_minutes(short_text) if short_text else 0,
                         "md": text, "quiz": quizzes[0] if quizzes else None,
                         "quiz2": quizzes2[0] if quizzes2 else None,
                         "quiz3": quizzes3[0] if quizzes3 else None, "quizzes": quiz_list,
-                        "short": short.read_text(encoding="utf-8") if short.exists() else None})
+                        "short": short_text})
     return lessons
 
 
@@ -243,8 +298,8 @@ def find_reviews(subj, prefix="Review-"):
             continue
         text = pages[0].read_text(encoding="utf-8")
         m = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S)
-        title = re.sub(r"<[^>]+>", "", m.group(1)).strip() if m else f.name
-        heads = [re.sub(r"<[^>]+>", "", h).strip() for h in re.findall(r"<h2[^>]*>(.*?)</h2>", text, re.S)]
+        title = plain(m.group(1)) if m else f.name
+        heads = [plain(h) for h in re.findall(r"<h2[^>]*>(.*?)</h2>", text, re.S)]
         reviews.append({"slug": slug_path(f.name), "label": f.name, "title": title, "html": text, "heads": heads})
     return reviews
 
@@ -289,7 +344,7 @@ def render_lesson(lesson, key="md"):
             continue
         toc.append((m.group(1), label))
     # drop the markdown's own plain-text "สารบัญ" (the sidebar replaces it)
-    body = re.sub(r'<h2 id="[^"]*">สารบัญ</h2>\s*<ol>.*?</ol>\s*(<hr />\s*)?', "", body, count=1, flags=re.S)
+    body = re.sub(r'<h2 id="[^"]*">สารบัญ</h2>\s*<(ol|ul)[^>]*>.*?</\1>\s*(<hr />\s*)?', "", body, count=1, flags=re.S)
     return body, toc
 
 
@@ -303,9 +358,9 @@ def quiz_menu(prefix, quizzes, data_l, cls="qm"):
         return ""
     if len(quizzes) == 1:
         k, name, label = quizzes[0]
-        return f'<a class="btn btn-ghost" href="{prefix}{name}" data-l="{data_l}">📝 แบบทดสอบ</a>'
+        return f'<a class="btn btn-ghost" href="{prefix}{name}" data-l="{data_l}">📝 <span class="qm-l">แบบทดสอบ</span></a>'
     links = "".join(f'<a href="{prefix}{name}" data-l="{data_l}">📝 แบบทดสอบ{label}</a>' for k, name, label in quizzes)
-    return (f'<details class="{cls}"><summary class="btn btn-ghost">📝 แบบทดสอบ <b>{len(quizzes)}</b>'
+    return (f'<details class="{cls}"><summary class="btn btn-ghost">📝 <span class="qm-l">แบบทดสอบ</span> <b>{len(quizzes)}</b>'
             f'<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
             f'</summary><div class="qm-pop">{links}</div></details>')
 
@@ -325,12 +380,15 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
     data, cards = [], {g[0]: "" for g in groups}
     n_anim = sum(len(l["anims"]) for l in lessons) + len(anim_pages)
 
-    def card(g, s, num_small, num, title, href, topics_txt, actions, extra=""):
+    def card(g, s, num_small, num, title, href, topics_txt, actions, extra="", meta=""):
+        badge = (f'<span class="num"><small>{num_small}</small>{num}</span>' if num_small
+                 else f'<span class="num num-icon">{num}</span>')
+        meta_html = f'<div class="card-meta">{meta}</div>' if meta else ""
         return f"""
 <li class="card" data-g="{g}" data-s="{s}">
   <div class="card-head">
-    <span class="num"><small>{num_small}</small>{num}</span>
-    <a class="card-title" href="{href}" data-l="{s}">{esc(title)}</a>
+    {badge}
+    <div class="card-tt"><a class="card-title" href="{href}" data-l="{s}">{esc(title)}</a>{meta_html}</div>
     <span class="done" title="เคยเปิดแล้ว">✓</span>
   </div>
   <p class="card-topics">{esc(topics_txt)}</p>
@@ -357,8 +415,12 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
         anims = "".join(f'<a href="{s}/{a["name"]}" data-l="{s}" title="{esc(a["title"])}">▶ {esc(a["short"])}</a>'
                         for a in les["anims"])
         extra = f'\n  <div class="card-anims"><span>🎬</span>{anims}</div>' if anims else ""
+        meta = [f"⏱ ~{les['mins']} นาที", f"{len(topics)} หัวข้อ"]
+        if les["short"]:
+            meta.append(f"สรุปสั้น ~{les['short_mins']} นาที")
         cards[g] += card(g, s, small, num, short_title(les["title"]), f"{s}/index.html",
-                         " · ".join(shown), actions, extra)
+                         les["desc"] or " · ".join(shown), actions, extra,
+                         "<span>" + "</span><span>".join(meta) + "</span>")
         data.append({"s": s, "f": " ".join([les["label"], les["title"]] + [t for _, t in topics]
                                          + [a["title"] for a in les["anims"]]).lower(),
                      "toc": [[a, t] for a, t in topics]})
@@ -366,21 +428,19 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
     def simple_cards(g, items, icon, btn_label, topics_fn):
         for it in items:
             s = it["slug"]
-            m = re.search(r"\d+", it["label"])
             actions = f'<a class="btn btn-primary" href="{s}/index.html" data-l="{s}">{btn_label}</a>'
             if it.get("quiz2"):
                 actions += f'<a class="btn" href="{s}/quiz2.html" data-l="{s}">🧩 ชุดที่ 2</a>'
-            cards[g] += card(g, s, icon, m.group(0) if m else "•", it["title"], f"{s}/index.html",
-                             topics_fn(it), actions)
+            cards[g] += card(g, s, "", icon, it["title"], f"{s}/index.html", topics_fn(it), actions)
             data.append({"s": s, "f": " ".join([it["label"], it["title"]] + it["heads"]).lower(), "toc": []})
 
     def quiz_info(qp):
         sm = re.search(r'<div class="sub">(.*?)</div>', qp["html"], re.S)
         return re.sub(r"<[^>]+>", "", sm.group(1)).split(" — ")[0] if sm else qp["label"]
 
-    simple_cards("review", reviews, "REV", "🎯 เปิดรีวิว", lambda r: " · ".join(r["heads"][:4]))
-    simple_cards("quiz", quizpages, "QUIZ", "📝 ทำแบบทดสอบ", quiz_info)
-    simple_cards("anim", anim_pages, "ANIM", "▶ ดูแอนิเมชัน", lambda r: " · ".join(r["heads"][:4]))
+    simple_cards("review", reviews, "🎯", "เปิดรีวิว", lambda r: " · ".join(r["heads"][:4]))
+    simple_cards("quiz", quizpages, "📝", "ทำแบบทดสอบ", quiz_info)
+    simple_cards("anim", anim_pages, "🎬", "ดูแอนิเมชัน", lambda r: " · ".join(r["heads"][:4]))
 
     present = [g for g in groups if cards[g[0]]]
     counts = {g[0]: cards[g[0]].count('<li class="card"') for g in present}
@@ -473,6 +533,7 @@ def lesson_page(subj, lessons, i, les, is_short, body, toc):
   <main class="lesson" id="main">
     <div class="eyebrow"><a href="../index.html">{esc(subj['code'])}</a> · {esc(les['label'])}{" · สรุปสั้น" if is_short else ""}</div>
     <h1 class="lesson-title">{esc(les['title'])}</h1>
+    <p class="read-meta">⏱ อ่านประมาณ {les["short_mins"] if is_short else les["mins"]} นาที · {len(toc)} หัวข้อ</p>
     {meta}
     <article class="prose">{body}</article>
     {quiz_end}
@@ -482,6 +543,7 @@ def lesson_page(subj, lessons, i, les, is_short, body, toc):
     <div class="otp-inner">
       <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
       <ol>{otp}</ol>
+      {'<p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>' if "⭐" in body else ""}
     </div>
   </aside>
 </div>
@@ -535,11 +597,12 @@ def build():
                     lesson_page(subj, lessons, i, les, is_short, body, toc), encoding="utf-8")
 
             for key, n, lbl in les["quizzes"]:
-                bar = ext_bar([("index.html", "← กลับไปอ่านสรุป"), ("../index.html", code), ("../../index.html", "หน้าแรก")], sticky=True)
-                (ldir / n).write_text(inject_bar(les[key].read_text(encoding="utf-8"), bar, margin_fix=True), encoding="utf-8")
+                bar = quiz_bar([("index.html", "← กลับไปอ่านสรุป"), ("../index.html", code), ("../../index.html", "หน้าแรก")])
+                (ldir / n).write_text(inject_quiz(les[key].read_text(encoding="utf-8"), bar, 2), encoding="utf-8")
 
-            search_index.append({"s": subj["code"], "t": les["title"], "u": f"{subj['slug']}/{les['slug']}/index.html",
-                                 "h": [topic(t) for _, t in les["toc"]]})
+            search_index.append({"s": subj["code"], "t": short_title(les["title"]), "l": les["label"],
+                                 "u": f"{subj['slug']}/{les['slug']}/index.html",
+                                 "h": [[a, topic(t)] for a, t in les["toc"]]})
             for a in les["anims"]:
                 bar = ext_bar([("index.html", f"← กลับไปอ่านสรุป {esc(les['label'])}"), ("../index.html", code), ("../../index.html", "หน้าแรก")])
                 (ldir / a["name"]).write_text(inject_bar(a["html"], bar), encoding="utf-8")
@@ -552,11 +615,11 @@ def build():
         for qp in quizpages:
             qdir = sdir / qp["slug"]
             qdir.mkdir(parents=True, exist_ok=True)
-            bar = ext_bar([("../index.html", f"← {code}"), ("../../index.html", "หน้าแรก")], sticky=True)
+            bar = quiz_bar([("../index.html", f"← {code}"), ("../../index.html", "หน้าแรก")])
             q2files = sorted((subj["dir"] / qp["label"]).glob("quiz2-*.html"))
             qp["quiz2"] = bool(q2files)
             for out_name, text in [("index.html", qp["html"])] + [("quiz2.html", f.read_text(encoding="utf-8")) for f in q2files[:1]]:
-                (qdir / out_name).write_text(inject_bar(text, bar, margin_fix=True), encoding="utf-8")
+                (qdir / out_name).write_text(inject_quiz(text, bar, 2), encoding="utf-8")
             qp["title"] = re.sub(r"^(Quiz:\s*|ข้อสอบจริง\s*)", "", qp["title"])
             search_index.append({"s": subj["code"], "t": qp["title"], "u": f"{subj['slug']}/{qp['slug']}/index.html", "h": []})
         for rv in reviews + anim_pages:
@@ -585,8 +648,8 @@ def build():
     home = f"""
 <main class="wrap home">
   <section class="home-hero">
-    <p class="kicker">Mahidol ICT · ปี 2</p>
-    <h1>สรุปบทเรียน <span class="nw">อ่านง่าย</span> <span class="nw">ทวนเร็ว</span></h1>
+    <p class="kicker">🌿 Mahidol ICT · ปี 2</p>
+    <h1>สรุปบทเรียน <em class="nw">อ่านง่าย</em> <span class="nw">ทวนเร็ว</span></h1>
     <p class="lede">อ่านฉบับเต็มเพื่อเข้าใจ ใช้สรุปสั้นทวนก่อนสอบ แล้วลองทำแบบทดสอบท้ายบท</p>
     <div class="search">
       <label class="searchbox big"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="ค้นหาหัวข้อทุกวิชา เช่น cache, VLAN, use case…" autocomplete="off"><kbd>/</kbd></label>

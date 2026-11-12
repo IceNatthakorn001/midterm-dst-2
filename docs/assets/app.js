@@ -166,25 +166,52 @@
   // ---------- home search ----------
   var q = document.getElementById('q'), results = document.getElementById('results');
   if (q && results && window.SEARCH_INDEX) {
+    // highlight the search term inside a text node-safe way
+    var mark = function (el, text, term) {
+      var i = text.toLowerCase().indexOf(term);
+      if (i < 0) { el.appendChild(document.createTextNode(text)); return; }
+      el.appendChild(document.createTextNode(text.slice(0, i)));
+      var m = document.createElement('mark'); m.textContent = text.slice(i, i + term.length); el.appendChild(m);
+      el.appendChild(document.createTextNode(text.slice(i + term.length)));
+    };
+    // results grouped by lesson: lesson title once, then up to 3 matching sections
     var render = function () {
       var term = q.value.trim().toLowerCase();
       results.innerHTML = '';
       if (!term) return;
-      var hits = [];
+      var groups = [];
       window.SEARCH_INDEX.forEach(function (l) {
-        if (l.t.toLowerCase().indexOf(term) !== -1) hits.push({ l: l, h: null });
-        l.h.forEach(function (h) { if (h && h.toLowerCase().indexOf(term) !== -1) hits.push({ l: l, h: h }); });
+        var titleHit = l.t.toLowerCase().indexOf(term) !== -1;
+        var secs = [];
+        l.h.forEach(function (h) {
+          var anchor = Array.isArray(h) ? h[0] : '', text = Array.isArray(h) ? h[1] : h;
+          if (text && text.toLowerCase().indexOf(term) !== -1) secs.push([anchor, text]);
+        });
+        if (titleHit || secs.length) groups.push({ l: l, t: titleHit, s: secs });
       });
-      hits.slice(0, 30).forEach(function (x) {
-        var li = document.createElement('li'), a = document.createElement('a');
-        a.href = x.l.u;
-        a.textContent = x.h || x.l.t;
+      groups.sort(function (a, b) { return (b.t - a.t) || (b.s.length - a.s.length); });
+      groups.slice(0, 8).forEach(function (g) {
+        var li = document.createElement('li'); li.className = 'rg';
+        var head = document.createElement('a'); head.className = 'rg-head'; head.href = g.l.u;
         var small = document.createElement('small');
-        small.textContent = x.l.s + ' · ' + x.l.t;
-        a.appendChild(small);
-        li.appendChild(a); results.appendChild(li);
+        small.textContent = g.l.s + (g.l.l ? ' · ' + g.l.l : '');
+        head.appendChild(small);
+        mark(head, g.l.t, term);
+        li.appendChild(head);
+        g.s.slice(0, 3).forEach(function (s) {
+          var a = document.createElement('a'); a.className = 'rg-hit';
+          a.href = g.l.u + (s[0] ? '#' + s[0] : '');
+          mark(a, s[1], term);
+          li.appendChild(a);
+        });
+        if (g.s.length > 3) {
+          var more = document.createElement('div'); more.className = 'rg-more';
+          more.textContent = 'และอีก ' + (g.s.length - 3) + ' หัวข้อในบทนี้';
+          li.appendChild(more);
+        }
+        results.appendChild(li);
       });
-      if (!hits.length) results.innerHTML = '<li><a>ไม่พบหัวข้อที่ค้นหา ลองคำอื่นดูนะ</a></li>';
+      if (!groups.length) results.innerHTML = '<li class="none">ไม่พบหัวข้อที่ค้นหา ลองคำอื่นดูนะ</li>';
     };
     q.addEventListener('input', render);
     q.addEventListener('keydown', function (e) {
