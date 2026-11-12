@@ -62,6 +62,16 @@
   paintHome();
   addEventListener('pageshow', function () { paintContinue(); paintHome(); });
 
+  // ---------- background: forest -> hills -> leaves ----------
+  var bgBtn = document.getElementById('bgBtn');
+  if (!root.dataset.bg) root.dataset.bg = 'forest';
+  if (bgBtn) bgBtn.addEventListener('click', function () {
+    var order = ['forest', 'hills', 'leaves'];
+    var next = order[(order.indexOf(root.dataset.bg) + 1) % order.length];
+    root.dataset.bg = next;
+    try { localStorage.setItem('bg', next); } catch (e) {}
+  });
+
   // ---------- theme ----------
   var themeBtn = document.getElementById('themeBtn');
   if (themeBtn) themeBtn.addEventListener('click', function () {
