@@ -1,0 +1,52 @@
+/* Quiz Pro pages on the study site (html.snq.snq-pro).
+   The quiz-pro template already ships the "ธรรมชาติ" palette (--qp-*) and follows data-theme when
+   html has .snq, so this file only adds: the site bar, the subject accent, and the review hand-off banner.
+   It must not restyle the quiz itself (choices, fill slots, retry, results all use .qp-* classes). */
+
+/* subject accent for primary buttons / chips (light); a lifted tint of it in dark mode */
+:root.snq-pro:not([data-theme="dark"]) {
+  --qp-accent: var(--sn-accent, #2f5d46);
+  --qp-accent-soft: color-mix(in srgb, var(--sn-accent, #2f5d46) 12%, #fffdf8);
+}
+:root.snq-pro[data-theme="dark"] {
+  --qp-accent: color-mix(in srgb, var(--sn-accent, #2f5d46) 45%, #f0ead8);
+  --qp-accent-soft: color-mix(in srgb, var(--sn-accent, #2f5d46) 28%, #1a221c);
+}
+
+/* ---------- site bar (sticky, full-bleed without widening the page) ---------- */
+.snq-bar {
+  --bar-bg: color-mix(in srgb, var(--qp-bg) 94%, transparent);
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; min-width: 0;
+  margin: 0 -16px 4px; padding: 10px 16px;
+  font: 500 .9rem/1.5 var(--qp-font);
+  /* border-image paints the bar's background 100vmax to each side; it never creates scrollable overflow */
+  border-image: linear-gradient(to top, var(--qp-border) 1px, var(--bar-bg) 1px) fill 0 / 0 / 0 100vmax;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.snq-bar a { color: var(--qp-muted); text-decoration: none; overflow-wrap: anywhere; }
+.snq-bar a:nth-child(2) { color: var(--qp-text); font-weight: 600; }
+.snq-bar a:hover { color: var(--qp-accent); }
+.snq-home { display: grid; place-items: center; color: #2f5d46 !important; margin-right: 2px; }
+:root[data-theme="dark"] .snq-home { color: #8fc0a1 !important; }
+.snq-home svg path:last-child { stroke: var(--qp-bg); }
+.snq-sep { color: var(--qp-border-2); }
+@media (max-width: 420px) { .snq-bar { font-size: .84rem; gap: 4px 8px; } }
+
+/* ---------- "next set to review" banner (assets/srs.js, review.html hand-off) ---------- */
+.snq-next-holder:empty { display: none; }
+.snq-next {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
+  margin: 10px 0 14px; padding: 14px 16px; border-radius: 18px;
+  background: var(--qp-accent-soft); border: 1px solid color-mix(in srgb, var(--qp-accent) 35%, var(--qp-border));
+  color: var(--qp-text); line-height: 1.5;
+}
+.snq-next small { display: block; color: var(--qp-muted); font-size: .82rem; }
+.snq-next strong { display: block; font-weight: 600; }
+.snq-next > div:first-child { min-width: 0; flex: 1 1 220px; }
+.snq-next-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.snq-next-btn {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; border-radius: 999px;
+  background: var(--qp-accent); color: var(--qp-accent-ink); text-decoration: none; font-weight: 600; font-size: .92rem;
+}
+.snq-next-btn.is-quiet { background: var(--qp-surface); color: var(--qp-text-2); border: 1px solid var(--qp-border-2); }

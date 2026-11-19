@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 13 – Web Services with Node.js · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L13</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/short.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/short.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/short.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/short.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/short.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/short.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/short.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/short.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/short.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/short.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/short.html"><span class="nl">L12</span>Web Services</a></li><li class='cur'><a href="../l13/short.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L13 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 13 – Web Services with Node.js</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 13 นาที · 14 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l13">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p>เลขสไลด์ = เลขหน้า PDF (เลขที่พิมพ์บนสไลด์เลื่อน +2/+4/+6 ตั้งแต่หน้า 32) | โค้ดทุกชุดรันจริงแล้ว (Express 5.3.0, cors, jsonwebtoken, axios; DB จำลอง)</p>
+</blockquote>
+<h2 id="0-objectives-สไลด์-12-4">0. Objectives (สไลด์ 1–2, 4)</h2>
+<ul>
+<li>สร้าง WS ด้วย Node.js | อธิบาย <strong>CORS</strong> | อธิบาย <strong>JWT</strong> | ทดสอบ WS</li>
+<li>Contents: Create WS → Postman → CORS → Token-Based Auth → JWT → Calling RESTful WS (Axios) → VSCode Debugger</li>
+</ul>
+<h2 id="1-rest-สไลด์-3-56">1. REST (สไลด์ 3, 5–6)</h2>
+<ul>
+<li>⭐ Client → <strong>HTTP method</strong> (GET/POST/DELETE/PUT) + <strong>URL</strong> (<code>/surveys/123</code>) → Server → <strong>JSON</strong></li>
+<li>⭐ หลัก 5 ข้อ: every &quot;thing&quot; an ID | link things | standard methods | multiple representations | <strong>communicate statelessly</strong></li>
+<li>เทคโนโลยี: HTTP, Node.js, XML/JSON, JavaScript ฝั่ง client</li>
+</ul>
+<h2 id="2-เตรียม-ws-nodejs-mysql-สไลด์-715">2. เตรียม WS: Node.js + MySQL (สไลด์ 7–15)</h2>
+<ul>
+<li>⭐ ขั้น: database → table → packages → <code>.env</code> → <code>studentservices.js</code> → <code>studentform.html</code></li>
+<li>Architecture: client ส่ง GET/POST/PUT/DELETE → Student WS (+DB) → ตอบ <strong>JSON</strong></li>
+<li>⭐ packages: <strong>dotenv, express, mysql2, nodemon</strong></li>
+<li><code>.env</code>: <code>DB_user</code>, <code>DB_pass</code>, <code>DB_name</code> = &quot;itcs212&quot;, <code>host</code> = &quot;localhost&quot;</li>
+<li>⭐ studentservices.js = ไฟล์หลัก: DB connection + CRUD ทั้งหมด</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>CRUD</th>
+<th>SQL</th>
+<th>HTTP</th>
+<th>⭐ RESTful WS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create</td>
+<td>INSERT</td>
+<td>PUT/POST</td>
+<td><strong>POST</strong></td>
+</tr>
+<tr>
+<td>Read</td>
+<td>SELECT</td>
+<td>GET</td>
+<td><strong>GET</strong></td>
+</tr>
+<tr>
+<td>Update</td>
+<td>UPDATE</td>
+<td>PUT/POST/PATCH</td>
+<td><strong>PUT</strong></td>
+</tr>
+<tr>
+<td>Delete</td>
+<td>DELETE</td>
+<td>DELETE</td>
+<td><strong>DELETE</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>mysql.createConnection({ host: process.env.host, user: process.env.DB_user, password: process.env.DB_pass, database: process.env.DB_name })</code></li>
+<li>⚠️ สไลด์ไม่แสดง <code>app.use(express.json())</code> — ไม่มีแล้ว <code>req.body</code> = undefined</li>
+</ul>
+<h2 id="3-student-ws-routes-สไลด์-1626">3. Student WS routes (สไลด์ 16–26)</h2>
+<ul>
+<li>⭐ แบบเดียวกันทุก route: อ่าน req → ไม่ครบ <strong>400</strong> <code>{error:true, message:'Please provide ...'}</code> → <code>dbConn.query(SQL, ค่า, cb)</code> → <code>res.send({error:false, data, message})</code></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>route</th>
+<th>input</th>
+<th>SQL</th>
+<th>data</th>
+<th>message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ <code>POST /student</code></td>
+<td><code>req.body.student</code></td>
+<td><code>INSERT INTO student SET ?</code></td>
+<td>affectedRows = 1</td>
+<td>New student has been created successfully.</td>
+</tr>
+<tr>
+<td>⭐ <code>PUT /student</code></td>
+<td><code>req.body.student</code> + <code>.student_id</code></td>
+<td><code>UPDATE student SET ? WHERE STU_ID = ?</code> ← <code>[student, student_id]</code></td>
+<td>1</td>
+<td>Student has been updated successfully.</td>
+</tr>
+<tr>
+<td>⭐ <code>DELETE /student</code></td>
+<td><code>req.body.student_id</code> (99998)</td>
+<td><code>DELETE FROM student WHERE STU_ID = ?</code></td>
+<td>1</td>
+<td>Student has been deleted successfully.</td>
+</tr>
+<tr>
+<td>⭐ <code>GET /student/:id</code></td>
+<td><code>req.params.id</code> (&quot;Receive value as parameter&quot;)</td>
+<td><code>SELECT * FROM student where STU_ID=?</code></td>
+<td><code>results[0]</code> (object)</td>
+<td>Student retrieved</td>
+</tr>
+<tr>
+<td>⭐ <code>GET /students</code></td>
+<td>—</td>
+<td><code>SELECT * FROM student</code></td>
+<td><code>results</code> (array)</td>
+<td>Student list.</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>คอลัมน์: STU_ID, STU_FNAME, STU_LNAME, STU_AGE | ผลทุกตัวเป็น <strong>JSON</strong> (สไลด์ 26)</li>
+<li>รันจริง: POST body <code>{}</code> → 400 | DELETE body <code>{}</code> → 400 <code>Please provide student_id</code> | <code>GET /student/12345</code> → 200 ไม่มี key data | <code>GET /student/</code> → 404 <code>Cannot GET /student/</code></li>
+<li>⚠️ สไลด์ 19 อ่าน <code>req.body.student.student_id</code> แต่ body สไลด์ 18 มีแค่ <code>STU_ID</code> → รันจริงได้ <strong>400</strong> (ต้องใส่ <code>student_id</code> ด้วยจึงได้ 200) | กรณี 400 ตอบ <code>error: student</code></li>
+<li>⚠️ JSON ในสไลด์ใช้ <code>”XXXXX&quot;</code> (คำพูดโค้ง) → JSON ไม่ถูกต้อง</li>
+</ul>
+<h2 id="4-postman-สไลด์-2731">4. Postman (สไลด์ 27–31)</h2>
+<ul>
+<li>&quot;collaboration platform for API development&quot; | postman.com/downloads</li>
+<li>New → <strong>HTTP</strong> → เลือก method (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) → URL → <strong>Send</strong></li>
+<li>ผลตัวอย่าง GET /students: <strong>200 OK, 182ms, 518 B</strong>, 3 คน (1 Wudhichart 21, 2 Jidapa 25, 3 Dolvara 25)</li>
+</ul>
+<h2 id="5-student-form-callstudentws-สไลด์-3237">5. Student Form + callStudentWS (สไลด์ 32–37)</h2>
+<ul>
+<li>ฟอร์ม: Student ID / Firstname / Lastname / Age | ปุ่ม Insert, Update, Delete, Select, Select all</li>
+<li>⭐ <code>async function callStudentWS(url, method, sentData = {})</code> → <code>if (method == &quot;select&quot;)</code> → <code>await fetch(url, {method:'GET'})</code> → <code>await response.json()</code></li>
+<li>⭐ ปุ่ม Select: <code>callStudentWS(&quot;http://localhost:3000/student/&quot; + STU_ID, &quot;select&quot;).then(data =&gt; { alert(data.message); ...value = data.data.STU_ID ... })</code></li>
+<li>รันจริง: id 4 → <code>Student retrieved</code>, STU_FNAME <code>XXXXX</code>, AGE 25</li>
+</ul>
+<h2 id="6-cors-สไลด์-3845">6. CORS (สไลด์ 38–45)</h2>
+<ul>
+<li>⭐ <strong>Same-origin policy</strong>: script เข้าถึงข้อมูลหน้าอื่นได้ <strong>iff origin (domain) เดียวกัน</strong></li>
+<li>⭐ <strong>CORS</strong>: กลไกให้ restricted resources (เช่น fonts) ถูก request จาก domain อื่นได้</li>
+<li>⭐ ข้าม origin = ต่าง <strong>domain / subdomain / port / protocol</strong></li>
+<li>error ตัวอย่าง: fetch <code>localhost:3000/student/1</code> จาก origin <code>localhost:3100</code> → blocked: No 'Access-Control-Allow-Origin' header</li>
+<li>⭐ <code>npm install --save cors</code> + <code>var cors = require('cors'); app.use(cors());</code> = <strong>All</strong> CORS (รันจริง ACAO = <code>*</code>)</li>
+<li>เฉพาะ route: <code>app.get('/student/:id', cors(), ...)</code> → &quot;This is CORS-enabled for a Single Route&quot;</li>
+<li><code>corsOptions = { origin: 'http://localhost:3100', methods: 'GET,POST,PUT,DELETE' }</code> → <code>app.use(cors(corsOptions))</code></li>
+<li>หลาย origin: <code>origin: whiteList</code> (array 3100, 3200) — รันจริงตอบ origin ที่อยู่ใน list, นอก list ไม่มี header</li>
+<li>ไม่ใช้ package: <code>res.header(&quot;Access-Control-Allow-Origin&quot;, &quot;http://localhost:3200&quot;)</code>, <code>res.header(&quot;Access-Control-Allow-Methods&quot;, &quot;GET&quot;)</code></li>
+<li>⚠️ สไลด์ 44 <code>'http://localhost:3200’]</code> → SyntaxError</li>
+</ul>
+<h2 id="7-token-based-authentication-สไลด์-4648">7. Token-Based Authentication (สไลด์ 46–48)</h2>
+<ul>
+<li>ทำให้ app/service ปลอดภัย — จัดการ user access ได้ปลอดภัยและมีประสิทธิภาพ</li>
+<li>⭐ Flow: 1 User Login {username, password} → 2 Authentication Service → 3 Token Generator → 4 Access Token → 5 เก็บใน <strong>Local Storage / Session Storage / Cookies</strong> → 6 HTTP request <strong>{Authorization: Bearer}</strong> → 7 Student WS → 8 <strong>Success or Deny</strong></li>
+</ul>
+<h2 id="8-jwt-สไลด์-4953">8. JWT (สไลด์ 49–53)</h2>
+<ul>
+<li>⭐ JSON object ตาม <strong>RFC 7519</strong> ส่งข้อมูลระหว่างฝ่ายอย่างปลอดภัย | use case: <strong>Authorization, Information Exchange</strong></li>
+<li>⭐ 3 ส่วนคั่นจุด <code>xxxxx.yyyyy.zzzzz</code> = <strong>Header.Payload.Signature</strong></li>
+<li>Header = <strong>type (JWT) + signing algorithm</strong> (HS256, RS256, HS384)</li>
+<li>⭐ Payload = claims: <strong>Registered</strong> (iss, exp, sub, aud, iat) | <strong>Public</strong> (ควรลง IANA JSON Web Token Registry กันชน) | <strong>Private</strong> (ตกลงกันเอง)</li>
+<li>⭐ Signature = encoded header + encoded payload + <strong>secret</strong> + algorithm ใน header → sign</li>
+<li>รันจริง: header <code>{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}</code>, payload <code>{email, userid:&quot;1&quot;, iat, exp}</code></li>
+</ul>
+<h2 id="9-jsonwebtoken-สไลด์-5456">9. jsonwebtoken (สไลด์ 54–56)</h2>
+<ul>
+<li>packages: <strong>jsonwebtoken</strong> (ใช้ในวิชา), express-jwt</li>
+<li>⭐ <code>sign(payload, secretOrPrivateKey, [options, callback])</code> | options: algorithm (<strong>default HS256</strong>), <strong>expiresIn</strong> (60, &quot;2 days&quot;, &quot;10h&quot;, &quot;7d&quot;), audience, issuer, header</li>
+<li>⭐ <code>verify(token, secretOrPublicKey, [options, callback])</code> | options: <strong>algorithms</strong> ([&quot;HS256&quot;,&quot;HS384&quot;]), audience, issuer, <strong>ignoreExpiration</strong> (true = ไม่ตรวจหมดอายุ)</li>
+<li>⚠️ สไลด์ 55 เขียน sign ใช้ &quot;PEM encoded public key&quot; สำหรับ RSA/ECDSA ทั้งที่ชื่อพารามิเตอร์คือ PrivateKey</li>
+</ul>
+<h2 id="10-jwt-implementation-สไลด์-5766">10. JWT Implementation (สไลด์ 57–66)</h2>
+<ul>
+<li>⭐ <code>npm install --save jsonwebtoken</code> | <code>jwt = require(&quot;jsonwebtoken&quot;)</code> | <code>.env</code>: <code>SECRET = &quot;secret&quot;</code></li>
+<li>เพิ่มปุ่ม <strong>Login</strong> (ตัวอย่างเพื่อขอ token)</li>
+<li>⭐ <code>router.post(&quot;/signin&quot;)</code>: <code>jwt.sign({ email: user.user.email, userid: user.user.userid.toString() }</code> (<strong>Payload</strong>)<code>, process.env.SECRET</code> (<strong>Secret</strong>)<code>, { expiresIn: &quot;1h&quot; }</code> (<strong>Option</strong>)<code>)</code> → <code>res.status(200).json({ token: jwtToken, message: user })</code> | รันจริง exp−iat = 3600</li>
+<li>⭐ <code>auth.js</code>: <code>token = req.headers.authorization.split(&quot; &quot;)[1]</code> → <code>jwt.verify(token, process.env.SECRET)</code> → <code>next()</code> | catch → <strong>401 <code>{error:true, message:&quot;Authentication failed!&quot;}</code></strong></li>
+<li>⭐ <code>authorize = require(&quot;./middlewares/auth&quot;); router.get('/students', authorize, ...)</code></li>
+<li>รันจริง: ไม่มี token / token มั่ว / secret อื่น / หมดอายุ → 401 | token จาก /signin → 200</li>
+<li>client login: <code>callStudentWS(url, method, token = &quot;&quot;, sentData = {})</code> → <code>&quot;login&quot;</code> = POST + <code>Content-Type: application/json</code> + <code>body: JSON.stringify(sentData)</code></li>
+<li>ปุ่ม Login: <code>user_data = { user: { email: &quot;test@test.com&quot;, userid: 1 } }</code> → <code>token = data.token</code></li>
+<li>⭐ select ส่ง token: <code>headers: { 'Authorization': 'Bearer ' + token }</code></li>
+<li>⚠️ สไลด์ 62 <code>'application/json’</code> → SyntaxError</li>
+<li>⚠️ สไลด์ 65 เรียก <code>callStudentWS(url, token, &quot;select&quot;)</code> สลับลำดับ → รันจริงได้ <code>undefined</code> ต้องเป็น <code>(url, &quot;select&quot;, token)</code></li>
+<li>Open question: เก็บ JWT ยังไงให้ปลอดภัย?</li>
+</ul>
+<h2 id="11-axios-สไลด์-6778">11. Axios (สไลด์ 67–78)</h2>
+<ul>
+<li>packages: HTTP, Request, Needle, <strong>Axios</strong>, SuperAgent, Got, Node-fetch | <code>npm install axios</code></li>
+<li>⭐ Axios ทำงานทั้ง Browser + Node.js | ข้อดี: older browsers, abort, response timeout, built-in <strong>CSRF</strong> protection, upload progress, <strong>automatic JSON</strong>, works in Node.js</li>
+<li>⭐ <code>get/delete(url[, config])</code> | <code>post/put/patch(url[, data[, config]])</code> | <code>axios(config)</code>: <code>url, method, params, data</code></li>
+<li>spoonacular: ตัวแปร API key, query (&quot;pizza&quot;), params <code>{ number: 20, query, apiKey }</code>, searchURL <code>.../recipes/complexSearch?</code> → <code>axios.get(searchURL, { params, responseType: &quot;json&quot; })</code> → <code>The number of results: 20</code> + ตาราง (index, id, title, image, imageType)</li>
+<li>⚠️ สไลด์ 75: <code>”Your API Key&quot;</code> → SyntaxError | <code>Console.table</code> → ReferenceError ต้องเป็น <code>console.table</code></li>
+<li>⭐ Student WS: <code>axios.get(&quot;http://localhost:3000/students&quot;, {responseType:'json'}).then(res =&gt; console.log(res.data))</code> → object <code>{ error:false, data:[...], message:'Student list.' }</code> | ใช้ async/await ได้</li>
+</ul>
+<h2 id="12-vscode-debugger-สไลด์-7982">12. VSCode Debugger (สไลด์ 79–82)</h2>
+<ul>
+<li>⭐ เพิ่มโฟลเดอร์เข้า workspace → เมนู debug → <strong>create a launch.json file</strong> → เลือก folder + <strong>Node.js</strong></li>
+<li>launch.json อยู่ใน <code>.vscode</code> ของ working folder (Example1) | <code>&quot;type&quot;: &quot;node&quot;</code>, <code>&quot;request&quot;: &quot;launch&quot;</code>, <code>&quot;name&quot;: &quot;Launch Program&quot;</code>, <code>&quot;skipFiles&quot;: [&quot;&lt;node_internals&gt;/**&quot;]</code>, ⭐ <code>&quot;program&quot;: &quot;${workspaceFolder}\\server.js&quot;</code></li>
+<li>ใส่ breakpoint → start debugging (ภาพ: หยุดที่ breakpoint, console <code>Debugger attached.</code>) | ⚠️ ภาพเป็น SQLserver.js</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td>PUT</td>
+<td>Create (เพิ่ม) · Update (แก้)</td>
+</tr>
+<tr>
+<td><code>/student</code></td>
+<td><code>/students</code></td>
+<td>POST/PUT/DELETE + <code>/:id</code> · GET ทั้งหมด</td>
+</tr>
+<tr>
+<td><code>req.body.student_id</code></td>
+<td><code>req.params.id</code></td>
+<td>DELETE (body) · GET select one (URL)</td>
+</tr>
+<tr>
+<td><code>results[0]</code></td>
+<td><code>results</code></td>
+<td>object เดียว · array</td>
+</tr>
+<tr>
+<td>400</td>
+<td>401</td>
+<td>ข้อมูลไม่ครบ · token ไม่ผ่าน</td>
+</tr>
+<tr>
+<td><code>method</code> ของ callStudentWS</td>
+<td><code>method</code> ของ fetch</td>
+<td>ชื่องาน (&quot;select&quot;/&quot;login&quot;) · HTTP method จริง</td>
+</tr>
+<tr>
+<td>fetch</td>
+<td>Axios</td>
+<td>ต้อง <code>response.json()</code> · JSON อัตโนมัติใน <code>res.data</code></td>
+</tr>
+<tr>
+<td><code>axios.get(url, config)</code></td>
+<td><code>axios.post(url, data, config)</code></td>
+<td>ไม่มี body · มี body</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td><code>data</code></td>
+<td>query string · request body</td>
+</tr>
+<tr>
+<td>Same-origin policy</td>
+<td>CORS</td>
+<td>กฎห้ามข้าม · กลไกอนุญาตให้ข้าม</td>
+</tr>
+<tr>
+<td><code>app.use(cors())</code></td>
+<td><code>app.get(path, cors(), ...)</code></td>
+<td>ทุก route · route เดียว</td>
+</tr>
+<tr>
+<td>origin string</td>
+<td>origin array (whiteList)</td>
+<td>origin เดียว · หลาย origin</td>
+</tr>
+<tr>
+<td><code>jwt.sign</code></td>
+<td><code>jwt.verify</code></td>
+<td>สร้าง (/signin) · ตรวจ (auth.js)</td>
+</tr>
+<tr>
+<td>Registered</td>
+<td>Public / Private claims</td>
+<td>iss, exp, sub, aud, iat · ตั้งเอง (Public ควรลง IANA / Private ตกลงกันเอง)</td>
+</tr>
+<tr>
+<td><code>expiresIn</code></td>
+<td><code>ignoreExpiration</code></td>
+<td>option ของ sign · option ของ verify</td>
+</tr>
+<tr>
+<td>Authentication Service</td>
+<td>Student Web service</td>
+<td>ออก token · ตรวจ token แล้วตอบ Success/Deny</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l12/short.html"><small>← บทก่อนหน้า</small><span>Lecture 12 – Web Services</span></a><span></span></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-objectives-สไลด์-12-4">Objectives</a></li><li><a href="#1-rest-สไลด์-3-56">REST</a></li><li><a href="#2-เตรียม-ws-nodejs-mysql-สไลด์-715">เตรียม WS: Node.js + MySQL</a></li><li><a href="#3-student-ws-routes-สไลด์-1626">Student WS routes</a></li><li><a href="#4-postman-สไลด์-2731">Postman</a></li><li><a href="#5-student-form-callstudentws-สไลด์-3237">Student Form + callStudentWS</a></li><li><a href="#6-cors-สไลด์-3845">CORS</a></li><li><a href="#7-token-based-authentication-สไลด์-4648">Token-Based Authentication</a></li><li><a href="#8-jwt-สไลด์-4953">JWT</a></li><li><a href="#9-jsonwebtoken-สไลด์-5456">jsonwebtoken</a></li><li><a href="#10-jwt-implementation-สไลด์-5766">JWT Implementation</a></li><li><a href="#11-axios-สไลด์-6778">Axios</a></li><li><a href="#12-vscode-debugger-สไลด์-7982">VSCode Debugger</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l13", "u": "web/l13/short.html", "t": "⚡ สรุปสั้น · Lecture 13 – Web Services with Node.js", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

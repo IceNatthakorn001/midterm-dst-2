@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 4 — Memory Management · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#b0552c}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Lecture4</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/short.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/short.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/short.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/short.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/short.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li><a href="../chapter05/short.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/short.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li><a href="../chapter07/short.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/short.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/short.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/short.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/short.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li><li class='cur'><a href="../lecture4/short.html"><span class="nl">Lecture4</span>Memory Management</a></li><li><a href="../lecture10/short.html"><span class="nl">Lecture10</span>Shell Script (+ Lab 10)</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Lecture4 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 4 — Memory Management</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 10 นาที · 17 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="lecture4">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><h2 id="0-ตารางเรียน-outline-สไลด์-23">0. ตารางเรียน / Outline (สไลด์ 2–3)</h2>
+<ul>
+<li>OS#1 Intro → OS#2 Process Concept → OS#3 Process Scheduling → <strong>OS#4 Memory Management</strong> → OS#5 File Systems → OS#6 Disk &amp; I/O → OS#7 Synchronization &amp; Deadlock</li>
+<li>OS#4: Sec 1 อังคาร 10 พ.ย. 9–11 น. IT311 | Sec 2 พฤหัส 12 พ.ย. 9–11 น. IT324</li>
+</ul>
+<h2 id="1-memory-hierarchy-memory-manager-สไลด์-56">1. Memory hierarchy &amp; memory manager (สไลด์ 5–6)</h2>
+<ul>
+<li><strong>แก่น:</strong> เร็ว = เล็ก+แพง, ใหญ่ = ช้า+ถูก | memory manager = manage, keep track, allocate, deallocate</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ขนาด</th>
+<th>ลักษณะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cache</td>
+<td>few <strong>MB</strong></td>
+<td>very fast, expensive, <strong>volatile</strong></td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>few <strong>GB</strong></td>
+<td>medium, <strong>volatile</strong></td>
+</tr>
+<tr>
+<td>Disk / SSD</td>
+<td>few <strong>TB</strong></td>
+<td>slow, cheap, <strong>non-volatile</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>พีระมิด L0 Registers → L1 Cache → L2 Main memory → L3 Disk cache → L4 Magnetic disk → L5 Optical/tapes | ขึ้นบน cost/bit แพง | ลงล่าง capacity + access time มากขึ้น</li>
+</ul>
+<h2 id="2-no-memory-abstraction-สไลด์-79">2. No Memory Abstraction (สไลด์ 7–9)</h2>
+<ul>
+<li><strong>แก่น:</strong> address absolute → process เดียว, ทับ OS ได้, รันหลายตัวยาก</li>
+<li>abstraction = ชั้นคั่นระหว่าง 2 ระบบ ไม่ต้องรู้การทำงานของอีกฝั่ง</li>
+<li>3 layout: (a) user บน / OS in RAM ล่าง | (b) OS in ROM บน / user ล่าง | (c) drivers in ROM บน / user กลาง / OS in RAM ล่าง</li>
+<li>รูป (c): โปรแกรม 2 ถูกวางที่ 16384 แต่ <code>JMP 28</code> ยังกระโดดไป absolute 28 (ADD ของโปรแกรม 1) ไม่ใช่ CMP ที่ 16412</li>
+</ul>
+<h2 id="3-address-space-สไลด์-10">3. Address space (สไลด์ 10)</h2>
+<ul>
+<li><strong>แก่น:</strong> ชุด address ที่ process ใช้ได้ แยกของใครของมัน — address 28 ของแต่ละโปรแกรมต้องเป็นคนละที่จริง</li>
+</ul>
+<h2 id="4-base-limit-สไลด์-1112">4. Base &amp; Limit (สไลด์ 11–12)</h2>
+<ul>
+<li>⭐ <strong>Base</strong> = จุดเริ่ม physical | <strong>Limit</strong> = ความยาวโปรแกรม | physical = addr + base | addr ≥ limit → fault</li>
+<li>⭐ ตัวอย่าง base = limit = 16384: <code>JMP 28</code> → 28 + 16384 = <strong>16412</strong> (CMP)</li>
+<li>ข้อเสีย: บวก + เทียบทุก reference | เทียบเร็ว | <strong>บวกช้า (carry-propagation)</strong></li>
+</ul>
+<h2 id="5-swapping-สไลด์-1315">5. Swapping (สไลด์ 13–15)</h2>
+<ul>
+<li><strong>แก่น:</strong> เอา process ทั้งตัวเข้า รัน แล้วกลับไป disk | idle อยู่บน disk ไม่กิน memory</li>
+<li>(a)A → (b)A,B → (c)A,B,C → (d)A ออก → (e)D เข้า → (f)B ออก → (g)A กลับมาคนละที่</li>
+<li>⭐ เกิด <strong>holes</strong> → <strong>compaction</strong> (ย้ายลงล่างรวม hole) แต่ไม่ค่อยทำ เพราะ <strong>เปลือง CPU time</strong></li>
+<li>fixed &amp; static → จัดพอดี | data segment (dynamic var) + stack (local var, return addr) <strong>โตได้</strong> → เผื่อ room for growth (stack กับ data โตเข้าหากัน)</li>
+</ul>
+<h2 id="6-bitmap-vs-linked-list-สไลด์-1617">6. Bitmap vs Linked list (สไลด์ 16–17)</h2>
+<ul>
+<li>⭐ แบ่ง memory เป็น allocation units | bitmap 1 บิต/unit (1 = ใช้, 0 = ว่าง)</li>
+<li>ตัวอย่าง: A 0–4, hole 5–7, B 8–13, C 14–17, hole 18–19, D 20–25, E 26–28, hole 29–31
+<ul>
+<li>bitmap <code>11111000 | 11111111 | 11001111 | 11111000</code></li>
+<li>list <code>P0 5 → H5 3 → P8 6 → P14 4 → H18 2 → P20 6 → P26 3 → H29 3</code></li>
+</ul>
+</li>
+<li>⭐ Bitmap: หา 0 ติดกัน k ตัว <strong>ช้า</strong> | List: process จบต้องอัปเดต + รวม hole</li>
+<li>4 กรณีเพื่อนบ้าน X: A X B → A hole B | A X hole → A hole ใหญ่ | hole X B → hole ใหญ่ B | hole X hole → hole ก้อนเดียว</li>
+</ul>
+<h2 id="7-allocation-algorithms-สไลด์-1822">7. Allocation algorithms (สไลด์ 18–22)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>วิธี</th>
+<th>หมายเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ First fit</td>
+<td>hole แรกที่พอ แบ่งเป็น 2 ส่วน</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Next fit</td>
+<td>เหมือน first แต่เริ่มจากที่ค้างไว้</td>
+<td>—</td>
+</tr>
+<tr>
+<td>⭐ Best fit</td>
+<td>hole เล็กสุดที่พอ</td>
+<td>ค้นทั้ง list → ช้ากว่า first</td>
+</tr>
+<tr>
+<td>Worst fit</td>
+<td>hole ใหญ่สุด</td>
+<td>hole ที่เหลือยังใช้ได้</td>
+</tr>
+<tr>
+<td>Quick fit</td>
+<td>list แยกตามขนาด (4 KB, 8 KB, …)</td>
+<td>หาเร็วมาก แต่ merge เพื่อนบ้านแพง</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>แยก list process/hole → 4 ตัวแรกเร็วขึ้น | hole list เรียงตามขนาด → ⭐ <strong>first = best เร็วเท่ากัน, next fit pointless</strong> | เก็บข้อมูลใน hole เองได้</li>
+</ul>
+<h2 id="8-virtual-memory-mmu-สไลด์-2325">8. Virtual memory &amp; MMU (สไลด์ 23–25)</h2>
+<ul>
+<li>base/limit มีปัญหา <strong>bloatware</strong> (preloaded software ที่ไม่จำเป็น) → virtual memory = มี process ใน memory ได้มากขึ้น</li>
+<li>⭐ address space แบ่งเป็น <strong>pages</strong> (ช่วงต่อเนื่อง) | ไม่ต้องอยู่ RAM ครบ | ไม่อยู่ → OS ไปดึงมา แล้ว <strong>re-execute</strong></li>
+<li>⭐ virtual address → <strong>MMU</strong> (อยู่ใน CPU package) → physical address → bus → memory / disk controller</li>
+</ul>
+<h2 id="9-paging-สไลด์-2627">9. Paging (สไลด์ 26–27)</h2>
+<ul>
+<li>⭐ page = virtual, page frame = physical, ขนาดเท่ากัน จำนวนไม่เท่ากัน</li>
+<li>map (4 KB): 0→2, 1→1, 2→6, 3→0, 4→4, 5→3, 9→5, 11→7, ที่เหลือ X</li>
+<li>⭐ physical = frame × 4096 + (addr mod 4096)
+<ul>
+<li><strong>8192</strong> → page 2 → frame 6 → <strong>24576</strong></li>
+<li><strong>20500</strong> → page 5, offset 20 → frame 3 → <strong>12308</strong></li>
+<li><strong>32780</strong> → page 8 = X → ⭐ <strong>page fault</strong> → trap OS → เลือก frame little-used เขียนกลับ disk → ดึง page → แก้ map → restart</li>
+</ul>
+</li>
+</ul>
+<h2 id="10-page-table-สไลด์-2830">10. Page table (สไลด์ 28–30)</h2>
+<ul>
+<li>⭐ <strong>8196</strong> = <code>0010 000000000100</code> → page 2, offset 4 → frame <code>110</code> → <code>110000000000100</code> = <strong>24580</strong> | offset 12 บิต copy ตรง</li>
+<li>⭐ entry 6 fields: frame # | present (1 = อยู่) | <strong>protection (1 = read only, 0 = R/W)</strong> | modified/dirty (1 = ต้องเขียน disk) | referenced | caching disabled (1 = disabled)</li>
+<li>ขั้นตอน: get VA → convert → 4 บิตแรก = page # → ไปแถว → present 0 = re-execute | 1 = frame + offset</li>
+</ul>
+<h2 id="11-tlb-สไลด์-3133">11. TLB (สไลด์ 31–33)</h2>
+<ul>
+<li>ปัญหา: map ต้องเร็ว + table ใหญ่ | register = เร็วแต่แพงมาก | ใน memory = ช้า (อ่าน 2 ครั้ง) | → <strong>TLB</strong></li>
+<li>⭐ TLB = small H/W, <strong>associative memory</strong>, อยู่ใน MMU | entry: virtual page, modified, protection, page frame, valid</li>
+<li>⭐ เทียบ <strong>parallel</strong> ทุก entry: hit + ไม่ผิด → frame จาก TLB | hit + ผิด → <strong>protection fault</strong> | miss → lookup page table แล้ว evict/แทน entry ใน TLB</li>
+</ul>
+<h2 id="12-page-table-สำหรับ-memory-ใหญ่-สไลด์-3438">12. Page table สำหรับ memory ใหญ่ (สไลด์ 34–38)</h2>
+<ul>
+<li>⭐ Multilevel: 32 บิต = <strong>PT1 10 | PT2 10 | Offset 12</strong> | process 12 MB (text / data / stack อย่างละ 4 MB) | memory 4 GB | table ละ K = 2^10 = 1024</li>
+<li>PT1 → top-level (entry 0 = text, 1 = data, 1023 = stack, อื่นไม่ใช้) → PT2 → page frame</li>
+<li>⭐ <strong>Physical = PT1 × 4M + PT2 × 4K + offset</strong> (K = 2^10, M = 2^20; 4K = 2^12 จาก offset, 4M = 2^10 × 2^12)</li>
+<li>⭐ <strong>0x00403004</strong> → PT1 = 1, PT2 = 3, offset = 4 → 4194304 + 12288 + 4 = <strong>4206596</strong></li>
+<li>Inverted: 1 entry ต่อ <strong>frame จริง</strong> (1 GB / 4 KB = 2^18 vs traditional 2^52) | index ด้วย hash ของ virtual page | ⭐ ข้อเสีย: ต้องค้น <strong>ทั้งตาราง</strong></li>
+</ul>
+<h2 id="13-page-replacement-สไลด์-3940">13. Page replacement (สไลด์ 39–40)</h2>
+<ul>
+<li>⭐ เป้าหมาย <strong>lowest page fault rate</strong> | เลือก page ที่ไม่ถูกใช้หนัก | ถูกแก้ → อัปเดต disk | <strong>local</strong> (process เดียวกัน) vs <strong>global</strong> (process อื่น)</li>
+<li>⭐ string <code>7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1</code>, 3 frames: <strong>Optimal 9 | LRU 12 | FIFO 15</strong> faults (สไลด์แสดง 11 ครั้งแรก: Optimal 7F/4H, FIFO 10F/1H)</li>
+</ul>
+<h2 id="1422-อัลกอริทึม-สไลด์-4153">14–22. อัลกอริทึม (สไลด์ 41–53)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>หลักการ</th>
+<th>จุดจำ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ Optimal</td>
+<td>evict label สูงสุด (ใช้อีกช้าสุด)</td>
+<td>ไม่ realistic</td>
+</tr>
+<tr>
+<td>⭐ NRU</td>
+<td>4 class จาก R,M → evict class ต่ำสุด</td>
+<td>class 0 = R0M0 … 3 = R1M1</td>
+</tr>
+<tr>
+<td>⭐ FIFO</td>
+<td>evict ตัวอยู่นานสุด (head)</td>
+<td>ง่ายมาก แต่ไม่สนการใช้</td>
+</tr>
+<tr>
+<td>Second-chance</td>
+<td>FIFO + R: 0 → แทนที่, 1 → clear + ไปท้าย list</td>
+<td>ตัวอย่าง: fault t = 20, A(R = 1) → B…H, A(20)</td>
+</tr>
+<tr>
+<td>Clock</td>
+<td>วงกลม + เข็ม: 0 → evict ใส่ที่เดิม เลื่อนเข็ม</td>
+<td>1 → clear + เลื่อนเข็ม</td>
+</tr>
+<tr>
+<td>⭐ LRU</td>
+<td>evict ไม่ได้ใช้นานสุด</td>
+<td>ทำยาก (อัปเดต list ทุก reference)</td>
+</tr>
+<tr>
+<td>NFU</td>
+<td>counter += R ทุก tick, evict ต่ำสุด</td>
+<td><strong>never forgets</strong></td>
+</tr>
+<tr>
+<td>⭐ Aging</td>
+<td>shift ขวา 1 แล้วใส่ R ซ้ายสุด</td>
+<td>tick 4: page 3 = <code>00100000</code> ต่ำสุด</td>
+</tr>
+<tr>
+<td>⭐ Working set</td>
+<td>R = 1 → time = CVT</td>
+<td>R = 0 &amp; age &gt; τ → out</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Aging R bits: t0 <code>101011</code> | t1 <code>110010</code> | t2 <code>110101</code> | t3 <code>100010</code> | t4 <code>011000</code> → t4: p0 01111000, p1 10110000, p2 10001000, <strong>p3 00100000</strong>, p4 01011000, p5 00101000</li>
+<li>WS คำศัพท์: <strong>working set</strong> | <strong>demand paging</strong> (เริ่ม 0 page) | <strong>locality of reference</strong> | ⭐ <strong>thrashing</strong> (fault ทุกไม่กี่คำสั่ง) | <strong>prepaging</strong> (โหลดก่อนรัน) | ws(k, t) = page ที่ถูกอ้างใน k references ล่าสุด</li>
+<li>WS เลือก: มี candidate → age สูงสุด | ไม่มี (R = 1 หมด) → เก่าสุดใน WS, สุ่ม ควร clean M = 0</li>
+<li>⭐ ตัวอย่าง CVT 2204, τ 700: <strong>1213 (R0) age 991 → remove</strong> | 2014/2020/2032 (R1) → 2204 | <strong>1620 (R0) age 584 → อยู่ต่อ</strong></li>
+</ul>
+<h2 id="23-summary-สไลด์-54">23. Summary (สไลด์ 54)</h2>
+<ul>
+<li>Optimal = benchmark | NRU = very crude ≈ LRU | FIFO = might throw out important | Second chance = big improvement over FIFO | Clock = realistic | LRU = excellent แต่ทำยาก | NFU = fairly crude ≈ LRU | ⭐ Aging = efficient ≈ LRU well | Working set = somewhat expensive | WSClock = good efficient</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Page</td>
+<td>Page frame</td>
+<td>virtual vs physical</td>
+</tr>
+<tr>
+<td>Base</td>
+<td>Limit</td>
+<td>จุดเริ่ม (บวก) vs ความยาว (เทียบ)</td>
+</tr>
+<tr>
+<td>Page fault</td>
+<td>Protection fault</td>
+<td>ไม่อยู่ใน memory vs ผิดสิทธิ์</td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td>Linked list</td>
+<td>หา k units ช้า vs ต้องรวม hole</td>
+</tr>
+<tr>
+<td>First fit</td>
+<td>Next fit</td>
+<td>เริ่มต้น list vs เริ่มที่ค้างไว้</td>
+</tr>
+<tr>
+<td>Best fit</td>
+<td>Worst fit</td>
+<td>เล็กสุดที่พอ vs ใหญ่สุด</td>
+</tr>
+<tr>
+<td>Swapping</td>
+<td>Paging</td>
+<td>ทั้ง process vs ทีละ page</td>
+</tr>
+<tr>
+<td>Multilevel</td>
+<td>Inverted</td>
+<td>PT1 → PT2 vs 1 entry/frame ค้นทั้งตาราง</td>
+</tr>
+<tr>
+<td>NRU</td>
+<td>LRU</td>
+<td>clock interval ล่าสุด vs ช่วงสั้น ๆ ทุก reference</td>
+</tr>
+<tr>
+<td>NFU</td>
+<td>Aging</td>
+<td>บวก R (ไม่ลืม) vs shift + R ซ้ายสุด</td>
+</tr>
+<tr>
+<td>Second-chance</td>
+<td>Clock</td>
+<td>ย้ายไปท้าย list vs เลื่อนเข็ม</td>
+</tr>
+<tr>
+<td>Demand paging</td>
+<td>Prepaging</td>
+<td>โหลดเมื่อใช้ vs โหลดก่อนรัน</td>
+</tr>
+<tr>
+<td>Protection 1</td>
+<td>Protection 0</td>
+<td>read only vs read &amp; write</td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Global</td>
+<td>evict ของ process ตัวเอง vs process อื่น</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../lecture3/short.html"><small>← บทก่อนหน้า</small><span>Lecture 3 — CPU Scheduling</span></a><a class="pg next" href="../lecture10/short.html"><small>บทถัดไป →</small><span>Lecture 10 – Shell Script (+ Lab 10)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-ตารางเรียน-outline-สไลด์-23">ตารางเรียน / Outline</a></li><li><a href="#1-memory-hierarchy-memory-manager-สไลด์-56">Memory hierarchy &amp; memory manager</a></li><li><a href="#2-no-memory-abstraction-สไลด์-79">No Memory Abstraction</a></li><li><a href="#3-address-space-สไลด์-10">Address space</a></li><li><a href="#4-base-limit-สไลด์-1112">Base &amp; Limit</a></li><li><a href="#5-swapping-สไลด์-1315">Swapping</a></li><li><a href="#6-bitmap-vs-linked-list-สไลด์-1617">Bitmap vs Linked list</a></li><li><a href="#7-allocation-algorithms-สไลด์-1822">Allocation algorithms</a></li><li><a href="#8-virtual-memory-mmu-สไลด์-2325">Virtual memory &amp; MMU</a></li><li><a href="#9-paging-สไลด์-2627">Paging</a></li><li><a href="#10-page-table-สไลด์-2830">Page table</a></li><li><a href="#11-tlb-สไลด์-3133">TLB</a></li><li><a href="#12-page-table-สำหรับ-memory-ใหญ่-สไลด์-3438">Page table สำหรับ memory ใหญ่</a></li><li><a href="#13-page-replacement-สไลด์-3940">Page replacement</a></li><li><a href="#1422-อัลกอริทึม-สไลด์-4153">–22. อัลกอริทึม</a></li><li><a href="#23-summary-สไลด์-54">Summary</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/lecture4", "u": "architecture/lecture4/short.html", "t": "⚡ สรุปสั้น · Lecture 4 — Memory Management", "s": "ITDS211"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

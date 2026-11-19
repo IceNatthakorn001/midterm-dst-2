@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 9 – Node.js Part I (Intro to Node.js) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L9</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/short.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/short.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/short.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/short.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/short.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/short.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/short.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li class='cur'><a href="../l9/short.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/short.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/short.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/short.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/short.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L9 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 9 – Node.js Part I (Intro to Node.js)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 9 นาที · 19 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l9">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p>เลขสไลด์ = เลขหน้า PDF (56 หน้า) | ⭐ = ต้องจำ / ออกบ่อย</p>
+</blockquote>
+<h2 id="0-unit-เป้าหมาย-สไลด์-24">0. Unit + เป้าหมาย (สไลด์ 2–4)</h2>
+<ul>
+<li>Part I Intro (Hello World, Module System, first server) | Part II Express | Part III Cookies, Session, Database</li>
+<li>เป้า: เข้าใจ Node | ใช้ Node modules พื้นฐาน | สร้าง web server from scratch</li>
+</ul>
+<h2 id="1-frontback-end-clientserver-side-สไลด์-56">1. Front/Back-end, Client/Server-side (สไลด์ 5–6)</h2>
+<ul>
+<li>Front-end = HTML, CSS, JS | Back-end = Database, API, Framework | ทั้งคู่ = <strong>Full-stack</strong></li>
+<li>⭐ <strong>Client-side</strong> = HTML/CSS/JS รัน <strong>ใน browser</strong> | <strong>Server-side</strong> = เลือกเนื้อหาตอบ request, ภาษา PHP, Python, Ruby, C#, <strong>Node.js</strong> | <strong>เข้าถึง OS + file system ได้เต็มที่</strong></li>
+</ul>
+<h2 id="2-request-response-6-ขั้น-สไลด์-78">2. Request / Response 6 ขั้น (สไลด์ 7–8)</h2>
+<ul>
+<li>⭐ #1 browser ส่ง <strong>HTTP GET</strong> → #2 web server ดูว่า resource อยู่ไหน (<strong>static #7</strong> = CSS/JS/images → ข้ามไป #5) → #3 <strong>dynamic</strong> → web app อ่าน <strong>database</strong> (request data: URL encoding, GET/POST data, cookies) → #4 รวม data + <strong>HTML templates</strong> → #5 ส่ง response HTML → #6 client ได้หน้า HTML</li>
+</ul>
+<h2 id="3-server-ip-port-สไลด์-910">3. Server, IP, Port (สไลด์ 9–10)</h2>
+<ul>
+<li>IP: <code>10.34.111.111</code>, <strong><code>localhost</code></strong> | Port: <code>3000</code>, <code>8080</code>, <code>8081</code> | รูปตึก: IP ≈ ที่อยู่ตึก, port ≈ ห้อง</li>
+<li>ตัวอย่างจอ nodemon: <code>Running at Port 3000</code>, <code>Request made at /mypage</code> → <code>404: Invalid accessed</code>, <code>/shabu</code>, <code>/bbq</code> | port 8080 + <code>Connected DB: tinycollege</code>, 6 rows → insert ITCS-223 → 7 rows</li>
+</ul>
+<h2 id="4-nodejs-คืออะไร-สไลด์-1112">4. Node.js คืออะไร (สไลด์ 11–12)</h2>
+<ul>
+<li>⭐ <strong>asynchronous JavaScript runtime built on Chrome's V8</strong> | &quot;open-source server environment&quot;</li>
+<li>⭐ <strong>No DOM, no <code>document</code>/<code>window</code>, no Cookies</strong> | มี JS + <strong>Modules: File system, HTTP, Utilities</strong></li>
+</ul>
+<h2 id="5-architecture-สไลด์-1315">5. Architecture (สไลด์ 13–15)</h2>
+<ul>
+<li>⭐ <strong>Single thread event loop</strong>: main thread รับ request → ส่งไปหน่วยที่เหมาะ (File System / Database / Computation) → <strong>ไม่รอ = non-blocking</strong> รับ request ถัดไป → หน่วยเสร็จ → thread ตอบกลับ</li>
+</ul>
+<h2 id="6-nodejs-facts-สไลด์-16">6. Node.js Facts (สไลด์ 16)</h2>
+<ul>
+<li>✅ highly-scalable, <strong>data (I/O) intensive</strong>, real-time | JavaScript all the time | JSON APIs | ⭐ ❌ <strong>computation-intensive</strong></li>
+</ul>
+<h2 id="7-getting-started-hello-world-สไลด์-1719">7. Getting started + Hello World (สไลด์ 17–19)</h2>
+<ul>
+<li>ติดตั้ง <strong>LTS</strong> จาก nodejs.org | เช็ก <code>node --version</code> (สไลด์: v24.21.0)</li>
+<li>เขียน <code>.js</code> → เปิด CLI ไปที่ directory → <code>node filename.js</code> → ดูผลใน command line หรือ browser</li>
+<li>helloworld.js → <code>Hello World!!</code> / <code>In the command line</code></li>
+<li>⭐ <code>console.log()</code> ใน Node <strong>ไม่ใช่</strong> <code>window.console.log()</code> — Node <strong>ไม่มี window</strong></li>
+</ul>
+<h2 id="8-global-objects-สไลด์-20">8. Global objects (สไลด์ 20)</h2>
+<ul>
+<li>ใช้ได้ทุก module โดยไม่ import: <code>__dirname</code>, <code>__filename</code>, <code>exports</code>, <code>module</code>, <code>require()</code>, <code>console.log()</code>, <code>process</code> | ⭐ <strong><code>global</code></strong> = global namespace</li>
+<li>⭐ <code>__dirname</code> = โฟลเดอร์ปัจจุบัน | <code>__filename</code> = full path รวมชื่อไฟล์ | <code>global.console.log(message)</code> → <code>Sam I am</code></li>
+</ul>
+<h2 id="9-module-สไลด์-2124">9. Module (สไลด์ 21–24)</h2>
+<ul>
+<li>⭐ <strong>ทุกไฟล์ JS = module</strong> | ของข้างใน <strong>local / private</strong> | ฟังก์ชันชื่อซ้ำคนละไฟล์ไม่ทับกัน (file1/file2 มี <code>sayHello</code> ทั้งคู่)</li>
+<li>⭐ <code>module.exports</code> 3 แบบ:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>โค้ด</th>
+<th>ใช้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Literal (msg.js)</td>
+<td><code>module.exports=&quot;Hello World!&quot;</code></td>
+<td><code>msg</code></td>
+</tr>
+<tr>
+<td>Object (ictgreet.js)</td>
+<td><code>module.exports.greetICT = message</code></td>
+<td><code>ictgreet.greetICT</code></td>
+</tr>
+<tr>
+<td>Function (hello.js)</td>
+<td><code>module.exports.sayHi = sayHello</code></td>
+<td><code>eng.sayHi()</code> (ไม่ใช่ sayHello)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>⭐ greet.js: <code>require(&quot;./hello&quot;)</code>, <code>require('./message/ictgreet')</code>, <code>require('./message/msg')</code> → output <strong><code>Hello</code> / <code>Hello World!</code> / <code>Hello ICT</code></strong></li>
+<li>⚠️ สไลด์ 24 มี smart quote (<code>”</code>, <code>’</code>) → copy ไปรันได้ SyntaxError</li>
+</ul>
+<h2 id="10-built-in-modules-สไลด์-25">10. Built-in modules (สไลด์ 25)</h2>
+<ul>
+<li><strong>Path, URL, File System, HTTP</strong> | ref: nodejs.org/docs/latest/api/</li>
+</ul>
+<h2 id="11-path-สไลด์-2628">11. Path (สไลด์ 26–28)</h2>
+<ul>
+<li>path ต่างตาม OS → ให้ module จัดการ</li>
+<li><code>path.resolve(__filename)</code> → <code>/Users/jidapa.kra/Documents/demo/path.js</code> | <code>path.extname</code> → <code>.js</code> | <code>path.join(__dirname,'test.js')</code> → <code>.../demo/test.js</code></li>
+<li>⭐ <code>path.parse()</code> → <strong>root</strong> <code>'/'</code> | <strong>dir</strong> <code>'/Users/jidapa.kra/Documents/demo'</code> | <strong>base</strong> <code>'path.js'</code> | <strong>name</strong> <code>'path'</code> | <strong>ext</strong> <code>'.js'</code></li>
+</ul>
+<h2 id="12-url-สไลด์-2931">12. URL (สไลด์ 29–31)</h2>
+<ul>
+<li>parse ด้วย <code>new URL('...')</code> ได้ URL object</li>
+<li>ส่วนของ URL: protocol, username/password (auth), hostname, port, <strong>host = hostname:port</strong>, origin, pathname, search (query), hash, href</li>
+<li>⭐ <code>https://www.covid19.com:8080/p/a/t/h?country=TH&amp;time=now</code> →</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>property</th>
+<th>ค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>protocol</td>
+<td><code>https:</code></td>
+</tr>
+<tr>
+<td>host</td>
+<td><code>www.covid19.com:8080</code></td>
+</tr>
+<tr>
+<td>port</td>
+<td><code>8080</code></td>
+</tr>
+<tr>
+<td>pathname</td>
+<td><code>/p/a/t/h</code> (comment สไลด์เขียน /P ผิด)</td>
+</tr>
+<tr>
+<td>search</td>
+<td><code>?country=TH&amp;time=now</code></td>
+</tr>
+<tr>
+<td>searchParams</td>
+<td><code>URLSearchParams { 'country' =&gt; 'TH', 'time' =&gt; 'now' }</code></td>
+</tr>
+<tr>
+<td>searchParams.get('time')</td>
+<td><code>now</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="13-file-system-สไลด์-3240">13. File System (สไลด์ 32–40)</h2>
+<ul>
+<li>⭐ คู่ async / Sync: read <code>readFile</code> | create <strong><code>appendFile</code></strong> | write <code>writeFile</code> | delete <strong><code>unlink</code></strong> | rename <code>rename</code> (+<code>Sync</code>)</li>
+<li>⭐ <strong>Sync = blocking</strong> (JS ที่เหลือรอจน read/write เสร็จ) | <strong>Async preferred</strong></li>
+<li>สไลด์ 34: async <code>fs.writeFile</code> → other work → done → <strong>callback</strong> | sync <code>fs.writeFileSync</code> → <strong>waiting</strong> → done → <strong>resume execution</strong></li>
+<li><code>fs.readFile(path, &quot;utf8&quot;, function(err, contents){...})</code> — err → <code>Error:</code>, ไม่ err → พิมพ์ contents (<code>Hello This is README.txt (#1)</code>)</li>
+<li>⭐ readFile 3 ไฟล์ async → <strong>ลำดับไม่แน่นอน</strong> (สไลด์ 37 รัน 4 ครั้ง ได้ 4 แบบ)</li>
+<li>⭐ ต้องการลำดับ: <strong>Sync version</strong> | <strong>nested callback</strong> | <strong>Promise / Async-Await</strong> (เลี่ยง callback hell)</li>
+<li><code>fs.readFileSync(path,&quot;utf8&quot;)</code> → return ค่าเลย → ลำดับ 1→2→3 เสมอ</li>
+<li>⭐ nested callback → ลำดับแน่นอน แต่ <strong>บันได <code>})</code> = Callback Hell</strong> อ่านยาก ดูแลยาก <strong>NOT a good practice</strong></li>
+<li>output ที่เรียงถูก: <code>Hello This is README.txt</code> / <code>README2.txt with some content</code> / <code>I have another README file (#3)</code></li>
+</ul>
+<h2 id="14-http-module-สไลด์-4142">14. HTTP module (สไลด์ 41–42)</h2>
+<ul>
+<li>Node ส่งข้อมูลผ่าน HTTP | <strong>สร้าง HTTP server ที่ listen port และตอบ response เมื่อมี request</strong></li>
+</ul>
+<h2 id="15-simple-server-สไลด์-4349">15. Simple server (สไลด์ 43–49)</h2>
+<ul>
+<li>server รับ request ส่ง response — เป็น <strong>plain text, HTML pages, JSON object</strong> ได้ | localhost, port 8081, <code>http://localhost:8081</code></li>
+<li>⭐ ขั้นตอน: <code>require(&quot;http&quot;)</code> → <code>http.createServer((req,res)=&gt;{...})</code> (ทำงานทุก request) → <code>res.statusCode = 200</code> (OK) → <code>res.setHeader(&quot;Content-Type&quot;,&quot;text/plain&quot;)</code> → <code>res.write(&quot;Hello World!&quot;)</code> → <code>res.end()</code> → <code>myServer.listen(8081, ()=&gt;console.log(&quot;Listening on the port 8081&quot;))</code> (bind localhost:8081)</li>
+<li>รัน <code>node myFirstNodeServer.js</code> → <code>Listening on the port 8081</code> → เปิด browser → <code>Hello World!</code> | <strong>Ctrl+C</strong> หยุด</li>
+<li>⚠️ สไลด์ 49 พิมพ์ <code>http:/locahost:8081</code> ผิด | log &quot;The new request comming&quot; ไม่มีในโค้ดสไลด์ 45–48</li>
+</ul>
+<h2 id="16-req-res-สไลด์-50">16. req / res (สไลด์ 50)</h2>
+<ul>
+<li>⭐ <code>req.url</code>, <code>req.method</code> → เปิด localhost:8081 ได้ <code>url /</code>, <code>method GET</code>, <code>url /favicon.ico</code>, <code>method GET</code></li>
+<li>browser ได้ <code>Request made!</code> (ภาพสไลด์เขียน &quot;Request maded&quot; ผิด)</li>
+</ul>
+<h2 id="17-routing-สไลด์-5155">17. Routing (สไลด์ 51–55)</h2>
+<ul>
+<li>route ตาม <code>req.url</code> | <code>http://localhost:8081/bbq</code> → <code>req.url</code> = <code>&quot;/bbq&quot;</code></li>
+<li>⭐</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>path</th>
+<th>status</th>
+<th>Content-Type</th>
+<th>ตอบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>200</td>
+<td>text/plain</td>
+<td><code>Greeting</code></td>
+</tr>
+<tr>
+<td><code>/shabu</code>, <code>/bbq</code></td>
+<td>200</td>
+<td><strong>text/html</strong></td>
+<td><code>fs.readFile(&quot;./bbq.html&quot;, ...)</code> → <code>res.write(data)</code></td>
+</tr>
+<tr>
+<td>อื่น (เช่น <code>/SOMEPATH</code>)</td>
+<td><strong>404</strong></td>
+<td>text/plain</td>
+<td><code>Invalid requested :(</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>terminal: <code>Req: /bbq</code>, <code>Req: /SOMEPATH</code>, <code>Req: /</code>, <code>Req: /shabu</code></li>
+<li>⚠️ template สไลด์ 54 <strong>ขาด <code>});</code></strong> ปิด createServer → SyntaxError</li>
+</ul>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client-side</td>
+<td>Server-side</td>
+<td>รันใน browser / เลือกเนื้อหาตอบ + เข้าถึง OS, file system</td>
+</tr>
+<tr>
+<td>Static</td>
+<td>Dynamic</td>
+<td>ส่งไฟล์เลย (#2→#5) / web app + DB + template</td>
+</tr>
+<tr>
+<td>Browser JS</td>
+<td>Node.js</td>
+<td>มี DOM/window/cookies / ไม่มี แต่มี fs, http</td>
+</tr>
+<tr>
+<td>Async (non-blocking)</td>
+<td>Sync (blocking)</td>
+<td>ทำงานอื่นต่อ + callback / รอแล้ว resume</td>
+</tr>
+<tr>
+<td><code>readFile</code></td>
+<td><code>readFileSync</code></td>
+<td>callback, ลำดับไม่แน่ / return ค่า, ลำดับแน่</td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td><code>__filename</code></td>
+<td>โฟลเดอร์ / full path + ชื่อไฟล์</td>
+</tr>
+<tr>
+<td>base</td>
+<td>name</td>
+<td><code>path.js</code> / <code>path</code></td>
+</tr>
+<tr>
+<td>host</td>
+<td>hostname</td>
+<td>มี port / ไม่มี port</td>
+</tr>
+<tr>
+<td>search</td>
+<td>searchParams</td>
+<td>string <code>?country=TH&amp;time=now</code> / object ใช้ <code>.get()</code></td>
+</tr>
+<tr>
+<td><code>module.exports = x</code></td>
+<td><code>module.exports.k = x</code></td>
+<td>ใช้ <code>msg</code> ตรง ๆ / ใช้ <code>ictgreet.greetICT</code></td>
+</tr>
+<tr>
+<td><code>sayHello</code> (ในไฟล์)</td>
+<td><code>sayHi</code> (ที่ export)</td>
+<td>ไฟล์อื่นเรียก <code>eng.sayHi()</code></td>
+</tr>
+<tr>
+<td><code>req</code></td>
+<td><code>res</code></td>
+<td>url, method (อ่าน) / statusCode, setHeader, write, end (เขียน)</td>
+</tr>
+<tr>
+<td><code>res.write</code></td>
+<td><code>res.end</code></td>
+<td>เขียนเนื้อหา / จบ response</td>
+</tr>
+<tr>
+<td>text/plain</td>
+<td>text/html</td>
+<td>ข้อความ / หน้า HTML</td>
+</tr>
+<tr>
+<td>200</td>
+<td>404</td>
+<td>OK / Error path ไม่ถูก</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../ecmascript/short.html"><small>← บทก่อนหน้า</small><span>ECMAScript Version (ITDS241)</span></a><a class="pg next" href="../l10/short.html"><small>บทถัดไป →</small><span>Lecture 10 – Node.js Part II (Express Framework)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-unit-เป้าหมาย-สไลด์-24">Unit + เป้าหมาย</a></li><li><a href="#1-frontback-end-clientserver-side-สไลด์-56">Front/Back-end, Client/Server-side</a></li><li><a href="#2-request-response-6-ขั้น-สไลด์-78">Request / Response 6 ขั้น</a></li><li><a href="#3-server-ip-port-สไลด์-910">Server, IP, Port</a></li><li><a href="#4-nodejs-คืออะไร-สไลด์-1112">Node.js คืออะไร</a></li><li><a href="#5-architecture-สไลด์-1315">Architecture</a></li><li><a href="#6-nodejs-facts-สไลด์-16">Node.js Facts</a></li><li><a href="#7-getting-started-hello-world-สไลด์-1719">Getting started + Hello World</a></li><li><a href="#8-global-objects-สไลด์-20">Global objects</a></li><li><a href="#9-module-สไลด์-2124">Module</a></li><li><a href="#10-built-in-modules-สไลด์-25">Built-in modules</a></li><li><a href="#11-path-สไลด์-2628">Path</a></li><li><a href="#12-url-สไลด์-2931">URL</a></li><li><a href="#13-file-system-สไลด์-3240">File System</a></li><li><a href="#14-http-module-สไลด์-4142">HTTP module</a></li><li><a href="#15-simple-server-สไลด์-4349">Simple server</a></li><li><a href="#16-req-res-สไลด์-50">req / res</a></li><li><a href="#17-routing-สไลด์-5155">Routing</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l9", "u": "web/l9/short.html", "t": "⚡ สรุปสั้น · Lecture 9 – Node.js Part I (Intro to Node.js)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 12 – Web Services · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L12</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/index.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/index.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/index.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li class='cur'><a href="../l12/index.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/index.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L12</div>
+    <h1 class="lesson-title">Lecture 12 – Web Services</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 59 นาที · 12 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l12">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทนี้ปูพื้นตั้งแต่ <strong>สถาปัตยกรรมก่อนยุคเว็บ</strong> (layer / tier) → <strong>HTTP</strong> (request / response) → <strong>HTML vs XML</strong> → การเก็บข้อมูลฝั่ง browser (<strong>Cookies, LocalStorage, sessionStorage</strong>) → <strong>JSON</strong> และการแปลง object ↔ string → <strong>Web Services</strong> และ <strong>REST</strong> (6 constraints, uniform interface, HTTP methods) แล้วปิดด้วยการ <strong>เรียก Web Service ด้วย JavaScript</strong> ผ่าน <strong>XMLHttpRequest</strong> และ <strong>Fetch</strong>
+<strong>Class Objectives</strong> (สไลด์ 2): อธิบายแนวคิดพื้นฐานของ <strong>JSON</strong> · อธิบายแนวคิดพื้นฐานของ <strong>Web Services</strong> · <strong>เรียก Web Services ด้วย JavaScript</strong> ได้</p>
+<p>บทนี้ไม่มีโจทย์คำนวณ แต่มี <strong>โค้ด / ตัวอย่าง request-response</strong> หลายจุด (HTTP message, XML, JSON, XHR, fetch) — เฉลยทีละขั้นและรันตรวจด้วย node แล้ว</p>
+</blockquote>
+<blockquote class="callout">
+<p>📌 <strong>เลขสไลด์ในสรุปนี้ = เลขหน้า PDF (1–90)</strong> — เลขที่พิมพ์มุมขวาล่างของสไลด์ไม่ตรงตั้งแต่หน้า 24 (หน้า 24–29 พิมพ์เป็น 26–31, หน้า 30–89 พิมพ์ +4 เช่นหน้า 30 = &quot;34&quot;, หน้า 89 = &quot;93&quot;, หน้า 90 = &quot;96&quot;) เพราะไฟล์ PDF ตัดบางสไลด์ออก</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L12-00-overview.png" alt="แผนผังภาพรวม Lecture 12" /></p>
+<h2 id="1-ก่อนมีเว็บ-ระบบสารสนเทศแบ่งเป็นชั้นยังไง-สไลด์-410">1. ก่อนมีเว็บ ระบบสารสนเทศแบ่งเป็นชั้นยังไง? <span class="slide-ref">สไลด์ 4–10</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ระบบสารสนเทศมี 3 layer (data / business logic / presentation) — การแยก layer ไปอยู่คนละเครื่องเรียกว่า tier ยิ่งแยกมาก (1 → 2 → 3 → N-tier) ยิ่งแต่ละส่วนเป็นอิสระและกระจายงานได้</strong></p>
+<h3 id="11-3-layers-กับ-tier-ต่างกันยังไง-สไลด์-5">1.1 3 layers กับ tier ต่างกันยังไง? <span class="slide-ref">สไลด์ 5</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>layer = ชั้นทางตรรกะ 3 ชั้น ส่วน tier = การแยก layer เหล่านั้นออกจากกันทางกายภาพ (physical separation)</strong></p>
+<p>Information Systems ประกอบด้วย 3 layers:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Resource Management (database) Layer</strong></td>
+<td>ชั้นเก็บ/จัดการข้อมูล (ฐานข้อมูล)</td>
+</tr>
+<tr>
+<td><strong>Application Logic / Business Layer</strong></td>
+<td>ชั้นตรรกะทางธุรกิจ การประมวลผล</td>
+</tr>
+<tr>
+<td><strong>Presentation (user interface) Layer</strong></td>
+<td>ชั้นหน้าจอที่ผู้ใช้เห็นและโต้ตอบ</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Tier</strong> = &quot;Physical separation of these layers&quot; — คือเอา layer ไปวางแยกเครื่อง/แยกส่วนกันจริง ๆ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนร้านอาหาร: หน้าร้าน (presentation) ครัว (business logic) และห้องเก็บวัตถุดิบ (database) — ร้านเล็กอาจรวมทุกอย่างในห้องเดียว (1-tier) ร้านใหญ่แยกเป็นคนละห้อง/คนละตึก (หลาย tier)</p>
+</blockquote>
+<h3 id="12-1-tier-2-tier-3-tier-ต่างกันยังไง-สไลด์-68">1.2 1-tier, 2-tier, 3-tier ต่างกันยังไง? <span class="slide-ref">สไลด์ 6–8</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>1-tier = ทั้ง 3 layer อยู่เครื่องเดียว (ผูกกันแน่น ขยายยาก) · 2-tier = client-server · 3-tier = แต่ละ layer อยู่ tier ของตัวเองเกือบอิสระ (front-end / middleware / back-end)</strong></p>
+<p><img loading="lazy" src="diagrams/L12-01-tiers.png" alt="1-tier, 2-tier, 3-tier" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>1-Tier</th>
+<th>2-Tier</th>
+<th>3-Tier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ลักษณะ</td>
+<td>3 layers run on <strong>one machine</strong> หรือ implement ใน <strong>one software package</strong></td>
+<td>เรียกว่า <strong>Client-Server architecture</strong></td>
+<td><strong>Each layer almost independent</strong> และรันบน tier แยกกัน</td>
+</tr>
+<tr>
+<td>ใครอยู่ไหน</td>
+<td>ทุกอย่างอยู่ที่เดียว — ยุค <strong>dumb terminals and mainframes</strong></td>
+<td>presentation อยู่ <strong>client</strong>, data layer อยู่ <strong>server</strong> — application layer อยู่ได้<strong>ทั้ง client หรือ server</strong></td>
+<td>Client Tier → Application Tier (Application Server) → Database Tier (Database Server)</td>
+</tr>
+<tr>
+<td>ชื่อเรียกอื่น</td>
+<td>–</td>
+<td>–</td>
+<td><strong>front-end</strong> (หรือ GUI), <strong>middleware</strong>, <strong>back-end</strong></td>
+</tr>
+<tr>
+<td>ข้อเสียที่สไลด์บอก</td>
+<td>layers <strong>tightly connected</strong>, ยากเรื่อง <strong>scalability และ portability</strong></td>
+<td>–</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="13-n-tier-คืออะไร-สไลด์-9">1.3 N-tier คืออะไร? <span class="slide-ref">สไลด์ 9</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>N-tier (aka Distributed application) คล้าย 3-tier แต่เพิ่มจำนวน application server เป็น tier แยกหลายตัว เพื่อกระจาย business logic</strong></p>
+<ul>
+<li>AKA <strong>Distributed application</strong></li>
+<li>คล้าย 3-tier แต่ <strong>number of application servers are increased</strong> และแต่ละตัวเป็น <strong>individual tiers</strong> → เพื่อ <strong>distribute the business logic</strong></li>
+</ul>
+<p>ตัวอย่างในสไลด์ (วาดใหม่ตามรูป):</p>
+<p><img loading="lazy" src="diagrams/L12-02-ntier.png" alt="N-tier architecture" /></p>
+<ul>
+<li>Client → <strong>WAF</strong> → <strong>Web Tier</strong> → แยกไป <strong>Middle Tier 1</strong> (ตรง) และ <strong>Middle Tier 2</strong> (ผ่าน <strong>Messaging</strong>)</li>
+<li>Middle Tier 1 เรียก <strong>Remote Service</strong> และ <strong>Data Tier</strong>, Middle Tier 2 ใช้ <strong>Data Tier</strong></li>
+<li>มี <strong>Cache</strong> อยู่ระหว่าง Data Tier กับ Middle Tier ทั้งสอง</li>
+</ul>
+<blockquote class="callout">
+<p>สไลด์แสดงแค่รูปนี้ ไม่ได้อธิบายแต่ละกล่อง (เช่น WAF) เพิ่มเติม</p>
+</blockquote>
+<h3 id="14-web-application-architecture-ตัวอย่าง-easyrec-สไลด์-10">1.4 Web Application Architecture (ตัวอย่าง Easyrec) <span class="slide-ref">สไลด์ 10</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>สไลด์ยกตัวอย่างเว็บแอปจริงที่แบ่งเป็นหลาย layer/server — client หลายตัวคุยกับระบบผ่าน &quot;Web Service API&quot; ชั้นเดียว</strong></p>
+<p>สไลด์นี้เป็นรูปล้วน (สถาปัตยกรรม Easyrec จาก Wikipedia) วาดใหม่ส่วนหลักได้ดังนี้:</p>
+<p><img loading="lazy" src="diagrams/L12-03-webapp-arch.png" alt="Web application architecture (Easyrec)" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>Layer</th>
+<th>สิ่งที่อยู่ข้างใน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Clients</strong></td>
+<td>Client Layer</td>
+<td>Client Application 1, 2, …, N — คุยสองทางกับ Web Service API</td>
+</tr>
+<tr>
+<td><strong>Recommender Server</strong></td>
+<td>API Layer</td>
+<td><strong>Web Service API</strong> (ประตูเดียวที่ client เรียก)</td>
+</tr>
+<tr>
+<td></td>
+<td>Application Layer</td>
+<td>Online Recommender Services, Action Service, Offline Recommender Services</td>
+</tr>
+<tr>
+<td></td>
+<td>Database Layer</td>
+<td>DB (Actions), DB (Association Rules)</td>
+</tr>
+<tr>
+<td><strong>Generator Server</strong></td>
+<td>Datamining Layer</td>
+<td>Action-Based Generators, Content-Based Generators → เขียนลง DB (Association Rules)</td>
+</tr>
+<tr>
+<td><strong>3rd Party Metadata</strong></td>
+<td>–</td>
+<td>ส่งข้อมูลเข้า DB (Association Rules)</td>
+</tr>
+<tr>
+<td><strong>Administration Tool</strong></td>
+<td>Administration Layer</td>
+<td>Management, API Documentation, Administration — มีเส้นเชื่อมไปยัง Recommender Server และ Generator Server (ไม่ได้วาดในรูปด้านบนเพื่อไม่ให้เส้นรก)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จุดที่เชื่อมกับบทนี้: client ทุกตัวเข้าถึงระบบผ่าน <strong>Web Service API</strong> — นี่คือบทบาทของ Web Service ที่จะเรียนในหัวข้อ 7</p>
+</blockquote>
+<hr />
+<h2 id="2-เว็บยุคแรกทำงานยังไง-www-basics-cgi-สไลด์-11">2. เว็บยุคแรกทำงานยังไง? (WWW basics + CGI) <span class="slide-ref">สไลด์ 11</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เว็บยุคแรกสร้างบนระบบ client/server เดิม — ผู้ใช้คลิก URL → web server เรียก CGI script ที่ตรงกับ URL → script ทำงาน (ทำตัวเป็น client ของระบบเดิม) → ส่งผลกลับ → server ส่งหน้าเว็บให้ browser</strong></p>
+<p><img loading="lazy" src="diagrams/L12-04-cgi.png" alt="การทำงานของ CGI ในเว็บยุคแรก" /></p>
+<p>ขั้นตอนตามสไลด์:</p>
+<ol>
+<li>ผู้ใช้ <strong>คลิก URL</strong> → server <strong>invoke script ที่ตรงกับ URL นั้น</strong> (web server: <em>map URL to CGI script → execute CGI script</em>)</li>
+<li><strong>CGI script (หรือโปรแกรม) ทำตัวเป็น client</strong> แบบดั้งเดิม (&quot;implemented as a normal client&quot;) คุยกับ <strong>Existing Middleware Infrastructure</strong></li>
+<li>script ทำงาน สร้างผลลัพธ์ แล้ว <strong>ส่งกลับให้ server</strong> (มักเป็น <strong>address of a web page</strong>) — server <em>get results back (stdout of CGI script)</em></li>
+<li>server <strong>ดึงหน้านั้นมาแล้วส่งให้ browser</strong> (<em>prepare response page → send page to browser</em>)</li>
+</ol>
+<hr />
+<h2 id="3-http-คืออะไร-และ-request-response-หน้าตาเป็นยังไง-สไลด์-1231">3. HTTP คืออะไร และ request / response หน้าตาเป็นยังไง? <span class="slide-ref">สไลด์ 12–31</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTTP คือโปรโตคอลแลกเปลี่ยนเอกสารที่เป็นรากฐานของการแลกข้อมูลบนเว็บ — request มี 3 ส่วน (request line / headers / body) และ response มี 3 ส่วน (status line / headers / body)</strong></p>
+<h3 id="31-http-เป็น-communication-protocol-แบบไหน-สไลด์-1315">3.1 HTTP เป็น communication protocol แบบไหน? <span class="slide-ref">สไลด์ 13–15</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTTP ออกแบบมาเพื่อแลกเอกสาร คล้าย e-mail (ใช้ mail header ตาม RFC 822 และ MIME types) และเป็นฐานของการแลกข้อมูลทุกอย่างบนเว็บ</strong></p>
+<ul>
+<li>HTTP was designed for <strong>exchanging documents</strong> — เกือบเหมือน e-mail (ใช้ <strong>RFC 822 compliant mail headers</strong> และ <strong>MIME types</strong>)</li>
+<li>เป็น <strong>foundation of any data exchange on the Web</strong></li>
+<li><strong>MIME type</strong> = กลไกบอก client ว่า <strong>เอกสารที่ส่งมาเป็นชนิดไหน</strong></li>
+</ul>
+<p><strong>หน้าเว็บ 1 หน้า = หลาย request</strong> (สไลด์ 14) — browser ส่ง GET แยกไฟล์ละครั้ง และไฟล์อาจมาจากคนละ server:</p>
+<p><img loading="lazy" src="diagrams/L12-05-http-fetch.png" alt="หน้าเว็บ 1 หน้าดึงไฟล์จากหลาย server" /></p>
+<p><strong>HTTP อยู่ตรงไหนในเว็บ</strong> (สไลด์ 15) — ชั้นบน (The Web) คือ HTML, CSS, JavaScript, Web APIs วางอยู่บน <strong>HTTP</strong> ซึ่งวางอยู่บน TLS/TCP, DNS/UDP และ IP:</p>
+<p><img loading="lazy" src="diagrams/L12-06-web-stack.png" alt="HTTP ใน stack ของเว็บ" /></p>
+<h3 id="32-http-มีลักษณะสำคัญอะไรบ้าง-สไลด์-16">3.2 HTTP มีลักษณะสำคัญอะไรบ้าง? <span class="slide-ref">สไลด์ 16</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTTP เรียบง่าย อ่านได้ด้วยคน ขยายได้ และเป็น stateless แต่ไม่ใช่ sessionless</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คุณสมบัติ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Simple and human readable</strong></td>
+<td>ออกแบบให้เรียบง่าย คนอ่าน message ได้</td>
+</tr>
+<tr>
+<td><strong>Extensible</strong></td>
+<td>ขยายเพิ่มความสามารถได้</td>
+</tr>
+<tr>
+<td><strong>Stateless, but not sessionless</strong></td>
+<td>ตัวโปรโตคอลไม่จำสถานะ แต่ยังทำ session ได้ (เช่นด้วย cookies — ดูหัวข้อ 5)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="33-http-request-มีส่วนประกอบอะไร-สไลด์-1723">3.3 HTTP Request มีส่วนประกอบอะไร? <span class="slide-ref">สไลด์ 17–23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Request = Request Line (method, path, version) + Request Headers (ข้อมูลประกอบ) + Request Body (ข้อมูลที่ส่งไป)</strong></p>
+<p><img loading="lazy" src="diagrams/L12-07-http-message.png" alt="โครงสร้าง HTTP request และ response" /></p>
+<p><strong>(1) Request Line</strong> (สไลด์ 18)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path/Resources</th>
+<th>HTTP Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET, POST, PUT, DELETE, …</td>
+<td>ระบุ <strong>URI</strong> (Uniform Resource Identifier) หรือ <strong>URL</strong> (Uniform Resource Locator) ของ resource ที่ขอ</td>
+<td>HTTP/1.1, HTTP/2.0</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>(2) Request Headers</strong> (สไลด์ 19–20)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Header</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Host</strong></td>
+<td>domain name หรือ IP ของ server ที่ request ถูกส่งไป</td>
+</tr>
+<tr>
+<td><strong>User-Agent</strong></td>
+<td>client application ที่ส่ง request เช่น web browser และ OS</td>
+</tr>
+<tr>
+<td><strong>Accept</strong></td>
+<td>media types ที่ client รับได้/อยากได้ใน response เช่น <code>application/json</code> (JSON), <code>text/html</code> (HTML), <code>image/png</code> (PNG)</td>
+</tr>
+<tr>
+<td><strong>Content-Type</strong></td>
+<td>ชนิด/รูปแบบของข้อมูลที่ส่งไปใน <strong>request body</strong></td>
+</tr>
+<tr>
+<td><strong>Authorization</strong></td>
+<td>credentials หรือ tokens เพื่อขอสิทธิ์เข้าถึง protected resources</td>
+</tr>
+<tr>
+<td>และอื่น ๆ</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Accept</strong> vs <strong>Content-Type</strong> ใน request: Accept = &quot;ฉันอยากได้คำตอบเป็นชนิดไหน&quot; | Content-Type = &quot;ข้อมูลที่ฉันส่งไปเป็นชนิดไหน&quot;</p>
+</blockquote>
+<p><strong>(3) Request Body</strong> (สไลด์ 21)</p>
+<ul>
+<li>เก็บ <strong>ข้อมูลที่ client ส่งให้ server</strong> ใช้หลัก ๆ กับ <strong>POST, PUT หรือ DELETE</strong></li>
+<li>รูปแบบข้อมูล <strong>ขึ้นกับ header Content-Type</strong></li>
+</ul>
+<p><strong>ตัวอย่างที่ 1 — request แบบย่อ</strong> (สไลด์ 22)</p>
+<pre><code class="language-http">GET / HTTP/1.1
+Host: developer.mozilla.org
+Accept-Language: fr
+</code></pre>
+<p>แยกทีละส่วน:</p>
+<ol>
+<li>บรรทัดแรก = <strong>Request Line</strong> → method = <code>GET</code>, path = <code>/</code>, version = <code>HTTP/1.1</code></li>
+<li>สองบรรทัดถัดมา = <strong>Request Headers</strong> → <code>Host</code> บอก server ปลายทาง, <code>Accept-Language: fr</code> ขอภาษาฝรั่งเศส</li>
+<li>ไม่มี body (GET)</li>
+</ol>
+<p><strong>ตัวอย่างที่ 2 — POST แบบเต็ม</strong> (สไลด์ 23) สไลด์ระบายสีแบ่ง header เป็น 3 กลุ่ม:</p>
+<pre><code class="language-http">POST / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Macintosh;… )… Firefox/51.0
+Accept: text/html,application/xhtml+xml,…,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Content-Type: multipart/form-data; boundary=-12656974
+Content-Length: 345
+
+-12656974
+(more data)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>บรรทัด</th>
+<th>กลุ่ม header (ตามสีในสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request Line</td>
+<td><code>POST / HTTP/1.1</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>Request Headers</td>
+<td>Host, User-Agent, Accept, Accept-Language, Accept-Encoding</td>
+<td><strong>Request headers</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Connection, Upgrade-Insecure-Requests</td>
+<td><strong>General headers</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Content-Type, Content-Length</td>
+<td><strong>Representation headers</strong></td>
+</tr>
+<tr>
+<td>Request Body</td>
+<td><code>-12656974</code> (more data)</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="34-http-response-มีส่วนประกอบอะไร-สไลด์-2429">3.4 HTTP Response มีส่วนประกอบอะไร? <span class="slide-ref">สไลด์ 24–29</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Response = Status Line (version, status code, status text) + Response Headers + Response Body (เนื้อหาจริง ชนิดตาม Content-Type)</strong></p>
+<p><strong>(1) Status Line</strong> (สไลด์ 25)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>HTTP Version</th>
+<th>Status Code</th>
+<th>Status Text</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP/1.1, HTTP/2.0</td>
+<td><strong>200</strong>: OK – request สำเร็จ</td>
+<td>OK</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>404</strong>: Not Found – ไม่พบ resource ที่ขอบน server</td>
+<td>Not Found</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>500</strong>: Internal Server Error – เกิด error ที่ server</td>
+<td>Internal Server Error</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>(2) Response Headers</strong> (สไลด์ 26)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Header</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Content-Type</strong></td>
+<td>ชนิด/รูปแบบของ <strong>response body</strong> เช่น <code>text/html</code>, <code>application/json</code>, <code>image/png</code></td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td>วันเวลาที่สร้าง response</td>
+</tr>
+<tr>
+<td><strong>Server</strong></td>
+<td>ซอฟต์แวร์ web server และเวอร์ชันที่ประมวลผล request</td>
+</tr>
+<tr>
+<td><strong>Content-Length</strong></td>
+<td>ขนาดของ response body เป็น <strong>bytes</strong></td>
+</tr>
+<tr>
+<td>และอื่น ๆ</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>(3) Response Body</strong> (สไลด์ 27)</p>
+<ul>
+<li>ข้อมูล/เนื้อหาจริงที่ server ส่งกลับ</li>
+<li>เป็น HTML, JSON, XML, plain text หรือรูปแบบอื่นตามที่ <strong>Content-Type</strong> ระบุ</li>
+</ul>
+<p><strong>ตัวอย่าง response</strong> (สไลด์ 28)</p>
+<pre><code class="language-http">HTTP/1.1 200 OK
+Date: Sat, 09 Oct 2010 14:28:02 GMT
+Server: Apache
+Last-Modified: Tue, 01 Dec 2009 20:18:22 GMT
+ETag: &quot;51142bc1-7449-479b075b2891b&quot;
+Accept-Ranges: bytes
+Content-Length: 29769
+Content-Type: text/html
+
+&lt;!DOCTYPE html... (here come the 29769 bytes of the requested web page)
+</code></pre>
+<p>อ่านทีละขั้น:</p>
+<ol>
+<li><strong>Status Line</strong> <code>HTTP/1.1 200 OK</code> → version = HTTP/1.1, status code = <strong>200</strong>, status message = <strong>OK</strong> (สำเร็จ)</li>
+<li><strong>Headers</strong> → server คือ Apache, body ยาว <strong>29769 bytes</strong>, ชนิด <strong>text/html</strong></li>
+<li><strong>Body</strong> → หน้า HTML ยาว 29769 bytes ตรงกับ Content-Length</li>
+</ol>
+<p><strong>ตัวอย่าง response แบบเต็ม</strong> (สไลด์ 29) สไลด์แบ่ง header เป็น 3 กลุ่มเช่นกัน (body = <code>(body)</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม (ตามสีในสไลด์)</th>
+<th>Headers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Response headers</strong></td>
+<td>Access-Control-Allow-Origin: <code>*</code>, Etag, Server: Apache, Set-Cookie: csrftoken=…, Vary: Cookie, Accept-Encoding, X-Frame-Options: DENY</td>
+</tr>
+<tr>
+<td><strong>General headers</strong></td>
+<td>Connection: Keep-Alive, Date, Keep-Alive: timeout=5, max=999, Transfer-Encoding: chunked</td>
+</tr>
+<tr>
+<td><strong>Representation headers</strong></td>
+<td>Content-Encoding: gzip, Content-Type: text/html; charset=utf-8, Last-Modified</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <code>Set-Cookie</code> ในตัวอย่างนี้คือวิธีที่ server ส่ง cookie มาให้ browser — เชื่อมกับหัวข้อ 5 ที่ว่า cookie ถูกจัดการผ่าน HTTP headers ได้</p>
+</blockquote>
+<h3 id="35-http-components-สไลด์-30">3.5 HTTP Components <span class="slide-ref">สไลด์ 30</span></h3>
+<p>สไลด์นี้เป็นลิงก์ให้ไปอ่านต่อ 3 เรื่อง: <strong>HTTP request methods</strong>, <strong>HTTP headers</strong>, <strong>HTTP response status codes</strong> (สไลด์ไม่มีเนื้อหาเพิ่มในหน้า)</p>
+<h3 id="36-ส่ง-parameter-ไปกับ-http-ยังไง-สไลด์-31">3.6 ส่ง parameter ไปกับ HTTP ยังไง? <span class="slide-ref">สไลด์ 31</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>การมี form ทำให้ผู้ใช้ส่งข้อมูลให้ server ได้ (ต้องแก้ HTML และ HTTP) — POST ใส่ข้อมูลไว้ใน body ส่วน GET ต้องใส่ parameter ไว้ใน URL</strong></p>
+<p>ตัวอย่าง POST ไปยัง CGI script:</p>
+<pre><code class="language-http">POST /cgi-bin/post-query HTTP/1.0
+Accept: www/source
+Accept: text/html
+Accept: video/mpeg
+Accept: image/jpeg
+...
+Accept: application/postscript
+User-Agent: Lynx/2.2 libwww/2.14
+Content-type: application/x-www-form-urlencoded
+Content-length: 150
+    * a blank line *
+&amp;name = Cesare+Pautasso
+&amp;email= pautasso@inf.ethz.ch
+...
+</code></pre>
+<p>อ่านทีละส่วน (ตามคำอธิบายข้างรูปในสไลด์):</p>
+<ol>
+<li><code>POST /cgi-bin/post-query</code> → <strong>POST request ระบุ CGI script ที่จะรัน</strong> (post-query)</li>
+<li>headers (Accept, User-Agent, …) → <strong>&quot;As before&quot;</strong> คือเหมือน request ปกติ — มี <code>Content-type: application/x-www-form-urlencoded</code> บอกว่า body เป็นข้อมูลจาก form</li>
+<li><strong>บรรทัดว่าง</strong> คั่นระหว่าง headers กับ body</li>
+<li><code>&amp;name=…&amp;email=…</code> → <strong>ข้อมูลที่ผู้ใช้กรอกใน form แล้วส่งกลับไป server</strong></li>
+<li>ถ้าใช้ <strong>GET</strong> ก็ได้ แต่ต้องเอา parameter ไปต่อใน URL: <code>/cgi-bin/post-query?name=...&amp;email=...</code></li>
+</ol>
+<hr />
+<h2 id="4-html-ต่างจาก-xml-ยังไง-สไลด์-3236">4. HTML ต่างจาก XML ยังไง? <span class="slide-ref">สไลด์ 32–36</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTML บอกแค่ &quot;จะแสดงผลยังไง&quot; สำหรับคนอ่าน ไม่บอกความหมายของข้อมูล → จึงมี XML ซึ่งให้ตั้ง tag เอง ใช้กำหนดโครงสร้างข้อมูลเพื่อแลกเปลี่ยน/จัดเก็บ ให้โปรแกรมประมวลผลได้</strong></p>
+<h3 id="41-ทำไมต้องมี-xml-สไลด์-3233">4.1 ทำไมต้องมี XML? <span class="slide-ref">สไลด์ 32–33</span></h3>
+<ul>
+<li><strong>HTML</strong> = markup language ที่อธิบายว่าเอกสาร <strong>ควรแสดงผลยังไง</strong> (visual format)</li>
+<li>HTML เป็นแค่หนึ่งใน markup languages — บางภาษามีมาก่อน HTML เช่น <strong>SGML</strong> (Standard Generalized Markup Language)</li>
+<li>HTML มีแค่ primitives สำหรับจัดรูปแบบเอกสาร <strong>โดยคิดถึงผู้ใช้ที่เป็นคน</strong></li>
+<li>ใช้ HTML <strong>ไม่มีทางบอกว่าเนื้อหาคืออะไร (semantics)</strong> → จึงเสนอมาตรฐาน <strong>XML</strong></li>
+</ul>
+<h3 id="42-xml-มีคุณสมบัติอะไร-สไลด์-34">4.2 XML มีคุณสมบัติอะไร? <span class="slide-ref">สไลด์ 34</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>XML ตั้ง tag เองได้ มี schema กำหนดชนิดข้อมูล ไม่ได้ทำมาให้ browser แสดง แต่ให้โปรแกรม/เครื่องประมวลผล และใช้เป็นภาษากลางตอนเรียก service ข้าม Internet</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>HTML</th>
+<th>XML</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tag</td>
+<td><strong>pre-defined</strong></td>
+<td><strong>ไม่ pre-defined</strong> (ตั้งเอง)</td>
+</tr>
+<tr>
+<td>เป้าหมาย</td>
+<td>แสดงผลให้คนดู</td>
+<td><strong>กำหนดโครงสร้างข้อมูลแบบมาตรฐาน</strong> เพื่อ <strong>แลกเปลี่ยนและจัดเก็บ</strong></td>
+</tr>
+<tr>
+<td>ใครใช้</td>
+<td>browser</td>
+<td><strong>ไม่ได้ตั้งใจให้ browser</strong> — ให้ <strong>โปรแกรมและเครื่อง</strong> ประมวลผลอัตโนมัติ</td>
+</tr>
+<tr>
+<td>ชนิดข้อมูล</td>
+<td>–</td>
+<td><strong>XML Schemas support data types</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>XML ใช้เป็น <strong>ภาษากลางสำหรับ marshalling/serializing arguments</strong> ตอนเรียก service ข้าม Internet (แปลงพารามิเตอร์เป็นข้อความเพื่อส่งไป)</li>
+</ul>
+<h3 id="43-โครงสร้างเอกสาร-xml-เป็นยังไง-สไลด์-35">4.3 โครงสร้างเอกสาร XML เป็นยังไง? <span class="slide-ref">สไลด์ 35</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เอกสาร XML เป็นโครงสร้างต้นไม้ เริ่มที่ root แตกกิ่งไปถึง leaves</strong></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;
+&lt;note&gt;
+  &lt;to&gt;Wud&lt;/to&gt;
+  &lt;from&gt;Bell&lt;/from&gt;
+  &lt;heading&gt;Reminder&lt;/heading&gt;
+  &lt;body&gt;Please buy fruits today&lt;/body&gt;
+&lt;/note&gt;
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บรรทัด</th>
+<th>ชื่อที่สไลด์ชี้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;</code></td>
+<td><strong>XML Declaration</strong> – Version and Encoding</td>
+</tr>
+<tr>
+<td><code>&lt;note&gt;</code></td>
+<td><strong>Root element</strong></td>
+</tr>
+<tr>
+<td><code>&lt;to&gt;</code>, <code>&lt;from&gt;</code>, <code>&lt;heading&gt;</code>, <code>&lt;body&gt;</code></td>
+<td><strong>Child element</strong></td>
+</tr>
+<tr>
+<td><code>&lt;/note&gt;</code></td>
+<td><strong>End Root element</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="diagrams/L12-08-xml-tree.png" alt="ต้นไม้ของเอกสาร XML note" /></p>
+<h3 id="44-xml-schema-กับเอกสาร-xml-สัมพันธ์กันยังไง-สไลด์-36">4.4 XML Schema กับเอกสาร XML สัมพันธ์กันยังไง? <span class="slide-ref">สไลด์ 36</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>XML Schema เป็น &quot;แม่แบบ&quot; ที่กำหนดว่า element นี้ต้องมีลูกอะไร เรียงยังไง ชนิดอะไร — เอกสาร XML จริงต้องเป็นไปตามนั้น</strong></p>
+<p>Schema (ซ้าย):</p>
+<pre><code class="language-xml">&lt;xs:element name=&quot;university&quot;&gt;
+  &lt;xs:complexType&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name=&quot;name&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element name=&quot;address&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element name=&quot;city&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element name=&quot;country&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:element&gt;
+</code></pre>
+<p>เอกสารที่ได้ตาม schema (ขวา):</p>
+<pre><code class="language-xml">&lt;university&gt;
+  &lt;name&gt;Mahidol&lt;/name&gt;
+  &lt;address&gt; 999 Phuttamonthon 4 Road&lt;/address&gt;
+  &lt;city&gt;Nakhon Pathom&lt;/city&gt;
+  &lt;country&gt;Thailand&lt;/country&gt;
+&lt;/university&gt;
+</code></pre>
+<p>อ่าน schema ทีละขั้น:</p>
+<ol>
+<li><code>xs:element name=&quot;university&quot;</code> → มี element ชื่อ <code>university</code></li>
+<li><code>xs:complexType</code> → เป็นชนิดซับซ้อน (มี element ลูก)</li>
+<li><code>xs:sequence</code> → ลูกต้องเรียงตามลำดับ: <code>name</code> → <code>address</code> → <code>city</code> → <code>country</code></li>
+<li>ลูกแต่ละตัวมี <code>type=&quot;xs:string&quot;</code> → เป็นข้อความ (นี่คือตัวอย่างของ &quot;XML Schemas support data types&quot;)</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ 36 บรรทัดแรกพิมพ์เป็น <code>name=”university&quot;</code> (ใช้เครื่องหมายคำพูดแบบโค้ง <code>”</code> ตัวหน้า) — ถ้าเขียนจริงต้องใช้ <code>&quot;</code> ตรงทั้งคู่ (สรุปนี้แก้ให้แล้วในโค้ดด้านบน)</p>
+</blockquote>
+<hr />
+<h2 id="5-cookies-localstorage-sessionstorage-ต่างกันยังไง-สไลด์-3744">5. Cookies, LocalStorage, sessionStorage ต่างกันยังไง? <span class="slide-ref">สไลด์ 37–44</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทั้งสามเก็บข้อมูล key/value ไว้ที่ browser — cookie เล็ก (4KB) มีวันหมดอายุ และถูกส่งไป server ทุก request; LocalStorage ใหญ่กว่า (≥5MB/domain) อยู่จนกว่าจะลบ และไม่ถูกส่งไป server; sessionStorage เหมือน LocalStorage แต่อยู่แค่ใน tab ปัจจุบัน</strong></p>
+<h3 id="51-cookie-คืออะไร-ใช้ทำอะไร-สไลด์-3840">5.1 Cookie คืออะไร ใช้ทำอะไร? <span class="slide-ref">สไลด์ 38–40</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>cookie = ข้อมูล key/value ขนาดเล็กที่ server ส่งมาให้ browser เก็บ แล้ว browser ส่งกลับไปกับ request ถึง server เดิม — ใช้รักษา session state ข้ามหลายหน้า เช่น login ค้าง ตะกร้าสินค้า</strong></p>
+<ul>
+<li>ชื่อเรียกหลายแบบ เช่น <strong>HTTP cookie</strong>, <strong>web cookie</strong></li>
+<li>เป็น <strong>ข้อมูลขนาดเล็กมาก</strong> ที่ <strong>ดาวน์โหลดมาจาก web server</strong> ตอนเข้าเว็บ แล้ว <strong>browser เก็บไว้ในเครื่อง</strong></li>
+<li>ปกติถูก <strong>ส่งไปกับ request ถึง web server เดียวกัน</strong> และใช้บอก server ว่า request มาจากไหน เช่น <strong>keeping a user logged-in</strong></li>
+<li>เก็บข้อมูลแบบ <strong>key/value pairs</strong></li>
+<li>ช่วย <strong>maintain session state over several page requests</strong> เช่น <strong>ติดตามของในตะกร้าสินค้า</strong></li>
+<li>จำกัดขนาด <strong>ไม่เกิน 4KB</strong> และ <strong>มีวันหมดอายุ (expiry)</strong></li>
+</ul>
+<p><strong>จุดประสงค์หลักของ cookies</strong> (สไลด์ 40): <strong>Session management</strong>, <strong>Personalization</strong>, <strong>Tracking</strong></p>
+<p><strong>ตัวอย่าง cookie:</strong></p>
+<pre><code>&quot;username=Wudhichart; expires=Thu, 18 Dec 2016 12:00:00 UTC&quot;;
+</code></pre>
+<ul>
+<li><code>username=Wudhichart</code> → คู่ key/value ที่เก็บ</li>
+<li><code>expires=…</code> → วันเวลาหมดอายุของ cookie</li>
+<li>สไลด์เขียนว่า &quot;See example how to manipulate cookies&quot; (ตัวอย่างโค้ดอยู่นอกสไลด์ ไม่ได้ใส่ในไฟล์)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนบัตรคิว/สายรัดข้อมือที่ร้านให้ไว้ — ทุกครั้งที่กลับไปร้านเดิมก็ยื่นบัตรนี้ให้ดู ร้านจึงจำได้ว่าเราเป็นใคร (แต่บัตรเล็ก จดได้น้อย และมีวันหมดอายุ)</p>
+</blockquote>
+<h3 id="52-localstorage-คืออะไร-ต่างจาก-cookie-ยังไง-สไลด์-4143">5.2 LocalStorage คืออะไร ต่างจาก Cookie ยังไง? <span class="slide-ref">สไลด์ 41–43</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>LocalStorage ใช้เก็บข้อมูลเหมือน cookie แต่ใหญ่กว่า (≥5MB ต่อ domain) แชร์กันใน domain เดียว server แก้ผ่าน HTTP header ไม่ได้ และทั้ง key และ value ต้องเป็น string</strong></p>
+<p>คุณสมบัติ (สไลด์ 41):</p>
+<ul>
+<li>พื้นที่ <strong>อย่างน้อย 5MB ต่อ web domain</strong> (ขึ้นกับการตั้งค่า)</li>
+<li>เว็บแอปใน <strong>domain เดียวกันใช้ LocalStorage ร่วมกัน</strong></li>
+<li>ข้อมูลใน LocalStorage <strong>ไม่ถูกจัดการโดย server ผ่าน HTTP headers</strong></li>
+<li>1 record = <strong>key/value pair</strong> และ <strong>ทั้ง key และ value ต้องเป็น string</strong></li>
+</ul>
+<p><strong>Cookies vs LocalStorage</strong> (สไลด์ 42):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Key differences</th>
+<th>Cookies</th>
+<th>LocalStorage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Storage Capacity</strong></td>
+<td>ประมาณ <strong>4KB</strong></td>
+<td>ประมาณ <strong>5MB ต่อ domain</strong></td>
+</tr>
+<tr>
+<td><strong>Accessibility</strong></td>
+<td>เข้าถึงได้ทั้ง <strong>client side (JavaScript)</strong> และ <strong>server side (ผ่าน HTTP headers)</strong></td>
+<td>เข้าถึงได้ <strong>เฉพาะ client side (JavaScript)</strong></td>
+</tr>
+<tr>
+<td><strong>Expiration</strong></td>
+<td>ตั้ง <strong>วันหมดอายุ</strong> ได้</td>
+<td>อยู่ในเครื่อง client <strong>จนกว่าผู้ใช้ลบเอง หรือโปรแกรมลบ</strong></td>
+</tr>
+<tr>
+<td><strong>Transmission</strong></td>
+<td><strong>ถูกแนบไปกับทุก HTTP request</strong> ถึง domain เดิมโดยอัตโนมัติ</td>
+<td><strong>ไม่ถูกส่งไป server อัตโนมัติ</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>การใช้งาน LocalStorage ที่สไลด์ให้ไปดูตัวอย่าง (สไลด์ 43): <strong>Store data</strong>, <strong>Get data</strong>, <strong>Set data</strong>, <strong>Remove data</strong>, และ <strong>ใช้ GUI จัดการ LocalStorage</strong> (สไลด์ไม่ได้ใส่โค้ด)</p>
+<h3 id="53-sessionstorage-ต่างจาก-localstorage-ยังไง-สไลด์-44">5.3 sessionStorage ต่างจาก LocalStorage ยังไง? <span class="slide-ref">สไลด์ 44</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>sessionStorage คล้าย LocalStorage แต่มีอยู่แค่ใน browser tab ปัจจุบัน — refresh หน้าแล้วข้อมูลยังอยู่</strong></p>
+<ul>
+<li><strong>exists only within the current browser tab</strong></li>
+<li><strong>When page is refreshed, the sessionStorage is maintained</strong> (refresh ไม่หาย)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Cookies</th>
+<th>LocalStorage</th>
+<th>sessionStorage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ขนาด</td>
+<td>~4KB</td>
+<td>≥5MB/domain</td>
+<td>(สไลด์ไม่ระบุ — บอกแค่ว่า &quot;like LocalStorage&quot;)</td>
+</tr>
+<tr>
+<td>ขอบเขต</td>
+<td>ส่งไปกับ request ถึง server เดิม</td>
+<td>ทุกเว็บแอปใน domain เดียวกัน</td>
+<td><strong>เฉพาะ tab ปัจจุบัน</strong></td>
+</tr>
+<tr>
+<td>อายุ</td>
+<td>มี expiry</td>
+<td>จนกว่าจะลบ</td>
+<td>refresh แล้วยังอยู่</td>
+</tr>
+<tr>
+<td>server เข้าถึง</td>
+<td>ได้ (HTTP headers)</td>
+<td>ไม่ได้</td>
+<td>(สไลด์ไม่ระบุ)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-json-คืออะไร-และใช้เก็บ-object-ลง-localstorage-ยังไง-สไลด์-4554">6. JSON คืออะไร และใช้เก็บ object ลง LocalStorage ยังไง? <span class="slide-ref">สไลด์ 45–54</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>LocalStorage รับแต่ string แต่ข้อมูลแอปเป็น object → ต้องแปลง object เป็น string โดยไม่เสียโครงสร้าง (serialisation) และแปลงกลับ (parsing) — JSON คือรูปแบบ string มาตรฐานที่ทำสิ่งนี้ได้ ใช้ <code>JSON.stringify()</code> / <code>JSON.parse()</code></strong></p>
+<h3 id="61-ทำไมต้องแปลง-object-เป็น-string-สไลด์-4647">6.1 ทำไมต้องแปลง object เป็น string? <span class="slide-ref">สไลด์ 46–47</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เพราะแอปออกแบบแบบ OOP ข้อมูลส่วนใหญ่เป็น object แต่ LocalStorage รับแค่ string — การแปลงต้องเก็บทั้งข้อมูลและโครงสร้างไว้ เพื่อแปลงกลับได้ภายหลัง</strong></p>
+<ul>
+<li>เรามักออกแบบแอปตาม <strong>object-oriented paradigm</strong> → ข้อมูลส่วนใหญ่อยู่ในรูป <strong>object</strong></li>
+<li>จะใช้ LocalStorage ต้อง <strong>แปลง object เป็น String</strong> (LocalStorage รับแค่ String)</li>
+<li>เงื่อนไขเดียว: การแปลงต้อง <strong>คงทั้งข้อมูลและโครงสร้างของ object</strong> เพื่อดึงกลับมา <strong>สร้าง object ใหม่ (reconstitute) ได้</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กระบวนการ</th>
+<th>ชื่อเรียก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>object → string</td>
+<td><strong>serialisation</strong> หรือ <strong>stringifying</strong></td>
+</tr>
+<tr>
+<td>string → object (ย้อนกลับ)</td>
+<td><strong>deserialisation</strong> หรือ <strong>parsing</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-json-ต่างจาก-object-literal-ของ-javascript-ยังไง-สไลด์-48">6.2 JSON ต่างจาก object literal ของ JavaScript ยังไง? <span class="slide-ref">สไลด์ 48</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>JSON มาจากแนวคิด object literal ของ JS แต่ต่างกัน 3 ข้อ — JSON เป็น String, ไม่ support properties (ตามที่สไลด์เขียน) และชื่อ property ต้องอยู่ในเครื่องหมายคำพูด</strong></p>
+<ul>
+<li>object literal notation ของ JavaScript นำไปสู่ <strong>มาตรฐานรูปแบบข้อมูล</strong> ที่ใช้ส่งข้อมูลมีโครงสร้าง (เช่น object data) อย่างแพร่หลาย → เรียกว่า <strong>JavaScript Object Notation (JSON)</strong></li>
+<li>ความต่างสำคัญระหว่าง JSON กับ object literal:
+<ol>
+<li><strong>JSON is a String</strong></li>
+<li><strong>JSON does not support properties</strong></li>
+<li><strong>Property names in JSON are enclosed by quotes</strong> (ชื่อ key ต้องมี <code>&quot;…&quot;</code>)</li>
+</ol>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อ 2 &quot;JSON does not support properties&quot; สไลด์เขียนไว้สั้น ๆ แบบนี้ และดูขัดกับข้อ 3 ที่พูดถึง &quot;property names in JSON&quot; — ตีความไม่ได้ชัดจากสไลด์ ถ้าออกสอบให้ตอบตามข้อความในสไลด์ หรือถามอาจารย์ว่าหมายถึงอะไร</p>
+</blockquote>
+<h3 id="63-json-มีชนิดข้อมูลพื้นฐานอะไรบ้าง-สไลด์-49">6.3 JSON มีชนิดข้อมูลพื้นฐานอะไรบ้าง? <span class="slide-ref">สไลด์ 49</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>6 ชนิด — Number, String, Boolean, Array, Object (JSON object), null</strong></p>
+<p>ทดลองด้วย node (<code>JSON.stringify</code> object ที่มีครบ 6 ชนิด):</p>
+<pre><code class="language-js">JSON.stringify({n: 1, s: &quot;a&quot;, b: true, a: [1,2], o: {x: 1}, z: null})
+// ผลรันจริง: {&quot;n&quot;:1,&quot;s&quot;:&quot;a&quot;,&quot;b&quot;:true,&quot;a&quot;:[1,2],&quot;o&quot;:{&quot;x&quot;:1},&quot;z&quot;:null}
+</code></pre>
+<h3 id="64-เขียน-object-เป็น-json-หน้าตายังไง-สไลด์-5053">6.4 เขียน object เป็น JSON หน้าตายังไง? <span class="slide-ref">สไลด์ 50–53</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ต่างจาก object literal ตรงที่ key ทุกตัวต้องมี &quot;…&quot; — JSON object ใช้ <code>{ }</code>, JSON array ใช้ <code>[ ]</code> ซ้อนกันได้</strong></p>
+<p><strong>Object literal (JS) vs JSON</strong> (สไลด์ 50):</p>
+<pre><code class="language-js">var wudhichart = {
+  firstName: &quot;Wudhichart&quot;,
+  lastName: &quot;sawangphol&quot;,
+  age: 30,
+  university: &quot;Mahidol&quot;,
+  feesPaid: true
+};
+</code></pre>
+<pre><code class="language-json">{
+  &quot;wudhichart&quot; : {&quot;firstName&quot;: &quot;Wudhichart&quot;,
+                  &quot;lastName&quot;: &quot;sawangphol&quot;,
+                  &quot;age&quot;: 30,
+                  &quot;university&quot;: &quot;Mahidol&quot;,
+                  &quot;feesPaid&quot;: true}
+}
+</code></pre>
+<p>สังเกตทีละจุด:</p>
+<ol>
+<li>object literal: key <strong>ไม่มี</strong> เครื่องหมายคำพูด (<code>firstName:</code>)</li>
+<li>JSON: key <strong>มี</strong> <code>&quot;firstName&quot;:</code> ทุกตัว (ข้อ 3 ของสไลด์ 48)</li>
+<li>JSON ห่ออีกชั้นด้วย key <code>&quot;wudhichart&quot;</code> → object ซ้อน object</li>
+<li>ค่า <code>30</code> เป็น Number, <code>true</code> เป็น Boolean, <code>&quot;Mahidol&quot;</code> เป็น String</li>
+</ol>
+<p>รันตรวจด้วย node:</p>
+<pre><code class="language-js">JSON.parse(ข้อความ JSON ของสไลด์ 50).wudhichart.university   // → &quot;Mahidol&quot; (parse ผ่าน = JSON ถูกรูปแบบ)
+JSON.parse('{firstName: &quot;Wudhichart&quot;}')                     // → SyntaxError (key ไม่มี &quot;...&quot; ไม่ใช่ JSON)
+</code></pre>
+<p><strong>JSON object</strong> (สไลด์ 51):</p>
+<pre><code class="language-js">var jsonobject = {
+  &quot;wudhichart&quot; : {
+    &quot;firstName&quot;: &quot;Wudhichart&quot;,
+    &quot;lastName&quot;: &quot;Sawangphol&quot;,
+    &quot;age&quot;: 30,
+    &quot;university&quot;: &quot;Mahidol&quot;,
+    &quot;feesPaid&quot;: true
+  }
+};
+</code></pre>
+<p><strong>JSON Array</strong> (สไลด์ 52) — <code>&quot;people&quot;</code> เป็น array ของ object 2 คน:</p>
+<pre><code class="language-js">var jsonarray = {
+  &quot;people&quot;: [{
+    &quot;firstName&quot;: &quot;Wudhichart&quot;,
+    &quot;lastName&quot;: &quot;Sawangphol&quot;,
+    &quot;age&quot;: 30,
+    &quot;university&quot;: &quot;Mahidol&quot;,
+    &quot;feesPaid&quot;: true
+  }, {
+    &quot;firstName&quot;: &quot;Pawitra&quot;,
+    &quot;lastName&quot;: &quot;Chiravirakul&quot;,
+    &quot;age&quot;: 30,
+    &quot;university&quot;: &quot;Mahidol&quot;,
+    &quot;feesPaid&quot;: true
+  }]
+};
+</code></pre>
+<p>รันตรวจด้วย node: <code>jsonarray.people</code> เป็น array (<code>Array.isArray</code> → <code>true</code>) ยาว <code>2</code> และ <code>jsonarray.people[1].firstName</code> → <code>&quot;Pawitra&quot;</code></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 51–52 เขียนเป็น <code>var jsonobject = { ... };</code> ซึ่งใน JavaScript คือ <strong>object</strong> (รันจริง <code>typeof jsonobject</code> → <code>&quot;object&quot;</code>) ไม่ใช่ string — ส่วน <code>{ ... }</code> คือ &quot;รูปแบบ JSON&quot; แต่ตามสไลด์ 48 ที่ว่า &quot;JSON is a String&quot; ถ้าจะได้ JSON ที่เป็น string จริงต้องผ่าน <code>JSON.stringify()</code> (หัวข้อ 6.5)</p>
+</blockquote>
+<p><strong>JSON Editor</strong> (สไลด์ 53): เครื่องมือออนไลน์ http://jsoneditoronline.org/</p>
+<h3 id="65-ใช้-json-เก็บ-object-ลง-localstorage-ยังไง-สไลด์-54">6.5 ใช้ JSON เก็บ object ลง LocalStorage ยังไง? <span class="slide-ref">สไลด์ 54</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>JSON เป็น string และเก็บโครงสร้าง object ได้ครบ → stringify ก่อนเก็บ, parse ตอนดึงกลับ</strong></p>
+<p>JSON ช่วยได้เพราะ: <strong>JSON is String</strong> และ <strong>JSON can keep all structures of an object</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ทิศทาง</th>
+<th>ฟังก์ชัน JavaScript</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Object → JSON</td>
+<td><code>JSON.stringify(object)</code></td>
+</tr>
+<tr>
+<td>JSON → Object</td>
+<td><code>JSON.parse(JSON)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ลองแปลง object ของสไลด์ 50 ไปกลับ (รันด้วย node):</p>
+<pre><code class="language-js">const s = JSON.stringify(wudhichart);
+typeof s;   // &quot;string&quot;
+s;          // '{&quot;firstName&quot;:&quot;Wudhichart&quot;,&quot;lastName&quot;:&quot;sawangphol&quot;,&quot;age&quot;:30,&quot;university&quot;:&quot;Mahidol&quot;,&quot;feesPaid&quot;:true}'
+
+const back = JSON.parse(s);
+typeof back;          // &quot;object&quot;
+back.age;             // 30   (ยังเป็น number)
+back.feesPaid;        // true (ยังเป็น boolean)
+</code></pre>
+<p>ทีละขั้น:</p>
+<ol>
+<li><code>JSON.stringify</code> → ได้ <strong>string</strong> ที่ key ทุกตัวมี <code>&quot;…&quot;</code> → เอาไปเก็บใน LocalStorage ได้ (เพราะรับแค่ string)</li>
+<li><code>JSON.parse</code> → ได้ <strong>object</strong> กลับมา ชนิดข้อมูลข้างใน (number, boolean) <strong>ไม่เพี้ยน</strong> = &quot;keep all structures of an object&quot;</li>
+</ol>
+<hr />
+<h2 id="7-web-service-คืออะไร-ต่างจาก-api-ยังไง-สไลด์-5558">7. Web Service คืออะไร ต่างจาก API ยังไง? <span class="slide-ref">สไลด์ 55–58</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Web Service = ระบบซอฟต์แวร์ที่ให้เครื่องคุยกับเครื่องข้ามเครือข่าย (นิยาม W3C) ส่ง request/response ในรูปแบบที่โปรแกรม decode ง่าย (XML หรือ JSON) — Web Service ทุกตัวเป็น API แต่ API ไม่ใช่ Web Service ทุกตัว เพราะ WS ต้องใช้ network เสมอ</strong></p>
+<h3 id="71-นิยามและลักษณะของ-web-service-สไลด์-56">7.1 นิยามและลักษณะของ Web Service <span class="slide-ref">สไลด์ 56</span></h3>
+<ul>
+<li>นิยาม W3C: <em>&quot;A Web service is a software system/application designed to support <strong>interoperable machine-to-machine interaction over a network</strong>&quot;</em></li>
+<li><strong>Hosting services on a remote machine</strong> — บริการอยู่บนเครื่องอื่น</li>
+<li><strong>A standardized way of integrating web-based applications</strong> — วิธีมาตรฐานในการเชื่อมเว็บแอปเข้าด้วยกัน</li>
+<li>request และ response ถูก <strong>encode ในรูปแบบที่โปรแกรม decode ได้ง่าย</strong>
+<ul>
+<li>encoding ที่นิยมที่สุด: <strong>XML (SOAP หรือ POX)</strong> และ <strong>JSON</strong></li>
+</ul>
+</li>
+<li>มี 2 แบบหลัก: <strong>SOAP</strong> และ <strong>RESTful web services (RESTful Web APIs)</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนบริการ delivery ที่มีเมนูมาตรฐาน — แอปไหนก็สั่งได้ ขอแค่สั่งตามรูปแบบที่กำหนด (request) แล้วรับของกลับมาในรูปแบบที่ตกลงกัน (response)</p>
+</blockquote>
+<h3 id="72-web-service-สร้างบนมาตรฐานอะไร-สไลด์-57">7.2 Web Service สร้างบนมาตรฐานอะไร? <span class="slide-ref">สไลด์ 57</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>SOAP, WSDL, HTTP และ REST</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>มาตรฐาน</th>
+<th>หมายเหตุจากสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SOAP</strong> – Simple Object Access Protocol</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>WSDL</strong> – Web Services Description Language</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong> – Hypertext Transfer Protocol</td>
+<td>ใช้เป็น <strong>transport protocol</strong> — <strong>SOAP/HTTP</strong> ใช้ขนส่ง message ข้าม network applications</td>
+</tr>
+<tr>
+<td><strong>REST</strong> – Representational state transfer</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="73-web-service-vs-api-สไลด์-58">7.3 Web Service vs API <span class="slide-ref">สไลด์ 58</span></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Web Service</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>คืออะไร</td>
+<td>ใช้ <strong>ปฏิสัมพันธ์ระหว่างเครื่องผ่าน network</strong></td>
+<td><strong>interface ระหว่าง 2 แอปพลิเคชัน</strong></td>
+</tr>
+<tr>
+<td>ต้องใช้ network ไหม</td>
+<td><strong>ต้องใช้เสมอ</strong></td>
+<td><strong>ไม่จำเป็น</strong></td>
+</tr>
+<tr>
+<td>ความสัมพันธ์</td>
+<td><strong>All Web services are APIs</strong></td>
+<td><strong>…but all APIs are not Web services</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>HTTP</strong> เป็นโปรโตคอลที่นิยมที่สุดในการสื่อสารของ WS</li>
+</ul>
+<hr />
+<h2 id="8-rest-คืออะไร-มีหลักการอะไรบ้าง-สไลด์-5976">8. REST คืออะไร มีหลักการอะไรบ้าง? <span class="slide-ref">สไลด์ 59–76</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>REST เป็น &quot;สถาปัตยกรรม&quot; ไม่ใช่เทคโนโลยี/มาตรฐาน/โปรโตคอล — ใช้มาตรฐานที่มีอยู่ (HTTP, URL, XML/HTML/JSON, MIME types) และมี 6 constraints ที่ทำให้เป็นสไตล์ REST</strong></p>
+<h3 id="81-rest-คืออะไร-ใช้มาตรฐานอะไร-สไลด์-60">8.1 REST คืออะไร ใช้มาตรฐานอะไร? <span class="slide-ref">สไลด์ 60</span></h3>
+<ul>
+<li>REST (<strong>RE</strong>presentational <strong>S</strong>tate <strong>T</strong>ransfer) <strong>is an architecture</strong>
+<ul>
+<li><strong>NOT</strong> a technology, <strong>NOT</strong> standards specification, <strong>NOT</strong> a protocol</li>
+</ul>
+</li>
+<li>REST ใช้มาตรฐาน: <strong>HTTP</strong>, <strong>URL</strong>, <strong>XML/HTML/JSON/etc</strong>, <strong>MIME Types / Media types</strong> เช่น <code>text/xml</code>, <code>image/gif</code>, <code>application/json</code>, <code>audio/mpeg</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อสอบชอบถาม: REST <strong>ไม่ใช่โปรโตคอล</strong> (ต่างจาก SOAP ที่ชื่อมีคำว่า Protocol) — REST เป็น architectural style</p>
+</blockquote>
+<h3 id="82-rest-constraints-มีอะไรบ้าง-สไลด์-6162">8.2 REST constraints มีอะไรบ้าง? <span class="slide-ref">สไลด์ 61–62</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>6 ข้อ — Client/Server, Stateless, Cacheable, Uniform Interface, Layered Systems, Code-On-Demand (ข้อสุดท้ายเป็น optional)</strong></p>
+<ul>
+<li>REST constraints = <strong>design rules</strong> ที่ใช้กำหนดลักษณะเฉพาะของ REST architectural style</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L12-09-rest.png" alt="REST constraints และหลักของ uniform interface" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ 6 ข้อ: <strong>C-S-C-U-L-C</strong> → <strong>C</strong>lient/Server · <strong>S</strong>tateless · <strong>C</strong>acheable · <strong>U</strong>niform interface · <strong>L</strong>ayered system · <strong>C</strong>ode on demand</p>
+</blockquote>
+<h3 id="83-clientserver-สไลด์-63">8.3 Client/Server <span class="slide-ref">สไลด์ 63</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>client กับ server ต้องพัฒนาแยกกันได้โดยไม่พึ่งกัน — แยกเรื่อง UI ออกจากเรื่องเก็บข้อมูล</strong></p>
+<ul>
+<li>client application และ server application <strong>MUST be able to evolve separately without any dependency</strong></li>
+<li>แยก <strong>user interface concerns</strong> (ของ client) ออกจาก <strong>data storage concerns</strong> (ของ server)</li>
+<li>ผลดี:
+<ul>
+<li>ให้แต่ละส่วน <strong>evolve independently</strong></li>
+<li>เพิ่ม <strong>portability</strong> ของ UI ข้ามหลาย platform</li>
+<li>เพิ่ม <strong>scalability</strong> เพราะ server components ง่ายขึ้น</li>
+</ul>
+</li>
+</ul>
+<h3 id="84-stateless-สไลด์-64">8.4 Stateless <span class="slide-ref">สไลด์ 64</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>server ไม่จำอะไรจาก request ก่อนหน้า — ทุก request ต้องมีข้อมูลครบในตัว (no session, no history)</strong></p>
+<ul>
+<li>server <strong>ไม่เก็บอะไรเกี่ยวกับ HTTP request ล่าสุด</strong> ของ client — ถือว่า <strong>ทุก request เป็นของใหม่</strong>: <strong>No session, no history</strong></li>
+<li>แต่ละ request <strong>ต้องมีข้อมูลทั้งหมดที่จำเป็น</strong> ให้ server เข้าใจ</li>
+<li><strong>ใช้ context ที่เก็บไว้บน server ไม่ได้</strong></li>
+<li>ผลดี: เพิ่ม <strong>scalability และ reliability</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนส่งจดหมายถึงหน่วยงานที่ไม่มีแฟ้มประวัติเรา — ทุกฉบับต้องแนบชื่อ เลขบัตร และเรื่องที่ขอให้ครบในฉบับเดียว เพราะเขาไม่จำฉบับก่อน</p>
+</blockquote>
+<h3 id="85-cacheable-สไลด์-65">8.5 Cacheable <span class="slide-ref">สไลด์ 65</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>resource ที่ cache ได้ต้องประกาศตัวว่า cacheable — ช่วยให้ client เร็วขึ้นและ server รับโหลดน้อยลง แต่ถ้าข้อมูลใน cache เก่า ความน่าเชื่อถืออาจลดลง</strong></p>
+<ul>
+<li>ใช้ caching กับ resource เมื่อเหมาะสม และ resource <strong>MUST declare themselves cacheable</strong></li>
+<li>ผลดี: <strong>performance ดีขึ้นฝั่ง client</strong> และ <strong>scalability ดีขึ้นฝั่ง server</strong> เพราะโหลดลดลง</li>
+<li>ถ้า response cacheable → client cache <strong>มีสิทธิ์นำ response นั้นมาใช้ซ้ำ</strong> กับ request ที่เท่ากันในภายหลัง</li>
+<li>ข้อเสีย: <strong>reliability อาจลดลง</strong> ถ้า <strong>stale data</strong> (ข้อมูลเก่า) ใน cache ต่างจากข้อมูลที่จะได้ถ้าส่ง request ไป server ตรง ๆ มาก</li>
+</ul>
+<h3 id="86-uniform-interface-สไลด์-6667">8.6 Uniform interface <span class="slide-ref">สไลด์ 66–67</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุก resource เข้าถึงผ่าน interface กลางแบบเดียวกัน (HTTP GET/POST/PUT/DELETE) และมี URI เดียวต่อ resource — ระบบโดยรวมเรียบง่ายขึ้น แต่ประสิทธิภาพลดลงเพราะส่งข้อมูลในรูปแบบมาตรฐาน ไม่ใช่แบบเฉพาะของแอป</strong></p>
+<ul>
+<li>ต้องกำหนด interface ของ API สำหรับ resource ที่เปิดให้ผู้ใช้ API และ <strong>ทำตามอย่างเคร่งครัด</strong></li>
+<li>resource หนึ่งควรมี <strong>only one logical URI</strong> และมีวิธีดึงข้อมูลที่เกี่ยวข้องเพิ่มเติม</li>
+<li>ทุก resource เข้าถึงด้วย <strong>generic interface</strong> (เช่น HTTP GET, POST, PUT, DELETE)</li>
+<li>ผลดี: <strong>สถาปัตยกรรมโดยรวมเรียบง่ายขึ้น</strong></li>
+<li>ข้อเสีย: <em>&quot;degrades efficiency, since information is transferred in a standardized form rather than one which is specific to an application's needs&quot;</em></li>
+</ul>
+<p><strong>Guiding principles ของ uniform interface (4 ข้อ)</strong> (สไลด์ 67):</p>
+<ol>
+<li><strong>Identifying the resource</strong></li>
+<li><strong>Resource representation</strong></li>
+<li><strong>Self-descriptive Messages</strong></li>
+<li><strong>Hypermedia as the Engine of Application State (HATEOAS)</strong></li>
+</ol>
+<h3 id="87-identifying-the-resource-สไลด์-6870">8.7 Identifying the resource <span class="slide-ref">สไลด์ 68–70</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุก resource ต้องมี URI เฉพาะ — resource คืออะไรก็ได้ที่ตั้งชื่อได้ ใช้ &quot;คำนาม&quot; ไม่ใช่ &quot;คำกริยา&quot; และใช้ URI ที่อ่านง่าย ('Nice' URIs)</strong></p>
+<ul>
+<li>แต่ละ resource ต้องมี <strong>specific and cohesive URI</strong></li>
+<li>แนวคิดของ REST:
+<ul>
+<li><strong>A resource</strong>
+<ul>
+<li><strong>อะไรก็ได้ที่ตั้งชื่อได้</strong> เป็น resource ได้ เช่น document หรือ image, temporal service, collection ของ resource อื่น, สิ่งของที่ไม่ใช่เสมือน (non-virtual object) เช่น <strong>คน</strong></li>
+<li>ใช้ <strong>Nouns instead of verbs</strong></li>
+</ul>
+</li>
+<li><strong>A resource identifier</strong>
+<ul>
+<li>ทุก resource เข้าถึงได้ด้วย <strong>URI/URL</strong></li>
+<li>URI ระบุ resource <strong>ตัวใดตัวหนึ่งโดยเฉพาะ</strong></li>
+<li>ใช้ <strong>'Nice' URIs</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>ตัวอย่าง</strong> (สไลด์ 69–70):</p>
+<pre><code>HTTP/1.1 GET
+https://www.googleapis.com/customsearch/v1?parameters
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วนของ URL</th>
+<th>สไลด์ชี้ว่าเป็น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>googleapis.com</code></td>
+<td><strong>Company/Owner</strong></td>
+</tr>
+<tr>
+<td><code>customsearch</code></td>
+<td><strong>API Name</strong></td>
+</tr>
+<tr>
+<td><code>v1</code></td>
+<td><strong>Version</strong></td>
+</tr>
+<tr>
+<td><code>?parameters</code></td>
+<td>parameter ที่ส่งไป (ใช้จริงในหัวข้อ 9.3)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="88-rest-methods-ใช้-method-ไหนทำอะไร-สไลด์-71">8.8 REST methods — ใช้ method ไหนทำอะไร? <span class="slide-ref">สไลด์ 71</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>GET = อ่าน, DELETE = ลบ, POST = สร้าง (บางทีแก้), PUT = แก้ (บางทีสร้าง), PATCH = แก้บางส่วน — PUT เป็น idempotent แต่ POST ไม่ใช่; ใช้ PUT เมื่อ client เป็นคนกำหนด URI ของ resource ใหม่ ใช้ POST เมื่อ server เป็นคนกำหนด</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GET</strong></td>
+<td>Retrieve a copy of a Resource (ดึงสำเนา resource)</td>
+</tr>
+<tr>
+<td><strong>DELETE</strong></td>
+<td>Remove a Resource (ลบ)</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td><strong>Create</strong> or sometimes update</td>
+</tr>
+<tr>
+<td><strong>PUT</strong></td>
+<td><strong>Update</strong> a Resource or sometimes create</td>
+</tr>
+<tr>
+<td><strong>PATCH</strong></td>
+<td>Update <strong>only part</strong> of a resource</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>PUT vs POST:</strong></p>
+<ul>
+<li><strong>POST is not idempotent but PUT is</strong></li>
+<li>client ใช้ <strong>PUT</strong> เมื่อ <strong>client เป็นคนกำหนด</strong> ว่า resource ใหม่จะมี URI อะไร</li>
+<li>client ใช้ <strong>POST</strong> เมื่อ <strong>server เป็นคนกำหนด</strong> URI ของ resource ใหม่</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่ได้ให้นิยามคำว่า <strong>idempotent</strong> — จำประโยค &quot;POST is not idempotent but PUT is&quot; ไว้ตามสไลด์ ถ้าต้องอธิบายความหมายให้ถามอาจารย์/ดูเอกสารประกอบ</p>
+<p class="c-warn">⚠️ POST กับ PUT ทำได้ทั้งสร้างและแก้ — ต่างกันที่ &quot;หน้าที่หลัก&quot; (POST = create, PUT = update) และ &quot;ใครกำหนด URI&quot;</p>
+</blockquote>
+<h3 id="89-resource-representation-สไลด์-72">8.9 Resource representation <span class="slide-ref">สไลด์ 72</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>representation = เอกสารที่จับ &quot;สถานะปัจจุบัน&quot; ของ resource — resource เดียวมีได้หลาย representation (HTML, XML, JSON, TXT…) client เลือกได้ผ่าน Accept header</strong></p>
+<ul>
+<li>representation ของ resource = <strong>เอกสารที่จับสถานะปัจจุบันของ resource</strong></li>
+<li>resource หนึ่ง <strong>มีได้หลาย representations</strong></li>
+<li>client <strong>ระบุได้ว่ารับ representation แบบไหน</strong> (เช่นใน <strong>HTTP Accept header</strong> — ดูหัวข้อ 3.3)</li>
+<li>representation <strong>มี links</strong> สำหรับนำทางและเข้าถึง resource อื่นต่อ</li>
+<li>อยู่ในรูป <strong>HTML, XML, JSON, TXT</strong> และอื่น ๆ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 ช่วยจำ: ชื่อ <strong>RE</strong>presentational <strong>S</strong>tate <strong>T</strong>ransfer เข้ากับข้อนี้ — representation คือ &quot;เอกสารที่จับ state ปัจจุบัน&quot; ของ resource</p>
+</blockquote>
+<h3 id="810-self-descriptive-messages-สไลด์-73">8.10 Self-descriptive Messages <span class="slide-ref">สไลด์ 73</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุก message ต้องมีข้อมูลพอบอกวิธีประมวลผลตัวเอง — คือมี metadata เช่น HTTP response code, Host, Content-Type</strong></p>
+<ul>
+<li>แต่ละ message มี <strong>ข้อมูลเพียงพอที่จะบอกว่าต้องประมวลผล message นั้นยังไง</strong></li>
+<li>ต้องมีการส่ง <strong>meta information (metadata)</strong> ใน request และ response</li>
+<li>ตัวอย่าง metadata: <strong>HTTP response code</strong>, <strong>Host</strong>, <strong>Content-Type</strong> ฯลฯ</li>
+</ul>
+<h3 id="811-hateoas-สไลด์-74">8.11 HATEOAS <span class="slide-ref">สไลด์ 74</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ hypertext (links ใน response) เป็นทางนำทางผ่าน API — client ไม่ต้องรู้ URL ทั้งหมดล่วงหน้า แค่ตาม links ที่ server ให้มา</strong></p>
+<ul>
+<li><em>&quot;hypertext should be used to find your way through the API&quot;</em></li>
+<li>ตัวอย่าง: JSON response จาก <code>HTTP GET http://api.domain.com/management/departments</code></li>
+</ul>
+<pre><code class="language-json">{
+  &quot;departmentId&quot;: 10,
+  &quot;departmentName&quot;: &quot;Administration&quot;,
+  &quot;locationId&quot;: 1700,
+  &quot;managerId&quot;: 200,
+  &quot;links&quot;: [
+    {
+      &quot;href&quot;: &quot;10/employees&quot;,
+      &quot;rel&quot;: &quot;employees&quot;,
+      &quot;type&quot; : &quot;GET&quot;
+    }
+  ]
+}
+</code></pre>
+<p>อ่านทีละขั้น:</p>
+<ol>
+<li>4 บรรทัดแรก = <strong>ข้อมูลของ department</strong> (id 10 ชื่อ Administration)</li>
+<li><code>&quot;links&quot;</code> = รายการ <strong>ลิงก์ไปยัง resource ที่เกี่ยวข้อง</strong> (ส่วนที่สไลด์ไฮไลต์)</li>
+<li>ลิงก์นี้บอกว่า: ถ้าอยากได้ <strong>employees</strong> (<code>rel</code>) ของแผนกนี้ ให้ส่ง <strong>GET</strong> (<code>type</code>) ไปที่ <strong><code>10/employees</code></strong> (<code>href</code>)</li>
+<li>client จึง &quot;เดินทาง&quot; ต่อใน API ได้ด้วย links ที่ได้รับ — นี่คือ HATEOAS
+(รันตรวจด้วย node: <code>JSON.parse</code> ผ่าน, <code>links[0].type</code> → <code>&quot;GET&quot;</code>, <code>links[0].href</code> → <code>&quot;10/employees&quot;</code>)</li>
+</ol>
+<h3 id="812-layered-system-สไลด์-75">8.12 Layered system <span class="slide-ref">สไลด์ 75</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>deploy API แบบหลายชั้นได้ โดย client แยกไม่ออกว่าคุยกับ end server ตรง ๆ หรือผ่านตัวกลาง — ช่วยเรื่อง scalability ด้วย load balancing</strong></p>
+<ul>
+<li>REST ให้ใช้ <strong>layered system architecture</strong> ในการ deploy API</li>
+<li>สถาปัตยกรรม <strong>transparent</strong> — client <strong>ปกติบอกไม่ได้</strong> ว่าเชื่อมกับ <strong>end server โดยตรง</strong> หรือ <strong>ตัวกลาง (intermediary)</strong> ระหว่างทาง</li>
+<li>ใช้เพิ่ม <strong>system scalability</strong> โดยทำ <strong>load balancing</strong> ของ services ข้ามหลาย networks และ processors</li>
+</ul>
+<h3 id="813-code-on-demand-สไลด์-76">8.13 Code on demand <span class="slide-ref">สไลด์ 76</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>constraint เดียวที่เป็น optional — server ส่งโค้ด (applet/script) ให้ client ดาวน์โหลดไปรัน เพื่อขยายความสามารถ client โดยไม่ต้องผูกกับ logic ฝั่ง server</strong></p>
+<ul>
+<li><strong>optional</strong> constraint — ตั้งใจให้ logic ใน client (เช่น web browser) <strong>อัปเดตได้อิสระจาก logic ฝั่ง server</strong></li>
+<li>ขยายความสามารถของ client ได้ด้วยการ <strong>ดาวน์โหลดและรันโค้ด</strong> ในรูป <strong>applets หรือ scripts</strong></li>
+</ul>
+<p>ตัวอย่าง: <code>GET /api/resource</code> ได้ response</p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;Resource Name&quot;
+  },
+  &quot;code&quot;: &quot;function printSomething() { console.log('Executing client-side code'); }&quot;
+}
+</code></pre>
+<p>ทีละขั้น:</p>
+<ol>
+<li><code>&quot;data&quot;</code> = ข้อมูล resource ปกติ</li>
+<li><code>&quot;code&quot;</code> = <strong>โค้ดที่ server ส่งมาเป็น string</strong> (รันจริง <code>typeof r.code</code> → <code>&quot;string&quot;</code>)</li>
+<li>client นำ string นี้ไปรัน → ฟังก์ชัน <code>printSomething()</code> จะพิมพ์ข้อความ</li>
+<li>รันตรวจด้วย node (สร้างฟังก์ชันจาก string แล้วเรียก) → ผลลัพธ์: <code>Executing client-side code</code></li>
+</ol>
+<blockquote class="callout">
+<p>สไลด์ไม่ได้แสดงว่า client รันโค้ดนี้ด้วยคำสั่งอะไร — node ข้างบนเป็นแค่การตรวจว่าโค้ดใน string ทำงานได้และพิมพ์อะไร</p>
+</blockquote>
+<hr />
+<h2 id="9-เรียก-web-service-ด้วย-javascript-ยังไง-สไลด์-7789">9. เรียก Web Service ด้วย JavaScript ยังไง? <span class="slide-ref">สไลด์ 77–89</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>มี 2 วิธีพื้นฐาน — XMLHttpRequest (XHR) แบบเก่าที่ใช้ event/readyState และ Fetch แบบใหม่ที่คืน Promise และอ่าน response 2 ขั้น</strong></p>
+<ul>
+<li>Basic approaches สำหรับเรียก WS ด้วย JavaScript (สไลด์ 78): <strong>XMLHttpRequest (XHR)</strong> และ <strong>Fetch</strong></li>
+</ul>
+<h3 id="91-xmlhttprequest-ใช้ยังไง-สไลด์-7985">9.1 XMLHttpRequest ใช้ยังไง? <span class="slide-ref">สไลด์ 79–85</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้าง object → open() ตั้งค่า → send() ส่ง → รอ event (load / error / progress) แล้วอ่าน status, statusText, response — ปัจจุบันใช้เพื่อรองรับสคริปต์เดิมและ browser เก่า</strong></p>
+<p><strong>XHR คืออะไร ทำไมยังใช้</strong> (สไลด์ 79):</p>
+<ul>
+<li><strong>built-in browser object</strong> ที่ใช้ส่ง HTTP request ใน JavaScript</li>
+<li>ในเว็บสมัยใหม่ยังใช้ด้วย 2 เหตุผล: <strong>รองรับสคริปต์เดิมที่ใช้ XHR</strong> และ <strong>รองรับ browser เก่า</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L12-11-xhr-steps.png" alt="ขั้นตอนใช้ XMLHttpRequest" /></p>
+<p><strong>ขั้น 1 — สร้าง request</strong> (สไลด์ 79)</p>
+<pre><code class="language-js">let request = new XMLHttpRequest()
+</code></pre>
+<p><strong>ขั้น 2 — ตั้งค่า request</strong> (สไลด์ 80)</p>
+<pre><code class="language-js">request.open(method, URL, [async, user, password])
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>พารามิเตอร์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>HTTP-method เช่น <code>&quot;GET&quot;</code> หรือ <code>&quot;POST&quot;</code></td>
+</tr>
+<tr>
+<td><code>URL</code></td>
+<td>URL ที่จะขอ เป็น string หรือ URL object ก็ได้</td>
+</tr>
+<tr>
+<td><code>async</code></td>
+<td>ถ้าตั้งเป็น <strong><code>false</code> อย่างชัดเจน</strong> → request จะเป็น <strong>synchronous</strong> (สไลด์บอกว่าจะอธิบายภายหลัง)</td>
+</tr>
+<tr>
+<td><code>user</code>, <code>password</code></td>
+<td>login/password สำหรับ <strong>basic HTTP auth</strong> (ถ้าต้องใช้)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p><code>[ ... ]</code> = พารามิเตอร์ที่ไม่บังคับ</p>
+</blockquote>
+<p><strong>ขั้น 3 — เปิด connection และส่ง request</strong> (สไลด์ 81)</p>
+<pre><code class="language-js">request.send([body])
+</code></pre>
+<ul>
+<li>มีพารามิเตอร์ <strong>optional ตัวเดียว</strong> คือ <code>body</code></li>
+<li>method อย่าง <strong>GET ไม่มี body</strong> แต่บาง method เช่น <strong>POST ใช้ body</strong> ส่งข้อมูลไป server (ตรงกับหัวข้อ 3.3)</li>
+</ul>
+<p><strong>ขั้น 4 — รับผลด้วย event</strong> (สไลด์ 82)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>เกิดเมื่อ</th>
+<th>Event function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>load</strong></td>
+<td>request <strong>เสร็จสมบูรณ์</strong> (<strong>แม้ HTTP status จะเป็น 400 หรือ 500</strong>) และ response ดาวน์โหลดครบ</td>
+<td><code>onload</code></td>
+</tr>
+<tr>
+<td><strong>error</strong></td>
+<td><strong>ส่ง request ไม่ได้</strong></td>
+<td><code>onerror</code></td>
+</tr>
+<tr>
+<td><strong>progress</strong></td>
+<td>กำลังดาวน์โหลด response — รายงานว่าโหลดไปเท่าไร</td>
+<td><code>onprogress</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ จุดหลอก: <strong>load ≠ สำเร็จ</strong> — ได้ 404/500 ก็ยังเป็น load (เพราะ request ส่งถึงและได้คำตอบกลับมา) ส่วน <strong>error</strong> คือส่ง request ไม่ได้เลย</p>
+</blockquote>
+<p><strong>Response properties</strong> (สไลด์ 83)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>คืออะไร</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td>HTTP status code (<strong>number</strong>)</td>
+<td>200, 404, 403</td>
+</tr>
+<tr>
+<td><code>statusText</code></td>
+<td>HTTP status message (<strong>string</strong>)</td>
+<td>OK (200), Not Found (404), Forbidden (403)</td>
+</tr>
+<tr>
+<td><code>response</code></td>
+<td><strong>server response body</strong></td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตั้งชนิดของ response</strong> (สไลด์ 84)</p>
+<pre><code class="language-js">request.responseType = &quot;json&quot;
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>responseType</th>
+<th>ได้ข้อมูลเป็น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&quot;&quot;</code> (default)</td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>&quot;text&quot;</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>&quot;arraybuffer&quot;</code></td>
+<td>ArrayBuffer</td>
+</tr>
+<tr>
+<td><code>&quot;blob&quot;</code></td>
+<td>Blob (ข้อมูล binary)</td>
+</tr>
+<tr>
+<td><code>&quot;document&quot;</code></td>
+<td>XML หรือ HTML document</td>
+</tr>
+<tr>
+<td><code>&quot;json&quot;</code></td>
+<td>JSON (<strong>parse ให้อัตโนมัติ</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 84 พิมพ์เป็น <code>request.responseType = ”json”</code> (เครื่องหมายคำพูดแบบโค้ง) — ลองรันใน node แล้วได้ <code>SyntaxError: Invalid or unexpected token</code> ตอนเขียนจริงต้องใช้ <code>&quot;json&quot;</code> (คำพูดตรง) ตามที่แก้ไว้ด้านบน</p>
+</blockquote>
+<p><strong>Ready states</strong> (สไลด์ 85) — XHR มี property สถานะ ใช้ผ่าน <code>request.readyState</code>:</p>
+<pre><code class="language-js">UNSENT = 0;            // initial state
+OPENED = 1;            // open called
+HEADERS_RECEIVED = 2;  // response headers received
+LOADING = 3;           // response is loading (a data packet is received)
+DONE = 4;              // request complete
+</code></pre>
+<p><img loading="lazy" src="diagrams/L12-10-xhr-states.png" alt="readyState ของ XMLHttpRequest" /></p>
+<ul>
+<li>การเปลี่ยน state จัดการได้ด้วย property <code>request.onreadystatechange</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำลำดับ 0–4: <strong>U-O-H-L-D</strong> → ยังไม่ส่ง → เปิดแล้ว → ได้ header → กำลังโหลด body → เสร็จ</p>
+</blockquote>
+<blockquote class="callout">
+<p>ไม่ได้รัน XHR ด้วย node เพราะ <code>XMLHttpRequest</code> เป็น object ของ browser (สไลด์ 79 &quot;built-in browser object&quot;) — ผลตามที่อธิบายในตารางด้านบนมาจากสไลด์</p>
+</blockquote>
+<h3 id="92-fetch-ใช้ยังไง-สไลด์-8688">9.2 Fetch ใช้ยังไง? <span class="slide-ref">สไลด์ 86–88</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>fetch(url, [options])</code> คืน Promise — อ่านผล 2 ขั้น: (1) resolve เป็น Response ทันทีที่ server ตอบ headers → เช็ก status/ok, (2) เรียก method อ่าน body เช่น <code>.json()</code> ซึ่งคืน Promise อีกชั้น — Promise จะ reject เฉพาะเมื่อส่ง HTTP request ไม่ได้</strong></p>
+<ul>
+<li>Fetch = <strong>ฟังก์ชันสมัยใหม่</strong> สำหรับส่ง network requests</li>
+<li><strong>Fetch return as promises</strong></li>
+</ul>
+<pre><code class="language-js">let promise = fetch(url, [options])
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>พารามิเตอร์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td>URL ที่จะขอ</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td>optional เช่น <strong>method, header</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img loading="lazy" src="diagrams/L12-12-fetch.png" alt="ขั้นตอนรับผลจาก fetch" /></p>
+<p><strong>ขั้นที่ 1</strong> (สไลด์ 87): promise จาก fetch <strong>resolve เป็น object ของ class <code>Response</code></strong> ทันทีที่ server ตอบกลับด้วย <strong>headers</strong></p>
+<ul>
+<li>ตรงนี้ <strong>เช็ก HTTP status ได้</strong></li>
+<li>promise <strong>reject ถ้า fetch ส่ง HTTP-request ไม่ได้</strong></li>
+<li>property ที่ใช้เช็ก:
+<ul>
+<li><code>status</code> – HTTP status code</li>
+<li><code>ok</code> – Boolean, <strong><code>true</code> ถ้า status อยู่ในช่วง 200–299</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>ขั้นที่ 2</strong> (สไลด์ 88): อ่าน <strong>response body</strong> — class Response มี method แบบ promise หลายตัว:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>ได้ body เป็น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>response.text()</code></td>
+<td>text</td>
+</tr>
+<tr>
+<td><code>response.json()</code></td>
+<td><strong>parse เป็น JSON</strong></td>
+</tr>
+<tr>
+<td><code>response.formData()</code></td>
+<td>FormData</td>
+</tr>
+<tr>
+<td><code>response.blob()</code></td>
+<td>Blob (binary data with type)</td>
+</tr>
+<tr>
+<td><code>response.arrayBuffer()</code></td>
+<td>ArrayBuffer</td>
+</tr>
+<tr>
+<td><code>response.body</code></td>
+<td><strong>ReadableStream</strong> — อ่าน body ทีละ chunk ได้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <code>response.body</code> เป็น <strong>property</strong> (ReadableStream) ไม่ใช่ method เหมือนตัวอื่นในตาราง</p>
+</blockquote>
+<h3 id="93-ตัวอย่าง-เรียก-google-custom-search-ด้วย-fetch-สไลด์-89">9.3 ตัวอย่าง: เรียก Google Custom Search ด้วย fetch <span class="slide-ref">สไลด์ 89</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เอาคำค้นจาก textbox มาต่อเป็น URL ของ API → fetch → <code>.then(res =&gt; res.json())</code> ได้ข้อมูล → แสดงใน <code>#output</code> ด้วย JSON.stringify → ถ้าพลาดไป <code>.catch</code></strong></p>
+<pre><code class="language-js">function getConferenceResponses() {
+  let query = document.querySelector(&quot;#q&quot;).value; // Get query from a textbox
+  console.log(query);
+  let rooturl =
+    &quot;https://www.googleapis.com/customsearch/v1?key=&quot; +
+    APi_key +
+    &quot;&amp;cx=&quot; +
+    cx +
+    &quot;&amp;q=&quot; +
+    query; //Request URL
+
+  fetch(rooturl)
+    .then((res) =&gt; res.json()) // Get JSON from the response
+    .then((data) =&gt; {
+      console.log(data);
+      document.querySelector(&quot;#output&quot;).innerHTML =
+        &quot;&lt;p&gt;&quot; + JSON.stringify(data, null, &quot;\t&quot;) + &quot;&lt;/p&gt;&quot;;
+    })
+    .catch((err) =&gt; console.log(err));
+}
+</code></pre>
+<p>อธิบายทีละขั้น:</p>
+<ol>
+<li><code>document.querySelector(&quot;#q&quot;).value</code> → อ่านคำค้นจาก textbox id <code>q</code> แล้ว <code>console.log</code> ออกมา</li>
+<li>ต่อ string เป็น URL: <code>…/customsearch/v1?key=&lt;APi_key&gt;&amp;cx=&lt;cx&gt;&amp;q=&lt;query&gt;</code> — นี่คือ URL แบบเดียวกับตัวอย่าง &quot;Identifying the resource&quot; (หัวข้อ 8.7) โดย <code>?parameters</code> คือ <code>key</code>, <code>cx</code>, <code>q</code>
+<ul>
+<li><code>APi_key</code> และ <code>cx</code> <strong>ไม่ได้ประกาศในสไลด์</strong> — เป็นค่าที่ต้องมีอยู่แล้ว (key ของ API และรหัส search engine)</li>
+</ul>
+</li>
+<li><code>fetch(rooturl)</code> → ส่ง request ไปที่ URL นั้น (ไม่ได้ใส่ options) ได้ Promise กลับมา</li>
+<li><code>.then((res) =&gt; res.json())</code> → <strong>ขั้นที่ 1→2 ของ fetch</strong>: ได้ Response แล้วสั่งอ่าน body เป็น JSON (คืน Promise อีกชั้น)</li>
+<li><code>.then((data) =&gt; {...})</code> → ได้ข้อมูลเป็น object → <code>console.log(data)</code> และใส่ลงใน element <code>#output</code> โดยแปลงกลับเป็น string ด้วย <code>JSON.stringify(data, null, &quot;\t&quot;)</code> (ย่อหน้าด้วย tab ให้อ่านง่าย) ครอบด้วย <code>&lt;p&gt;…&lt;/p&gt;</code></li>
+<li><code>.catch((err) =&gt; console.log(err))</code> → ถ้า Promise ถูก reject (เช่นส่ง request ไม่ได้) จะพิมพ์ error</li>
+</ol>
+<p><strong>ตรวจด้วย node (จำลอง ไม่ได้ยิง API จริง):</strong> แทน <code>document</code> ด้วย object ปลอมที่ textbox มีค่า <code>&quot;web services&quot;</code>, ตั้ง <code>APi_key = &quot;MYKEY&quot;</code>, <code>cx = &quot;MYCX&quot;</code> และแทน <code>fetch</code> ด้วยฟังก์ชันปลอมที่ตอบ <code>{ kind: &quot;customsearch#search&quot;, items: [] }</code></p>
+<pre><code>web services                                                          ← ขั้น 1 console.log(query)
+URL = https://www.googleapis.com/customsearch/v1?key=MYKEY&amp;cx=MYCX&amp;q=web services   ← ขั้น 2
+{ kind: 'customsearch#search', items: [] }                            ← ขั้น 5 console.log(data)
+innerHTML = &quot;&lt;p&gt;{\n\t\&quot;kind\&quot;: \&quot;customsearch#search\&quot;,\n\t\&quot;items\&quot;: []\n}&lt;/p&gt;&quot;     ← ขั้น 5 (\t = ย่อหน้าด้วย tab)
+</code></pre>
+<p>กรณีจำลองให้ fetch reject (<code>TypeError: Failed to fetch</code>) → ไม่เข้า <code>.then</code> ทั้งสอง แต่ไปที่ <code>.catch</code> แล้วพิมพ์ error ออกมา ตรงกับขั้นที่ 6</p>
+<blockquote class="callout">
+<p>ผลจริงของ Google API (หน้าตา <code>data</code>) สไลด์ไม่ได้แสดง — ผลด้านบนเป็นค่าจำลองเพื่อดูลำดับการทำงานเท่านั้น</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layer</td>
+<td>ชั้นทางตรรกะของระบบ (data / business logic / presentation)</td>
+<td>&quot;แบ่งงาน&quot;</td>
+</tr>
+<tr>
+<td>Tier</td>
+<td>การแยก layer ออกไปอยู่คนละที่ทางกายภาพ</td>
+<td>&quot;แบ่งเครื่อง&quot;</td>
+</tr>
+<tr>
+<td>N-tier / Distributed application</td>
+<td>เพิ่ม application server เป็นหลาย tier เพื่อกระจาย business logic</td>
+<td>3-tier ที่ตรงกลางแตกหลายตัว</td>
+</tr>
+<tr>
+<td>CGI script</td>
+<td>โปรแกรมที่ web server เรียกตาม URL ทำตัวเป็น client ของระบบเดิม</td>
+<td>เว็บยุคแรก</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>โปรโตคอลแลกเปลี่ยนเอกสาร เป็นรากฐานการแลกข้อมูลบนเว็บ</td>
+<td>stateless แต่ไม่ sessionless</td>
+</tr>
+<tr>
+<td>MIME type / Media type</td>
+<td>บอกชนิดของเอกสารที่ส่ง เช่น <code>text/html</code>, <code>application/json</code></td>
+<td>&quot;ป้ายบอกชนิดของ&quot;</td>
+</tr>
+<tr>
+<td>URI / URL</td>
+<td>Uniform Resource Identifier / Locator — ระบุ resource ที่ขอ</td>
+<td>ที่อยู่ของ resource</td>
+</tr>
+<tr>
+<td>Status code</td>
+<td>ตัวเลขผลของ request: 200 OK, 404 Not Found, 500 Internal Server Error</td>
+<td>200 สำเร็จ · 404 หาไม่เจอ · 500 server error</td>
+</tr>
+<tr>
+<td>XML</td>
+<td>markup ที่ตั้ง tag เอง ใช้กำหนดโครงสร้างข้อมูลเพื่อแลกเปลี่ยน/จัดเก็บ</td>
+<td>HTML = หน้าตา, XML = ความหมาย</td>
+</tr>
+<tr>
+<td>XML Schema</td>
+<td>แม่แบบกำหนดโครงสร้างและชนิดข้อมูลของเอกสาร XML</td>
+<td>แบบฟอร์มเปล่า</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>ข้อมูล key/value เล็ก ≤4KB มี expiry ถูกส่งไปกับทุก request</td>
+<td>บัตรคิวที่ยื่นทุกครั้ง</td>
+</tr>
+<tr>
+<td>LocalStorage</td>
+<td>ที่เก็บ key/value (string) ≥5MB/domain อยู่จนกว่าจะลบ ไม่ถูกส่งไป server</td>
+<td>ตู้เก็บของในเครื่อง</td>
+</tr>
+<tr>
+<td>sessionStorage</td>
+<td>เหมือน LocalStorage แต่อยู่แค่ใน tab ปัจจุบัน (refresh ไม่หาย)</td>
+<td>ตู้ประจำ tab</td>
+</tr>
+<tr>
+<td>Serialisation / Stringifying</td>
+<td>แปลง object → string</td>
+<td><code>JSON.stringify</code></td>
+</tr>
+<tr>
+<td>Deserialisation / Parsing</td>
+<td>แปลง string → object</td>
+<td><code>JSON.parse</code></td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>JavaScript Object Notation — string มาตรฐานส่งข้อมูลมีโครงสร้าง key ต้องมี <code>&quot;…&quot;</code></td>
+<td>6 types: Number String Boolean Array Object null</td>
+</tr>
+<tr>
+<td>Web Service</td>
+<td>ระบบให้เครื่องคุยกับเครื่องข้าม network (W3C)</td>
+<td>WS ทุกตัวเป็น API</td>
+</tr>
+<tr>
+<td>SOAP / WSDL</td>
+<td>Simple Object Access Protocol / Web Services Description Language</td>
+<td>มาตรฐานของ WS</td>
+</tr>
+<tr>
+<td>POX</td>
+<td>XML แบบหนึ่งที่สไลด์ยกเป็น encoding ของ WS คู่กับ SOAP</td>
+<td>XML (SOAP or POX)</td>
+</tr>
+<tr>
+<td>REST</td>
+<td>REpresentational State Transfer — <strong>architecture</strong> ไม่ใช่ protocol</td>
+<td>6 constraints</td>
+</tr>
+<tr>
+<td>Stateless</td>
+<td>server ไม่เก็บ context, ทุก request ต้องมีข้อมูลครบ</td>
+<td>no session, no history</td>
+</tr>
+<tr>
+<td>HATEOAS</td>
+<td>Hypermedia as the Engine of Application State — ใช้ links ใน response นำทาง API</td>
+<td>ตาม <code>links</code> ไป</td>
+</tr>
+<tr>
+<td>Idempotent</td>
+<td>คำที่สไลด์ใช้: PUT เป็น idempotent, POST ไม่ใช่ (สไลด์ไม่ได้นิยาม)</td>
+<td>POST ✗ / PUT ✓</td>
+</tr>
+<tr>
+<td>XMLHttpRequest (XHR)</td>
+<td>built-in browser object สำหรับส่ง HTTP request (แบบเก่า)</td>
+<td>open → send → onload</td>
+</tr>
+<tr>
+<td>readyState</td>
+<td>สถานะ XHR 0–4: UNSENT, OPENED, HEADERS_RECEIVED, LOADING, DONE</td>
+<td>U-O-H-L-D</td>
+</tr>
+<tr>
+<td>Fetch</td>
+<td>ฟังก์ชันสมัยใหม่ส่ง request คืน Promise</td>
+<td>2 ขั้น: Response → body</td>
+</tr>
+<tr>
+<td><code>response.ok</code></td>
+<td><code>true</code> เมื่อ status 200–299</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li><strong>3 layers</strong>: Resource Management (database) / Application Logic (Business) / Presentation (UI) — <strong>tier</strong> = แยกทางกายภาพ</li>
+<li><strong>1-tier</strong> = เครื่องเดียว (dumb terminal + mainframe) ผูกแน่น ขยายยาก | <strong>2-tier</strong> = <strong>Client-Server</strong> | <strong>3-tier</strong> = front-end / middleware / back-end | <strong>N-tier</strong> = Distributed application เพิ่ม app server</li>
+<li>HTTP: <strong>simple &amp; human readable, extensible, stateless but not sessionless</strong> | ใช้ RFC 822 mail headers + <strong>MIME types</strong></li>
+<li><strong>Request</strong> = Request Line (Method + Path + Version) + Headers + Body | <strong>Response</strong> = Status Line (Version + Code + Text) + Headers + Body</li>
+<li>Status: <strong>200 OK / 404 Not Found / 500 Internal Server Error</strong> | Response <code>Content-Length</code> = ขนาด body เป็น bytes</li>
+<li>GET ใส่ parameter ใน URL (<code>?name=...&amp;email=...</code>) | POST ใส่ใน body (<code>application/x-www-form-urlencoded</code>)</li>
+<li>HTML = แสดงผล (tag กำหนดไว้แล้ว) | <strong>XML</strong> = ข้อมูล (ตั้ง tag เอง, schema มี data types, ไม่ได้ทำให้ browser, ใช้ marshalling/serializing)</li>
+<li><strong>Cookie ≤4KB, มี expiry, ส่งทุก request, server เข้าถึงได้</strong> | <strong>LocalStorage ≥5MB/domain, อยู่จนลบ, ไม่ส่ง, JS เท่านั้น, key/value ต้อง string</strong> | <strong>sessionStorage = tab ปัจจุบัน, refresh ไม่หาย</strong></li>
+<li>Cookie ใช้ทำ: <strong>Session management, Personalization, Tracking</strong></li>
+<li><strong>serialisation/stringifying</strong> ↔ <strong>deserialisation/parsing</strong> | <code>JSON.stringify(object)</code> / <code>JSON.parse(JSON)</code></li>
+<li>JSON vs object literal: <strong>JSON is a String</strong>, &quot;does not support properties&quot;, <strong>property names in quotes</strong> | 6 basic types</li>
+<li>WS นิยาม W3C: <strong>interoperable machine-to-machine interaction over a network</strong> | encoding: <strong>XML (SOAP/POX), JSON</strong> | สร้างบน <strong>SOAP, WSDL, HTTP, REST</strong></li>
+<li><strong>All WS are APIs, not all APIs are WS</strong> | WS ต้องใช้ network เสมอ</li>
+<li>REST = <strong>architecture</strong> (ไม่ใช่ technology/standard/protocol) ใช้ HTTP, URL, XML/HTML/JSON, MIME types</li>
+<li><strong>6 REST constraints</strong>: Client/Server, Stateless, Cacheable, Uniform Interface, Layered Systems, <strong>Code-On-Demand (optional)</strong></li>
+<li><strong>Uniform interface 4 ข้อ</strong>: Identifying the resource, Resource representation, Self-descriptive messages, <strong>HATEOAS</strong></li>
+<li>Resource: <strong>nouns not verbs</strong>, <strong>one logical URI</strong>, 'Nice' URIs | ตัวอย่าง URL: googleapis.com = Company/Owner, customsearch = API Name, v1 = Version</li>
+<li><strong>GET</strong> read | <strong>DELETE</strong> remove | <strong>POST</strong> create (sometimes update) | <strong>PUT</strong> update (sometimes create) | <strong>PATCH</strong> partial update</li>
+<li><strong>POST not idempotent, PUT is</strong> | PUT = client กำหนด URI | POST = server กำหนด URI</li>
+<li>XHR: <code>new XMLHttpRequest()</code> → <code>open(method, URL, [async, user, password])</code> → <code>send([body])</code> | events <strong>load / error / progress</strong> | <strong>load เกิดแม้ status 400/500</strong></li>
+<li><code>readyState</code> <strong>0 UNSENT, 1 OPENED, 2 HEADERS_RECEIVED, 3 LOADING, 4 DONE</strong> + <code>onreadystatechange</code></li>
+<li><code>responseType</code>: &quot;&quot;, text, arraybuffer, blob, document, <strong>json (parse อัตโนมัติ)</strong></li>
+<li><strong>Fetch</strong>: คืน Promise, <strong>reject เฉพาะเมื่อส่ง request ไม่ได้</strong> | <code>ok</code> = true เมื่อ <strong>200–299</strong> | body: text(), json(), formData(), blob(), arrayBuffer(), body (ReadableStream)</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layer</td>
+<td>Tier</td>
+<td>layer = แบ่งตามหน้าที่ (ตรรกะ) / tier = แยกกันทางกายภาพ</td>
+</tr>
+<tr>
+<td>2-tier</td>
+<td>3-tier</td>
+<td>2-tier = client + database server (app layer อยู่ฝั่งไหนก็ได้) / 3-tier = มี application server กลางแยกออกมา</td>
+</tr>
+<tr>
+<td>3-tier</td>
+<td>N-tier</td>
+<td>N-tier เพิ่มจำนวน application server เป็นหลาย tier เพื่อกระจาย business logic</td>
+</tr>
+<tr>
+<td>Request Line</td>
+<td>Status Line</td>
+<td>request: Method + Path + Version / response: Version + Status code + Status text</td>
+</tr>
+<tr>
+<td><code>Accept</code></td>
+<td><code>Content-Type</code></td>
+<td>Accept = ชนิดที่ client อยากได้กลับ / Content-Type = ชนิดของ body ที่กำลังส่ง</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td>XML</td>
+<td>HTML = แสดงผล tag ตายตัว ให้ browser / XML = โครงสร้างข้อมูล ตั้ง tag เอง ให้โปรแกรม</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>LocalStorage</td>
+<td>4KB vs 5MB · มี expiry vs อยู่จนลบ · ส่งทุก request vs ไม่ส่ง · server+client vs client เท่านั้น</td>
+</tr>
+<tr>
+<td>LocalStorage</td>
+<td>sessionStorage</td>
+<td>LocalStorage แชร์ทั้ง domain / sessionStorage อยู่แค่ tab ปัจจุบัน</td>
+</tr>
+<tr>
+<td>Serialisation</td>
+<td>Deserialisation</td>
+<td>object → string (stringify) / string → object (parse)</td>
+</tr>
+<tr>
+<td>Object literal</td>
+<td>JSON</td>
+<td>object literal เป็น object, key ไม่ต้องมีคำพูด / JSON เป็น string, key ต้องมี <code>&quot;…&quot;</code></td>
+</tr>
+<tr>
+<td>Web Service</td>
+<td>API</td>
+<td>WS ต้องใช้ network และเป็น API เสมอ / API ไม่จำเป็นต้องใช้ network</td>
+</tr>
+<tr>
+<td>SOAP</td>
+<td>REST</td>
+<td>SOAP = Protocol (ชื่อบอก) / REST = architecture ไม่ใช่ protocol</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>PUT</td>
+<td>POST create, ไม่ idempotent, server กำหนด URI / PUT update, idempotent, client กำหนด URI</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>PATCH</td>
+<td>PUT update resource / PATCH update <strong>เฉพาะบางส่วน</strong></td>
+</tr>
+<tr>
+<td>Stateless (REST)</td>
+<td>Cacheable (REST)</td>
+<td>stateless = server ไม่จำ request ก่อน / cacheable = client นำ response เดิมมาใช้ซ้ำได้</td>
+</tr>
+<tr>
+<td>XHR <code>load</code></td>
+<td>XHR <code>error</code></td>
+<td>load = request เสร็จแม้ได้ 400/500 / error = ส่ง request ไม่ได้เลย</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>statusText</code></td>
+<td>status = ตัวเลข (200) / statusText = ข้อความ (OK)</td>
+</tr>
+<tr>
+<td><code>response.ok</code></td>
+<td><code>response.status</code></td>
+<td>ok = boolean (true ถ้า 200–299) / status = เลข status code</td>
+</tr>
+<tr>
+<td>XMLHttpRequest</td>
+<td>Fetch</td>
+<td>XHR = object แบบเก่า ใช้ event/readyState (รองรับสคริปต์เดิม/browser เก่า) / Fetch = ฟังก์ชันใหม่ คืน Promise อ่านผล 2 ขั้น</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l11/index.html"><small>← บทก่อนหน้า</small><span>Lecture 11 – Node.js Part III (Cookies, Session, and Database)</span></a><a class="pg next" href="../l13/index.html"><small>บทถัดไป →</small><span>Lecture 13 – Web Services with Node.js</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-ก่อนมีเว็บ-ระบบสารสนเทศแบ่งเป็นชั้นยังไง-สไลด์-410">ก่อนมีเว็บ ระบบสารสนเทศแบ่งเป็นชั้นยังไง?</a></li><li><a href="#2-เว็บยุคแรกทำงานยังไง-www-basics-cgi-สไลด์-11">เว็บยุคแรกทำงานยังไง? (WWW basics + CGI)</a></li><li><a href="#3-http-คืออะไร-และ-request-response-หน้าตาเป็นยังไง-สไลด์-1231">HTTP คืออะไร และ request / response หน้าตาเป็นยังไง?</a></li><li><a href="#4-html-ต่างจาก-xml-ยังไง-สไลด์-3236">HTML ต่างจาก XML ยังไง?</a></li><li><a href="#5-cookies-localstorage-sessionstorage-ต่างกันยังไง-สไลด์-3744">Cookies, LocalStorage, sessionStorage ต่างกันยังไง?</a></li><li><a href="#6-json-คืออะไร-และใช้เก็บ-object-ลง-localstorage-ยังไง-สไลด์-4554">JSON คืออะไร และใช้เก็บ object ลง LocalStorage ยังไง?</a></li><li><a href="#7-web-service-คืออะไร-ต่างจาก-api-ยังไง-สไลด์-5558">Web Service คืออะไร ต่างจาก API ยังไง?</a></li><li><a href="#8-rest-คืออะไร-มีหลักการอะไรบ้าง-สไลด์-5976">REST คืออะไร มีหลักการอะไรบ้าง?</a></li><li><a href="#9-เรียก-web-service-ด้วย-javascript-ยังไง-สไลด์-7789">เรียก Web Service ด้วย JavaScript ยังไง?</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l12", "u": "web/l12/index.html", "t": "Lecture 12 – Web Services", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 10 – Node.js Part II (Express Framework) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L10</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/index.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li class='cur'><a href="../l10/index.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/index.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/index.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/index.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L10</div>
+    <h1 class="lesson-title">Lecture 10 – Node.js Part II (Express Framework)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 44 นาที · 16 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l10">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> ต่อจาก Node.js Part I บทนี้เริ่มจาก <strong>ทบทวน</strong> การสร้าง server ด้วย <code>http</code> module และทำ routing ด้วย <code>if/else</code> บน <code>req.url</code> แล้วเปลี่ยนมาใช้ <strong>Express</strong> ที่ทำเรื่องเดียวกันได้ง่ายกว่า: ตั้งโปรเจกต์ด้วย npm, ทำ routing ด้วย <strong><code>express.Router()</code></strong>, จัดการ path ที่ไม่มี (404), ส่ง <strong>static files</strong> (CSS/รูป) ด้วย <code>express.static</code>, แบ่ง route เป็น <strong>modular routes</strong> และปิดท้ายด้วย <strong>form handling</strong> ทั้งแบบ <strong>GET (<code>req.query</code>)</strong> และ <strong>POST (<code>req.body</code>)</strong></p>
+<p>บทนี้ไม่มีโจทย์คำนวณ แต่มี <strong>โค้ด Node.js/Express</strong> หลายชุด — ทุกชุดในสรุปนี้ถูกรันจริงด้วย Node v22 + Express 5.3.0 แล้ว (ผลรันอยู่ในแต่ละหัวข้อ)</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L10-00-overview.png" alt="แผนผังภาพรวม Lecture 10" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>หน้า Outline (สไลด์ 4) มี 7 หัวข้อ</strong> แต่ไฟล์นี้สอนจริงแค่ 4 หัวข้อแรก (RECAP, Express, express.Router(), Form Handling) แล้วจบที่สไลด์ 53 &quot;See you all next week&quot;</p>
+<p>หัวข้อ <strong>Cookies + Session, Environmental Variables, Database + Node.js</strong> ไม่มีเนื้อหาในไฟล์นี้ (สไลด์ 2 บอกว่าอยู่ใน <strong>Node.js Part III</strong>)</p>
+</blockquote>
+<h2 id="0-บทนี้อยู่ตรงไหนของ-nodejs-unit-และเรียนอะไร-สไลด์-24">0. บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร? <span class="slide-ref">สไลด์ 2–4</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node.js แบ่ง 3 ส่วน — Part I พื้นฐาน + server แรก, Part II (บทนี้) Express Framework, Part III Cookies/Session/Database เป้าหมายบทนี้คือสร้าง server ด้วย Express, ทำ routing, และรับข้อมูลจากฟอร์ม</strong></p>
+<p><strong>Node.js Unit</strong> (สไลด์ 2):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>เนื้อหา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Part I – Intro Node.js</td>
+<td>Getting Started + &quot;Hello World&quot;, Node Module System, Build your first server</td>
+</tr>
+<tr>
+<td><strong>Part II – Express Framework</strong></td>
+<td>← บทนี้</td>
+</tr>
+<tr>
+<td>Part III</td>
+<td>Cookies, Session, and Database</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Course Objective</strong> (สไลด์ 3) — หลังเรียนควรทำได้:</p>
+<ul>
+<li>สร้าง <strong>server แบบง่ายด้วย Express Framework</strong></li>
+<li>ทำ <strong>routing</strong> ด้วย Node.js (กำหนดว่า URL ไหนให้ทำอะไร)</li>
+<li>ทำ <strong>form handling</strong> ด้วย Node.js (รับค่าที่ผู้ใช้กรอกมาประมวลผล)</li>
+</ul>
+<p><strong>Outline</strong> (สไลด์ 4): RECAP: Node.js → Express Framework → express.Router() → Form Handling (GET and POST) → Cookies + Session → Environmental Variables → Database + Node.js (3 หัวข้อหลังไม่มีในไฟล์นี้ ดู ⚠️ ด้านบน)</p>
+<hr />
+<h2 id="1-recap-nodejs-คืออะไร-และสร้าง-server-ด้วย-http-module-ยังไง-สไลด์-59">1. RECAP: Node.js คืออะไร และสร้าง server ด้วย http module ยังไง? <span class="slide-ref">สไลด์ 5–9</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node.js คือ JavaScript runtime แบบ asynchronous ที่สร้างบน V8 ของ Chrome ใช้ทำ server ได้ (ไม่มี DOM/window/cookies แต่มี module อย่าง fs, http) สร้าง server ด้วย <code>http.createServer((req,res)=&gt;{...})</code> แล้ว <code>listen(port)</code></strong></p>
+<h3 id="11-nodejs-คืออะไร-สไลด์-6">1.1 Node.js คืออะไร? <span class="slide-ref">สไลด์ 6</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>&quot;An open-source server environment&quot; — เอา JS engine V8 มาห่อเป็น Node ให้รัน JS นอก browser ได้</strong></p>
+<ul>
+<li>นิยามตามสไลด์: <em>Node.js is an <strong>asynchronous JavaScript runtime</strong> built on <strong>Chrome's V8</strong> JavaScript engine.</em></li>
+<li>รูปในสไลด์: กล่อง <strong>JS Engine (V8)</strong> อยู่ข้างในกล่อง <strong>(Node)</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-01-node-runtime.png" alt="Node = V8 + modules แต่ไม่มี DOM" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ใน Node <strong>ไม่มี</strong></th>
+<th>ใน Node <strong>มี</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DOM</td>
+<td>JS code บางส่วน</td>
+</tr>
+<tr>
+<td>object อย่าง <code>document</code>, <code>window</code></td>
+<td>Modules เช่น <strong>File system</strong>, <strong>HTTP</strong>, <strong>Utilities</strong></td>
+</tr>
+<tr>
+<td>Cookies</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนเอาเครื่องยนต์ (V8) ออกจากรถ (browser) ไปใส่เรือ (Node) — เครื่องเดิม แต่ไม่มีพวงมาลัย/กระจก (DOM, window) มีอุปกรณ์ของเรือแทน (fs, http)</p>
+</blockquote>
+<h3 id="12-web-server-ทำอะไร-และ-server-ตัวอย่างอยู่ที่ไหน-สไลด์-7">1.2 Web server ทำอะไร และ server ตัวอย่างอยู่ที่ไหน? <span class="slide-ref">สไลด์ 7</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>web server รับ HTTP request จาก client แล้วส่ง HTTP response กลับ (เป็น plain text, HTML หรือ JSON ก็ได้) ตัวอย่างนี้ใช้เครื่องเราเป็น server ที่ localhost port 8081</strong></p>
+<ul>
+<li>web server <strong>รับ HTTP request</strong> จาก client และ <strong>ตอบ HTTP response</strong></li>
+<li>response อยู่ในรูป <strong>plain text</strong>, <strong>HTML pages</strong> หรือ <strong>JSON object</strong> ได้</li>
+<li>ต้อง <strong>require HTTP module</strong> เพื่อสร้าง web server แบบง่าย</li>
+<li>Server: running at <strong><code>localhost</code></strong>, <strong>Port: 8081</strong> → URL: <strong><code>http://localhost:8081</code></strong> (&quot;Our machine as a server&quot;)</li>
+</ul>
+<h3 id="13-โค้ด-server-แรก-myfirstnodeserverjs-สไลด์-8">1.3 โค้ด server แรก (<code>myFirstNodeServer.js</code>) <span class="slide-ref">สไลด์ 8</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>require(&quot;http&quot;)</code> → <code>createServer</code> รับ callback <code>(req, res)</code> → ตั้ง statusCode/header → <code>write</code> → <code>end</code> → <code>listen(8081)</code></strong></p>
+<pre><code class="language-js">/* Import HTTP Module */
+const http = require(&quot;http&quot;);
+// Create a server object
+const myServer = http.createServer((req, res)=&gt; {
+    // Write a response to the client
+    res.statusCode = 200;  // Status 200: OK
+    res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+    res.write(&quot;Hello World!&quot;);
+    res.end(); // End the response
+});
+// Server listens on port 8081
+myServer.listen(8081,() =&gt; {
+    console.log(&quot;Listening on the port 8081&quot;);
+});
+</code></pre>
+<p>อธิบายทีละบรรทัด:</p>
+<ol>
+<li><code>require(&quot;http&quot;)</code> — โหลด module HTTP ที่มากับ Node</li>
+<li><code>http.createServer(callback)</code> — สร้าง server; callback จะถูกเรียก <strong>ทุกครั้งที่มี request เข้ามา</strong> โดยได้ <code>req</code> (ข้อมูล request) กับ <code>res</code> (ใช้ตอบกลับ)</li>
+<li><code>res.statusCode = 200</code> — สถานะ <strong>200 = OK</strong></li>
+<li><code>res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;)</code> — บอก browser ว่าเนื้อหาเป็นข้อความธรรมดา</li>
+<li><code>res.write(&quot;Hello World!&quot;)</code> — เขียนเนื้อหา response</li>
+<li><code>res.end()</code> — <strong>จบ response</strong> (ถ้าลืม browser จะรอค้าง)</li>
+<li><code>myServer.listen(8081, cb)</code> — เริ่มรอ request ที่ port 8081; callback ทำงานตอนเริ่ม listen สำเร็จ</li>
+</ol>
+<p>รันด้วย <code>node myFirstNodeServer.js</code> → terminal แสดง <code>Listening on the port 8081</code></p>
+<h3 id="14-ทดสอบการเชื่อมต่อ-สไลด์-9">1.4 ทดสอบการเชื่อมต่อ <span class="slide-ref">สไลด์ 9</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>พิมพ์ <code>http://localhost:8081</code> ใน browser → server ได้ request แล้วตอบข้อความ → browser แสดง &quot;Hello World!&quot;</strong></p>
+<p>ลำดับตามสไลด์:</p>
+<ol>
+<li><strong>Server running at Port 8081</strong> — รัน <code>node myFirstNodeServer.js</code> แล้วเห็น <code>Listening on the port 8081</code></li>
+<li><strong>Make a HTTP request to the server</strong> — พิมพ์ URL ใน browser (Request →)</li>
+<li><strong>Server received the request and responded with a text</strong> (← Response)</li>
+<li><strong>The text is showed in the Client's browser</strong> — หน้าเว็บแสดง <code>Hello World!</code></li>
+</ol>
+<p><strong>ผลรันจริง</strong> (โค้ดสไลด์ 8):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>200, <code>text/plain</code>, <code>Hello World!</code></td>
+</tr>
+<tr>
+<td><code>GET /favicon.ico</code></td>
+<td>200, <code>text/plain</code>, <code>Hello World!</code> (server นี้ตอบเหมือนกันทุก URL เพราะไม่ได้ดู <code>req.url</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Console ของ server: <code>Listening on the port 8081</code> บรรทัดเดียว</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 9 เขียน URL เป็น <code>http:/locahost:8081</code> (พิมพ์ผิด) — ที่ถูกคือ <code>http://localhost:8081</code></p>
+<p class="c-warn">⚠️ terminal ในสไลด์ 9 มีบรรทัด <code>The new request comming: /</code> และ <code>The new request comming: /favicon.ico</code> แต่โค้ดสไลด์ 8 <strong>ไม่มี</strong> <code>console.log</code> บรรทัดนี้ — รันโค้ดสไลด์ 8 จริงจะเห็นแค่ <code>Listening on the port 8081</code> (ภาพในสไลด์น่าจะมาจากโค้ดเวอร์ชันที่เพิ่ม log ไว้) แต่สังเกตได้ว่า <strong>browser ส่ง request 2 ครั้ง: <code>/</code> และ <code>/favicon.ico</code></strong></p>
+</blockquote>
+<hr />
+<h2 id="2-ทำ-routing-ด้วย-http-module-ล้วน-ๆ-ทำยังไง-สไลด์-1013">2. ทำ routing ด้วย http module ล้วน ๆ ทำยังไง? <span class="slide-ref">สไลด์ 10–13</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>routing = ส่ง request ไปยังโค้ดที่จัดการ URL นั้น ใน http module ทำโดยเช็ก <code>req.url</code> ด้วย if/else ทีละกรณี แล้วใช้ <code>fs.readFile</code> อ่านไฟล์ HTML ส่งกลับ ถ้าไม่ตรงอะไรเลยตอบ 404</strong></p>
+<h3 id="21-respond-with-a-web-page-สไลด์-10">2.1 Respond with a Web Page <span class="slide-ref">สไลด์ 10</span></h3>
+<ul>
+<li>โดยทั่วไป server จะตอบ request ด้วย <strong>หน้าเว็บ</strong> เช่น <code>http://localhost:8081/homepage</code></li>
+<li>เมื่อมี HTTP request เข้ามา จะถูก <strong>route</strong> ไปยังโค้ดที่จัดการ เช่น ส่งหน้าเฉพาะกลับไป</li>
+<li><strong><code>req</code> (HTTP request object) มี <code>url</code></strong> ที่ใช้ทำ routing ได้</li>
+</ul>
+<h3 id="22-ตัวอย่าง-หน้า-shabu-กับ-bbq-สไลด์-11">2.2 ตัวอย่าง: หน้า shabu กับ bbq <span class="slide-ref">สไลด์ 11</span></h3>
+<p>มี HTML 2 หน้าอยู่ที่ root ของโปรเจกต์ (<code>(root)/shabu.html</code>, <code>(root)/bbq.html</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>หัวข้อในหน้า</th>
+<th>รายการร้าน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shabu.html</code></td>
+<td>Let's have Shabu Shabu</td>
+<td>Akiyoshi, Fufu Taiwanese Shabu, Kagonoya, Momo Paradise, You &amp; I Premium Suki Buffet</td>
+</tr>
+<tr>
+<td><code>bbq.html</code> (title &quot;Barbeque&quot;)</td>
+<td>Let's have BBQ</td>
+<td>AKA, Guru Gyuu, Nice Two Meat U, Kosirae</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="23-โค้ด-routingjs-template-สไลด์-12">2.3 โค้ด <code>routing.js</code> (template) <span class="slide-ref">สไลด์ 12</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>if <code>/</code> → ข้อความ Greeting | <code>/shabu</code>, <code>/bbq</code> → อ่านไฟล์ html ส่งกลับเป็น <code>text/html</code> | อื่น ๆ → 404 <code>text/plain</code></strong></p>
+<p><img loading="lazy" src="diagrams/L10-02-http-routing.png" alt="ลำดับการเช็ก req.url ใน routing.js" /></p>
+<p>สไลด์ให้โครง (template) ไว้ แล้วแยกโค้ดแต่ละช่องไว้ในกล่องข้าง ๆ รวมกันได้ดังนี้:</p>
+<pre><code class="language-js">/* HTTP Module with Routing */
+const http = require(&quot;http&quot;);
+const fs = require(&quot;fs&quot;);    // For opening HTML files
+
+const myServer = http.createServer((req, res)=&gt;{
+    console.log(&quot;Req: &quot; + req.url);
+    if(req.url === &quot;/&quot;){
+        /* Send a greeting message */
+        res.statusCode = 200;
+        res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+        res.write(&quot;Greeting&quot;);
+        res.end();
+    }
+    else if(req.url===&quot;/shabu&quot;) {
+        /* Send shabu.html*/      // เหมือนกล่อง bbq แต่เปลี่ยนเป็น ./shabu.html
+    }
+    else if(req.url===&quot;/bbq&quot;) {
+        /* Send bbq.html*/
+        fs.readFile(&quot;./bbq.html&quot;, function(err, data) {
+            res.statusCode = 200;
+            res.setHeader(&quot;Content-Type&quot;,&quot;text/html&quot;);
+            res.write(data);
+            res.end();
+        });
+    }
+    else {
+        /* Error: Invalid path */
+        res.statusCode = 404;  // Status 404: Error
+        res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+        res.write(&quot;Invalid requested :(&quot;);
+        res.end();
+    }
+});   // ← สไลด์ไม่มีบรรทัดนี้ (ดู ⚠️)
+// Server listens on port 8081
+console.log(&quot;Listening on the port 8081&quot;);
+myServer.listen(8081);
+</code></pre>
+<p>จุดที่ควรสังเกต:</p>
+<ul>
+<li><strong>Content-Type ต่างกัน</strong>: ข้อความ greeting และ error ใช้ <strong><code>text/plain</code></strong> ส่วนไฟล์ HTML ใช้ <strong><code>text/html</code></strong> (สไลด์ไฮไลต์ไว้)</li>
+<li><strong>status code</strong>: ปกติ <strong>200</strong>, path ผิด <strong>404</strong></li>
+<li><code>fs.readFile(path, callback)</code> เป็นแบบ async — <code>res.write(data)</code> / <code>res.end()</code> ต้องอยู่ <strong>ใน callback</strong> หลังอ่านไฟล์เสร็จ</li>
+<li>กล่อง &quot;Send shabu.html&quot; ไม่มีโค้ดในสไลด์ — ใช้แบบเดียวกับ bbq แต่เปลี่ยนชื่อไฟล์</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ โครงในสไลด์ 12 <strong>ขาด <code>});</code> ที่ปิด <code>http.createServer(...)</code></strong> หลังบล็อก <code>else</code> (ตรวจด้วย <code>node --check</code> แล้วได้ <code>SyntaxError: Unexpected end of input</code>) — ถ้าพิมพ์ตามต้องเติมเอง</p>
+</blockquote>
+<h3 id="24-ผลลัพธ์-สไลด์-13">2.4 ผลลัพธ์ <span class="slide-ref">สไลด์ 13</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>server แสดง <code>Req: &lt;path&gt;</code> ทุก request และ browser เห็นผลตาม if/else</strong></p>
+<p>Server is running at 8081, waiting for requests → console:</p>
+<pre><code>Listening on the port 8081
+Req: /bbq
+Req: /SOMEPATH
+Req: /
+Req: /shabu
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Browser แสดง</th>
+<th>ผลรันจริง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:8081/bbq</code></td>
+<td>หน้า Let's have BBQ</td>
+<td>200 <code>text/html</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:8081/SOMEPATH</code></td>
+<td><code>Invalid requested :(</code></td>
+<td>404 <code>text/plain</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:8081</code></td>
+<td><code>Greeting</code></td>
+<td>200 <code>text/plain</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตว่าบรรทัด <code>console.log(&quot;Listening on the port 8081&quot;)</code> อยู่ <strong>ก่อน</strong> <code>listen()</code> และอยู่นอก callback จึงพิมพ์ทันทีที่รันไฟล์ ส่วน <code>Req: ...</code> พิมพ์ทุกครั้งที่มี request</p>
+</blockquote>
+<hr />
+<h2 id="3-express-คืออะไร-ทำไมต้องใช้-สไลด์-1416">3. Express คืออะไร ทำไมต้องใช้? <span class="slide-ref">สไลด์ 14–16</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Express เป็น Node.js web application framework ที่ minimal และยืดหยุ่น ช่วยเรื่อง routing, สร้าง API และทำงานกับ template engine (Pug, EJS) ได้ — เป็น framework อันดับต้นของ Node.js</strong></p>
+<h3 id="31-express-ในรายการ-nodejs-frameworks-สไลด์-15">3.1 Express ในรายการ Node.js frameworks <span class="slide-ref">สไลด์ 15</span></h3>
+<p>สไลด์ยกบทความ 2 แหล่งมาแสดง:</p>
+<p><strong>simform.com — &quot;Top 12 Best Node.js Frameworks&quot;: Express.js – Express for Everyone</strong></p>
+<ul>
+<li>จุดเด่นในกรอบ: Rapid server-side programming, Super high test coverage, High performing, Templating (GitHub ★ 49.4k)</li>
+<li>Express.js (aka Express) <strong>อยู่อันดับต้นของ Node.js frameworks</strong> มีแนวทาง minimalistic เรียบง่ายตรงไปตรงมา <strong>เปิดตัวปี 2010</strong> และถูกเรียกว่า <strong>de facto standard ของ Node.js</strong> ภายใต้ <strong>MIT license</strong></li>
+</ul>
+<p><strong>anywhere.epam.com — Express.js</strong></p>
+<ul>
+<li>Express เป็น backend framework ของ Node.js ที่ minimalist และเร็ว เป็น open-source (MIT license)</li>
+<li>Features:
+<ul>
+<li>มีโครง <strong>Model-View-Controller (MVC)</strong> แบ่งแอปใหญ่เป็นส่วน ๆ ที่แต่ละส่วนมีหน้าที่ต่างกัน</li>
+<li>ทำหน้าที่คล้าย <strong>routing table</strong> หรือชุด routing libraries</li>
+<li>รองรับ packet injection ของ heavy loads (ช่วยตอนขยาย capacity)</li>
+<li>มี <strong>engine templates มากกว่า 14 แบบ</strong>, HTTP methods และ synchronization</li>
+<li>มี <strong>debugging function</strong> ที่ช่วยชี้ว่าปัญหาอยู่ตรงไหน</li>
+</ul>
+</li>
+</ul>
+<h3 id="32-express-ช่วยอะไร-สไลด์-16">3.2 Express ช่วยอะไร? <span class="slide-ref">สไลด์ 16</span></h3>
+<ul>
+<li>นิยาม: Express is a <strong>minimal and flexible</strong> Node.js web application framework that provides a <strong>robust set of features</strong> for <strong>web and mobile applications</strong></li>
+<li>ช่วยจัดการ <strong>routing</strong></li>
+<li>ช่วยสร้าง <strong>API</strong></li>
+<li>ทำงานกับ <strong>template engine</strong> เช่น <strong>Pug</strong> หรือ <strong>EJS</strong>:
+<ul>
+<li>ตอน runtime template engine <strong>แทนตัวแปรใน template ด้วยค่าจริง</strong></li>
+<li>แล้ว <strong>แปลง template เป็นไฟล์ HTML</strong> ส่งให้ client</li>
+<li>ทำให้ <strong>ออกแบบหน้า HTML ได้ง่ายขึ้น</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เทียบกับข้อ 2: ใน http module ต้องเขียน if/else เช็ก <code>req.url</code> เอง ตั้ง header เอง อ่านไฟล์เอง — Express ย่อเหลือ <code>router.get('/shabu', ...)</code> + <code>res.sendFile(...)</code></p>
+</blockquote>
+<hr />
+<h2 id="4-เริ่มโปรเจกต์-express-ยังไง-สไลด์-1724">4. เริ่มโปรเจกต์ Express ยังไง? <span class="slide-ref">สไลด์ 17–24</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้างโฟลเดอร์ → <code>npm init</code> (ได้ package.json) → <code>npm install express</code> → (เลือกได้) <code>npm install nodemon</code> → สร้าง <code>app.js</code> → ตั้ง <code>&quot;start&quot;</code> ใน scripts → <code>npm start</code></strong></p>
+<p><img loading="lazy" src="diagrams/L10-03-express-setup.png" alt="ขั้นตอนตั้งโปรเจกต์ Express" /></p>
+<h3 id="41-ภาพรวมขั้นตอน-สไลด์-17">4.1 ภาพรวมขั้นตอน <span class="slide-ref">สไลด์ 17</span></h3>
+<ol>
+<li>สร้าง working directory <strong>&quot;MyFirstExpress&quot;</strong></li>
+<li>initialize โปรเจกต์ด้วย <strong><code>npm init</code></strong></li>
+<li>ติดตั้ง Express และเพิ่มลง dependencies ด้วย <strong><code>npm install express</code></strong></li>
+<li><strong>[Optional]</strong> ติดตั้ง <strong>nodemon</strong> — คอย <strong>monitor การเปลี่ยนแปลงใน source file แล้ว restart โปรแกรมให้อัตโนมัติ</strong>: <code>npm install nodemon</code></li>
+<li>สร้าง <strong>entry point file</strong> และไฟล์ที่เกี่ยวข้อง</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <strong>NPM</strong> = package manager สำหรับติดตั้ง Node.js packages เพิ่มเติม</p>
+</blockquote>
+<h3 id="42-npm-init-สไลด์-18">4.2 <code>npm init</code> <span class="slide-ref">สไลด์ 18</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>npm init ถามข้อมูลโปรเจกต์ทีละข้อแล้วสร้าง <code>package.json</code> = meta-data ของโปรเจกต์</strong></p>
+<pre><code>C:\YOUR_PATH_TO_WORK\myFirstExpress&gt;npm init
+This utility will walk you through creating a package.json file.
+...
+package name: (myfirstexpress)
+version: (1.0.0)
+description: This is my first Express app
+entry point: (index.js) app.js
+test command:
+git repository:
+keywords:
+author: Jidapa
+...
+</code></pre>
+<ul>
+<li>ค่าในวงเล็บคือค่า default กด Enter ได้เลย</li>
+<li>ตัวอย่างนี้เปลี่ยน <strong>entry point</strong> จาก <code>index.js</code> เป็น <strong><code>app.js</code></strong> → ใน package.json จะเป็น <code>&quot;main&quot;: &quot;app.js&quot;</code></li>
+</ul>
+<p><code>package.json</code> (Meta-data about the Project):</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;myfirstexpress&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;description&quot;: &quot;&quot;,
+  &quot;main&quot;: &quot;app.js&quot;,
+  &quot;scripts&quot;: {
+    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
+  },
+  &quot;author&quot;: &quot;Jidapa&quot;,
+  &quot;license&quot;: &quot;ISC&quot;
+}
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ 18 ตอบ description ว่า &quot;This is my first Express app&quot; แต่ package.json ที่แสดงข้าง ๆ เป็น <code>&quot;description&quot;: &quot;&quot;</code> — เป็นภาพจากคนละครั้ง ไม่มีผลกับเนื้อหา</p>
+</blockquote>
+<h3 id="43-npm-install-express-สไลด์-19">4.3 <code>npm install express</code> <span class="slide-ref">สไลด์ 19</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้งแล้ว express จะไปอยู่ในส่วน <code>&quot;dependencies&quot;</code> ของ package.json (และสร้าง package-lock.json)</strong></p>
+<pre><code>C:\YOUR_PATH_TO_WORK\myFirstExpress&gt;npm install express
+npm notice created a lockfile as package-lock.json. You should commit this file.
+npm WARN myfirstexpress@1.0.0 No repository field.
++ express@4.17.1
+added 50 packages from 37 contributors and audited 126 packages in 2.625s
+found 0 vulnerabilities
+</code></pre>
+<pre><code class="language-json">  &quot;dependencies&quot;: {
+    &quot;express&quot;: &quot;^5.3.0&quot;
+  }
+</code></pre>
+<ul>
+<li>ดูรายการ Node packages ที่ติดตั้งได้ที่ส่วน <strong>&quot;dependencies&quot;</strong> ใน <code>package.json</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ log ในสไลด์ 19 แสดง <code>express@4.17.1</code> แต่ package.json ข้าง ๆ เป็น <code>&quot;^5.3.0&quot;</code> (และสไลด์ 20 เป็น <code>&quot;^5.2.1&quot;</code>) — ภาพมาจากคนละเวอร์ชัน ไม่ต้องจำเลขเวอร์ชัน</p>
+</blockquote>
+<h3 id="44-npm-install-nodemon-สไลด์-20">4.4 <code>npm install nodemon</code> <span class="slide-ref">สไลด์ 20</span></h3>
+<ul>
+<li>log การติดตั้งมี <code>nodemon@2.0.7 postinstall</code> และ WARN เรื่อง optional dependency <code>fsevents</code> (ต้องการ OS darwin แต่เครื่องเป็น win32) — เป็นแค่คำเตือน</li>
+<li><strong>package.json จะเก็บรายการ module ที่ติดตั้งซึ่งงานเราต้องใช้</strong>:</li>
+</ul>
+<pre><code class="language-json">  &quot;dependencies&quot;: {
+    &quot;express&quot;: &quot;^5.2.1&quot;,
+    &quot;nodemon&quot;: &quot;^3.1.14&quot;
+  }
+</code></pre>
+<h3 id="45-สร้าง-entry-file-appjs-สไลด์-2122">4.5 สร้าง entry file <code>app.js</code> <span class="slide-ref">สไลด์ 21–22</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>app.js = ไฟล์หลักของ server มีชุด routing ที่จัดการ request + โค้ดตั้งค่า server</strong></p>
+<pre><code class="language-js">/* Import modules */
+const express = require('express');
+const port=3000
+/* 2. Create a new Express application */
+const app = express();
+/* 3. Create a route at ROOT: / */
+app.get('/', (req, res) =&gt; {
+    res.send('Hello World from Root!')
+})
+/* 4. Bind our server to the port */
+app.listen(port, () =&gt; {
+    console.log(`Server listening on port: ${port}`)
+})
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>โค้ด</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Import</td>
+<td><code>require('express')</code></td>
+<td>โหลด Express</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>const app = express()</code></td>
+<td>สร้าง Express application ใหม่</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>app.get('/', (req,res)=&gt;{...})</code></td>
+<td>สร้าง route ที่ root <code>/</code> สำหรับ HTTP <strong>GET</strong></td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>res.send('...')</code></td>
+<td>ส่ง response กลับ (Express ตั้ง Content-Type และจบ response ให้เอง)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>app.listen(port, cb)</code></td>
+<td>ผูก server กับ port 3000</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ลองรัน</strong> (สไลด์ 22): <code>node app.js</code> → terminal: <code>Server listening on port: 3000</code> → เปิด <code>localhost:3000</code> เห็น <strong>Hello World from Root!</strong></p>
+<p>ผลรันจริง: <code>GET /</code> → 200 <code>text/html; charset=utf-8</code> &quot;Hello World from Root!&quot;</p>
+<blockquote class="callout">
+<p class="c-tip">💡 เทียบกับสไลด์ 8: ไม่ต้องตั้ง <code>statusCode</code>, <code>setHeader</code>, <code>write</code>, <code>end</code> เอง — <code>res.send()</code> ทำให้หมด</p>
+</blockquote>
+<h3 id="46-ตั้ง-script-start-สไลด์-23">4.6 ตั้ง script &quot;start&quot; <span class="slide-ref">สไลด์ 23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใส่ <code>&quot;start&quot;: &quot;node app.js&quot;</code> หรือ <code>&quot;start&quot;: &quot;nodemon app.js&quot;</code> ใน scripts แล้วรันด้วย <code>npm start</code></strong></p>
+<pre><code class="language-json">&quot;scripts&quot;: {
+    &quot;start&quot;: &quot;nodemon app.js&quot;
+},
+</code></pre>
+<pre><code>(base) &lt;PATH TO PROJECT&gt;% npm start
+&gt; lecture09-express@1.0.0 start
+&gt;
+&gt; nodemon app.js
+[nodemon] 3.1.14
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,mjs,json
+[nodemon] starting `node app.js`
+Server listening on port: 3000
+</code></pre>
+<ul>
+<li>nodemon เฝ้าไฟล์นามสกุล js, mjs, json; พิมพ์ <code>rs</code> เพื่อ restart เองได้</li>
+</ul>
+<h3 id="47-จัดโฟลเดอร์-สไลด์-24">4.7 จัดโฟลเดอร์ <span class="slide-ref">สไลด์ 24</span></h3>
+<p>เอาไฟล์ HTML, CSS และ resource ทั้งหมดไว้ในโฟลเดอร์โปรเจกต์ เช่น:</p>
+<ul>
+<li><code>(root)/</code>
+<ul>
+<li><code>node_modules/</code> — package ที่ติดตั้ง</li>
+<li><code>package-lock.json</code></li>
+<li><code>package.json</code></li>
+<li><code>app.js</code> — entry file</li>
+<li><code>html/</code>
+<ul>
+<li><code>bbq.html</code></li>
+<li><code>shabu.html</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="5-expressrouter-และ-middleware-คืออะไร-สไลด์-2527">5. <code>express.Router()</code> และ middleware คืออะไร? <span class="slide-ref">สไลด์ 25–27</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>middleware = ฟังก์ชันที่เข้าถึง <code>req</code> และ <code>res</code> ได้ <code>express.Router()</code> เป็น middleware ที่ช่วยจัดการ route — สร้าง router แล้ว <code>app.use(router)</code> จากนั้นใช้ <code>router.get(...)</code> แทน <code>app.get(...)</code></strong></p>
+<h3 id="51-ตัวอย่าง-route-ที่จะจัดการ-สไลด์-26">5.1 ตัวอย่าง route ที่จะจัดการ <span class="slide-ref">สไลด์ 26</span></h3>
+<ul>
+<li>ใช้ <code>express.Router()</code> middleware ช่วยจัดการ routes</li>
+<li><strong>Middleware: Functions that have access to the request object (<code>req</code>) and the response object (<code>res</code>)</strong></li>
+</ul>
+<p><code>http://localhost:XXXX/</code> + path:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>HTTP Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code> (root)</td>
+<td>GET</td>
+</tr>
+<tr>
+<td><code>/shabu</code></td>
+<td>GET</td>
+</tr>
+<tr>
+<td><code>/bbq</code></td>
+<td>GET</td>
+</tr>
+<tr>
+<td><code>/product/view</code></td>
+<td>GET</td>
+</tr>
+<tr>
+<td><code>/product/add</code></td>
+<td><strong>POST</strong></td>
+</tr>
+<tr>
+<td><code>/user/add</code></td>
+<td><strong>POST</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 26 เขียน <code>express.router()</code> (r เล็ก) แต่โค้ดจริงในสไลด์ 27 เป็น <strong><code>express.Router()</code></strong> (R ใหญ่) — JS แยกตัวพิมพ์ใหญ่เล็ก ให้ใช้ <code>Router</code></p>
+</blockquote>
+<h3 id="52-โค้ด-server-router-สไลด์-27">5.2 โค้ด server + router <span class="slide-ref">สไลด์ 27</span></h3>
+<pre><code class="language-js">const express = require('express');
+const path = require('path')
+const port=3000
+const app = express();
+/* 1. Create a router object and register the router */
+const router = express.Router();
+app.use(router)
+/* 2. Apply the created router to the route */
+router.get('/', (req, res) =&gt; {
+    res.send('Hello World from Root!')
+})
+app.listen(port, () =&gt; {
+    console.log(`Server listening on port: ${port}`)
+})
+</code></pre>
+<ol>
+<li><code>express.Router()</code> สร้าง router object → <code>app.use(router)</code> <strong>ลงทะเบียน</strong> router กับ app</li>
+<li>ใช้ <code>router.get('/', ...)</code> กำหนด route</li>
+<li>รันด้วย <code>npm start</code> (= <code>nodemon app.js</code> ตาม script ที่ตั้งไว้) → <code>Server listening on port: 3000</code></li>
+</ol>
+<ul>
+<li><strong>ถ้าแก้ app.js nodemon จะรันใหม่ให้อัตโนมัติ</strong></li>
+</ul>
+<hr />
+<h2 id="6-ส่งหน้า-html-ตาม-route-และจัดการ-path-ที่ไม่มี-404-ยังไง-สไลด์-2830">6. ส่งหน้า HTML ตาม route และจัดการ path ที่ไม่มี (404) ยังไง? <span class="slide-ref">สไลด์ 28–30</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>router.get('/shabu', ...)</code> + <code>res.sendFile(path.join(...))</code> ที่ชี้ไป <code>__dirname</code> + <code>/html/shabu.html</code> ส่งไฟล์ HTML กลับ path ที่ไม่ได้กำหนดจะได้ error &quot;Cannot GET ...&quot; — ถ้าอยากตอบเอง ให้ใส่ <code>router.use(...)</code> ไว้ท้ายสุด ซึ่งถูกเรียกทุก HTTP method</strong></p>
+<p><img loading="lazy" src="diagrams/L10-04-express-router.png" alt="การไหลของ request ผ่าน router" /></p>
+<h3 id="61-เพิ่ม-route-ที่ส่งไฟล์-html-สไลด์-28">6.1 เพิ่ม route ที่ส่งไฟล์ HTML <span class="slide-ref">สไลด์ 28</span></h3>
+<pre><code class="language-js">/* 3. Add more routes with the proper HTTP method */
+router.get('/shabu', (req, res) =&gt; {
+   console.log('Shabu shabu...');
+   res.sendFile(path.join(`${__dirname}/html/shabu.html`))
+})
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สิ่งที่ใช้</th>
+<th>ความหมายตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>router.get('/shabu', ...)</code></td>
+<td>สร้าง route <code>/shabu</code> รับ <strong>HTTP GET</strong> แล้ว server จะส่งหน้า HTML ที่ระบุกลับด้วย <strong><code>sendFile</code></strong></td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td><strong>global variable</strong> ที่ได้ <strong>absolute path ของโฟลเดอร์</strong> ที่มีไฟล์ที่กำลังรันอยู่</td>
+</tr>
+<tr>
+<td><code>path.join(...)</code></td>
+<td><strong>รวม path หลายส่วนเป็น path เดียว</strong> (ต้อง <code>require('path')</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ 28 (และ 43, 47) template string ถูกตัดขึ้นบรรทัดใหม่: <code> `${__dirname}</code> ↵ <code>/html/shabu.html`</code> — เป็นการตัดเพื่อให้พอดีสไลด์ <strong>ถ้าพิมพ์ขึ้นบรรทัดใหม่จริงใน backtick</strong> ตัวขึ้นบรรทัดและช่องว่างจะกลายเป็นส่วนหนึ่งของ path → รันจริงได้ <strong><code>Error: ENOENT: no such file or directory</code></strong> และ browser ได้ 404 ต้องเขียนให้อยู่ <strong>บรรทัดเดียว</strong> ตามโค้ดด้านบน</p>
+</blockquote>
+<h3 id="62-ผลลัพธ์-สไลด์-29">6.2 ผลลัพธ์ <span class="slide-ref">สไลด์ 29</span></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>URL</th>
+<th>ผลในสไลด์</th>
+<th>ผลรันจริง (Express 5)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:3000</code></td>
+<td>Hello World from Root!</td>
+<td>200</td>
+</tr>
+<tr>
+<td><code>http://localhost:3000/shabu</code></td>
+<td>หน้า Let's have Shabu Shabu (console: <code>Shabu shabu...</code>)</td>
+<td>200</td>
+</tr>
+<tr>
+<td><code>http://localhost:3000/somewhere</code></td>
+<td><strong><code>Cannot GET /somewhere</code></strong></td>
+<td>404 + <code>Cannot GET /somewhere</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>/somewhere</code> — <strong>URL นี้ไม่ได้กำหนดไว้ใน server จึง throw error</strong></li>
+</ul>
+<h3 id="63-จัดการ-path-ที่ไม่ได้กำหนด-สไลด์-30">6.3 จัดการ path ที่ไม่ได้กำหนด <span class="slide-ref">สไลด์ 30</span></h3>
+<pre><code class="language-js">/* 4. Handle other unspecified paths */
+router.use((req, res, next) =&gt; {
+  console.log(&quot;404: Invalid accessed&quot;);
+  res.status(404).send(&quot;Invalid Path&quot;);
+})
+</code></pre>
+<ul>
+<li>path อื่นที่ไม่ได้กำหนด <strong>จะมาตกที่นี่</strong></li>
+<li><strong><code>router.use</code> จะถูกเรียก (เสมอ) ไม่ว่าจะเป็น HTTP method ไหน</strong> (ต่างจาก <code>router.get</code> ที่รับแค่ GET)</li>
+<li><code>res.status(404).send(...)</code> — ตั้ง status 404 แล้วส่งข้อความ</li>
+<li>วางไว้ <strong>หลัง</strong> route อื่นทั้งหมด (สไลด์ใส่เป็นขั้นที่ 4 ต่อจาก route ขั้นที่ 2–3)</li>
+</ul>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Response</th>
+<th>Console</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /somewhere</code></td>
+<td>404 <code>Invalid Path</code></td>
+<td><code>404: Invalid accessed</code></td>
+</tr>
+<tr>
+<td><code>POST /somewhere</code></td>
+<td>404 <code>Invalid Path</code> (ยืนยันว่าทุก method มาตกที่ <code>router.use</code>)</td>
+<td><code>404: Invalid accessed</code></td>
+</tr>
+<tr>
+<td><code>GET /</code></td>
+<td>200 <code>Hello World from Root!</code> (route ที่มีอยู่ไม่โดนกระทบ)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-ต่อ-navbar-เข้ากับ-route-ยังไง-สไลด์-31">7. ต่อ navbar เข้ากับ route ยังไง? <span class="slide-ref">สไลด์ 31</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใส่ path ของ route ใน <code>href</code> ของลิงก์ใน navbar — path ใน href ต้องตรงกับ route ที่กำหนดใน app.js</strong></p>
+<pre><code class="language-html">&lt;!-- Recall Your CSS/CSS Framework --&gt;
+&lt;body&gt;
+   &lt;ul class=&quot;navbar-nav&quot;&gt;
+      &lt;li class=&quot;nav-item&quot;&gt;
+         &lt;a class=&quot;nav-link active&quot; href=&quot;/&quot;&gt;HelloWorld&lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;nav-item&quot;&gt;
+         &lt;a class=&quot;nav-link&quot; href=&quot;/shabu&quot;&gt;Shabu&lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;nav-item&quot;&gt;
+         &lt;a class=&quot;nav-link&quot; href=&quot;/my-form&quot;&gt;Form&lt;/a&gt;
+      &lt;/li&gt;
+   &lt;/ul&gt;
+&lt;/body&gt;
+</code></pre>
+<ul>
+<li>คลิก &quot;Shabu&quot; → browser ส่ง <code>GET /shabu</code> → ตรงกับ <code>router.get('/shabu', ...)</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 31 พิมพ์ <code>&lt;li lass=&quot;nav-item&quot;&gt;</code> (ควรเป็น <code>class</code>) และ <code>&quot;nav-link active”</code> (ปิดด้วยเครื่องหมายคำพูดโค้ง) — โค้ดด้านบนแก้ให้แล้ว</p>
+</blockquote>
+<hr />
+<h2 id="8-ทำไม-cssรูปไม่ขึ้น-และ-expressstatic-แก้ยังไง-สไลด์-3234">8. ทำไม CSS/รูปไม่ขึ้น และ <code>express.static</code> แก้ยังไง? <span class="slide-ref">สไลด์ 32–34</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>server ส่งให้แค่ไฟล์ที่มี route เท่านั้น CSS/รูป/JS ฝั่งหน้าเว็บจึงโหลดไม่ได้ ต้องใช้ built-in middleware <code>express.static</code> ชี้ไปที่โฟลเดอร์ <code>public</code> แล้วใน HTML อ้างไฟล์โดยนับจาก public เป็นราก (<code>/mystyle.css</code>)</strong></p>
+<h3 id="81-ปัญหา-สไลด์-32">8.1 ปัญหา <span class="slide-ref">สไลด์ 32</span></h3>
+<ul>
+<li>ใน HTML <strong>relative path ไปยัง static files/resources</strong> (รูป, CSS, JavaScript ฝั่งหน้าเว็บ) <strong>จะใช้ไม่ได้</strong></li>
+<li>ต้องใช้ <strong><code>express.static</code></strong> built-in middleware function เพื่อ serve static files</li>
+</ul>
+<p>ตัวอย่าง <code>demostatic.html</code> (มี CSS 1 ไฟล์ + รูป 1 รูป):</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+    &lt;head&gt;
+        &lt;title&gt;Demo static files&lt;/title&gt;
+        &lt;link rel=&quot;stylesheet&quot; href=&quot;../public/mystyle.css&quot;&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Test the CSS&lt;/h1&gt;
+        &lt;img src=&quot;../public/images/sampleImg.png&quot;&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ผล (เปิด <code>localhost:3000/test</code>): หัวข้อ &quot;Test the CSS&quot; ไม่มีสไตล์ รูปเป็นไอคอนรูปเสีย → <strong>No CSS or images work :(</strong></p>
+<h3 id="82-ตั้ง-static-directory-สไลด์-33">8.2 ตั้ง static directory <span class="slide-ref">สไลด์ 33</span></h3>
+<pre><code class="language-js">const express=require('express');
+const path=require('path')
+const port=3000
+const app = express();
+const router = express.Router();
+app.use(router)
+/* 1. Set the static file directory */
+app.use('/', express.static(path.join(__dirname,'public')));
+...
+router.get('/test', (req, res) =&gt; {
+    console.log('Test static files...')
+    res.sendFile(path.join(`${__dirname}/html/demostatic.html`))
+})
+...
+app.listen(port, () =&gt; {
+    console.log(`Server listening on port: ${port}`)
+})
+</code></pre>
+<ul>
+<li><code>'/'</code> ตัวแรก = <strong>mount path</strong> ของ static directory (URL ที่ขึ้นต้นด้วยอะไร)</li>
+<li><code>path.join(__dirname,'public')</code> = โฟลเดอร์จริงที่เก็บไฟล์ static</li>
+<li>โครงโฟลเดอร์: <code>html/</code>, <code>node_modules/</code>, <code>public/</code> (มี <code>images/sampleImg.png</code> และ <code>mystyle.css</code>), <code>app.js</code>, <code>package-lock.json</code>, <code>package.json</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 33 (และ 43, 47) เขียน <code>console.log('Test static files...’)</code> — ปิดด้วยเครื่องหมายคำพูดโค้ง <code>’</code> ถ้าคัดลอกไปรันจะได้ <strong><code>SyntaxError: Invalid or unexpected token</code></strong> (ตรวจด้วย <code>node --check</code> แล้ว) ต้องใช้ <code>'</code> ธรรมดาทั้งคู่</p>
+</blockquote>
+<h3 id="83-แก้-path-ใน-html-สไลด์-34">8.3 แก้ path ใน HTML <span class="slide-ref">สไลด์ 34</span></h3>
+<pre><code class="language-html">&lt;!--2. Refer to the file using relative paths --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;/mystyle.css&quot;&gt;
+...
+&lt;img src=&quot;/images/sampleImg.png&quot;&gt;
+</code></pre>
+<ul>
+<li>อ้างไฟล์ด้วย <strong>path เทียบกับ static directory</strong></li>
+<li><strong>เพราะตั้ง static directory ให้เริ่มที่ <code>/public</code> แล้ว path ไปยัง resource จึงถูก &quot;reset&quot;</strong> — <code>public/</code> กลายเป็นราก <code>/</code></li>
+<li>ผล: หัวข้อ &quot;Test the CSS&quot; มีพื้นหลังสีฟ้า (cyan) และรูปแสดงขึ้น</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-05-static.png" alt="express.static จับ URL ไปหาไฟล์ใน public" /></p>
+<p><strong>ผลรันจริง</strong> (static mount ที่ <code>/</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /test</code></td>
+<td>200 ได้ demostatic.html (console: <code>Test static files...</code>)</td>
+</tr>
+<tr>
+<td><code>GET /mystyle.css</code></td>
+<td>200 <code>text/css</code></td>
+</tr>
+<tr>
+<td><code>GET /images/sampleImg.png</code></td>
+<td>200 <code>image/png</code></td>
+</tr>
+<tr>
+<td><code>GET /public/mystyle.css</code></td>
+<td><strong>404</strong> — เพราะ <code>public</code> ถูกตัดออกจาก URL แล้ว จึงไม่ต้อง (และห้าม) ใส่ <code>public</code> ใน path</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนตั้งโฟลเดอร์ <code>public</code> เป็น &quot;หน้าร้าน&quot; — ลูกค้าเห็นแค่ของที่วางหน้าร้าน และเรียกชื่อของได้ตรง ๆ (<code>/mystyle.css</code>) โดยไม่ต้องรู้ว่าหลังร้านเก็บไว้ในโฟลเดอร์ชื่ออะไร</p>
+</blockquote>
+<hr />
+<h2 id="9-modular-routes-คืออะไร-สไลด์-3538">9. Modular routes คืออะไร? <span class="slide-ref">สไลด์ 35–38</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เมื่อเว็บใหญ่ขึ้น ควรแบ่ง route เป็นโมดูล — สร้าง router หลายตัว แล้ว <code>app.use(&quot;/product&quot;, router1)</code> ทำให้ path ใน router1 ถูกต่อท้าย <code>/product</code> อัตโนมัติ (<code>router1.get('/add')</code> = <code>/product/add</code>)</strong></p>
+<h3 id="91-แนวคิด-สไลด์-35">9.1 แนวคิด <span class="slide-ref">สไลด์ 35</span></h3>
+<p>When the website grows, the routes should be designed as <strong>modular routes</strong>.</p>
+<p><img loading="lazy" src="diagrams/L10-06-modular.png" alt="โครง modular routes" /></p>
+<ul>
+<li><code>app</code> ดูแล <code>/</code></li>
+<li><code>router1</code> ดูแล <code>/product</code> → <code>/add</code>, <code>/edit</code>, <code>/delete</code></li>
+<li><code>router2</code> ดูแล <code>/user</code> → <code>/add</code>, <code>/edit</code>, <code>/view</code></li>
+<li><code>routerN</code> ดูแล <code>/module</code> (ตัวแทนโมดูลอื่น ๆ)</li>
+</ul>
+<h3 id="92-โค้ด-สไลด์-36">9.2 โค้ด <span class="slide-ref">สไลด์ 36</span></h3>
+<pre><code class="language-js">const express=require('express');
+const app=express();
+const router1=express.Router();
+const router2=express.Router();
+app.use(&quot;/product&quot;, router1);     //Register router1
+app.use(&quot;/user&quot;, router2);        //Register router2
+
+// Main app
+app.get('/', function (req, res){
+    res.send(&quot;Homepage&quot;);
+});
+// Module: product
+router1.get('/', function (req, res) {
+    res.send(&quot;Module for product - Root&quot;);
+});
+router1.get('/add', function (req, res) {
+    res.send(&quot;Module for product - Add&quot;);
+});
+// Module: user
+router2.get('/', function (req, res) {
+    res.send(&quot;Module for user - Root&quot;);
+});
+router2.get('/add', function (req, res) {
+    res.send(&quot;Module for user - Add&quot;);
+});
+// Server running on the port: 3030
+app.listen(3030, function () {
+    console.log(&quot;Server listening at Port 3030&quot;);
+});
+</code></pre>
+<h3 id="93-url-ผลลัพธ์-สไลด์-3638">9.3 URL → ผลลัพธ์ <span class="slide-ref">สไลด์ 36–38</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>URL เต็ม = mount path ของ router + path ใน router</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>URL</th>
+<th>ใครจัดการ</th>
+<th>ผลลัพธ์ (สไลด์ + รันจริง)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:3030/</code></td>
+<td><code>app.get('/')</code></td>
+<td><code>Homepage</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:3030/product</code></td>
+<td><code>router1.get('/')</code></td>
+<td><code>Module for product - Root</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:3030/product/add</code></td>
+<td><code>router1.get('/add')</code></td>
+<td><code>Module for product - Add</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:3030/user</code></td>
+<td><code>router2.get('/')</code></td>
+<td><code>Module for user - Root</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:3030/user/add</code></td>
+<td><code>router2.get('/add')</code></td>
+<td><code>Module for user - Add</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>สไลด์ 37 เน้นกลุ่ม <strong>/product</strong> (router1), สไลด์ 38 เน้นกลุ่ม <strong>/user</strong> (router2) — โค้ดเดียวกับสไลด์ 36</li>
+<li>รันจริง: <code>/product/edit</code> ได้ 404 <code>Cannot GET /product/edit</code> เพราะโค้ดนี้ยังไม่ได้สร้าง route <code>/edit</code> (ในแผนภาพสไลด์ 35 มี แต่ในโค้ดตัวอย่างไม่มี)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนห้างที่แบ่งชั้น: <code>app.use(&quot;/product&quot;, router1)</code> คือบอกว่า &quot;ชั้น product ให้ router1 ดูแล&quot; — ใน router1 จึงเขียนแค่ <code>/add</code> ไม่ต้องเขียน <code>/product/add</code></p>
+</blockquote>
+<hr />
+<h2 id="10-form-handling-คืออะไร-และมี-flow-ยังไง-สไลด์-3945">10. Form handling คืออะไร และมี flow ยังไง? <span class="slide-ref">สไลด์ 39–45</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ฟอร์มคือที่ผู้ใช้กรอกข้อมูล ควร validate ฝั่ง browser ก่อน แล้วส่งให้ server ด้วย GET หรือ POST ผ่าน attribute <code>method</code> และ <code>action</code> ของ <code>&lt;form&gt;</code> server อ่านค่าตาม attribute <code>name</code> ของ input</strong></p>
+<h3 id="101-หลักการ-สไลด์-40">10.1 หลักการ <span class="slide-ref">สไลด์ 40</span></h3>
+<ul>
+<li><strong>Form</strong> คือที่ที่ผู้ใช้กรอกข้อมูล</li>
+<li>ข้อมูลที่ผู้ใช้กรอก <strong>ควร validate ที่ browser (client) เมื่อทำได้</strong> (เช่น JS script, HTML5 attributes)</li>
+<li>ฟอร์มถูก <strong>submit ไปที่ server ด้วย GET หรือ POST</strong></li>
+<li>หลัง submit server จัดการค่าจากฟอร์ม เช่น <strong>เพิ่ม user ใหม่ตอนลงทะเบียน</strong>, <strong>อัปเดต product ที่มีอยู่</strong></li>
+<li>ควร <strong>validate เพิ่มที่ server</strong> ด้วย ถ้าจะนำข้อมูลไปจัดการกับ database</li>
+</ul>
+<h3 id="102-flow-ของ-form-handling-สไลด์-41">10.2 Flow ของ form handling <span class="slide-ref">สไลด์ 41</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>GET ขอฟอร์มเปล่า → ผู้ใช้กรอก → POST ส่งข้อมูล → server validate → ไม่ผ่านส่งฟอร์มพร้อม error กลับ / ผ่านทำงานแล้ว redirect ไปหน้า success</strong></p>
+<p><img loading="lazy" src="diagrams/L10-07-form-flow.png" alt="flow ของ form handling (จาก MDN)" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝั่ง</th>
+<th>ขั้น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser</td>
+<td>1. Browser requests page containing form → <strong>HTTP GET</strong></td>
+</tr>
+<tr>
+<td>Server</td>
+<td>2. Create empty default form → ส่งกลับไป</td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>3. User populate/update form → <strong>HTTP POST with form data</strong></td>
+</tr>
+<tr>
+<td>Server</td>
+<td>4. Validate data → <strong>Is data valid?</strong></td>
+</tr>
+<tr>
+<td>Server</td>
+<td>5a. <strong>No</strong> → Create form with user-entered data and error messages → กลับไปขั้น 3</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>5b. <strong>Yes</strong> → Perform actions on (valid) data → Redirect browser to &quot;success&quot; URL → End</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="103-ฟอร์มตัวอย่าง-myformhtml-สไลด์-42">10.3 ฟอร์มตัวอย่าง <code>myForm.html</code> <span class="slide-ref">สไลด์ 42</span></h3>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;title&gt;Register Form&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;form id=&quot;frmRegister&quot; action=&quot;&quot; method=&quot;&quot;&gt;
+    &lt;label for=&quot;fname&quot;&gt;First name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;fname&quot; value=&quot;John&quot;&gt;&lt;br&gt;
+    &lt;label for=&quot;lname&quot;&gt;Last name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;lname&quot; value=&quot;Doe&quot;&gt;&lt;br&gt;
+    &lt;button type=&quot;submit&quot; &gt;Submit&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<ul>
+<li><strong><code>action</code></strong> = ปลายทางที่ฟอร์มจะถูกส่งไป</li>
+<li><strong><code>method</code></strong> = HTTP method ที่ใช้ส่งฟอร์ม</li>
+<li>(ตอนนี้ยังเว้นว่างไว้ จะเติมในข้อ 11–12)</li>
+</ul>
+<h3 id="104-server-ที่ส่งฟอร์มให้-สไลด์-4344">10.4 Server ที่ส่งฟอร์มให้ <span class="slide-ref">สไลด์ 43–44</span></h3>
+<pre><code class="language-js">const express = require('express');
+const path = require('path')
+const port=3000
+const app = express();
+/* 1. Create a router object and register the router */
+const router = express.Router();
+app.use(router)
+/* 2. Add routes */
+router.get('/', (req, res) =&gt; {...})
+/* 3. Add Form to the route */
+router.get('/my-form', (req, res) =&gt; {
+    console.log('Retrieve the form...')
+    res.sendFile(path.join(`${__dirname}/html/myForm.html`))
+})
+app.listen(port, () =&gt; {
+    console.log(`Server listening on port: ${port}`)
+})
+</code></pre>
+<ul>
+<li>เมื่อผู้ใช้ส่ง <strong>HTTP GET ไปที่ <code>http://localhost:3000/my-form</code></strong> จะได้ฟอร์มกลับไป</li>
+<li><strong>ถ้าเริ่มจากศูนย์</strong> ต้องทำตามขั้น: (1) ตั้งโปรเจกต์ <code>npm init</code>, <code>npm install express</code>, <code>npm install nodemon</code> (2) สร้าง entry file <code>app.js</code> (3) ตั้ง <code>start</code> ใน package.json</li>
+</ul>
+<p>ผล (สไลด์ 44): <code>npm start</code> → <code>Server listening on port: 3000</code> → เปิด <code>localhost:3000/my-form</code> → browser (Client) เห็นฟอร์ม First name / Last name / Submit, terminal (Server) พิมพ์ข้อความว่าดึงฟอร์ม</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ terminal ในสไลด์ 44, 48, 52 แสดง <code>Retrieve a form</code> แต่โค้ดเขียน <code>console.log('Retrieve the form...')</code> — รันจริงจะได้ <code>Retrieve the form...</code></p>
+</blockquote>
+<h3 id="105-attribute-ที่ต้องกำหนด-สไลด์-45">10.5 attribute ที่ต้องกำหนด <span class="slide-ref">สไลด์ 45</span></h3>
+<ul>
+<li>ฟอร์มส่งไป server ด้วย <strong>GET หรือ POST</strong></li>
+<li>ต้องกำหนด attribute ใน <code>&lt;form&gt;</code>:
+<ul>
+<li><strong><code>method</code></strong>: GET หรือ POST</li>
+<li><strong><code>action</code></strong>: path ไปยัง endpoint ที่กำหนดไว้ เช่น <code>/form-get</code>, <code>/form-post</code></li>
+</ul>
+</li>
+<li>หลัง submit server ดึงค่าจากฟอร์มโดยอ้างตาม <strong>attribute <code>name</code></strong> ของ element ในฟอร์ม</li>
+</ul>
+<hr />
+<h2 id="11-รับฟอร์มแบบ-get-ยังไง-reqquery-สไลด์-4648">11. รับฟอร์มแบบ GET ยังไง? (<code>req.query</code>) <span class="slide-ref">สไลด์ 46–48</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>&lt;form action=&quot;/form-get&quot; method=&quot;GET&quot;&gt;</code> → ข้อมูลไปต่อท้าย URL (<code>?fname=John&amp;lname=Doe</code>) → server ใช้ <code>router.get(&quot;/form-get&quot;, ...)</code> แล้วอ่านจาก <code>req.query.fname</code></strong></p>
+<h3 id="111-html-สไลด์-46">11.1 HTML <span class="slide-ref">สไลด์ 46</span></h3>
+<pre><code class="language-html">&lt;form id=&quot;frmRegister&quot; action=&quot;/form-get&quot; method=&quot;GET&quot;&gt;
+    &lt;label for=&quot;fname&quot;&gt;First name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;fname&quot; value=&quot;John&quot;&gt;&lt;br&gt;
+    &lt;label for=&quot;lname&quot;&gt;Last name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;lname&quot; value=&quot;Doe&quot;&gt;&lt;br&gt;
+    &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<ul>
+<li><strong>attribute <code>name</code></strong> จะถูกใช้อ้างอิงข้อมูลฟอร์มหลัง submit</li>
+</ul>
+<h3 id="112-server-สไลด์-47">11.2 Server <span class="slide-ref">สไลด์ 47</span></h3>
+<pre><code class="language-js">/* Handle GET: Display myform.html */
+router.get('/my-form', (req, res) =&gt; {
+    console.log('Retrieve the form...')
+    res.sendFile(path.join(`${__dirname}/html/myForm.html`))
+})
+/* Handle GET: Form submitted by GET */
+router.get(&quot;/form-get&quot;, function(req,res){
+    console.log(`${req.method}`); // HTTP method
+    console.log(req.query); // JSON
+    const fname = req.query.fname;
+    const lname = req.query.lname;
+    res.send(`Form submitted by ${fname} ${lname} with ${req.method}`);
+});
+</code></pre>
+<p>กฎ 4 ข้อจากสไลด์ (ต้องตรงกัน):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝั่ง HTML</th>
+<th>↔</th>
+<th>ฝั่ง server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;form action=&quot;/form-get&quot;&gt;</code></td>
+<td><strong>path ต้องตรงกัน</strong></td>
+<td><code>router.get(&quot;/form-get&quot;, ...)</code></td>
+</tr>
+<tr>
+<td><code>&lt;form method=&quot;GET&quot;&gt;</code></td>
+<td><strong>method ต้องตรงกัน</strong></td>
+<td><code>router.</code><strong><code>get</code></strong><code>(...)</code></td>
+</tr>
+<tr>
+<td><code>&lt;input name=&quot;fname&quot;&gt;</code>, <code>name=&quot;lname&quot;</code></td>
+<td>ชื่อเดียวกัน</td>
+<td><code>req.query.fname</code>, <code>req.query.lname</code></td>
+</tr>
+<tr>
+<td>ข้อมูลอยู่ <strong>หลัง <code>?</code> ใน URL</strong></td>
+<td></td>
+<td><strong><code>req.query</code></strong> = URL query parameters</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="113-ผลลัพธ์ทีละขั้น-สไลด์-48">11.3 ผลลัพธ์ทีละขั้น <span class="slide-ref">สไลด์ 48</span></h3>
+<p><img loading="lazy" src="diagrams/L10-08-get-post.png" alt="GET vs POST: ข้อมูลไปทางไหน" /></p>
+<ol>
+<li><strong>HTTP GET <code>localhost:3000/form</code></strong> → Routing to myForm.html → console: <code>Retrieve a form</code></li>
+<li>ผู้ใช้กด <strong>Submit</strong> (fname = John, lname = Doe) → <strong>Form Submission</strong>: browser ส่ง <strong>HTTP GET <code>localhost:3000/form-get?fname=John&amp;lname=Doe</code></strong></li>
+<li>console แสดง method และ <code>req.query</code>:<pre><code>GET
+{ fname: 'John' lname: 'Doe' },
+</code></pre>
+</li>
+<li><strong>Show Response</strong>: browser (URL <code>localhost:3000/form-get?fname=John&amp;lname=Doe</code>) แสดง <strong><code>Form submitted by John Doe with GET</code></strong></li>
+</ol>
+<p><strong>ผลรันจริง</strong> (Express 5.3.0):</p>
+<pre><code>Retrieve the form...
+GET
+[Object: null prototype] { fname: 'John', lname: 'Doe' }
+</code></pre>
+<p>response: <code>Form submitted by John Doe with GET</code></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ console ในสไลด์ 48 เขียน <code>{ fname: 'John' lname: 'Doe' },</code> (ขาด comma ระหว่าง property และมี comma เกินท้าย) — ของจริงคือ <code>{ fname: 'John', lname: 'Doe' }</code> และใน Express 5 <code>req.query</code> พิมพ์ออกมามีคำนำหน้า <code>[Object: null prototype]</code> (เป็น object ที่ไม่มี prototype แต่ใช้ <code>req.query.fname</code> ได้ตามปกติ)</p>
+<p class="c-warn">⚠️ สไลด์ 48/52 เขียน step แรกเป็น <code>localhost:3000/form</code> (และ URL bar เป็น <code>localhost:3030/form</code>) แต่ route ในโค้ดคือ <strong><code>/my-form</code></strong> — ใช้ <code>/my-form</code> ตามโค้ด และ terminal เขียน <code>Server listening at Port 3000</code> ขณะที่โค้ดพิมพ์ <code>Server listening on port: 3000</code></p>
+</blockquote>
+<hr />
+<h2 id="12-รับฟอร์มแบบ-post-ยังไง-reqbody-middleware-สไลด์-4952">12. รับฟอร์มแบบ POST ยังไง? (<code>req.body</code> + middleware) <span class="slide-ref">สไลด์ 49–52</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>&lt;form action=&quot;/form-post&quot; method=&quot;POST&quot;&gt;</code> → ข้อมูลอยู่ใน message body ไม่ใช่ URL → ต้องมี middleware <code>express.json()</code> และ <code>express.urlencoded({extended:true})</code> ก่อน แล้วใช้ <code>router.post(&quot;/form-post&quot;, ...)</code> อ่านจาก <code>req.body.fname</code></strong></p>
+<h3 id="121-html-สไลด์-49">12.1 HTML <span class="slide-ref">สไลด์ 49</span></h3>
+<pre><code class="language-html">&lt;form id=&quot;frmRegister&quot; action=&quot;/form-post&quot; method=&quot;POST&quot;&gt;
+    &lt;label for=&quot;fname&quot;&gt;First name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;fname&quot; value=&quot;John&quot;&gt;&lt;br&gt;
+    &lt;label for=&quot;lname&quot;&gt;Last name:&lt;/label&gt;&lt;br&gt;
+    &lt;input type=&quot;text&quot; name=&quot;lname&quot; value=&quot;Doe&quot;&gt;&lt;br&gt;
+    &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<ul>
+<li>ต่างจาก GET แค่ <code>action=&quot;/form-post&quot;</code> และ <code>method=&quot;POST&quot;</code> — attribute <code>name</code> ยังใช้อ้างข้อมูลเหมือนเดิม</li>
+</ul>
+<h3 id="122-ทำไมต้องมี-middleware-สไลด์-50">12.2 ทำไมต้องมี middleware? <span class="slide-ref">สไลด์ 50</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>POST เข้ารหัสข้อมูลไว้ใน body จึงต้องมี middleware แยกข้อมูลออกมา ตั้งแต่ Express 4.16 รวม body-parser เข้ามาแล้ว เขียนแค่ 2 บรรทัด</strong></p>
+<ul>
+<li>HTTP POST request <strong>encode ข้อมูลไว้ใน message body</strong> → ต้องใช้ <strong>middleware</strong> ดึงข้อมูลขาเข้าของ POST ออกมา</li>
+<li><strong>หลัง Express เวอร์ชัน 4.16</strong> &quot;body-parser&quot; ถูกรวมเข้ามาใน express แล้ว เขียนได้สั้น ๆ:</li>
+</ul>
+<pre><code class="language-js">router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>middleware</th>
+<th>หน้าที่ (ตามสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>express.json()</code></td>
+<td>built-in middleware แยก (parse) request ที่มี <strong>JSON payload</strong> (อิง body-parser)</td>
+</tr>
+<tr>
+<td><code>express.urlencoded()</code></td>
+<td>built-in middleware แยก request ที่มี <strong>urlencoded payload</strong> (อิง body-parser)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="123-server-สไลด์-51">12.3 Server <span class="slide-ref">สไลด์ 51</span></h3>
+<pre><code class="language-js">const path = require(&quot;path&quot;);
+const express = require(&quot;express&quot;);
+const app = express();
+/* Use Router object to handle routes */
+const router = express.Router();
+app.use(&quot;/&quot;, router); // Register the router
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
+...
+/* Handle GET: Display myform.html */
+router.get(&quot;/my-form&quot;, function(req,res){...});
+/* Handle POST: Form submitted by POST */
+router.post(&quot;/form-post&quot;,function(req,res){
+    console.log(req.method);
+    console.log(req.body);
+    const fname = req.body.fname;
+    const lname = req.body.lname;
+    res.send(`Form submitted by ${fname} ${lname} with ${req.method}`);
+});
+</code></pre>
+<ul>
+<li><strong>Note: ต้องมี middleware ที่ parse JSON และ urlencoded payload</strong></li>
+<li><strong><code>req.body</code></strong> มีข้อมูลจาก client ในรูป string หรือ JSON object</li>
+<li>ใช้ <strong><code>router.post</code></strong> (ไม่ใช่ <code>router.get</code>) ให้ตรงกับ <code>method=&quot;POST&quot;</code></li>
+</ul>
+<h3 id="124-ผลลัพธ์-สไลด์-52">12.4 ผลลัพธ์ <span class="slide-ref">สไลด์ 52</span></h3>
+<ol>
+<li>HTTP GET <code>localhost:3000/form</code> (route จริง <code>/my-form</code>) → Routing to myForm.html → <code>Retrieve a form</code></li>
+<li>Submit → <strong>HTTP POST <code>localhost:3000/form-post</code></strong> (URL <strong>ไม่มี</strong> <code>?fname=...</code> ต่อท้าย)</li>
+<li>console:<pre><code>POST
+{ fname: 'John' lname: 'Doe' },
+</code></pre>
+</li>
+<li>browser (URL <code>localhost:3000/form-post</code>) แสดง <strong><code>Form submitted by John Doe with POST</code></strong></li>
+</ol>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณีทดสอบ</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST <code>/form-post</code> body urlencoded <code>fname=John&amp;lname=Doe</code></td>
+<td>200 <code>Form submitted by John Doe with POST</code>, console <code>POST</code> / <code>{ fname: 'John', lname: 'Doe' }</code></td>
+</tr>
+<tr>
+<td>POST <code>/form-post</code> body JSON <code>{&quot;fname&quot;:&quot;John&quot;,&quot;lname&quot;:&quot;Doe&quot;}</code></td>
+<td>200 ผลเดียวกัน (เพราะมี <code>express.json()</code>)</td>
+</tr>
+<tr>
+<td><strong>ไม่ใส่ middleware 2 บรรทัด</strong> แล้ว POST แบบเดียวกัน</td>
+<td><code>req.body</code> เป็น <strong><code>undefined</code></strong> → อ่าน <code>req.body.fname</code> ไม่ได้ (ยืนยัน Note ของสไลด์ 51)</td>
+</tr>
+<tr>
+<td>GET <code>/form-post</code></td>
+<td>404 <code>Cannot GET /form-post</code> (route นี้รับแค่ POST)</td>
+</tr>
+<tr>
+<td>POST <code>/form-get</code></td>
+<td>404 <code>Cannot POST /form-get</code> (route นี้รับแค่ GET)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ console ในสไลด์ 52 เขียน <code>{ fname: 'John' lname: 'Doe' },</code> เหมือนสไลด์ 48 — ของจริงคือ <code>{ fname: 'John', lname: 'Doe' }</code></p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node.js</td>
+<td>asynchronous JavaScript runtime บน Chrome's V8 engine; &quot;an open-source server environment&quot;</td>
+<td>JS ที่รันนอก browser</td>
+</tr>
+<tr>
+<td>V8</td>
+<td>JavaScript engine ของ Chrome ที่ Node ใช้</td>
+<td>เครื่องยนต์ JS</td>
+</tr>
+<tr>
+<td><code>http</code> module</td>
+<td>module สำหรับสร้าง web server</td>
+<td><code>http.createServer</code></td>
+</tr>
+<tr>
+<td><code>fs</code> module</td>
+<td>File system module ใช้อ่านไฟล์ (<code>fs.readFile</code>)</td>
+<td>เปิดไฟล์ HTML</td>
+</tr>
+<tr>
+<td><code>req</code> / <code>res</code></td>
+<td>request object (มี <code>url</code>, <code>method</code>, <code>query</code>, <code>body</code>) / response object ใช้ตอบกลับ</td>
+<td>ขาเข้า / ขาออก</td>
+</tr>
+<tr>
+<td>status code 200 / 404</td>
+<td>OK / ไม่พบ (Error)</td>
+<td>200 ผ่าน, 404 ไม่มี path</td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>header บอกชนิดเนื้อหา: <code>text/plain</code>, <code>text/html</code></td>
+<td>ข้อความเปล่า vs หน้าเว็บ</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>ส่ง request ไปยังโค้ดที่จัดการ URL นั้น</td>
+<td>URL ไหน ทำอะไร</td>
+</tr>
+<tr>
+<td>Express</td>
+<td>minimal &amp; flexible Node.js web application framework</td>
+<td>ทำ server ง่ายขึ้น</td>
+</tr>
+<tr>
+<td>Template engine</td>
+<td>(Pug, EJS) แทนตัวแปรใน template ด้วยค่าจริงตอน runtime แล้วแปลงเป็น HTML</td>
+<td>แม่แบบ + ค่า = HTML</td>
+</tr>
+<tr>
+<td>NPM</td>
+<td>package manager ติดตั้ง Node.js packages</td>
+<td><code>npm install</code></td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>meta-data ของโปรเจกต์ + รายการ dependencies + scripts</td>
+<td>บัตรประจำตัวโปรเจกต์</td>
+</tr>
+<tr>
+<td>nodemon</td>
+<td>เฝ้า source file แล้ว restart โปรแกรมอัตโนมัติ</td>
+<td>แก้แล้วรันใหม่เอง</td>
+</tr>
+<tr>
+<td>entry file (<code>app.js</code>)</td>
+<td>ไฟล์หลักของ server: routing + ตั้งค่า server</td>
+<td><code>&quot;main&quot;: &quot;app.js&quot;</code></td>
+</tr>
+<tr>
+<td><code>npm start</code></td>
+<td>รัน script <code>&quot;start&quot;</code> ใน package.json</td>
+<td>= <code>nodemon app.js</code></td>
+</tr>
+<tr>
+<td>Middleware</td>
+<td>ฟังก์ชันที่เข้าถึง <code>req</code> และ <code>res</code> ได้</td>
+<td>ด่านกลางทาง</td>
+</tr>
+<tr>
+<td><code>express.Router()</code></td>
+<td>middleware ช่วยจัดการ route</td>
+<td><code>router.get(...)</code></td>
+</tr>
+<tr>
+<td><code>router.use(...)</code></td>
+<td>ถูกเรียกทุก HTTP method — ใช้ดัก path ที่ไม่ได้กำหนด (404)</td>
+<td>ตาข่ายท้ายสุด</td>
+</tr>
+<tr>
+<td><code>res.send()</code> / <code>res.sendFile()</code></td>
+<td>ส่งข้อความ / ส่งไฟล์กลับ</td>
+<td>send = ข้อความ, sendFile = ไฟล์</td>
+</tr>
+<tr>
+<td><code>res.status(404)</code></td>
+<td>ตั้ง status code ก่อนส่ง</td>
+<td><code>.status(404).send(...)</code></td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td>global variable = absolute path ของโฟลเดอร์ที่มีไฟล์ที่กำลังรัน</td>
+<td>&quot;ฉันอยู่โฟลเดอร์ไหน&quot;</td>
+</tr>
+<tr>
+<td><code>path.join()</code></td>
+<td>รวม path หลายส่วนเป็น path เดียว</td>
+<td>ต่อ path</td>
+</tr>
+<tr>
+<td>Static files</td>
+<td>ไฟล์ที่ส่งตรง ๆ เช่น รูป, CSS, JS ฝั่งหน้าเว็บ</td>
+<td>ของหน้าร้าน</td>
+</tr>
+<tr>
+<td><code>express.static</code></td>
+<td>built-in middleware สำหรับ serve static files</td>
+<td><code>app.use('/', express.static(...public))</code></td>
+</tr>
+<tr>
+<td>Mount path</td>
+<td>path ที่ใช้ผูก static directory/router (<code>'/'</code>, <code>&quot;/product&quot;</code>)</td>
+<td>คำนำหน้า URL</td>
+</tr>
+<tr>
+<td>Modular routes</td>
+<td>แบ่ง route เป็นหลาย router ตามโมดูล</td>
+<td>router ละแผนก</td>
+</tr>
+<tr>
+<td><code>action</code> / <code>method</code></td>
+<td>attribute ของ <code>&lt;form&gt;</code>: ปลายทาง / HTTP method</td>
+<td>ส่งไปไหน / ส่งแบบไหน</td>
+</tr>
+<tr>
+<td><code>name</code> (input)</td>
+<td>ชื่อที่ server ใช้อ้างค่าจากฟอร์ม</td>
+<td><code>req.query.fname</code></td>
+</tr>
+<tr>
+<td><code>req.query</code></td>
+<td>URL query parameters (หลัง <code>?</code>) — ใช้กับ GET</td>
+<td>GET → query</td>
+</tr>
+<tr>
+<td><code>req.body</code></td>
+<td>ข้อมูลใน body (string/JSON) — ใช้กับ POST, ต้องมี middleware</td>
+<td>POST → body</td>
+</tr>
+<tr>
+<td><code>express.json()</code> / <code>express.urlencoded()</code></td>
+<td>built-in middleware parse JSON / urlencoded payload (อิง body-parser, รวมใน Express ตั้งแต่ 4.16)</td>
+<td>2 บรรทัดที่ห้ามลืมเมื่อใช้ POST</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>Node.js</strong> = asynchronous JS runtime บน V8 | ไม่มี DOM, <code>document</code>, <code>window</code>, cookies | มี module เช่น fs, HTTP, utilities</li>
+<li>⭐ server ด้วย http module: <code>createServer((req,res)=&gt;{ statusCode → setHeader → write → end })</code> → <code>listen(8081)</code></li>
+<li>⭐ routing ด้วย http module = <code>if (req.url === &quot;/...&quot;)</code> + <code>fs.readFile</code> + Content-Type <code>text/html</code>; path ไม่รู้จัก → 404 <code>text/plain</code></li>
+<li>⭐ ตั้งโปรเจกต์: <code>npm init</code> → <code>npm install express</code> → (<code>npm install nodemon</code>) → <code>app.js</code> → <code>&quot;start&quot;: &quot;nodemon app.js&quot;</code> → <code>npm start</code></li>
+<li>⭐ Express พื้นฐาน: <code>const app = express()</code> → <code>app.get('/', (req,res)=&gt;res.send(...))</code> → <code>app.listen(3000, ...)</code></li>
+<li>⭐ Router: <code>const router = express.Router(); app.use(router); router.get(...)</code></li>
+<li>⭐ ส่งไฟล์: <code>res.sendFile(path.join(`${__dirname}/html/shabu.html`))</code></li>
+<li>⭐ path ที่ไม่มี → ถ้าไม่จัดการ ได้ <code>Cannot GET /somewhere</code>; จัดการเองด้วย <code>router.use((req,res,next)=&gt;res.status(404).send(&quot;Invalid Path&quot;))</code> ไว้ท้ายสุด — <strong><code>router.use</code> ถูกเรียกทุก HTTP method</strong></li>
+<li>⭐ navbar: <code>href</code> ต้องตรงกับ route ใน app.js</li>
+<li>⭐ static: <code>app.use('/', express.static(path.join(__dirname,'public')))</code> แล้วใน HTML อ้าง <code>/mystyle.css</code>, <code>/images/sampleImg.png</code> (ไม่ต้องมี <code>public</code>)</li>
+<li>⭐ modular: <code>app.use(&quot;/product&quot;, router1)</code> + <code>router1.get('/add')</code> = <strong><code>/product/add</code></strong></li>
+<li>⭐ form: <code>action</code> = ปลายทาง, <code>method</code> = GET/POST, server อ่านตาม <code>name</code></li>
+<li>⭐ <strong>GET</strong>: ข้อมูลใน URL <code>?fname=John&amp;lname=Doe</code> → <code>router.get</code> + <code>req.query</code></li>
+<li>⭐ <strong>POST</strong>: ข้อมูลใน body → ต้องมี <code>express.json()</code> + <code>express.urlencoded({extended:true})</code> → <code>router.post</code> + <code>req.body</code></li>
+<li>⭐ path ใน route ต้องตรงกับ <code>action</code> และ method ใน route ต้องตรงกับ <code>method</code> ของ form</li>
+<li>validate ฝั่ง client เมื่อทำได้ และ validate เพิ่มที่ server ถ้าจะเก็บลง database</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http</code> module (สไลด์ 8–13)</td>
+<td>Express (สไลด์ 21–)</td>
+<td>http: ต้องเช็ก <code>req.url</code> ด้วย if/else, ตั้ง header, <code>write</code>, <code>end</code> เอง · Express: <code>router.get(path, ...)</code> + <code>res.send</code>/<code>sendFile</code></td>
+</tr>
+<tr>
+<td><code>res.write()</code> + <code>res.end()</code></td>
+<td><code>res.send()</code></td>
+<td>แบบ http ต้องเขียนแล้วปิดเอง · <code>res.send</code> ของ Express ส่งและจบให้ในคำสั่งเดียว</td>
+</tr>
+<tr>
+<td><code>res.send()</code></td>
+<td><code>res.sendFile()</code></td>
+<td>send = ส่งข้อความ/เนื้อหา · sendFile = ส่งไฟล์ (ต้องใช้ absolute path → <code>__dirname</code> + <code>path.join</code>)</td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>text/html</code></td>
+<td>ข้อความธรรมดา (Greeting, error) vs หน้า HTML (shabu.html, bbq.html)</td>
+</tr>
+<tr>
+<td><code>router.get(...)</code></td>
+<td><code>router.use(...)</code></td>
+<td>get รับเฉพาะ GET ที่ path ตรง · use ถูกเรียกทุก method — ใช้ดัก 404</td>
+</tr>
+<tr>
+<td><code>app.get('/')</code></td>
+<td><code>router.get('/')</code></td>
+<td>ผูก route กับ app ตรง ๆ vs ผูกกับ router (ที่ลงทะเบียนด้วย <code>app.use(router)</code>)</td>
+</tr>
+<tr>
+<td><code>app.use(router)</code></td>
+<td><code>app.use(&quot;/product&quot;, router1)</code></td>
+<td>ลงทะเบียน router ที่ root vs ลงทะเบียนแบบมี mount path → path ใน router ถูกต่อท้าย <code>/product</code></td>
+</tr>
+<tr>
+<td><code>node app.js</code></td>
+<td><code>npm start</code> (<code>nodemon app.js</code>)</td>
+<td>รันครั้งเดียว · nodemon restart อัตโนมัติเมื่อแก้ไฟล์</td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td><code>path.join()</code></td>
+<td>ตัวแปร = โฟลเดอร์ของไฟล์ที่รันอยู่ · ฟังก์ชัน = รวม path หลายส่วน</td>
+</tr>
+<tr>
+<td><code>href=&quot;../public/mystyle.css&quot;</code></td>
+<td><code>href=&quot;/mystyle.css&quot;</code></td>
+<td>แบบแรกใช้ไม่ได้ (ไม่มี static) · แบบหลังใช้ได้หลังตั้ง <code>express.static</code> ที่ <code>public</code></td>
+</tr>
+<tr>
+<td><code>req.url</code></td>
+<td><code>req.query</code></td>
+<td>path ทั้งหมดที่ขอ (ใช้ทำ routing ใน http module) · object ของค่าหลัง <code>?</code></td>
+</tr>
+<tr>
+<td>GET form</td>
+<td>POST form</td>
+<td>GET: ข้อมูลใน URL → <code>req.query</code>, <code>router.get</code> · POST: ข้อมูลใน body → <code>req.body</code>, <code>router.post</code>, ต้องมี middleware</td>
+</tr>
+<tr>
+<td><code>express.json()</code></td>
+<td><code>express.urlencoded()</code></td>
+<td>parse JSON payload · parse urlencoded payload (แบบที่ฟอร์ม HTML ส่ง)</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td><code>method</code></td>
+<td>ส่งไป path ไหน · ส่งด้วย GET หรือ POST</td>
+</tr>
+<tr>
+<td>validate ฝั่ง client</td>
+<td>validate ฝั่ง server</td>
+<td>ทำเมื่อทำได้ (JS, HTML5 attributes) · ทำเพิ่มเมื่อจะจัดการข้อมูลกับ database</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l9/index.html"><small>← บทก่อนหน้า</small><span>Lecture 9 – Node.js Part I (Intro to Node.js)</span></a><a class="pg next" href="../l11/index.html"><small>บทถัดไป →</small><span>Lecture 11 – Node.js Part III (Cookies, Session, and Database)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-บทนี้อยู่ตรงไหนของ-nodejs-unit-และเรียนอะไร-สไลด์-24">บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร?</a></li><li><a href="#1-recap-nodejs-คืออะไร-และสร้าง-server-ด้วย-http-module-ยังไง-สไลด์-59">RECAP: Node.js คืออะไร และสร้าง server ด้วย http module ยังไง?</a></li><li><a href="#2-ทำ-routing-ด้วย-http-module-ล้วน-ๆ-ทำยังไง-สไลด์-1013">ทำ routing ด้วย http module ล้วน ๆ ทำยังไง?</a></li><li><a href="#3-express-คืออะไร-ทำไมต้องใช้-สไลด์-1416">Express คืออะไร ทำไมต้องใช้?</a></li><li><a href="#4-เริ่มโปรเจกต์-express-ยังไง-สไลด์-1724">เริ่มโปรเจกต์ Express ยังไง?</a></li><li><a href="#5-expressrouter-และ-middleware-คืออะไร-สไลด์-2527">express.Router() และ middleware คืออะไร?</a></li><li><a href="#6-ส่งหน้า-html-ตาม-route-และจัดการ-path-ที่ไม่มี-404-ยังไง-สไลด์-2830">ส่งหน้า HTML ตาม route และจัดการ path ที่ไม่มี (404) ยังไง?</a></li><li><a href="#7-ต่อ-navbar-เข้ากับ-route-ยังไง-สไลด์-31">ต่อ navbar เข้ากับ route ยังไง?</a></li><li><a href="#8-ทำไม-cssรูปไม่ขึ้น-และ-expressstatic-แก้ยังไง-สไลด์-3234">ทำไม CSS/รูปไม่ขึ้น และ express.static แก้ยังไง?</a></li><li><a href="#9-modular-routes-คืออะไร-สไลด์-3538">Modular routes คืออะไร?</a></li><li><a href="#10-form-handling-คืออะไร-และมี-flow-ยังไง-สไลด์-3945">Form handling คืออะไร และมี flow ยังไง?</a></li><li><a href="#11-รับฟอร์มแบบ-get-ยังไง-reqquery-สไลด์-4648">รับฟอร์มแบบ GET ยังไง? (req.query)</a></li><li><a href="#12-รับฟอร์มแบบ-post-ยังไง-reqbody-middleware-สไลด์-4952">รับฟอร์มแบบ POST ยังไง? (req.body + middleware)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l10", "u": "web/l10/index.html", "t": "Lecture 10 – Node.js Part II (Express Framework)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

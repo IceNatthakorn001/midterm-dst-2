@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 10 – Shell Script (+ Lab 10) · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#b0552c}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Lecture10</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/index.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/index.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/index.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/index.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/index.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li><a href="../chapter05/index.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/index.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li><a href="../chapter07/index.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/index.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/index.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/index.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/index.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li><li><a href="../lecture4/index.html"><span class="nl">Lecture4</span>Memory Management</a></li><li class='cur'><a href="../lecture10/index.html"><span class="nl">Lecture10</span>Shell Script (+ Lab 10)</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Lecture10</div>
+    <h1 class="lesson-title">Lecture 10 – Shell Script (+ Lab 10)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 46 นาที · 24 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="lecture10">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>หมายเหตุไฟล์ต้นทาง:</strong> <code>Lecture 10 Shell script.pdf</code> (49 หน้า) เป็นสไลด์ของ <strong>ITDS212 Computer System Lab #10 Shell Scripts</strong> (15 ต.ค. 2026) ส่วน <code>Lab 10 Shell scripts.pdf</code> (4 หน้า) เป็นใบงาน Lab #10</p>
+<p>เลขสไลด์ในสรุปนี้ = เลขหน้า PDF (ตรงกับเลขที่พิมพ์มุมขวาล่างของสไลด์) อ้างเป็น <strong>(Lecture สไลด์ N)</strong> และ <strong>(Lab หน้า N)</strong></p>
+<p>ทุกสคริปต์ในสรุปนี้ <strong>รันจริงด้วย GNU bash 5.3</strong> (Git Bash บน Windows) แล้ว ผลที่ต่างจากสไลด์มี <code>&gt; ⚠️</code> กำกับ</p>
+</blockquote>
+<blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทนี้สอนใช้ <strong>shell</strong> เป็นภาษาโปรแกรม เริ่มจากความต่างของ <strong>shell variable กับ environment variable</strong> (ตัวไหนส่งต่อให้ child process ได้ และทำไมต้อง <code>export</code>) แล้วรู้จัก shell แต่ละแบบ (sh, csh, ksh, bash) จากนั้นไล่ <strong>17 ขั้นของการเขียน shell script</strong> ตั้งแต่สร้างไฟล์, shebang, <code>chmod</code>, ตัวแปร, quote, ตัวแปรพิเศษ (<code>$0 $# $? $!</code> ...), array, expression ไปจนถึง <code>if</code> / <code>case</code> / <code>while</code> / <code>for</code> และการรับ argument ปิดด้วย <strong>ตัวอย่าง test1–test27</strong> (คำนวณ, <code>read</code>, function, จัดการไฟล์/โฟลเดอร์, date, <code>wait</code>, <code>sleep</code>) ซึ่ง Lab 10 ให้สร้าง รัน และอธิบายครบทุกตัว</p>
+<p>บทนี้ <strong>มีโค้ด bash</strong> ทุกตัวอย่างมีเฉลย output ทีละขั้น</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L10-00-overview.png" alt="แผนผังภาพรวม Lecture 10" /></p>
+<h2 id="สารบัญ">สารบัญ</h2>
+<p><strong>ภาค Lecture</strong>
+0. วิชานี้เรียนอะไรตามตาราง และวัดผลยังไง?</p>
+<ol>
+<li>Environment variable คืออะไร มีตัวไหนบ้าง?</li>
+<li>Shell variable ต่างจาก Environment variable ยังไง?</li>
+<li>Shell กับ Shell script คืออะไร และ shell มีกี่แบบ?</li>
+<li>การเขียน shell script มีกี่ขั้น?</li>
+<li>สร้างไฟล์ → shebang → ใส่คำสั่ง → chmod → รัน ทำยังไง?</li>
+<li>สร้างและเรียกใช้ตัวแปรยังไง และ single quote ต่างจาก double quote ยังไง?</li>
+<li>ตัวแปรพิเศษ <code>$0 $# $* $@ $? $!</code> คืออะไร?</li>
+<li>ใช้ environment variable ใน script ยังไง?</li>
+<li>เขียน comment ยังไง?</li>
+<li>ใช้ array ยังไง ทำไมต้องมี <code>{ }</code>?</li>
+<li>เขียนเงื่อนไข (expression) ยังไง?</li>
+<li><code>if</code> เขียนยังไง?</li>
+<li><code>case</code> เขียนยังไง?</li>
+<li><code>while</code> loop เขียนยังไง?</li>
+<li><code>for</code> loop เขียนยังไง?</li>
+<li>รับ input argument ยังไง?</li>
+<li>ตัวอย่าง test1–test18 (echo, คำนวณ, loop, read, if/case, argument, string, function)</li>
+<li>ตัวอย่าง test19–test27 (โฟลเดอร์, ไฟล์, date, wait, sleep)</li>
+</ol>
+<p><strong>ภาค Lab</strong>
+19. Lab 10 ต้องทำอะไร ส่งอะไร?
+20. แนวคำตอบ Lab: test1–test27 แต่ละตัวทำอะไร ได้ output อะไร</p>
+<hr />
+<h1>ภาค Lecture</h1>
+<h2 id="0-วิชานี้เรียนอะไรตามตาราง-และวัดผลยังไง-lecture-สไลด์-13">0. วิชานี้เรียนอะไรตามตาราง และวัดผลยังไง? <sub>(Lecture สไลด์ 1–3)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Lab #10 คือ &quot;การฝึกเขียน shell script&quot; ต่อจากสัปดาห์ 9 (การจัดการสภาพแวดล้อม) คะแนนแบ่ง lab report / quiz / midterm / final อย่างละ 25% และต้องเข้าเรียน 80%</strong></p>
+<p><strong>Tentative Schedule</strong> (สไลด์ 2)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ติดตั้ง virtual machine และ Ubuntu OS, login ด้วย username/password</td>
+<td>9</td>
+<td>การฝึกใช้คำสั่งเกี่ยวกับการจัดการสภาพแวดล้อม</td>
+</tr>
+<tr>
+<td>2</td>
+<td>แนะนำโครงสร้างระบบปฏิบัติการลีนุกซ์ และคำสั่ง Linux เบื้องต้น</td>
+<td><strong>10</strong></td>
+<td><strong>การฝึกเขียน shell script</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>การจัดการแฟ้มข้อมูล</td>
+<td>11</td>
+<td>การเขียนโปรแกรมจัดการ process และ thread</td>
+</tr>
+<tr>
+<td>4</td>
+<td>การจัดการผู้ใช้และกลุ่มผู้ใช้ของระบบ</td>
+<td>12</td>
+<td>การติดตั้ง Apache server, MySQL, PHP</td>
+</tr>
+<tr>
+<td>5</td>
+<td>สิทธิ์ของผู้ใช้</td>
+<td>13</td>
+<td>การตรวจสอบระบบ (System monitoring)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ใช้ nano และ vim editor</td>
+<td>14</td>
+<td>การบริหารจัดการระบบปฏิบัติการลีนุกซ์</td>
+</tr>
+<tr>
+<td>7</td>
+<td>คำสั่งจัดการ storage</td>
+<td>15</td>
+<td>โครงสร้างและการบริหารจัดการระบบปฏิบัติการวินโดว์</td>
+</tr>
+<tr>
+<td>8</td>
+<td>คำสั่งเกี่ยวกับ process และ memory</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Evaluation and Grading Criteria</strong> (สไลด์ 3)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธีการวัดผล</th>
+<th>น้ำหนัก (%)</th>
+<th>สัปดาห์ที่ประเมิน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>การเข้าเรียน</td>
+<td>ต้อง 80% attendance</td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>รายงานผลแลป</td>
+<td>25</td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>การทดสอบย่อย</td>
+<td>25</td>
+<td>1–15</td>
+</tr>
+<tr>
+<td>การสอบกลางภาค</td>
+<td>25</td>
+<td>9</td>
+</tr>
+<tr>
+<td>การสอบปลายภาค</td>
+<td>25</td>
+<td>17</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ส่งรายงานแลปภายใน <strong>23.59 น. ของวันอังคาร</strong> หรือวันที่มีการเรียน</li>
+<li>มี <strong>ทดสอบย่อยทุกอาทิตย์</strong> ก่อนจบคาบ</li>
+</ul>
+<hr />
+<h2 id="1-environment-variable-คืออะไร-มีตัวไหนบ้าง-lecture-สไลด์-4">1. Environment variable คืออะไร มีตัวไหนบ้าง? <sub>(Lecture สไลด์ 4)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>environment variable คือตัวแปรที่บอก &quot;สภาพแวดล้อม&quot; ของผู้ใช้ปัจจุบัน เช่น ใครล็อกอิน (USER, LOGNAME), home อยู่ไหน (HOME), ใช้ shell อะไร (SHELL), หาโปรแกรมจากโฟลเดอร์ไหน (PATH)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวแปร</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>USER</strong></td>
+<td>ผู้ใช้ที่ล็อกอินอยู่ตอนนี้</td>
+</tr>
+<tr>
+<td><strong>HOME</strong></td>
+<td>home directory ของผู้ใช้ปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>SHELL</strong></td>
+<td>path ของ shell ที่ผู้ใช้ใช้ เช่น bash หรือ zsh</td>
+</tr>
+<tr>
+<td><strong>LOGNAME</strong></td>
+<td>ชื่อของผู้ใช้ปัจจุบัน</td>
+</tr>
+<tr>
+<td><strong>PATH</strong></td>
+<td>รายการ directory ที่ระบบจะค้นเมื่อสั่งรันคำสั่ง — ค้น <strong>ตามลำดับ</strong> และใช้ <strong>ไฟล์ executable ตัวแรกที่เจอ</strong></td>
+</tr>
+<tr>
+<td><strong>LANG</strong></td>
+<td>ภาษาที่ใช้อยู่</td>
+</tr>
+<tr>
+<td><strong>TERM</strong></td>
+<td>terminal emulation ที่ใช้อยู่</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 PATH เปรียบเหมือนรายชื่อชั้นวางของที่ไล่หาทีละชั้น เจอของชิ้นแรกที่ชื่อตรงก็หยิบเลย ไม่หาต่อ</p>
+</blockquote>
+<hr />
+<h2 id="2-shell-variable-ต่างจาก-environment-variable-ยังไง-lecture-สไลด์-510">2. Shell variable ต่างจาก Environment variable ยังไง? <sub>(Lecture สไลด์ 5–10)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>shell variable อยู่แค่ใน shell ที่สร้างมัน ส่วน environment variable ถูกส่งต่อ (inherit) ให้ child shell/โปรแกรมลูก ทำ shell variable ให้เป็น environment variable ได้ด้วย <code>export</code></strong></p>
+<h3 id="21-echo-logname-กับ-echo-logname-ต่างกันยังไง-lecture-สไลด์-5">2.1 <code>echo LOGNAME</code> กับ <code>echo $LOGNAME</code> ต่างกันยังไง? <sub>(Lecture สไลด์ 5)</sub></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ต้องมี <code>$</code> นำหน้าถึงจะได้ &quot;ค่า&quot; ของตัวแปร ถ้าไม่มี <code>$</code> echo จะพิมพ์ชื่อออกมาตรง ๆ</strong></p>
+<p>ผลลัพธ์ในสไลด์ (เครื่อง <code>sudsanguan@muict</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>echo LOGNAME</code></td>
+<td><code>LOGNAME</code></td>
+</tr>
+<tr>
+<td><code>echo $LOGNAME</code></td>
+<td><code>sudsanguan</code></td>
+</tr>
+<tr>
+<td><code>echo SHELL</code></td>
+<td><code>SHELL</code></td>
+</tr>
+<tr>
+<td><code>echo $SHELL</code></td>
+<td><code>/bin/bash</code></td>
+</tr>
+<tr>
+<td><code>echo PATH</code></td>
+<td><code>PATH</code></td>
+</tr>
+<tr>
+<td><code>echo $PATH</code></td>
+<td><code>/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>กล่องในสไลด์เขียนว่า <strong>&quot;LOGNAME – Shell Variables&quot;</strong> และ <strong>&quot;$LOGNAME – Environment Variables&quot;</strong></li>
+<li>สังเกต PATH: เป็นรายการ directory คั่นด้วย <code>:</code> (ตามความหมายในสไลด์ 4)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ตามผลรันในสไลด์ (และที่รันเอง) <code>echo LOGNAME</code> แค่พิมพ์ <strong>ข้อความ &quot;LOGNAME&quot;</strong> ไม่ได้ดึงค่าตัวแปรใด ๆ ออกมา ประเด็นที่ควรจำจากหน้านี้คือ <strong>ไม่มี <code>$</code> = ได้ตัวหนังสือ, มี <code>$</code> = ได้ค่า</strong> ส่วนป้าย &quot;Shell Variables / Environment Variables&quot; ถ้าออกสอบให้ตอบตามสไลด์</p>
+</blockquote>
+<h3 id="22-คุณสมบัติของทั้งสองแบบ-lecture-สไลด์-6">2.2 คุณสมบัติของทั้งสองแบบ <sub>(Lecture สไลด์ 6)</sub></h3>
+<ul>
+<li><strong>Shell variables</strong> มีอยู่ <strong>เฉพาะใน shell ที่สร้างมัน</strong></li>
+<li><strong>Environment variables</strong> ถูก <strong>inherit ไปยัง child shell</strong> แต่ shell variable <strong>ไม่ถูก inherit</strong></li>
+<li>เปลี่ยน shell variable เป็น environment variable ได้ด้วยคำสั่ง <strong><code>export</code></strong></li>
+<li>คนทั่วไปมักเข้าใจว่า shell variable กับ environment variable <strong>เป็นตัวเดียวกัน</strong> (ซึ่งไม่ใช่)</li>
+<li>shell variable คือ <strong>ตัวแปรภายใน</strong> ที่ใช้ขณะรันโปรแกรม shell</li>
+<li>shell มี <strong>คำสั่ง built-in</strong> สำหรับ <strong>create, assign, delete</strong> shell variable</li>
+</ul>
+<h3 id="23-shell-เริ่มทำงานแล้วเกิดอะไรกับตัวแปร-lecture-สไลด์-78">2.3 Shell เริ่มทำงานแล้วเกิดอะไรกับตัวแปร? <sub>(Lecture สไลด์ 7–8)</sub></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตอน shell เริ่ม ค่า environment variable ทั้งหมดถูก copy มาเป็น shell variable ชื่อเดียวกัน แต่การแก้/ลบ shell variable ไม่กระทบ environment variable ตัวจริง</strong></p>
+<p><strong>ตัวอย่างสไลด์ 7 — สร้างและลบ shell variable</strong></p>
+<pre><code class="language-bash">$ foo=bar        # สร้าง shell variable ชื่อ foo
+$ echo $foo
+bar
+$ unset foo      # ลบตัวแปร
+$ echo $foo
+                 # ← ได้บรรทัดว่าง เพราะ foo ไม่มีแล้ว
+</code></pre>
+<p>รันจริงได้ผลตรงกับสไลด์: <code>bar</code> แล้วตามด้วยบรรทัดว่าง</p>
+<p><strong>ตัวอย่างสไลด์ 8 — ดูทั้งสองฝั่งพร้อมกัน</strong> (<code>strings /proc/$$/environ | grep LOGNAME</code> = ดู environment variable ของ shell ปัจจุบัน, <code>echo $LOGNAME</code> = ดู shell variable)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ลำดับ</th>
+<th>คำสั่ง</th>
+<th>output</th>
+<th>ป้ายในสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>strings /proc/$$/environ | grep LOGNAME</code></td>
+<td><code>LOGNAME=seed</code></td>
+<td>Environment variable</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>echo $LOGNAME</code></td>
+<td><code>seed</code></td>
+<td>Shell variable</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LOGNAME=bob</code> แล้ว <code>echo $LOGNAME</code></td>
+<td><code>bob</code></td>
+<td>Shell variable เปลี่ยนค่า</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>strings /proc/$$/environ | grep LOGNAME</code></td>
+<td><code>LOGNAME=seed</code></td>
+<td>Environment variable <strong>คงเดิม</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>unset LOGNAME</code> แล้ว <code>echo $LOGNAME</code></td>
+<td>(ว่าง)</td>
+<td>Shell variable <strong>หายไป</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>strings /proc/$$/environ | grep LOGNAME</code></td>
+<td><code>LOGNAME=seed</code></td>
+<td>Environment variable <strong>ยังคงอยู่</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>$$</code> = PID ของ shell ปัจจุบัน → <code>/proc/$$/environ</code> คือไฟล์ environment ของ process นั้น</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ รันซ้ำใน Git Bash บน Windows: ขั้น 4 ได้ <code>LOGNAME=bob</code> และขั้น 6 ไม่เจอ LOGNAME เลย ต่างจากสไลด์ เพราะ <code>/proc</code> บน Windows (Cygwin) ทำงานไม่เหมือน Ubuntu ที่ใช้ในสไลด์ — <strong>ตอบข้อสอบให้ยึดผลตามสไลด์</strong> (env คงเดิมเสมอ)</p>
+</blockquote>
+<h3 id="24-child-shell-ได้ตัวแปรอะไรบ้าง-lecture-สไลด์-910">2.4 Child shell ได้ตัวแปรอะไรบ้าง? <sub>(Lecture สไลด์ 9–10)</sub></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุกคำสั่งที่รันจาก bash จะเป็น child process ของ bash และได้รับเฉพาะ environment variable (ที่ copy มา + ที่ export แล้ว) ไม่ได้ shell variable ที่ไม่ได้ export</strong></p>
+<p><strong>สไลด์ 9 — ดู parent/child ด้วย <code>ps</code></strong></p>
+<pre><code class="language-text">$ cd /
+$ ps
+  PID TTY       TIME CMD
+ 2011 pts/0 00:00:00 bash
+ 5227 pts/0 00:00:00 ps
+$ ls -al |more &amp;
+[1] 5229
+$ ps -f
+UID       PID  PPID C STIME TTY   TIME     CMD
+sudsang+  2011 1985 0 15:15 pts/0 00:00:00 bash
+sudsang+  5228 2011 0 19:03 pts/0 00:00:00 ls --color=auto -al
+sudsang+  5229 2011 0 19:03 pts/0 00:00:00 more
+sudsang+  5230 2011 0 19:03 pts/0 00:00:00 ps -f
+[1]+  Stopped        ls --color=auto -al | more
+</code></pre>
+<ul>
+<li><code>ls</code>, <code>more</code>, <code>ps -f</code> มี <strong>PPID = 2011</strong> = PID ของ bash → ทั้งสามเป็น <strong>child</strong> ของ bash</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-01-process-tree.png" alt="bash เป็น parent ของ ls, more, ps" /></p>
+<p><strong>สไลด์ 10 — ตัวแปรตัวไหนไปถึง child process</strong></p>
+<p><img loading="lazy" src="diagrams/L10-02-inherit.png" alt="การส่งต่อตัวแปรจาก parent shell ไป child process" /></p>
+<ul>
+<li>ใน parent process (ที่รัน shell) มี <strong>Environment variables</strong> และ <strong>shell's internal variables (shell variables)</strong> 4 กลุ่ม:
+<ol>
+<li><strong>Shell variables copied from environment variables</strong> — ได้มาตอน shell เริ่ม</li>
+<li><strong>User-defined shell variables (exported)</strong> — ตัวแปรที่เราสร้างและ export แล้ว</li>
+<li><strong>User-defined shell variables (not exported)</strong> — ตัวแปรที่เราสร้างแต่ไม่ export</li>
+<li><strong>Predefined shell variables</strong> (เช่น <code>BASHPID</code>)</li>
+</ol>
+</li>
+<li>เมื่อ shell รันโปรแกรมใหม่ (child process) จะมีแค่ <strong>กลุ่ม 1 และ 2</strong> ที่กลายเป็น environment variables ของ child</li>
+</ul>
+<p><strong>รันพิสูจน์เอง</strong> (ไม่มีในสไลด์ ใช้ยืนยันกฎในสไลด์ 6/10):</p>
+<pre><code class="language-bash">myshell=local            # shell variable (not exported)
+export myenv=exported    # export แล้ว
+bash -c 'echo &quot;child sees myshell=[$myshell] myenv=[$myenv]&quot;'
+</code></pre>
+<p>output: <code>child sees myshell=[] myenv=[exported]</code> → child เห็นแค่ตัวที่ export</p>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสมุดโน้ตส่วนตัว (shell variable) กับใบแจ้งที่ถ่ายเอกสารแจกลูก ๆ ทุกคน (environment variable) — <code>export</code> คือการเอาโน้ตไปถ่ายเอกสารแจก</p>
+</blockquote>
+<hr />
+<h2 id="3-shell-กับ-shell-script-คืออะไร-และ-shell-มีกี่แบบ-lecture-สไลด์-1112">3. Shell กับ Shell script คืออะไร และ shell มีกี่แบบ? <sub>(Lecture สไลด์ 11–12)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Kernel คุมฮาร์ดแวร์/ทรัพยากร ผู้ใช้สั่งงานผ่าน Shell (CLI) และเอาคำสั่ง shell มาเรียงเป็นไฟล์ = Shell Script เพื่อให้ทำงานสะดวกขึ้น — bash คือ default shell ของ Linux ปัจจุบัน</strong></p>
+<h3 id="31-shell-อยู่ตรงไหนในระบบ-lecture-สไลด์-11">3.1 Shell อยู่ตรงไหนในระบบ? <sub>(Lecture สไลด์ 11)</sub></h3>
+<ul>
+<li>Linux มี <strong>Kernel</strong> เชื่อมต่อกับ <strong>Hardware</strong> เพื่อบริหารจัดการทรัพยากร</li>
+<li>ผู้ใช้สั่งการผ่าน <strong>Shell</strong> และนำคำสั่งใน shell มาสร้างเป็นชุดคำสั่ง = <strong>Shell Script</strong></li>
+<li><strong>CLI = Command Line Interface</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L10-03-layers.png" alt="ชั้นของระบบ: Application → Shell → Kernel" /></p>
+<ul>
+<li>รูปในสไลด์เป็นวงซ้อนกัน: <strong>Kernel</strong> อยู่แกนใน (Hardware, Scheduler, Memory), <strong>Shell</strong> ห่อรอบ (CLI, sequencing), <strong>Application</strong> อยู่วงนอกสุด (user app., daemons)</li>
+</ul>
+<h3 id="32-shell-แต่ละแบบต่างกันยังไง-lecture-สไลด์-12">3.2 Shell แต่ละแบบต่างกันยังไง? <sub>(Lecture สไลด์ 12)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Shell</th>
+<th>path</th>
+<th>จุดเด่นตามสไลด์</th>
+<th>default prompt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bourne shell</strong></td>
+<td><code>/bin/sh</code></td>
+<td>shell ยุคแรก ใช้แพร่หลาย โครงสร้างภาษาคล้าย <strong>ภาษาอัลกอ (ALGO)</strong> เขียน script ได้ เป็น <strong>standard shell ที่มีใน UNIX ทุกตัว</strong> ย้าย script ไป UNIX อื่นได้โดยไม่ต้องแก้</td>
+<td><strong><code>$</code></strong></td>
+</tr>
+<tr>
+<td><strong>C shell</strong></td>
+<td><code>/bin/csh</code></td>
+<td>พัฒนาหลัง Bourne shell ไวยากรณ์ <strong>เหมือนภาษา C</strong> มีฟังก์ชันสะดวก ควบคุมการไหลของข้อมูลดีกว่า Bourne และ <strong>เรียกคำสั่งที่ใช้ไปแล้วซ้ำได้</strong></td>
+<td><strong><code>%</code></strong></td>
+</tr>
+<tr>
+<td><strong>Korn shell</strong></td>
+<td><code>/bin/ksh</code></td>
+<td>พัฒนาจาก Bourne + C shell ทำได้ทุกอย่างที่ Bourne ทำ เขียน script ง่ายและรัดกุมขึ้น เรียกคำสั่งเก่ามา execute ได้ = <strong>รวมข้อดีของ Bourne และ C shell</strong> แต่ <strong>ไม่ได้มีใน UNIX ทุกตัว</strong></td>
+<td><strong><code>$</code></strong></td>
+</tr>
+<tr>
+<td><strong>Bourne Again shell (bash)</strong></td>
+<td><code>/bin/bash</code></td>
+<td>นำ Bourne shell มาพัฒนาใหม่ ทำ <strong>line editing</strong> ได้ เพิ่มประสิทธิภาพหลายอย่าง <strong>ไม่ใช่ standard UNIX shell</strong> แต่เป็น <strong>default shell ของ Linux ปัจจุบัน</strong></td>
+<td><strong><code>$</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำ prompt: มีแค่ <strong>C shell ที่เป็น <code>%</code></strong> ที่เหลือเป็น <code>$</code> หมด</p>
+<p class="c-warn">⚠️ อย่าสับสน: <strong>standard UNIX shell = Bourne (sh)</strong> ส่วน <strong>default ของ Linux = bash</strong></p>
+</blockquote>
+<hr />
+<h2 id="4-การเขียน-shell-script-มีกี่ขั้น-lecture-สไลด์-13">4. การเขียน shell script มีกี่ขั้น? <sub>(Lecture สไลด์ 13)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>สไลด์แบ่งเป็น 17 หัวข้อ — 5 ขั้นแรกคือวิธีทำให้ script รันได้ ที่เหลือคือไวยากรณ์ของภาษา (ตัวแปร, เงื่อนไข, loop, argument)</strong></p>
+<ol>
+<li>สร้าง file shell script</li>
+<li>กำหนด interpreter หรือ <strong>shebang</strong></li>
+<li>ใส่ชุดคำสั่ง command line</li>
+<li>กำหนดสิทธิ์ <strong>execute</strong> ให้ shell script</li>
+<li>เรียกใช้งาน shell script (execute)</li>
+<li>สร้างตัวแปรใน shell script</li>
+<li>เรียกใช้งานตัวแปรใน shell script</li>
+<li>ใช้ตัวแปร environment</li>
+<li>ตัวแปรแบบพิเศษ</li>
+<li>การ Comment</li>
+<li>ตัวแปรแถวลำดับ (array)</li>
+<li>รูปแบบเงื่อนไข (expression)</li>
+<li>เงื่อนไข if</li>
+<li>เงื่อนไข case switch</li>
+<li>loop while</li>
+<li>loop for</li>
+<li>การส่งค่า input argument</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์จริง หัวข้อ <strong>9 (ตัวแปรพิเศษ) อยู่สไลด์ 21 ก่อนหัวข้อ 8 (environment) ที่สไลด์ 22</strong> สรุปนี้เรียงตามเลขหัวข้อ 1–17 แต่บอกเลขสไลด์กำกับทุกหัวข้อ</p>
+</blockquote>
+<hr />
+<h2 id="5-สร้างไฟล์-shebang-ใส่คำสั่ง-chmod-รัน-ทำยังไง-lecture-สไลด์-1417">5. สร้างไฟล์ → shebang → ใส่คำสั่ง → chmod → รัน ทำยังไง? <sub>(Lecture สไลด์ 14–17)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>script คือไฟล์ text ธรรมดา บรรทัดแรกต้องเป็น shebang <code>#!/bin/bash</code> บอกว่าใช้ interpreter ตัวไหน แล้วต้อง <code>chmod</code> ให้มีสิทธิ์ x ก่อนจึงรันด้วย <code>./ชื่อไฟล์</code> ได้</strong></p>
+<p><img loading="lazy" src="diagrams/L10-04-steps.png" alt="5 ขั้นทำให้ script รันได้" /></p>
+<p><strong>ขั้น 1 สร้างไฟล์</strong> (สไลด์ 14) — เป็น file text ธรรมดา สร้างด้วย editor อะไรก็ได้ เช่น vim, nano: <code>$ nano hello.sh</code></p>
+<p><strong>ขั้น 2 shebang</strong> (สไลด์ 14) — บรรทัดแรกต้องกำหนด shebang เพื่อให้โปรแกรมรู้ว่าจะใช้ <strong>interpreter ตัวไหน</strong> load ไฟล์ รูปแบบ <code>#!&lt;shell program&gt;</code>:</p>
+<ul>
+<li><code>#!/bin/sh</code> · <code>#!/bin/csh</code> · <code>#!/bin/bash</code> · <code>#!/bin/ksh</code></li>
+</ul>
+<p><strong>ขั้น 3 ใส่คำสั่ง</strong> (สไลด์ 15) — เขียน code ที่ต้องการให้ script ทำ เช่นแสดง &quot;Hello World&quot; ด้วย <code>echo</code> แล้ว save:</p>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Hello World!&quot;
+</code></pre>
+<p><strong>ขั้น 4 กำหนดสิทธิ์ execute</strong> (สไลด์ 16)</p>
+<ul>
+<li>ไฟล์ที่เพิ่งสร้างมีสิทธิ์ owner แค่ <strong>read + write</strong> (<code>-rw-rw-r--</code>) ยัง <strong>execute ไม่ได้</strong></li>
+</ul>
+<pre><code class="language-text">$ ls -l test.sh
+-rw-rw-r-- 1 staff staff 32 May 13 15:28 test.sh
+$ sudo chmod 700 test.sh
+$ ls -l test.sh
+-rwx------ 1 staff staff 32 May 13 15:28 test.sh
+</code></pre>
+<ul>
+<li>อ่าน <code>700</code>: owner = 7 = rwx, group = 0, others = 0 → <code>-rwx------</code></li>
+<li><strong>มี <code>x</code> แล้ว = ไฟล์ execute ได้</strong></li>
+<li>ขนาด 32 bytes ตรงกับไฟล์ Hello World ข้างบน (รันเองได้ 32 bytes เท่ากัน)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ บน Windows (Git Bash) <code>chmod</code> ไม่เปลี่ยนสิทธิ์จริง <code>ls -l</code> ขึ้น <code>-rwxr-xr-x</code> ตลอด — ต้องลองบน Ubuntu VM ถึงจะเห็นผลตามสไลด์</p>
+</blockquote>
+<p><strong>ขั้น 5 รัน</strong> (สไลด์ 17)</p>
+<ul>
+<li>พิมพ์ <strong>full path</strong> ของ script หรือถ้าอยู่ใน directory เดียวกันใช้ <strong><code>./&lt;shell script&gt;</code></strong> แล้ว Enter</li>
+<li>shell จะรันตั้งแต่ <strong>บรรทัดแรกถึงบรรทัดสุดท้าย</strong> แสดงผลบนจอ แล้ว <strong>ออกจากโปรแกรมเอง</strong></li>
+</ul>
+<pre><code class="language-text">~/shell$ nano test.sh
+~/shell$ ./test.sh
+Hello World!
+</code></pre>
+<p>รันจริง: <code>Hello World!</code> ✔</p>
+<hr />
+<h2 id="6-สร้างและเรียกใช้ตัวแปรยังไง-และ-single-quote-ต่างจาก-double-quote-ยังไง-lecture-สไลด์-1820">6. สร้างและเรียกใช้ตัวแปรยังไง และ single quote ต่างจาก double quote ยังไง? <sub>(Lecture สไลด์ 18–20)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตั้งตัวแปรด้วย <code>variable=value</code> ห้ามมี space รอบ <code>=</code> อ่านค่าด้วย <code>$ชื่อ</code> — ใน <code>'...'</code> ได้ตัวหนังสือตามที่พิมพ์ ส่วนใน <code>&quot;...&quot;</code> จะแทนค่าตัวแปรให้</strong></p>
+<h3 id="61-สร้างตัวแปร-lecture-สไลด์-18">6.1 สร้างตัวแปร <sub>(Lecture สไลด์ 18)</sub></h3>
+<ul>
+<li>ไม่ต้องประกาศชนิดตัวแปรเหมือนภาษา C กำหนดค่าแล้วใช้ได้ทันที: <strong><code>variable=value</code></strong></li>
+<li>⚠️ <strong>ระวัง space:</strong> ใน shell script space คือตัวแบ่ง argument จึง <strong>ห้ามมี space หน้าและหลัง <code>=</code></strong></li>
+<li>ถ้าค่ามี space ให้ครอบด้วย <strong>single quote <code>'</code></strong> หรือ <strong>double quote <code>&quot;</code></strong></li>
+</ul>
+<pre><code class="language-bash">#!/bin/bash
+var1=shell
+var3='shell script'
+var4=&quot;shell script'
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 18 บรรทัด <code>var4=&quot;shell script'</code> เปิดด้วย <code>&quot;</code> แต่ปิดด้วย <code>'</code> ซึ่งผิด (quote ต้องเป็นคู่ชนิดเดียวกัน) — ที่ถูกคือ <code>var4=&quot;shell script&quot;</code> เหมือนในสไลด์ 20</p>
+</blockquote>
+<p>ทดลองรันกรณีมี space (ไม่มีในสไลด์ ใช้ยืนยันข้อเตือน):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เขียน</th>
+<th>ผลรัน</th>
+<th>เพราะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x = 5</code></td>
+<td><code>x: command not found</code></td>
+<td>shell มองว่า <code>x</code> คือคำสั่ง มี argument <code>=</code> กับ <code>5</code></td>
+</tr>
+<tr>
+<td><code>x= 5</code></td>
+<td><code>5: command not found</code></td>
+<td>กลายเป็นตั้ง x เป็นค่าว่าง แล้วรันคำสั่งชื่อ <code>5</code></td>
+</tr>
+<tr>
+<td><code>v=a b</code></td>
+<td><code>b: command not found</code></td>
+<td>space ตัดค่า → รันคำสั่ง <code>b</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-เรียกใช้ตัวแปร-lecture-สไลด์-1920">6.2 เรียกใช้ตัวแปร <sub>(Lecture สไลด์ 19–20)</sub></h3>
+<ul>
+<li>แสดงค่าโดยใช้ <strong><code>$</code> นำหน้าตัวแปร</strong></li>
+<li><strong>single quote <code>'...'</code></strong> → ได้ค่า <strong>ตามสิ่งที่พิมพ์</strong> ทุกตัวอักษร</li>
+<li><strong>double quote <code>&quot;...&quot;</code></strong> → <strong>นำค่าของตัวแปรที่เก็บไว้มาแสดง</strong></li>
+</ul>
+<p><strong>ตัวอย่างสไลด์ 20</strong> (เขียนแบบ quote ตรงที่ถูกต้อง):</p>
+<pre><code class="language-bash">#!/bin/bash
+var1=shell
+var2=script
+var3='shell script'
+var4=&quot;shell script&quot;
+var5='$var1 $var2'
+var6=&quot;$var1 $var2&quot;
+echo $var1
+echo $var2
+echo $var3
+echo $var4
+echo $var5
+echo $var6
+</code></pre>
+<p><strong>เฉลย output ทีละบรรทัด:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>output</th>
+<th>เหตุผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>echo $var1</code></td>
+<td><code>shell</code></td>
+<td>ค่าธรรมดา</td>
+</tr>
+<tr>
+<td><code>echo $var2</code></td>
+<td><code>script</code></td>
+<td>ค่าธรรมดา</td>
+</tr>
+<tr>
+<td><code>echo $var3</code></td>
+<td><code>shell script</code></td>
+<td>quote เดี่ยวทำให้เก็บ space ได้</td>
+</tr>
+<tr>
+<td><code>echo $var4</code></td>
+<td><code>shell script</code></td>
+<td>quote คู่ก็เก็บ space ได้</td>
+</tr>
+<tr>
+<td><code>echo $var5</code></td>
+<td><strong><code>$var1 $var2</code></strong></td>
+<td>ใน <code>'...'</code> ไม่แทนค่า → ได้ตัวหนังสือ <code>$var1 $var2</code> ตรง ๆ</td>
+</tr>
+<tr>
+<td><code>echo $var6</code></td>
+<td><strong><code>shell script</code></strong></td>
+<td>ใน <code>&quot;...&quot;</code> แทนค่า var1, var2</td>
+</tr>
+</tbody>
+</table></div>
+<p>รันจริงได้ตรงกับสไลด์ทั้ง 6 บรรทัด ✔</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ 20 บรรทัด <code>var4=&quot;shell script”</code>, <code>var6=&quot;$var1 $var2”</code> ใช้ <strong>อัญประกาศโค้ง <code>”</code></strong> และมี <code>“</code> เกินท้าย <code>echo $var6 “</code> — ถ้าพิมพ์ตามสไลด์เป๊ะแล้วรัน ได้ <code>script”: command not found</code>, บรรทัด var4/var5/var6 ว่าง และบรรทัดสุดท้ายเป็น <code>“</code> ไม่ตรงกับ output ในสไลด์ <strong>ต้องใช้ <code>&quot;</code> ตรงเท่านั้น</strong> (เป็นปัญหาที่เกิดจากการพิมพ์ใน PowerPoint)</p>
+</blockquote>
+<hr />
+<h2 id="7-ตัวแปรพิเศษ-0-คืออะไร-lecture-สไลด์-21">7. ตัวแปรพิเศษ <code>$0 $# $* $@ $? $!</code> คืออะไร? <sub>(Lecture สไลด์ 21)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ระบบตั้งค่าให้เอง ไม่ต้องประกาศ — <code>$0..$n</code> คือชื่อ script และ argument, <code>$#</code> จำนวน argument, <code>$*</code>/<code>$@</code> argument ทั้งหมด, <code>$?</code> สถานะจบของคำสั่งล่าสุด (0 = สำเร็จ)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตัวแปร</th>
+<th>ความหมายตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>$0 $1 $2 …</code></strong></td>
+<td>อ้างอิง <strong>ชื่อ shell script ($0)</strong> และ <strong>argument</strong> ของ script — เรียกว่า <strong>position parameter</strong></td>
+</tr>
+<tr>
+<td><strong><code>$#</code></strong></td>
+<td><strong>จำนวน argument</strong> ของ script</td>
+</tr>
+<tr>
+<td><strong><code>$*</code></strong></td>
+<td>argument ของ script <strong>เรียงกันทั้งหมด</strong></td>
+</tr>
+<tr>
+<td><strong><code>$@</code></strong></td>
+<td>คล้าย <code>$*</code> แต่ใช้ <strong>ช่องว่างคั่นระหว่าง position parameter</strong></td>
+</tr>
+<tr>
+<td><strong><code>$?</code></strong></td>
+<td><strong>สถานะการจบการทำงานครั้งล่าสุด</strong> — สำเร็จไม่มี error = <strong>0</strong>, ผิดพลาด = <strong>ค่าที่ไม่ใช่ 0</strong></td>
+</tr>
+<tr>
+<td><strong><code>$!</code></strong></td>
+<td>แสดง <strong>process ID</strong> ของ shell ที่ทำงานอยู่ (ตามสไลด์)</td>
+</tr>
+</tbody>
+</table></div>
+<p>รันทดสอบ <code>$?</code>: <code>ls book.txt</code> (มีไฟล์) → <code>$?</code> = <strong>0</strong> · <code>ls nofile</code> (ไม่มีไฟล์) → <code>$?</code> = <strong>2</strong> (ไม่ใช่ 0)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 21 บอกว่า <code>$!</code> คือ &quot;process ID ของ shell ที่ทำงานอยู่&quot; แต่ในสไลด์ 48 (test26) ใช้ <code>$!</code> หลังคำสั่งที่มี <code>&amp;</code> เพื่อเอา PID ของ <strong>process ที่เพิ่งส่งไปทำงานเบื้องหลัง</strong> มารอด้วย <code>wait</code> และ PID ของ shell ที่ใช้ใน <code>/proc/$$/environ</code> (สไลด์ 8) คือ <code>$$</code> — รันจริงได้ <code>$$=1111</code> แต่หลัง <code>sleep 1 &amp;</code> ได้ <code>$!=1114</code> (คนละค่า) ถ้าออกสอบนิยามให้เช็กกับอาจารย์</p>
+</blockquote>
+<hr />
+<h2 id="8-ใช้-environment-variable-ใน-script-ยังไง-lecture-สไลด์-22">8. ใช้ environment variable ใน script ยังไง? <sub>(Lecture สไลด์ 22)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>script รันเป็น child process จึงเห็นเฉพาะ environment variable — ถ้าอยากให้ script เห็นตัวแปร ต้อง <code>export</code> ก่อน</strong></p>
+<ul>
+<li>ตัวแปรใน shell มี 2 ชนิด: <strong>ตัวแปรธรรมดา (variable)</strong> และ <strong>ตัวแปรสภาพแวดล้อม (environment variable)</strong></li>
+<li>environment variable คล้ายตัวแปรธรรมดา แต่ต่างกันตรงที่ <strong>โปรแกรมที่ทำงานใน shell นั้นจะได้รับตัวแปรสภาพแวดล้อมและค่าของมันไปด้วย</strong></li>
+<li>ทำตัวแปรธรรมดาให้เป็น environment variable ได้ด้วย <strong><code>export</code></strong></li>
+</ul>
+<pre><code class="language-bash">#!/bin/bash
+echo $NAME
+</code></pre>
+<pre><code class="language-text">$ ./test.sh
+                  ← ว่าง (Null / Nil / Empty)
+$ export NAME=dst
+$ ./test.sh
+dst
+</code></pre>
+<p><strong>ทีละขั้น:</strong></p>
+<ol>
+<li>รันครั้งแรก: <code>NAME</code> <strong>ยังไม่กำหนดค่าและไม่ใช่ environment variable</strong> → ค่าเป็น <strong>null</strong> → พิมพ์บรรทัดว่าง (สไลด์เขียนกำกับว่า <em>Null / Nil / Empty</em>)</li>
+<li><code>export NAME=dst</code> → ประกาศให้ NAME เป็น environment variable และ assign ค่า</li>
+<li>รันอีกครั้ง: script (child) <strong>สืบทอด</strong> NAME มา → พิมพ์ <code>dst</code></li>
+</ol>
+<p>รันจริงตรงกับสไลด์ ✔</p>
+<hr />
+<h2 id="9-เขียน-comment-ยังไง-lecture-สไลด์-23">9. เขียน comment ยังไง? <sub>(Lecture สไลด์ 23)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ข้อความหลัง <code>#</code> คือ comment shell ไม่สนใจ ยกเว้นบรรทัดแรกที่ <code>#!</code> ใช้เป็น shebang</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+# Test Comment
+var=hello
+echo $var
+</code></pre>
+<ul>
+<li>บรรทัด 1 = shebang · บรรทัด 2 = comment ถูกข้าม · บรรทัด 3 ตั้ง var · บรรทัด 4 พิมพ์</li>
+<li>output: <strong><code>hello</code></strong> (รันจริงตรง ✔)</li>
+</ul>
+<hr />
+<h2 id="10-ใช้-array-ยังไง-ทำไมต้องมี-lecture-สไลด์-24">10. ใช้ array ยังไง ทำไมต้องมี <code>{ }</code>? <sub>(Lecture สไลด์ 24)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>array มี index เริ่มที่ 0 เหมือนภาษา C แต่ตอนอ่านค่าต้องเขียน <code>${ชื่อ[index]}</code> ถ้าไม่ใส่ <code>{ }</code> จะได้ค่าแรกต่อด้วยข้อความ <code>[index]</code></strong></p>
+<pre><code class="language-bash">#!/bin/bash
+txt[0]=&quot;a&quot;
+txt[1]=&quot;b&quot;
+txt[2]=&quot;c&quot;
+echo $txt[0] $txt[1] $txt[2]
+echo ${txt[0]} ${txt[1]} ${txt[2]}
+</code></pre>
+<p><strong>เฉลย:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บรรทัด</th>
+<th>output</th>
+<th>เหตุผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>echo $txt[0] $txt[1] $txt[2]</code></td>
+<td><strong><code>a[0] a[1] a[2]</code></strong></td>
+<td><code>$txt</code> ไม่มี <code>{}</code> = ค่าแรก (<code>a</code>) แล้ว <code>[0]</code>, <code>[1]</code>, <code>[2]</code> ถูกพิมพ์ต่อเป็นตัวหนังสือ</td>
+</tr>
+<tr>
+<td><code>echo ${txt[0]} ${txt[1]} ${txt[2]}</code></td>
+<td><strong><code>a b c</code></strong></td>
+<td><code>{}</code> จับกลุ่มชื่อ+index ทำให้ได้ค่าแต่ละช่อง</td>
+</tr>
+</tbody>
+</table></div>
+<p>รันจริงตรงกับสไลด์ ✔</p>
+<hr />
+<h2 id="11-เขียนเงื่อนไข-expression-ยังไง-lecture-สไลด์-2526">11. เขียนเงื่อนไข (expression) ยังไง? <sub>(Lecture สไลด์ 25–26)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตัวเลขใช้ตัวย่อ <code>-eq -ne -gt -ge -lt -le</code> · string ใช้ <code>= != -n -z</code> · ไฟล์ใช้ <code>-d -f -r -w -x -s</code> · รวมเงื่อนไขด้วย <code>! -a -o</code></strong></p>
+<p><strong>เปรียบเทียบจำนวนเต็ม</strong> (สไลด์ 25)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>expression</th>
+<th>จริงเมื่อ</th>
+<th>ย่อมาจาก (ช่วยจำ)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int1 -eq int2</code></td>
+<td>int1 <strong>เท่ากับ</strong> int2</td>
+<td>equal</td>
+</tr>
+<tr>
+<td><code>int1 -ne int2</code></td>
+<td>int1 <strong>ไม่เท่ากับ</strong> int2</td>
+<td>not equal</td>
+</tr>
+<tr>
+<td><code>int1 -gt int2</code></td>
+<td>int1 <strong>มากกว่า</strong> int2</td>
+<td>greater than</td>
+</tr>
+<tr>
+<td><code>int1 -ge int2</code></td>
+<td>int1 <strong>มากกว่าหรือเท่ากับ</strong> int2</td>
+<td>greater or equal</td>
+</tr>
+<tr>
+<td><code>int1 -lt int2</code></td>
+<td>int1 <strong>น้อยกว่า</strong> int2</td>
+<td>less than</td>
+</tr>
+<tr>
+<td><code>int1 -le int2</code></td>
+<td>int1 <strong>น้อยกว่าหรือเท่ากับ</strong> int2</td>
+<td>less or equal</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เปรียบเทียบ string</strong> (สไลด์ 25)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>expression</th>
+<th>จริงเมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>str1 = str2</code></td>
+<td>str1 <strong>เหมือนกับ</strong> str2</td>
+</tr>
+<tr>
+<td><code>str1 != str2</code></td>
+<td>str1 <strong>ไม่เหมือนกับ</strong> str2</td>
+</tr>
+<tr>
+<td><code>str</code> (สไลด์เขียน &quot;Str&quot;)</td>
+<td>str <strong>ไม่เป็นค่าว่าง</strong></td>
+</tr>
+<tr>
+<td><code>-n str</code></td>
+<td>str มี <strong>ความยาวมากกว่า 0</strong></td>
+</tr>
+<tr>
+<td><code>-z str</code></td>
+<td>str มี <strong>ความยาวเป็น 0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ตรวจสอบไฟล์</strong> (สไลด์ 26)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>expression</th>
+<th>จริงเมื่อ filename...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-d filename</code></td>
+<td>เป็น <strong>directory</strong></td>
+</tr>
+<tr>
+<td><code>-f filename</code></td>
+<td>เป็น <strong>file</strong></td>
+</tr>
+<tr>
+<td><code>-r filename</code></td>
+<td><strong>อ่านได้</strong> โดยโปรแกรม</td>
+</tr>
+<tr>
+<td><code>-w filename</code></td>
+<td><strong>เขียนได้</strong> โดยโปรแกรม</td>
+</tr>
+<tr>
+<td><code>-x filename</code></td>
+<td><strong>run ได้</strong> โดยโปรแกรม</td>
+</tr>
+<tr>
+<td><code>-s filename</code></td>
+<td>มี <strong>ขนาดไม่เป็น 0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เงื่อนไขอื่น ๆ</strong> (สไลด์ 26)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>expression</th>
+<th>จริงเมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>!expr</code></td>
+<td>expr <strong>เป็นเท็จ</strong> (กลับค่า)</td>
+</tr>
+<tr>
+<td><code>exp1 -a exp2</code></td>
+<td>exp1 <strong>และ</strong> exp2 เป็นจริง (AND)</td>
+</tr>
+<tr>
+<td><code>exp1 -o exp2</code></td>
+<td>exp1 <strong>หรือ</strong> exp2 เป็นจริง (OR)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>รันทดสอบใน <code>[ ]</code></strong> (ไฟล์ <code>book.txt</code> มีข้อมูล 4 บรรทัด):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ทดสอบ</th>
+<th>ผล</th>
+<th></th>
+<th>ทดสอบ</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[ 5 -eq 5 ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ -n &quot;&quot; ]</code></td>
+<td>false</td>
+</tr>
+<tr>
+<td><code>[ 5 -ne 5 ]</code></td>
+<td>false</td>
+<td></td>
+<td><code>[ -z &quot;&quot; ]</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td><code>[ 7 -gt 3 ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ $s ]</code> (s=hi)</td>
+<td>true</td>
+</tr>
+<tr>
+<td><code>[ 3 -ge 3 ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ $e ]</code> (e ว่าง)</td>
+<td>false</td>
+</tr>
+<tr>
+<td><code>[ 2 -lt 1 ]</code></td>
+<td>false</td>
+<td></td>
+<td><code>[ -d book.txt ]</code></td>
+<td>false</td>
+</tr>
+<tr>
+<td><code>[ 2 -le 2 ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ -f book.txt ]</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td><code>[ abc = abc ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ -s book.txt ]</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td><code>[ abc != abd ]</code></td>
+<td>true</td>
+<td></td>
+<td><code>[ ! -d book.txt ]</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td><code>[ 1 -eq 1 -a 2 -eq 3 ]</code></td>
+<td>false</td>
+<td></td>
+<td><code>[ 1 -eq 1 -o 2 -eq 3 ]</code></td>
+<td>true</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สับสนบ่อย: ตัวเลขใช้ <code>-eq</code> ส่วน string ใช้ <code>=</code> · สไลด์พิมพ์ขีดเป็น <code>–eq</code> (en dash) ตอนเขียนจริงต้องเป็น <code>-</code> ธรรมดา</p>
+</blockquote>
+<hr />
+<h2 id="12-if-เขียนยังไง-lecture-สไลด์-27">12. <code>if</code> เขียนยังไง? <sub>(Lecture สไลด์ 27)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>if [ เงื่อนไข ] then ... elif ... else ... fi</code> — ปิดด้วย <code>fi</code> (if กลับหลัง) และต้องมี space ในวงเล็บ <code>[ ]</code></strong></p>
+<pre><code class="language-bash">if [ expression ]
+then
+   commands
+elif [ expression ]
+then
+   commands
+else
+   commands
+fi
+</code></pre>
+<p><strong>ตัวอย่าง:</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+var1=&quot;cat&quot;
+var2=&quot;cat&quot;
+if [ $var1 = $var2 ]
+then
+echo &quot;Yes, it is equal&quot;
+else
+echo &quot;No, it is not equal&quot;
+fi
+</code></pre>
+<ul>
+<li><code>$var1 = $var2</code> → <code>cat = cat</code> เป็นจริง → เข้า <code>then</code></li>
+<li>output: <strong><code>Yes, it is equal</code></strong> (รันจริงตรง ✔)</li>
+</ul>
+<hr />
+<h2 id="13-case-เขียนยังไง-lecture-สไลด์-28">13. <code>case</code> เขียนยังไง? <sub>(Lecture สไลด์ 28)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>case</code> เทียบค่าเดียวกับหลายแบบเหมือน switch — แต่ละกรณีลงท้าย <code>)</code> คำสั่งจบด้วย <code>;;</code> กรณีอื่น ๆ ใช้ <code>*)</code> และปิดด้วย <code>esac</code> (case กลับหลัง)</strong></p>
+<ul>
+<li><code>case</code> ใช้เปรียบเทียบเหมือน <code>if</code> แต่รูปแบบการทำงานต่างกัน</li>
+</ul>
+<pre><code class="language-bash">case string in
+  str1)
+     commands;;
+  str2)
+     commands;;
+  str3)
+     commands;;
+  *)
+     commands;;
+esac
+</code></pre>
+<p><strong>ตัวอย่าง:</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+var1=&quot;cat&quot;
+case $var1 in
+&quot;ant&quot;)
+echo &quot;It is an ant&quot;;;
+&quot;bee&quot;)
+echo &quot;It is a bee&quot;;;
+&quot;cat&quot;)
+echo &quot;It is a cat&quot;;;
+*)
+echo &quot;I don't know&quot;;;
+esac
+</code></pre>
+<ul>
+<li><code>$var1</code> = <code>cat</code> → ไม่ตรง <code>ant</code>, ไม่ตรง <code>bee</code>, <strong>ตรง <code>cat</code></strong> → พิมพ์แล้วหยุดที่ <code>;;</code></li>
+<li>output: <strong><code>It is a cat</code></strong> (รันจริงตรง ✔)</li>
+</ul>
+<hr />
+<h2 id="14-while-loop-เขียนยังไง-lecture-สไลด์-29">14. <code>while</code> loop เขียนยังไง? <sub>(Lecture สไลด์ 29)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>while [ เงื่อนไข ] do ... done</code> วนไปเรื่อย ๆ จนกว่าเงื่อนไขจะเป็นเท็จ</strong></p>
+<pre><code class="language-bash">while [ expression ]
+do
+   commands
+   ………….
+done
+</code></pre>
+<p><strong>ตัวอย่าง:</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+num=1
+while [ $num -le 10 ]
+do
+ echo &quot;Loop $num&quot;
+ ((num = $num+1))
+done
+</code></pre>
+<p><strong>ไล่ทีละรอบ:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รอบ</th>
+<th>num ก่อนเช็ก</th>
+<th><code>$num -le 10</code></th>
+<th>พิมพ์</th>
+<th>num หลัง <code>(( ))</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>จริง</td>
+<td>Loop 1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>จริง</td>
+<td>Loop 2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>จริง (10 ≤ 10)</td>
+<td>Loop 10</td>
+<td>11</td>
+</tr>
+<tr>
+<td>–</td>
+<td>11</td>
+<td><strong>เท็จ</strong> → ออก</td>
+<td>–</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>output: <strong><code>Loop 1</code> ถึง <code>Loop 10</code></strong> (10 บรรทัด) รันจริงตรง ✔</li>
+<li><code>(( ... ))</code> คือการคำนวณเลขใน bash (<code>num = num + 1</code>)</li>
+</ul>
+<hr />
+<h2 id="15-for-loop-เขียนยังไง-lecture-สไลด์-30">15. <code>for</code> loop เขียนยังไง? <sub>(Lecture สไลด์ 30)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>for var in list</code> วนตามรายการทีละค่า หรือเขียนแบบภาษา C <code>for ((i=1;i&lt;5;i++))</code> — ต่างจาก while ตรงวิธีเขียนเงื่อนไข</strong></p>
+<pre><code class="language-bash">for var in list
+do
+   commands
+   ………….
+done
+</code></pre>
+<p><strong>แบบ 1 — วนตามรายการ</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+for i in 1 2 3 4 5
+do
+ echo &quot;Loop $i&quot;
+done
+</code></pre>
+<ul>
+<li>i ได้ค่า 1, 2, 3, 4, 5 ตามลำดับ → output: <strong><code>Loop 1</code> … <code>Loop 5</code></strong> (รันจริงตรงสไลด์ ✔)</li>
+</ul>
+<p><strong>แบบ 2 — แบบภาษา C</strong> (สไลด์ให้ไว้ในกล่องเขียวเข้มด้านล่าง)</p>
+<pre><code class="language-bash">for ((i=1;i&lt;5;i++))
+do
+ echo &quot;Loop $i&quot;
+done
+</code></pre>
+<ul>
+<li>เริ่ม i=1, วนขณะ <code>i&lt;5</code>, เพิ่มทีละ 1 → i = 1, 2, 3, 4</li>
+<li>output: <strong><code>Loop 1</code> … <code>Loop 4</code></strong> (4 บรรทัด)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ กล่อง output ในสไลด์ 30 (<code>Loop 1</code>–<code>Loop 5</code>) เป็นผลของ <strong>แบบ 1</strong> เท่านั้น — แบบ 2 รันจริงได้แค่ <strong>Loop 1–4</strong> เพราะเงื่อนไขคือ <code>i&lt;5</code> (ถ้าอยากได้ถึง 5 ต้องเป็น <code>i&lt;=5</code>)</p>
+</blockquote>
+<hr />
+<h2 id="16-รับ-input-argument-ยังไง-lecture-สไลด์-31">16. รับ input argument ยังไง? <sub>(Lecture สไลด์ 31)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ค่าที่พิมพ์ต่อท้ายชื่อ script จะเข้าไปอยู่ใน <code>$1</code>, <code>$2</code>, ... ทำให้ script ทำงานต่างกันตามค่าที่ส่งเข้ามา — คำที่อยู่ใน <code>&quot; &quot;</code> นับเป็น 1 argument</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+
+var1=$1
+var2=$2
+
+echo &quot;$1 &amp; $2&quot;
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th><code>$1</code></th>
+<th><code>$2</code></th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>./test.sh a b</code></td>
+<td><code>a</code></td>
+<td><code>b</code></td>
+<td><strong><code>a &amp; b</code></strong></td>
+</tr>
+<tr>
+<td><code>./test.sh &quot;a c d&quot; b</code></td>
+<td><code>a c d</code></td>
+<td><code>b</code></td>
+<td><strong><code>a c d &amp; b</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ครั้งที่ 2 <code>&quot;a c d&quot;</code> อยู่ในเครื่องหมายคำพูด จึงเป็น <strong>argument เดียว</strong> แม้มี space</li>
+<li>รันจริงตรงทั้ง 2 แบบ ✔</li>
+</ul>
+<hr />
+<h2 id="17-ตัวอย่าง-test1test18-lecture-สไลด์-3240">17. ตัวอย่าง test1–test18 <sub>(Lecture สไลด์ 32–40)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>รวมตัวอย่างการใช้ echo, คำนวณด้วย <code>(( ))</code>, loop + break, <code>read</code> รับค่าจากคีย์บอร์ด, <code>[[ ]]</code> กับ <code>&amp;&amp;</code>/<code>||</code>, if-elif / case, <code>$#</code>, ต่อ string, <code>cut</code> แยก argument, และ function</strong></p>
+<blockquote class="callout">
+<p>รูปแบบ: โค้ดตามสไลด์ → output ที่รันจริง → อธิบายทีละขั้น ตัวไหนต้องพิมพ์ input ใส่ตัวอย่าง input ไว้</p>
+</blockquote>
+<h3 id="test1sh-echo-3-แบบ-lecture-สไลด์-32">test1.sh — echo 3 แบบ <sub>(Lecture สไลด์ 32)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Printing text with newline&quot;
+echo -n &quot;Printing text without newline&quot;
+echo -e &quot;\nRemoving \t backslash \t characters\n&quot;
+</code></pre>
+<p>output (<code>⇥</code> = tab):</p>
+<pre><code class="language-text">Printing text with newline
+Printing text without newline
+Removing ⇥ backslash ⇥ characters
+
+</code></pre>
+<ol>
+<li><code>echo</code> ธรรมดา → พิมพ์แล้ว <strong>ขึ้นบรรทัดใหม่</strong></li>
+<li><code>echo -n</code> → พิมพ์ <strong>โดยไม่ขึ้นบรรทัดใหม่</strong></li>
+<li><code>echo -e</code> → แปล escape: <code>\n</code> = ขึ้นบรรทัดใหม่ (ทำให้ข้อความบรรทัดก่อนไม่ติดกัน), <code>\t</code> = tab, <code>\n</code> ท้ายสุด + newline ของ echo เอง = เกิด <strong>บรรทัดว่าง</strong> ท้าย</li>
+</ol>
+<h3 id="test2sh-บวกเลข-lecture-สไลด์-32">test2.sh — บวกเลข <sub>(Lecture สไลด์ 32)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+# Add two numeric value
+((sum=25+35))
+
+#Print the result
+echo $sum
+</code></pre>
+<ul>
+<li><code>(( ))</code> คำนวณ 25+35 เก็บใน sum → output: <strong><code>60</code></strong></li>
+</ul>
+<h3 id="test3sh-หากำลังสอง-lecture-สไลด์-33">test3.sh — หากำลังสอง <sub>(Lecture สไลด์ 33)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+#The following script calculates
+#the square value of the number, 5.
+((area=5*5))
+echo $area
+</code></pre>
+<ul>
+<li>5×5 → output: <strong><code>25</code></strong></li>
+</ul>
+<h3 id="test4sh-while-break-lecture-สไลด์-33">test4.sh — while + break <sub>(Lecture สไลด์ 33)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+valid=true
+count=1
+while [ $valid ]          # ← ต้องมี space หลังคำว่า while
+do
+echo $count
+if [ $count -eq 5 ];      # ← ต้องมี space หลังคำว่า if
+then
+break
+fi
+((count=$count+1))
+done
+</code></pre>
+<p>output:</p>
+<pre><code class="language-text">1
+2
+3
+4
+5
+</code></pre>
+<ol>
+<li><code>[ $valid ]</code> = <code>[ true ]</code> → string ไม่ว่าง = จริง (ตามตาราง &quot;str&quot; สไลด์ 25) → วนตลอด</li>
+<li>แต่ละรอบพิมพ์ count แล้วเช็ก <code>count -eq 5</code></li>
+<li>เมื่อ count = 5 → <code>break</code> ออกจาก loop ทันที จึงพิมพ์ถึง 5 เท่านั้น</li>
+</ol>
+<h3 id="test5sh-นับถอยหลัง-lecture-สไลด์-34">test5.sh — นับถอยหลัง <sub>(Lecture สไลด์ 34)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+for (( counter=10; counter&gt;0; counter-- ))
+do
+echo -n &quot;$counter &quot;
+done
+printf &quot;\n&quot;
+</code></pre>
+<ul>
+<li>counter = 10, 9, ..., 1 (หยุดเมื่อ counter = 0 เพราะ <code>0&gt;0</code> เท็จ)</li>
+<li><code>echo -n</code> ทำให้อยู่บรรทัดเดียวกัน แล้ว <code>printf &quot;\n&quot;</code> ปิดท้ายด้วยการขึ้นบรรทัด</li>
+<li>output: <strong><code>10 9 8 7 6 5 4 3 2 1 </code></strong> (มี space ท้าย)</li>
+</ul>
+<h3 id="test6sh-รับชื่อด้วย-read-lecture-สไลด์-34">test6.sh — รับชื่อด้วย read <sub>(Lecture สไลด์ 34)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Enter Your Name&quot;
+read name
+echo &quot;Welcome $name to DST program&quot;
+</code></pre>
+<p>ตัวอย่าง input <code>Ice</code>:</p>
+<pre><code class="language-text">Enter Your Name
+Ice
+Welcome Ice to DST program
+</code></pre>
+<ul>
+<li><code>read name</code> รอผู้ใช้พิมพ์แล้วเก็บไว้ใน <code>name</code></li>
+</ul>
+<h3 id="test7sh-ifelse-เลขหลักเดียว-lecture-สไลด์-35">test7.sh — if/else เลขหลักเดียว <sub>(Lecture สไลด์ 35)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+n=10
+if [ $n -lt 10 ];
+then
+echo &quot;It is a one digit number&quot;
+else
+echo &quot;It is a two digit number&quot;
+fi
+</code></pre>
+<ul>
+<li><code>10 -lt 10</code> → 10 &lt; 10 <strong>เท็จ</strong> → เข้า else</li>
+<li>output: <strong><code>It is a two digit number</code></strong></li>
+</ul>
+<h3 id="test8sh-ตรวจ-usernamepassword-lecture-สไลด์-35">test8.sh — ตรวจ username/password <sub>(Lecture สไลด์ 35)</sub></h3>
+<pre><code class="language-bash">!/bin/bash
+
+echo &quot;Enter username&quot;
+read username
+echo &quot;Enter password&quot;
+read password
+
+if [[ ( $username == &quot;admin&quot; &amp;&amp; $password == &quot;secret&quot; ) ]]; then
+echo &quot;valid user&quot;
+else
+echo &quot;invalid user&quot;
+fi
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>input</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admin</code> / <code>secret</code></td>
+<td><code>valid user</code></td>
+</tr>
+<tr>
+<td><code>admin</code> / <code>x</code></td>
+<td><code>invalid user</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>[[ ... ]]</code> รองรับ <code>==</code> และ <code>&amp;&amp;</code> (AND) → ต้องถูก <strong>ทั้งคู่</strong> ถึง valid</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ บรรทัดแรกในสไลด์คือ <code>!/bin/bash</code> (ขาด <code>#</code>) → รันด้วย <code>bash test8.sh</code> ขึ้น error <code>line 1: !/bin/bash: No such file or directory</code> ก่อน แต่บรรทัดที่เหลือยังทำงานปกติ ที่ถูกต้องคือ <code>#!/bin/bash</code> (ถ้ารันแบบ <code>./test8.sh</code> จะไม่มี shebang ให้ระบบเลือก bash)</p>
+</blockquote>
+<h3 id="test9sh-or-ใน-lecture-สไลด์-36">test9.sh — OR ใน <code>[[ ]]</code> <sub>(Lecture สไลด์ 36)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;Enter any number&quot;
+read n
+
+if [[ ( $n -eq 15 || $n  -eq 45 ) ]]
+then
+echo &quot;You won the game&quot;
+else
+echo &quot;You lost the game&quot;
+fi
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>input</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15</td>
+<td>You won the game</td>
+</tr>
+<tr>
+<td>45</td>
+<td>You won the game</td>
+</tr>
+<tr>
+<td>7</td>
+<td>You lost the game</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>||</code> = OR → ตรง 15 <strong>หรือ</strong> 45 ก็ชนะ</li>
+</ul>
+<h3 id="test10sh-if-elif-else-lecture-สไลด์-36">test10.sh — if / elif / else <sub>(Lecture สไลด์ 36)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;Enter your lucky number&quot;
+read n
+
+if [ $n -eq 101 ];
+then
+echo &quot;You got 1st prize&quot;
+elif [ $n -eq 510 ];
+then
+echo &quot;You got 2nd prize&quot;
+elif [ $n -eq 999 ];
+then
+echo &quot;You got 3rd prize&quot;
+
+else
+echo &quot;Sorry, try for the next time&quot;
+fi
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>input</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>101</td>
+<td>You got 1st prize</td>
+</tr>
+<tr>
+<td>510</td>
+<td>You got 2nd prize</td>
+</tr>
+<tr>
+<td>999</td>
+<td>You got 3rd prize</td>
+</tr>
+<tr>
+<td>อื่น ๆ (เช่น 5)</td>
+<td>Sorry, try for the next time</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="test11sh-งานเดียวกับ-test10-แต่ใช้-case-lecture-สไลด์-37">test11.sh — งานเดียวกับ test10 แต่ใช้ case <sub>(Lecture สไลด์ 37)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;Enter your lucky number&quot;
+read n
+case $n in
+101)
+echo echo &quot;You got 1st prize&quot; ;;
+510)
+echo &quot;You got 2nd prize&quot; ;;
+999)
+echo &quot;You got 3rd prize&quot; ;;
+*)
+echo &quot;Sorry, try for the next time&quot; ;;
+esac
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>input</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>101</td>
+<td><strong><code>echo You got 1st prize</code></strong></td>
+</tr>
+<tr>
+<td>510</td>
+<td>You got 2nd prize</td>
+</tr>
+<tr>
+<td>999</td>
+<td>You got 3rd prize</td>
+</tr>
+<tr>
+<td>อื่น ๆ</td>
+<td>Sorry, try for the next time</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียน <code>echo echo &quot;You got 1st prize&quot;</code> (echo ซ้ำ) → คำว่า echo ตัวที่สองถูกพิมพ์ออกมาด้วย ได้ <code>echo You got 1st prize</code> ถ้าต้องการผลเหมือน test10 ให้ลบ echo ออกหนึ่งตัว</p>
+</blockquote>
+<h3 id="test12sh-นับ-argument-lecture-สไลด์-37">test12.sh — นับ argument <sub>(Lecture สไลด์ 37)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Total arguments : $#&quot;
+echo &quot;1st Argument = $1&quot;
+echo &quot;2nd argument = $2&quot;
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bash test12.sh a b c</code></td>
+<td><code>Total arguments : 3</code> / <code>1st Argument = a</code> / <code>2nd argument = b</code></td>
+</tr>
+<tr>
+<td><code>bash test12.sh</code> (ไม่ส่ง)</td>
+<td><code>Total arguments : 0</code> / <code>1st Argument = </code> / <code>2nd argument = </code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="test13sh-ต่อ-string-lecture-สไลด์-37">test13.sh — ต่อ string <sub>(Lecture สไลด์ 37)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+string1=&quot;DST at&quot;
+string2=&quot;Mahidol&quot;
+echo &quot;$string1$string2&quot;
+string3=$string1+$string2
+string3+=&quot; is the best&quot;
+echo $string3
+</code></pre>
+<p>output:</p>
+<pre><code class="language-text">DST atMahidol
+DST at+Mahidol is the best
+</code></pre>
+<ol>
+<li><code>&quot;$string1$string2&quot;</code> → วางติดกัน <strong>ไม่มี space คั่น</strong> → <code>DST atMahidol</code></li>
+<li><code>string3=$string1+$string2</code> → <code>+</code> <strong>ไม่ใช่การบวก</strong> แต่เป็นตัวอักษรธรรมดา → <code>DST at+Mahidol</code></li>
+<li><code>string3+=&quot; is the best&quot;</code> → <code>+=</code> คือ <strong>ต่อท้าย</strong> string → <code>DST at+Mahidol is the best</code></li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ <code>string1=“DST at&quot;</code> และ <code>string2=“Mahidol&quot;</code> เปิดด้วย <strong>อัญประกาศโค้ง <code>“</code></strong> — พิมพ์ตามนั้นแล้วรันจะ error (<code>command not found</code>) และได้บรรทัดว่างกับ <code>+ is the best</code> ผลข้างบนคือหลังแก้เป็น <code>&quot;</code> ตรงแล้ว</p>
+</blockquote>
+<h3 id="test14sh-แยก-argument-แบบ-x45-y30-lecture-สไลด์-38">test14.sh — แยก argument แบบ <code>X=45 Y=30</code> <sub>(Lecture สไลด์ 38)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+for arg in &quot;$@&quot;
+do
+index=$(echo $arg | cut -f1 -d=)
+val=$(echo $arg | cut -f2 -d=)
+case $index in
+X) x=$val;;
+Y) y=$val;;
+*)
+esac
+done
+((result=x+y))
+echo &quot;X+Y=$result&quot;
+</code></pre>
+<p>รันตามสไลด์ <code>bash command_line_names.sh X=45 Y=30</code> → <strong><code>X+Y=75</code></strong></p>
+<p>ทีละขั้น:</p>
+<ol>
+<li><code>for arg in &quot;$@&quot;</code> วนทุก argument: รอบ 1 <code>X=45</code>, รอบ 2 <code>Y=30</code></li>
+<li><code>cut -d= -f1</code> ตัดด้วย <code>=</code> เอาส่วนที่ 1 → <code>index</code> = <code>X</code> / <code>Y</code></li>
+<li><code>cut -d= -f2</code> เอาส่วนที่ 2 → <code>val</code> = <code>45</code> / <code>30</code></li>
+<li><code>case</code> จับ X → <code>x=45</code>, Y → <code>y=30</code> (ตัวอื่นเข้า <code>*)</code> แล้วไม่ทำอะไร)</li>
+<li><code>((result=x+y))</code> = 75</li>
+</ol>
+<ul>
+<li>ลองสลับ/เพิ่ม: <code>Y=5 X=2 Z=9</code> → <code>X+Y=7</code> (Z ถูกข้าม)</li>
+<li>สไลด์ใช้ชื่อไฟล์ <code>command_line_names.sh</code> ในภาพหน้าจอ แต่ป้ายคือ test14.sh</li>
+</ul>
+<h3 id="test15sh-read-สองค่าแล้วบวก-lecture-สไลด์-39">test15.sh — read สองค่าแล้วบวก <sub>(Lecture สไลด์ 39)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Enter first number&quot;
+read x
+echo &quot;Enter second number&quot;
+read y
+(( sum=x+y ))
+echo &quot;The result of addition=$sum&quot;
+</code></pre>
+<p>input 3 และ 4 → output สุดท้าย <strong><code>The result of addition=7</code></strong></p>
+<h3 id="test16sh-create-function-lecture-สไลด์-39">test16.sh — Create Function <sub>(Lecture สไลด์ 39)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+function F1()
+{
+echo 'I like bash programming'
+}
+
+F1
+</code></pre>
+<ul>
+<li>ประกาศ function <code>F1</code> ก่อน แล้วเรียกด้วยชื่อ <code>F1</code> (ไม่ต้องมีวงเล็บ)</li>
+<li>output: <strong><code>I like bash programming</code></strong></li>
+</ul>
+<h3 id="test17sh-create-function-with-parameters-lecture-สไลด์-40">test17.sh — Create Function with Parameters <sub>(Lecture สไลด์ 40)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+Rectangle_Area() {
+area=$(($1 * $2))
+echo &quot;Area is : $area&quot;
+}
+
+Rectangle_Area 10 20
+</code></pre>
+<ul>
+<li>เรียก <code>Rectangle_Area 10 20</code> → ใน function <code>$1</code>=10, <code>$2</code>=20</li>
+<li><code>$(( ))</code> คำนวณแล้วคืนค่า → area = 200</li>
+<li>output: <strong><code>Area is : 200</code></strong></li>
+</ul>
+<h3 id="test18sh-pass-return-value-from-function-lecture-สไลด์-40">test18.sh — Pass Return Value from Function <sub>(Lecture สไลด์ 40)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+function greeting() {
+
+str=&quot;Hello, $name&quot;
+echo $str
+
+}
+
+echo &quot;Enter your name&quot;
+read name
+
+val=$(greeting)
+echo &quot;Return value of the function is $val&quot;
+</code></pre>
+<p>input <code>Ice</code> → output:</p>
+<pre><code class="language-text">Enter your name
+Return value of the function is Hello, Ice
+</code></pre>
+<ol>
+<li><code>read name</code> เก็บชื่อ</li>
+<li><code>$(greeting)</code> รัน function แล้ว <strong>เก็บสิ่งที่ function echo ออกมา</strong> ลงตัวแปร val (จึงไม่พิมพ์ &quot;Hello, Ice&quot; ออกจอตรง ๆ)</li>
+<li>echo บรรทัดสุดท้ายพิมพ์ค่า val</li>
+</ol>
+<blockquote class="callout">
+<p class="c-tip">💡 <code>$( ... )</code> = &quot;รันคำสั่งข้างในแล้วเอา output มาเป็นค่า&quot; ใช้ทั้งใน test14 (<code>$(echo ... | cut ...)</code>) และ test18</p>
+</blockquote>
+<hr />
+<h2 id="18-ตัวอย่าง-test19test27-ไฟล์-โฟลเดอร์-date-wait-sleep-lecture-สไลด์-4149">18. ตัวอย่าง test19–test27 (ไฟล์, โฟลเดอร์, date, wait, sleep) <sub>(Lecture สไลด์ 41–49)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ script สั่งคำสั่ง Linux — <code>mkdir</code> (+ เช็ก <code>-d</code> ก่อน), อ่านไฟล์ทีละบรรทัดด้วย <code>while read</code>, <code>rm -i</code> ถามก่อนลบ, <code>&gt;&gt;</code> ต่อท้ายไฟล์, <code>-f</code> เช็กว่ามีไฟล์, <code>date +%Y...</code> ดึงวันเวลา, <code>wait $!</code> รอ process, <code>sleep</code> หน่วงเวลา</strong></p>
+<blockquote class="callout">
+<p>ภาพหน้าจอในสไลด์ใช้ชื่อไฟล์จริงคนละชื่อกับป้าย testNN (เช่น <code>make_directory.sh</code>, <code>directory_exist.sh</code>, <code>read_file.sh</code>, <code>delete_file.sh</code>, <code>append_file.sh</code>, <code>file_exist.sh</code>, <code>date_parse.sh</code>, <code>wait_example.sh</code>, <code>sleep_example.sh</code>)</p>
+</blockquote>
+<h3 id="test19sh-สร้าง-directory-ตามชื่อที่ผู้ใช้กำหนด-lecture-สไลด์-41">test19.sh — สร้าง directory ตามชื่อที่ผู้ใช้กำหนด <sub>(Lecture สไลด์ 41)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Enter directory name&quot;
+read newdir
+`mkdir $newdir`
+</code></pre>
+<ul>
+<li>ถ้าชื่อ directory <strong>ยังไม่มี</strong> → สร้างใหม่ (input <code>test_dir</code> → <code>ls</code> เห็น <code>test_dir</code>)</li>
+<li>ถ้าชื่อ <strong>มีอยู่แล้ว</strong> → <strong>แสดง error</strong>: รันซ้ำได้ <code>mkdir: cannot create directory 'test_dir': File exists</code></li>
+<li><code>`...`</code> (backtick) คือการรันคำสั่งข้างใน</li>
+</ul>
+<h3 id="test20sh-เช็กก่อนสร้าง-lecture-สไลด์-42">test20.sh — เช็กก่อนสร้าง <sub>(Lecture สไลด์ 42)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Enter directory name&quot;
+read ndir
+if [ -d &quot;$ndir&quot; ]
+then
+echo &quot;Directory exist&quot;
+else
+`mkdir $ndir`
+echo &quot;Directory created&quot;
+fi
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ครั้งที่</th>
+<th>input</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>newdir</code> (ยังไม่มี)</td>
+<td><code>Directory created</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>newdir</code> (มีแล้ว)</td>
+<td><code>Directory exist</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ใช้ <code>-d</code> ตรวจก่อน → <strong>ไม่เกิด error แบบ test19</strong></li>
+</ul>
+<h3 id="test21sh-อ่านไฟล์ทีละบรรทัด-lecture-สไลด์-43">test21.sh — อ่านไฟล์ทีละบรรทัด <sub>(Lecture สไลด์ 43)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+file='book.txt'
+while read line; do
+echo $line
+done &lt; $file
+</code></pre>
+<ul>
+<li><code>done &lt; $file</code> ส่งไฟล์เข้าเป็น input ของ loop → <code>read line</code> อ่านทีละบรรทัดจนหมดไฟล์</li>
+<li>output (book.txt ในสไลด์):</li>
+</ul>
+<pre><code class="language-text">1. Pro AngularJS
+2. Learning JQquery
+3. PHP Programming
+4. CodeIgniter 3
+</code></pre>
+<p>ตรงกับ <code>cat book.txt</code></p>
+<h3 id="test22sh-ลบไฟล์โดยถามยืนยันก่อน-lecture-สไลด์-44">test22.sh — ลบไฟล์โดยถามยืนยันก่อน <sub>(Lecture สไลด์ 44)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Enter filename to remove&quot;
+read fn
+rm -i $fn
+</code></pre>
+<pre><code class="language-text">Enter filename to remove
+test.txt
+rm: remove regular file 'test.txt'? y
+</code></pre>
+<ul>
+<li><code>rm -i</code> = interactive → <strong>ถาม y/n ก่อนลบจริง</strong> ตอบ <code>y</code> แล้ว <code>ls</code> ไม่เห็น test.txt แล้ว</li>
+<li>(รันเองกับไฟล์ว่างข้อความเป็น <code>remove regular empty file</code> — ต่างเพราะไฟล์ทดสอบว่าง)</li>
+</ul>
+<h3 id="test23sh-append-ต่อท้ายไฟล์-lecture-สไลด์-45">test23.sh — append ต่อท้ายไฟล์ <sub>(Lecture สไลด์ 45)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;Before appending the file&quot;
+cat book.txt
+
+echo &quot;Learning Laravel 5&quot;&gt;&gt; book.txt
+echo &quot;After appending the file&quot;
+cat book.txt
+</code></pre>
+<pre><code class="language-text">Before appending the file
+1. Pro AngularJS
+2. Learning JQquery
+3. PHP Programming
+4. CodeIgniter 3
+After appending the file
+1. Pro AngularJS
+2. Learning JQquery
+3. PHP Programming
+4. CodeIgniter 3
+Learning Laravel 5
+</code></pre>
+<ul>
+<li><code>&gt;&gt;</code> = <strong>ต่อท้าย</strong> ไฟล์ (ของเดิมยังอยู่) → บรรทัดใหม่ไปอยู่ล่างสุด</li>
+</ul>
+<h3 id="test24sh-เช็กว่ามีไฟล์ไหม-lecture-สไลด์-46">test24.sh — เช็กว่ามีไฟล์ไหม <sub>(Lecture สไลด์ 46)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+filename=$1
+if [ -f &quot;$filename&quot; ]; then
+echo &quot;File exists&quot;
+else
+echo &quot;File does not exist&quot;
+fi
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bash file_exist.sh book.txt</code></td>
+<td><code>File exists</code></td>
+</tr>
+<tr>
+<td><code>bash file_exist.sh book2.txt</code></td>
+<td><code>File does not exist</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>รับชื่อไฟล์จาก argument <code>$1</code> แล้วตรวจด้วย <code>-f</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียน <code>if [ -f &quot;$filename&quot; ] then</code> (<strong>ไม่มี <code>;</code> ก่อน <code>then</code></strong>) — พิมพ์ตามนั้นรันแล้วได้ <code>syntax error near unexpected token 'else'</code> ต้องใส่ <code>;</code> หรือขึ้นบรรทัดใหม่ก่อน <code>then</code> (โค้ดข้างบนแก้แล้ว)</p>
+</blockquote>
+<h3 id="test25sh-ดึงวันเวลาจากระบบ-lecture-สไลด์-47">test25.sh — ดึงวันเวลาจากระบบ <sub>(Lecture สไลด์ 47)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+Year=`date +%Y`
+Month=`date +%m`
+Day=`date +%d`
+Hour=`date +%H`
+Minute=`date +%M`
+Second=`date +%S`
+echo `date`
+echo &quot;Current Date is: $Day-$Month-$Year&quot;
+echo &quot;Current Time is: $Hour:$Minute:$Second&quot;
+</code></pre>
+<p>ผลในสไลด์:</p>
+<pre><code class="language-text">Mon Jul 9 12:04:41 EDT 2018
+Current Date is: 09-07-2018
+Current Time is: 12:04:41
+</code></pre>
+<ul>
+<li><code>date +%Y</code> ปี, <code>%m</code> เดือน, <code>%d</code> วัน, <code>%H</code> ชั่วโมง, <code>%M</code> นาที, <code>%S</code> วินาที</li>
+<li>รูปแบบที่พิมพ์: วันที่ <strong>วัน-เดือน-ปี</strong>, เวลา <strong>ชม:นาที:วินาที</strong></li>
+<li>ผลขึ้นกับเวลาที่รัน (รันเองได้ <code>Current Date is: 17-11-2026</code>)</li>
+</ul>
+<h3 id="test26sh-wait-รอ-process-ให้จบ-lecture-สไลด์-48">test26.sh — wait รอ process ให้จบ <sub>(Lecture สไลด์ 48)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+echo &quot;Wait command&quot; &amp;
+process_id=$!
+wait $process_id
+echo &quot;Exited with status $?&quot;
+</code></pre>
+<pre><code class="language-text">Wait command
+Exited with status 0
+</code></pre>
+<ol>
+<li><code>&amp;</code> ส่ง <code>echo</code> ไปทำงาน <strong>เบื้องหลัง</strong></li>
+<li><code>$!</code> เก็บ PID ของ process นั้น</li>
+<li><code>wait</code> รอจน process นั้นจบ</li>
+<li><code>$?</code> = สถานะจบของ process ที่รอ → <strong>0</strong> = สำเร็จ</li>
+</ol>
+<h3 id="test27sh-sleep-lecture-สไลด์-49">test27.sh — sleep <sub>(Lecture สไลด์ 49)</sub></h3>
+<pre><code class="language-bash">#!/bin/bash
+
+echo &quot;Wait for 5 seconds&quot;
+sleep 5
+echo &quot;Completed&quot;
+</code></pre>
+<pre><code class="language-text">Wait for 5 seconds
+Completed        ← ขึ้นหลังผ่านไป 5 วินาที
+</code></pre>
+<ul>
+<li><code>sleep 5</code> = หยุดรอ 5 วินาที (รันจริงใช้เวลา ~5.08 วินาที)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียน <code>echo “Wait for 5 seconds”</code> ด้วย <strong>อัญประกาศโค้ง</strong> → พิมพ์ตามนั้นจะได้ <code>“Wait for 5 seconds”</code> และ <code>“Completed”</code> <strong>ติดเครื่องหมายมาด้วย</strong> ต่างจากภาพหน้าจอในสไลด์ ต้องใช้ <code>&quot;</code> ตรง</p>
+</blockquote>
+<hr />
+<h1>ภาค Lab</h1>
+<h2 id="19-lab-10-ต้องทำอะไร-ส่งอะไร-lab-หน้า-14">19. Lab 10 ต้องทำอะไร ส่งอะไร? <sub>(Lab หน้า 1–4)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้างและรัน test1.sh–test27.sh ทุกตัวจากสไลด์ แคปโค้ด+ผลรัน อธิบายว่าแต่ละตัวทำอะไร รวมเป็น PDF ไฟล์เดียวชื่อ <code>6887xxx_lab10.pdf</code> ส่งใน MyCourses ภายในเที่ยงคืนวันที่ 15 ต.ค.</strong></p>
+<ul>
+<li><strong>Objective</strong> (Lab หน้า 2): Learn how to write shell scripts</li>
+<li><strong>What to Submit</strong> (Lab หน้า 3):
+<ul>
+<li>ฝึกเขียน shell script</li>
+<li>สร้าง script, รัน, และ <strong>save outputs ใน PDF ไฟล์เดียว</strong></li>
+<li>ส่งที่ลิงก์ใน <strong>MyCourses</strong></li>
+<li>ชื่อไฟล์: <strong><code>6887xxx_lab10.pdf</code></strong></li>
+<li>กำหนดส่ง: <strong>วันนี้ (Oct 15) เที่ยงคืน</strong></li>
+</ul>
+</li>
+<li><strong>Shell Scripts</strong> (Lab หน้า 4): สำหรับทุก script ในสไลด์ Lecture
+<ol>
+<li>สร้าง <strong>test1.sh ถึง test27.sh</strong></li>
+<li>รันแต่ละ script</li>
+<li><strong>snapshot</strong> โค้ดและ output</li>
+<li><strong>อธิบาย</strong> ว่าแต่ละ script ทำอะไร</li>
+</ol>
+</li>
+</ul>
+<h2 id="20-แนวคำตอบ-lab-test1test27-ทำอะไร-ได้-output-อะไร">20. แนวคำตอบ Lab: test1–test27 ทำอะไร ได้ output อะไร</h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ตารางนี้เป็นคำอธิบายในรายงาน — ทุกแถวรันผ่านจริงแล้ว (ตัวที่สไลด์พิมพ์ผิดให้ใช้โค้ดฉบับแก้ในข้อ 17–18)</strong></p>
+<p>ขั้นตอนทำในเครื่อง Ubuntu ต่อ 1 ไฟล์: <code>nano testN.sh</code> → พิมพ์โค้ด → <code>chmod 700 testN.sh</code> → <code>./testN.sh</code> (หรือ <code>bash testN.sh</code>) → แคปหน้าจอ</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>script</th>
+<th>ทำอะไร (คำอธิบายสำหรับรายงาน)</th>
+<th>input / argument ที่ใช้ทดสอบ</th>
+<th>output ที่รันได้</th>
+<th>ต้องแก้จากสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>test1</td>
+<td>เทียบ echo ปกติ / <code>-n</code> ไม่ขึ้นบรรทัด / <code>-e</code> แปล <code>\n</code> <code>\t</code></td>
+<td>–</td>
+<td>3 บรรทัด + บรรทัดว่าง</td>
+<td>–</td>
+</tr>
+<tr>
+<td>test2</td>
+<td>บวก 25+35 ด้วย <code>(( ))</code></td>
+<td>–</td>
+<td><code>60</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test3</td>
+<td>หากำลังสองของ 5</td>
+<td>–</td>
+<td><code>25</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test4</td>
+<td>while วนพิมพ์ count และ <code>break</code> เมื่อถึง 5</td>
+<td>–</td>
+<td><code>1</code>…<code>5</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test5</td>
+<td>for แบบ C นับถอยหลัง 10→1 บรรทัดเดียว</td>
+<td>–</td>
+<td><code>10 9 8 7 6 5 4 3 2 1</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test6</td>
+<td><code>read</code> ชื่อแล้วกล่าวต้อนรับ</td>
+<td><code>Ice</code></td>
+<td><code>Welcome Ice to DST program</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test7</td>
+<td>if/else บอกว่า n=10 เป็นเลขกี่หลัก</td>
+<td>–</td>
+<td><code>It is a two digit number</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test8</td>
+<td>ตรวจ username/password ด้วย <code>[[ &amp;&amp; ]]</code></td>
+<td><code>admin</code>/<code>secret</code></td>
+<td><code>valid user</code></td>
+<td>เติม <code>#</code> บรรทัดแรก</td>
+</tr>
+<tr>
+<td>test9</td>
+<td>ชนะถ้าเลขเป็น 15 หรือ 45 (<code>||</code>)</td>
+<td><code>15</code> / <code>7</code></td>
+<td><code>You won the game</code> / <code>You lost the game</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test10</td>
+<td>if-elif-else ตรวจเลขนำโชค 101/510/999</td>
+<td><code>510</code></td>
+<td><code>You got 2nd prize</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test11</td>
+<td>งานเดียวกับ test10 ด้วย case</td>
+<td><code>101</code></td>
+<td><code>echo You got 1st prize</code></td>
+<td>ลบ <code>echo</code> ที่ซ้ำ</td>
+</tr>
+<tr>
+<td>test12</td>
+<td>แสดงจำนวน argument (<code>$#</code>) และ <code>$1</code> <code>$2</code></td>
+<td><code>a b c</code></td>
+<td><code>Total arguments : 3</code> …</td>
+<td>–</td>
+</tr>
+<tr>
+<td>test13</td>
+<td>ต่อ string ด้วยการวางติดกัน, <code>+</code> และ <code>+=</code></td>
+<td>–</td>
+<td><code>DST atMahidol</code> / <code>DST at+Mahidol is the best</code></td>
+<td>เปลี่ยน <code>“</code> เป็น <code>&quot;</code></td>
+</tr>
+<tr>
+<td>test14</td>
+<td>แยก argument <code>X=..</code> <code>Y=..</code> ด้วย <code>cut</code> แล้วบวก</td>
+<td><code>X=45 Y=30</code></td>
+<td><code>X+Y=75</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test15</td>
+<td><code>read</code> 2 ตัวเลขแล้วบวก</td>
+<td><code>3</code>, <code>4</code></td>
+<td><code>The result of addition=7</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test16</td>
+<td>สร้างและเรียก function</td>
+<td>–</td>
+<td><code>I like bash programming</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test17</td>
+<td>function รับ parameter คำนวณพื้นที่สี่เหลี่ยม</td>
+<td>(ในโค้ด 10 20)</td>
+<td><code>Area is : 200</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test18</td>
+<td>function คืนค่าผ่าน <code>$(...)</code></td>
+<td><code>Ice</code></td>
+<td><code>Return value of the function is Hello, Ice</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test19</td>
+<td>สร้าง directory ตามชื่อที่พิมพ์ (ซ้ำแล้ว error)</td>
+<td><code>test_dir</code></td>
+<td>สร้างได้ / ครั้งที่ 2 <code>File exists</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test20</td>
+<td>เช็ก <code>-d</code> ก่อนค่อยสร้าง</td>
+<td><code>newdir</code> ×2</td>
+<td><code>Directory created</code> / <code>Directory exist</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test21</td>
+<td>อ่าน book.txt ทีละบรรทัด</td>
+<td>(book.txt 4 บรรทัด)</td>
+<td>4 บรรทัดของไฟล์</td>
+<td>สร้าง book.txt ก่อน</td>
+</tr>
+<tr>
+<td>test22</td>
+<td>ลบไฟล์แบบถามยืนยัน <code>rm -i</code></td>
+<td><code>test.txt</code>, <code>y</code></td>
+<td>ไฟล์หายไป</td>
+<td>สร้าง test.txt ก่อน</td>
+</tr>
+<tr>
+<td>test23</td>
+<td>append &quot;Learning Laravel 5&quot; ต่อท้าย book.txt</td>
+<td>–</td>
+<td>ก่อน 4 บรรทัด / หลัง 5 บรรทัด</td>
+<td>–</td>
+</tr>
+<tr>
+<td>test24</td>
+<td>เช็ก <code>-f</code> ว่ามีไฟล์ตาม <code>$1</code> ไหม</td>
+<td><code>book.txt</code> / <code>book2.txt</code></td>
+<td><code>File exists</code> / <code>File does not exist</code></td>
+<td>เติม <code>;</code> ก่อน <code>then</code></td>
+</tr>
+<tr>
+<td>test25</td>
+<td>ดึงวัน/เวลาจาก <code>date</code> มาแสดงรูปแบบ วัน-เดือน-ปี</td>
+<td>–</td>
+<td>วันเวลาปัจจุบัน</td>
+<td>–</td>
+</tr>
+<tr>
+<td>test26</td>
+<td>ส่ง echo ไปเบื้องหลัง แล้ว <code>wait $!</code></td>
+<td>–</td>
+<td><code>Wait command</code> / <code>Exited with status 0</code></td>
+<td>–</td>
+</tr>
+<tr>
+<td>test27</td>
+<td>พิมพ์ รอ 5 วินาทีด้วย <code>sleep</code> แล้วพิมพ์ต่อ</td>
+<td>–</td>
+<td><code>Wait for 5 seconds</code> / <code>Completed</code></td>
+<td>เปลี่ยน <code>“ ”</code> เป็น <code>&quot;</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 test21–test23 ใช้ <code>book.txt</code> เดียวกัน: สร้างไฟล์ 4 บรรทัดตามสไลด์ก่อน (<code>1. Pro AngularJS</code> … <code>4. CodeIgniter 3</code>) และรัน test21 ก่อน test23 จะได้ผลตรงสไลด์</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shell</td>
+<td>ส่วนที่ผู้ใช้สั่งงาน OS ผ่าน CLI</td>
+<td>ชั้นกลางระหว่างแอปกับ kernel</td>
+</tr>
+<tr>
+<td>Shell script</td>
+<td>ไฟล์ที่รวมคำสั่ง shell ไว้รันต่อเนื่อง</td>
+<td>สูตรคำสั่งเรียงบรรทัด</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>Command Line Interface</td>
+<td>พิมพ์คำสั่ง</td>
+</tr>
+<tr>
+<td>Shebang</td>
+<td>บรรทัดแรก <code>#!&lt;shell&gt;</code> บอก interpreter</td>
+<td><code>#!/bin/bash</code></td>
+</tr>
+<tr>
+<td>Shell variable</td>
+<td>ตัวแปรภายใน shell ที่สร้างมัน</td>
+<td>ไม่ส่งต่อลูก</td>
+</tr>
+<tr>
+<td>Environment variable</td>
+<td>ตัวแปรที่ child process ได้รับ</td>
+<td>ส่งต่อลูก</td>
+</tr>
+<tr>
+<td><code>export</code></td>
+<td>ทำ shell variable ให้เป็น environment variable</td>
+<td>ถ่ายเอกสารแจก</td>
+</tr>
+<tr>
+<td><code>unset</code></td>
+<td>ลบตัวแปร</td>
+<td></td>
+</tr>
+<tr>
+<td>Child process / PPID</td>
+<td>process ที่ shell สร้าง / PID ของ parent</td>
+<td>ls, more, ps ลูกของ bash</td>
+</tr>
+<tr>
+<td>PATH</td>
+<td>รายการ directory ที่ค้นหาคำสั่งตามลำดับ</td>
+<td>ใช้ตัวแรกที่เจอ</td>
+</tr>
+<tr>
+<td>Position parameter</td>
+<td><code>$0</code> ชื่อ script, <code>$1 $2 …</code> argument</td>
+<td></td>
+</tr>
+<tr>
+<td><code>$#</code> / <code>$*</code> / <code>$@</code></td>
+<td>จำนวน argument / argument ทั้งหมด</td>
+<td></td>
+</tr>
+<tr>
+<td><code>$?</code></td>
+<td>สถานะจบคำสั่งล่าสุด</td>
+<td>0 = สำเร็จ</td>
+</tr>
+<tr>
+<td><code>$!</code></td>
+<td>(สไลด์ 21) PID ของ shell · (สไลด์ 48) PID ของงานเบื้องหลัง</td>
+<td>ใช้คู่ <code>&amp;</code> + <code>wait</code></td>
+</tr>
+<tr>
+<td><code>chmod 700</code></td>
+<td>owner rwx, คนอื่นไม่มีสิทธิ์</td>
+<td><code>-rwx------</code></td>
+</tr>
+<tr>
+<td><code>(( ))</code> / <code>$(( ))</code></td>
+<td>คำนวณเลข</td>
+<td><code>((sum=25+35))</code></td>
+</tr>
+<tr>
+<td><code>$( )</code> / <code>` `</code></td>
+<td>รันคำสั่งแล้วเอาผลมาใช้</td>
+<td><code>val=$(greeting)</code></td>
+</tr>
+<tr>
+<td><code>'...'</code> vs <code>&quot;...&quot;</code></td>
+<td>ไม่แทนค่า vs แทนค่าตัวแปร</td>
+<td></td>
+</tr>
+<tr>
+<td><code>${arr[i]}</code></td>
+<td>อ่านค่า array ช่อง i</td>
+<td>ต้องมี <code>{}</code></td>
+</tr>
+<tr>
+<td><code>fi</code> / <code>esac</code></td>
+<td>ปิด if / ปิด case</td>
+<td>สะกดกลับหลัง</td>
+</tr>
+<tr>
+<td><code>;;</code></td>
+<td>จบแต่ละกรณีใน case</td>
+<td></td>
+</tr>
+<tr>
+<td><code>read</code></td>
+<td>รับค่าจากคีย์บอร์ด</td>
+<td></td>
+</tr>
+<tr>
+<td><code>&gt;&gt;</code></td>
+<td>ต่อท้ายไฟล์</td>
+<td></td>
+</tr>
+<tr>
+<td><code>rm -i</code></td>
+<td>ลบแบบถามก่อน</td>
+<td></td>
+</tr>
+<tr>
+<td><code>wait</code> / <code>sleep</code></td>
+<td>รอ process จบ / หน่วงเวลา</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ <strong>Shell vs Environment variable</strong>: env ถูก inherit ไป child, shell var ไม่ถูก; ใช้ <code>export</code>; ตอน shell เริ่ม env ถูก copy มาเป็น shell var ชื่อเดียวกัน แก้ shell var ไม่กระทบ env</li>
+<li>⭐ environment variable ตัวอย่าง: USER, HOME, SHELL, LOGNAME, PATH, LANG, TERM — PATH ค้นตามลำดับ ใช้ตัวแรกที่เจอ</li>
+<li>⭐ <strong>4 shell</strong>: sh (standard UNIX, <code>$</code>), csh (เหมือน C, <code>%</code>), ksh (รวมข้อดี sh+csh, ไม่มีทุก UNIX, <code>$</code>), bash (default Linux, line editing, <code>$</code>)</li>
+<li>⭐ ขั้นทำให้ script รัน: สร้างไฟล์ → shebang → คำสั่ง → <strong><code>chmod 700</code></strong> → <strong><code>./script</code></strong></li>
+<li>⭐ <strong>ห้ามมี space รอบ <code>=</code></strong>, <code>'</code> ไม่แทนค่า / <code>&quot;</code> แทนค่า (สไลด์ 20 ได้ <code>$var1 $var2</code> vs <code>shell script</code>)</li>
+<li>⭐ ตัวแปรพิเศษ <code>$0 $1.. $# $* $@ $? $!</code> — <code>$?</code> = 0 คือสำเร็จ</li>
+<li>⭐ array ต้อง <code>${txt[0]}</code> ไม่งั้นได้ <code>a[0] a[1] a[2]</code></li>
+<li>⭐ ตัวเปรียบเทียบ <code>-eq -ne -gt -ge -lt -le</code> / <code>= != -n -z</code> / <code>-d -f -r -w -x -s</code> / <code>! -a -o</code></li>
+<li>⭐ โครง <code>if … then … elif … else … fi</code>, <code>case … in x) ;; *) ;; esac</code>, <code>while [ ] do … done</code>, <code>for var in list do … done</code></li>
+<li>⭐ <code>for ((i=1;i&lt;5;i++))</code> ได้ <strong>4 รอบ</strong> ไม่ใช่ 5</li>
+<li>⭐ argument ใน <code>&quot; &quot;</code> นับเป็น 1 ตัว (<code>&quot;a c d&quot; b</code> → <code>a c d &amp; b</code>)</li>
+<li>⭐ test1–27: จำ output สำคัญ — 60, 25, 1..5, <code>10 9 … 1</code>, two digit, <code>X+Y=75</code>, <code>Area is : 200</code>, <code>DST at+Mahidol is the best</code>, <code>Exited with status 0</code></li>
+<li>⭐ Lab: test1–27 + snapshot + คำอธิบาย → <code>6887xxx_lab10.pdf</code></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shell variable</td>
+<td>Environment variable</td>
+<td>อยู่แค่ shell ตัวเอง vs ส่งต่อให้ child (ต้อง export)</td>
+</tr>
+<tr>
+<td><code>echo LOGNAME</code></td>
+<td><code>echo $LOGNAME</code></td>
+<td>พิมพ์คำว่า LOGNAME vs พิมพ์ค่า (ชื่อผู้ใช้)</td>
+</tr>
+<tr>
+<td><code>'$var1 $var2'</code></td>
+<td><code>&quot;$var1 $var2&quot;</code></td>
+<td>ได้ตัวหนังสือตรง ๆ vs แทนค่าเป็น <code>shell script</code></td>
+</tr>
+<tr>
+<td><code>$txt[0]</code></td>
+<td><code>${txt[0]}</code></td>
+<td>ค่าแรก + &quot;[0]&quot; vs ค่าช่อง 0</td>
+</tr>
+<tr>
+<td><code>-eq</code></td>
+<td><code>=</code></td>
+<td>เทียบตัวเลข vs เทียบ string</td>
+</tr>
+<tr>
+<td><code>-n str</code></td>
+<td><code>-z str</code></td>
+<td>ยาว &gt; 0 vs ยาว = 0</td>
+</tr>
+<tr>
+<td><code>-d</code></td>
+<td><code>-f</code></td>
+<td>เป็น directory vs เป็นไฟล์</td>
+</tr>
+<tr>
+<td><code>-a</code></td>
+<td><code>-o</code></td>
+<td>AND vs OR (ใน <code>[ ]</code>); ใน <code>[[ ]]</code> ใช้ <code>&amp;&amp;</code> / <code>||</code></td>
+</tr>
+<tr>
+<td><code>$*</code></td>
+<td><code>$@</code></td>
+<td>argument เรียงกันทั้งหมด vs คั่นด้วยช่องว่างระหว่าง parameter (ตามสไลด์)</td>
+</tr>
+<tr>
+<td><code>$$</code></td>
+<td><code>$!</code></td>
+<td>PID ของ shell ปัจจุบัน vs PID ของงานที่ส่งไปเบื้องหลังล่าสุด (ตามที่ใช้ในสไลด์ 48)</td>
+</tr>
+<tr>
+<td><code>echo -n</code></td>
+<td><code>echo -e</code></td>
+<td>ไม่ขึ้นบรรทัดใหม่ vs แปล <code>\n</code> <code>\t</code></td>
+</tr>
+<tr>
+<td><code>for i in 1 2 3 4 5</code></td>
+<td><code>for ((i=1;i&lt;5;i++))</code></td>
+<td>5 รอบ vs 4 รอบ</td>
+</tr>
+<tr>
+<td>test10 (if-elif)</td>
+<td>test11 (case)</td>
+<td>งานเดียวกัน คนละไวยากรณ์ (test11 มี echo ซ้ำ)</td>
+</tr>
+<tr>
+<td>test19</td>
+<td>test20</td>
+<td>สร้างเลย (ซ้ำแล้ว error) vs เช็ก <code>-d</code> ก่อน</td>
+</tr>
+<tr>
+<td>Bourne shell (sh)</td>
+<td>bash</td>
+<td>standard UNIX shell vs default shell ของ Linux</td>
+</tr>
+<tr>
+<td>C shell prompt <code>%</code></td>
+<td>sh / ksh / bash prompt <code>$</code></td>
+<td>csh ตัวเดียวที่เป็น %</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../lecture4/index.html"><small>← บทก่อนหน้า</small><span>Lecture 4 — Memory Management</span></a><span></span></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-วิชานี้เรียนอะไรตามตาราง-และวัดผลยังไง-lecture-สไลด์-13">วิชานี้เรียนอะไรตามตาราง และวัดผลยังไง? (Lecture สไลด์ 1–3)</a></li><li><a href="#1-environment-variable-คืออะไร-มีตัวไหนบ้าง-lecture-สไลด์-4">Environment variable คืออะไร มีตัวไหนบ้าง? (Lecture สไลด์ 4)</a></li><li><a href="#2-shell-variable-ต่างจาก-environment-variable-ยังไง-lecture-สไลด์-510">Shell variable ต่างจาก Environment variable ยังไง? (Lecture สไลด์ 5–10)</a></li><li><a href="#3-shell-กับ-shell-script-คืออะไร-และ-shell-มีกี่แบบ-lecture-สไลด์-1112">Shell กับ Shell script คืออะไร และ shell มีกี่แบบ? (Lecture สไลด์ 11–12)</a></li><li><a href="#4-การเขียน-shell-script-มีกี่ขั้น-lecture-สไลด์-13">การเขียน shell script มีกี่ขั้น? (Lecture สไลด์ 13)</a></li><li><a href="#5-สร้างไฟล์-shebang-ใส่คำสั่ง-chmod-รัน-ทำยังไง-lecture-สไลด์-1417">สร้างไฟล์ → shebang → ใส่คำสั่ง → chmod → รัน ทำยังไง? (Lecture สไลด์ 14–17)</a></li><li><a href="#6-สร้างและเรียกใช้ตัวแปรยังไง-และ-single-quote-ต่างจาก-double-quote-ยังไง-lecture-สไลด์-1820">สร้างและเรียกใช้ตัวแปรยังไง และ single quote ต่างจาก double quote ยังไง? (Lecture สไลด์ 18–20)</a></li><li><a href="#7-ตัวแปรพิเศษ-0-คืออะไร-lecture-สไลด์-21">ตัวแปรพิเศษ $0 $# $* $@ $? $! คืออะไร? (Lecture สไลด์ 21)</a></li><li><a href="#8-ใช้-environment-variable-ใน-script-ยังไง-lecture-สไลด์-22">ใช้ environment variable ใน script ยังไง? (Lecture สไลด์ 22)</a></li><li><a href="#9-เขียน-comment-ยังไง-lecture-สไลด์-23">เขียน comment ยังไง? (Lecture สไลด์ 23)</a></li><li><a href="#10-ใช้-array-ยังไง-ทำไมต้องมี-lecture-สไลด์-24">ใช้ array ยังไง ทำไมต้องมี { }? (Lecture สไลด์ 24)</a></li><li><a href="#11-เขียนเงื่อนไข-expression-ยังไง-lecture-สไลด์-2526">เขียนเงื่อนไข (expression) ยังไง? (Lecture สไลด์ 25–26)</a></li><li><a href="#12-if-เขียนยังไง-lecture-สไลด์-27">if เขียนยังไง? (Lecture สไลด์ 27)</a></li><li><a href="#13-case-เขียนยังไง-lecture-สไลด์-28">case เขียนยังไง? (Lecture สไลด์ 28)</a></li><li><a href="#14-while-loop-เขียนยังไง-lecture-สไลด์-29">while loop เขียนยังไง? (Lecture สไลด์ 29)</a></li><li><a href="#15-for-loop-เขียนยังไง-lecture-สไลด์-30">for loop เขียนยังไง? (Lecture สไลด์ 30)</a></li><li><a href="#16-รับ-input-argument-ยังไง-lecture-สไลด์-31">รับ input argument ยังไง? (Lecture สไลด์ 31)</a></li><li><a href="#17-ตัวอย่าง-test1test18-lecture-สไลด์-3240">ตัวอย่าง test1–test18 (Lecture สไลด์ 32–40)</a></li><li><a href="#18-ตัวอย่าง-test19test27-ไฟล์-โฟลเดอร์-date-wait-sleep-lecture-สไลด์-4149">ตัวอย่าง test19–test27 (ไฟล์, โฟลเดอร์, date, wait, sleep) (Lecture สไลด์ 41–49)</a></li><li><a href="#19-lab-10-ต้องทำอะไร-ส่งอะไร-lab-หน้า-14">Lab 10 ต้องทำอะไร ส่งอะไร? (Lab หน้า 1–4)</a></li><li><a href="#20-แนวคำตอบ-lab-test1test27-ทำอะไร-ได้-output-อะไร">แนวคำตอบ Lab: test1–test27 ทำอะไร ได้ output อะไร</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/lecture10", "u": "architecture/lecture10/index.html", "t": "Lecture 10 – Shell Script (+ Lab 10)", "s": "ITDS211"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

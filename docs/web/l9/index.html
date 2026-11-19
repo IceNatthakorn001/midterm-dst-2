@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 9 – Node.js Part I (Intro to Node.js) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L9</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/index.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li class='cur'><a href="../l9/index.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/index.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/index.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/index.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/index.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L9</div>
+    <h1 class="lesson-title">Lecture 9 – Node.js Part I (Intro to Node.js)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 49 นาที · 21 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l9">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทแรกของ unit Node.js เริ่มจากทวนว่าเว็บทำงานยังไง (<strong>client-side vs server-side</strong>, request/response, IP, port) แล้วรู้จัก <strong>Node.js</strong> = JavaScript runtime บน <strong>V8</strong> ที่ทำงานแบบ <strong>single thread event loop / non-blocking</strong> จากนั้นเริ่มเขียน (Hello World, <strong>global objects</strong>), ทำ <strong>module ของตัวเอง</strong> (<code>module.exports</code> + <code>require</code>) และใช้ <strong>built-in modules</strong> 4 ตัว: <strong>path</strong>, <strong>URL</strong>, <strong>fs</strong> (async vs sync, callback hell) และ <strong>http</strong> ปิดด้วยการ <strong>สร้าง web server เอง</strong> ที่ตอบเป็นข้อความ/หน้า HTML และทำ <strong>routing</strong> ด้วย <code>req.url</code></p>
+<p>ไม่มีโจทย์คำนวณ แต่มี <strong>โค้ดเยอะ</strong> — ทุกตัวอย่างในหัวข้อ 7–16 รันจริงด้วย node v22 ตรวจแล้ว (server ทดสอบด้วยการยิง request จริง)</p>
+</blockquote>
+<blockquote class="callout">
+<p>📌 เลข <code>(สไลด์ N)</code> = เลขหน้าใน PDF (56 หน้า) ซึ่งตรงกับเลขที่พิมพ์บนสไลด์</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L9-00-overview.png" alt="แผนผังภาพรวม Lecture 9" /></p>
+<h2 id="0-บทนี้อยู่ตรงไหน-และต้องได้อะไร-สไลด์-24">0. บทนี้อยู่ตรงไหน และต้องได้อะไร? <span class="slide-ref">สไลด์ 2–4</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node.js มี 3 ตอน — ตอนนี้ (Part I) คือพื้นฐาน Node, module system และสร้าง server เองตั้งแต่ศูนย์ ส่วน Express, cookies/session/database อยู่ Part II–III</strong></p>
+<p><strong>Node.js Unit</strong> (สไลด์ 2)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตอน</th>
+<th>เนื้อหา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Part I – Intro to Node.js</strong> (บทนี้)</td>
+<td>Getting Started + &quot;Hello World&quot;, Node Module System, Build your first server</td>
+</tr>
+<tr>
+<td>Part II</td>
+<td>Express Framework</td>
+</tr>
+<tr>
+<td>Part III</td>
+<td>Cookies, Session, and Database</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เป้าหมายวันนี้</strong> (สไลด์ 3)</p>
+<ul>
+<li>เข้าใจ <strong>แนวคิดพื้นฐานของ Node.js</strong></li>
+<li>ใช้ <strong>Node modules พื้นฐาน</strong> ได้</li>
+<li>สร้าง <strong>web server ง่าย ๆ ตั้งแต่ศูนย์</strong> (from scratch) ได้</li>
+</ul>
+<p><strong>Outline</strong> (สไลด์ 4): Intro to Node.js → Getting Started + &quot;Hello World&quot; → Global object → Node Module System (Create your own, Built-in Module: Path, URL, File System, HTTP) → Build your own server</p>
+<hr />
+<h2 id="1-front-end-back-end-และ-client-side-server-side-ต่างกันยังไง-สไลด์-56">1. Front-end / Back-end และ Client-side / Server-side ต่างกันยังไง? <span class="slide-ref">สไลด์ 5–6</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>client-side code (HTML, CSS, JS) รันใน browser ส่วน server-side code เลือกว่าจะส่งเนื้อหาอะไรกลับไปตอบ request เขียนได้หลายภาษา (รวมถึง Node.js) และเข้าถึง OS กับ file system ของ server ได้เต็มที่</strong></p>
+<p><strong>RECAP: Develop a Web Page</strong> (สไลด์ 5) — งานพัฒนาเว็บแบ่งเป็น 2 ฝั่ง ถ้าทำทั้งสองฝั่ง = <strong>Full-stack</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝั่ง</th>
+<th>เครื่องมือที่สไลด์ยกมา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Front-end</strong></td>
+<td>HTML, CSS, JavaScript</td>
+</tr>
+<tr>
+<td><strong>Back-end</strong></td>
+<td>Database, API, Framework</td>
+</tr>
+<tr>
+<td><strong>Full-stack</strong></td>
+<td>ครอบทั้ง Front-end + Back-end</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Client-side vs Server-side</strong> (สไลด์ 6 — อ้างจาก MDN)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Client-side</th>
+<th>Server-side</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เขียนด้วย</td>
+<td>HTML, CSS, JavaScript</td>
+<td>ได้หลายภาษา เช่น <strong>PHP, Python, Ruby, C#, Node.js (JavaScript)</strong></td>
+</tr>
+<tr>
+<td>รันที่ไหน</td>
+<td><strong>ใน web browser</strong></td>
+<td>บน server</td>
+</tr>
+<tr>
+<td>หน้าที่</td>
+<td>แสดงผล/โต้ตอบในเบราว์เซอร์</td>
+<td>ส่วนใหญ่คือ <strong>เลือกว่าจะส่งเนื้อหาอะไรกลับไป</strong> เพื่อตอบ request</td>
+</tr>
+<tr>
+<td>สิทธิ์</td>
+<td>—</td>
+<td><strong>เข้าถึง OS และ file system ของ server ได้เต็มที่</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 Node.js ทำให้ใช้ <strong>JavaScript ภาษาเดียว</strong> ได้ทั้งสองฝั่ง (เพราะ server-side ก็เขียนเป็น JS ได้)</p>
+</blockquote>
+<hr />
+<h2 id="2-เว็บเพจถูกส่งจาก-server-มาถึง-browser-ยังไง-สไลด์-78">2. เว็บเพจถูกส่งจาก server มาถึง browser ยังไง? <span class="slide-ref">สไลด์ 7–8</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>browser ส่ง HTTP GET → web server ดูว่าขอของ static หรือ dynamic → ถ้า static ส่งไฟล์กลับเลย ถ้า dynamic ส่งต่อให้ web application ไปดึง database แล้วรวมกับ HTML template → ส่ง HTML ที่สร้างเสร็จกลับไปให้ browser</strong></p>
+<p>แผนภาพในสไลด์ 7 แบ่งเป็นฝั่ง <strong>Server-side</strong> (Files, Web Server, Web Application, Database) กับ <strong>Client-side</strong> (Browser) — วาดใหม่ตามลำดับขั้นของสไลด์ 8:</p>
+<p><img loading="lazy" src="diagrams/L9-01-request-response.png" alt="Web page request / response" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>เกิดอะไรขึ้น (สไลด์ 8)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>#1</strong></td>
+<td>Client ส่ง <strong>HTTP (GET) request</strong> ไปที่ Web Server</td>
+</tr>
+<tr>
+<td><strong>#2</strong></td>
+<td>Web Server รับ request แล้ว <strong>วิเคราะห์ว่าจะไปเอา resource จากไหน</strong> — ถ้าเป็น <strong>static resource</strong> (#7 ในรูป: CSS, JavaScript, Images, other files) ข้ามไป <strong>#5</strong> เลย</td>
+</tr>
+<tr>
+<td><strong>#3</strong></td>
+<td>ถ้าเป็น <strong>dynamic resource</strong> → ส่ง request ต่อให้ <strong>Web Application (server-side code)</strong> พร้อม request data (URL encoding, GET/POST data, Cookies) แล้ว web app <strong>อ่านข้อมูลที่ต้องใช้จาก database</strong></td>
+</tr>
+<tr>
+<td><strong>#4</strong></td>
+<td>Server <strong>รวมข้อมูลที่ได้เข้ากับ HTML templates</strong></td>
+</tr>
+<tr>
+<td><strong>#5</strong></td>
+<td>ส่ง <strong>response</strong> ที่มี HTML ที่สร้างขึ้นกลับไป</td>
+</tr>
+<tr>
+<td><strong>#6</strong></td>
+<td>Client ได้รับหน้า HTML (HTML, CSS, JavaScript)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ static = ไฟล์สำเร็จรูป ส่งได้ทันที (#2 → #5) | dynamic = ต้องให้โค้ดฝั่ง server ประมวลผล + ดึง DB + ใส่ template ก่อน (#3 → #4 → #5)</p>
+</blockquote>
+<hr />
+<h2 id="3-server-ip-address-port-คืออะไร-สไลด์-910">3. Server, IP address, Port คืออะไร? <span class="slide-ref">สไลด์ 9–10</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>server ถูกเรียกด้วย IP address (เช่น 10.34.111.111 หรือ localhost) และในเครื่องเดียวมีหลาย port (3000, 8080, 8081, …) ให้แต่ละโปรแกรม server จอง</strong></p>
+<p>สไลด์ 9 ใช้ <strong>รูปตึก</strong> แทน server โดยมีหน้าต่างบานหนึ่งไฮไลต์ไว้ คู่กับรายการ:</p>
+<ul>
+<li><strong>IP Address:</strong> <code>10.34.111.111</code>, <strong><code>localhost</code></strong> (ตัวแดง), …</li>
+<li><strong>Port:</strong> <code>3000</code>, <code>8080</code>, <code>8081</code>, …</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนตึก: <strong>IP = ที่อยู่ของตึก</strong> (เครื่อง server) ส่วน <strong>port = ห้องในตึก</strong> (โปรแกรมไหนในเครื่องนั้น) — ถ้ารู้แค่ที่อยู่ตึกแต่ไม่รู้เลขห้อง ก็ส่งของไม่ถึงคน</p>
+<p>บทนี้ server ของเรารันที่ <strong>localhost</strong> port <strong>8081</strong> (หัวข้อ 15)</p>
+</blockquote>
+<p><strong>Example: Node JS Server</strong> (สไลด์ 10) — หน้าจอ terminal ตัวอย่าง 2 จอ ของ server ที่รันด้วย <code>nodemon</code>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>จอที่ 1 (port 3000)</th>
+<th>จอที่ 2 (port 8080 + database)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[nodemon] to restart at any time, enter rs</code></td>
+<td><code>[nodemon] starting node app.js</code></td>
+</tr>
+<tr>
+<td><code>[nodemon] watching path(s): *.*</code></td>
+<td><code>Server listening at Port 8080</code></td>
+</tr>
+<tr>
+<td><code>[nodemon] watching extensions: js,mjs,json</code></td>
+<td><code>Connected DB: tinycollege</code></td>
+</tr>
+<tr>
+<td><code>[nodemon] starting node app.js</code></td>
+<td><code>Retrieved all courses in tinycollege...</code> → <code>6 rows returned</code></td>
+</tr>
+<tr>
+<td><code>Running at Port 3000</code></td>
+<td><code>Adding ITCS-223 ...</code> → <code>1 record inserted</code></td>
+</tr>
+<tr>
+<td><code>Request made at /mypage</code> → <code>404: Invalid accessed</code></td>
+<td><code>Retrieved all courses in tinycollege...</code> → <code>7 rows returned</code></td>
+</tr>
+<tr>
+<td><code>Request made at /mypage</code>, <code>/shabu</code>, <code>/bbq</code>, <code>/mypage</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จอนี้คือ &quot;ภาพปลายทาง&quot; ของ unit นี้ — server รับ request ตาม path (<code>/shabu</code>, <code>/bbq</code>), ตอบ 404 เมื่อ path ไม่ถูก (ทำในบทนี้) และต่อ database (Part III)</p>
+</blockquote>
+<hr />
+<h2 id="4-nodejs-คืออะไร-สไลด์-1112">4. Node.js คืออะไร? <span class="slide-ref">สไลด์ 11–12</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node.js คือ asynchronous JavaScript runtime ที่สร้างบน V8 engine ของ Chrome (&quot;open-source server environment&quot;) — มี JS engine เหมือน browser แต่ไม่มี DOM/document/window/cookies และมี modules เพิ่ม เช่น file system, HTTP, utilities</strong></p>
+<p>นิยามตามสไลด์: <em>&quot;Node.js is an <strong>asynchronous JavaScript runtime</strong> built on <strong>Chrome's V8 JavaScript engine</strong>.&quot;</em> และเป็น <em>&quot;An <strong>open-source server environment</strong>&quot;</em></p>
+<p>ในรูปสไลด์ 12: กล่อง <strong>JS Engine (V8)</strong> ถูกห่อด้วยกล่อง <strong>(Node)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สิ่งที่ Node <strong>ไม่มี</strong> (ต่างจาก browser)</th>
+<th>สิ่งที่ Node <strong>มี</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No DOM</strong></td>
+<td>JS Engine (V8)</td>
+</tr>
+<tr>
+<td>ไม่มี object อย่าง <strong><code>document</code></strong>, <strong><code>window</code></strong></td>
+<td>Some JS codes + <strong>Modules</strong> เช่น <strong>File system</strong>, <strong>HTTP</strong>, <strong>Utilities</strong></td>
+</tr>
+<tr>
+<td><strong>No Cookies</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนเอา &quot;เครื่องยนต์&quot; (V8) ออกจากรถ Chrome มาใส่รถอีกคัน (Node) — เครื่องยนต์เดิม แต่ตัวถังใหม่: ไม่มีหน้าจอเว็บ (DOM) แต่มีอุปกรณ์ฝั่ง server (อ่านไฟล์, ทำ HTTP server)</p>
+</blockquote>
+<hr />
+<h2 id="5-nodejs-ทำงานยังไง-single-thread-event-loop-สไลด์-1315">5. Node.js ทำงานยังไง? (Single thread event loop) <span class="slide-ref">สไลด์ 13–15</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node ใช้ main thread เดียว (event loop) รับ request แล้วส่งงานไปหน่วยที่เหมาะ (File System / Database / Computation) โดยไม่รอให้เสร็จ (non-blocking) จึงรับ request ถัดไปได้ทันที เมื่อหน่วยไหนเสร็จ thread ค่อยตอบกลับ request นั้น</strong></p>
+<p>รูปในสไลด์: <strong>Node.js Server</strong> มีวง event loop (ลูกบอลเหลือง = thread) และกล่อง <strong>Operations</strong> = File System, Database, Computation</p>
+<p><img loading="lazy" src="diagrams/L9-02-event-loop.png" alt="Single thread event loop" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สไลด์</th>
+<th>ขั้น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13</td>
+<td><strong>&quot;Single thread event loop model&quot;</strong> — request เข้ามา → <strong>main thread</strong> รับแล้ว <strong>ส่งต่อให้หน่วยที่เหมาะ</strong> (ในรูป Request 1 → File System)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>thread <strong>พร้อมรับ request ถัดไปทันที ไม่ต้องรอหน่วยนั้นทำเสร็จ = non-blocking</strong> (Request 2 → Computation ขณะ File System ยังทำงานอยู่ ⏳)</td>
+</tr>
+<tr>
+<td>15</td>
+<td>เมื่อหน่วยไหน <strong>ทำเสร็จ</strong> (File System เป็นสีเขียว) → thread <strong>ตอบกลับ request นั้น</strong> (Request 1) และวนต่อไปแบบนี้</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนพนักงานรับออเดอร์คนเดียวในร้านอาหาร: รับออเดอร์โต๊ะ 1 ส่งเข้าครัว แล้วไปรับโต๊ะ 2 ต่อเลยโดยไม่ยืนรอหน้าครัว พออาหารโต๊ะ 1 เสร็จก็ค่อยยกไปเสิร์ฟ</p>
+</blockquote>
+<hr />
+<h2 id="6-nodejs-เหมาะ-ไม่เหมาะกับงานแบบไหน-สไลด์-16">6. Node.js เหมาะ / ไม่เหมาะกับงานแบบไหน? <span class="slide-ref">สไลด์ 16</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เหมาะกับงาน scalable, I/O หนัก, real-time, JSON API และได้เขียน JS ตลอด แต่ไม่เหมาะกับงานคำนวณหนัก</strong></p>
+<p><strong>Node.js Facts</strong></p>
+<ul>
+<li>✅ เหมาะกับแอปที่ <strong>highly-scalable</strong>, <strong>data (I/O) intensive</strong>, <strong>real-time</strong></li>
+<li>✅ <strong>JavaScript all the time</strong> — ใช้ JS ทั้งระบบ</li>
+<li>✅ แอปที่เป็น <strong>JSON APIs based</strong></li>
+<li>❌ <strong>Not for computation-intensive application</strong> — ไม่เหมาะกับงานคำนวณหนัก</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เชื่อมกับหัวข้อ 5: Node เก่งเรื่อง &quot;ส่งงานไปแล้วไม่รอ&quot; (I/O) แต่มี thread หลักเดียว จึงไม่ถนัดงานที่ต้องคำนวณหนัก ๆ</p>
+</blockquote>
+<hr />
+<h2 id="7-เริ่มใช้-nodejs-และรัน-hello-world-ยังไง-สไลด์-1719">7. เริ่มใช้ Node.js และรัน &quot;Hello World&quot; ยังไง? <span class="slide-ref">สไลด์ 17–19</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง Node.js รุ่น LTS จาก nodejs.org เช็กด้วย <code>node --version</code> แล้วเขียน JS เซฟเป็น <code>.js</code> เปิด command line ไปที่โฟลเดอร์นั้น รันด้วย <code>node filename.js</code></strong></p>
+<h3 id="71-ติดตั้งและเช็ก-สไลด์-18">7.1 ติดตั้งและเช็ก <span class="slide-ref">สไลด์ 18</span></h3>
+<ul>
+<li>ดาวน์โหลดและติดตั้ง Node.js รุ่น <strong>LTS ล่าสุด (stable version)</strong> จาก <strong>https://nodejs.org</strong></li>
+<li>เช็กว่าติดตั้งแล้ว: เปิด command line พิมพ์</li>
+</ul>
+<pre><code>node --version
+</code></pre>
+<p>ตัวอย่างในสไลด์ได้ <code>v24.21.0</code></p>
+<h3 id="72-hello-world-สไลด์-19">7.2 Hello World <span class="slide-ref">สไลด์ 19</span></h3>
+<p>ขั้นตอน:</p>
+<ol>
+<li>เขียน <strong>JS code</strong> แล้วเซฟเป็น <code>filename.js</code></li>
+<li>เปิด <strong>command line interface</strong> แล้ว navigate ไปที่ directory นั้น</li>
+<li>รันด้วย <code>node filename.js</code></li>
+<li>ดูผลที่ <strong>command line หรือ browser</strong></li>
+</ol>
+<p><code>helloworld.js</code></p>
+<pre><code class="language-js">/* Everything is written in JS */
+console.log(&quot;Hello World!!&quot;);
+console.log(&quot;In the command line&quot;);
+</code></pre>
+<p>รัน <code>node 0_helloworld.js</code> (สไลด์ตั้งชื่อไฟล์ตอนรันว่า <code>0_helloworld.js</code>) → output:</p>
+<pre><code>Hello World!!
+In the command line
+</code></pre>
+<p>✔️ รันจริงได้ตรงกับสไลด์</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Note ในสไลด์:</strong> <code>console.log()</code> ใน Node <strong>ไม่ใช่</strong> <code>window.console.log()</code> แบบในวิชา JS ก่อนหน้า เพราะ <strong>Node.js ไม่มี object <code>window</code></strong></p>
+</blockquote>
+<hr />
+<h2 id="8-global-objects-มีอะไรบ้าง-สไลด์-20">8. Global objects มีอะไรบ้าง? <span class="slide-ref">สไลด์ 20</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>global objects ใช้ได้ในทุก module (ทุกไฟล์) โดยไม่ต้อง import เช่น <code>__dirname</code>, <code>__filename</code>, <code>exports</code>, <code>module</code>, <code>require()</code>, <code>console.log()</code>, <code>process</code> และ <code>global</code> คือ global namespace</strong></p>
+<p>Global objects ที่สไลด์ยกตัวอย่าง:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชื่อ</th>
+<th>ความหมายตามสไลด์ / ที่ใช้ในบทนี้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>__dirname</code></strong></td>
+<td>โฟลเดอร์ปัจจุบัน (current dir) ของไฟล์</td>
+</tr>
+<tr>
+<td><strong><code>__filename</code></strong></td>
+<td>full path ของไฟล์ปัจจุบัน</td>
+</tr>
+<tr>
+<td><code>exports</code></td>
+<td>ใช้ส่งของออกจาก module (หัวข้อ 9)</td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td>ใช้คู่กับ <code>module.exports</code> (หัวข้อ 9)</td>
+</tr>
+<tr>
+<td><code>require()</code></td>
+<td>โหลด module (หัวข้อ 9)</td>
+</tr>
+<tr>
+<td><code>console.log()</code></td>
+<td>แสดงผลใน command line</td>
+</tr>
+<tr>
+<td><code>process</code></td>
+<td>(สไลด์ระบุชื่อเฉย ๆ)</td>
+</tr>
+<tr>
+<td><strong><code>global</code></strong></td>
+<td><strong>global namespace</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>myglobal_demo.js</code></p>
+<pre><code class="language-js">/* Global objects can be called by any
+modules/files without import*/
+let message=&quot;Sam I am&quot;;
+console.log(__dirname);  //Show current dir
+console.log(__filename); //Show current full path
+
+global.console.log(message);
+</code></pre>
+<p><strong>เฉลย output ทีละบรรทัด</strong> (สไลด์ไม่ได้แสดง output — ผลขึ้นกับว่าไฟล์อยู่ที่ไหน):</p>
+<ol>
+<li><code>console.log(__dirname)</code> → path <strong>โฟลเดอร์</strong> ที่ไฟล์อยู่ เช่น <code>C:\...\demo</code></li>
+<li><code>console.log(__filename)</code> → path เต็ม <strong>รวมชื่อไฟล์</strong> เช่น <code>C:\...\demo\myglobal_demo.js</code></li>
+<li><code>global.console.log(message)</code> → <code>Sam I am</code> (เรียก <code>console</code> ผ่าน <code>global</code> ก็ได้ผลเหมือน <code>console.log</code> ปกติ)</li>
+</ol>
+<p>✔️ รันจริงได้ 3 บรรทัดตามนี้</p>
+<hr />
+<h2 id="9-module-ใน-nodejs-คืออะไร-สไลด์-2124">9. Module ใน Node.js คืออะไร? <span class="slide-ref">สไลด์ 21–24</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุกไฟล์ JS ใน Node คือ module ของที่ประกาศในไฟล์เป็น private ของไฟล์นั้น ถ้าจะให้ไฟล์อื่นใช้ต้อง &quot;ส่งออก&quot; ด้วย <code>module.exports</code> แล้วอีกไฟล์ &quot;ดึงเข้า&quot; ด้วย <code>require('./path')</code></strong></p>
+<p><strong>Node Module Systems</strong> (สไลด์ 21) แบ่งเป็น 2 แบบ: <strong>Create your module</strong> (ทำเอง) และ <strong>Built-in Module</strong> (Path, URL, File System, HTTP)</p>
+<h3 id="91-modularity-ทำไมชื่อซ้ำกันข้ามไฟล์ได้-สไลด์-22">9.1 Modularity — ทำไมชื่อซ้ำกันข้ามไฟล์ได้? <span class="slide-ref">สไลด์ 22</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>property/method ในแต่ละ module มี scope แค่ในไฟล์นั้น (local/private) ฟังก์ชันชื่อเดียวกันในคนละไฟล์จึงไม่ทับกัน</strong></p>
+<ul>
+<li><strong>Every JS file in the Node is a module</strong> — ทุกไฟล์ = 1 module</li>
+<li>แต่ละ module มักเป็น <strong>ชุดของ functions</strong> ที่อยากเอาไปใช้ในแอป</li>
+<li>properties และ methods ใน module <strong>scoped ในไฟล์นั้น</strong> = <strong>local / private</strong> ต่อ module นั้น</li>
+<li>จึงมี <strong>method ชื่อเดียวกัน 2 ตัว</strong> (คนละไฟล์) ได้โดย <strong>ไม่ overwrite กัน</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><code>file1.js</code></th>
+<th><code>file2.js</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>let message = &quot;Hola&quot;;</code><br><code>function sayHello(){</code><br> <code>console.log(message);</code><br><code>}</code></td>
+<td><code>function sayHello(){</code><br> <code>console.log(&quot;Hello&quot;);</code><br><code>}</code><br><br><code>sayHello();</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>เฉลยถ้ารัน</strong> (ทดลองรันจริง):</p>
+<ul>
+<li><code>node file2.js</code> → <code>Hello</code> (เรียก <code>sayHello</code> ของไฟล์ตัวเอง)</li>
+<li><code>node file1.js</code> → ไม่มี output เพราะประกาศฟังก์ชันไว้แต่ไม่ได้เรียก</li>
+<li><code>sayHello</code> ทั้งสองตัวไม่ชนกัน เพราะอยู่คนละ module</li>
+</ul>
+<h3 id="92-moduleexports-ส่งออกอะไรได้บ้าง-สไลด์-23">9.2 <code>module.exports</code> ส่งออกอะไรได้บ้าง? <span class="slide-ref">สไลด์ 23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>module.exports</code> เป็น object พิเศษที่ใช้ &quot;เปิดเผย&quot; ของให้ไฟล์อื่น — ส่งออกได้ทั้งค่า literal, ค่าในรูป property ของ object และ function (จะตั้งชื่อใหม่ตอน export ก็ได้)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>ไฟล์</th>
+<th>โค้ด</th>
+<th>ไฟล์อื่นจะได้อะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Export Literals</strong></td>
+<td><code>msg.js</code></td>
+<td><code>module.exports=&quot;Hello World!&quot;</code></td>
+<td>ได้ค่า string <code>&quot;Hello World!&quot;</code> ตรง ๆ</td>
+</tr>
+<tr>
+<td><strong>Export Objects</strong></td>
+<td><code>ictgreet.js</code></td>
+<td><code>let message = 'Hello ICT';</code><br><code>module.exports.greetICT = message;</code></td>
+<td>ได้ object ที่มี property <strong><code>greetICT</code></strong> = <code>'Hello ICT'</code></td>
+</tr>
+<tr>
+<td><strong>Export Function</strong></td>
+<td><code>hello.js</code></td>
+<td><code>let message = 'Hello ICT';</code><br><code>function sayHello(){ console.log(&quot;Hello&quot;); }</code><br><code>/* Export sayHello function as sayHi */</code><br><code>module.exports.sayHi = sayHello;</code></td>
+<td>ได้ object ที่มี method <strong><code>sayHi</code></strong> (ข้างในคือ <code>sayHello</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ใน <code>hello.js</code> ชื่อในไฟล์คือ <code>sayHello</code> แต่ <strong>ชื่อที่ export ออกไปคือ <code>sayHi</code></strong> → ไฟล์อื่นต้องเรียก <code>.sayHi()</code> ไม่ใช่ <code>.sayHello()</code></p>
+<p class="c-tip">💡 <code>message</code> ใน <code>hello.js</code> ไม่ได้ export → ไฟล์อื่นมองไม่เห็น (private ตามหัวข้อ 9.1)</p>
+</blockquote>
+<h3 id="93-require-ดึง-module-มาใช้ยังไง-สไลด์-24">9.3 <code>require</code> — ดึง module มาใช้ยังไง? <span class="slide-ref">สไลด์ 24</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>require(&quot;./relative/path&quot;)</code> คืนค่าที่ไฟล์นั้น export ไว้ แล้วเก็บในตัวแปรเพื่อเรียก method/property ต่อ</strong></p>
+<p>โครงสร้างโฟลเดอร์:</p>
+<ul>
+<li><code>(root)</code>
+<ul>
+<li><code>message/</code> (folder) → <code>ictgreet.js</code>, <code>msg.js</code></li>
+<li><strong><code>greet.js</code></strong> ← ไฟล์ที่รัน</li>
+<li><code>hello.js</code></li>
+</ul>
+</li>
+</ul>
+<p><code>greet.js</code></p>
+<pre><code class="language-js">/* Import the modules
+Use relative paths to refer to JS */
+const eng = require(&quot;./hello&quot;);
+const ictgreet = require('./message/ictgreet');
+const msg = require('./message/msg')
+
+/* Call the methods and property */
+eng.sayHi();
+console.log(`${msg}`)
+console.log(`${ictgreet.greetICT}`);
+</code></pre>
+<p><img loading="lazy" src="diagrams/L9-03-modules.png" alt="require โหลด 3 module เข้า greet.js" /></p>
+<p><strong>เฉลย output ทีละขั้น</strong> (<code>node greet.js</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>บรรทัด</th>
+<th>อธิบาย</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eng.sayHi();</code></td>
+<td><code>eng</code> = object จาก <code>hello.js</code> → <code>sayHi</code> คือ <code>sayHello</code> → พิมพ์ &quot;Hello&quot;</td>
+<td><code>Hello</code></td>
+</tr>
+<tr>
+<td><code>console.log(`${msg}`)</code></td>
+<td><code>msg</code> = string ที่ <code>msg.js</code> export ตรง ๆ</td>
+<td><code>Hello World!</code></td>
+</tr>
+<tr>
+<td><code>console.log(`${ictgreet.greetICT}`)</code></td>
+<td>property <code>greetICT</code> ของ object จาก <code>ictgreet.js</code></td>
+<td><code>Hello ICT</code></td>
+</tr>
+</tbody>
+</table></div>
+<pre><code>Hello
+Hello World!
+Hello ICT
+</code></pre>
+<p>✔️ รันจริงได้ตรงกับสไลด์</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 24 มี <strong>เครื่องหมายคำพูดแบบโค้ง (smart quote)</strong> หลุดมา 2 จุด: <code>module.exports=&quot;Hello World!”;</code> (ใน <code>msg.js</code>) และ <code>require('./message/msg’)</code> (ใน <code>greet.js</code>) — ถ้า copy ไปรันตรง ๆ จะได้ <strong>SyntaxError: Invalid or unexpected token</strong> (ทดลองแล้ว) ให้พิมพ์เป็น <code>&quot;</code> และ <code>'</code> ธรรมดา ส่วนสไลด์ 23 เขียน <code>msg.js</code> ถูกแล้ว</p>
+<p class="c-tip">💡 <code>require</code> ใช้ <strong>relative path</strong> (<code>./</code> = โฟลเดอร์เดียวกับไฟล์ที่เรียก) และไม่ต้องใส่ <code>.js</code> ต่อท้าย</p>
+</blockquote>
+<hr />
+<h2 id="10-built-in-modules-มีอะไรบ้าง-สไลด์-25">10. Built-in modules มีอะไรบ้าง? <span class="slide-ref">สไลด์ 25</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node มี built-in modules ไว้สร้าง server — บทนี้ใช้ 4 ตัว: Path, URL, File System, HTTP</strong></p>
+<ul>
+<li>Node.js มี <strong>built-in modules</strong> ชุดหนึ่งสำหรับ <strong>สร้าง server</strong></li>
+<li>ตัวที่มีประโยชน์และเรียนในบทนี้: <strong>Path Module</strong>, <strong>URL Module</strong>, <strong>File System Module</strong>, <strong>HTTP Module</strong></li>
+<li>อ้างอิงเต็ม: https://nodejs.org/docs/latest/api/</li>
+</ul>
+<hr />
+<h2 id="11-path-module-ใช้ทำอะไร-สไลด์-2628">11. Path module ใช้ทำอะไร? <span class="slide-ref">สไลด์ 26–28</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>path module จัดการ path ของไฟล์/โฟลเดอร์ให้เอง (เพราะแต่ละ OS เขียน path ต่างกัน) — <code>resolve</code> หา absolute path, <code>extname</code> เอานามสกุล, <code>parse</code> แยก path เป็น object 5 ส่วน, <code>join</code> ต่อ path</strong></p>
+<ul>
+<li>ให้เครื่องมือทำงานกับ <strong>file and directory paths</strong></li>
+<li>path <strong>ต่างกันตาม OS</strong> → ให้ module จัดการให้อัตโนมัติ</li>
+<li>method ที่ใช้บ่อย (สไลด์ 27):
+<ul>
+<li><strong><code>path.resolve()</code></strong> — คำนวณ <strong>absolute path</strong> จาก relative path</li>
+<li><strong><code>path.parse()</code></strong> — แยก path เป็น object ที่มีส่วนประกอบ <strong>root, dir, base, name, ext</strong></li>
+</ul>
+</li>
+</ul>
+<p><code>path.js</code> (สไลด์ 28)</p>
+<pre><code class="language-js">/* Path Module */
+/* Import the Path module */
+const path = require('path');
+
+/* Use path.resolve for get the absolute path of a
+relative path */
+let fullPath = path.resolve(__filename);
+console.log(fullPath);
+
+/* Get some component of a path */
+console.log(`File extension is ${path.extname(__filename)}`)
+
+/* Parses a path to an object with the segments */
+console.log(path.parse(fullPath));
+
+/* Join the path segment */
+console.log(path.join(__dirname,'test.js'));
+</code></pre>
+<p><strong>เฉลย output ทีละขั้น</strong> (ตามสไลด์ ซึ่งรันบน macOS ที่ <code>/Users/jidapa.kra/Documents/demo/</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำสั่ง</th>
+<th>ทำอะไร</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path.resolve(__filename)</code></td>
+<td>absolute path ของไฟล์นี้</td>
+<td><code>/Users/jidapa.kra/Documents/demo/path.js</code></td>
+</tr>
+<tr>
+<td><code>path.extname(__filename)</code></td>
+<td>เอาแค่นามสกุล</td>
+<td><code>File extension is .js</code></td>
+</tr>
+<tr>
+<td><code>path.parse(fullPath)</code></td>
+<td>แยกเป็น object</td>
+<td>ดูตารางด้านล่าง</td>
+</tr>
+<tr>
+<td><code>path.join(__dirname,'test.js')</code></td>
+<td>ต่อโฟลเดอร์ปัจจุบันกับ <code>test.js</code></td>
+<td><code>/Users/jidapa.kra/Documents/demo/test.js</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ผลของ <code>path.parse()</code>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>key</th>
+<th>ความหมาย (Note ในสไลด์)</th>
+<th>ค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>root</strong></td>
+<td>the root</td>
+<td><code>'/'</code></td>
+</tr>
+<tr>
+<td><strong>dir</strong></td>
+<td>folder path เริ่มจาก root</td>
+<td><code>'/Users/jidapa.kra/Documents/demo'</code></td>
+</tr>
+<tr>
+<td><strong>base</strong></td>
+<td><strong>file name + extension</strong></td>
+<td><code>'path.js'</code></td>
+</tr>
+<tr>
+<td><strong>name</strong></td>
+<td>file name (ไม่มีนามสกุล)</td>
+<td><code>'path'</code></td>
+</tr>
+<tr>
+<td><strong>ext</strong></td>
+<td>file extension</td>
+<td><code>'.js'</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>✔️ รันจริงแล้ว — บน Windows ได้รูปแบบ <code>C:\...\demo\path.js</code> และ <code>root: 'C:\\'</code> (ตรงกับที่สไลด์ 27 บอกว่า path ต่างตาม OS) เมื่อจำลอง path แบบ macOS ได้ค่าตรงกับสไลด์ทุกตัว</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในสไลด์ บรรทัด <code>`File extension is ${...}`</code> ถูกตัดขึ้นบรรทัดใหม่เพราะความกว้างสไลด์ — ถ้าพิมพ์ Enter จริงภายใน backtick ผลจะแตกเป็น 2 บรรทัด (<code>File extension is</code> / <code>.js</code>) ให้เขียนบรรทัดเดียวจึงได้ตามสไลด์</p>
+<p class="c-warn">⚠️ <strong>base vs name:</strong> base = <code>path.js</code> (มีนามสกุล) | name = <code>path</code> (ไม่มีนามสกุล)</p>
+</blockquote>
+<hr />
+<h2 id="12-url-module-แยกส่วนของ-url-ยังไง-สไลด์-2931">12. URL module แยกส่วนของ URL ยังไง? <span class="slide-ref">สไลด์ 29–31</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ <code>new URL('...')</code> parse URL string เป็น object แล้วอ่านส่วนต่าง ๆ ได้ เช่น href, protocol, host, port, pathname, search และ searchParams (ใช้ <code>.get('key')</code> ดึงค่าของ query)</strong></p>
+<ul>
+<li>ให้เครื่องมือสำหรับ <strong>URL resolution และ parsing</strong></li>
+<li>URL string = string ที่มีโครงสร้าง ประกอบด้วยหลายส่วนที่มีความหมาย เมื่อ parse แล้วจะได้ <strong>URL object</strong> ที่มี property ของแต่ละส่วน</li>
+<li>ใช้แค่ <strong>URL constructor</strong> ก็แยกส่วนได้</li>
+</ul>
+<h3 id="121-url-มีส่วนอะไรบ้าง-สไลด์-30">12.1 URL มีส่วนอะไรบ้าง? <span class="slide-ref">สไลด์ 30</span></h3>
+<p>ตัวอย่างในสไลด์ (จาก nodejs.org): <code>https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วนของ URL</th>
+<th>ชื่อ property</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https:</code></td>
+<td><strong>protocol</strong></td>
+</tr>
+<tr>
+<td><code>user</code> / <code>pass</code></td>
+<td><strong>username</strong> / <strong>password</strong> (รวมกัน = auth)</td>
+</tr>
+<tr>
+<td><code>sub.example.com</code></td>
+<td><strong>hostname</strong></td>
+</tr>
+<tr>
+<td><code>8080</code></td>
+<td><strong>port</strong></td>
+</tr>
+<tr>
+<td><code>sub.example.com:8080</code></td>
+<td><strong>host</strong> (= hostname + port)</td>
+</tr>
+<tr>
+<td><code>https://sub.example.com:8080</code></td>
+<td><strong>origin</strong></td>
+</tr>
+<tr>
+<td><code>/p/a/t/h</code></td>
+<td><strong>pathname</strong></td>
+</tr>
+<tr>
+<td><code>?query=string</code></td>
+<td><strong>search</strong> (ส่วนหลัง <code>?</code> = query)</td>
+</tr>
+<tr>
+<td><code>/p/a/t/h?query=string</code></td>
+<td>path (= pathname + search)</td>
+</tr>
+<tr>
+<td><code>#hash</code></td>
+<td><strong>hash</strong></td>
+</tr>
+<tr>
+<td>ทั้งเส้น</td>
+<td><strong>href</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>host vs hostname:</strong> host มี port ด้วย (<code>sub.example.com:8080</code>) | hostname ไม่มี port (<code>sub.example.com</code>)</p>
+</blockquote>
+<h3 id="122-ตัวอย่างใช้งาน-สไลด์-31">12.2 ตัวอย่างใช้งาน <span class="slide-ref">สไลด์ 31</span></h3>
+<p><code>url.js</code></p>
+<pre><code class="language-js">/* URL Module */
+/* Import the URL module */
+const url = require('url');
+
+/* URL Constructor parsing the URL string */
+const fakeurl = new URL('https://www.covid19.com:8080/p/a/t/h?country=TH&amp;time=now');
+
+/* Show the main URL components */
+console.log(fakeurl.href);          // the URL
+console.log(fakeurl.protocol);      // https:
+console.log(fakeurl.host);          // www.covid19.com:8080
+console.log(fakeurl.port);          // 8080
+console.log(fakeurl.pathname);      // /P/a/t/h
+console.log(fakeurl.search);        // Query string
+
+console.log(fakeurl.searchParams);  // Query params
+console.log(fakeurl.searchParams.get('time'));
+</code></pre>
+<p><strong>เฉลย output ทีละบรรทัด:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>property</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>href</code></td>
+<td><code>https://www.covid19.com:8080/p/a/t/h?country=TH&amp;time=now</code></td>
+</tr>
+<tr>
+<td><code>protocol</code></td>
+<td><code>https:</code> (มี <code>:</code> ติดมาด้วย)</td>
+</tr>
+<tr>
+<td><code>host</code></td>
+<td><code>www.covid19.com:8080</code></td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>8080</code></td>
+</tr>
+<tr>
+<td><code>pathname</code></td>
+<td><code>/p/a/t/h</code></td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td><code>?country=TH&amp;time=now</code> (มี <code>?</code> นำหน้า)</td>
+</tr>
+<tr>
+<td><code>searchParams</code></td>
+<td><code>URLSearchParams { 'country' =&gt; 'TH', 'time' =&gt; 'now' }</code></td>
+</tr>
+<tr>
+<td><code>searchParams.get('time')</code></td>
+<td><code>now</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>✔️ รันจริงได้ตรงกับกล่อง output ในสไลด์ทุกบรรทัด</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ comment ในสไลด์ 31 เขียน <code>// /P/a/t/h</code> (P ตัวใหญ่) แต่ output จริง (ทั้งในสไลด์และที่รัน) คือ <strong><code>/p/a/t/h</code></strong> ตัวเล็ก — ยึดตาม output</p>
+<p class="c-tip">💡 ในสไลด์ URL string ถูกตัดเป็น 2 บรรทัดเพราะความกว้างสไลด์ ตอนเขียนจริงให้อยู่บรรทัดเดียว</p>
+</blockquote>
+<hr />
+<h2 id="13-file-system-fs-module-async-กับ-sync-ต่างกันยังไง-สไลด์-3240">13. File System (fs) module — async กับ sync ต่างกันยังไง? <span class="slide-ref">สไลด์ 32–40</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>fs ใช้อ่าน/สร้าง/เขียน/ลบ/เปลี่ยนชื่อไฟล์ ทุก method มีคู่ async (<code>fs.readFile</code>) กับ sync (<code>fs.readFileSync</code>) — sync บล็อกโปรแกรมจนอ่านเสร็จ async ไม่บล็อกแต่ลำดับผลไม่แน่นอน ถ้าต้องการลำดับใช้ sync หรือซ้อน callback (ซ้อนมากเกิด callback hell) หรือ Promise / Async-Await</strong></p>
+<h3 id="131-fs-ทำอะไรได้บ้าง-สไลด์-33">13.1 fs ทำอะไรได้บ้าง? <span class="slide-ref">สไลด์ 33</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุกงานมี method เป็นคู่ async/sync และควรใช้ async เพื่อไม่ให้บล็อก</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>งาน</th>
+<th>Asynchronous</th>
+<th>Synchronous</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Read</strong> files</td>
+<td><code>fs.readFile()</code></td>
+<td><code>fs.readFileSync()</code></td>
+</tr>
+<tr>
+<td><strong>Create</strong> files</td>
+<td><code>fs.appendFile()</code></td>
+<td><code>fs.appendFileSync()</code></td>
+</tr>
+<tr>
+<td><strong>Write</strong> files</td>
+<td><code>fs.writeFile()</code></td>
+<td><code>fs.writeFileSync()</code></td>
+</tr>
+<tr>
+<td><strong>Delete</strong> files</td>
+<td><code>fs.unlink()</code></td>
+<td><code>fs.unlinkSync()</code></td>
+</tr>
+<tr>
+<td><strong>Rename</strong> files</td>
+<td><code>fs.rename()</code></td>
+<td><code>fs.renameSync()</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>ทุก method ใน FS module มาเป็นคู่</strong> ทั้ง asynchronous และ synchronous</li>
+<li><strong>Synchronous (blocking)</strong> = JavaScript ส่วนที่เหลือใน Node process <strong>ต้องรอ</strong> จนงานที่ไม่ใช่ JS (เช่น read/write) เสร็จก่อน</li>
+<li><strong>Asynchronous ควรใช้มากกว่า (preferred)</strong> เพื่อหลีกเลี่ยงการ blocking</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 จำง่าย: ชื่อที่ลงท้าย <strong><code>Sync</code></strong> = แบบรอ (blocking) | ไม่มี Sync = แบบไม่รอ (ต้องมี callback)</p>
+<p class="c-warn">⚠️ สร้างไฟล์ใช้ <strong><code>appendFile</code></strong> และลบไฟล์ใช้ <strong><code>unlink</code></strong> (ไม่ใช่ชื่อ create/delete)</p>
+</blockquote>
+<h3 id="132-async-vs-sync-ต่างกันยังไงในเชิงเวลา-สไลด์-34">13.2 Async vs Sync ต่างกันยังไงในเชิงเวลา? <span class="slide-ref">สไลด์ 34</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>async สั่ง OS เขียนไฟล์แล้วไปทำงานอื่นต่อ เสร็จแล้วเรียก callback ส่วน sync สั่งแล้วรอเฉย ๆ จน OS เขียนเสร็จจึงทำงานต่อ</strong></p>
+<p><img loading="lazy" src="diagrams/L9-04-async-sync.png" alt="FS Async vs Sync" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>FS Asynchronous (Non-blocking)</strong></th>
+<th><strong>FS Synchronous (Blocking)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ตัวอย่างในรูป</td>
+<td><code>fs.writeFile</code></td>
+<td><code>fs.writeFileSync</code></td>
+</tr>
+<tr>
+<td>หลังสั่ง OS เขียนไฟล์</td>
+<td>NodeJS process <strong>ทำงานอื่นต่อ (other work)</strong></td>
+<td>NodeJS process <strong>รอ (waiting...)</strong></td>
+</tr>
+<tr>
+<td>เมื่อ OS เขียนเสร็จ</td>
+<td>เรียก <strong>callback</strong></td>
+<td><strong>resume execution</strong> (ทำบรรทัดถัดไป)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="133-อ่านไฟล์เดียวแบบ-async-สไลด์-35">13.3 อ่านไฟล์เดียวแบบ async <span class="slide-ref">สไลด์ 35</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>fs.readFile(path, &quot;utf8&quot;, callback)</code> — callback รับ <code>(err, contents)</code> ถ้ามี err ให้แสดง error ถ้าไม่มีให้ใช้ contents</strong></p>
+<p>โครงสร้าง: <code>(root)</code> → <code>src/README.txt</code> และ <code>fs.js</code></p>
+<p><code>fs.js</code></p>
+<pre><code class="language-js">/* File System Module */
+const path = require('path');
+const fs = require('fs');
+
+const readme1 = path.join(__dirname,&quot;src/README.txt&quot;);
+
+/* Read a File */
+fs.readFile(readme1 , &quot;utf8&quot;,
+                function(err, contents){
+    // Check if there is an error occurred
+    if(err)
+        console.log(&quot;Error: &quot;, err);
+    else{
+        /* If no error, display
+           the contents of the file */
+        console.log(contents);
+    }
+});
+</code></pre>
+<p>อธิบายทีละส่วน:</p>
+<ol>
+<li><code>path.join(__dirname, &quot;src/README.txt&quot;)</code> → สร้าง path เต็มไปยัง README.txt (ใช้ path module จากหัวข้อ 11)</li>
+<li><code>fs.readFile(ไฟล์, &quot;utf8&quot;, callback)</code> → สั่งอ่านไฟล์แบบ encoding <code>utf8</code> (ได้ผลเป็นข้อความ)</li>
+<li><strong>Callback Function</strong> <code>function(err, contents)</code> → ถูกเรียกเมื่ออ่านเสร็จ
+<ul>
+<li><code>err</code> มีค่า → พิมพ์ <code>Error: ...</code></li>
+<li>ไม่มี error → พิมพ์ <code>contents</code> = เนื้อหาไฟล์</li>
+</ul>
+</li>
+</ol>
+<p>ไฟล์ README.txt ในสไลด์มีข้อความ <code>Hello This is README.txt (#1)</code> → <strong>output:</strong> <code>Hello This is README.txt (#1)</code></p>
+<p>✔️ รันจริงได้เนื้อหาไฟล์ออกมา และเมื่อลองชี้ไปไฟล์ที่ไม่มีอยู่ จะเข้าทาง <code>err</code> พิมพ์ <code>Error: ...</code> (code <code>ENOENT</code>)</p>
+<h3 id="134-อ่านหลายไฟล์แบบ-async-ทำไมลำดับไม่แน่นอน-สไลด์-3637">13.4 อ่านหลายไฟล์แบบ async — ทำไมลำดับไม่แน่นอน? <span class="slide-ref">สไลด์ 36–37</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เรียก <code>fs.readFile</code> 3 ครั้งติดกัน Node ไม่รอแต่ละไฟล์ ไฟล์ไหนอ่านเสร็จก่อน callback ของไฟล์นั้นก็พิมพ์ก่อน → รันแต่ละครั้งลำดับอาจต่างกัน</strong></p>
+<pre><code class="language-js">/* File System Module */
+const path = require(&quot;path&quot;);
+const fs = require(&quot;fs&quot;);
+
+const readme1 = path.join(__dirname,&quot;src/README.txt&quot;);
+const readme2 = path.join(__dirname,&quot;src/README2.txt&quot;);
+const readme3 = path.join(__dirname,&quot;src/README3.txt&quot;);
+
+/* Read File 1 */
+fs.readFile(readme1 , &quot;utf8&quot;,
+                function(err, contents){ … });
+/* Read File 2 */
+fs.readFile(readme2 , &quot;utf8&quot;,
+                function(err, contents){ … });
+/* Read File 3 */
+fs.readFile(readme3 , &quot;utf8&quot;,
+                function(err, contents){ … });
+</code></pre>
+<p>(<code>…</code> = callback แบบเดียวกับหัวข้อ 13.3)</p>
+<p><strong>ผลรัน <code>node fs</code> 4 ครั้งในสไลด์ 37 — ลำดับไม่เหมือนกัน:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ครั้งที่</th>
+<th>บรรทัด 1</th>
+<th>บรรทัด 2</th>
+<th>บรรทัด 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Hello This is README.txt</td>
+<td>I have another README file (#3)</td>
+<td>README2.txt with some content</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Hello This is README.txt</td>
+<td>README2.txt with some content</td>
+<td>I have another README file (#3)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Hello This is README.txt</td>
+<td>I have another README file (#3)</td>
+<td>README2.txt with some content</td>
+</tr>
+<tr>
+<td>4</td>
+<td>README2.txt with some content</td>
+<td>Hello This is README.txt</td>
+<td>I have another README file (#3)</td>
+</tr>
+</tbody>
+</table></div>
+<p>✔️ รันจริง 5 ครั้งก็ได้ลำดับต่างกันจริง (บางครั้งไฟล์ 3 ขึ้นก่อนไฟล์ 1) — ตรงกับประเด็นของสไลด์</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ถ้าข้อสอบถาม &quot;output คืออะไร&quot; ของโค้ด async แบบนี้ คำตอบคือ <strong>ลำดับไม่แน่นอน</strong> (non-deterministic) ไม่ใช่ 1→2→3 เสมอ</p>
+</blockquote>
+<h3 id="135-ถ้าต้องการให้ได้ลำดับแน่นอน-ทำยังไง-สไลด์-38">13.5 ถ้าต้องการให้ได้ลำดับแน่นอน ทำยังไง? <span class="slide-ref">สไลด์ 38</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>3 ทาง — ใช้ sync version, ซ้อน callback (nested) หรือใช้ Promise / Async-Await ที่สะอาดกว่าเพื่อเลี่ยง callback hell</strong></p>
+<p><strong>Asynchronous Programming</strong> — ถ้าอยาก <strong>guarantee the sequence</strong>:</p>
+<ol>
+<li>ใช้ <strong>synchronous version</strong> (ถ้ามี) → หัวข้อ 13.6</li>
+<li>เขียน <strong>nested callback</strong> (callback ซ้อนกัน) → หัวข้อ 13.7</li>
+<li>หรือเลี่ยง <strong>Callback hell</strong> ที่ซับซ้อน ด้วยเวอร์ชันที่สะอาดกว่า: <strong>Promise</strong> และ <strong>Async/Await</strong> (สไลด์บทนี้บอกแค่ชื่อ)</li>
+</ol>
+<h3 id="136-sync-version-สไลด์-39">13.6 Sync version <span class="slide-ref">สไลด์ 39</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>fs.readFileSync(path, encoding)</code> คืนเนื้อหาไฟล์มาเป็นค่าโดยตรง (ไม่มี callback) และรอจนเสร็จ ผลจึงออกตามลำดับ 1→2→3 เสมอ</strong></p>
+<p><code>fs_sync.js</code></p>
+<pre><code class="language-js">/* File System Module */
+const path = require(&quot;path&quot;);
+const fs = require(&quot;fs&quot;);
+
+const readme1 = path.join(__dirname,&quot;src/README.txt&quot;);
+const readme2 = path.join(__dirname,&quot;src/README2.txt&quot;);
+const readme3 = path.join(__dirname,&quot;src/README3.txt&quot;);
+
+/* Read File 1 */
+let content = fs.readFileSync(readme1, &quot;utf8&quot;);
+console.log(content);
+
+/* Read File 2 */
+let content2 = fs.readFileSync(readme2, &quot;utf-8&quot;);
+console.log(content2);
+
+/* Read File 3 */
+let content3 = fs.readFileSync(readme3, &quot;utf-8&quot;);
+console.log(content3);
+</code></pre>
+<p><strong>Output</strong> (<code>node fs_sync</code>) — ได้ลำดับนี้ทุกครั้ง:</p>
+<pre><code>Hello This is README.txt
+README2.txt with some content
+I have another README file (#3)
+</code></pre>
+<p>✔️ รันจริงได้ตรงกับสไลด์</p>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกตความต่างของรูปแบบ: async → ผลมาทาง <strong>parameter ของ callback</strong> (<code>contents</code>) | sync → ผลมาเป็น <strong>ค่าที่ return</strong> (<code>let content = ...</code>)</p>
+<p class="c-tip">💡 สไลด์ใช้ทั้ง <code>&quot;utf8&quot;</code> และ <code>&quot;utf-8&quot;</code> ในไฟล์เดียวกัน และได้ผลเหมือนกัน (ตรวจตอนรันแล้ว)</p>
+</blockquote>
+<h3 id="137-callback-version-และ-callback-hell-สไลด์-40">13.7 Callback version และ Callback Hell <span class="slide-ref">สไลด์ 40</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>อ่านไฟล์ถัดไปภายใน callback ของไฟล์ก่อนหน้า → ได้ลำดับแน่นอน แต่โค้ดซ้อนเป็นขั้นบันได <code>})</code> = Callback Hell อ่านยาก ดูแลยาก ไม่ใช่ good practice</strong></p>
+<p><code>fs_callback.js</code></p>
+<pre><code class="language-js">/* File System Module */
+const path = require(&quot;path&quot;);
+const fs = require(&quot;fs&quot;);
+
+const readme1 = path.join(__dirname,&quot;src/README.txt&quot;);
+const readme2 = path.join(__dirname,&quot;src/README2.txt&quot;);
+const readme3 = path.join(__dirname,&quot;src/README3.txt&quot;);
+
+fs.readFile(readme1, &quot;utf8&quot;, function(err, contents){ /* File 1 */
+    if(err) console.log(&quot;Error: &quot;, err);
+    else{         console.log(contents);
+                  fs.readFile(readme2, &quot;utf8&quot;, function(err, contents){ /* File 2 */
+                 if(err) console.log(&quot;Error: &quot;, err);
+                  else{    console.log(contents)
+                           fs.readFile(readme3, &quot;utf8&quot;, function(err, contents){ /* File 3 */
+                              if(err) console.log(&quot;Error: &quot;, err);
+                              else{ console.log(contents); }
+                           });
+                  }
+            });
+     }
+});
+</code></pre>
+<p>ลำดับการทำงาน:</p>
+<ol>
+<li>อ่านไฟล์ 1 → เสร็จ → พิมพ์ไฟล์ 1 → <strong>แล้วค่อย</strong> สั่งอ่านไฟล์ 2</li>
+<li>อ่านไฟล์ 2 เสร็จ → พิมพ์ไฟล์ 2 → <strong>แล้วค่อย</strong> สั่งอ่านไฟล์ 3</li>
+<li>อ่านไฟล์ 3 เสร็จ → พิมพ์ไฟล์ 3</li>
+</ol>
+<p><strong>Output</strong> (<code>node fs_callback</code>) — ลำดับแน่นอน:</p>
+<pre><code>Hello This is README.txt
+README2.txt with some content
+I have another README file (#3)
+</code></pre>
+<p>✔️ รันจริงได้ตรงกับสไลด์</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Note ในสไลด์:</strong> การซ้อน callback และ <strong>&quot;บันไดของ <code>})</code>&quot; ตอนท้าย</strong> เรียกว่า <strong>Callback Hell</strong> — โค้ด <strong>อ่านยากและดูแลยาก</strong> = <strong>NOT a good practice</strong></p>
+<p class="c-tip">💡 เปรียบเหมือนต้องโทรถามทีละคน: &quot;ถ้าคนที่ 1 รับสาย แล้วค่อยโทรหาคนที่ 2 ถ้าคนที่ 2 รับ แล้วค่อยโทรหาคนที่ 3…&quot; ยิ่งคนเยอะ ประโยคยิ่งซ้อนลึก</p>
+</blockquote>
+<hr />
+<h2 id="14-http-module-คืออะไร-สไลด์-4142">14. HTTP module คืออะไร? <span class="slide-ref">สไลด์ 41–42</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>http module ทำให้ Node รับส่งข้อมูลผ่าน HTTP ได้ — ใช้สร้าง HTTP server ที่ listen อยู่บน port และตอบ response กลับเมื่อมี request</strong></p>
+<ul>
+<li>Node.js ส่งข้อมูลผ่าน <strong>Hypertext Transfer Protocol (HTTP)</strong> ได้</li>
+<li>HTTP module <strong>สร้าง HTTP server</strong> ที่ <strong>listen</strong> อยู่ที่ server port และ <strong>ตอบ response กลับไปที่ client เมื่อมี request</strong></li>
+<li>รูปในสไลด์: Server ที่ <strong>Port: 8081</strong> และหน้าจอ command prompt (<code>node http</code>) แสดง <code>Listening on the port 8081</code></li>
+</ul>
+<hr />
+<h2 id="15-สร้าง-web-server-ง่าย-ๆ-ยังไง-สไลด์-4349">15. สร้าง web server ง่าย ๆ ยังไง? <span class="slide-ref">สไลด์ 43–49</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>require(&quot;http&quot;)</code> → <code>http.createServer((req, res) =&gt; {...})</code> ใส่วิธีตอบ (statusCode, setHeader, write, end) → <code>listen(8081)</code> → รัน <code>node ไฟล์.js</code> แล้วเปิด <code>http://localhost:8081</code> ใน browser จะเห็นข้อความที่ server ตอบ</strong></p>
+<h3 id="151-server-ที่จะสร้างหน้าตาแบบไหน-สไลด์-44">15.1 Server ที่จะสร้างหน้าตาแบบไหน? <span class="slide-ref">สไลด์ 44</span></h3>
+<ul>
+<li><strong>web server</strong> รับ <strong>HTTP requests</strong> จาก client แล้วส่ง <strong>HTTP response</strong> กลับ</li>
+<li>response อาจเป็น <strong>plain text</strong>, <strong>HTML pages</strong> หรือ <strong>JSON object</strong></li>
+<li>ใช้ <strong>HTTP module</strong> สร้าง web server ง่าย ๆ</li>
+<li>Server: รันที่ <strong><code>localhost</code></strong>, <strong>Port: 8081</strong> → <strong>URL: <code>http://localhost:8081</code></strong></li>
+<li>รูป: <strong>&quot;Our Machine as a server&quot;</strong> — เครื่องเราเองทำหน้าที่เป็น server ที่ port 8081</li>
+</ul>
+<h3 id="152-โค้ด-server-ตัวแรก-สไลด์-4547">15.2 โค้ด server ตัวแรก <span class="slide-ref">สไลด์ 45–47</span></h3>
+<p><code>myFirstNodeServer.js</code> (เวอร์ชันสุดท้ายในสไลด์ 47)</p>
+<pre><code class="language-js">/* Import HTTP Module */
+const http = require(&quot;http&quot;);
+
+// Create a server object
+const myServer = http.createServer((req, res)=&gt; {
+// Write a response to the client
+res.statusCode = 200;  // Status 200: OK
+res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+res.write(&quot;Hello World!&quot;);
+res.end(); // End the response
+});
+
+// Server listens on port 8081
+myServer.listen(8081,() =&gt; {
+    console.log(&quot;Listening on the port 8081&quot;);
+});
+</code></pre>
+<p>อธิบายทีละขั้น (สไลด์ 45 → 46 → 47):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>โค้ด</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Import (สไลด์ 45)</td>
+<td><code>const http = require(&quot;http&quot;);</code></td>
+<td>โหลด HTTP module</td>
+</tr>
+<tr>
+<td>2. Create a server (สไลด์ 46)</td>
+<td><code>http.createServer((req, res) =&gt; {...})</code></td>
+<td>ฟังก์ชันข้างในจะทำงาน <strong>ทุกครั้งที่มี request เข้ามา</strong> → server ตอบ <strong>&quot;Hello World&quot; แบบ plain-text</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><code>res.statusCode = 200;</code></td>
+<td><strong>HTTP 200 OK</strong> = request <strong>สำเร็จ</strong></td>
+</tr>
+<tr>
+<td></td>
+<td><code>res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);</code></td>
+<td>บอก browser ว่าเนื้อหาเป็นข้อความธรรมดา</td>
+</tr>
+<tr>
+<td></td>
+<td><code>res.write(&quot;Hello World!&quot;);</code></td>
+<td>เขียนเนื้อหาลง response</td>
+</tr>
+<tr>
+<td></td>
+<td><code>res.end();</code></td>
+<td><strong>จบ response</strong> (ส่งออกไป)</td>
+</tr>
+<tr>
+<td>3. Server listening (สไลด์ 47)</td>
+<td><code>myServer.listen(8081, () =&gt; {...})</code></td>
+<td><strong>ผูก (bind) server เข้ากับ network address ที่ localhost และ port 8081</strong> แล้วพิมพ์ข้อความใน callback เมื่อพร้อม</td>
+</tr>
+<tr>
+<td>หยุด server</td>
+<td>กด <strong>Ctrl+C</strong></td>
+<td>หยุด server ไม่ให้รันต่อ</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สไลด์ 45–46 เขียนแบบเก่า: <code>console.log(&quot;Listening on the port 8081&quot;);</code> แล้วค่อย <code>myServer.listen(8081);</code> แยกกัน ส่วนสไลด์ 47 ย้าย <code>console.log</code> เข้าไปใน <strong>callback ของ <code>listen</code></strong> ให้พิมพ์ตอน server พร้อมจริง — ทั้งสองแบบพิมพ์ข้อความเดียวกัน</p>
+</blockquote>
+<h3 id="153-รันและทดสอบ-สไลด์-4849">15.3 รันและทดสอบ <span class="slide-ref">สไลด์ 48–49</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>รันแล้ว terminal ขึ้น &quot;Listening on the port 8081&quot; → พิมพ์ localhost:8081 ใน browser = ส่ง request → server ตอบ &quot;Hello World!&quot; ขึ้นใน browser</strong></p>
+<p><img loading="lazy" src="diagrams/L9-05-server-flow.png" alt="ลำดับการรันและทดสอบ server" /></p>
+<ol>
+<li><strong>Run your Server</strong> (สไลด์ 48): <code>node myFirstNodeServer.js</code> → terminal แสดง <code>Listening on the port 8081</code> (= <strong>Server running at Port 8081</strong>)</li>
+<li><strong>Make a HTTP request to the server</strong> (สไลด์ 49): พิมพ์ <code>localhost:8081</code> ใน browser → <strong>Request</strong></li>
+<li><strong>Server received the request and responded with a text</strong> → <strong>Response</strong></li>
+<li><strong>The text is showed in the Client's browser</strong>: หน้าเว็บแสดง <code>Hello World!</code></li>
+</ol>
+<p>✔️ รันจริงแล้วยิง request ไปที่ <code>/</code> ได้ status <code>200</code>, <code>Content-Type: text/plain</code>, เนื้อหา <code>Hello World!</code> (path อื่นเช่น <code>/favicon.ico</code> ก็ได้ <code>Hello World!</code> เหมือนกัน เพราะโค้ดนี้ไม่ได้ดู URL)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 49 เขียน URL ว่า <code>http:/locahost:8081</code> (สะกดผิด 2 จุด) — ที่ถูกคือ <strong><code>http://localhost:8081</code></strong></p>
+<p class="c-warn">⚠️ terminal ในสไลด์ 49 มีบรรทัด <code>The new request comming: /</code> และ <code>The new request comming: /favicon.ico</code> แต่โค้ดในสไลด์ 45–48 <strong>ไม่มีคำสั่งพิมพ์บรรทัดนี้</strong> — แปลว่าภาพมาจากโค้ดอีกเวอร์ชันที่ log request ไว้ (แบบหัวข้อ 16) ถ้ารันโค้ดตามสไลด์ 47 จริง terminal จะมีแค่ <code>Listening on the port 8081</code></p>
+</blockquote>
+<hr />
+<h2 id="16-request-object-req-กับ-response-object-res-มีอะไร-สไลด์-50">16. Request object (<code>req</code>) กับ Response object (<code>res</code>) มีอะไร? <span class="slide-ref">สไลด์ 50</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>req</code> เก็บข้อมูล request ที่เข้ามา เช่น <code>req.url</code> (path) และ <code>req.method</code> (GET) ส่วน <code>res</code> ใช้สร้างคำตอบ (statusCode, setHeader, write, end)</strong></p>
+<pre><code class="language-js">/* HTTP Module */
+const http = require(&quot;http&quot;);
+
+// Create a server object
+const myServer = http.createServer((req, res)=&gt;{
+    // Log the request detail
+    console.log(`url ${req.url}`);
+    console.log(`method ${req.method}`);
+
+    // Write a response to the client
+    res.statusCode = 200;  // Status 200: OK
+    res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+    res.write(&quot;Request made!&quot;);
+    res.end(); // End the response
+    // End the response
+});
+
+// Server listens on port 8081
+myServer.listen(8081,() =&gt; {
+    console.log(&quot;Listening on the port 8081&quot;);
+});
+</code></pre>
+<p><strong>เมื่อเปิด <code>http://localhost:8081</code> ใน browser</strong> — terminal แสดง (Show the url and method that is from <strong>&quot;req&quot;</strong>):</p>
+<pre><code>Listening on the port 8081
+url /
+method GET
+url /favicon.ico
+method GET
+</code></pre>
+<ul>
+<li>request แรก: <code>req.url</code> = <code>/</code> (ไม่มี path ต่อท้าย) และ <code>req.method</code> = <code>GET</code></li>
+<li>สังเกตว่ามี request ที่ 2 ไปที่ <code>/favicon.ico</code> ตามมาเอง (ตามที่เห็นในสไลด์)</li>
+<li><strong>Server responses back with the text in the browser</strong> → browser แสดงข้อความที่ <code>res.write</code> ส่งไป</li>
+</ul>
+<p>✔️ รันจริงแล้วยิง <code>/</code> กับ <code>/favicon.ico</code> ได้ log ตรงกับสไลด์ และได้ response <code>Request made!</code></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ภาพ browser ในสไลด์ 50 แสดง <strong><code>Request maded</code></strong> แต่โค้ดเขียน <code>res.write(&quot;Request made!&quot;)</code> — รันจริงได้ <strong><code>Request made!</code></strong> (ยึดตามโค้ด)</p>
+<p class="c-tip">💡 จำ: <strong><code>req</code> = สิ่งที่ client ส่งมา (อ่าน)</strong> | <strong><code>res</code> = สิ่งที่เราจะส่งกลับ (เขียน)</strong></p>
+</blockquote>
+<hr />
+<h2 id="17-routing-ตอบคนละหน้าตาม-url-ยังไง-สไลด์-5155">17. Routing — ตอบคนละหน้าตาม URL ยังไง? <span class="slide-ref">สไลด์ 51–55</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ <code>req.url</code> เช็กว่า path คืออะไรด้วย if/else if — <code>/</code> ตอบข้อความ, <code>/shabu</code> และ <code>/bbq</code> อ่านไฟล์ HTML ด้วย <code>fs.readFile</code> แล้วส่งเป็น <code>text/html</code> ส่วน path อื่นตอบ 404 &quot;Invalid requested :(&quot;</strong></p>
+<h3 id="171-routing-คืออะไร-สไลด์-5152">17.1 Routing คืออะไร? <span class="slide-ref">สไลด์ 51–52</span></h3>
+<ul>
+<li>โดยทั่วไป server ตอบ request ของ client ด้วย <strong>Web Page</strong> เช่น <code>http://localhost:8081/homepage</code></li>
+<li>เมื่อมี HTTP request เข้ามา จะถูก <strong>route</strong> ไปยังโค้ดที่จัดการมัน เช่น ส่งหน้าเฉพาะกลับไป</li>
+<li><strong>request object (<code>req</code>) มี <code>url</code></strong> ที่ใช้ทำ routing ได้</li>
+<li><strong>Check the incoming path of the request, and respond with the appropriate pages</strong> — ตัวอย่าง: <code>request.url</code> ของ <code>http://localhost:8081/bbq</code> คือ <strong><code>&quot;/bbq&quot;</code></strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L9-06-routing.png" alt="Routing ตาม request.url" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 ในสไลด์ 52 กล่อง <code>404 Invalid</code> วาดเป็น <strong>สี่เหลี่ยมด้านขนาน</strong> (สัญลักษณ์ output ของ flowchart) ส่วนรูปที่วาดใหม่ใช้สี่เหลี่ยมสีชมพูแทน</p>
+</blockquote>
+<h3 id="172-หน้า-html-ที่จะส่ง-สไลด์-53">17.2 หน้า HTML ที่จะส่ง <span class="slide-ref">สไลด์ 53</span></h3>
+<p>โครงสร้าง: <code>(root)</code> → <code>shabu.html</code>, <code>bbq.html</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>หัวข้อในหน้า</th>
+<th>รายการร้าน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shabu.html</code></td>
+<td>Let's have Shabu Shabu</td>
+<td>Akiyoshi, Fufu Taiwanese Shabu, Kagonoya, Momo Paradise, You &amp; I Premium Suki Buffet</td>
+</tr>
+<tr>
+<td><code>bbq.html</code></td>
+<td>Let's have BBQ</td>
+<td>AKA, Guru Gyuu, Nice Two Meat U, Kosirae</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="173-โค้ด-routing-สไลด์-54">17.3 โค้ด routing <span class="slide-ref">สไลด์ 54</span></h3>
+<p>สไลด์ให้เป็น <strong>template</strong> <code>routing.js</code> ที่เว้นช่องไว้ แล้วมีกล่องโค้ดให้เติมแต่ละช่อง — รวมเป็นโค้ดเต็มได้ดังนี้ (ช่อง <code>/shabu</code> สไลด์ไม่ได้ให้โค้ด แต่ทำแบบเดียวกับ <code>/bbq</code>):</p>
+<pre><code class="language-js">/* HTTP Module with Routing */
+const http = require(&quot;http&quot;);
+const fs = require(&quot;fs&quot;);    // For opening HTML files
+
+const myServer = http.createServer((req, res)=&gt;{
+    console.log(&quot;Req: &quot; + req.url);
+    if(req.url === &quot;/&quot;){
+        /* Send a greeting message */
+        res.statusCode = 200;
+        res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+        res.write(&quot;Greeting&quot;);
+        res.end();
+    }
+    else if(req.url===&quot;/shabu&quot;) {
+        /* Send shabu.html*/
+        // (เหมือนช่อง /bbq แต่เปลี่ยนเป็น &quot;./shabu.html&quot;)
+    }
+    else if(req.url===&quot;/bbq&quot;) {
+        /* Send bbq.html*/
+        fs.readFile(&quot;./bbq.html&quot;, function(err, data) {
+            res.statusCode = 200;
+            res.setHeader(&quot;Content-Type&quot;,&quot;text/html&quot;);
+            res.write(data);
+            res.end();
+        });
+    }
+    else {
+        /* Error: Invalid path */
+        res.statusCode = 404;  // Status 404: Error
+        res.setHeader(&quot;Content-Type&quot;, &quot;text/plain&quot;);
+        res.write(&quot;Invalid requested :(&quot;);
+        res.end();
+    }
+});   // ← ปิด createServer (สไลด์ลืมใส่)
+// Server listens on port 8081
+console.log(&quot;Listening on the port 8081&quot;);
+myServer.listen(8081);
+</code></pre>
+<p>เทียบ 3 แบบของคำตอบ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>path</th>
+<th>statusCode</th>
+<th>Content-Type</th>
+<th>เนื้อหาที่ส่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td><strong>200</strong></td>
+<td><strong><code>text/plain</code></strong></td>
+<td><code>&quot;Greeting&quot;</code></td>
+</tr>
+<tr>
+<td><code>/shabu</code>, <code>/bbq</code></td>
+<td><strong>200</strong></td>
+<td><strong><code>text/html</code></strong></td>
+<td><code>data</code> = เนื้อหาไฟล์ HTML ที่อ่านด้วย <code>fs.readFile</code></td>
+</tr>
+<tr>
+<td>อื่น ๆ</td>
+<td><strong>404</strong> (Error)</td>
+<td><strong><code>text/plain</code></strong></td>
+<td><code>&quot;Invalid requested :(&quot;</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ template ในสไลด์ 54 <strong>ขาด <code>});</code> ปิด <code>http.createServer(...)</code></strong> หลังบล็อก <code>else</code> — ถ้าพิมพ์ตามสไลด์เป๊ะจะได้ <strong>SyntaxError: Unexpected end of input</strong> (ทดลองแล้ว) ต้องเติม <code>});</code> ก่อนบรรทัด <code>// Server listens on port 8081</code></p>
+<p class="c-tip">💡 ส่ง HTML ต้องตั้ง <code>Content-Type</code> เป็น <strong><code>text/html</code></strong> ส่วนข้อความธรรมดาใช้ <strong><code>text/plain</code></strong></p>
+<p class="c-tip">💡 สังเกตว่า <code>res.statusCode/setHeader/write/end</code> ของหน้า HTML อยู่ <strong>ข้างใน callback ของ <code>fs.readFile</code></strong> เพราะต้องรอให้อ่านไฟล์เสร็จก่อนจึงมี <code>data</code> ให้ส่ง</p>
+</blockquote>
+<h3 id="174-ผลลัพธ์-สไลด์-55">17.4 ผลลัพธ์ <span class="slide-ref">สไลด์ 55</span></h3>
+<p><strong>Server is running at 8081, waiting for requests</strong> — terminal (<code>nodemon routing</code>):</p>
+<pre><code>Listening on the port 8081
+Req: /bbq
+Req: /SOMEPATH
+Req: /
+Req: /shabu
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เปิด URL</th>
+<th>browser แสดง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:8081/bbq</code></td>
+<td>หน้า <strong>Let's have BBQ</strong> (AKA, Guru Gyuu, Nice Two Meat U, Kosirae)</td>
+</tr>
+<tr>
+<td><code>http://localhost:8081/SOMEPATH</code></td>
+<td><code>Invalid requested :(</code></td>
+</tr>
+<tr>
+<td><code>http://localhost:8081</code></td>
+<td><code>Greeting</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>✔️ รันโค้ดที่เติม <code>});</code> แล้วยิง request จริง: <code>/bbq</code> → 200 <code>text/html</code> (เนื้อหา bbq.html), <code>/SOMEPATH</code> → <strong>404</strong> <code>Invalid requested :(</code>, <code>/</code> → 200 <code>Greeting</code>, <code>/shabu</code> → 200 <code>text/html</code> และ terminal log <code>Req: ...</code> ตามลำดับเดียวกับสไลด์</p>
+<p><strong>More about Node next class</strong> (สไลด์ 56) → Part II: Express Framework</p>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Client-side</strong></td>
+<td>โค้ด HTML/CSS/JS ที่รันใน browser</td>
+<td>ฝั่งหน้าจอผู้ใช้</td>
+</tr>
+<tr>
+<td><strong>Server-side</strong></td>
+<td>โค้ดบน server ที่เลือกเนื้อหาตอบ request เข้าถึง OS/file system ได้</td>
+<td>ฝั่งหลังร้าน</td>
+</tr>
+<tr>
+<td><strong>Static resource</strong></td>
+<td>ไฟล์สำเร็จรูป (CSS, JS, images) ส่งได้ทันที</td>
+<td>ของพร้อมหยิบ</td>
+</tr>
+<tr>
+<td><strong>Dynamic resource</strong></td>
+<td>ต้องให้ web app ดึง DB + ใส่ template ก่อนส่ง</td>
+<td>ของที่ต้องปรุงก่อนเสิร์ฟ</td>
+</tr>
+<tr>
+<td><strong>localhost</strong></td>
+<td>ชื่อของเครื่องตัวเองในฐานะ server</td>
+<td>&quot;เครื่องนี้&quot;</td>
+</tr>
+<tr>
+<td><strong>Port</strong></td>
+<td>หมายเลขช่องของโปรแกรม server ในเครื่อง (3000, 8080, 8081)</td>
+<td>เลขห้องในตึก</td>
+</tr>
+<tr>
+<td><strong>Node.js</strong></td>
+<td>asynchronous JavaScript runtime บน Chrome's V8 engine, open-source server environment</td>
+<td>JS ที่ออกมานอก browser</td>
+</tr>
+<tr>
+<td><strong>V8</strong></td>
+<td>JavaScript engine ของ Chrome ที่ Node ใช้</td>
+<td>เครื่องยนต์</td>
+</tr>
+<tr>
+<td><strong>Single thread event loop</strong></td>
+<td>thread หลักเดียวรับ request แล้วส่งงานไปหน่วยอื่น</td>
+<td>พนักงานรับออเดอร์คนเดียว</td>
+</tr>
+<tr>
+<td><strong>Non-blocking</strong></td>
+<td>ไม่รองานเสร็จก่อนรับงานถัดไป</td>
+<td>สั่งแล้วไปทำอย่างอื่น</td>
+</tr>
+<tr>
+<td><strong>Blocking</strong></td>
+<td>ต้องรองานเสร็จก่อนทำบรรทัดถัดไป</td>
+<td>ยืนรอหน้าครัว</td>
+</tr>
+<tr>
+<td><strong>Global objects</strong></td>
+<td>ของที่ใช้ได้ทุกไฟล์โดยไม่ต้อง import (<code>__dirname</code>, <code>__filename</code>, <code>require</code>, …)</td>
+<td>ของส่วนกลาง</td>
+</tr>
+<tr>
+<td><strong><code>global</code></strong></td>
+<td>global namespace</td>
+<td>ห้องโถงกลาง</td>
+</tr>
+<tr>
+<td><strong>Module</strong></td>
+<td>ไฟล์ JS 1 ไฟล์ ของข้างในเป็น private</td>
+<td>1 ไฟล์ = 1 กล่อง</td>
+</tr>
+<tr>
+<td><strong><code>module.exports</code></strong></td>
+<td>object พิเศษสำหรับส่งของออกจาก module</td>
+<td>ประตูทางออก</td>
+</tr>
+<tr>
+<td><strong><code>require()</code></strong></td>
+<td>โหลด module มาใช้</td>
+<td>ประตูทางเข้า</td>
+</tr>
+<tr>
+<td><strong>Built-in module</strong></td>
+<td>module ที่ Node มีให้ (path, url, fs, http)</td>
+<td>ของแถมในกล่อง</td>
+</tr>
+<tr>
+<td><strong>Callback function</strong></td>
+<td>ฟังก์ชันที่ส่งเข้าไปให้ถูกเรียกเมื่องานเสร็จ</td>
+<td>&quot;เสร็จแล้วโทรบอกนะ&quot;</td>
+</tr>
+<tr>
+<td><strong>Callback Hell</strong></td>
+<td>callback ซ้อนกันลึกเป็นบันได <code>})</code> อ่านยาก</td>
+<td>บันไดนรก</td>
+</tr>
+<tr>
+<td><strong>Promise / Async-Await</strong></td>
+<td>ทางเลือกที่สะอาดกว่าเพื่อเลี่ยง callback hell (บทนี้แค่บอกชื่อ)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong><code>http.createServer</code></strong></td>
+<td>สร้าง server object พร้อมฟังก์ชันตอบ request</td>
+<td>เปิดร้าน</td>
+</tr>
+<tr>
+<td><strong><code>listen(port)</code></strong></td>
+<td>bind server เข้ากับ localhost:port</td>
+<td>เปิดประตูรับลูกค้า</td>
+</tr>
+<tr>
+<td><strong><code>req</code></strong></td>
+<td>request object: <code>req.url</code>, <code>req.method</code></td>
+<td>ใบสั่งของลูกค้า</td>
+</tr>
+<tr>
+<td><strong><code>res</code></strong></td>
+<td>response object: <code>statusCode</code>, <code>setHeader</code>, <code>write</code>, <code>end</code></td>
+<td>ของที่ส่งกลับ</td>
+</tr>
+<tr>
+<td><strong>Status 200 / 404</strong></td>
+<td>200 OK = สำเร็จ / 404 = Error (path ไม่ถูก)</td>
+<td>200 ผ่าน 404 ไม่เจอ</td>
+</tr>
+<tr>
+<td><strong>Content-Type</strong></td>
+<td>header บอกชนิดเนื้อหา <code>text/plain</code> หรือ <code>text/html</code></td>
+<td>ป้ายบอกชนิดของ</td>
+</tr>
+<tr>
+<td><strong>Routing</strong></td>
+<td>เช็ก <code>req.url</code> แล้วส่งหน้าให้ตรง path</td>
+<td>แยกทางตามป้าย</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ นิยาม <strong>Node.js</strong> = asynchronous JavaScript runtime built on <strong>Chrome's V8</strong> + &quot;open-source server environment&quot; | <strong>ไม่มี DOM, document, window, cookies</strong> | มี modules (file system, HTTP, utilities)</li>
+<li>⭐ <strong>Single thread event loop</strong>: main thread รับ request → ส่งไปหน่วยที่เหมาะ → <strong>ไม่รอ (non-blocking)</strong> รับ request ถัดไป → หน่วยเสร็จแล้วค่อยตอบกลับ</li>
+<li>⭐ เหมาะ: highly-scalable, <strong>I/O intensive</strong>, real-time, JSON API | <strong>ไม่เหมาะ: computation-intensive</strong></li>
+<li>⭐ ลำดับ request/response 6 ขั้น — static ข้ามจาก #2 ไป #5, dynamic ผ่าน web app + DB + template</li>
+<li>รัน: <code>node --version</code>, <code>node filename.js</code> | <code>console.log</code> ใน Node ≠ <code>window.console.log</code></li>
+<li>⭐ <code>__dirname</code> = โฟลเดอร์ | <code>__filename</code> = full path รวมชื่อไฟล์ | <code>global</code> = global namespace</li>
+<li>⭐ ทุกไฟล์ = module, ของข้างใน <strong>private</strong> | export 3 แบบ: literal / object / function | <strong>ชื่อที่ export (<code>sayHi</code>) ≠ ชื่อในไฟล์ (<code>sayHello</code>) ได้</strong></li>
+<li>⭐ <code>require('./message/msg')</code> ใช้ relative path → output ของ greet.js = <code>Hello</code> / <code>Hello World!</code> / <code>Hello ICT</code></li>
+<li>path: <code>resolve</code> (absolute), <code>extname</code> (<code>.js</code>), <code>parse</code> (<strong>root, dir, base, name, ext</strong>), <code>join</code></li>
+<li>⭐ URL: <code>protocol</code> = <code>https:</code> | <code>host</code> = <code>www.covid19.com:8080</code> (มี port) | <code>port</code> = <code>8080</code> | <code>pathname</code> = <code>/p/a/t/h</code> | <code>search</code> = <code>?country=TH&amp;time=now</code> | <code>searchParams.get('time')</code> = <code>now</code></li>
+<li>⭐ fs: ทุก method มีคู่ <strong>async / Sync</strong> — read <code>readFile</code>, create <code>appendFile</code>, write <code>writeFile</code>, delete <code>unlink</code>, rename <code>rename</code> | <strong>async preferred</strong></li>
+<li>⭐ readFile 3 ไฟล์ติดกัน (async) → <strong>ลำดับผลไม่แน่นอน</strong> | อยากได้ลำดับ → <strong>Sync</strong>, <strong>nested callback</strong> (→ Callback Hell), <strong>Promise / Async-Await</strong></li>
+<li>⭐ สร้าง server: <code>require(&quot;http&quot;)</code> → <code>createServer((req,res)=&gt;{ statusCode=200; setHeader(&quot;Content-Type&quot;,&quot;text/plain&quot;); write(...); end(); })</code> → <code>listen(8081)</code> → เปิด <code>http://localhost:8081</code> | <strong>Ctrl+C</strong> หยุด</li>
+<li>⭐ <code>req.url</code>, <code>req.method</code> (GET) | เปิด localhost:8081 ได้ <code>url /</code> และ <code>url /favicon.ico</code></li>
+<li>⭐ Routing: <code>/</code> → 200 text/plain &quot;Greeting&quot; | <code>/bbq</code>, <code>/shabu</code> → 200 <strong>text/html</strong> (อ่านไฟล์ด้วย fs.readFile) | อื่น ๆ → <strong>404</strong> &quot;Invalid requested :(&quot;</li>
+</ul>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client-side</td>
+<td>Server-side</td>
+<td>client รันใน browser (HTML/CSS/JS) / server เลือกเนื้อหาตอบ request เข้าถึง OS + file system ได้</td>
+</tr>
+<tr>
+<td>Static resource</td>
+<td>Dynamic resource</td>
+<td>static ส่งไฟล์เลย (#2→#5) / dynamic ผ่าน web app + database + template</td>
+</tr>
+<tr>
+<td>Browser JS</td>
+<td>Node.js</td>
+<td>browser มี DOM, <code>document</code>, <code>window</code>, cookies / Node ไม่มี แต่มี modules (fs, http)</td>
+</tr>
+<tr>
+<td>Blocking (sync)</td>
+<td>Non-blocking (async)</td>
+<td>sync รอเสร็จก่อน (waiting → resume) / async ทำงานอื่นต่อแล้วเรียก callback</td>
+</tr>
+<tr>
+<td><code>fs.readFile</code></td>
+<td><code>fs.readFileSync</code></td>
+<td>async: ผลมาทาง callback <code>(err, contents)</code> ลำดับไม่แน่นอน / sync: ผลเป็นค่าที่ return ลำดับแน่นอน</td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td><code>__filename</code></td>
+<td>โฟลเดอร์ของไฟล์ / path เต็มรวมชื่อไฟล์</td>
+</tr>
+<tr>
+<td><code>base</code></td>
+<td><code>name</code> (path.parse)</td>
+<td><code>path.js</code> (มีนามสกุล) / <code>path</code> (ไม่มีนามสกุล)</td>
+</tr>
+<tr>
+<td><code>host</code></td>
+<td><code>hostname</code></td>
+<td>host มี port (<code>www.covid19.com:8080</code>) / hostname ไม่มี</td>
+</tr>
+<tr>
+<td><code>pathname</code></td>
+<td><code>search</code></td>
+<td><code>/p/a/t/h</code> / <code>?country=TH&amp;time=now</code> (มี <code>?</code>)</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td><code>searchParams</code></td>
+<td>string query ทั้งก้อน / object <code>URLSearchParams</code> ใช้ <code>.get('key')</code> ได้</td>
+</tr>
+<tr>
+<td><code>module.exports = ค่า</code></td>
+<td><code>module.exports.ชื่อ = ค่า</code></td>
+<td>ส่งค่าตรง ๆ (ใช้ <code>msg</code> ได้เลย) / ส่งเป็น property (ต้องใช้ <code>ictgreet.greetICT</code>)</td>
+</tr>
+<tr>
+<td>ชื่อฟังก์ชันในไฟล์ (<code>sayHello</code>)</td>
+<td>ชื่อที่ export (<code>sayHi</code>)</td>
+<td>ไฟล์อื่นเรียกได้แค่ชื่อที่ export → <code>eng.sayHi()</code></td>
+</tr>
+<tr>
+<td><code>req</code></td>
+<td><code>res</code></td>
+<td>ข้อมูลที่ client ส่งมา (url, method) / สิ่งที่เราตอบกลับ (statusCode, header, write, end)</td>
+</tr>
+<tr>
+<td><code>res.write()</code></td>
+<td><code>res.end()</code></td>
+<td>เขียนเนื้อหาลง response / จบและส่ง response</td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>text/html</code></td>
+<td>ข้อความธรรมดา (&quot;Hello World!&quot;, &quot;Greeting&quot;, 404) / หน้า HTML (bbq.html, shabu.html)</td>
+</tr>
+<tr>
+<td>Status 200</td>
+<td>Status 404</td>
+<td>OK สำเร็จ / Error path ไม่ถูก</td>
+</tr>
+<tr>
+<td><code>console.log</code> ก่อน <code>listen(8081)</code> (สไลด์ 45)</td>
+<td><code>listen(8081, () =&gt; console.log(...))</code> (สไลด์ 47)</td>
+<td>พิมพ์ทันที / พิมพ์ใน callback ตอน server พร้อม — ข้อความเหมือนกัน</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../ecmascript/index.html"><small>← บทก่อนหน้า</small><span>ECMAScript Version (ITDS241)</span></a><a class="pg next" href="../l10/index.html"><small>บทถัดไป →</small><span>Lecture 10 – Node.js Part II (Express Framework)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-บทนี้อยู่ตรงไหน-และต้องได้อะไร-สไลด์-24">บทนี้อยู่ตรงไหน และต้องได้อะไร?</a></li><li><a href="#1-front-end-back-end-และ-client-side-server-side-ต่างกันยังไง-สไลด์-56">Front-end / Back-end และ Client-side / Server-side ต่างกันยังไง?</a></li><li><a href="#2-เว็บเพจถูกส่งจาก-server-มาถึง-browser-ยังไง-สไลด์-78">เว็บเพจถูกส่งจาก server มาถึง browser ยังไง?</a></li><li><a href="#3-server-ip-address-port-คืออะไร-สไลด์-910">Server, IP address, Port คืออะไร?</a></li><li><a href="#4-nodejs-คืออะไร-สไลด์-1112">Node.js คืออะไร?</a></li><li><a href="#5-nodejs-ทำงานยังไง-single-thread-event-loop-สไลด์-1315">Node.js ทำงานยังไง? (Single thread event loop)</a></li><li><a href="#6-nodejs-เหมาะ-ไม่เหมาะกับงานแบบไหน-สไลด์-16">Node.js เหมาะ / ไม่เหมาะกับงานแบบไหน?</a></li><li><a href="#7-เริ่มใช้-nodejs-และรัน-hello-world-ยังไง-สไลด์-1719">เริ่มใช้ Node.js และรัน &quot;Hello World&quot; ยังไง?</a></li><li><a href="#8-global-objects-มีอะไรบ้าง-สไลด์-20">Global objects มีอะไรบ้าง?</a></li><li><a href="#9-module-ใน-nodejs-คืออะไร-สไลด์-2124">Module ใน Node.js คืออะไร?</a></li><li><a href="#10-built-in-modules-มีอะไรบ้าง-สไลด์-25">Built-in modules มีอะไรบ้าง?</a></li><li><a href="#11-path-module-ใช้ทำอะไร-สไลด์-2628">Path module ใช้ทำอะไร?</a></li><li><a href="#12-url-module-แยกส่วนของ-url-ยังไง-สไลด์-2931">URL module แยกส่วนของ URL ยังไง?</a></li><li><a href="#13-file-system-fs-module-async-กับ-sync-ต่างกันยังไง-สไลด์-3240">File System (fs) module — async กับ sync ต่างกันยังไง?</a></li><li><a href="#14-http-module-คืออะไร-สไลด์-4142">HTTP module คืออะไร?</a></li><li><a href="#15-สร้าง-web-server-ง่าย-ๆ-ยังไง-สไลด์-4349">สร้าง web server ง่าย ๆ ยังไง?</a></li><li><a href="#16-request-object-req-กับ-response-object-res-มีอะไร-สไลด์-50">Request object (req) กับ Response object (res) มีอะไร?</a></li><li><a href="#17-routing-ตอบคนละหน้าตาม-url-ยังไง-สไลด์-5155">Routing — ตอบคนละหน้าตาม URL ยังไง?</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l9", "u": "web/l9/index.html", "t": "Lecture 9 – Node.js Part I (Intro to Node.js)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

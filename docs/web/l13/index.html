@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 13 – Web Services with Node.js · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L13</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/index.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/index.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/index.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/index.html"><span class="nl">L12</span>Web Services</a></li><li class='cur'><a href="../l13/index.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L13</div>
+    <h1 class="lesson-title">Lecture 13 – Web Services with Node.js</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 63 นาที · 16 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l13">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทนี้ต่อจาก Express — สร้าง <strong>Web Service แบบ REST</strong> ด้วย Node.js + Express + MySQL (ไฟล์ <code>studentservices.js</code>) ที่ทำ <strong>CRUD</strong> ข้อมูลนักศึกษาแล้วตอบกลับเป็น <strong>JSON</strong>, ทดสอบด้วย <strong>Postman</strong>, เรียกจากหน้าเว็บด้วย <code>fetch</code> แล้วเจอปัญหา <strong>CORS</strong> (ข้าม origin), ป้องกัน service ด้วย <strong>Token-Based Authentication / JWT</strong>, เรียก REST service จากฝั่ง Node.js ด้วย <strong>Axios</strong> และปิดท้ายด้วยการ <strong>debug Node.js ใน VSCode</strong></p>
+<p>บทนี้ไม่มีโจทย์คำนวณ แต่มี <strong>โค้ด Node.js/Express</strong> หลายชุด — ทุกชุดในสรุปนี้ถูกรันจริงด้วย Node v22.16 + Express 5.3.0, cors 2.8.6, jsonwebtoken 9.0.3, axios 1.21.1, dotenv แล้ว (ผลรันอยู่ในแต่ละหัวข้อ)</p>
+<p class="c-warn">⚠️ เครื่องที่ตรวจไม่มี MySQL จึงใช้ <strong>database จำลองในหน่วยความจำ</strong> ที่ตอบแบบเดียวกับ <code>dbConn.query</code> (คืน <code>affectedRows</code> / แถวข้อมูล) — ส่วน route, การเช็กข้อมูล, JSON ที่ตอบ, CORS, JWT, Axios เป็นผลจากโค้ดสไลด์จริง</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L13-00-overview.png" alt="แผนผังภาพรวม Lecture 13" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>เลขสไลด์ในสรุปนี้ = เลขหน้า PDF</strong> (83 หน้า) — เลขที่พิมพ์มุมขวาล่างของสไลด์ตรงกันถึงหน้า 31 แล้วจากนั้นเลื่อน: หน้า 32–45 พิมพ์ +2 (เช่นหน้า 32 พิมพ์ &quot;34&quot;), หน้า 46–66 พิมพ์ +4 (หน้า 46 พิมพ์ &quot;50&quot;), หน้า 67–83 พิมพ์ +6 (หน้า 67 พิมพ์ &quot;73&quot;) — แปลว่าไฟล์นี้ตัดสไลด์บางหน้าออกไป</p>
+</blockquote>
+<h2 id="0-บทนี้เรียนอะไร-สไลด์-12-4">0. บทนี้เรียนอะไร? <span class="slide-ref">สไลด์ 1–2, 4</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เป้าหมาย 4 ข้อ — สร้าง Web Services ด้วย Node.js, อธิบาย CORS, อธิบาย JWT, ทดสอบ Web Services</strong></p>
+<ul>
+<li>สไลด์ 1: ITDS241 Web Technologies and Applications — <em>Web Services with Node.js</em> (Asst. Prof. Wudhichart Sawangphol)</li>
+<li><strong>Class Objectives</strong> (สไลด์ 2) — หลังเรียนควรทำได้:
+<ul>
+<li><strong>สร้าง Web Services ด้วย Node.js</strong></li>
+<li>อธิบายแนวคิดพื้นฐานของ <strong>Cross-origin resource sharing (CORS)</strong></li>
+<li>อธิบายแนวคิดพื้นฐานของ <strong>JSON Web Tokens (JWT)</strong></li>
+<li><strong>ทดสอบ (test)</strong> Web Services</li>
+</ul>
+</li>
+<li><strong>Contents</strong> (สไลด์ 4): Create WS using Node.js → Testing WS using Postman → CORS → Token-Based Authentication → JWT → Calling RESTful WS using Node.js → Node.js Debugger via VSCode</li>
+</ul>
+<hr />
+<h2 id="1-rest-คืออะไร-มีหลักการอะไร-สไลด์-3-56">1. REST คืออะไร มีหลักการอะไร? <span class="slide-ref">สไลด์ 3, 5–6</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>REST API = client ส่ง HTTP method (GET/POST/PUT/DELETE) ไปที่ URL ของ resource แล้ว server ตอบกลับเป็น JSON มีหลัก 5 ข้อ เช่นให้ทุกอย่างมี ID ใช้ method มาตรฐาน และสื่อสารแบบ stateless</strong></p>
+<h3 id="11-rest-api-หน้าตาเป็นยังไง-สไลด์-3">1.1 REST API หน้าตาเป็นยังไง? <span class="slide-ref">สไลด์ 3</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>client ส่ง HTTP method + URL ไปที่ server แล้ว server ตอบกลับเป็น JSON</strong></p>
+<p>รูป &quot;What is a REST API?&quot; (จาก medium.com):</p>
+<p><img loading="lazy" src="diagrams/L13-01-rest-api.png" alt="REST API: method + URL → server → JSON" /></p>
+<ul>
+<li><strong>Client</strong> ส่ง request ที่ประกอบด้วย <strong>HTTP method</strong> (GET, POST, DELETE, PUT) + <strong>URL</strong> ของ resource (<code>/surveys</code>, <code>/surveys/123</code>, <code>/surveys/123/resp ...</code>)</li>
+<li><strong>Server</strong> ตอบกลับเป็น <strong>JSON</strong> เช่น <code>{ survey_id: 123, score: 9, message: &quot;amaze ...&quot;, response_id: 4 }</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสั่งอาหารที่เคาน์เตอร์: URL คือ &quot;เมนูไหน&quot; method คือ &quot;จะทำอะไรกับมัน&quot; (ขอดู/สั่งเพิ่ม/แก้/ยกเลิก) แล้วได้ของกลับมาในรูปแบบมาตรฐาน (JSON)</p>
+</blockquote>
+<h3 id="12-key-rest-principles-สไลด์-5">1.2 Key REST principles <span class="slide-ref">สไลด์ 5</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>5 หลัก: ทุกอย่างมี ID, เชื่อมโยงกัน, ใช้ method มาตรฐาน, แสดงได้หลายรูปแบบ, สื่อสารแบบ stateless</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หลักการ</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Give every &quot;thing&quot; an ID</td>
+<td>ทุก resource มีตัวระบุ เช่น <code>/surveys/123</code>, <code>/student/4</code></td>
+</tr>
+<tr>
+<td>Link things together</td>
+<td>resource เชื่อมโยงถึงกัน</td>
+</tr>
+<tr>
+<td>Use standard methods</td>
+<td>ใช้ HTTP method มาตรฐาน (GET, POST, PUT, DELETE)</td>
+</tr>
+<tr>
+<td>Resources with multiple representations</td>
+<td>resource เดียวแสดงได้หลายรูปแบบ (สไลด์ 6 ระบุว่าใช้ XML และ JSON แลกเปลี่ยนข้อมูล)</td>
+</tr>
+<tr>
+<td>Communicate statelessly</td>
+<td>สื่อสารแบบไม่เก็บสถานะ (stateless) ระหว่าง request</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="13-rest-technologies-สไลด์-6">1.3 REST: Technologies <span class="slide-ref">สไลด์ 6</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTTP เป็นฐาน + Node.js + XML/JSON แลกข้อมูล + JavaScript ฝั่ง client</strong></p>
+<ul>
+<li><strong>HTTP</strong> เป็นพื้นฐาน</li>
+<li><strong>Node.js</strong> (ฝั่ง server ในวิชานี้)</li>
+<li><strong>XML และ JSON</strong> สำหรับแลกเปลี่ยนข้อมูล</li>
+<li><strong>JavaScript</strong> สำหรับเขียนฝั่ง client (เช่น browser)</li>
+</ul>
+<hr />
+<h2 id="2-สร้าง-rest-web-service-ด้วย-nodejs-mysql-ต้องเตรียมอะไร-สไลด์-715">2. สร้าง REST web service ด้วย Node.js + MySQL ต้องเตรียมอะไร? <span class="slide-ref">สไลด์ 7–15</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้าง database + table → ติดตั้ง dotenv, express, mysql2, nodemon → เก็บค่าเชื่อมต่อใน <code>.env</code> → เขียน <code>studentservices.js</code> (ต่อ DB + CRUD) → ทำ <code>studentform.html</code> ไว้เรียก service</strong></p>
+<h3 id="21-ขั้นตอนทั้งหมด-สไลด์-78">2.1 ขั้นตอนทั้งหมด <span class="slide-ref">สไลด์ 7–8</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>6 ขั้น: database → table → packages → .env → studentservices.js → studentform.html</strong></p>
+<ol>
+<li>Create a <strong>database</strong></li>
+<li>Create a <strong>table</strong></li>
+<li>Install all necessary <strong>packages</strong></li>
+<li>Create the <strong><code>.env</code></strong> file</li>
+<li>Create <strong><code>studentservices.js</code></strong> to access the database</li>
+<li>Create HTML (<strong><code>studentform.html</code></strong>) to interact with the service</li>
+</ol>
+<h3 id="22-overview-architecture-สไลด์-9-12-33">2.2 Overview Architecture <span class="slide-ref">สไลด์ 9, 12, 33</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ผู้ใช้ใช้อุปกรณ์ (client) ส่ง request GET/POST/PUT/DELETE ไปที่ Student Web service ซึ่งต่อกับ database แล้วตอบกลับเป็น JSON</strong></p>
+<p><img loading="lazy" src="diagrams/L13-02-architecture.png" alt="Overview Architecture ของ Student WS" /></p>
+<ul>
+<li>ฝั่ง client: ผู้ใช้ + อุปกรณ์ (desktop, laptop, tablet, phone)</li>
+<li>ลูกศรไป: <strong>GET / POST / PUT / DELETE</strong> → กล่อง <strong>Student Web service (Studentservice.js)</strong> + server + database</li>
+<li>ลูกศรกลับ: <strong>JSON</strong></li>
+<li>สไลด์ 12 คือรูปเดียวกันซ้ำ (เปิดส่วน Student Services) และสไลด์ 33 ใช้รูปเดียวกันแต่ <strong>ตีกรอบแดงที่ฝั่ง client</strong> เพื่อเปิดส่วน Student Form (ข้อ 5)</li>
+</ul>
+<h3 id="23-packages-ที่ต้องใช้-สไลด์-10">2.3 Packages ที่ต้องใช้ <span class="slide-ref">สไลด์ 10</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ต้องมี 4 packages: dotenv, express, mysql2, nodemon</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>package</th>
+<th>ใช้ทำอะไร (ตามที่ใช้ในบทนี้)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dotenv</code></td>
+<td>อ่านค่าจากไฟล์ <code>.env</code> มาเป็น <code>process.env.*</code></td>
+</tr>
+<tr>
+<td><code>express</code></td>
+<td>framework ทำ server + route</td>
+</tr>
+<tr>
+<td><code>mysql2</code></td>
+<td>เชื่อมต่อ MySQL (<code>mysql.createConnection</code>)</td>
+</tr>
+<tr>
+<td><code>nodemon</code></td>
+<td>restart server อัตโนมัติเมื่อแก้ไฟล์ (จาก L10)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="24-ไฟล์-env-สไลด์-13">2.4 ไฟล์ <code>.env</code> <span class="slide-ref">สไลด์ 13</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ <code>.env</code> เป็นไฟล์ configuration — เก็บ user/password/ชื่อ DB/host แยกจากโค้ด</strong></p>
+<pre><code># .env
+DB_user = &quot;itcs212&quot;
+DB_pass = &quot;itcs212&quot;
+DB_name = &quot;itcs212&quot;
+host = &quot;localhost&quot;
+</code></pre>
+<p>ผลรันจริง: <code>require(&quot;dotenv&quot;).config()</code> อ่านไฟล์นี้ได้ (มีช่องว่างรอบ <code>=</code> ก็ได้) → <code>process.env.DB_user</code> = <code>itcs212</code>, <code>process.env.host</code> = <code>localhost</code></p>
+<h3 id="25-studentservicesjs-คืออะไร-และ-crud-จับคู่กับ-sqlhttp-ยังไง-สไลด์-14">2.5 <code>studentservices.js</code> คืออะไร และ CRUD จับคู่กับ SQL/HTTP ยังไง? <span class="slide-ref">สไลด์ 14</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>studentservices.js เป็นไฟล์หลักของ service มีทั้งการเชื่อมต่อ database และ CRUD ทั้งหมด — ใน RESTful WS ใช้ Create=POST, Read=GET, Update=PUT, Delete=DELETE</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>SQL</th>
+<th>HTTP</th>
+<th><strong>RESTful WS</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C</strong>reate</td>
+<td>INSERT</td>
+<td>PUT / POST</td>
+<td><strong>POST</strong></td>
+</tr>
+<tr>
+<td><strong>R</strong>ead (Retrieve)</td>
+<td>SELECT</td>
+<td>GET</td>
+<td><strong>GET</strong></td>
+</tr>
+<tr>
+<td><strong>U</strong>pdate (Modify)</td>
+<td>UPDATE</td>
+<td>PUT / POST / PATCH</td>
+<td><strong>PUT</strong></td>
+</tr>
+<tr>
+<td><strong>D</strong>elete (Destroy)</td>
+<td>DELETE</td>
+<td>DELETE</td>
+<td><strong>DELETE</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 ช่อง HTTP บอกว่า &quot;ใช้ได้หลายตัว&quot; แต่ช่อง RESTful WS คือ <strong>ตัวที่บทนี้ใช้จริง</strong> — จำคู่ C-POST, R-GET, U-PUT, D-DELETE</p>
+</blockquote>
+<h3 id="26-เชื่อมต่อ-database-สไลด์-15">2.6 เชื่อมต่อ database <span class="slide-ref">สไลด์ 15</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>mysql.createConnection</code> ด้วยค่า host/user/password/database ที่ดึงจาก <code>process.env</code></strong></p>
+<pre><code class="language-js">// create the connection to database
+let dbConn = mysql.createConnection({
+    host: process.env.host,
+    user: process.env.DB_user,
+    password: process.env.DB_pass,
+    database: process.env.DB_name,
+});
+</code></pre>
+<ul>
+<li><code>mysql.createConnection({...})</code> สร้างการเชื่อมต่อ (ได้ object <code>dbConn</code> ไว้ใช้ <code>dbConn.query(...)</code> ทุก route)</li>
+<li>ค่าทุกตัวดึงจาก <code>.env</code> ผ่าน <code>process.env</code> — ชื่อต้องตรงกับในไฟล์ (<code>host</code> ตัวเล็ก, <code>DB_user</code>, <code>DB_pass</code>, <code>DB_name</code>)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่ได้แสดงบรรทัด <code>require</code> (เช่น <code>require(&quot;dotenv&quot;).config()</code>, <code>require(&quot;mysql2&quot;)</code>, <code>express.Router()</code>) และไม่ได้แสดง <code>app.use(express.json())</code> — ตอนรันจริงต้องมี <code>express.json()</code> ไม่งั้น <code>req.body</code> เป็น <code>undefined</code> (เรื่องเดียวกับ POST form ใน L10)</p>
+</blockquote>
+<hr />
+<h2 id="3-แต่ละ-route-ของ-student-ws-crud-เขียนยังไง-สไลด์-1626">3. แต่ละ route ของ Student WS (CRUD) เขียนยังไง? <span class="slide-ref">สไลด์ 16–26</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุก route มีรูปแบบเดียวกัน — อ่านข้อมูลจาก request (<code>req.body</code> หรือ <code>req.params</code>) → ถ้าไม่ครบตอบ 400 → <code>dbConn.query(SQL, ค่า, callback)</code> → ตอบ JSON <code>{ error, data, message }</code></strong></p>
+<p><img loading="lazy" src="diagrams/L13-03-route-pattern.png" alt="รูปแบบของทุก route" /></p>
+<p>สรุป 5 service:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>งาน</th>
+<th>Method + URL</th>
+<th>ข้อมูลเข้ามาทาง</th>
+<th>SQL</th>
+<th><code>data</code> ที่ตอบ</th>
+<th><code>message</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Insert</td>
+<td><code>POST /student</code></td>
+<td>body <code>{ student: {...} }</code></td>
+<td><code>INSERT INTO student SET ?</code></td>
+<td><code>affectedRows</code> (1)</td>
+<td>New student has been created successfully.</td>
+</tr>
+<tr>
+<td>Update</td>
+<td><code>PUT /student</code></td>
+<td>body <code>{ student: {...} }</code></td>
+<td><code>UPDATE student SET ? WHERE STU_ID = ?</code></td>
+<td><code>affectedRows</code> (1)</td>
+<td>Student has been updated successfully.</td>
+</tr>
+<tr>
+<td>Delete</td>
+<td><code>DELETE /student</code></td>
+<td>body <code>{ student_id: 99998 }</code></td>
+<td><code>DELETE FROM student WHERE STU_ID = ?</code></td>
+<td><code>affectedRows</code> (1)</td>
+<td>Student has been deleted successfully.</td>
+</tr>
+<tr>
+<td>Select one</td>
+<td><code>GET /student/4</code></td>
+<td>URL parameter <code>:id</code></td>
+<td><code>SELECT * FROM student where STU_ID=?</code></td>
+<td>แถวเดียว <code>results[0]</code></td>
+<td>Student retrieved</td>
+</tr>
+<tr>
+<td>Select all</td>
+<td><code>GET /students</code></td>
+<td>—</td>
+<td><code>SELECT * FROM student</code></td>
+<td>array ทุกแถว <code>results</code></td>
+<td>Student list.</td>
+</tr>
+</tbody>
+</table></div>
+<p>ตารางนักศึกษามี 4 คอลัมน์: <code>STU_ID</code>, <code>STU_FNAME</code>, <code>STU_LNAME</code>, <code>STU_AGE</code></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ JSON ตัวอย่างในสไลด์ 16–25 เขียน <code>&quot;STU_FNAME&quot;: ”XXXXX&quot;</code> (เปิดด้วยเครื่องหมายคำพูดโค้ง <code>”</code>) — ถ้าคัดลอกไปวางใน Postman จะเป็น JSON ไม่ถูกต้อง (ทดสอบ <code>JSON.parse</code> แล้วได้ <code>Unexpected token '”'</code>) ต้องใช้ <code>&quot;</code> ธรรมดา</p>
+</blockquote>
+<h3 id="31-insert-student-post-student-สไลด์-1617">3.1 Insert Student — <code>POST /student</code> <span class="slide-ref">สไลด์ 16–17</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ส่งข้อมูลนักศึกษาใน body ชื่อ <code>student</code> → <code>INSERT INTO student SET ?</code> → ตอบ <code>data: 1</code> (จำนวนแถวที่เพิ่ม)</strong></p>
+<p>Request (สไลด์ 16):</p>
+<pre><code class="language-json">POST /student
+Body:
+{
+  &quot;student&quot;: {
+    &quot;STU_ID&quot;: 99998,
+    &quot;STU_FNAME&quot;: &quot;XXXXX&quot;,
+    &quot;STU_LNAME&quot;: &quot;YYYYY&quot;,
+    &quot;STU_AGE&quot;: 35
+  }
+}
+</code></pre>
+<p>โค้ด (สไลด์ 17):</p>
+<pre><code class="language-js">route.post('/student', function (req, res) {
+    let student = req.body.student;
+    console.log(student);
+    if (!student) {
+        return res.status(400).send({ error: true, message: 'Please provide student information' });
+    }
+    dbConn.query(&quot;INSERT INTO student SET ? &quot;, student, function (error, results) {
+        if (error) throw error;
+        return res.send({error: false, data: results.affectedRows, message: 'New student has been created successfully.'});
+    });
+});
+</code></pre>
+<p>อธิบายทีละขั้น:</p>
+<ol>
+<li><code>route.post('/student', ...)</code> — สไลด์ชี้ว่าเป็น <strong>Service URL</strong>: รับ <strong>POST</strong> ที่ <code>/student</code></li>
+<li><code>req.body.student</code> — ดึง object <code>student</code> จาก body (JSON format ตามกล่องด้านบน)</li>
+<li>ถ้าไม่มี <code>student</code> → ตอบ <strong>400</strong> พร้อม <code>{ error: true, message: 'Please provide student information' }</code></li>
+<li><code>dbConn.query(&quot;INSERT INTO student SET ? &quot;, student, cb)</code> — <code>?</code> ถูกแทนด้วย object <code>student</code> (คอลัมน์ = key ของ object)</li>
+<li>สำเร็จ → ตอบ JSON <code>{ error: false, data: results.affectedRows, message: ... }</code></li>
+</ol>
+<p>Response (สไลด์ 16–17):</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: false,
+  &quot;data&quot;: 1,
+  &quot;message&quot;: &quot;New student has been created successfully.&quot;
+}
+</code></pre>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /student</code> body ตามสไลด์</td>
+<td>200 <code>{&quot;error&quot;:false,&quot;data&quot;:1,&quot;message&quot;:&quot;New student has been created successfully.&quot;}</code> — console พิมพ์ <code>{ STU_ID: 99998, STU_FNAME: 'XXXXX', STU_LNAME: 'YYYYY', STU_AGE: 35 }</code></td>
+</tr>
+<tr>
+<td><code>POST /student</code> body <code>{}</code></td>
+<td>400 <code>{&quot;error&quot;:true,&quot;message&quot;:&quot;Please provide student information&quot;}</code> — console พิมพ์ <code>undefined</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-update-student-put-student-สไลด์-1819">3.2 Update Student — <code>PUT /student</code> <span class="slide-ref">สไลด์ 18–19</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ส่งข้อมูลใหม่ใน body <code>student</code> → <code>UPDATE student SET ? WHERE STU_ID = ?</code> โดยแทน <code>?</code> ด้วย <code>[student, student_id]</code> ตามลำดับ → ตอบ <code>data: 1</code></strong></p>
+<p>Request (สไลด์ 18): <code>PUT /student</code> body เหมือน insert (<code>{ &quot;student&quot;: { &quot;STU_ID&quot;: 99998, ... &quot;STU_AGE&quot;: 35 } }</code>)</p>
+<p>โค้ด (สไลด์ 19):</p>
+<pre><code class="language-js">route.put('/student', function (req, res) {
+    let student_id = req.body.student.student_id;
+    let student = req.body.student;
+    if (!student_id || !student) {
+        return res.status(400).send({ error: student, message: 'Please provide student information' });
+    }
+    dbConn.query(&quot;UPDATE student SET ? WHERE STU_ID = ?&quot;, [student, student_id], function (error, results) {
+        if (error) throw error;
+        return res.send({error: false, data: results.affectedRows, message: 'Student has been updated successfully.'})
+    });
+});
+</code></pre>
+<ul>
+<li><code>?</code> ตัวแรก ← <code>student</code> (ค่าใหม่ทั้ง object), <code>?</code> ตัวที่สอง ← <code>student_id</code> (แถวไหน) — ส่งเป็น <strong>array ตามลำดับ <code>?</code></strong></li>
+<li>Response (สไลด์ 18–19): <code>{ &quot;error&quot;: false, &quot;data&quot;: 1, &quot;message&quot;: &quot;Student has been updated successfully.&quot; }</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>โค้ดกับ body ในสไลด์ไม่ตรงกัน:</strong> โค้ดอ่าน <code>req.body.student.student_id</code> แต่ body ในสไลด์ 18 มี <code>STU_ID</code> ไม่มี <code>student_id</code> → รันจริงด้วย body ตามสไลด์ได้ <strong>400</strong> <code>{&quot;error&quot;:{&quot;STU_ID&quot;:99998,...},&quot;message&quot;:&quot;Please provide student information&quot;}</code> (ไม่ใช่ 200 ตามสไลด์) — ต้องใส่ <code>student_id</code> ใน object <code>student</code> ด้วย (รันแล้วได้ 200 <code>data: 1</code>) หรือถามอาจารย์ว่าตั้งใจให้อ่านจาก field ไหน</p>
+<p class="c-warn">⚠️ กรณี 400 โค้ดนี้ตอบ <code>error: student</code> (ส่ง object นักศึกษากลับไป) ต่างจาก route อื่นที่ตอบ <code>error: true</code></p>
+</blockquote>
+<h3 id="33-delete-student-delete-student-สไลด์-2021">3.3 Delete Student — <code>DELETE /student</code> <span class="slide-ref">สไลด์ 20–21</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ส่ง <code>student_id</code> ใน body → <code>DELETE FROM student WHERE STU_ID = ?</code> → ตอบ <code>data: 1</code></strong></p>
+<p>Request (สไลด์ 20): <code>DELETE /student</code> body <code>{ &quot;student_id&quot;: 99998 }</code></p>
+<p>โค้ด (สไลด์ 21):</p>
+<pre><code class="language-js">route.delete('/student', function (req, res) {
+    let student_id = req.body.student_id;
+    if (!student_id) {
+        return res.status(400).send({ error: true, message: 'Please provide student_id' });
+    }
+    dbConn.query('DELETE FROM student WHERE STU_ID = ?', [student_id], function (error, results) {
+        if (error) throw error;
+        return res.send({ error: false, data: results.affectedRows, message: 'Student has been deleted successfully.' });
+    });
+});
+</code></pre>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DELETE /student</code> body <code>{&quot;student_id&quot;:99998}</code></td>
+<td>200 <code>{&quot;error&quot;:false,&quot;data&quot;:1,&quot;message&quot;:&quot;Student has been deleted successfully.&quot;}</code></td>
+</tr>
+<tr>
+<td><code>DELETE /student</code> body <code>{}</code></td>
+<td>400 <code>{&quot;error&quot;:true,&quot;message&quot;:&quot;Please provide student_id&quot;}</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="34-select-a-student-get-studentid-สไลด์-2223">3.4 Select a student — <code>GET /student/:id</code> <span class="slide-ref">สไลด์ 22–23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>id อยู่ใน URL (<code>/student/4</code>) → route เขียน <code>/student/:id</code> แล้วอ่านด้วย <code>req.params.id</code> (&quot;Receive value as parameter&quot;) → ตอบแถวแรก <code>results[0]</code></strong></p>
+<pre><code class="language-js">route.get('/student/:id', function (req, res) {
+    let student_id = req.params.id;
+    if (!student_id) {
+        return res.status(400).send({ error: true, message: 'Please provide student id.' });
+    }
+    dbConn.query('SELECT * FROM student where STU_ID=?', student_id, function (error, results) {
+        if (error) throw error;
+        return res.send({ error: false, data: results[0], message: 'Student retrieved' });
+    });
+});
+</code></pre>
+<p>Response ของ <code>GET /student/4</code> (สไลด์ 22–23):</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: false,
+  &quot;data&quot;: { &quot;STU_ID&quot;: 4, &quot;STU_FNAME&quot;: &quot;XXXXX&quot;, &quot;STU_LNAME&quot;: &quot;YYYYY&quot;, &quot;STU_AGE&quot;: 25 },
+  &quot;message&quot;: &quot;Student retrieved&quot;
+}
+</code></pre>
+<ul>
+<li><code>data</code> เป็น <strong>object เดียว</strong> (เพราะใช้ <code>results[0]</code>) ไม่ใช่ array</li>
+</ul>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /student/4</code></td>
+<td>200 ตรงกับสไลด์ (<code>req.params.id</code> ได้ค่าเป็น string <code>&quot;4&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>GET /student/12345</code> (ไม่มีในตาราง)</td>
+<td>200 <code>{&quot;error&quot;:false,&quot;message&quot;:&quot;Student retrieved&quot;}</code> — <code>results[0]</code> เป็น <code>undefined</code> จึงไม่มี key <code>data</code></td>
+</tr>
+<tr>
+<td><code>GET /student/</code> (ไม่ใส่ id)</td>
+<td>404 <code>Cannot GET /student/</code> — ไม่เข้า route นี้เลย บรรทัด <code>if (!student_id)</code> จึงไม่ได้ทำงานในกรณีนี้</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="35-select-all-students-get-students-สไลด์-2425">3.5 Select all students — <code>GET /students</code> <span class="slide-ref">สไลด์ 24–25</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ไม่ต้องส่งอะไร → <code>SELECT * FROM student</code> → <code>data</code> เป็น array ของทุกแถว</strong></p>
+<pre><code class="language-js">route.get('/students', function (req, res) {
+    dbConn.query('SELECT * FROM student', function (error, results) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'Student list.' });
+    });
+});
+</code></pre>
+<p>Response (สไลด์ 24–25):</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: false,
+  &quot;data&quot;: [
+    { &quot;STU_ID&quot;: 4, &quot;STU_FNAME&quot;: &quot;XXXXX&quot;, &quot;STU_LNAME&quot;: &quot;YYYYY&quot;, &quot;STU_AGE&quot;: 25 },
+    { &quot;STU_ID&quot;: 99999, &quot;STU_FNAME&quot;: &quot;AAAAA&quot;, &quot;STU_LNAME&quot;: &quot;BBBBB&quot;, &quot;STU_AGE&quot;: 24 }
+  ],
+  &quot;message&quot;: &quot;Student list.&quot;
+}
+</code></pre>
+<p>ผลรันจริง: ได้ JSON รูปแบบเดียวกัน (array ทุกแถว)</p>
+<blockquote class="callout">
+<p class="c-tip">💡 สังเกต URL: <strong><code>/student</code></strong> (เอกพจน์) ใช้กับ POST/PUT/DELETE และ <code>/student/:id</code>; <strong><code>/students</code></strong> (พหูพจน์) ใช้กับ &quot;ขอทั้งหมด&quot;</p>
+</blockquote>
+<h3 id="36-output-ของ-service-สไลด์-26">3.6 Output ของ service <span class="slide-ref">สไลด์ 26</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ผลลัพธ์ทุกอย่างจาก studentservices.js อยู่ในรูปแบบ JSON</strong></p>
+<ul>
+<li>ทุก route ตอบ object ที่มี 3 key เหมือนกัน: <strong><code>error</code></strong> (true/false), <strong><code>data</code></strong>, <strong><code>message</code></strong></li>
+</ul>
+<hr />
+<h2 id="4-ทดสอบ-web-service-ด้วย-postman-ยังไง-สไลด์-2731">4. ทดสอบ web service ด้วย Postman ยังไง? <span class="slide-ref">สไลด์ 27–31</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Postman เป็นแอปช่วยพัฒนา API ใช้ทดสอบ service ได้โดยไม่ต้องมีหน้าเว็บ — New → HTTP → เลือก method → ใส่ URL → Send → ดู response</strong></p>
+<h3 id="41-postman-คืออะไร-สไลด์-2728">4.1 Postman คืออะไร <span class="slide-ref">สไลด์ 27–28</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Postman = collaboration platform for API development ใช้ทดสอบ web service</strong></p>
+<ul>
+<li>ใช้ <strong>ทดสอบ web service</strong> ของเรา</li>
+<li>คำนิยามที่สไลด์อ้าง: <em>&quot;Postman is a collaboration platform for API development. Postman's features simplify each step of building an API and streamline collaboration so you can create better APIs—faster&quot;</em></li>
+<li>ดาวน์โหลดที่ https://www.postman.com/downloads/</li>
+<li>สไลด์ 28: ภาพหน้าจอ Postman (Untitled Request: ช่อง method GET, ช่อง URL, ปุ่ม Send, แท็บ Params/Authorization/Headers/Body, ส่วน Response ด้านล่าง)</li>
+</ul>
+<h3 id="42-สร้าง-request-สไลด์-2930">4.2 สร้าง request <span class="slide-ref">สไลด์ 29–30</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>New → HTTP → เลือก method → ใส่ URL → Send</strong></p>
+<ol>
+<li>กด <strong>New</strong> (สไลด์ 29) → เลือกชนิด <strong>HTTP</strong> (ตัวเลือกอื่นในหน้าต่าง: GraphQL, gRPC, WebSocket, Socket.IO, MQTT ฯลฯ)</li>
+<li>เลือก <strong>HTTP method</strong> จาก dropdown (สไลด์ 30): <strong>GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS</strong> หรือพิมพ์ method ใหม่</li>
+<li>ใส่ <strong>URL</strong> ในช่อง &quot;Enter URL or paste text&quot; แล้วกด <strong>Send</strong></li>
+</ol>
+<h3 id="43-ดูผลลัพธ์-สไลด์-31">4.3 ดูผลลัพธ์ <span class="slide-ref">สไลด์ 31</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Postman แสดง Status (200 OK), เวลา, ขนาด และ body ที่เป็น JSON</strong></p>
+<p>ภาพ response ของ <code>GET /students</code>: <strong>Status 200 OK, Time 182ms, Size 518 B</strong>, แสดง body แบบ Pretty / JSON:</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: false,
+  &quot;data&quot;: [
+    { &quot;STU_ID&quot;: 1, &quot;STU_FNAME&quot;: &quot;Wudhichart&quot;, &quot;STU_LNAME&quot;: &quot;Sawanpghol&quot;, &quot;STU_AGE&quot;: 21 },
+    { &quot;STU_ID&quot;: 2, &quot;STU_FNAME&quot;: &quot;Jidapa&quot;, &quot;STU_LNAME&quot;: &quot;Kraisangka&quot;, &quot;STU_AGE&quot;: 25 },
+    { &quot;STU_ID&quot;: 3, &quot;STU_FNAME&quot;: &quot;Dolvara&quot;, &quot;STU_LNAME&quot;: &quot;Guna-Tilaka&quot;, &quot;STU_AGE&quot;: 25 }
+  ],
+  &quot;message&quot;: &quot;Student list.&quot;
+}
+</code></pre>
+<blockquote class="callout">
+<p class="c-tip">💡 สำหรับ POST/PUT/DELETE ที่ต้องส่ง body (ข้อ 3) ใน Postman ใช้แท็บ <strong>Body</strong> (เห็นในสไลด์ 28) — สไลด์ไม่ได้แสดงขั้นตอนนี้ละเอียด</p>
+</blockquote>
+<hr />
+<h2 id="5-หน้าเว็บ-studentformhtml-เรียก-service-ยังไง-สไลด์-3237">5. หน้าเว็บ (studentform.html) เรียก service ยังไง? <span class="slide-ref">สไลด์ 32–37</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>studentform.html มีช่อง Student ID / Firstname / Lastname / Age และปุ่ม Insert, Update, Delete, Select, Select all — ปุ่มเรียกฟังก์ชัน <code>callStudentWS(url, method, sentData)</code> ที่ใช้ <code>fetch</code> ส่ง request แล้ว <code>response.json()</code> แปลงผลเป็น object มาเติมลงฟอร์ม</strong></p>
+<h3 id="51-หน้าฟอร์ม-สไลด์-3234">5.1 หน้าฟอร์ม <span class="slide-ref">สไลด์ 32–34</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ฟอร์มมี 4 ช่อง (ID, Firstname, Lastname, Age) + 5 ปุ่ม (Insert, Update, Delete, Select, Select all)</strong></p>
+<ul>
+<li>สไลด์ 32: หน้าเปิดส่วน <strong>Student Form</strong>; สไลด์ 33: Overview Architecture ตีกรอบที่ฝั่ง client (ส่วนที่จะทำต่อไปนี้)</li>
+<li><code>studentform.html</code> (สไลด์ 34):</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง</th>
+<th>placeholder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Student ID:</td>
+<td>Student ID</td>
+</tr>
+<tr>
+<td>Student Firstname:</td>
+<td>Firstname</td>
+</tr>
+<tr>
+<td>Student Lastname:</td>
+<td>Lastname</td>
+</tr>
+<tr>
+<td>Student Age:</td>
+<td>Age</td>
+</tr>
+</tbody>
+</table></div>
+<p>ปุ่ม: <strong>Insert · Update · Delete · Select · Select all</strong></p>
+<h3 id="52-ฟังก์ชัน-callstudentws-สไลด์-35">5.2 ฟังก์ชัน <code>callStudentWS</code> <span class="slide-ref">สไลด์ 35</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>async function ที่รับ url + ชื่องาน (<code>method</code>) แล้วใช้ <code>fetch</code> ยิง request — ตัวอย่างนี้มีแค่กรณี <code>&quot;select&quot;</code> (GET)</strong></p>
+<pre><code class="language-js">async function callStudentWS(url, method, sentData = {}) {
+    let data;
+    if (method == &quot;select&quot;) {
+        let response = await fetch(url, {
+            method: 'GET'
+        });
+        data = await response.json();
+    }
+    return data;
+}
+</code></pre>
+<ol>
+<li><code>async function</code> — ข้างในใช้ <code>await</code> ได้ และฟังก์ชันคืน <strong>Promise</strong> (จึงต้องใช้ <code>.then(...)</code> ตอนเรียก)</li>
+<li><code>method</code> ที่นี่คือ <strong>ชื่องาน</strong> ของเรา (<code>&quot;select&quot;</code>) ไม่ใช่ HTTP method — HTTP method จริงกำหนดใน <code>fetch(url, { method: 'GET' })</code></li>
+<li><code>await fetch(...)</code> — รอ response จาก service</li>
+<li><code>await response.json()</code> — แปลง body ที่เป็น JSON เป็น object</li>
+<li><code>sentData = {}</code> — ค่า default ไว้ส่งข้อมูล (ยังไม่ได้ใช้ในกรณี select)</li>
+</ol>
+<h3 id="53-ปุ่ม-select-สไลด์-36">5.3 ปุ่ม Select <span class="slide-ref">สไลด์ 36</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>กด Select → อ่าน ID → เรียก <code>callStudentWS(url + id, &quot;select&quot;)</code> → <code>.then</code> เอา <code>data.data.*</code> เติมลงฟอร์ม</strong></p>
+<pre><code class="language-js">let selectBtnRef = document.querySelector(&quot;#select&quot;);
+
+selectBtnRef.addEventListener(&quot;click&quot;, () =&gt; {
+    STU_ID = STU_IDTxtRef.value;
+    callStudentWS(&quot;http://localhost:3000/student/&quot; + STU_ID,
+        &quot;select&quot;).then(
+        (data) =&gt; {
+            console.log(data);
+            if (data) {
+                alert(data.message);
+                STU_IDTxtRef.value = data.data.STU_ID;
+                STU_FNAMETxtRef.value = data.data.STU_FNAME;
+                STU_LNAMETxtRef.value = data.data.STU_LNAME;
+                STU_AGETxtRef.value = data.data.STU_AGE;
+            }
+        }
+    );
+});
+</code></pre>
+<p>ทีละขั้น:</p>
+<ol>
+<li>หาปุ่ม <code>#select</code> แล้วผูก event <code>click</code></li>
+<li>อ่าน Student ID จากช่องกรอก → ต่อเป็น URL <code>http://localhost:3000/student/&lt;id&gt;</code> (ตรงกับ route <code>GET /student/:id</code> ข้อ 3.4)</li>
+<li><strong>Call the function &quot;callStudentWS&quot;</strong> ด้วยงาน <code>&quot;select&quot;</code></li>
+<li><code>.then((data) =&gt; ...)</code> — ได้ object JSON → <code>alert(data.message)</code> (เช่น &quot;Student retrieved&quot;)</li>
+<li>ส่วนที่สไลด์ตีกรอบแดง: เอา <code>data.data.STU_ID / STU_FNAME / STU_LNAME / STU_AGE</code> ใส่กลับลงช่องในฟอร์ม — สังเกตว่าเป็น <strong><code>data.data</code></strong> เพราะ <code>data</code> ตัวแรกคือ response ทั้งก้อน ส่วน <code>.data</code> คือ key <code>data</code> ใน JSON</li>
+</ol>
+<p><strong>ผลรันจริง</strong> (เรียก <code>callStudentWS(&quot;.../student/4&quot;, &quot;select&quot;)</code> ใน Node): <code>data.message</code> = <code>Student retrieved</code>, <code>data.data.STU_FNAME</code> = <code>XXXXX</code>, <code>data.data.STU_AGE</code> = <code>25</code></p>
+<h3 id="54-student-form-cont-สไลด์-37">5.4 Student Form (cont.) <span class="slide-ref">สไลด์ 37</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>studentForm.html ใช้ติดต่อกับ studentservices.js (โค้ดปุ่มอื่นให้ดูจากตัวอย่าง)</strong></p>
+<ul>
+<li><code>studentForm.html</code> ใช้ติดต่อกับ <code>studentservices.js</code></li>
+<li>&quot;See Example.&quot; — สไลด์ไม่ได้แสดงโค้ดของปุ่ม Insert/Update/Delete/Select all (ให้ดูจากไฟล์ตัวอย่างของอาจารย์)</li>
+</ul>
+<hr />
+<h2 id="6-cors-คืออะไร-และเปิดให้ข้าม-origin-ยังไง-สไลด์-3845">6. CORS คืออะไร และเปิดให้ข้าม origin ยังไง? <span class="slide-ref">สไลด์ 38–45</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>same-origin policy ให้ script เข้าถึงข้อมูลได้เฉพาะหน้าที่ origin เดียวกัน ถ้าต่าง domain / subdomain / port / protocol จะถูกบล็อก — CORS คือกลไกที่ให้ server อนุญาต origin อื่น ใน Node ใช้ package <code>cors</code> (<code>app.use(cors())</code>) หรือตั้ง header <code>Access-Control-Allow-Origin</code> เอง</strong></p>
+<p><img loading="lazy" src="diagrams/L13-04-cors.png" alt="CORS: browser บล็อกถ้า response ไม่มี header อนุญาต" /></p>
+<h3 id="61-same-origin-policy-สไลด์-39">6.1 Same-origin policy <span class="slide-ref">สไลด์ 39</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>script เข้าถึงข้อมูลหน้าอื่นได้ก็ต่อเมื่อ origin (domain) เดียวกัน</strong></p>
+<ul>
+<li><strong>same-origin policy</strong> = นโยบายที่ให้ script ในหน้าเว็บหนึ่ง <strong>เข้าถึงข้อมูลของอีกหน้าได้ก็ต่อเมื่อทั้งสองหน้ามี origin (domain) เดียวกันเท่านั้น</strong></li>
+</ul>
+<h3 id="62-cors-และเงื่อนไขที่ถือว่า-ข้าม-origin-สไลด์-40">6.2 CORS และเงื่อนไขที่ถือว่า &quot;ข้าม origin&quot; <span class="slide-ref">สไลด์ 40</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>CORS ให้ resource ถูกขอจาก domain อื่นได้ — ข้าม origin เมื่อต่าง domain, subdomain, port หรือ protocol</strong></p>
+<ul>
+<li><strong>Cross-origin resource sharing (CORS)</strong> = กลไกที่ยอมให้ <strong>resource ที่ถูกจำกัด (เช่น fonts)</strong> บนหน้าเว็บ ถูก request จาก <strong>domain อื่น</strong> นอก domain ที่ส่ง resource แรกมา</li>
+<li>Cross-Origin request <strong>ล้มเหลว</strong> ถ้าไปที่:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ต่างกันที่</th>
+<th>ตัวอย่าง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>domain</strong> ต่าง</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>subdomain</strong> ต่าง</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>port</strong> ต่าง</td>
+<td>หน้าเว็บ <code>localhost:3100</code> → service <code>localhost:3000</code> (ตัวอย่างในสไลด์)</td>
+</tr>
+<tr>
+<td><strong>protocol</strong> ต่าง</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>ข้อความ error ใน console ที่สไลด์แสดง:</p>
+<pre><code>Access to fetch at 'http://localhost:3000/student/1' from origin 'http://localhost:3100'
+has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on
+the requested resource. If an opaque response serves your needs, set the request's mode
+to 'no-cors' to fetch the resource with CORS disabled.
+</code></pre>
+<ul>
+<li>อ่านว่า: หน้าเว็บอยู่ที่ port <strong>3100</strong> แต่ไปเรียก service ที่ port <strong>3000</strong> → <strong>port ต่าง = คนละ origin</strong> และ response ไม่มี header <code>Access-Control-Allow-Origin</code> → ถูกบล็อก</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนหอพักที่ รปภ. (browser) ปล่อยให้คนนอกหอ (origin อื่น) เอาของออกไปได้ก็ต่อเมื่อเจ้าของห้อง (server) เขียนใบอนุญาต (header) แนบมาด้วย</p>
+</blockquote>
+<h3 id="63-เปิด-cors-ทั้งหมดด้วย-package-cors-สไลด์-41">6.3 เปิด CORS ทั้งหมดด้วย package <code>cors</code> <span class="slide-ref">สไลด์ 41</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>npm install --save cors</code> แล้วเพิ่ม 2 บรรทัดใน studentservices.js → เปิด CORS ให้ทุก request</strong></p>
+<pre><code>npm install --save cors
+</code></pre>
+<pre><code class="language-js">var cors = require('cors');
+app.use(cors());
+</code></pre>
+<h3 id="64-เปิดเฉพาะบาง-route-สไลด์-42">6.4 เปิดเฉพาะบาง route <span class="slide-ref">สไลด์ 42</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใส่ <code>cors()</code> เป็น middleware ใน route นั้นแทน <code>app.use(cors())</code></strong></p>
+<ul>
+<li><code>app.use(cors());</code> → ทุก route เป็น CORS</li>
+<li>ถ้าอยากเปิด <strong>เฉพาะบาง route</strong> ให้ใส่ <code>cors()</code> เป็น middleware ใน route นั้น:</li>
+</ul>
+<pre><code class="language-js">app.get('/student/:id', cors(), function (req, res) {
+    res.json({msg: 'This is CORS-enabled for a Single Route'})
+})
+</code></pre>
+<p>(ที่มา: expressjs.com/en/resources/middleware/cors.html)</p>
+<h3 id="65-ตั้งค่า-origin-และ-methods-สไลด์-4344">6.5 ตั้งค่า origin และ methods <span class="slide-ref">สไลด์ 43–44</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ส่ง options ให้ <code>cors(...)</code> — <code>origin</code> = origin ที่อนุญาต (string หรือ array), <code>methods</code> = method ที่อนุญาต</strong></p>
+<pre><code class="language-js">let corsOptions = {
+    origin: 'http://localhost:3100',
+    methods: 'GET,POST,PUT,DELETE'
+}
+app.use(cors(corsOptions));
+</code></pre>
+<ul>
+<li>ตัวอย่าง: อนุญาตเฉพาะ origin <code>http://localhost:3100</code> และเฉพาะ <strong>GET, POST, PUT, DELETE</strong> (สไลด์ 43)</li>
+</ul>
+<p>หลาย origin ใช้ <strong>array</strong> (whitelist) (สไลด์ 44):</p>
+<pre><code class="language-js">let whiteList = ['http://localhost:3100', 'http://localhost:3200']
+let corsOptions = {
+    origin: whiteList,
+    methods: 'GET,POST,PUT,DELETE'
+}
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 44 ปิด string ตัวที่สองด้วย <code>’</code> (เครื่องหมายคำพูดโค้ง): <code>'http://localhost:3200’]</code> — คัดลอกไปรันได้ <strong><code>SyntaxError: Invalid or unexpected token</code></strong> (ตรวจด้วย <code>node --check</code> แล้ว) ต้องใช้ <code>'</code> ธรรมดา</p>
+</blockquote>
+<h3 id="66-ตั้ง-header-เองโดยไม่ใช้-package-สไลด์-45">6.6 ตั้ง header เองโดยไม่ใช้ package <span class="slide-ref">สไลด์ 45</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตั้ง <code>Access-Control-Allow-Origin</code> และ <code>Access-Control-Allow-Methods</code> ด้วย <code>res.header</code> เองได้</strong></p>
+<pre><code class="language-js">res.header(&quot;Access-Control-Allow-Origin&quot;, &quot;http://localhost:3200&quot;)
+res.header(&quot;Access-Control-Allow-Methods&quot;, &quot;GET&quot;)
+</code></pre>
+<ul>
+<li>อนุญาต origin <code>http://localhost:3200</code> และ method <strong>GET</strong> เท่านั้น</li>
+</ul>
+<h3 id="67-ผลรันจริงของทุกแบบ-สไลด์-4145">6.7 ผลรันจริงของทุกแบบ <span class="slide-ref">สไลด์ 41–45</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุกแบบทำให้ response มี header <code>Access-Control-Allow-Origin</code> — ต่างกันแค่ค่าที่ใส่ (<code>*</code>, origin เดียว, ตาม whitelist)</strong></p>
+<p>ส่ง request พร้อม header <code>Origin</code> แล้วดู header <code>Access-Control-Allow-Origin</code> (ACAO) ที่ server ตอบ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>Origin ที่ส่ง</th>
+<th>ACAO ที่ได้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ไม่มี cors</td>
+<td><code>localhost:3100</code></td>
+<td>(ไม่มี) → browser จะบล็อกแบบสไลด์ 40</td>
+</tr>
+<tr>
+<td><code>app.use(cors())</code> (41)</td>
+<td><code>localhost:3100</code></td>
+<td><code>*</code> (ทุก origin)</td>
+</tr>
+<tr>
+<td><code>cors()</code> เฉพาะ <code>/student/:id</code> (42)</td>
+<td><code>localhost:3100</code></td>
+<td><code>/student/1</code> ได้ <code>*</code> · route อื่นที่ไม่ใส่ <code>cors()</code> ไม่มี header</td>
+</tr>
+<tr>
+<td><code>origin: 'http://localhost:3100'</code> (43)</td>
+<td><code>localhost:3100</code> / <code>localhost:3200</code></td>
+<td>ตอบ <code>http://localhost:3100</code> ทั้งสองกรณี → origin 3200 ไม่ตรงกับที่อนุญาต</td>
+</tr>
+<tr>
+<td><code>origin: whiteList</code> (44)</td>
+<td><code>3100</code> / <code>3200</code> / <code>3300</code></td>
+<td><code>3100</code> / <code>3200</code> / (ไม่มี) — ตอบกลับเป็น origin ที่ขอถ้าอยู่ใน list</td>
+</tr>
+<tr>
+<td><code>res.header(...)</code> (45)</td>
+<td><code>localhost:3200</code></td>
+<td><code>http://localhost:3200</code> + <code>Access-Control-Allow-Methods: GET</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>request แบบ OPTIONS (preflight) กับ <code>cors(corsOptions)</code> ได้ <code>Access-Control-Allow-Methods: GET,POST,PUT,DELETE</code> ตามที่ตั้ง; กับ <code>cors()</code> เฉย ๆ ได้ <code>GET,HEAD,PUT,PATCH,POST,DELETE</code></li>
+</ul>
+<hr />
+<h2 id="7-token-based-authentication-ทำงานยังไง-สไลด์-4648">7. Token-Based Authentication ทำงานยังไง? <span class="slide-ref">สไลด์ 46–48</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ผู้ใช้ login ครั้งเดียวเพื่อรับ access token แล้วเก็บไว้ฝั่ง client จากนั้นทุก request แนบ token ใน header <code>Authorization: Bearer</code> ให้ service ตรวจ → อนุญาตหรือปฏิเสธ</strong></p>
+<ul>
+<li>คำถามตั้งต้น (สไลด์ 47): <strong>ทำยังไงให้ application และ service ปลอดภัย?</strong></li>
+<li><strong>Token-based authentication</strong> ให้วิธีที่ <strong>ปลอดภัยและมีประสิทธิภาพ</strong> ในการจัดการการเข้าถึงของผู้ใช้ใน application/service สมัยใหม่</li>
+</ul>
+<h3 id="token-based-authentication-flow-สไลด์-48">Token-Based Authentication Flow <span class="slide-ref">สไลด์ 48</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>8 ขั้น: login → Authentication Service/Token Generator → ได้ Access Token → เก็บ → ส่ง request พร้อม Bearer → Student WS → Success/Deny</strong></p>
+<p><img loading="lazy" src="diagrams/L13-05-token-flow.png" alt="Token-Based Authentication Flow 8 ขั้น" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>เกิดอะไร (ตามรูปสไลด์)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client ส่ง <strong>User Login {username, password}</strong> ไปที่ server</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Authentication Service</strong> (ในฝั่ง server)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Token Generator</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>server ส่ง <strong>Access Token</strong> กลับมา</td>
+</tr>
+<tr>
+<td>5</td>
+<td>client เก็บ token ไว้ที่ <strong>Local Storage / Session Storage / Cookies</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>client ส่ง <strong>HTTP request {Authorization: Bearer}</strong> ไปที่ Student Web service</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Student Web service (Studentservice.js)</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>ตอบกลับ <strong>Success or Deny</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 48 เป็นรูปที่มีแค่เลขขั้น 2, 3, 7 กำกับกล่อง ไม่ได้เขียนว่าแต่ละกล่องทำอะไร — การทำงานจริงของขั้นเหล่านี้ดูได้จากโค้ดในข้อ 10 (sign token ที่ <code>/signin</code>, verify ที่ <code>auth.js</code>)</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสายรัดข้อมือคอนเสิร์ต: ตรวจบัตร (login) ครั้งเดียวที่ทางเข้าแล้วได้สายรัด (token) จากนั้นจะเข้าโซนไหนก็แค่โชว์สายรัด ไม่ต้องยื่นบัตรประชาชนใหม่ทุกครั้ง</p>
+</blockquote>
+<hr />
+<h2 id="8-jwt-มีโครงสร้างอะไร-สไลด์-4953">8. JWT มีโครงสร้างอะไร? <span class="slide-ref">สไลด์ 49–53</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>JWT คือ JSON object ตามมาตรฐาน RFC 7519 ใช้ส่งข้อมูลระหว่างฝ่ายอย่างปลอดภัย มี 3 ส่วนคั่นด้วยจุด <code>Header.Payload.Signature</code> (หน้าตา <code>xxxxx.yyyyy.zzzzz</code>)</strong></p>
+<h3 id="81-jwt-คืออะไร-ใช้ทำอะไร-สไลด์-50">8.1 JWT คืออะไร ใช้ทำอะไร <span class="slide-ref">สไลด์ 50</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>JWT = JSON object ตาม RFC 7519 ส่งข้อมูลอย่างปลอดภัย ใช้กับ Authorization และ Information Exchange</strong></p>
+<ul>
+<li><strong>JSON Web Tokens (JWT)</strong> = JSON object ที่อธิบายใน <strong>open standard (RFC 7519)</strong> เป็น <strong>วิธีที่ปลอดภัยในการส่งข้อมูลระหว่างฝ่ายต่าง ๆ</strong></li>
+<li>ตัวอย่าง use case: <strong>Authorization</strong> และ <strong>Information Exchange</strong></li>
+</ul>
+<h3 id="82-สามส่วนของ-jwt-สไลด์-5153">8.2 สามส่วนของ JWT <span class="slide-ref">สไลด์ 51–53</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Header (type + algorithm) . Payload (claims) . Signature (header + payload + secret + algorithm)</strong></p>
+<p><img loading="lazy" src="diagrams/L13-06-jwt-parts.png" alt="โครงสร้าง JWT 3 ส่วน" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>มีอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Header</strong></td>
+<td>2 อย่าง: <strong>type</strong> ของ token (คือ JWT) + <strong>signing algorithm</strong> เช่น <strong>HS256, RS256, HS384</strong></td>
+</tr>
+<tr>
+<td><strong>Payload</strong></td>
+<td><strong>claims</strong> = ข้อความเกี่ยวกับ entity (ปกติคือ user) + ข้อมูลเพิ่มเติม มี 3 ชนิด (ตารางล่าง)</td>
+</tr>
+<tr>
+<td><strong>Signature</strong></td>
+<td>สร้างจาก <strong>encoded header + encoded payload + secret + algorithm ที่ระบุใน header</strong> แล้ว sign</td>
+</tr>
+</tbody>
+</table></div>
+<p>Claims 3 ชนิด (สไลด์ 52):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชนิด</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Registered claims</strong></td>
+<td>ชุด claim ที่กำหนดไว้แล้ว: <strong>iss</strong> (issuer), <strong>exp</strong> (expiration time), <strong>sub</strong> (subject), <strong>aud</strong> (audience), <strong>iat</strong> (Issued At)</td>
+</tr>
+<tr>
+<td><strong>Public claims</strong></td>
+<td>กำหนดเองได้ แต่เพื่อ <strong>ไม่ให้ชนกัน</strong> ควรนิยามไว้ใน <strong>IANA JSON Web Token Registry</strong></td>
+</tr>
+<tr>
+<td><strong>Private claims</strong></td>
+<td>claim ที่ตั้งเองเพื่อแชร์ข้อมูลระหว่างฝ่ายที่ <strong>ตกลงกันว่าจะใช้</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ผลรันจริง</strong> (token จาก <code>/signin</code> ในข้อ 10 แยกด้วย <code>.</code> ได้ 3 ส่วน แล้วถอด base64url):</p>
+<ul>
+<li>Header: <code>{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}</code> — ตรงกับ &quot;type + signing algorithm&quot;</li>
+<li>Payload: <code>{&quot;email&quot;:&quot;test@test.com&quot;,&quot;userid&quot;:&quot;1&quot;,&quot;iat&quot;:...,&quot;exp&quot;:...}</code> — <code>email</code>, <code>userid</code> เป็น claim ที่เราตั้งเอง ส่วน <code>iat</code>, <code>exp</code> เป็น <strong>registered claims</strong> ที่ package ใส่ให้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 Signature ผูกกับ secret — ถ้าใครแก้ payload แต่ไม่รู้ secret ก็สร้าง signature ใหม่ให้ตรงไม่ได้ (รันจริง: token ที่ sign ด้วย secret อื่นถูก <code>auth.js</code> ตอบ 401)</p>
+</blockquote>
+<hr />
+<h2 id="9-ใช้-package-jsonwebtoken-ยังไง-sign-verify-สไลด์-5456">9. ใช้ package <code>jsonwebtoken</code> ยังไง? (<code>sign</code> / <code>verify</code>) <span class="slide-ref">สไลด์ 54–56</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>วิชานี้ใช้ <code>jsonwebtoken</code> มี 2 ฟังก์ชันหลัก — <code>sign(payload, secretOrPrivateKey, [options, callback])</code> สร้าง token และ <code>verify(token, secretOrPublicKey, [options, callback])</code> ตรวจ token</strong></p>
+<h3 id="91-packages-ที่มี-สไลด์-54">9.1 Packages ที่มี <span class="slide-ref">สไลด์ 54</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>มี jsonwebtoken และ express-jwt — วิชานี้ใช้ jsonwebtoken</strong></p>
+<ul>
+<li><strong>jsonwebtoken</strong> (https://github.com/auth0/node-jsonwebtoken) ← <strong>ใช้ในวิชานี้</strong></li>
+<li><strong>express-jwt</strong> (https://www.npmjs.com/package/express-jwt)</li>
+</ul>
+<h3 id="92-sign-สร้าง-jsonwebtoken-สไลด์-55">9.2 <code>sign</code> — สร้าง JsonWebToken <span class="slide-ref">สไลด์ 55</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>sign</code> สร้าง token จาก payload + secret, options สำคัญ: algorithm (default HS256), expiresIn</strong></p>
+<p>Syntax: <code>sign(payload, secretOrPrivateKey, [options, callback])</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>พารามิเตอร์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>payload</code></td>
+<td>object literal, buffer หรือ string ที่เป็น JSON ถูกต้อง</td>
+</tr>
+<tr>
+<td><code>secretOrPrivateKey</code></td>
+<td>string หรือ buffer ที่เป็น <strong>secret</strong> (สำหรับ HMAC) หรือ <strong>PEM encoded public key</strong> สำหรับ RSA และ ECDSA</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td><code>algorithm</code> (<strong>default: HS256</strong>), <code>expiresIn</code> (เป็นวินาที หรือ string ช่วงเวลา เช่น <code>60</code>, <code>&quot;2 days&quot;</code>, <code>&quot;10h&quot;</code>, <code>&quot;7d&quot;</code>), <code>audience</code>, <code>issuer</code> (optional: string หรือ array ของค่าที่ใช้ได้ของ field <code>iss</code>), <code>header</code>, etc.</td>
+</tr>
+<tr>
+<td><code>callback</code></td>
+<td>ฟังก์ชัน callback (optional)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 55 เขียนว่า secretOrPrivateKey สำหรับ RSA/ECDSA เป็น &quot;PEM encoded <strong>public</strong> key&quot; (ตามชื่อพารามิเตอร์ควรเป็น private key) — จำตามสไลด์ไว้ แต่ถ้าเจอในข้อสอบให้ถามอาจารย์</p>
+</blockquote>
+<h3 id="93-verify-ตรวจ-token-สไลด์-56">9.3 <code>verify</code> — ตรวจ token <span class="slide-ref">สไลด์ 56</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>verify</code> ตรวจ token ด้วย secret, options สำคัญ: algorithms, ignoreExpiration</strong></p>
+<p>Syntax: <code>verify(token, secretOrPublicKey, [options, callback])</code></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>พารามิเตอร์</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>token</code></td>
+<td>string ของ JsonWebToken</td>
+</tr>
+<tr>
+<td><code>secretOrPublicKey</code></td>
+<td>string หรือ buffer ที่เป็น secret (HMAC) หรือ PEM encoded public key (RSA, ECDSA)</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td><code>algorithms</code> (list ชื่อ algorithm ที่อนุญาต เช่น <code>[&quot;HS256&quot;, &quot;HS384&quot;]</code>), <code>audience</code>, <code>issuer</code> (optional), <code>ignoreExpiration</code> (ถ้า <code>true</code> <strong>ไม่ตรวจวันหมดอายุ</strong>), etc.</td>
+</tr>
+<tr>
+<td><code>callback</code></td>
+<td>ฟังก์ชัน callback (optional)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ผลรันจริง:</strong></p>
+<ul>
+<li><code>sign</code> โดยไม่ระบุ algorithm → header <code>alg</code> = <strong>HS256</strong> (ตรงกับ default)</li>
+<li><code>verify</code> token ที่หมดอายุแล้วด้วย <code>{ ignoreExpiration: true }</code> → ผ่าน ได้ payload คืนมา</li>
+<li><code>verify</code> token HS256 ด้วย <code>{ algorithms: [&quot;HS384&quot;] }</code> → <code>JsonWebTokenError: invalid algorithm</code></li>
+</ul>
+<hr />
+<h2 id="10-ทำ-jwt-จริงในโปรเจกต์-student-ws-ยังไง-สไลด์-5766">10. ทำ JWT จริงในโปรเจกต์ Student WS ยังไง? <span class="slide-ref">สไลด์ 57–66</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง jsonwebtoken + ตั้ง SECRET ใน .env → route <code>POST /signin</code> ใช้ <code>jwt.sign</code> สร้าง token (อายุ 1h) → middleware <code>auth.js</code> ดึง token จาก header <code>Authorization: Bearer &lt;token&gt;</code> แล้ว <code>jwt.verify</code> ผ่านก็ <code>next()</code> ไม่ผ่านตอบ 401 → ใส่ <code>authorize</code> ใน route ที่ต้องการป้องกัน → ฝั่งหน้าเว็บ login เก็บ token แล้วแนบไปกับทุก request</strong></p>
+<p><img loading="lazy" src="diagrams/L13-07-jwt-impl.png" alt="ลำดับการทำงานของ JWT ในโปรเจกต์" /></p>
+<h3 id="101-ตั้งค่า-server-สไลด์-57">10.1 ตั้งค่า server <span class="slide-ref">สไลด์ 57</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง jsonwebtoken → require → ตั้ง SECRET ใน .env</strong></p>
+<pre><code>npm install --save jsonwebtoken
+</code></pre>
+<pre><code class="language-js">jwt = require(&quot;jsonwebtoken&quot;)
+</code></pre>
+<pre><code># .env
+SECRET = &quot;secret&quot;
+</code></pre>
+<ul>
+<li>3 ขั้น: <strong>ติดตั้ง</strong> package → <strong>require</strong> → <strong>ตั้ง secret ในไฟล์ .env</strong> (ไม่เขียน secret ลงในโค้ดตรง ๆ)</li>
+</ul>
+<h3 id="102-เพิ่มปุ่ม-login-สไลด์-58">10.2 เพิ่มปุ่ม Login <span class="slide-ref">สไลด์ 58</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เพิ่มปุ่ม Login ในฟอร์มไว้ขอ token (เป็นแค่ตัวอย่าง)</strong></p>
+<ul>
+<li>เพิ่มปุ่ม <strong>Login</strong> ข้างหน้าปุ่ม Insert/Update/Delete/Select/Select all ในฟอร์มเดิม</li>
+<li><strong>นี่เป็นแค่ตัวอย่าง login เพื่อขอ token</strong> (ไม่ได้ตรวจ username/password จริง)</li>
+</ul>
+<h3 id="103-route-signin-สร้าง-token-สไลด์-59">10.3 Route <code>/signin</code> สร้าง token <span class="slide-ref">สไลด์ 59</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>POST /signin</code> → <code>jwt.sign(payload, process.env.SECRET, { expiresIn: &quot;1h&quot; })</code> → ตอบ <code>{ token, message }</code></strong></p>
+<pre><code class="language-js">router.post(&quot;/signin&quot;, (req, res) =&gt; {
+    console.log(req.body);
+    let user = req.body;
+    let jwtToken = jwt.sign({
+        email: user.user.email,
+        userid: user.user.userid.toString()
+    }, process.env.SECRET, {
+        expiresIn: &quot;1h&quot;
+    });
+    res.status(200).json({
+        token: jwtToken,
+        message: user
+    });
+});
+</code></pre>
+<p><code>jwt.sign</code> 3 ส่วนที่สไลด์ชี้:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ในโค้ด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Payload</strong></td>
+<td><code>{ email: user.user.email, userid: user.user.userid.toString() }</code></td>
+</tr>
+<tr>
+<td><strong>Secret</strong></td>
+<td><code>process.env.SECRET</code> (จาก .env)</td>
+</tr>
+<tr>
+<td><strong>Option</strong></td>
+<td><code>{ expiresIn: &quot;1h&quot; }</code> — หมดอายุใน 1 ชั่วโมง</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ตอบกลับ <strong>200</strong> เป็น JSON <code>{ token: jwtToken, message: user }</code></li>
+<li>สังเกต <code>user.user.email</code> — <code>user</code> คือ body ทั้งก้อน และใน body มี key ชื่อ <code>user</code> อีกชั้น (ดูข้อมูลในข้อ 10.6)</li>
+</ul>
+<p><strong>ผลรันจริง</strong> (body <code>{ user: { email: &quot;test@test.com&quot;, userid: 1 } }</code>):</p>
+<ul>
+<li>console server: <code>{ user: { email: 'test@test.com', userid: 1 } }</code></li>
+<li>response: <code>{&quot;token&quot;:&quot;eyJhbGciOiJIUzI1NiIs...&quot;,&quot;message&quot;:{&quot;user&quot;:{&quot;email&quot;:&quot;test@test.com&quot;,&quot;userid&quot;:1}}}</code></li>
+<li>payload ใน token: <code>userid</code> เป็น <strong>string <code>&quot;1&quot;</code></strong> (เพราะ <code>.toString()</code>), <code>exp - iat</code> = <strong>3600</strong> วินาที (= <code>&quot;1h&quot;</code>)</li>
+</ul>
+<h3 id="104-middleware-authjs-ตรวจ-token-สไลด์-60">10.4 Middleware <code>auth.js</code> ตรวจ token <span class="slide-ref">สไลด์ 60</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ดึง token จาก <code>Authorization: Bearer &lt;token&gt;</code> → <code>jwt.verify</code> → ผ่าน <code>next()</code> / ไม่ผ่าน 401</strong></p>
+<pre><code class="language-js">const jwt = require(&quot;jsonwebtoken&quot;);
+
+module.exports = (req, res, next) =&gt; {
+    try {
+        const token = req.headers.authorization.split(&quot; &quot;)[1];
+        var decoded = jwt.verify(token, process.env.SECRET);
+        console.log(decoded);
+        next();
+    } catch (error) {
+        res.status(401).json({error: true, message: &quot;Authentication failed!&quot; });
+    }
+};
+</code></pre>
+<p>ทีละบรรทัด:</p>
+<ol>
+<li><code>module.exports = (req, res, next) =&gt; {...}</code> — export เป็น <strong>middleware</strong> (มี <code>next</code>)</li>
+<li><code>req.headers.authorization</code> = <code>&quot;Bearer &lt;token&gt;&quot;</code> → <code>.split(&quot; &quot;)</code> ได้ <code>[&quot;Bearer&quot;, &quot;&lt;token&gt;&quot;]</code> → <code>[1]</code> = ตัว token</li>
+<li><code>jwt.verify(token, process.env.SECRET)</code> — ถ้า token ถูกต้องและยังไม่หมดอายุ ได้ payload (<code>decoded</code>) ถ้าไม่ถูกจะ <strong>throw error</strong></li>
+<li>ผ่าน → <code>next()</code> ไปทำ route ต่อ</li>
+<li>ไม่ผ่าน (throw) → <code>catch</code> → ตอบ <strong>401</strong> <code>{ error: true, message: &quot;Authentication failed!&quot; }</code></li>
+</ol>
+<h3 id="105-ใส่-authorize-ใน-service-สไลด์-61">10.5 ใส่ <code>authorize</code> ใน service <span class="slide-ref">สไลด์ 61</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใส่ <code>authorize</code> คั่นระหว่าง path กับ handler → route นั้นต้องมี token ที่ถูกต้อง</strong></p>
+<pre><code class="language-js">authorize = require(&quot;./middlewares/auth&quot;);
+
+router.get('/students', authorize, function (req, res) {
+    dbConn.query('SELECT * FROM student', function (error, results) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'Student list.' });
+    });
+});
+</code></pre>
+<ul>
+<li>ไฟล์ middleware อยู่ที่ <code>./middlewares/auth</code> (โฟลเดอร์ <code>middlewares</code>)</li>
+<li>ใส่ <code>authorize</code> <strong>คั่นระหว่าง path กับ handler</strong> → request ต้องผ่าน auth.js ก่อนถึงจะเข้า handler</li>
+</ul>
+<p><strong>ผลรันจริง</strong> (<code>GET /students</code> ที่มี <code>authorize</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>request</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ไม่มี header Authorization</td>
+<td>401 <code>{&quot;error&quot;:true,&quot;message&quot;:&quot;Authentication failed!&quot;}</code> (<code>req.headers.authorization</code> เป็น <code>undefined</code> → <code>.split</code> error → เข้า catch)</td>
+</tr>
+<tr>
+<td><code>Bearer abc.def.ghi</code> (token มั่ว)</td>
+<td>401</td>
+</tr>
+<tr>
+<td>token ที่ sign ด้วย secret อื่น</td>
+<td>401</td>
+</tr>
+<tr>
+<td>token ที่หมดอายุแล้ว</td>
+<td>401</td>
+</tr>
+<tr>
+<td>token จาก <code>/signin</code></td>
+<td>200 ได้ Student list + console server พิมพ์ <code>{ email: 'test@test.com', userid: '1', iat: ..., exp: ... }</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 สไลด์ 17–25 เขียน <code>route.post / route.get ...</code> แต่สไลด์ 59, 61 เขียน <code>router.post / router.get</code> — เป็นชื่อตัวแปร router ที่สร้างจาก <code>express.Router()</code> (สไลด์ไม่ได้แสดงบรรทัดที่สร้าง) ในโปรเจกต์จริงต้องใช้ชื่อเดียวกันทั้งไฟล์</p>
+</blockquote>
+<h3 id="106-ฝั่งหน้าเว็บ-callstudentws-รองรับ-login-สไลด์-62">10.6 ฝั่งหน้าเว็บ: <code>callStudentWS</code> รองรับ login <span class="slide-ref">สไลด์ 62</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เพิ่มพารามิเตอร์ <code>token</code> และกรณี <code>&quot;login&quot;</code> ที่ส่ง POST + JSON body ไป <code>/signin</code></strong></p>
+<p>ฟังก์ชันเพิ่มพารามิเตอร์ <strong><code>token</code></strong> เป็นตัวที่ 3: <code>callStudentWS(url, method, token = &quot;&quot;, sentData = {})</code> (สไลด์บอกว่า <strong>แสดงเฉพาะส่วน login</strong>)</p>
+<pre><code class="language-js">async function callStudentWS(url, method, token = &quot;&quot;, sentData = {}) {
+    let data;
+    if (method == &quot;login&quot;) {
+        let aMethod = &quot;POST&quot;;
+        let response = await fetch(url, {
+            method: aMethod,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },body: JSON.stringify(sentData)
+        });
+        data = await response.json();
+    }
+    return data;
+}
+</code></pre>
+<ul>
+<li>งาน <code>&quot;login&quot;</code> → ส่ง <strong>POST</strong> พร้อม header <code>Content-Type: application/json</code> และ body = <code>JSON.stringify(sentData)</code> (แปลง object เป็น string JSON)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 62 เขียน <code>'Accept': 'application/json’,</code> — ปิดด้วย <code>’</code> (คำพูดโค้ง) → <code>node --check</code> ได้ <strong><code>SyntaxError: Invalid or unexpected token</code></strong> โค้ดด้านบนแก้เป็น <code>'</code> แล้ว</p>
+</blockquote>
+<h3 id="107-ปุ่ม-login-สไลด์-63">10.7 ปุ่ม Login <span class="slide-ref">สไลด์ 63</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>กด Login → ส่ง <code>user_data</code> ไป <code>/signin</code> → เก็บ <code>token = data.token</code></strong></p>
+<pre><code class="language-js">let loginBtnRef = document.querySelector(&quot;#login&quot;);
+
+loginBtnRef.addEventListener(&quot;click&quot;, () =&gt; {
+    let user_data = {
+        user: {
+            email: &quot;test@test.com&quot;,
+            userid: 1,
+        },
+    };
+    callStudentWS(&quot;http://localhost:3000/signin&quot;, &quot;login&quot;, token,
+        user_data).then(
+        (data) =&gt; {
+            console.log(data);
+            token = data.token;
+        }
+    );
+});
+</code></pre>
+<ul>
+<li><code>user_data</code> เป็น <strong>ข้อมูลตัวอย่าง</strong> (สไลด์บอกไว้) — โครง <code>{ user: { email, userid } }</code> จึงต้องอ่านด้วย <code>user.user.email</code> ที่ server</li>
+<li>ได้ผลแล้วเก็บ <code>token = data.token</code> ไว้ในตัวแปร <code>token</code> เพื่อใช้กับ request ถัดไป</li>
+</ul>
+<h3 id="108-ส่ง-token-ไปกับ-select-a-student-สไลด์-6465">10.8 ส่ง token ไปกับ &quot;select a student&quot; <span class="slide-ref">สไลด์ 64–65</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>กรณี <code>&quot;select&quot;</code> ใส่ header <code>'Authorization': 'Bearer ' + token</code> (ระวังลำดับ argument ในสไลด์ 65)</strong></p>
+<p>แก้ส่วน <code>&quot;select&quot;</code> ของ <code>callStudentWS</code> ให้ตั้ง header <strong>&quot;Authorization&quot;</strong> เพื่อส่ง <strong>bearer token</strong> (สไลด์ 64):</p>
+<pre><code class="language-js">async function callStudentWS(url, method, token = &quot;&quot;, sentData = {}) {
+    let data;
+    if (method == &quot;select&quot;) {
+        let response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        data = await response.json();
+    }
+    return data;
+}
+</code></pre>
+<ul>
+<li><code>'Bearer ' + token</code> — มีช่องว่างหลัง Bearer เพราะ auth.js ใช้ <code>split(&quot; &quot;)[1]</code> แยกเอาตัว token</li>
+</ul>
+<p>เรียกใช้ที่ปุ่ม Select (สไลด์ 65):</p>
+<pre><code class="language-js">selectBtnRef.addEventListener(&quot;click&quot;, () =&gt; {
+    STU_ID = STU_IDTxtRef.value;
+    callStudentWS(
+        &quot;http://localhost:3000/student/&quot; + STU_ID,
+        token,
+        &quot;select&quot;
+    ).then((data) =&gt; {
+        console.log(data);
+        if (data) {
+            alert(data.message);
+            STU_IDTxtRef.value = data.data.STU_ID;
+            STU_FNAMETxtRef.value = data.data.STU_FNAME;
+            STU_LNAMETxtRef.value = data.data.STU_LNAME;
+            STU_AGETxtRef.value = data.data.STU_AGE;
+        }
+    });
+});
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>ลำดับ argument ในสไลด์ 65 สลับกับ signature ในสไลด์ 62/64:</strong> ฟังก์ชันรับ <code>(url, method, token, ...)</code> แต่สไลด์ 65 เรียก <code>(url, token, &quot;select&quot;)</code> → <code>method</code> ได้ค่า token, <code>token</code> ได้ <code>&quot;select&quot;</code> → ไม่เข้า <code>if (method == &quot;select&quot;)</code> → คืน <code>undefined</code> — <strong>รันจริงได้ <code>data = undefined</code> ฟอร์มไม่ถูกเติมอะไรเลย</strong> ต้องเรียกเป็น <code>callStudentWS(url, &quot;select&quot;, token)</code> (รันแล้วได้ <code>{&quot;error&quot;:false,&quot;data&quot;:{&quot;STU_ID&quot;:4,...},&quot;message&quot;:&quot;Student retrieved&quot;}</code>)</p>
+</blockquote>
+<h3 id="109-jwt-open-question-สไลด์-66">10.9 JWT Open Question <span class="slide-ref">สไลด์ 66</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>คำถามปลายเปิด: จะเก็บ JWT ยังไงให้ปลอดภัย</strong></p>
+<ul>
+<li><strong>&quot;How can we storage JWT securely?&quot;</strong> — เก็บ JWT ยังไงให้ปลอดภัย</li>
+<li>สไลด์ทิ้งเป็นคำถามปลายเปิด ไม่มีคำตอบ (ที่เก็บที่สไลด์ 48 ระบุไว้คือ Local Storage, Session Storage, Cookies)</li>
+</ul>
+<hr />
+<h2 id="11-เรียก-restful-ws-จาก-nodejs-ด้วย-axios-ยังไง-สไลด์-6778">11. เรียก RESTful WS จาก Node.js ด้วย Axios ยังไง? <span class="slide-ref">สไลด์ 67–78</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ฝั่ง Node.js ก็เป็น client เรียก REST service ได้ มีหลาย package — วิชานี้ใช้ Axios (<code>npm install axios</code>) เรียกด้วย <code>axios.get/post/put/patch/delete(url, ...)</code> หรือ <code>axios(config)</code> แล้วได้ผลที่ <code>res.data</code> (แปลง JSON ให้อัตโนมัติ)</strong></p>
+<h3 id="111-packages-ที่ใช้เรียก-restful-ws-สไลด์-6869">11.1 Packages ที่ใช้เรียก RESTful WS <span class="slide-ref">สไลด์ 68–69</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>มีหลาย package (HTTP, Request, Needle, Axios, SuperAgent, Got, Node-fetch) — วิชานี้ใช้ Axios</strong></p>
+<p>การ consume RESTful WS <strong>ไม่ยาก</strong> มีหลาย package:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>package</th>
+<th>แหล่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP</td>
+<td>Standard HTTP Library</td>
+</tr>
+<tr>
+<td>Request</td>
+<td>github.com/request/request</td>
+</tr>
+<tr>
+<td>Needle</td>
+<td>github.com/tomas/needle</td>
+</tr>
+<tr>
+<td><strong>Axios</strong> ← ใช้ในวิชานี้</td>
+<td>github.com/axios/axios</td>
+</tr>
+<tr>
+<td>SuperAgent</td>
+<td>github.com/visionmedia/superagent</td>
+</tr>
+<tr>
+<td>Got</td>
+<td>github.com/sindresorhus/got</td>
+</tr>
+<tr>
+<td>Node-fetch</td>
+<td>github.com/node-fetch/node-fetch</td>
+</tr>
+</tbody>
+</table></div>
+<p>ติดตั้ง: <code>npm install axios</code></p>
+<h3 id="112-axios-คืออะไร-ข้อดีอะไร-สไลด์-70">11.2 Axios คืออะไร ข้อดีอะไร <span class="slide-ref">สไลด์ 70</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Axios ทำ HTTP request ได้ทั้ง browser และ Node.js มีข้อดี 7 ข้อ เช่น abort, timeout, CSRF protection, แปลง JSON อัตโนมัติ</strong></p>
+<ul>
+<li><strong>Axios</strong> = JavaScript library ใช้ทำ <strong>HTTP requests</strong> ได้ทั้งใน <strong>Browser และ Node.js</strong></li>
+<li>ข้อดี:
+<ul>
+<li><strong>supports older browsers</strong> — ใช้กับ browser รุ่นเก่าได้</li>
+<li><strong>abort a request</strong> — ยกเลิก request ได้</li>
+<li><strong>set a response timeout</strong> — ตั้งเวลารอสูงสุดได้</li>
+<li><strong>built-in CSRF (Cross-site request forgery) protection</strong> — มีการป้องกัน CSRF ในตัว</li>
+<li><strong>upload progress</strong> — ติดตามความคืบหน้าการอัปโหลด</li>
+<li><strong>automatic JSON data transformation</strong> — แปลง JSON ให้อัตโนมัติ</li>
+<li><strong>works in Node.js</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="113-ฟังก์ชันของ-axios-สไลด์-7172">11.3 ฟังก์ชันของ Axios <span class="slide-ref">สไลด์ 71–72</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>get/delete รับ <code>(url, config)</code> ส่วน post/put/patch รับ <code>(url, data, config)</code> เพราะมี body</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฟังก์ชัน</th>
+<th>มี <code>data</code> (body)?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>axios.get(url[, config])</code></td>
+<td>ไม่มี</td>
+</tr>
+<tr>
+<td><code>axios.delete(url[, config])</code></td>
+<td>ไม่มี</td>
+</tr>
+<tr>
+<td><code>axios.post(url[, data[, config]])</code></td>
+<td>มี</td>
+</tr>
+<tr>
+<td><code>axios.put(url[, data[, config]])</code></td>
+<td>มี</td>
+</tr>
+<tr>
+<td><code>axios.patch(url[, data[, config]])</code></td>
+<td>มี</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>url</code> = URL ของ server ที่จะส่ง request · <code>data</code> = ข้อมูลที่ส่งเป็น <strong>request body</strong> · <code>config</code> = <strong>Request Config</strong></li>
+</ul>
+<p>หรือใช้ <strong><code>axios(config)</code></strong> แล้วกำหนด method เอง (สไลด์ 72) — config ที่ใช้บ่อย:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>config</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td>URL ของ server</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td>request method</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>URL parameters ที่ส่งไปกับ request</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>ข้อมูลที่ส่งเป็น request body</td>
+</tr>
+</tbody>
+</table></div>
+<p>(ดูเพิ่มที่ github.com/axios/axios#request-config)</p>
+<p><strong>ผลรันจริง:</strong> <code>axios({ url: &quot;http://localhost:3000/student&quot;, method: &quot;post&quot;, data: { student: {...} } })</code> → 200 <code>{&quot;error&quot;:false,&quot;data&quot;:1,&quot;message&quot;:&quot;New student has been created successfully.&quot;}</code></p>
+<h3 id="114-ตัวอย่าง-เรียก-spoonacular-api-สไลด์-7376">11.4 ตัวอย่าง: เรียก spoonacular API <span class="slide-ref">สไลด์ 73–76</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ <code>axios.get(searchURL, { params, responseType: &quot;json&quot; })</code> — <code>params</code> ถูกต่อเป็น query string ให้อัตโนมัติ แล้วอ่านผลที่ <code>res.data.results</code></strong></p>
+<p>ตัวแปรที่ต้องมี (สไลด์ 73): <strong>API key จาก spoonacular</strong>, <strong>query</strong> (คำค้น), <strong>params</strong>, <strong>searchURL</strong></p>
+<p><code>params</code> (สไลด์ 74):</p>
+<pre><code class="language-js">let params = {
+    number: 20,
+    query: query,
+    apiKey: API_key,
+};
+</code></pre>
+<p>เรียก service (สไลด์ 75):</p>
+<pre><code class="language-js">const axios = require(&quot;axios&quot;).default;
+const API_key = &quot;Your API Key&quot;;
+let query = &quot;pizza&quot;;
+let params = {
+    number: 20,
+    query: query,
+    apiKey: API_key,
+};
+let searchURL = &quot;https://api.spoonacular.com/recipes/complexSearch?&quot;;
+axios
+    .get(searchURL, { params, responseType: &quot;json&quot; })
+    .then((res) =&gt; {
+        console.log(`The number of results: ${res.data.results.length}`);
+        console.table(res.data.results);
+    })
+    .catch((err) =&gt; console.log(err));
+</code></pre>
+<p>ทีละขั้น:</p>
+<ol>
+<li><code>require(&quot;axios&quot;).default</code> — โหลด Axios</li>
+<li>ตั้ง API key, คำค้น <code>&quot;pizza&quot;</code>, <code>params</code> (ขอ <strong>20</strong> ผลลัพธ์)</li>
+<li><code>axios.get(searchURL, { params, responseType: &quot;json&quot; })</code> — <code>{ params }</code> คือ shorthand ของ <code>{ params: params }</code></li>
+<li><code>.then(res =&gt; ...)</code> — <code>res.data</code> คือ JSON ที่ได้ → พิมพ์จำนวนผล + แสดงเป็นตาราง</li>
+<li><code>.catch(err =&gt; console.log(err))</code> — ถ้า error พิมพ์ error</li>
+</ol>
+<p>Output (สไลด์ 76): <code>The number of results: 20</code> ตามด้วยตาราง <code>console.table</code> คอลัมน์ <strong>(index), id, title, image, imageType</strong> 20 แถว (index 0–19) เช่น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>(index)</th>
+<th>id</th>
+<th>title</th>
+<th>imageType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>656329</td>
+<td>Pizza bites with pumpkin</td>
+<td>jpg</td>
+</tr>
+<tr>
+<td>1</td>
+<td>680975</td>
+<td>BLT Pizza</td>
+<td>jpg</td>
+</tr>
+<tr>
+<td>2</td>
+<td>663136</td>
+<td>Thai Pizza</td>
+<td>jpg</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>19</td>
+<td>652592</td>
+<td>Multigrain Tandoori Pizza With Paneer Tikka</td>
+<td>jpg</td>
+</tr>
+</tbody>
+</table></div>
+<p>(คอลัมน์ image เป็น URL รูป <code>https://spoonacular.com/recipeImages/&lt;id&gt;-312x231.jpg</code>)</p>
+<p><strong>ผลรันจริง:</strong> เรียก spoonacular จริงไม่ได้ (ต้องมี API key) แต่ตรวจส่วนอื่นแล้ว:</p>
+<ul>
+<li><code>params</code> ถูกต่อท้าย URL เป็น <code>...complexSearch?&amp;number=20&amp;query=pizza&amp;apiKey=...</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ โค้ดในสไลด์ 75 มี 2 จุดที่รันไม่ได้:</p>
+<ol>
+<li><code>const API_key = ”Your API Key&quot;;</code> เปิดด้วย <code>”</code> (คำพูดโค้ง) → <code>node --check</code> ได้ <strong><code>SyntaxError: Invalid or unexpected token</code></strong></li>
+<li><code>Console.table(...)</code> ตัว <strong>C ใหญ่</strong> → รันจริงได้ <strong><code>ReferenceError: Console is not defined</code></strong> (จะไปเข้า <code>.catch</code> แล้วพิมพ์ error แทนตาราง) ต้องเป็น <code>console.table</code> ตัวเล็ก — ผลในสไลด์ 76 ที่เป็นตารางจึงมาจากโค้ดที่ใช้ <code>console.table</code></li>
+</ol>
+<p>โค้ดด้านบนแก้ทั้งสองจุดแล้ว</p>
+</blockquote>
+<h3 id="115-ตัวอย่าง-เรียก-student-ws-ของเราเอง-สไลด์-7778">11.5 ตัวอย่าง: เรียก Student WS ของเราเอง <span class="slide-ref">สไลด์ 77–78</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>axios.get(&quot;http://localhost:3000/students&quot;)</code> แล้วอ่านผลที่ <code>res.data</code> (ใช้ async/await แทนได้)</strong></p>
+<pre><code class="language-js">const axios = require('axios').default;
+
+let searchURL = &quot;http://localhost:3000/students&quot;;
+
+axios.get(searchURL, {responseType: 'json'})
+.then((res) =&gt;{
+    console.log(res.data);
+});
+</code></pre>
+<ul>
+<li><strong>Note that we can use async/await as well.</strong> — ใช้ <code>const res = await axios.get(...)</code> แทน <code>.then</code> ได้</li>
+</ul>
+<p>Output (สไลด์ 78): object ที่ <code>res.data</code> (Node แสดงแบบ object ไม่ใช่ string):</p>
+<pre><code>{
+  error: false,
+  data: [
+    { STU_ID: 2, STU_FNAME: 'Jidapa', STU_LNAME: 'Kraisangka', STU_AGE: 25 },
+    { STU_ID: 3, STU_FNAME: 'Dolvara', STU_LNAME: 'Guna-Tilaka', STU_AGE: 25 },
+    { STU_ID: 4, STU_FNAME: 'Wudhichart', STU_LNAME: 'Sawanpghol', STU_AGE: 25 },
+    { STU_ID: 5, STU_FNAME: 'Sorawee', STU_LNAME: 'Yanta', STU_AGE: 25 },
+    { STU_ID: 99998, STU_FNAME: 'Wudhichart', STU_LNAME: 'Sawangphol', STU_AGE: 35 }
+  ],
+  message: 'Student list.'
+}
+</code></pre>
+<p><strong>ผลรันจริง:</strong> <code>console.log(res.data)</code> พิมพ์ object <code>{ error: false, data: [...], message: 'Student list.' }</code> (ข้อมูลตามตารางในเครื่อง) และ <code>typeof res.data</code> = <code>object</code> → ยืนยัน <strong>automatic JSON transformation</strong> ไม่ต้อง <code>JSON.parse</code> / <code>.json()</code> เอง (ต่างจาก <code>fetch</code> ในข้อ 5 ที่ต้อง <code>await response.json()</code>)</p>
+<hr />
+<h2 id="12-debug-nodejs-ใน-vscode-ยังไง-สไลด์-7982">12. Debug Node.js ใน VSCode ยังไง? <span class="slide-ref">สไลด์ 79–82</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เพิ่มโฟลเดอร์โปรเจกต์เข้า workspace → เมนู debug → create a launch.json file → เลือกโฟลเดอร์ + Node.js → แก้ <code>&quot;program&quot;</code> ให้ชี้ไฟล์ที่จะ debug → ใส่ breakpoint → เริ่ม debug</strong></p>
+<p><img loading="lazy" src="diagrams/L13-08-debugger.png" alt="ขั้นตอน debug Node.js ใน VSCode" /></p>
+<h3 id="121-สร้าง-launchjson-สไลด์-80">12.1 สร้าง launch.json <span class="slide-ref">สไลด์ 80</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>workspace → debug menu → create a launch.json file → เลือก folder + Node.js</strong></p>
+<ol>
+<li>ต้อง <strong>เพิ่มโฟลเดอร์ของโปรเจกต์ Node.js เข้า workspace</strong> ก่อน</li>
+<li>เลือกเมนู <strong>debug</strong> ที่แถบซ้าย (หมายเลข 1 ในรูป: ไอคอน Run and Debug)</li>
+<li>เลือก <strong>create a launch.json file</strong> (หมายเลข 2: ลิงก์ใต้ปุ่ม &quot;Run and Debug (F5)&quot;)</li>
+<li>เลือก <strong>working folder</strong> (หมายเลข 3: รายการ &quot;Select a workspace folder to create a launch.json file in&quot; มี Example, Example1, Code) แล้วเลือก <strong>Node.js</strong></li>
+</ol>
+<h3 id="122-แก้-launchjson-สไลด์-81">12.2 แก้ launch.json <span class="slide-ref">สไลด์ 81</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>แก้ <code>&quot;program&quot;</code> ใน launch.json ให้ชี้ไฟล์ที่จะ debug (เช่น server.js)</strong></p>
+<ul>
+<li>ไฟล์ <code>launch.json</code> ถูกสร้างใต้ working folder ในโฟลเดอร์ <code>.vscode</code> (กรณีนี้คือ <code>Example1/.vscode/launch.json</code>)</li>
+<li>ปรับแต่งไฟล์ เช่นถ้าจะ debug <code>server.js</code> ให้เปลี่ยน <code>program</code> เป็น <code>server.js</code>:</li>
+</ul>
+<pre><code class="language-json">&quot;type&quot;: &quot;node&quot;,
+&quot;request&quot;: &quot;launch&quot;,
+&quot;name&quot;: &quot;Launch Program&quot;,
+&quot;skipFiles&quot;: [
+    &quot;&lt;node_internals&gt;/**&quot;
+],
+&quot;program&quot;: &quot;${workspaceFolder}\\server.js&quot;
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>key</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&quot;type&quot;: &quot;node&quot;</code></td>
+<td>debug แบบ Node.js</td>
+</tr>
+<tr>
+<td><code>&quot;request&quot;: &quot;launch&quot;</code></td>
+<td>ให้ VSCode เปิดโปรแกรมขึ้นมาเอง</td>
+</tr>
+<tr>
+<td><code>&quot;name&quot;</code></td>
+<td>ชื่อ configuration ที่เห็นในเมนู</td>
+</tr>
+<tr>
+<td><code>&quot;skipFiles&quot;</code></td>
+<td>ข้ามโค้ดภายในของ Node (<code>&lt;node_internals&gt;</code>) ตอน step</td>
+</tr>
+<tr>
+<td><code>&quot;program&quot;</code></td>
+<td>ไฟล์ที่จะรัน/debug — <code>${workspaceFolder}</code> = โฟลเดอร์ workspace</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="123-ใส่-breakpoint-แล้วเริ่ม-debug-สไลด์-82">12.3 ใส่ breakpoint แล้วเริ่ม debug <span class="slide-ref">สไลด์ 82</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใส่ breakpoint แล้ว start debugging — โปรแกรมหยุดที่ breakpoint ให้ดูตัวแปร/call stack</strong></p>
+<ul>
+<li>ใส่ <strong>breakpoint</strong> ในไฟล์ server.js → เริ่ม debug ผ่าน <strong>debug menu</strong></li>
+<li>ภาพหน้าจอในสไลด์: โปรแกรม <strong>หยุดที่ breakpoint</strong> บรรทัด 39 (<code>var sql = &quot;SELECT * FROM student&quot;;</code> แถบเหลือง), แผงซ้ายแสดง VARIABLES / WATCH / <strong>CALL STACK (PAUSED ON BREAKPOINT)</strong> / BREAKPOINTS และแถบปุ่มควบคุม debug ด้านบน</li>
+<li>DEBUG CONSOLE แสดง: <code>node.exe --inspect-brk=21397 SQLserver.js</code> → <code>Debugger listening on ws://127.0.0.1:21397/...</code> → <code>Debugger attached.</code> → <code>Connected!</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อความสไลด์ 81–82 พูดถึง <code>server.js</code> แต่ภาพหน้าจอสไลด์ 82 เป็นไฟล์ <strong><code>SQLserver.js</code></strong> — เป็นตัวอย่างคนละไฟล์ หลักการเหมือนกัน</p>
+</blockquote>
+<p>สไลด์ 83: References — https://go.microsoft.com/fwlink/?linkid=830387</p>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Service (WS)</td>
+<td>โปรแกรมฝั่ง server ที่รับ HTTP request แล้วตอบข้อมูล (ในบทนี้เป็น JSON)</td>
+<td>API ให้โปรแกรมอื่นเรียก</td>
+</tr>
+<tr>
+<td>REST / RESTful WS</td>
+<td>สไตล์ service ที่ใช้ HTTP method มาตรฐานกับ URL ของ resource ตอบเป็น JSON/XML, stateless</td>
+<td>method + URL → JSON</td>
+</tr>
+<tr>
+<td>CRUD</td>
+<td>Create, Read, Update, Delete</td>
+<td>POST, GET, PUT, DELETE</td>
+</tr>
+<tr>
+<td><code>.env</code> / dotenv</td>
+<td>ไฟล์ configuration (DB user/pass/name, host, SECRET) อ่านผ่าน <code>process.env</code></td>
+<td>ความลับไม่อยู่ในโค้ด</td>
+</tr>
+<tr>
+<td><code>mysql2</code> / <code>dbConn.query</code></td>
+<td>package เชื่อม MySQL / สั่ง SQL พร้อมแทน <code>?</code> ด้วยค่า แล้วรับผลใน callback</td>
+<td><code>?</code> = ช่องใส่ค่า</td>
+</tr>
+<tr>
+<td><code>affectedRows</code></td>
+<td>จำนวนแถวที่ถูก INSERT/UPDATE/DELETE</td>
+<td><code>data: 1</code></td>
+</tr>
+<tr>
+<td><code>req.body</code></td>
+<td>ข้อมูลใน body (POST/PUT/DELETE)</td>
+<td><code>req.body.student</code></td>
+</tr>
+<tr>
+<td><code>req.params</code></td>
+<td>ค่าจาก URL parameter (<code>/student/:id</code>)</td>
+<td><code>req.params.id</code></td>
+</tr>
+<tr>
+<td>400 / 401</td>
+<td>status ที่ service ตอบเมื่อข้อมูลไม่ครบ (&quot;Please provide ...&quot;) / เมื่อ token ไม่ผ่าน (&quot;Authentication failed!&quot;)</td>
+<td>400 ขาดข้อมูล, 401 token ไม่ผ่าน</td>
+</tr>
+<tr>
+<td>Postman</td>
+<td>collaboration platform for API development ใช้ทดสอบ WS</td>
+<td>ทดสอบ API ไม่ต้องมีหน้าเว็บ</td>
+</tr>
+<tr>
+<td><code>fetch</code> + <code>response.json()</code></td>
+<td>ส่ง request จาก browser + แปลง body เป็น object</td>
+<td>ต้อง <code>await</code> 2 ครั้ง</td>
+</tr>
+<tr>
+<td>Same-origin policy</td>
+<td>script เข้าถึงข้อมูลหน้าอื่นได้เฉพาะ origin เดียวกัน</td>
+<td>กฎพื้นฐานของ browser</td>
+</tr>
+<tr>
+<td>CORS</td>
+<td>กลไกให้ resource ถูก request จาก domain อื่นได้</td>
+<td>ใบอนุญาตข้าม origin</td>
+</tr>
+<tr>
+<td>Origin ต่าง</td>
+<td>ต่าง domain / subdomain / port / protocol</td>
+<td>3100 ≠ 3000</td>
+</tr>
+<tr>
+<td><code>cors</code> package</td>
+<td><code>app.use(cors())</code> เปิดทุก route / <code>cors()</code> ใน route / <code>cors(corsOptions)</code></td>
+<td>2 บรรทัดเปิด CORS</td>
+</tr>
+<tr>
+<td><code>Access-Control-Allow-Origin</code></td>
+<td>header ที่บอกว่า origin ไหนเรียกได้</td>
+<td>ไม่มี header = โดนบล็อก</td>
+</tr>
+<tr>
+<td>Token-Based Authentication</td>
+<td>login ครั้งเดียวรับ token แล้วแนบ token ทุก request</td>
+<td>สายรัดข้อมือ</td>
+</tr>
+<tr>
+<td>Bearer token</td>
+<td>ส่ง token ใน header <code>Authorization: Bearer &lt;token&gt;</code></td>
+<td><code>'Bearer ' + token</code></td>
+</tr>
+<tr>
+<td>JWT</td>
+<td>JSON object ตาม RFC 7519 ส่งข้อมูลระหว่างฝ่ายอย่างปลอดภัย</td>
+<td><code>xxxxx.yyyyy.zzzzz</code></td>
+</tr>
+<tr>
+<td>Header / Payload / Signature</td>
+<td>type+algorithm / claims / ลายเซ็นจาก header+payload+secret+algorithm</td>
+<td>3 ส่วนคั่นจุด</td>
+</tr>
+<tr>
+<td>Claims</td>
+<td>ข้อความเกี่ยวกับ entity — Registered (iss, exp, sub, aud, iat), Public, Private</td>
+<td>ข้อมูลใน payload</td>
+</tr>
+<tr>
+<td><code>jwt.sign</code> / <code>jwt.verify</code></td>
+<td>สร้าง token / ตรวจ token (ผิดจะ throw)</td>
+<td>sign ตอน login, verify ใน middleware</td>
+</tr>
+<tr>
+<td><code>expiresIn</code></td>
+<td>อายุ token (วินาที หรือ &quot;1h&quot;, &quot;2 days&quot;, &quot;7d&quot;)</td>
+<td><code>&quot;1h&quot;</code> = 3600 วินาที</td>
+</tr>
+<tr>
+<td>HS256</td>
+<td>algorithm default ของ <code>sign</code></td>
+<td>default</td>
+</tr>
+<tr>
+<td>Middleware <code>auth.js</code></td>
+<td>ฟังก์ชัน <code>(req,res,next)</code> ตรวจ token ก่อนเข้า route</td>
+<td>ผ่าน <code>next()</code> ไม่ผ่าน 401</td>
+</tr>
+<tr>
+<td>Axios</td>
+<td>library ทำ HTTP request ได้ทั้ง browser และ Node.js</td>
+<td><code>axios.get(url).then(res =&gt; res.data)</code></td>
+</tr>
+<tr>
+<td><code>params</code> (Axios)</td>
+<td>URL parameters ที่ต่อเป็น query string ให้</td>
+<td><code>?number=20&amp;query=pizza</code></td>
+</tr>
+<tr>
+<td><code>launch.json</code></td>
+<td>ไฟล์ตั้งค่า debug ของ VSCode (<code>type</code>, <code>request</code>, <code>program</code>)</td>
+<td>ชี้ <code>program</code> ไปไฟล์ที่ debug</td>
+</tr>
+<tr>
+<td>Breakpoint</td>
+<td>จุดที่ให้โปรแกรมหยุดตอน debug</td>
+<td>หยุดดูค่าตัวแปร</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ REST: client ส่ง <strong>HTTP method + URL</strong> → server ตอบ <strong>JSON</strong> | หลัก 5 ข้อ: ID, link, standard methods, multiple representations, <strong>stateless</strong></li>
+<li>⭐ เทคโนโลยี REST: HTTP, Node.js, XML/JSON, JavaScript ฝั่ง client</li>
+<li>⭐ ขั้นตอนสร้าง WS: database → table → packages (<strong>dotenv, express, mysql2, nodemon</strong>) → <code>.env</code> → <code>studentservices.js</code> → <code>studentform.html</code></li>
+<li>⭐ CRUD ↔ RESTful: <strong>Create=POST, Read=GET, Update=PUT, Delete=DELETE</strong> (SQL: INSERT, SELECT, UPDATE, DELETE)</li>
+<li>⭐ 5 route: <code>POST /student</code> · <code>PUT /student</code> · <code>DELETE /student</code> (body <code>student_id</code>) · <code>GET /student/:id</code> (<code>req.params.id</code>, <code>results[0]</code>) · <code>GET /students</code> (array)</li>
+<li>⭐ ทุก response เป็น JSON <code>{ error, data, message }</code> | ข้อมูลไม่ครบ → <strong>400</strong></li>
+<li>Postman: New → HTTP → เลือก method → URL → Send → ดู Status/Body</li>
+<li>⭐ ฝั่งหน้าเว็บ: <code>async callStudentWS</code> + <code>await fetch(url, {method})</code> + <code>await response.json()</code> → <code>.then(data =&gt; data.data.STU_ID ...)</code></li>
+<li>⭐ <strong>Same-origin policy</strong> / <strong>CORS</strong> — ข้าม origin ถ้าต่าง <strong>domain, subdomain, port, protocol</strong></li>
+<li>⭐ <code>npm install --save cors</code> + <code>var cors = require('cors'); app.use(cors());</code> = เปิด <strong>All</strong> CORS requests | เฉพาะ route: <code>app.get(path, cors(), handler)</code> | ตั้ง <code>origin</code> (string/array) + <code>methods</code> | หรือ <code>res.header(&quot;Access-Control-Allow-Origin&quot;, ...)</code></li>
+<li>⭐ Token flow 8 ขั้น: Login → Authentication Service → Token Generator → Access Token → เก็บใน Local Storage/Session Storage/Cookies → request <code>Authorization: Bearer</code> → Student WS → Success/Deny</li>
+<li>⭐ JWT = RFC 7519 | use case: Authorization, Information Exchange | <strong>Header.Payload.Signature</strong></li>
+<li>⭐ Header = type + signing algorithm (HS256, RS256, HS384) | Payload = claims (Registered: iss, exp, sub, aud, iat / Public / Private) | Signature = encoded header + encoded payload + secret + algorithm</li>
+<li>⭐ <code>sign(payload, secretOrPrivateKey, [options, callback])</code> (algorithm default HS256, expiresIn) | <code>verify(token, secretOrPublicKey, [options, callback])</code> (algorithms, ignoreExpiration)</li>
+<li>⭐ JWT ในโปรเจกต์: <code>npm install --save jsonwebtoken</code> → <code>SECRET</code> ใน .env → <code>POST /signin</code> + <code>jwt.sign(..., process.env.SECRET, {expiresIn:&quot;1h&quot;})</code> → <code>auth.js</code>: <code>req.headers.authorization.split(&quot; &quot;)[1]</code> + <code>jwt.verify</code> → <code>next()</code> / <strong>401 &quot;Authentication failed!&quot;</strong> → <code>router.get('/students', authorize, ...)</code></li>
+<li>⭐ client ส่ง token: <code>headers: { 'Authorization': 'Bearer ' + token }</code></li>
+<li>Open question: เก็บ JWT ยังไงให้ปลอดภัย?</li>
+<li>⭐ เรียก REST จาก Node.js: HTTP, Request, Needle, <strong>Axios</strong>, SuperAgent, Got, Node-fetch | <code>npm install axios</code></li>
+<li>⭐ Axios ข้อดี: older browsers, abort, timeout, CSRF protection, upload progress, <strong>automatic JSON</strong>, works in Node.js</li>
+<li>⭐ <code>axios.get/delete(url[, config])</code> · <code>axios.post/put/patch(url[, data[, config]])</code> · <code>axios(config)</code> กับ <code>url, method, params, data</code></li>
+<li>spoonacular: <code>axios.get(searchURL, { params, responseType: &quot;json&quot; })</code> → <code>res.data.results</code> (20 ผล)</li>
+<li>⭐ VSCode debug: workspace → debug menu → create launch.json → เลือก folder + Node.js → แก้ <code>&quot;program&quot;: &quot;${workspaceFolder}\\server.js&quot;</code> → breakpoint → start</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code> (Create)</td>
+<td><code>PUT</code> (Update)</td>
+<td>ใน RESTful WS บทนี้: POST = เพิ่มนักศึกษา, PUT = แก้นักศึกษาที่มีอยู่ (ทั้งคู่ส่ง body <code>{ student: {...} }</code>)</td>
+</tr>
+<tr>
+<td><code>/student</code></td>
+<td><code>/students</code></td>
+<td><code>/student</code> ใช้กับ POST/PUT/DELETE และ <code>/student/:id</code> (คนเดียว) · <code>/students</code> = GET ทั้งหมด</td>
+</tr>
+<tr>
+<td><code>req.body.student_id</code></td>
+<td><code>req.params.id</code></td>
+<td>DELETE ส่ง id ใน body · GET select one ส่ง id ใน URL</td>
+</tr>
+<tr>
+<td><code>results[0]</code></td>
+<td><code>results</code></td>
+<td>select one ได้ object เดียว · select all ได้ array</td>
+</tr>
+<tr>
+<td><code>affectedRows</code></td>
+<td><code>results</code></td>
+<td>INSERT/UPDATE/DELETE ตอบจำนวนแถวที่เปลี่ยน · SELECT ตอบแถวข้อมูล</td>
+</tr>
+<tr>
+<td>400</td>
+<td>401</td>
+<td>400 = ข้อมูลไม่ครบ (&quot;Please provide ...&quot;) · 401 = token ไม่ผ่าน (&quot;Authentication failed!&quot;)</td>
+</tr>
+<tr>
+<td><code>method</code> ใน <code>callStudentWS</code></td>
+<td><code>method</code> ใน <code>fetch</code></td>
+<td>ชื่องานของเรา (&quot;select&quot;, &quot;login&quot;) · HTTP method จริง ('GET', 'POST')</td>
+</tr>
+<tr>
+<td><code>fetch</code></td>
+<td>Axios</td>
+<td>fetch ต้อง <code>await response.json()</code> เอง · Axios แปลง JSON อัตโนมัติ อยู่ใน <code>res.data</code> และใช้ใน Node.js ได้</td>
+</tr>
+<tr>
+<td><code>axios.get(url, config)</code></td>
+<td><code>axios.post(url, data, config)</code></td>
+<td>get/delete ไม่มี data · post/put/patch มี data เป็นพารามิเตอร์ที่ 2</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td><code>data</code> (Axios config)</td>
+<td>params = ต่อเป็น query string ใน URL · data = request body</td>
+</tr>
+<tr>
+<td>Same-origin policy</td>
+<td>CORS</td>
+<td>กฎที่ห้ามข้าม origin · กลไกที่ server ใช้อนุญาตให้ข้ามได้</td>
+</tr>
+<tr>
+<td><code>app.use(cors())</code></td>
+<td><code>app.get(path, cors(), ...)</code></td>
+<td>ทุก route · เฉพาะ route นั้น</td>
+</tr>
+<tr>
+<td><code>origin: '...'</code> (string)</td>
+<td><code>origin: whiteList</code> (array)</td>
+<td>อนุญาต origin เดียว · หลาย origin</td>
+</tr>
+<tr>
+<td><code>cors</code> package</td>
+<td><code>res.header(...)</code></td>
+<td>ใช้ package ตั้งให้ · ตั้ง <code>Access-Control-Allow-Origin/Methods</code> เอง</td>
+</tr>
+<tr>
+<td><code>jwt.sign</code></td>
+<td><code>jwt.verify</code></td>
+<td>สร้าง token (ตอน <code>/signin</code>) · ตรวจ token (ใน <code>auth.js</code>)</td>
+</tr>
+<tr>
+<td><code>secretOrPrivateKey</code></td>
+<td><code>secretOrPublicKey</code></td>
+<td>ใช้ใน sign · ใช้ใน verify</td>
+</tr>
+<tr>
+<td>Registered claims</td>
+<td>Private claims</td>
+<td>ชื่อมาตรฐาน (iss, exp, sub, aud, iat) · ตั้งเองตามที่ตกลงกัน</td>
+</tr>
+<tr>
+<td>Public claims</td>
+<td>Private claims</td>
+<td>ตั้งเองได้แต่ควรลงทะเบียน IANA กันชน · ใช้กันเองระหว่างฝ่ายที่ตกลง</td>
+</tr>
+<tr>
+<td>Authentication Service</td>
+<td>Student Web service</td>
+<td>ฝั่งที่ออก token (login) · ฝั่งที่รับ request + ตรวจ token แล้วตอบ Success/Deny</td>
+</tr>
+<tr>
+<td><code>expiresIn</code></td>
+<td><code>ignoreExpiration</code></td>
+<td>option ของ sign (อายุ token) · option ของ verify (true = ไม่ตรวจหมดอายุ)</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l12/index.html"><small>← บทก่อนหน้า</small><span>Lecture 12 – Web Services</span></a><span></span></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-บทนี้เรียนอะไร-สไลด์-12-4">บทนี้เรียนอะไร?</a></li><li><a href="#1-rest-คืออะไร-มีหลักการอะไร-สไลด์-3-56">REST คืออะไร มีหลักการอะไร?</a></li><li><a href="#2-สร้าง-rest-web-service-ด้วย-nodejs-mysql-ต้องเตรียมอะไร-สไลด์-715">สร้าง REST web service ด้วย Node.js + MySQL ต้องเตรียมอะไร?</a></li><li><a href="#3-แต่ละ-route-ของ-student-ws-crud-เขียนยังไง-สไลด์-1626">แต่ละ route ของ Student WS (CRUD) เขียนยังไง?</a></li><li><a href="#4-ทดสอบ-web-service-ด้วย-postman-ยังไง-สไลด์-2731">ทดสอบ web service ด้วย Postman ยังไง?</a></li><li><a href="#5-หน้าเว็บ-studentformhtml-เรียก-service-ยังไง-สไลด์-3237">หน้าเว็บ (studentform.html) เรียก service ยังไง?</a></li><li><a href="#6-cors-คืออะไร-และเปิดให้ข้าม-origin-ยังไง-สไลด์-3845">CORS คืออะไร และเปิดให้ข้าม origin ยังไง?</a></li><li><a href="#7-token-based-authentication-ทำงานยังไง-สไลด์-4648">Token-Based Authentication ทำงานยังไง?</a></li><li><a href="#8-jwt-มีโครงสร้างอะไร-สไลด์-4953">JWT มีโครงสร้างอะไร?</a></li><li><a href="#9-ใช้-package-jsonwebtoken-ยังไง-sign-verify-สไลด์-5456">ใช้ package jsonwebtoken ยังไง? (sign / verify)</a></li><li><a href="#10-ทำ-jwt-จริงในโปรเจกต์-student-ws-ยังไง-สไลด์-5766">ทำ JWT จริงในโปรเจกต์ Student WS ยังไง?</a></li><li><a href="#11-เรียก-restful-ws-จาก-nodejs-ด้วย-axios-ยังไง-สไลด์-6778">เรียก RESTful WS จาก Node.js ด้วย Axios ยังไง?</a></li><li><a href="#12-debug-nodejs-ใน-vscode-ยังไง-สไลด์-7982">Debug Node.js ใน VSCode ยังไง?</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l13", "u": "web/l13/index.html", "t": "Lecture 13 – Web Services with Node.js", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

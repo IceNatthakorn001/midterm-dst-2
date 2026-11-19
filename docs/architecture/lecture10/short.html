@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 10 – Shell Script (+ Lab 10) · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#b0552c}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Lecture10</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/short.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/short.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/short.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/short.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/short.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li><a href="../chapter05/short.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/short.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li><a href="../chapter07/short.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/short.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/short.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/short.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/short.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li><li><a href="../lecture4/short.html"><span class="nl">Lecture4</span>Memory Management</a></li><li class='cur'><a href="../lecture10/short.html"><span class="nl">Lecture10</span>Shell Script (+ Lab 10)</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Lecture10 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 10 – Shell Script (+ Lab 10)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 6 นาที · 16 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="lecture10">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p>สไลด์ = ITDS212 Computer System Lab #10 (49 หน้า) · Lab 10 (4 หน้า) · output ทุกตัวรันจริงด้วย bash แล้ว</p>
+</blockquote>
+<h2 id="0-รายวิชา-สไลด์-13">0. รายวิชา (สไลด์ 1–3)</h2>
+<ul>
+<li>Week 10 = ฝึกเขียน shell script | คะแนน: lab report 25, quiz 25, midterm 25 (wk 9), final 25 (wk 17), เข้าเรียน ≥ 80% | ส่งแลปภายใน 23.59 วันอังคาร | quiz ทุกอาทิตย์</li>
+</ul>
+<h2 id="1-environment-variables-สไลด์-4">1. Environment variables (สไลด์ 4)</h2>
+<ul>
+<li>⭐ USER, HOME, SHELL, LOGNAME, <strong>PATH</strong> (ค้น dir ตามลำดับ ใช้ executable ตัวแรกที่เจอ), LANG, TERM</li>
+</ul>
+<h2 id="2-shell-vs-environment-variable-สไลด์-510">2. Shell vs Environment variable (สไลด์ 5–10)</h2>
+<ul>
+<li><code>echo LOGNAME</code> → <code>LOGNAME</code> | <code>echo $LOGNAME</code> → ค่า (ต้องมี <code>$</code>)</li>
+<li>⭐ shell var อยู่แค่ shell ที่สร้าง | <strong>env var inherit ไป child, shell var ไม่</strong> | <code>export</code> = ทำเป็น env var | built-in สำหรับ create/assign/delete</li>
+<li>⭐ shell เริ่ม → env ทั้งหมด <strong>copy</strong> เป็น shell var ชื่อเดียวกัน; แก้/unset shell var <strong>ไม่กระทบ</strong> env (สไลด์ 8: <code>LOGNAME=bob</code> → echo ได้ bob แต่ <code>/proc/$$/environ</code> ยัง <code>LOGNAME=seed</code>)</li>
+<li><code>foo=bar; echo $foo</code> → bar; <code>unset foo; echo $foo</code> → ว่าง</li>
+<li><code>ps -f</code>: ls/more/ps มี PPID 2011 = ลูกของ bash</li>
+<li>child ได้: shell vars copied from env + user-defined <strong>exported</strong> | ไม่ได้: not exported, predefined (BASHPID)</li>
+</ul>
+<h2 id="3-shell-สไลด์-1112">3. Shell (สไลด์ 11–12)</h2>
+<ul>
+<li>Kernel (hardware, scheduler, memory) ← Shell (CLI) ← Application | Shell script = รวมคำสั่ง shell</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>shell</th>
+<th>จุดเด่น</th>
+<th>prompt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ sh (Bourne)</td>
+<td>ยุคแรก, <strong>standard ใน UNIX ทุกตัว</strong>, ย้าย script ได้ไม่ต้องแก้</td>
+<td><code>$</code></td>
+</tr>
+<tr>
+<td>csh</td>
+<td>ไวยากรณ์เหมือน C, เรียกคำสั่งเก่าได้</td>
+<td>⭐ <strong><code>%</code></strong></td>
+</tr>
+<tr>
+<td>ksh</td>
+<td>รวมข้อดี sh + csh, <strong>ไม่มีทุก UNIX</strong></td>
+<td><code>$</code></td>
+</tr>
+<tr>
+<td>⭐ bash</td>
+<td>Bourne ใหม่, line editing, <strong>ไม่ใช่ standard UNIX แต่ default ของ Linux</strong></td>
+<td><code>$</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="4-17-ขั้น-สไลด์-13">4. 17 ขั้น (สไลด์ 13)</h2>
+<p>สร้างไฟล์ | shebang | ใส่คำสั่ง | chmod | รัน | สร้างตัวแปร | เรียกใช้ตัวแปร | env var | ตัวแปรพิเศษ | comment | array | expression | if | case | while | for | input argument</p>
+<h2 id="5-ทำให้-script-รันได้-สไลด์-1417">5. ทำให้ script รันได้ (สไลด์ 14–17)</h2>
+<ul>
+<li>⭐ <code>nano hello.sh</code> → <code>#!/bin/bash</code> (หรือ sh/csh/ksh) → <code>echo &quot;Hello World!&quot;</code> → <code>chmod 700 test.sh</code> (<code>-rw-rw-r--</code> → <code>-rwx------</code>) → <code>./test.sh</code> → <code>Hello World!</code></li>
+</ul>
+<h2 id="6-ตัวแปร-quote-สไลด์-1820">6. ตัวแปร + quote (สไลด์ 18–20)</h2>
+<ul>
+<li>⭐ <code>variable=value</code> <strong>ห้าม space รอบ <code>=</code></strong> | ค่ามี space ใช้ <code>'</code> หรือ <code>&quot;</code></li>
+<li>⭐ <code>'...'</code> = ตามที่พิมพ์ | <code>&quot;...&quot;</code> = แทนค่า → var5=<code>'$var1 $var2'</code> → <strong><code>$var1 $var2</code></strong> | var6=<code>&quot;$var1 $var2&quot;</code> → <strong><code>shell script</code></strong></li>
+<li>ผลทั้งหมด: shell / script / shell script / shell script / $var1 $var2 / shell script</li>
+</ul>
+<h2 id="7-ตัวแปรพิเศษ-สไลด์-21">7. ตัวแปรพิเศษ (สไลด์ 21)</h2>
+<ul>
+<li>⭐ <code>$0</code> ชื่อ script, <code>$1 $2…</code> argument (position parameter) | <code>$#</code> จำนวน arg | <code>$*</code> arg ทั้งหมด | <code>$@</code> คล้าย <code>$*</code> คั่นด้วยช่องว่าง | <strong><code>$?</code> = 0 สำเร็จ, ≠0 ผิดพลาด</strong> | <code>$!</code> PID (สไลด์ 21: ของ shell; สไลด์ 48: ใช้กับงาน <code>&amp;</code>)</li>
+</ul>
+<h2 id="8-env-var-ใน-script-สไลด์-22">8. Env var ใน script (สไลด์ 22)</h2>
+<ul>
+<li><code>echo $NAME</code> → ว่าง (null) | <code>export NAME=dst</code> แล้วรัน → <code>dst</code></li>
+</ul>
+<h2 id="910-comment-array-สไลด์-2324">9–10. Comment, Array (สไลด์ 23–24)</h2>
+<ul>
+<li><code>#</code> = comment (บรรทัดแรก <code>#!</code> = shebang) → output <code>hello</code></li>
+<li>⭐ index เริ่ม 0 | <code>echo $txt[0] $txt[1] $txt[2]</code> → <strong><code>a[0] a[1] a[2]</code></strong> | <code>${txt[0]}…</code> → <strong><code>a b c</code></strong></li>
+</ul>
+<h2 id="11-expression-สไลด์-2526">11. Expression (สไลด์ 25–26)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ประเภท</th>
+<th>ตัวดำเนินการ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⭐ int</td>
+<td><code>-eq</code> = · <code>-ne</code> ≠ · <code>-gt</code> &gt; · <code>-ge</code> ≥ · <code>-lt</code> &lt; · <code>-le</code> ≤</td>
+</tr>
+<tr>
+<td>⭐ string</td>
+<td><code>=</code> · <code>!=</code> · <code>str</code> ไม่ว่าง · <code>-n</code> ยาว&gt;0 · <code>-z</code> ยาว=0</td>
+</tr>
+<tr>
+<td>⭐ file</td>
+<td><code>-d</code> dir · <code>-f</code> file · <code>-r</code> อ่านได้ · <code>-w</code> เขียนได้ · <code>-x</code> run ได้ · <code>-s</code> ขนาด≠0</td>
+</tr>
+<tr>
+<td>อื่น</td>
+<td><code>!expr</code> not · <code>-a</code> and · <code>-o</code> or</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1216-if-case-while-for-argument-สไลด์-2731">12–16. if / case / while / for / argument (สไลด์ 27–31)</h2>
+<ul>
+<li>⭐ <code>if [ ] then … elif [ ] then … else … fi</code> → cat = cat → <code>Yes, it is equal</code></li>
+<li>⭐ <code>case $x in a) …;; *) …;; esac</code> → <code>It is a cat</code></li>
+<li><code>while [ $num -le 10 ] … ((num=$num+1))</code> → Loop 1–10 (วนจนเงื่อนไขเท็จ)</li>
+<li><code>for i in 1 2 3 4 5</code> → Loop 1–5 | ⭐ <code>for ((i=1;i&lt;5;i++))</code> → <strong>Loop 1–4</strong> (สไลด์โชว์ 1–5 เป็นของแบบแรก)</li>
+<li><code>echo &quot;$1 &amp; $2&quot;</code>: <code>./test.sh a b</code> → <code>a &amp; b</code> | <code>./test.sh &quot;a c d&quot; b</code> → <code>a c d &amp; b</code></li>
+</ul>
+<h2 id="17-test118-สไลด์-3240">17. test1–18 (สไลด์ 32–40)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>test</th>
+<th>ตัวตั้ง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>echo / <code>-n</code> / <code>-e &quot;\n…\t…\n&quot;</code></td>
+<td>3 บรรทัด + บรรทัดว่าง</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>((sum=25+35))</code></td>
+<td>⭐ 60</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>((area=5*5))</code></td>
+<td>25</td>
+</tr>
+<tr>
+<td>4</td>
+<td>while <code>[ $valid ]</code> + break ที่ 5</td>
+<td>⭐ 1 2 3 4 5</td>
+</tr>
+<tr>
+<td>5</td>
+<td>for counter 10→1 <code>echo -n</code></td>
+<td><code>10 9 8 7 6 5 4 3 2 1</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>read name</td>
+<td><code>Welcome &lt;name&gt; to DST program</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>n=10, <code>-lt 10</code></td>
+<td>⭐ two digit number</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>[[ admin &amp;&amp; secret ]]</code></td>
+<td>valid / invalid user (⚠️ ขาด <code>#</code> บรรทัดแรก)</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>[[ 15 || 45 ]]</code></td>
+<td>won / lost</td>
+</tr>
+<tr>
+<td>10</td>
+<td>if-elif 101/510/999</td>
+<td>1st / 2nd / 3rd / Sorry</td>
+</tr>
+<tr>
+<td>11</td>
+<td>case เดียวกัน</td>
+<td>⚠️ 101 → <code>echo You got 1st prize</code> (echo ซ้ำ)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>$#</code>, <code>$1</code>, <code>$2</code></td>
+<td><code>a b c</code> → Total 3, a, b</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>&quot;$s1$s2&quot;</code>, <code>$s1+$s2</code>, <code>+=</code></td>
+<td>⭐ <code>DST atMahidol</code> / <code>DST at+Mahidol is the best</code> (⚠️ แก้ <code>“</code>)</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>cut -d=</code> แยก X=45 Y=30</td>
+<td>⭐ <code>X+Y=75</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td>read x, y บวก</td>
+<td>3+4 → 7</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>function F1()</code></td>
+<td><code>I like bash programming</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>Rectangle_Area 10 20</code></td>
+<td>⭐ <code>Area is : 200</code></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>val=$(greeting)</code></td>
+<td><code>Return value of the function is Hello, &lt;name&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="18-test1927-สไลด์-4149">18. test19–27 (สไลด์ 41–49)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>test</th>
+<th>ทำอะไร</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19</td>
+<td><code>`mkdir $newdir`</code></td>
+<td>ใหม่ = สร้าง / ซ้ำ = error <code>File exists</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>[ -d ]</code> ก่อน mkdir</td>
+<td><code>Directory created</code> / <code>Directory exist</code></td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>while read line … done &lt; $file</code></td>
+<td>พิมพ์ book.txt ทีละบรรทัด (4 บรรทัด)</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>rm -i $fn</code></td>
+<td>ถาม <code>remove regular file …?</code> ก่อนลบ</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>echo … &gt;&gt; book.txt</code></td>
+<td>⭐ ต่อท้าย → เพิ่ม <code>Learning Laravel 5</code></td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>[ -f &quot;$1&quot; ]</code></td>
+<td><code>File exists</code> / <code>File does not exist</code> (⚠️ ต้องมี <code>;</code> ก่อน then)</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>`date +%Y/%m/%d/%H/%M/%S`</code></td>
+<td><code>Current Date is: DD-MM-YYYY</code> / <code>Current Time is: HH:MM:SS</code></td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>echo … &amp;</code>, <code>wait $!</code>, <code>$?</code></td>
+<td>⭐ <code>Wait command</code> / <code>Exited with status 0</code></td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>sleep 5</code></td>
+<td><code>Wait for 5 seconds</code> → 5 วิ → <code>Completed</code> (⚠️ แก้ <code>“ ”</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1920-lab-10-lab-หน้า-14">19–20. Lab 10 (Lab หน้า 1–4)</h2>
+<ul>
+<li>⭐ สร้าง + รัน <strong>test1.sh–test27.sh</strong> → snapshot โค้ด+output → <strong>อธิบายว่าแต่ละตัวทำอะไร</strong> → รวม PDF เดียว <strong><code>6887xxx_lab10.pdf</code></strong> → MyCourses ภายในเที่ยงคืน 15 ต.ค.</li>
+<li>ต้องแก้ก่อนรัน: test8 (<code>#!</code>), test11 (echo ซ้ำ), test13/27 (อัญประกาศโค้ง), test24 (<code>;</code> ก่อน then) | สร้าง book.txt 4 บรรทัดก่อน test21–23</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shell var</td>
+<td>Env var</td>
+<td>ไม่ส่งต่อ vs ส่งต่อ child (export)</td>
+</tr>
+<tr>
+<td><code>echo X</code></td>
+<td><code>echo $X</code></td>
+<td>ชื่อ vs ค่า</td>
+</tr>
+<tr>
+<td><code>'…'</code></td>
+<td><code>&quot;…&quot;</code></td>
+<td>ไม่แทนค่า vs แทนค่า</td>
+</tr>
+<tr>
+<td><code>$txt[0]</code></td>
+<td><code>${txt[0]}</code></td>
+<td><code>a[0]</code> vs <code>a</code></td>
+</tr>
+<tr>
+<td><code>-eq</code></td>
+<td><code>=</code></td>
+<td>ตัวเลข vs string</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td><code>-z</code></td>
+<td>ยาว &gt; 0 vs = 0</td>
+</tr>
+<tr>
+<td><code>-d</code></td>
+<td><code>-f</code></td>
+<td>directory vs file</td>
+</tr>
+<tr>
+<td><code>-a</code> / <code>&amp;&amp;</code></td>
+<td><code>-o</code> / <code>||</code></td>
+<td>AND vs OR</td>
+</tr>
+<tr>
+<td><code>$$</code></td>
+<td><code>$!</code></td>
+<td>PID shell vs PID งาน <code>&amp;</code> ล่าสุด</td>
+</tr>
+<tr>
+<td><code>echo -n</code></td>
+<td><code>echo -e</code></td>
+<td>ไม่ขึ้นบรรทัด vs แปล <code>\n \t</code></td>
+</tr>
+<tr>
+<td><code>i in 1 2 3 4 5</code></td>
+<td><code>((i=1;i&lt;5;i++))</code></td>
+<td>5 รอบ vs 4 รอบ</td>
+</tr>
+<tr>
+<td>test19</td>
+<td>test20</td>
+<td>error ถ้ามีแล้ว vs เช็ก <code>-d</code> ก่อน</td>
+</tr>
+<tr>
+<td>sh</td>
+<td>bash</td>
+<td>standard UNIX vs default Linux</td>
+</tr>
+<tr>
+<td>csh <code>%</code></td>
+<td>sh/ksh/bash <code>$</code></td>
+<td>prompt</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../lecture4/short.html"><small>← บทก่อนหน้า</small><span>Lecture 4 — Memory Management</span></a><span></span></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-รายวิชา-สไลด์-13">รายวิชา</a></li><li><a href="#1-environment-variables-สไลด์-4">Environment variables</a></li><li><a href="#2-shell-vs-environment-variable-สไลด์-510">Shell vs Environment variable</a></li><li><a href="#3-shell-สไลด์-1112">Shell</a></li><li><a href="#4-17-ขั้น-สไลด์-13">17 ขั้น</a></li><li><a href="#5-ทำให้-script-รันได้-สไลด์-1417">ทำให้ script รันได้</a></li><li><a href="#6-ตัวแปร-quote-สไลด์-1820">ตัวแปร + quote</a></li><li><a href="#7-ตัวแปรพิเศษ-สไลด์-21">ตัวแปรพิเศษ</a></li><li><a href="#8-env-var-ใน-script-สไลด์-22">Env var ใน script</a></li><li><a href="#910-comment-array-สไลด์-2324">–10. Comment, Array</a></li><li><a href="#11-expression-สไลด์-2526">Expression</a></li><li><a href="#1216-if-case-while-for-argument-สไลด์-2731">–16. if / case / while / for / argument</a></li><li><a href="#17-test118-สไลด์-3240">test1–18</a></li><li><a href="#18-test1927-สไลด์-4149">test19–27</a></li><li><a href="#1920-lab-10-lab-หน้า-14">–20. Lab 10 (Lab หน้า 1–4)</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/lecture10", "u": "architecture/lecture10/short.html", "t": "⚡ สรุปสั้น · Lecture 10 – Shell Script (+ Lab 10)", "s": "ITDS211"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

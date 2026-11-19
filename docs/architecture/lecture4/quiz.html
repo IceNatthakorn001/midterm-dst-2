@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html class="snq snq-pro" lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz: Lecture 4 — Memory Management</title>
+<!-- quiz-pro template — build with build_quiz_pro.js (do not edit the BANK by hand) -->
+<style>
+:root {
+  --qp-font: "IBM Plex Sans Thai Looped", "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+  --qp-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  --qp-bg: #f5f1e8; --qp-surface: #fffdf8; --qp-surface-2: #efe9dc; --qp-sunken: #f7f3ea;
+  --qp-text: #24302a; --qp-text-2: #3e4a42; --qp-muted: #69725f;
+  --qp-border: #e3dccd; --qp-border-2: #cfc4ad;
+  --qp-accent: #2f5d46; --qp-accent-ink: #ffffff; --qp-accent-soft: #e3ece4;
+  --qp-ok: #2f7546; --qp-ok-bg: #e5f0e1; --qp-bad: #a9442b; --qp-bad-bg: #f8e4dc;
+  --qp-warn: #8a5a00; --qp-warn-bg: #f8edd2; --qp-info-bg: #e9eef3;
+  --qp-code-bg: #f1ece1; --qp-code-text: #2a2f2b;
+  --qp-shadow: 0 1px 2px rgba(70,56,30,.05), 0 10px 28px -16px rgba(70,56,30,.28);
+  --qp-t-recall: #2f6690; --qp-t-understand: #a0522d; --qp-t-apply: #3f7a3a; --qp-t-compare: #7048a8;
+  --qp-t-error: #b03a3a; --qp-t-calc: #9a3f6a; --qp-t-code: #23707a; --qp-t-fill: #4b56b0;
+  color-scheme: light;
+}
+/* dark: follow the OS when standalone; inside the study site (html.snq) follow its data-theme toggle only */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.snq) {
+    --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+    --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+    --qp-border: #2b362e; --qp-border-2: #3d4b40;
+    --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+    --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+    --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+    --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+    --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+    --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+  --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+  --qp-border: #2b362e; --qp-border-2: #3d4b40;
+  --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+  --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+  --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+  --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+  --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+  --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+  color-scheme: dark;
+}
+
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; background: var(--qp-bg); }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0 auto; max-width: 760px; padding: 0 16px 72px;
+  font-family: var(--qp-font); font-size: 17px; line-height: 1.65;
+  background: var(--qp-bg); color: var(--qp-text);
+  overflow-wrap: anywhere;
+}
+:root.snq body { background: var(--qp-bg); color: var(--qp-text); }
+@media (min-width: 720px) { body { font-size: 17.5px; } }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--qp-accent) 55%, transparent); outline-offset: 2px; }
+code, pre, kbd { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+code { font-family: var(--qp-mono); font-size: .9em; background: var(--qp-surface-2); padding: .05em .35em; border-radius: 6px; }
+kbd { font-family: var(--qp-mono); font-size: .75em; border: 1px solid var(--qp-border-2); border-bottom-width: 2px; border-radius: 5px; padding: 0 .35em; color: var(--qp-muted); background: var(--qp-surface); }
+
+/* header */
+.qp-head { padding: 26px 0 6px; }
+.qp-eyebrow { font-size: .8rem; letter-spacing: .02em; color: var(--qp-muted); font-weight: 600; }
+.qp-h1 { font-size: clamp(1.4rem, 4.6vw, 1.85rem); line-height: 1.35; margin: 4px 0 6px; font-weight: 700; color: var(--qp-text); }
+:root.snq .qp-h1 { color: var(--qp-text); }
+.qp-head .sub { color: var(--qp-muted); font-size: .92rem; line-height: 1.6; margin: 0 0 6px; }
+body.qp-run .qp-head { display: none; }
+
+/* generic */
+.qp-app { padding-top: 8px; }
+.qp-card { background: var(--qp-surface); border: 1px solid var(--qp-border); border-radius: 20px; padding: 20px; box-shadow: var(--qp-shadow); margin: 0 0 14px; min-width: 0; }
+@media (max-width: 420px) { .qp-card { padding: 16px 14px; border-radius: 16px; } }
+.qp-h2 { font-size: 1.12rem; line-height: 1.4; margin: 0 0 10px; font-weight: 700; }
+.qp-h3 { font-size: 1rem; margin: 18px 0 8px; font-weight: 700; color: var(--qp-text-2); }
+.qp-muted { color: var(--qp-muted); }
+.qp-small { font-size: .88rem; }
+.qp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.qp-spacer { flex: 1; }
+.qp-btn { display: inline-flex; align-items: center; justify-content: center; gap: .4em; min-height: 46px; padding: .5em 1.15em;
+  border-radius: 999px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); font-weight: 600; line-height: 1.3; text-align: center; }
+.qp-btn:hover:not(:disabled) { border-color: var(--qp-accent); }
+.qp-btn:disabled { opacity: .45; cursor: not-allowed; }
+.qp-btn-primary { background: var(--qp-accent); border-color: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.qp-btn-quiet { border-color: transparent; background: transparent; color: var(--qp-muted); font-weight: 500; }
+.qp-link { border: 0; background: none; padding: 6px 4px; color: var(--qp-accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+.qp-note { border-radius: 14px; padding: 10px 14px; margin: 10px 0; font-size: .94rem; line-height: 1.6; background: var(--qp-info-bg); }
+.qp-note.is-warn { background: var(--qp-warn-bg); }
+.qp-note.is-bad { background: var(--qp-bad-bg); }
+.qp-note.is-ok { background: var(--qp-ok-bg); }
+
+/* chips */
+.qp-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 10px; }
+.qp-type { --c: var(--qp-muted); display: inline-block; font-size: .78rem; font-weight: 700; line-height: 1.5; padding: 2px 10px; border-radius: 999px;
+  color: var(--c); background: var(--qp-surface-2); background: color-mix(in srgb, var(--c) 14%, var(--qp-surface)); white-space: nowrap; }
+.qp-type[data-t="recall"] { --c: var(--qp-t-recall); } .qp-type[data-t="understand"] { --c: var(--qp-t-understand); }
+.qp-type[data-t="apply"] { --c: var(--qp-t-apply); } .qp-type[data-t="compare"] { --c: var(--qp-t-compare); }
+.qp-type[data-t="error"] { --c: var(--qp-t-error); } .qp-type[data-t="calc"] { --c: var(--qp-t-calc); }
+.qp-type[data-t="code"] { --c: var(--qp-t-code); } .qp-type[data-t="fill"] { --c: var(--qp-t-fill); }
+.qp-topic { font-size: .82rem; color: var(--qp-muted); }
+.qp-retry-chip { font-size: .78rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--qp-warn-bg); color: var(--qp-warn); }
+
+/* start screen */
+.qp-stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.qp-modes { display: grid; gap: 10px; }
+.qp-mode { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; text-align: left; width: 100%; min-height: 64px;
+  padding: 12px 16px; border-radius: 16px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); }
+.qp-mode:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-mode:disabled { opacity: .55; cursor: not-allowed; }
+.qp-mode b { font-size: 1.02rem; }
+.qp-mode span { grid-column: 1; font-size: .86rem; color: var(--qp-muted); line-height: 1.45; }
+.qp-mode i { grid-column: 2; grid-row: 1 / span 2; font-style: normal; font-size: 1.3rem; color: var(--qp-accent); }
+.qp-mode.is-main { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-opts { display: grid; gap: 4px; margin-top: 6px; }
+.qp-check { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 10px 6px; min-height: 48px; border-radius: 12px; cursor: pointer; line-height: 1.5; }
+.qp-check:hover { background: var(--qp-sunken); }
+.qp-check input { width: 1.25em; height: 1.25em; margin: .2em 0 0; accent-color: var(--qp-accent); }
+.qp-check small { display: block; color: var(--qp-muted); font-size: .84rem; }
+.qp-check.is-on { background: var(--qp-ok-bg); }
+.qp-srs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 8px 0 4px; }
+.qp-stat { background: var(--qp-sunken); border: 1px solid var(--qp-border); border-radius: 14px; padding: 10px 12px; }
+.qp-stat b { display: block; font-size: 1.35rem; line-height: 1.2; }
+.qp-stat span { font-size: .82rem; color: var(--qp-muted); }
+.qp-boxes { display: flex; gap: 4px; align-items: flex-end; height: 46px; margin-top: 8px; }
+.qp-boxes div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; font-size: .7rem; color: var(--qp-muted); height: 100%; }
+.qp-boxes div i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--qp-accent); opacity: .75; min-height: 2px; }
+.qp-hist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.qp-hist span { font-size: .8rem; padding: 2px 9px; border-radius: 999px; background: var(--qp-surface-2); color: var(--qp-text-2); }
+details.qp-how summary { cursor: pointer; color: var(--qp-accent); font-weight: 600; padding: 6px 0; }
+details.qp-how ul { margin: 6px 0 0; padding-left: 1.2em; font-size: .92rem; color: var(--qp-text-2); }
+
+/* brain dump */
+.qp-timer { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--qp-text-2); margin: 6px 0 10px; }
+.qp-tbar { flex: 1; height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-tbar i { display: block; height: 100%; background: var(--qp-accent); transition: width 1s linear; }
+.qp-ta { display: block; width: 100%; min-height: 220px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2);
+  background: var(--qp-sunken); color: var(--qp-text); line-height: 1.7; resize: vertical; }
+:root.snq .qp-ta { background: var(--qp-sunken); color: var(--qp-text); border: 1.5px solid var(--qp-border-2); border-radius: 14px; }
+.qp-ta:focus { outline: none; border-color: var(--qp-accent); }
+.qp-mine { white-space: pre-wrap; background: var(--qp-sunken); border: 1px dashed var(--qp-border-2); border-radius: 14px; padding: 10px 14px; max-height: 240px; overflow: auto; font-size: .94rem; color: var(--qp-text-2); }
+.qp-kps { display: grid; gap: 6px; margin: 8px 0; }
+.qp-kps .qp-check { border: 1px solid var(--qp-border); }
+.qp-tally { font-weight: 700; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+
+/* session bar */
+.qp-bar { padding: 10px 0 6px; }
+.qp-bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: .9rem; color: var(--qp-muted); }
+.qp-bar-row b { color: var(--qp-text); }
+.qp-time { font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 4px; }
+.qp-prog { height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; margin-top: 6px; }
+.qp-prog i { display: block; height: 100%; background: var(--qp-accent); border-radius: 9px; transition: width .3s; }
+.qp-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+.qp-grid button { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text-2); font-size: .85rem; font-variant-numeric: tabular-nums; padding: 0; }
+.qp-grid button.is-cur { border: 2px solid var(--qp-accent); color: var(--qp-accent); font-weight: 700; }
+.qp-grid button.is-ok { background: var(--qp-ok-bg); border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-grid button.is-bad { background: var(--qp-bad-bg); border-color: var(--qp-bad); color: var(--qp-bad); }
+.qp-grid button.is-shaky { background: var(--qp-warn-bg); border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-grid-foot { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--qp-muted); margin: -2px 0 8px; align-items: center; }
+.qp-grid-foot i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+/* question */
+.qp-q { font-size: 1.1em; font-weight: 600; line-height: 1.6; margin: 0 0 14px; }
+.qp-code { margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; background: var(--qp-code-bg); color: var(--qp-code-text); border: 1px solid var(--qp-border);
+  font-family: var(--qp-mono); font-size: .84em; line-height: 1.55; white-space: pre; overflow-x: auto; tab-size: 4; max-width: 100%; overflow-wrap: normal; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.qp-choices { display: grid; gap: 10px; }
+.qp-choice { display: grid; grid-template-columns: 2em 1fr; gap: 10px; align-items: start; width: 100%; text-align: left; min-height: 54px;
+  padding: 11px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); line-height: 1.55;
+  transition: border-color .15s, background .15s, transform .08s; }
+.qp-choice:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-choice:active:not(:disabled) { transform: translateY(1px); }
+.qp-choice:disabled { cursor: default; }
+.qp-letter { display: inline-grid; place-items: center; width: 2em; height: 2em; border-radius: 50%; background: var(--qp-surface-2); font-weight: 700; font-size: .92em; line-height: 1; }
+.qp-ctext { padding-top: .12em; min-width: 0; }
+.qp-choice.is-picked { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-choice.is-picked .qp-letter { background: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-choice.is-correct { border-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-choice.is-correct .qp-letter { background: var(--qp-ok); color: var(--qp-surface); }
+.qp-choice.is-wrong { border-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-choice.is-wrong .qp-letter { background: var(--qp-bad); color: var(--qp-surface); }
+.qp-choice.is-dim { opacity: .62; }
+.qp-gate { text-align: center; padding: 18px 12px; border: 1.5px dashed var(--qp-border-2); border-radius: 16px; background: var(--qp-sunken); }
+.qp-gate p { margin: 0 0 12px; color: var(--qp-text-2); font-size: .95rem; }
+
+/* confidence */
+.qp-conf { margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--qp-sunken); border: 1px solid var(--qp-border); }
+.qp-conf-q { font-weight: 600; font-size: .95rem; margin: 0 0 8px; }
+.qp-conf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qp-cbtn { min-height: 50px; border-radius: 12px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); font-weight: 700; padding: 6px 4px; line-height: 1.25; }
+.qp-cbtn small { display: block; font-weight: 400; font-size: .72rem; color: var(--qp-muted); }
+.qp-cbtn[data-c="sure"] { border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-cbtn[data-c="unsure"] { border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-cbtn[data-c="guess"] { color: var(--qp-text-2); }
+.qp-cbtn:hover { filter: brightness(1.05); background: var(--qp-sunken); }
+
+/* feedback */
+.qp-fb { margin-top: 16px; }
+.qp-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-weight: 700; font-size: 1.05rem; padding: 10px 14px; border-radius: 14px; }
+.qp-verdict.is-ok { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-verdict.is-bad { background: var(--qp-bad-bg); color: var(--qp-bad); }
+.qp-verdict small { font-weight: 500; font-size: .85rem; color: var(--qp-text-2); }
+.qp-ex { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.qp-ex li { padding: 9px 12px 9px 14px; border-radius: 12px; border-left: 4px solid var(--qp-border-2); background: var(--qp-sunken); font-size: .95rem; line-height: 1.6; }
+.qp-ex li.is-correct { border-left-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-ex li.is-wrong { border-left-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-ex li b { display: block; font-size: .92rem; }
+.qp-ex li em { font-style: normal; font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--qp-surface); margin-left: 6px; vertical-align: 1px; }
+.qp-reread { margin-top: 10px; font-size: .92rem; color: var(--qp-text-2); padding: 8px 12px; border-radius: 12px; border: 1px dashed var(--qp-border-2); }
+.qp-reread b { color: var(--qp-accent); }
+
+/* fill */
+.qp-ftext { font-size: 1.02em; line-height: 2.55; margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; background: var(--qp-sunken); }
+.qp-slot { display: inline-block; min-width: 84px; min-height: 2em; padding: 0 10px; margin: 0 3px; line-height: 1.85; text-align: center; vertical-align: middle;
+  border: 2px dashed var(--qp-border-2); border-radius: 10px; background: var(--qp-surface); color: var(--qp-text); font-weight: 600; }
+.qp-slot.is-filled { border-style: solid; border-color: var(--qp-t-fill); cursor: grab; touch-action: none; user-select: none; }
+.qp-slot.is-target, .qp-slot.is-over { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-slot.is-correct { border-style: solid; border-color: var(--qp-ok); background: var(--qp-ok-bg); cursor: default; }
+.qp-slot.is-wrong { border-style: solid; border-color: var(--qp-bad); background: var(--qp-bad-bg); cursor: default; text-decoration: line-through; }
+.qp-slot-ans { color: var(--qp-ok); font-weight: 700; font-size: .92rem; margin-right: 4px; }
+.qp-bank-label { color: var(--qp-muted); font-size: .85rem; margin: 0 0 6px; }
+.qp-bank { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--qp-border); background: var(--qp-surface); min-height: 60px; }
+.qp-chip { padding: 7px 14px; min-height: 42px; border-radius: 999px; border: 1.5px solid var(--qp-t-fill); background: var(--qp-surface); color: var(--qp-text);
+  cursor: grab; touch-action: none; user-select: none; font-weight: 600; line-height: 1.4; }
+.qp-chip.is-sel { background: var(--qp-t-fill); color: var(--qp-surface); }
+.qp-chip.is-used { visibility: hidden; }
+.qp-chip.is-ghost { position: fixed; z-index: 99; pointer-events: none; transform: translate(-50%, -50%); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.qp-fill-wait { margin-top: 12px; font-size: .9rem; color: var(--qp-muted); }
+
+/* nav */
+.qp-nav { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.qp-nav .qp-btn { min-width: 110px; }
+.qp-keys { display: none; margin-top: 10px; font-size: .8rem; color: var(--qp-muted); line-height: 2; }
+.qp-kh { display: none; }
+@media (hover: hover) and (pointer: fine) { .qp-keys { display: block; } .qp-kh { display: inline; } }
+
+/* results */
+.qp-score { text-align: center; padding: 6px 0 4px; }
+.qp-score .qp-big { font-size: clamp(2.4rem, 11vw, 3.2rem); font-weight: 700; line-height: 1.1; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+.qp-score .qp-big small { font-size: .45em; color: var(--qp-muted); font-weight: 600; }
+.qp-bars { display: grid; gap: 10px; }
+.qp-bar-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
+.qp-bar-item .qp-meter { grid-column: 1 / -1; height: 8px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-bar-item .qp-meter i { display: block; height: 100%; border-radius: 9px; background: var(--qp-ok); }
+.qp-bar-item .qp-meter i.is-mid { background: var(--qp-warn); }
+.qp-bar-item .qp-meter i.is-low { background: var(--qp-bad); }
+.qp-bar-item .qp-hint { grid-column: 1 / -1; font-size: .86rem; color: var(--qp-text-2); }
+.qp-bar-item .qp-num { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .92rem; }
+.qp-matrix { display: grid; grid-template-columns: minmax(64px, auto) 1fr 1fr; gap: 6px; font-size: .9rem; }
+.qp-matrix > div { border-radius: 12px; padding: 8px 10px; min-width: 0; }
+.qp-mh { font-weight: 700; color: var(--qp-muted); font-size: .82rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.qp-cell b { display: block; font-size: 1.4rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.qp-cell span { font-size: .8rem; line-height: 1.35; display: block; }
+.qp-cell.c-know { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-cell.c-danger { background: var(--qp-bad-bg); color: var(--qp-bad); outline: 2px solid var(--qp-bad); outline-offset: -2px; }
+.qp-cell.c-shaky { background: var(--qp-warn-bg); color: var(--qp-warn); }
+.qp-cell.c-gap { background: var(--qp-surface-2); color: var(--qp-text-2); }
+.qp-revs { display: grid; gap: 8px; }
+details.qp-rev { border: 1px solid var(--qp-border); border-radius: 14px; background: var(--qp-surface); }
+details.qp-rev > summary { cursor: pointer; padding: 10px 14px; line-height: 1.55; list-style: none; display: grid; gap: 4px; }
+details.qp-rev > summary::-webkit-details-marker { display: none; }
+details.qp-rev > summary .qp-chips { margin: 0; }
+details.qp-rev[open] > summary { border-bottom: 1px solid var(--qp-border); }
+.qp-rev-body { padding: 10px 14px 12px; font-size: .94rem; }
+.qp-rev-body p { margin: 4px 0; }
+.qp-grp { font-weight: 700; font-size: .92rem; margin: 14px 0 6px; display: flex; align-items: center; gap: 8px; }
+.qp-grp i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.qp-model { white-space: pre-wrap; background: var(--qp-ok-bg); border-radius: 14px; padding: 12px 14px; line-height: 1.7; margin: 10px 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media print { .qp-nav, .qp-bar, .qp-grid, .qp-keys { display: none; } }
+</style>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="../../assets/quizpro.css"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>"><style>:root{--sn-accent:#b0552c}</style>
+</head>
+<body>
+<nav class="snq-bar"><a class="snq-home" href="../../index.html" aria-label="หน้าแรก"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></a><a href="index.html">← กลับไปอ่านสรุป</a><span class="snq-sep">/</span><a href="../index.html">🖥️ ITDS211</a><span class="snq-sep">/</span><a href="../../index.html">หน้าแรก</a></nav>
+<header class="qp-head">
+  <div class="qp-eyebrow">แบบทดสอบ · ITDS211 Computer Architecture and Operating Systems</div>
+  <h1 class="qp-h1">Lecture 4 — Memory Management</h1>
+  <div class="sub">40 ข้อ แบ่งเป็นความจำ 6 ข้อ ความเข้าใจ 8 ข้อ การนำไปใช้ 6 ข้อ แยกคู่สับสน 4 ข้อ หาจุดผิด 2 ข้อ การคำนวณ 10 ข้อ เติมคำ 4 ข้อ — นึกเองก่อน · บอกความมั่นใจก่อนดูเฉลย · ข้อที่พลาดวนกลับมาแก้ตัว · นัดรอบทบทวนให้ (คะแนนนับจากการตอบครั้งแรก)</div>
+</header>
+<main id="qp-app" class="qp-app"></main>
+<noscript><p>ต้องเปิด JavaScript เพื่อทำแบบทดสอบนี้</p></noscript>
+
+<script>
+(function () {
+'use strict';
+const BANK = {"id":"arch-l4","title":"Lecture 4 — Memory Management","subject":"ITDS211 Computer Architecture and Operating Systems","keypoints":["Memory hierarchy: cache (MB, เร็ว แพง volatile) → RAM (GB, volatile) → disk/SSD (TB, ช้า ถูก non-volatile); memory manager = track / allocate / deallocate","ไม่มี abstraction: address เป็น absolute, มีได้ process เดียว, เขียนทับ OS ได้ → จึงต้องมี address space ของแต่ละ process","Base/limit: physical = address + base, ถ้า address ≥ limit → fault; ข้อเสียคือบวก+เทียบทุก reference (การบวกช้าเพราะ carry-propagation)","Swapping ย้าย process ทั้งตัวเข้า-ออก disk → เกิด hole; compaction รวม hole ได้แต่เปลือง CPU time","จำที่ว่างด้วย bitmap (1 บิตต่อ unit หา 0 ติดกัน k ตัวช้า) หรือ linked list (P/H, start, length รวม hole เมื่อ process จบ)","เลือก hole: first fit, next fit (ค้นต่อจากที่ค้าง), best fit (เล็กสุดที่พอ ช้า), worst fit (ใหญ่สุด), quick fit (list แยกตามขนาด merge แพง)","Virtual memory: address space แบ่งเป็น page, ไม่ต้องอยู่ใน RAM ครบ, MMU แปลง virtual → physical; page ที่ไม่ถูก map → page fault","Paging: page # = addr ÷ page size, offset คัดลอกตรง, physical = frame × page size + offset; page table entry มี 6 field","TLB = associative memory ใน MMU เทียบทุก entry พร้อมกัน: hit ได้ frame ทันที, ผิดสิทธิ์ = protection fault, miss = lookup page table แล้วแทน entry","Multilevel page table แบ่ง 32 บิตเป็น PT1 10 + PT2 10 + offset 12; inverted page table มี 1 entry ต่อ frame แต่ต้องค้นทั้งตาราง","Page replacement เป้าหมาย lowest page fault rate: Optimal (benchmark ทำจริงไม่ได้), FIFO, LRU (ดีแต่ทำยาก), NRU 4 class จาก R/M","Second-chance/Clock ดู R bit ให้โอกาสอีกรอบ; NFU บวก R เข้า counter (ไม่เคยลืม) → Aging shift ขวาแล้วใส่ R ซ้ายสุด","Working set = page ที่ process กำลังใช้ ต้องอยู่ใน memory ไม่งั้น thrashing; R = 0 และ age &gt; τ → เอาออก"],"feynman":{"prompt":"อธิบายให้เพื่อนที่ไม่ได้เรียนฟังว่า virtual memory กับ paging ทำงานยังไง ตั้งแต่โปรแกรมสร้าง virtual address จนได้ physical address และถ้า page ไม่อยู่ใน memory จะเกิดอะไรขึ้น","model":"โปรแกรมไม่ได้ใช้ที่อยู่จริงใน RAM ตรง ๆ แต่ใช้ virtual address ซึ่ง address space ของโปรแกรมถูกหั่นเป็นก้อนขนาดเท่ากันเรียกว่า page ส่วน RAM ก็ถูกหั่นเป็น page frame ขนาดเดียวกัน แต่จำนวน page กับ frame ไม่จำเป็นต้องเท่ากัน และไม่ต้องมีทุก page อยู่ใน RAM พร้อมกัน\n\nเวลาโปรแกรมสร้าง address มันจะไปที่ MMU ก่อน MMU แบ่ง address เป็นเลข page กับ offset เช่น page 4 KB ที่อยู่ 13000 คือ page 3 offset 712 แล้วดูใน page table ว่า page 3 อยู่ frame ไหน ถ้า present bit เป็น 1 และอยู่ frame 5 ก็ได้ physical = 5 × 4096 + 712 = 21192 โดย offset ถูกคัดลอกไปตรง ๆ เพื่อให้เร็ว MMU มี TLB เก็บการแปลที่ใช้บ่อยไว้ ไม่ต้องอ่าน page table ใน memory ทุกครั้ง\n\nถ้า page นั้นไม่ได้ map (absent) MMU จะ trap ไปหา OS เรียกว่า page fault OS เลือก frame ที่ไม่ค่อยถูกใช้ เขียนกลับ disk ถ้าถูกแก้ แล้วโหลด page ที่ต้องการเข้ามา แก้ map แล้ว restart คำสั่ง การเลือกว่าจะเอา page ไหนออกคือหน้าที่ของ page replacement algorithm เช่น FIFO, LRU, Clock","checklist":["address space แบ่งเป็น page, RAM แบ่งเป็น page frame ขนาดเท่ากัน","ไม่ต้องมีทุก page อยู่ใน RAM พร้อมกัน","MMU แปลง virtual → physical ด้วย page table (page # → frame, offset คัดลอกตรง)","present/absent bit = 0 → page fault → OS โหลด page แล้ว restart คำสั่ง","TLB ช่วยให้แปลงเร็วโดยไม่ต้องผ่าน page table","ตอน memory เต็มต้องใช้ page replacement algorithm เลือก page ออก"]},"review":{"4. Base และ Limit registers ทำงานยังไง?":"physical = address + base; address ≥ limit → fault (สไลด์ 11–12)","9. Paging: page กับ page frame แปลง address ยังไง?":"page # = addr ÷ 4096, offset = addr mod 4096, physical = frame × 4096 + offset (สไลด์ 26–27)","12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)":"PT1 10 / PT2 10 / offset 12 และ inverted = 1 entry ต่อ frame (สไลด์ 35–38)"},"questions":[{"id":"szdud5","type":"recall","topic":"1. Memory hierarchy คืออะไร และ memory manager ทำอะไร?","q":"ตาม memory hierarchy ในสไลด์ ชั้นใดเป็น non-volatile ขนาดหลาย TB?","choices":["Main memory / RAM","Registers ใน CPU","Cache memory (MB)","Magnetic disk / SSD"],"correct":3,"explain":["ผิด — RAM มีขนาดหลาย GB และเป็น volatile (ข้อมูลหายเมื่อปิดเครื่อง)","ผิด — registers อยู่บนสุดของพีระมิด เล็กที่สุดและแพงที่สุดต่อบิต ไม่ใช่ TB","ผิด — cache มีขนาดหลาย MB เร็วมาก แพง และเป็น volatile","ถูก — สไลด์ 5: a few TB of slow, cheap, non-volatile magnetic disk or SSD"]},{"id":"114qj2n","type":"recall","topic":"3. Address space คืออะไร?","q":"Address space ตามนิยามในสไลด์คืออะไร?","choices":["ชุด address ที่ process ใช้ได้","ชุด frame ว่างทั้งหมดใน RAM","ช่วง address ที่ OS จองไว้เอง","จำนวนบิตของ physical addr"],"correct":0,"explain":["ถูก — สไลด์ 10: the set of memory addresses that a process can use และแต่ละ process มีของตัวเอง","ผิด — frame ว่างใน RAM เป็นเรื่องที่ memory manager ติดตาม ไม่ใช่นิยามของ address space","ผิด — address space เป็นของแต่ละ process ไม่ใช่พื้นที่ที่ OS จองไว้ใช้เอง","ผิด — address space คือชุดของ address ไม่ใช่ความกว้างบิตของ physical address"]},{"id":"cqva5x","type":"recall","topic":"12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)","q":"Multilevel page table ในสไลด์แบ่ง virtual address 32 บิตอย่างไร?","choices":["PT1 8, PT2 12, Offset 12 บิต","PT1 12, PT2 10, Offset 10 บิต","PT1 10, PT2 10, Offset 12 บิต","PT1 16, PT2 4, Offset 12 บิต"],"correct":2,"explain":["ผิด — แบ่งแบบนี้ PT1 มีแค่ 256 entries ซึ่งไม่ตรงกับ K = 2^10 = 1024 ในสไลด์","ผิด — สลับ offset กับ PT1; offset ต้องเป็น 12 บิตเพราะ page 4 KB = 2^12","ถูก — สไลด์ 35: 10-bit PT1, 10-bit PT2 และ 12-bit Offset (รวม 32 บิต)","ผิด — แบบนี้ second-level table มีแค่ 16 entries ไม่ใช่ 1024 ตามสไลด์"]},{"id":"1juwr0x","type":"recall","topic":"15. NRU (Not Recently Used)","q":"ใน NRU page ที่ R = 0 และ M = 1 อยู่ class ใด?","choices":["Class 2","Class 1","Class 3","Class 0"],"correct":1,"explain":["ผิด — Class 2 = referenced, not modified (R = 1, M = 0) สลับ R กับ M","ถูก — สไลด์ 42: Class 1 = not referenced, modified","ผิด — Class 3 = referenced, modified (R = 1, M = 1)","ผิด — Class 0 = not referenced, not modified (R = 0, M = 0)"]},{"id":"v4j2h9","type":"recall","topic":"23. ตารางสรุปอัลกอริทึมทั้งหมด","q":"ตารางสรุปสไลด์ 54 บอกว่า algorithm ใด \"Not implementable, but useful as a benchmark\"?","choices":["Aging","WSClock","Optimal","Clock"],"correct":2,"explain":["ผิด — Aging = Efficient algorithm that approximates LRU well","ผิด — WSClock = Good efficient algorithm","ถูก — Optimal ต้องรู้อนาคตจึงทำจริงไม่ได้ แต่ใช้เป็นมาตรฐานเทียบ","ผิด — Clock = Realistic (ใช้งานจริงได้)"]},{"id":"ckgg8z","type":"recall","topic":"22. Working Set","q":"การเริ่ม process ด้วย 0 page แล้วโหลดเฉพาะที่ต้องใช้ เรียกว่าอะไร?","choices":["Demand paging","Pre-paging","Working set","Swapping in"],"correct":0,"explain":["ถูก — สไลด์ 50: start up processes with 0 pages and only load what's needed = demand paging","ผิด — prepaging คือโหลด working set ไว้ก่อนให้ process รัน (ตรงข้ามกัน)","ผิด — working set คือชุด page ที่ process กำลังใช้ ไม่ใช่ชื่อวิธีโหลด page","ผิด — swapping นำ process เข้ามาทั้งตัว (in its entirety) ไม่ใช่โหลดทีละ page ที่ต้องใช้"]},{"id":"1mpfkde","type":"understand","topic":"2. ถ้า \"ไม่มี memory abstraction\" จะเกิดอะไรขึ้น?","q":"ถ้าไม่มี memory abstraction ทำไมการวางโปรแกรม 2 ตัวต่อกันใน memory จึงพัง?","choices":["disk ช้าเกินกว่าจะ swap ได้ทัน","CPU รันได้แค่ทีละหนึ่งคำสั่งเท่านั้น","RAM ไม่พอเก็บโปรแกรมทั้งสองตัว","address เป็น absolute จึงชี้ผิดที่"],"correct":3,"explain":["ผิด — ความเร็ว disk ไม่เกี่ยว แม้โหลดทั้งคู่ไว้ใน RAM ก็ยังกระโดดผิดที่","ผิด — การรันทีละคำสั่งไม่ได้ทำให้ address ชี้ผิด ปัญหาอยู่ที่ address แบบ absolute","ผิด — ปัญหาไม่ใช่ขนาด RAM แต่เป็นการที่ address ไม่ถูกแปลตามตำแหน่งที่โหลด","ถูก — สไลด์ 9: all memory addresses are absolute เช่น JMP 28 ของโปรแกรมที่สองไปโดนคำสั่งของโปรแกรมแรก"]},{"id":"1ugl2lh","type":"understand","topic":"4. Base และ Limit registers ทำงานยังไง?","q":"ข้อเสียของ base และ limit registers ตามสไลด์ 12 คืออะไร?","choices":["ต้องเก็บ page table ใน memory","ต้องบวกทุกครั้ง ช้าเพราะ carry","ต้องเทียบ limit ทุกครั้งซึ่งช้ามาก","ย้ายโปรแกรมไปที่อื่นไม่ได้เลยสักที่"],"correct":1,"explain":["ผิด — page table เป็นปัญหาของ paging ไม่ใช่ base/limit","ถูก — ต้องบวกและเทียบทุก memory reference; การเทียบทำได้เร็ว แต่การบวกช้าเพราะ carry-propagation time","ผิด — สไลด์บอกตรงข้าม: comparisons can be done fast ส่วนที่ช้าคือการบวก","ผิด — base register ทำให้วางโปรแกรมที่ตำแหน่งใดก็ได้ ข้อเสียคือต้นทุนการบวก"]},{"id":"1hlpcku","type":"understand","topic":"5. Swapping คืออะไร และสร้างปัญหาอะไร?","q":"ทำไม memory compaction จึงไม่ค่อยถูกนำมาใช้ แม้จะรวม hole ได้?","choices":["ต้องใช้ CPU time มากในการย้าย","ทำได้เฉพาะ process ที่ขนาดคงที่","ทำให้ข้อมูลใน process เสียหาย","ต้องใช้ disk เพิ่มเป็นสองเท่า"],"correct":0,"explain":["ถูก — สไลด์ 14: it is not usually done because it requires a lot of CPU time (ต้องย้ายทุก process ลงล่าง)","ผิด — สไลด์ไม่ได้จำกัดแบบนั้น เรื่อง process ขนาดคงที่เป็นอีกประเด็นของการจัดสรร","ผิด — การย้าย process ไม่ได้ทำให้ข้อมูลเสีย ปัญหาคือเปลืองเวลา","ผิด — compaction ทำใน memory ไม่ได้ใช้ disk เพิ่ม"]},{"id":"1590kqt","type":"understand","topic":"8. Virtual memory คืออะไร และ MMU ทำหน้าที่อะไร?","q":"ใน virtual memory ถ้าโปรแกรมอ้างถึงส่วนที่ไม่อยู่ใน physical memory จะเกิดอะไร?","choices":["MMU ส่ง address ออก bus ตรง","CPU ข้ามไปทำคำสั่งถัดไปทันทีเลย","OS ดึงส่วนนั้นมาแล้ว re-execute","โปรแกรมถูก terminate ทันทีเลย"],"correct":2,"explain":["ผิด — virtual address ไม่ไปที่ memory bus ตรง ๆ ต้องผ่าน MMU เสมอ (สไลด์ 25)","ผิด — คำสั่งไม่ได้ถูกข้าม แต่ถูกทำใหม่หลังโหลด page มาแล้ว","ถูก — สไลด์ 24: OS is alerted to go getting the missing piece and re-execute the instruction","ผิด — กรณีนี้เป็นเรื่องปกติของ virtual memory ไม่ใช่ error ที่ต้องปิดโปรแกรม"]},{"id":"1ugmvp7","type":"understand","topic":"11. TLB ช่วยให้แปลง address เร็วขึ้นยังไง?","q":"ทำไมการเก็บ page table ทั้งหมดไว้ใน memory จึงช้า?","choices":["page table ต้องอยู่บน disk เสมอ","ต้องอ่าน memory 2 ครั้งต่อการใช้","ต้องบวก base ก่อนอ่านตารางทุกครั้ง","ต้องค้นทุก entry ของตารางทุกครั้ง"],"correct":1,"explain":["ผิด — สไลด์พูดถึงการเก็บ page table ใน memory ไม่ใช่บน disk เหตุผลที่ช้าคืออ่าน memory 2 รอบ","ถูก — สไลด์ 31: slow since read memory twice (อ่าน page table 1 ครั้ง + อ่านข้อมูลจริงอีก 1 ครั้ง)","ผิด — การบวก base เป็นเรื่องของ base/limit registers ไม่ใช่ page table","ผิด — page table ใช้เลข page เป็น index ตรง ๆ การค้นทั้งตารางเป็นปัญหาของ inverted page table"]},{"id":"lojy60","type":"understand","topic":"12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)","q":"ข้อเสียร้ายแรงของ inverted page table คืออะไร?","choices":["ใช้ได้เฉพาะ address ขนาด 16 บิต","ต้องมี top-level table เพิ่มอีกชั้น","ตารางใหญ่มากเพราะมี entry ทุก page","H/W ต้องค้นทั้งตารางเพื่อแปลง address"],"correct":3,"explain":["ผิด — inverted page table ใช้กับ address space ใหญ่มาก (เช่น 2^52 pages) ไม่ใช่ 16 บิต","ผิด — top-level table เป็นของ multilevel page table ไม่ใช่ inverted","ผิด — ตรงข้าม: inverted มี entry ต่อ page frame จริงจึงเล็กลงมาก ตารางใหญ่คือแบบ traditional","ถูก — สไลด์ 38: translation becomes much harder because H/W must search the entire inverted page table"]},{"id":"t2jfgn","type":"understand","topic":"20. NFU (Not Frequently Used)","q":"ปัญหาหลักของ NFU คืออะไร และ Aging แก้อย่างไร?","choices":["NFU ไม่เคยลืม Aging จึง shift ขวา","NFU ไม่มี counter Aging จึงเพิ่มให้","NFU ใช้ R กับ M Aging จึงตัด M ทิ้ง","NFU ลืมเร็วไป Aging บวก R ทางขวา"],"correct":0,"explain":["ถูก — สไลด์ 48–49: NFU never forgets anything; Aging shift counter ขวา 1 บิตก่อน แล้วใส่ R ที่บิตซ้ายสุด","ผิด — NFU มี software counter ต่อ page อยู่แล้ว เริ่มที่ 0","ผิด — R กับ M ใช้แบ่ง class ใน NRU ส่วน NFU ใช้แค่ R bit บวกเข้า counter","ผิด — NFU ไม่ได้ลืมเร็ว (ตรงข้าม) และการบวก R ทางขวาคือวิธีของ NFU เอง"]},{"id":"1ulltoc","type":"understand","topic":"22. Working Set","q":"ทำไม working set ของ process ต้องอยู่ใน memory?","choices":["ไม่งั้น page table จะใหญ่เกินไป","ไม่งั้นต้องทำ compaction ทุกครั้ง","ไม่งั้น TLB เกิด protection fault","ไม่งั้น fault หนักจนเกิด thrashing"],"correct":3,"explain":["ผิด — ขนาด page table ขึ้นกับขนาด address space ไม่ใช่ว่า working set อยู่ใน memory หรือไม่","ผิด — compaction เป็นเรื่องของ swapping และ hole ไม่ใช่ working set","ผิด — protection fault เกิดเมื่อเจอใน TLB แต่ผิดสิทธิ์ ไม่เกี่ยวกับ working set","ถูก — สไลด์ 50: working set must be in memory, otherwise you'll experience heavy faulting (thrashing)"]},{"id":"1ia8mqk","type":"apply","topic":"4. Base และ Limit registers ทำงานยังไง?","q":"base = 20000, limit = 8000 — process สร้าง address ใดแล้ว CPU ตรวจพบ fault?","choices":["4000","8000","7999","0"],"correct":1,"explain":["ผิด — 4000 &lt; 8000 ผ่าน ได้ physical 24000","ถูก — CPU เช็กว่า address ≥ limit หรือไม่ (equal to or greater) 8000 ≥ 8000 → fault","ผิด — 7999 &lt; 8000 ผ่าน แล้วบวก base ได้ physical 27999","ผิด — 0 &lt; 8000 ผ่าน ได้ physical 20000 = จุดเริ่มของโปรแกรม"]},{"id":"117f8zf","type":"apply","topic":"9. Paging: page กับ page frame แปลง address ยังไง?","q":"ใช้ page table ด้านล่าง virtual address 22000 จะได้ผลอะไร?","code":"page table (page 4 KB = 4096 bytes, X = absent)\npage 0 → frame 3\npage 1 → frame 7\npage 2 → X\npage 3 → frame 5\npage 4 → frame 0\npage 5 → X\npage 6 → frame 2\npage 7 → frame 1","choices":["physical 1520","physical 9712","เกิด page fault","physical 22000"],"correct":2,"explain":["ผิด — คิดว่า page ที่ absent มี frame 0 จึงได้ 0 × 4096 + 1520 แต่ page ที่ไม่ถูก map ต้อง fault","ผิด — ปัดเลข page ขึ้นเป็น 6 (frame 2) → 8192 + 1520 แต่ต้องปัดเศษทิ้งได้ page 5","ถูก — 22000 ÷ 4096 = 5 (เศษ 1520) → page 5 = X (absent) → MMU trap ไป OS = page fault","ผิด — ใช้ virtual address เป็น physical ตรง ๆ โดยไม่ผ่านการแปลของ MMU"]},{"id":"1jxzx2g","type":"apply","topic":"7. จะเลือก hole ไหนให้ process ใหม่? (First / Next / Best / Worst / Quick fit)","q":"hole เรียงใน list: 8, 15, 5, 12, 25, 10 KB — ขอ 9 KB ด้วย best fit ได้ hole ใด?","choices":["10 KB","25 KB","15 KB","5 KB"],"correct":0,"explain":["ถูก — best fit ค้นทั้ง list เลือก hole เล็กสุดที่ยังพอ: hole ที่ ≥ 9 คือ 15, 12, 25, 10 → เล็กสุด 10","ผิด — 25 คือ hole ใหญ่สุด = worst fit","ผิด — 15 คือ hole แรกที่พอ = first fit","ผิด — 5 เล็กสุดแต่ไม่พอ (adequate) สำหรับ 9 KB"]},{"id":"9pjvrv","type":"apply","topic":"7. จะเลือก hole ไหนให้ process ใหม่? (First / Next / Best / Worst / Quick fit)","q":"hole: 8, 15, 5, 12, 25, 10 KB ใช้ next fit ขอ 9 KB แล้วขอ 7 KB ต่อ ครั้งที่สองได้ hole ใด?","choices":["8 KB","6 KB","25 KB","12 KB"],"correct":3,"explain":["ผิด — 8 KB คือผลของ first fit ที่เริ่มค้นจากต้น list ใหม่ทุกครั้ง","ผิด — เศษ 6 KB เล็กกว่า 7 KB จึงใช้ไม่ได้ ต้องค้นต่อ","ผิด — 25 KB คือ hole ใหญ่สุด = worst fit","ถูก — ครั้งแรกได้ 15 (เหลือเศษ 6) next fit ค้นต่อจากตรงนั้น: 6 ไม่พอ, 5 ไม่พอ, 12 พอ → 12 KB"]},{"id":"5ttxgn","type":"apply","topic":"17. Second-Chance","q":"Second-chance: list (หัว→ท้าย) A(R=1) B(R=1) C(R=0) D(R=1) เกิด page fault — page ใดถูก evict?","choices":["A","C","D","B"],"correct":1,"explain":["ผิด — A เก่าสุด จะถูก evict ถ้าเป็น FIFO ล้วน แต่ R = 1 จึงได้โอกาสที่สอง","ถูก — A มี R = 1 → clear แล้วย้ายไปท้าย, B ก็เช่นกัน, C มี R = 0 → evict ทันที (list ใหม่: D A B + page ใหม่)","ผิด — ตรวจถึง C ก่อนแล้ว C มี R = 0 จึงไม่ต้องไปถึง D","ผิด — B มี R = 1 จึงถูก clear และย้ายไปท้าย list เหมือนเพิ่งโหลด"]},{"id":"182gs9o","type":"apply","topic":"22. Working Set","q":"CVT = 3000, τ = 500 — page ใดถูกเอาออกตามอัลกอริทึม working set?","code":"page  time of last use  R\nP0    2900              1\nP1    2300              0\nP2    2650              0\nP3    2100              1","choices":["P2","P0","P1","P3"],"correct":2,"explain":["ผิด — P2: R = 0 แต่ age = 350 ≤ 500 ยังไม่เกิน threshold","ผิด — P0: R = 1 → อัปเดตเป็น 3000 อยู่ใน working set","ถูก — P1: R = 0, age = 3000 − 2300 = 700 &gt; 500 → out!","ผิด — P3 มีเวลาเก่าสุดแต่ R = 1 → เขียน CVT 3000 ลง time of last use (อยู่ใน working set)"]},{"id":"tfhm0j","type":"compare","topic":"9. Paging: page กับ page frame แปลง address ยังไง?","q":"Page กับ page frame ต่างกันอย่างไร?","choices":["frame มีขนาดใหญ่กว่า page เสมอทุกระบบ","จำนวน page เท่ากับจำนวน frame เสมอ","page ฝั่ง virtual, frame ฝั่ง physical","page ฝั่ง physical, frame ฝั่ง virtual"],"correct":2,"explain":["ผิด — page กับ page frame โดยทั่วไปมีขนาดเท่ากัน","ผิด — สไลด์บอกว่าจำนวน page กับ page frame ไม่เท่ากัน (เช่น 16 pages vs 8 frames)","ถูก — สไลด์ 26: page = fixed-size unit ใน virtual address space, page frame = unit ที่คู่กันใน physical memory","ผิด — สลับฝั่งกัน: frame คือของฝั่ง physical memory"]},{"id":"161i0zk","type":"compare","topic":"11. TLB ช่วยให้แปลง address เร็วขึ้นยังไง?","q":"เจอ virtual page ใน TLB แต่การเข้าถึงขัดกับ protection bits จะเกิดอะไร?","choices":["page fault ปกติ","TLB miss ธรรมดา","thrashing ทันที","protection fault"],"correct":3,"explain":["ผิด — page fault คือ page ไม่อยู่ใน memory ไม่ใช่กรณีเจอแต่ผิดสิทธิ์","ผิด — TLB miss คือไม่เจอ virtual page ใน TLB แต่ข้อนี้เจอแล้ว","ผิด — thrashing คือเกิด page fault ถี่ ๆ ไม่ใช่ผลของการผิดสิทธิ์ครั้งเดียว","ถูก — สไลด์ 33: valid match found but conflict with protection bits → protection fault"]},{"id":"vm1hs9","type":"compare","topic":"13. Page replacement: ทำไมต้องมี และมีอัลกอริทึมอะไรบ้าง?","q":"Local กับ global page replacement ต่างกันอย่างไร?","choices":["local เอา page ของ process ตัวเองออก","local เอา page ของ process อื่นออกไป","global เลือก page ใน TLB เท่านั้นเลย","global ใช้กับ algorithm Optimal เท่านั้น"],"correct":0,"explain":["ถูก — สไลด์ 39: local = evict a page in the same process, global = evict a page of another process","ผิด — สลับนิยามกัน: เอา page ของ process อื่นออกคือ global","ผิด — global/local แบ่งตาม process เจ้าของ page ไม่ใช่ TLB","ผิด — local/global เป็นประเด็นแยกจากการเลือก algorithm"]},{"id":"1qxyuom","type":"compare","topic":"18. Clock","q":"Clock ต่างจาก Second-chance อย่างไรเมื่อเจอ page ที่ R = 1?","choices":["clock ตั้ง R กลับเป็น 1 อีกรอบ","clock แค่ clear R แล้วเลื่อนเข็ม","clock evict page นั้นทันทีเลย","clock ย้าย page ไปท้าย list"],"correct":1,"explain":["ผิด — ทั้งสองแบบ clear R (ตั้งเป็น 0) ไม่ใช่ตั้งเป็น 1","ถูก — สไลด์ 46: clock เก็บ frame เป็นวงกลม R = 1 → clear แล้ว advance hand ไม่ต้องย้าย page","ผิด — ทั้งสองแบบ evict เฉพาะ page ที่ R = 0","ผิด — การย้าย page ไปท้าย list คือวิธีของ second-chance (สไลด์ 45)"]},{"id":"8gj03o","type":"error","topic":"7. จะเลือก hole ไหนให้ process ใหม่? (First / Next / Best / Worst / Quick fit)","q":"ข้อใดผิดเกี่ยวกับอัลกอริทึมเลือก hole?","choices":["quick fit หา hole เร็วแต่ merge กับเพื่อนบ้านได้ช้า","worst fit เลือก hole ใหญ่สุดให้เศษที่เหลือยังใช้ได้","best fit เร็วกว่า first fit เพราะได้ hole พอดี","first fit แบ่ง hole เป็นของ process กับเศษว่าง"],"correct":2,"explain":["ผิด — ข้อความนี้ถูกต้อง: สไลด์ 21 quick fit หาเร็วมาก แต่การหาเพื่อนบ้านเพื่อ merge แพง","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 20 worst fit takes the largest hole so the new hole will be big enough to be useful","ถูก — ข้อนี้คือข้อที่ผิด: สไลด์ 20 บอกว่า best fit ช้ากว่า first fit เพราะต้องค้นทั้ง list ทุกครั้ง","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 19 hole ถูกแบ่งเป็น 2 ส่วน: one for the process and one for the unused memory"]},{"id":"17hkyye","type":"error","topic":"11. TLB ช่วยให้แปลง address เร็วขึ้นยังไง?","q":"ข้อใดผิดเกี่ยวกับ TLB?","choices":["entry มี virtual page, protection, frame","TLB miss ทำให้ MMU สร้าง page fault ทันที","TLB เทียบ virtual page กับทุก entry พร้อมกัน","TLB มักอยู่ใน MMU เรียก associative memory"],"correct":1,"explain":["ผิด — ข้อความนี้ถูกต้อง: สไลด์ 32 entry มี virtual page, modified bit, protection code, page frame และ valid bit","ถูก — ข้อนี้คือข้อที่ผิด: สไลด์ 33 เมื่อ miss MMU ทำ ordinary page table lookup แล้วแทน entry หนึ่งใน TLB","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 33 H/W เทียบ virtual page number กับทุก entry แบบ parallel","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 32 TLB is usually inside the MMU และบางทีเรียก associative memory"]},{"id":"14ppis9","type":"fill","topic":"10. Page table หน้าตาเป็นยังไง และแปลง address ทีละขั้นยังไง?","q":"เติมชื่อ field ของ page table entry ให้ตรงกับความหมายของค่า 1 (สไลด์ 29)","parts":["1 = read only → ","\u003cbr>1 = must be written to disk → ","\u003cbr>1 = page อยู่ใน memory → ","\u003cbr>1 = being referenced → ",""],"blanks":["Protection","Modified","Present/absent","Referenced"],"bank":["Modified","Present/absent","Valid/invalid","Caching disabled","Protection","Referenced"],"explain":"สไลด์ 29: Protection 1 = read only, Modified (dirty) 1 = ต้องเขียนลง disk, Present/absent 1 = present, Referenced 1 = กำลังถูกอ้างถึง — Caching disabled 1 = disabled และ Valid/invalid เป็น bit ใน TLB entry (สไลด์ 32)"},{"id":"1xesqv","type":"fill","topic":"23. ตารางสรุปอัลกอริทึมทั้งหมด","q":"เติมชื่อ algorithm ให้ตรงกับ comment ในตารางสรุป (สไลด์ 54)","parts":["Very crude approximation of LRU → ","\u003cbr>Big improvement over FIFO → ","\u003cbr>Realistic → ","\u003cbr>Efficient algorithm that approximates LRU well → ","\u003cbr>Somewhat expensive to implement → ",""],"blanks":["NRU","Second chance","Clock","Aging","Working set"],"bank":["Working set","NRU","Clock","FIFO","NFU","Second chance","Aging"],"explain":"สไลด์ 54: NRU = very crude approximation of LRU, Second chance = big improvement over FIFO, Clock = realistic, Aging = efficient, approximates LRU well, Working set = somewhat expensive — NFU = fairly crude approximation to LRU, FIFO = might throw out important pages"},{"id":"9okm1b","type":"fill","topic":"7. จะเลือก hole ไหนให้ process ใหม่? (First / Next / Best / Worst / Quick fit)","q":"เติมชื่ออัลกอริทึมเลือก hole ให้ตรงกับวิธีการ (สไลด์ 19–21)","parts":["เลือก hole ใหญ่สุดเสมอ → ","\u003cbr>ค้นทั้ง list เลือก hole เล็กสุดที่พอ → ","\u003cbr>เริ่มค้นจากตรงที่ค้างไว้ครั้งก่อน → ","\u003cbr>มี list แยกตามขนาดที่ขอบ่อย → ",""],"blanks":["Worst fit","Best fit","Next fit","Quick fit"],"bank":["Next fit","Best fit","Quick fit","Compaction","Worst fit","First fit"],"explain":"สไลด์ 19–21: Worst fit = largest hole, Best fit = smallest adequate hole, Next fit = starts from where it left off, Quick fit = separate lists for common sizes — First fit เริ่มค้นจากต้น list ทุกครั้ง ส่วน Compaction เป็นการรวม hole ไม่ใช่อัลกอริทึมเลือก hole"},{"id":"1muun4l","type":"fill","topic":"12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)","q":"เติมขั้นตอนที่ MMU ใช้ two-level page table หา page frame (สไลด์ 37)","parts":["MMU ดึง "," มาเป็น index ใน "," page table → entry ที่ได้ชี้ไปยัง "," page table → ใช้ "," เป็น index ในตารางนั้นเพื่อหา page frame number"],"blanks":["PT1","top-level","second-level","PT2"],"bank":["TLB","second-level","PT2","PT1","Offset","top-level"],"explain":"สไลด์ 37: MMU ใช้ PT1 เป็น index ใน top-level page table → ได้ตำแหน่งของ second-level page table → ใช้ PT2 เป็น index หา page frame number — offset (12 บิต) ไม่ได้ใช้เป็น index และ TLB เป็นอีกกลไกหนึ่ง"},{"id":"8lge6z","type":"calc","topic":"4. Base และ Limit registers ทำงานยังไง?","q":"base = 32768, limit = 16384 — process อ้าง address 100 จะได้ physical address เท่าใด?","choices":["32868","100","16484","49252"],"correct":0,"explain":["ถูก — 100 &lt; 16384 ผ่านการเช็ก limit → 100 + base 32768 = 32868","ผิด — ลืมบวก base ซึ่ง CPU บวกให้อัตโนมัติก่อนส่ง address ออกไป","ผิด — เอา limit มาบวก (16384 + 100) แต่ limit ใช้เทียบ ไม่ได้ใช้บวก","ผิด — บวกทั้ง base และ limit (32768 + 16384 + 100)"]},{"id":"139g6bv","type":"calc","topic":"9. Paging: page กับ page frame แปลง address ยังไง?","q":"ใช้ page table ด้านล่าง virtual address 13000 แปลงเป็น physical address เท่าใด?","code":"page table (page 4 KB = 4096 bytes, X = absent)\npage 0 → frame 3\npage 1 → frame 7\npage 2 → X\npage 3 → frame 5\npage 4 → frame 0\npage 5 → X\npage 6 → frame 2\npage 7 → frame 1","choices":["21480","13000","20480","21192"],"correct":3,"explain":["ผิด — คิด page เป็น 4000 bytes ได้ offset 1000 แต่ 4 KB = 4096 bytes","ผิด — ใช้ virtual address ตรง ๆ ไม่ได้แปลงผ่าน page table","ผิด — ลืมบวก offset (5 × 4096 = 20480 คือแค่จุดเริ่มของ frame 5)","ถูก — 13000 ÷ 4096 = page 3 เศษ offset 712 → frame 5 → 5 × 4096 + 712 = 21192"]},{"id":"11vv1ot","type":"calc","topic":"10. Page table หน้าตาเป็นยังไง และแปลง address ทีละขั้นยังไง?","q":"virtual 16 บิต = page # 4 บิต + offset 12 บิต ใช้ page table ด้านล่าง 0x6ABC แปลงเป็น physical เท่าใด?","code":"page table (page 4 KB = 4096 bytes, X = absent)\npage 0 → frame 3\npage 1 → frame 7\npage 2 → X\npage 3 → frame 5\npage 4 → frame 0\npage 5 → X\npage 6 → frame 2\npage 7 → frame 1","choices":["0x6ABC","0x2ABC","0x2000","0xABC2"],"correct":1,"explain":["ผิด — ไม่ได้แทนเลข page ด้วยเลข frame","ถูก — 0x6ABC = 0110 101010111100 → page 6 → frame 2 (010) ต่อกับ offset 0xABC ที่คัดลอกตรง → 0x2ABC","ผิด — ลืมต่อ offset 12 บิตท้าย (offset ต้องคัดลอกจาก input ไป output)","ผิด — วาง frame ไว้ท้ายแทนที่จะอยู่บิตสูงหน้า offset"]},{"id":"1m8qe1v","type":"calc","topic":"12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)","q":"แบ่ง 32 บิตเป็น PT1 10 / PT2 10 / Offset 12 virtual address 0x00C02005 ได้ค่าใด?","choices":["PT1 = 3, PT2 = 2, offset = 5","PT1 = 0, PT2 = 3074, offset = 5","PT1 = 12, PT2 = 2, offset = 5","PT1 = 2, PT2 = 3, offset = 5"],"correct":0,"explain":["ถูก — 0x00C02005 = 0000000011 0000000010 000000000101 → PT1 = 3, PT2 = 2, offset = 5","ผิด — ตัดเป็น 8/12/12 บิตตามหลักเลขฐาน 16 ไม่ตรงกับ 10/10/12","ผิด — ตัดเป็น 12/8/12 บิต (อ่านเลขฐาน 16 สามหลักแรก 0x00C = 12) แต่ PT1 มี 10 บิต","ผิด — สลับ PT1 กับ PT2; PT1 คือ 10 บิตซ้ายสุด"]},{"id":"lhhlbi","type":"calc","topic":"12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? (Multilevel / Inverted)","q":"ใช้วิธีเดียวกับสไลด์ 38 physical memory 2 GB, page frame 4 KB inverted page table มีกี่ entry?","choices":["2^52","2^31","2^18","2^19"],"correct":3,"explain":["ผิด — 2^52 คือจำนวน entry ของ traditional page table (1 entry ต่อ virtual page)","ผิด — 2^31 คือจำนวน byte ของ 2 GB ลืมหารด้วยขนาด frame","ผิด — 2^18 คือคำตอบของตัวอย่าง 1 GB ในสไลด์ ไม่ใช่ 2 GB","ถูก — 1 entry ต่อ page frame: 2 GB ÷ 4 KB = 2^31 ÷ 2^12 = 2^19"]},{"id":"1as0ltm","type":"calc","topic":"6. OS จำว่า memory ส่วนไหนว่างได้ยังไง? (Bitmap vs Linked list)","q":"bitmap 16 units (1 = ใช้, 0 = ว่าง): 11100111 10000011 เขียนเป็น linked list (P/H, start, length) ได้ข้อใด?","choices":["H0,3 P3,2 H5,4 P9,5 H14,2","P0,3 H3,2 P5,4 H9,4 P13,3","P0,3 H3,2 P5,4 H9,5 P14,2","P0,2 H3,1 P5,3 H9,4 P14,1"],"correct":2,"explain":["ผิด — สลับความหมาย bit: 1 = ใช้อยู่ (process) ส่วน 0 = ว่าง (hole)","ผิด — นับ hole ช่วงที่สองขาดไป 1 unit (9–13 มี 5 units)","ถูก — units 0–2 ใช้ (P 0 3), 3–4 ว่าง (H 3 2), 5–8 ใช้ (P 5 4), 9–13 ว่าง (H 9 5), 14–15 ใช้ (P 14 2)","ผิด — ใช้ length = end − start โดยลืม +1"]},{"id":"4xs275","type":"calc","topic":"16. FIFO (First-In, First-Out)","q":"ไล่ reference string ด้านล่างด้วย FIFO เกิด page fault กี่ครั้ง?","code":"reference string: 4 1 2 4 3 1 5 2 4 1 3 5\nจำนวน page frame = 3 (เริ่มว่างทั้งหมด)","choices":["7 ครั้ง","9 ครั้ง","12 ครั้ง","11 ครั้ง"],"correct":1,"explain":["ผิด — 7 คือผลของ Optimal ซึ่งต่ำสุดเสมอ","ถูก — FIFO evict ตัวที่เข้ามาก่อน: 4 1 2 F F F, 4 HIT, 3 F(4 ออก), 1 HIT, 5 F(1 ออก), 2 HIT, 4 F(2 ออก), 1 F(3 ออก), 3 F(5 ออก), 5 F(4 ออก) = 9","ผิด — 12 คือนับทุก reference เป็น fault โดยลืมนับ HIT","ผิด — 11 คือผลของ LRU กับ string เดียวกัน"]},{"id":"3qas9o","type":"calc","topic":"19. LRU (Least Recently Used)","q":"ไล่ reference string ด้านล่างด้วย LRU เกิด page fault กี่ครั้ง?","code":"reference string: 4 1 2 4 3 1 5 2 4 1 3 5\nจำนวน page frame = 3 (เริ่มว่างทั้งหมด)","choices":["7 ครั้ง","9 ครั้ง","5 ครั้ง","11 ครั้ง"],"correct":3,"explain":["ผิด — 7 คือผลของ Optimal","ผิด — 9 คือผลของ FIFO (string นี้ FIFO บังเอิญดีกว่า LRU)","ผิด — 5 คือจำนวน page ไม่ซ้ำ (fault ตอนโหลดครั้งแรก) ยังไม่นับการ evict","ถูก — LRU evict ตัวที่ใช้ล่าสุดนานสุด: HIT แค่ 4 (ครั้งที่ 4) → 12 − 1 = 11 faults"]},{"id":"u3rr2p","type":"calc","topic":"14. Optimal","q":"ไล่ reference string ด้านล่างด้วย Optimal เกิด page fault กี่ครั้ง?","code":"reference string: 4 1 2 4 3 1 5 2 4 1 3 5\nจำนวน page frame = 3 (เริ่มว่างทั้งหมด)","choices":["7 ครั้ง","11 ครั้ง","5 ครั้ง","9 ครั้ง"],"correct":0,"explain":["ถูก — evict ตัวที่จะใช้อีกช้าสุด: 4 1 2 F×3, 3 F(4 ออก), 5 F(3 ออก), 4 F(2 ออก เพราะไม่ใช้อีก), 3 F(1 หรือ 4 ออก ไม่ใช้อีกทั้งคู่) ที่เหลือ HIT = 7","ผิด — 11 คือผลของ LRU","ผิด — 5 นับแค่ตอนโหลด page ไม่ซ้ำครั้งแรก ทั้งที่มี 3 frames จึงต้อง evict เพิ่ม","ผิด — 9 คือผลของ FIFO"]},{"id":"1p0hogf","type":"calc","topic":"21. Aging","q":"Aging counter 8 บิต เริ่ม 0 — page 3 มี R bit ทีละ tick = 1, 0, 0, 1 หลัง tick ที่ 4 counter เป็นเท่าใด?","choices":["00000010","00001001","10010000","01001000"],"correct":2,"explain":["ผิด — นี่คือ NFU ที่บวก R ตรง ๆ (1 + 0 + 0 + 1 = 2) ไม่ใช่ aging","ผิด — shift ซ้ายแล้วใส่ R ที่บิตขวาสุด (กลับทิศ) แต่ aging ใส่ R ที่บิตซ้ายสุด","ถูก — shift ขวาแล้วใส่ R ซ้ายสุด: 10000000 → 01000000 → 00100000 → 10010000","ผิด — ใส่ R ก่อนแล้วค่อย shift ทำให้ทุกบิตเลื่อนไปอีก 1 ตำแหน่ง"]}]};
+
+const app = document.getElementById('qp-app');
+if (!BANK || !BANK.questions) {
+  app.innerHTML = '<div class="qp-card">นี่คือ template ของ quiz-pro — สร้างไฟล์จริงด้วย <code>node build_quiz_pro.js bank.js out.html</code></div>';
+  return;
+}
+
+/* ------------------------------------------------------------ constants */
+const TYPES = { recall: 'ความจำ', understand: 'ความเข้าใจ', apply: 'การนำไปใช้', compare: 'แยกคู่สับสน',
+  error: 'หาจุดผิด', calc: 'การคำนวณ', code: 'ไล่โค้ด', fill: 'เติมคำ' };
+const TYPE_ORDER = Object.keys(TYPES);
+const HARD_TYPES = { recall: 1, understand: 1, compare: 1 };
+const L = ['ก', 'ข', 'ค', 'ง'];
+const CONF = { sure: 'มั่นใจ', unsure: 'ไม่แน่ใจ', guess: 'เดา' };
+const CONF_KEY = { KeyZ: 'sure', KeyX: 'unsure', KeyC: 'guess' };
+const INTERVALS = [1, 3, 7, 16, 35];          // Leitner box 1..5 → days
+const DUMP_SECONDS = 180;
+const KEY = 'sn-srs:' + BANK.id, IDX = 'sn-srs-index', PREF = 'sn-quizpro-prefs';
+const Q = BANK.questions;
+const TOPICS = [];
+Q.forEach((q, i) => { q.i = i; if (!TOPICS.includes(q.topic)) TOPICS.push(q.topic); });
+const REVIEW = BANK.review || {};
+
+/* ------------------------------------------------------------ helpers */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = n => (n < 10 ? '0' : '') + n;
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+function today() {                       // #today=YYYY-MM-DD simulates another day (testing only)
+  const m = /today=(\d{4}-\d{2}-\d{2})/.exec(location.hash);
+  return m ? m[1] : iso(new Date());
+}
+function parseIso(s) { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function addDays(s, n) { const d = parseIso(s); d.setDate(d.getDate() + n); return iso(d); }
+function dayDiff(a, b) { return Math.round((parseIso(b) - parseIso(a)) / 864e5); }
+const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+function thDate(s) { const d = parseIso(s); return d.getDate() + ' ' + TH_MON[d.getMonth()]; }
+function relDay(s) {
+  const n = dayDiff(today(), s);
+  if (n <= 0) return 'วันนี้';
+  if (n === 1) return 'พรุ่งนี้ (' + thDate(s) + ')';
+  return 'อีก ' + n + ' วัน (' + thDate(s) + ')';
+}
+function shuffle(a) { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; }
+const range = n => Array.from({ length: n }, (_, k) => k);
+function mmss(ms) { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + pad(s % 60); }
+function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+const wide = () => window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
+
+/* ------------------------------------------------------------ storage (never throws) */
+const store = (function () {
+  let ls = null; const mem = {};
+  try { ls = window.localStorage; const k = '__qp_test'; ls.setItem(k, '1'); ls.removeItem(k); } catch (e) { ls = null; }
+  return {
+    ok: !!ls,
+    get(k) {
+      try { if (ls) { const v = ls.getItem(k); if (v != null) return JSON.parse(v); } } catch (e) {}
+      try { return k in mem ? JSON.parse(mem[k]) : null; } catch (e) { return null; }
+    },
+    set(k, v) { const s = JSON.stringify(v); mem[k] = s; try { if (ls) ls.setItem(k, s); } catch (e) {} }
+  };
+})();
+
+let S = store.get(KEY);
+if (!S || S.v !== 1 || typeof S.items !== 'object') S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] };
+const P = Object.assign({ dump: true, hard: false, byTopic: false }, store.get(PREF) || {});
+const saveS = () => store.set(KEY, S);
+const saveP = () => store.set(PREF, P);
+
+/* ------------------------------------------------------------ spaced repetition (Leitner) */
+// item: { b: box 1-5, d: due ISO date, n: times seen, w: times wrong, l: last result 1/0, c: last confidence, r: last review date }
+function srsUpdate(id, ok, conf) {
+  const t = today();
+  let it = S.items[id];
+  const isNew = !it;
+  if (!it) it = S.items[id] = { b: 0, n: 0, w: 0 };
+  const reviewedToday = !isNew && it.r === t;
+  if (!ok) { it.b = 1; it.w++; }
+  else if (conf === 'sure') {
+    if (isNew) it.b = 2;                         // known already on first sight → skip box 1
+    else if (!reviewedToday) it.b = Math.min(5, Math.max(1, it.b) + 1);  // no promotion twice in one day
+    else it.b = Math.max(1, it.b);
+  } else it.b = Math.max(1, it.b);               // correct but unsure / guessed → stay in box
+  it.d = addDays(t, ok && conf === 'sure' ? INTERVALS[it.b - 1] : 1);  // not sure or wrong → due again tomorrow
+  it.n++; it.l = ok ? 1 : 0; it.c = conf; it.r = t;
+}
+const seenQs = () => Q.filter(q => S.items[q.id]);
+const dueQs = () => { const t = today(); return Q.filter(q => S.items[q.id] && S.items[q.id].d <= t); };
+const missedQs = () => Q.filter(q => { const it = S.items[q.id]; return it && (it.l === 0 || (it.w > 0 && it.b <= 2)); });
+function nextDue() {
+  let min = null;
+  seenQs().forEach(q => { const d = S.items[q.id].d; if (!min || d < min) min = d; });
+  if (!min) return null;
+  const t = today(), day = min <= t ? t : min;
+  const count = seenQs().filter(q => (S.items[q.id].d <= t ? t : S.items[q.id].d) === day).length;
+  return { date: min, day, count };
+}
+function boxCounts() {
+  const c = [0, 0, 0, 0, 0, 0];                // 0 = never answered
+  Q.forEach(q => { const it = S.items[q.id]; c[it ? it.b : 0]++; });
+  return c;
+}
+function updateIndex() {
+  const idx = store.get(IDX) || {};
+  const nd = nextDue();
+  idx[BANK.id] = { title: BANK.title, subject: BANK.subject || '', url: location.pathname, due: dueQs().length,
+    next: nd ? nd.date : null, total: Q.length, seen: seenQs().length, updated: new Date().toISOString() };
+  store.set(IDX, idx);
+}
+
+/* ------------------------------------------------------------ ordering */
+// interleave: never two neighbours from the same topic when avoidable; also avoid same type back-to-back
+function interleave(list) {
+  const groups = new Map();
+  shuffle(list.slice()).forEach(i => { const t = Q[i].topic; if (!groups.has(t)) groups.set(t, []); groups.get(t).push(i); });
+  const out = []; let lastT = null, lastY = null;
+  while (out.length < list.length) {
+    let cands = [...groups.keys()].filter(t => groups.get(t).length && t !== lastT);
+    if (!cands.length) cands = [...groups.keys()].filter(t => groups.get(t).length);
+    const max = Math.max(...cands.map(t => groups.get(t).length));
+    const top = cands.filter(t => groups.get(t).length === max);
+    const t = top[Math.floor(Math.random() * top.length)];
+    const g = groups.get(t);
+    let k = g.findIndex(i => Q[i].type !== lastY); if (k < 0) k = 0;
+    const i = g.splice(k, 1)[0];
+    out.push(i); lastT = t; lastY = Q[i].type;
+  }
+  return out;
+}
+function byTopic(list) {
+  return list.slice().sort((a, b) => (TOPICS.indexOf(Q[a].topic) - TOPICS.indexOf(Q[b].topic)) ||
+    (TYPE_ORDER.indexOf(Q[a].type) - TYPE_ORDER.indexOf(Q[b].type)) || (a - b));
+}
+
+/* ------------------------------------------------------------ run state */
+let screen = 'start';
+let R = null;
+let notice = '';
+let resetArmed = false;
+
+function mkStep(qi, retry) {
+  const q = Q[qi];
+  const st = { qi, retry, ans: null, pick: null, shown: false, t0: null };
+  if (q.type === 'fill') st.fill = { placed: q.blanks.map(() => null), sel: null, order: retry ? shuffle(range(q.bank.length)) : range(q.bank.length) };
+  else if (!retry) st.perm = [0, 1, 2, 3];
+  else {                                         // reshuffle; move the answer to a new letter
+    let p; for (let k = 0; k < 12; k++) { p = shuffle([0, 1, 2, 3]); if (p.indexOf(q.correct) !== q.correct) break; }
+    st.perm = p;
+  }
+  return st;
+}
+const MODE_LABEL = { full: 'ทั้งชุด', due: 'ทบทวนตามรอบ', missed: 'ข้อที่เคยพลาด', quick: 'สุ่ม 10 ข้อ', redo: 'ทำข้อที่พลาดอีกรอบ' };
+function startRun(mode, list) {
+  if (!list.length) return;
+  const order = P.byTopic ? byTopic(list) : interleave(list);
+  R = { mode, qset: order, steps: order.map(qi => mkStep(qi, 0)), pos: 0, first: {}, fixed: {}, t0: Date.now(),
+    hard: P.hard, gridOpen: wide(), warnedUn: false, dump: null, feyn: { text: '', shown: false, ticks: [] }, done: false };
+  notice = '';
+  if (mode === 'full' && P.dump) { R.dump = { text: '', end: Date.now() + DUMP_SECONDS * 1000, got: [] }; go('dump'); }
+  else go('q');
+}
+function cur() { return R && R.steps[R.pos]; }
+function queueRetry(qi, retry) {
+  if (R.steps.some((s, k) => k > R.pos && s.qi === qi && !s.ans)) return -1;
+  const gap = 4 + Math.floor(Math.random() * 3);                         // 4–6 other questions in between
+  const at = Math.min(R.pos + 1 + gap, R.steps.length);
+  R.steps.splice(at, 0, mkStep(qi, retry + 1));
+  return at - R.pos - 1;
+}
+function isOk(qi) { const f = R.first[qi]; return f ? f.ok : null; }
+
+function finalize(conf) {
+  const st = cur(), q = Q[st.qi];
+  let ok;
+  if (q.type === 'fill') ok = st.fill.placed.every((c, k) => c !== null && q.bank[c] === q.blanks[k]);
+  else ok = st.perm[st.pick] === q.correct;
+  st.ans = { choice: st.pick, conf: conf || null, ok };
+  const main = st.retry === 0;
+  if (main && !R.first[st.qi]) {
+    R.first[st.qi] = { orig: q.type === 'fill' ? null : st.perm[st.pick], placed: q.type === 'fill' ? st.fill.placed.slice() : null,
+      conf, ok, ms: Date.now() - (st.t0 || Date.now()) };
+    srsUpdate(q.id, ok, conf); saveS(); updateIndex();
+  }
+  st.requeue = null;
+  if (!ok || (main && conf === 'guess')) { const d = queueRetry(st.qi, st.retry); if (d >= 0) st.requeue = d; }
+  if (!main && ok) R.fixed[st.qi] = true;
+  render();
+  requestAnimationFrame(() => {
+    const fb = app.querySelector('.qp-fb');
+    if (fb && fb.getBoundingClientRect().top > window.innerHeight * 0.7) fb.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+}
+
+function next() {
+  if (!R) return;
+  notice = '';
+  if (R.pos < R.steps.length - 1) { R.pos++; return go('q', true); }
+  const un = R.steps.filter(s => s.retry === 0 && !s.ans);
+  if (un.length && !R.warnedUn) {
+    R.warnedUn = true;
+    R.pos = R.steps.indexOf(un[0]);
+    notice = 'ยังไม่ได้ตอบอีก ' + un.length + ' ข้อ — พามาข้อแรกที่ยังไม่ตอบ (กด “จบและดูผล” ได้ตลอด)';
+    return go('q', true);
+  }
+  finish();
+}
+function prev() { if (R && R.pos > 0) { notice = ''; R.pos--; go('q', true); } }
+function finish() {
+  R.done = true; R.tEnd = Date.now();
+  const total = R.qset.length, score = R.qset.filter(qi => isOk(qi)).length;
+  if (Object.keys(R.first).length) {
+    S.hist.push({ t: today(), m: R.mode, s: score, n: total });
+    S.hist = S.hist.slice(-20); saveS();
+  }
+  updateIndex();
+  go('results', true);
+}
+
+/* ------------------------------------------------------------ rendering */
+function go(s, scroll) {
+  screen = s;
+  document.body.classList.toggle('qp-run', s !== 'start');
+  render();
+  if (scroll || s !== 'q') {
+    const top = app.getBoundingClientRect().top + window.scrollY - 64;
+    if (window.scrollY > top) window.scrollTo(0, Math.max(0, top));
+  }
+}
+function render() {
+  if (screen === 'start') app.innerHTML = startHtml();
+  else if (screen === 'dump') app.innerHTML = dumpHtml();
+  else if (screen === 'dumpcheck') app.innerHTML = dumpCheckHtml();
+  else if (screen === 'q') app.innerHTML = qHtml();
+  else if (screen === 'results') app.innerHTML = resultsHtml();
+  if (screen === 'dump') {
+    const ta = app.querySelector('textarea[data-in="dump"]');
+    if (ta) { ta.value = R.dump.text; try { ta.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  if (screen === 'dumpcheck') { const m = app.querySelector('.qp-mine'); if (m) m.textContent = R.dump.text.trim() || '(ไม่ได้เขียนอะไร)'; }
+  if (screen === 'results') {
+    const ta = app.querySelector('textarea[data-in="feyn"]'); if (ta) ta.value = R.feyn.text;
+    const mine = app.querySelector('.qp-feyn-mine'); if (mine) mine.textContent = R.feyn.text.trim() || '(ไม่ได้เขียน)';
+  }
+  tick();
+}
+const typeChip = t => '<span class="qp-type" data-t="' + t + '">' + TYPES[t] + '</span>';
+
+function startHtml() {
+  const counts = {}; Q.forEach(q => { counts[q.type] = (counts[q.type] || 0) + 1; });
+  const due = dueQs().length, missed = missedQs().length, seen = seenQs().length, nd = nextDue();
+  let h = '';
+  if (!store.ok) h += '<div class="qp-note is-warn">เบราว์เซอร์นี้บันทึกข้อมูลไม่ได้ (storage ถูกปิด) — ทำแบบทดสอบได้ปกติ แต่รอบทบทวนจะไม่ถูกจำไว้</div>';
+  h += '<section class="qp-card"><div class="qp-stats">' + TYPE_ORDER.filter(t => counts[t]).map(t => typeChip(t).replace('</span>', ' ' + counts[t] + '</span>')).join('') + '</div>';
+  h += '<p class="qp-muted qp-small" style="margin:8px 0 0">' + Q.length + ' ข้อ · ' + TOPICS.length + ' หัวข้อ · ตอบแล้วต้องบอกความมั่นใจก่อนดูเฉลย · ข้อที่ผิดจะวนกลับมาให้แก้ตัว</p></section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">ความคืบหน้าการทบทวน</h2>';
+  if (seen) {
+    const bc = boxCounts(), mx = Math.max(1, ...bc);
+    h += '<div class="qp-srs"><div class="qp-stat"><b>' + due + '</b><span>ข้อถึงรอบทบทวนวันนี้</span></div>' +
+      '<div class="qp-stat"><b>' + (nd ? (dayDiff(today(), nd.day) <= 0 ? 'วันนี้' : thDate(nd.day)) : '–') + '</b><span>รอบถัดไป' + (nd ? ' · ' + nd.count + ' ข้อ' : '') + '</span></div>' +
+      '<div class="qp-stat"><b>' + seen + '/' + Q.length + '</b><span>ข้อที่เคยทำ</span></div></div>';
+    h += '<div class="qp-boxes" aria-label="จำนวนข้อในแต่ละกล่อง">' + bc.map((c, b) =>
+      '<div title="' + (b ? 'กล่อง ' + b + ' (ทวนทุก ' + INTERVALS[b - 1] + ' วัน)' : 'ยังไม่เคยทำ') + ': ' + c + ' ข้อ"><span>' + c + '</span><i style="height:' + Math.round(30 * c / mx) + 'px;' + (b ? '' : 'opacity:.25') + '"></i></div>').join('') + '</div>';
+    h += '<div class="qp-boxes" style="height:auto;margin-top:2px">' + bc.map((c, b) => '<div>' + (b ? 'กล่อง ' + b : 'ใหม่') + '</div>').join('') + '</div>';
+    if (S.hist.length) h += '<div class="qp-hist">' + S.hist.slice(-6).map(x => '<span>' + thDate(x.t) + ' · ' + x.s + '/' + x.n + '</span>').join('') + '</div>';
+    const ld = S.dumps[S.dumps.length - 1];
+    if (ld) h += '<p class="qp-muted qp-small" style="margin:8px 0 0">brain dump ครั้งล่าสุด (' + thDate(ld.t) + ') นึกออก ' + ld.got.length + '/' + ld.n + ' ประเด็น</p>';
+  } else h += '<p class="qp-muted" style="margin:0">ยังไม่เคยทำชุดนี้ ทำครั้งแรกแล้วระบบจะนัดรอบทบทวนให้ (1 · 3 · 7 · 16 · 35 วัน)</p>';
+  h += '</section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">เลือกวิธีทำ</h2><div class="qp-modes">';
+  h += '<button class="qp-mode is-main" data-act="mode" data-m="full"><b>ทำทั้งชุด</b><span>' + Q.length + ' ข้อ ' + (P.byTopic ? 'เรียงตามหัวข้อ' : 'สลับหัวข้อกัน') + (P.dump ? ' · เริ่มด้วยเขียนทุกอย่างที่จำได้' : '') + '</span><i>→</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="due"' + (due ? '' : ' disabled') + '><b>ทบทวนที่ถึงรอบ (' + due + ' ข้อ)</b><span>' +
+    (due ? 'ข้อที่ถึงกำหนดทวนวันนี้ตามรอบ Leitner' : (nd ? 'ยังไม่มีข้อถึงรอบ — รอบถัดไป ' + relDay(nd.day) : 'ทำทั้งชุดก่อน แล้วระบบจะนัดรอบให้')) + '</span><i>↻</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="missed"' + (missed ? '' : ' disabled') + '><b>เฉพาะข้อที่เคยพลาด (' + missed + ' ข้อ)</b><span>ข้อที่ผิดครั้งล่าสุด หรือเคยผิดและยังไม่แน่น</span><i>✎</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="quick"><b>สุ่ม 10 ข้อ (ทวนเร็ว)</b><span>ใช้เวลาประมาณ 5 นาที</span><i>⚡</i></button>';
+  h += '</div><div class="qp-opts">';
+  h += optHtml('dump', 'เขียนทุกอย่างที่จำได้ก่อนเริ่ม (brain dump)', 'ใช้กับ “ทำทั้งชุด” — นึกเองก่อน 2–3 นาที แล้วเทียบกับประเด็นสำคัญของบท');
+  h += optHtml('hard', 'โหมดนึกก่อนเห็นตัวเลือก', 'ข้อความจำ / ความเข้าใจ / แยกคู่สับสน จะซ่อนตัวเลือกไว้จนกว่าจะนึกคำตอบในใจได้');
+  h += optHtml('byTopic', 'เรียงตามหัวข้อ', 'ปิดไว้ (ค่าเริ่มต้น) = สลับหัวข้อกัน ทำยากกว่าแต่จำได้นานกว่า');
+  h += '</div></section>';
+
+  h += '<section class="qp-card"><details class="qp-how"><summary>ทำไมต้องทำแบบนี้ / แป้นลัด</summary><ul>' +
+    '<li><b>นึกเองก่อน</b> (brain dump, โหมดนึกก่อน) — การดึงความจำออกมาเองช่วยให้จำได้นานกว่าการอ่านซ้ำ</li>' +
+    '<li><b>บอกความมั่นใจ</b> ก่อนดูเฉลย — จะได้รู้ว่าข้อไหน “มั่นใจแต่ผิด” ซึ่งอันตรายที่สุดตอนสอบ</li>' +
+    '<li><b>รอบแก้ตัว</b> — ข้อที่ผิดหรือเดาจะกลับมาอีกใน 4–6 ข้อ สลับตัวเลือกใหม่ จนตอบถูก (ไม่นับคะแนน)</li>' +
+    '<li><b>สลับหัวข้อ</b> และ <b>ทวนตามรอบ</b> 1 · 3 · 7 · 16 · 35 วัน — ตอบถูกแบบมั่นใจจะขยับกล่องขึ้น ผิดกลับไปกล่อง 1</li>' +
+    '<li>คะแนนนับจากการตอบครั้งแรกเท่านั้น</li>' +
+    '<li>แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> หรือ <kbd>ก</kbd> <kbd>ข</kbd> <kbd>ค</kbd> <kbd>ง</kbd> เลือกตัวเลือก · <kbd>Z</kbd> มั่นใจ <kbd>X</kbd> ไม่แน่ใจ <kbd>C</kbd> เดา · <kbd>Enter</kbd> ข้อถัดไป · <kbd>←</kbd> <kbd>→</kbd> เลื่อนข้อ</li>' +
+    '</ul></details>';
+  if (seen) h += '<div style="margin-top:6px"><button class="qp-link" data-act="reset" style="color:var(--qp-muted)">' + (resetArmed ? 'กดอีกครั้งเพื่อยืนยันการล้างประวัติชุดนี้' : 'ล้างประวัติการทบทวนของชุดนี้') + '</button></div>';
+  h += '</section>';
+  return h;
+}
+function optHtml(k, t, d) {
+  return '<label class="qp-check' + (P[k] ? ' is-on' : '') + '"><input type="checkbox" data-pref="' + k + '"' + (P[k] ? ' checked' : '') + '><span>' + t + '<small>' + d + '</small></span></label>';
+}
+
+function dumpHtml() {
+  const left = R.dump.end - Date.now();
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 1 · นึกเองก่อน</span></div>' +
+    '<h2 class="qp-h2">เขียนทุกอย่างที่จำได้จากบทนี้</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 4px">ไม่ต้องเรียบร้อย เขียนเป็นคำ ๆ ได้ ห้ามเปิดสรุป — ยิ่งนึกยากยิ่งจำได้นาน</p>' +
+    '<div class="qp-timer"><span id="qp-dtimer">' + (left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว') + '</span><div class="qp-tbar"><i id="qp-dbar" style="width:' + Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%"></i></div></div>' +
+    '<textarea class="qp-ta" data-in="dump" placeholder="เช่น นิยาม คำสำคัญ ขั้นตอน สูตร ตัวอย่าง คู่ที่สับสน…" aria-label="เขียนทุกอย่างที่จำได้"></textarea>' +
+    '<p id="qp-dsoft" class="qp-muted qp-small"' + (left > 0 ? ' hidden' : '') + '>ครบเวลาที่แนะนำแล้ว — ยังนึกออกก็เขียนต่อได้</p>' +
+    '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="dump-skip">ข้ามขั้นนี้</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn qp-btn-primary" data-act="dump-done">เสร็จแล้ว ดูประเด็นสำคัญ →</button></div></section>';
+}
+function dumpCheckHtml() {
+  const kp = BANK.keypoints, got = R.dump.got;
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 2 · เทียบกับประเด็นสำคัญ</span></div>' +
+    '<h2 class="qp-h2">ติ๊กประเด็นที่คุณนึกออกเอง</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 8px">ติ๊กเฉพาะที่เขียนไว้แล้ว (หรือใจความเดียวกัน) — ข้อที่ไม่ได้ติ๊กคือจุดที่ต้องเก็บเพิ่ม</p>' +
+    '<p style="margin:0 0 4px">นึกออก <span class="qp-tally" id="qp-kp-n">' + got.length + '/' + kp.length + '</span></p>' +
+    '<div class="qp-kps">' + kp.map((k, i) => '<label class="qp-check' + (got.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-kp="' + i + '"' + (got.includes(i) ? ' checked' : '') + '><span>' + k + '</span></label>').join('') + '</div>' +
+    '<h3 class="qp-h3">สิ่งที่คุณเขียน</h3><div class="qp-mine"></div>' +
+    '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="dump-start">เริ่มทำข้อสอบ →</button></div></section>';
+}
+
+function barHtml() {
+  const total = R.qset.length, answered = Object.keys(R.first).length;
+  const okN = R.qset.filter(qi => isOk(qi)).length;
+  const st = cur(), mainNo = R.qset.indexOf(st.qi) + 1;
+  const pendingRetry = R.steps.filter((s, k) => k > R.pos && s.retry && !s.ans).length;
+  let h = '<div class="qp-bar"><div class="qp-bar-row">' +
+    '<span>' + (st.retry ? 'แก้ตัว · ข้อ <b>' + mainNo + '</b>' : 'ข้อ <b>' + mainNo + '</b>/' + total) + '</span>' +
+    '<span>ตอบแล้ว ' + answered + ' · ถูก ' + okN + '</span>' +
+    (pendingRetry ? '<span>รอแก้ตัว ' + pendingRetry + '</span>' : '') +
+    '<span class="qp-time" title="เวลาที่ใช้"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span id="qp-time">' + mmss(Date.now() - R.t0) + '</span></span>' +
+    '<span class="qp-spacer"></span>' +
+    '<button class="qp-link" data-act="grid" aria-expanded="' + R.gridOpen + '">' + (R.gridOpen ? 'ซ่อนตาราง' : 'ข้อทั้งหมด') + '</button>' +
+    '</div><div class="qp-prog" aria-hidden="true"><i style="width:' + pct(answered, total) + '%"></i></div></div>';
+  if (R.gridOpen) {
+    h += '<div class="qp-grid">' + R.qset.map((qi, k) => {
+      const f = R.first[qi];
+      let c = '';
+      if (f) c = f.ok ? (f.conf === 'sure' ? 'is-ok' : 'is-shaky') : 'is-bad';
+      if (st.qi === qi) c += ' is-cur';
+      return '<button class="' + c + '" data-act="jump" data-qi="' + qi + '" aria-label="ข้อ ' + (k + 1) + '">' + (k + 1) + '</button>';
+    }).join('') + '</div>' +
+      '<div class="qp-grid-foot"><span><i style="background:var(--qp-ok)"></i>ถูก มั่นใจ</span><span><i style="background:var(--qp-warn)"></i>ถูก ไม่แน่ใจ/เดา</span><span><i style="background:var(--qp-bad)"></i>ผิด</span><span class="qp-spacer"></span><button class="qp-link" data-act="finish">จบและดูผล</button></div>';
+  }
+  return h;
+}
+
+function qHtml() {
+  const st = cur(), q = Q[st.qi];
+  if (!st.t0) st.t0 = Date.now();
+  let h = barHtml();
+  if (notice) h += '<div class="qp-note is-warn">' + notice + '</div>';
+  h += '<article class="qp-card"><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (st.retry ? '<span class="qp-retry-chip">รอบแก้ตัว' + (st.retry > 1 ? ' ×' + st.retry : '') + ' · ไม่นับคะแนน</span>' : '') + '</div>';
+  h += '<div class="qp-q">' + q.q + '</div>';
+  if (q.code) h += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') h += fillHtml(q, st);
+  else {
+    const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null;
+    if (gated) h += '<div class="qp-gate"><p>ลองนึกคำตอบในใจ (หรือพูดออกมา) ให้ชัดก่อน แล้วค่อยเทียบกับตัวเลือก</p>' +
+      '<button class="qp-btn qp-btn-primary" data-act="reveal">นึกคำตอบในใจแล้ว → ดูตัวเลือก <span class="qp-kh"><kbd>Enter</kbd></span></button></div>';
+    else h += choicesHtml(q, st);
+  }
+  if (st.ans) h += feedbackHtml(q, st);
+  const last = R.pos === R.steps.length - 1;
+  h += '<div class="qp-nav"><button class="qp-btn" data-act="prev"' + (R.pos ? '' : ' disabled') + '>← ก่อนหน้า</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn' + (st.ans ? ' qp-btn-primary' : '') + '" data-act="next">' + (st.ans ? (last ? 'ดูผล →' : 'ข้อถัดไป →') : 'ข้าม →') + '</button></div>';
+  h += '<div class="qp-keys">แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> / <kbd>ก</kbd><kbd>ข</kbd><kbd>ค</kbd><kbd>ง</kbd> เลือก · <kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd> ความมั่นใจ · <kbd>Enter</kbd> ถัดไป · <kbd>←</kbd><kbd>→</kbd> เลื่อนข้อ</div>';
+  h += '</article>';
+  return h;
+}
+function choicesHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-choices" role="group" aria-label="ตัวเลือก">';
+  st.perm.forEach((orig, d) => {
+    let c = 'qp-choice';
+    if (a) {
+      if (orig === q.correct) c += ' is-correct';
+      else if (d === a.choice) c += ' is-wrong';
+      else c += ' is-dim';
+    } else if (st.pick === d) c += ' is-picked';
+    h += '<button class="' + c + '" data-act="pick" data-i="' + d + '"' + (a ? ' disabled' : '') + ' aria-pressed="' + (st.pick === d) + '">' +
+      '<span class="qp-letter">' + L[d] + '</span><span class="qp-ctext">' + q.choices[orig] + '</span></button>';
+  });
+  h += '</div>';
+  if (!a && st.pick !== null && !st.retry) h += confHtml('คุณมั่นใจคำตอบ ' + L[st.pick] + ' แค่ไหน? (เลือกแล้วจะเห็นเฉลย)');
+  return h;
+}
+function confHtml(label) {
+  return '<div class="qp-conf"><p class="qp-conf-q">' + label + '</p><div class="qp-conf-row">' +
+    '<button class="qp-cbtn" data-act="conf" data-c="sure">มั่นใจ<small>รู้แน่ <span class="qp-kh"><kbd>Z</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="unsure">ไม่แน่ใจ<small>พอนึกได้ <span class="qp-kh"><kbd>X</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="guess">เดา<small>ไม่รู้ <span class="qp-kh"><kbd>C</kbd></span></small></button>' +
+    '</div></div>';
+}
+function rereadHtml(q) {
+  return '<div class="qp-reread">อ่านทวน: <b>' + q.topic + '</b>' + (REVIEW[q.topic] ? ' — ' + REVIEW[q.topic] : '') + '</div>';
+}
+function calibNote(st) {
+  const a = st.ans;
+  if (st.retry) return a.ok ? '<div class="qp-note is-ok">แก้ตัวสำเร็จ — ครั้งนี้ตอบถูกแล้ว</div>' : '';
+  if (!a.ok && a.conf === 'sure') return '<div class="qp-note is-bad"><b>มั่นใจแต่ผิด = จุดอันตราย</b> — ความเข้าใจผิดแบบนี้มักพลาดซ้ำในห้องสอบ อ่านเหตุผลของตัวที่ถูกให้ละเอียด</div>';
+  if (a.ok && a.conf === 'guess') return '<div class="qp-note is-warn">เดาถูก — ยังไม่นับว่ารู้ ข้อนี้จะกลับมาให้ตอบอีกรอบ</div>';
+  if (a.ok && a.conf === 'unsure') return '<div class="qp-note is-warn">ถูกแต่ยังไม่แน่ใจ — ระบบจะนัดทวนข้อนี้เร็วขึ้น (พรุ่งนี้)</div>';
+  return '';
+}
+function requeueNote(st) {
+  if (st.requeue === null || st.requeue === undefined) return '';
+  return '<div class="qp-note">' + (st.requeue > 0 ? 'ข้อนี้จะกลับมาให้แก้ตัวหลังจากอีก ' + st.requeue + ' ข้อ' : 'ข้อนี้จะกลับมาให้แก้ตัวเป็นข้อถัดไป') + ' (สลับตัวเลือกใหม่ ไม่นับคะแนน)</div>';
+}
+function feedbackHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-fb" aria-live="polite">';
+  if (q.type === 'fill') {
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกทุกช่อง' : '✗ ยังไม่ถูกทุกช่อง') +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st) + '<ul class="qp-ex"><li class="is-correct"><b>เฉลย</b>' + q.explain + '</li></ul>';
+  } else {
+    const dc = st.perm.indexOf(q.correct);
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกต้อง' : '✗ ยังไม่ถูก — คำตอบคือ ' + L[dc]) +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st);
+    const order = [dc].concat(a.choice !== dc ? [a.choice] : [], [0, 1, 2, 3].filter(d => d !== dc && d !== a.choice));
+    h += '<ul class="qp-ex">' + order.map(d => {
+      const orig = st.perm[d];
+      const cls = orig === q.correct ? 'is-correct' : (d === a.choice ? 'is-wrong' : '');
+      const tag = orig === q.correct ? '<em>คำตอบ</em>' : (d === a.choice ? '<em>คุณเลือก</em>' : '');
+      return '<li class="' + cls + '"><b>' + L[d] + '. ' + q.choices[orig] + tag + '</b>' + q.explain[orig] + '</li>';
+    }).join('') + '</ul>';
+  }
+  h += rereadHtml(q) + requeueNote(st) + '</div>';
+  return h;
+}
+
+function fillHtml(q, st) {
+  const f = st.fill, a = st.ans;
+  let h = '<div class="qp-ftext">';
+  q.parts.forEach((p, k) => {
+    h += p;
+    if (k >= q.blanks.length) return;
+    const c = f.placed[k], ok = c !== null && q.bank[c] === q.blanks[k];
+    let cls = 'qp-slot';
+    if (a) cls += ok ? ' is-correct' : ' is-wrong';
+    else if (c !== null) cls += ' is-filled';
+    else if (f.sel !== null) cls += ' is-target';
+    h += '<button type="button" class="' + cls + '" data-slot="' + k + '"' + (a ? ' disabled' : '') + ' aria-label="ช่องที่ ' + (k + 1) + '">' + (c !== null ? q.bank[c] : '&nbsp;') + '</button>';
+    if (a && !ok) h += '<span class="qp-slot-ans">→ ' + q.blanks[k] + '</span>';
+  });
+  h += '</div>';
+  if (!a) {
+    h += '<p class="qp-bank-label">ลากคำไปวางในช่อง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</p><div class="qp-bank">';
+    f.order.forEach(i => {
+      h += '<button type="button" class="qp-chip' + (f.placed.includes(i) ? ' is-used' : '') + (f.sel === i ? ' is-sel' : '') + '" data-chip="' + i + '">' + q.bank[i] + '</button>';
+    });
+    h += '</div>';
+    const left = f.placed.filter(c => c === null).length;
+    if (left) h += '<p class="qp-fill-wait">วางคำให้ครบทุกช่องก่อน (เหลือ ' + left + ' ช่อง) <button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+    else if (st.retry) h += '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="fill-clear">ล้างช่อง</button><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="conf" data-c="">ตรวจคำตอบ</button></div>';
+    else h += confHtml('ครบทุกช่องแล้ว — มั่นใจแค่ไหน? (เลือกแล้วจะตรวจทันที)') + '<p class="qp-fill-wait"><button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+  }
+  return h;
+}
+
+function meter(ok, n) {
+  const p = pct(ok, n);
+  return '<div class="qp-meter"><i class="' + (p >= 80 ? '' : p >= 50 ? 'is-mid' : 'is-low') + '" style="width:' + Math.max(p, 2) + '%"></i></div>';
+}
+function resultsHtml() {
+  const total = R.qset.length, fs = R.qset.map(qi => ({ qi, f: R.first[qi] }));
+  const answered = fs.filter(x => x.f), score = fs.filter(x => x.f && x.f.ok).length;
+  const end = R.tEnd || Date.now(), spent = end - R.t0;
+  let h = '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">' + MODE_LABEL[R.mode] + '</span></div>' +
+    '<div class="qp-score"><div class="qp-muted qp-small">คะแนน (นับจากการตอบครั้งแรก)</div><div class="qp-big">' + score + '<small> / ' + total + '</small></div>' +
+    '<div class="qp-muted">' + pct(score, total) + '% · ใช้เวลา ' + mmss(spent) + ' นาที' + (answered.length ? ' · เฉลี่ย ' + Math.round(answered.reduce((s, x) => s + x.f.ms, 0) / answered.length / 1000) + ' วินาที/ข้อ' : '') + '</div>';
+  const retried = R.qset.filter(qi => R.steps.some(s => s.qi === qi && s.retry));
+  if (retried.length) h += '<div class="qp-muted qp-small">รอบแก้ตัว: แก้ได้ ' + retried.filter(qi => R.fixed[qi]).length + '/' + retried.length + ' ข้อ</div>';
+  if (answered.length < total) h += '<div class="qp-note is-warn" style="text-align:left">ยังไม่ได้ตอบ ' + (total - answered.length) + ' ข้อ (นับเป็นยังไม่ได้คะแนน)</div>';
+  h += '</div></section>';
+
+  // calibration matrix
+  const sure = x => x.f && x.f.conf === 'sure';
+  const m = { know: answered.filter(x => sure(x) && x.f.ok), danger: answered.filter(x => sure(x) && !x.f.ok),
+    shaky: answered.filter(x => !sure(x) && x.f.ok), gap: answered.filter(x => !sure(x) && !x.f.ok) };
+  const sureN = m.know.length + m.danger.length;
+  h += '<section class="qp-card"><h2 class="qp-h2">ความมั่นใจ vs ความถูกต้อง</h2><div class="qp-matrix">' +
+    '<div></div><div class="qp-mh">ถูก</div><div class="qp-mh">ผิด</div>' +
+    '<div class="qp-mh">มั่นใจ</div><div class="qp-cell c-know"><b>' + m.know.length + '</b><span>รู้จริง</span></div>' +
+    '<div class="qp-cell c-danger"><b>' + m.danger.length + '</b><span>จุดอันตราย — เข้าใจผิดแบบมั่นใจ</span></div>' +
+    '<div class="qp-mh">ไม่แน่ใจ / เดา</div><div class="qp-cell c-shaky"><b>' + m.shaky.length + '</b><span>ยังไม่แน่น</span></div>' +
+    '<div class="qp-cell c-gap"><b>' + m.gap.length + '</b><span>ยังไม่รู้ — เรียนใหม่</span></div></div>';
+  h += '<p class="qp-small" style="margin:10px 0 0">' + (sureN ? 'ตอนที่บอกว่า “มั่นใจ” ตอบถูก ' + pct(m.know.length, sureN) + '%' : 'ยังไม่มีข้อที่ตอบว่ามั่นใจ') +
+    (m.danger.length ? ' — มีจุดอันตราย ' + m.danger.length + ' ข้อ อ่านเฉลยข้อเหล่านี้ก่อนเป็นอันดับแรก' : (sureN ? ' — ความมั่นใจของคุณเชื่อถือได้' : '')) + '</p></section>';
+
+  // per topic (weakest first)
+  const tp = {};
+  fs.forEach(x => { const t = Q[x.qi].topic; tp[t] = tp[t] || [0, 0]; tp[t][1]++; if (x.f && x.f.ok) tp[t][0]++; });
+  const tlist = Object.keys(tp).sort((a, b) => (tp[a][0] / tp[a][1] - tp[b][0] / tp[b][1]) || (tp[b][1] - tp[a][1]) || (TOPICS.indexOf(a) - TOPICS.indexOf(b)));
+  h += '<section class="qp-card"><h2 class="qp-h2">แยกตามหัวข้อ <span class="qp-muted qp-small">(อ่อนสุดอยู่บน)</span></h2><div class="qp-bars">' + tlist.map(t => {
+    const [ok, n] = tp[t];
+    return '<div class="qp-bar-item"><span>' + t + '</span><span class="qp-num">' + ok + '/' + n + '</span>' + meter(ok, n) +
+      (ok < n ? '<span class="qp-hint">อ่านทวน: ' + (REVIEW[t] || 'หัวข้อ “' + t + '” ในสรุป') + '</span>' : '') + '</div>';
+  }).join('') + '</div>';
+  // per type
+  const ty = {};
+  fs.forEach(x => { const t = Q[x.qi].type; ty[t] = ty[t] || [0, 0]; ty[t][1]++; if (x.f && x.f.ok) ty[t][0]++; });
+  h += '<h3 class="qp-h3">แยกตามประเภทข้อ</h3><div class="qp-bars">' + TYPE_ORDER.filter(t => ty[t]).map(t =>
+    '<div class="qp-bar-item"><span>' + typeChip(t) + '</span><span class="qp-num">' + ty[t][0] + '/' + ty[t][1] + '</span>' + meter(ty[t][0], ty[t][1]) + '</div>').join('') + '</div></section>';
+
+  // review list
+  const unans = fs.filter(x => !x.f);
+  if (m.danger.length || m.gap.length || m.shaky.length || unans.length) {
+    h += '<section class="qp-card"><h2 class="qp-h2">ข้อที่ควรทวน</h2>';
+    const grp = (list, title, color) => list.length ? '<div class="qp-grp"><i style="background:' + color + '"></i>' + title + ' (' + list.length + ')</div><div class="qp-revs">' + list.map(x => revHtml(x)).join('') + '</div>' : '';
+    h += grp(m.danger, 'จุดอันตราย — มั่นใจแต่ผิด', 'var(--qp-bad)') + grp(m.gap, 'ผิด และไม่มั่นใจ', 'var(--qp-text-2)') +
+      grp(m.shaky, 'ถูก แต่ยังไม่แน่น (ไม่แน่ใจ / เดา)', 'var(--qp-warn)') + grp(unans, 'ยังไม่ได้ตอบ', 'var(--qp-border-2)');
+    h += '</section>';
+  }
+
+  // spaced repetition + actions
+  const nd = nextDue(), redo = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok);
+  h += '<section class="qp-card"><h2 class="qp-h2">รอบทบทวนถัดไป</h2><p style="margin:0 0 12px">' +
+    (nd ? relDay(nd.day) + ' — ' + nd.count + ' ข้อ' : '–') + (store.ok ? '' : ' <span class="qp-muted qp-small">(บันทึกไม่ได้ในเบราว์เซอร์นี้)</span>') + '</p>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 12px">ตอบถูกแบบมั่นใจ → ขยับกล่องขึ้น (ทวนห่างขึ้น 1·3·7·16·35 วัน) · ไม่แน่ใจ/เดา → ทวนพรุ่งนี้ · ผิด → กลับกล่อง 1</p>' +
+    '<div class="qp-row"><button class="qp-btn qp-btn-primary" data-act="redo"' + (redo.length ? '' : ' disabled') + '>ทำข้อที่พลาดอีกรอบ (' + redo.length + ')</button>' +
+    '<button class="qp-btn" data-act="home">กลับหน้าแรก</button></div></section>';
+
+  // Feynman
+  const F = BANK.feynman;
+  h += '<section class="qp-card" id="qp-feyn"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ปิดท้าย · Feynman</span></div>' +
+    '<h2 class="qp-h2">อธิบายให้เพื่อนที่ไม่ได้เรียนฟัง</h2><p style="margin:0 0 10px">' + F.prompt + '</p>';
+  if (!R.feyn.shown) {
+    h += '<textarea class="qp-ta" data-in="feyn" style="min-height:170px" placeholder="เขียนเหมือนอธิบายให้เพื่อนที่ไม่เคยเรียนวิชานี้ ใช้คำง่าย ๆ ยกตัวอย่างประกอบ"></textarea>' +
+      '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="feyn-show">ดูคำอธิบายตัวอย่าง →</button></div>';
+    if (S.feyn) h += '<p class="qp-muted qp-small">ครั้งก่อน (' + thDate(S.feyn.t) + ') ครอบคลุม ' + S.feyn.ticks.length + '/' + F.checklist.length + ' ประเด็น</p>';
+  } else {
+    h += '<h3 class="qp-h3">ที่คุณเขียน</h3><div class="qp-mine qp-feyn-mine"></div>' +
+      '<h3 class="qp-h3">คำอธิบายตัวอย่าง</h3><div class="qp-model">' + F.model + '</div>' +
+      '<h3 class="qp-h3">คำอธิบายของคุณครอบคลุมประเด็นไหนบ้าง? <span class="qp-tally" id="qp-fc-n">' + R.feyn.ticks.length + '/' + F.checklist.length + '</span></h3>' +
+      '<div class="qp-kps">' + F.checklist.map((c, i) => '<label class="qp-check' + (R.feyn.ticks.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-fc="' + i + '"' + (R.feyn.ticks.includes(i) ? ' checked' : '') + '><span>' + c + '</span></label>').join('') + '</div>' +
+      '<p class="qp-muted qp-small">ประเด็นที่ยังไม่ได้ติ๊ก = จุดที่ยังอธิบายไม่ได้ ลองกลับไปอ่านแล้วอธิบายใหม่</p>';
+  }
+  h += '</section>';
+  return h;
+}
+function revHtml(x) {
+  const q = Q[x.qi], f = x.f;
+  let body = '';
+  if (q.code) body += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') {
+    body += '<p><b>คำตอบที่ถูก:</b> ' + q.parts.map((p, k) => p + (k < q.blanks.length ? '<b style="color:var(--qp-ok)">[' + q.blanks[k] + ']</b>' : '')).join('') + '</p>';
+    body += '<p>' + q.explain + '</p>';
+  } else {
+    if (f && f.orig !== q.correct) body += '<p style="color:var(--qp-bad)"><b>คุณตอบ ' + L[f.orig] + '.</b> ' + q.choices[f.orig] + ' — ' + q.explain[f.orig] + '</p>';
+    body += '<p style="color:var(--qp-ok)"><b>เฉลย ' + L[q.correct] + '.</b> ' + q.choices[q.correct] + '</p><p>' + q.explain[q.correct] + '</p>';
+  }
+  body += rereadHtml(q);
+  return '<details class="qp-rev"><summary><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (f && f.conf ? '<span class="qp-topic">· ตอบว่า' + CONF[f.conf] + '</span>' : '') + '</div><span>' + q.q + '</span></summary><div class="qp-rev-body">' + body + '</div></details>';
+}
+
+/* ------------------------------------------------------------ timers */
+function tick() {
+  const t = document.getElementById('qp-time');
+  if (t && R) t.textContent = mmss(Date.now() - R.t0);
+  if (screen === 'dump' && R && R.dump) {
+    const left = R.dump.end - Date.now();
+    const a = document.getElementById('qp-dtimer'), b = document.getElementById('qp-dbar'), s = document.getElementById('qp-dsoft');
+    if (a) a.textContent = left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว';
+    if (b) b.style.width = Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%';
+    if (s) s.hidden = left > 0;
+  }
+}
+setInterval(tick, 1000);
+
+/* ------------------------------------------------------------ events */
+function pick(d) {
+  const st = cur(); if (!st || st.ans) return;
+  const q = Q[st.qi];
+  if (q.type === 'fill') return;
+  if (R.hard && HARD_TYPES[q.type] && !st.shown) st.shown = true;
+  st.pick = d;
+  if (st.retry) return finalize(null);
+  render();
+}
+function jumpToQ(qi) {
+  const k = R.steps.findIndex(s => s.qi === qi && s.retry === 0);
+  if (k >= 0) { notice = ''; R.pos = k; go('q', true); }
+}
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) {
+    // keyboard activation (detail 0) of fill chips / slots — pointer handlers cover mouse and touch
+    if (e.detail === 0) fillKeyClick(e.target);
+    return;
+  }
+  const act = el.dataset.act;
+  if (act === 'mode') {
+    resetArmed = false;
+    const m = el.dataset.m;
+    const list = m === 'full' ? range(Q.length) : m === 'due' ? dueQs().map(q => q.i) : m === 'missed' ? missedQs().map(q => q.i) : shuffle(range(Q.length)).slice(0, 10);
+    startRun(m, list);
+  } else if (act === 'dump-skip') { R.dump = null; go('q'); }
+  else if (act === 'dump-done') { go('dumpcheck'); }
+  else if (act === 'dump-start') {
+    S.dumps.push({ t: today(), text: R.dump.text.slice(0, 4000), got: R.dump.got.slice(), n: BANK.keypoints.length });
+    S.dumps = S.dumps.slice(-5); saveS();
+    go('q');
+  }
+  else if (act === 'reveal') { const st = cur(); st.shown = true; render(); }
+  else if (act === 'pick') pick(+el.dataset.i);
+  else if (act === 'conf') { const st = cur(); if (!st || st.ans) return; const q = Q[st.qi];
+    if (q.type === 'fill' ? st.fill.placed.includes(null) : st.pick === null) return;
+    finalize(el.dataset.c || null); }
+  else if (act === 'fill-clear') { const st = cur(); st.fill.placed = st.fill.placed.map(() => null); st.fill.sel = null; render(); }
+  else if (act === 'next') next();
+  else if (act === 'prev') prev();
+  else if (act === 'grid') { R.gridOpen = !R.gridOpen; render(); }
+  else if (act === 'jump') jumpToQ(+el.dataset.qi);
+  else if (act === 'finish') finish();
+  else if (act === 'redo') { const list = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok); startRun('redo', list); }
+  else if (act === 'home') { R = null; go('start', true); }
+  else if (act === 'feyn-show') {
+    R.feyn.shown = true;
+    S.feyn = { t: today(), text: R.feyn.text.slice(0, 4000), ticks: [] }; saveS();
+    render();
+  }
+  else if (act === 'reset') {
+    if (!resetArmed) { resetArmed = true; render(); return; }
+    resetArmed = false; S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] }; saveS(); updateIndex(); render();
+  }
+});
+app.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.pref) { P[el.dataset.pref] = el.checked; saveP(); render(); }
+  else if (el.dataset.kp !== undefined) {
+    const i = +el.dataset.kp, g = R.dump.got;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-kp-n').textContent = g.length + '/' + BANK.keypoints.length;
+  } else if (el.dataset.fc !== undefined) {
+    const i = +el.dataset.fc, g = R.feyn.ticks;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-fc-n').textContent = g.length + '/' + BANK.feynman.checklist.length;
+    if (S.feyn) { S.feyn.ticks = g.slice(); saveS(); }
+  }
+});
+app.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.in;
+  if (k === 'dump' && R && R.dump) R.dump.text = e.target.value;
+  if (k === 'feyn' && R) R.feyn.text = e.target.value;
+});
+
+document.addEventListener('keydown', e => {
+  if (screen !== 'q' || !R || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target;
+  if (tg && tg.closest && tg.closest('textarea, input, select, [contenteditable="true"]')) return;
+  const nativeBtn = tg && tg.closest && tg.closest('button, a, summary, label');
+  const st = cur(), q = Q[st.qi];
+  const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null && q.type !== 'fill';
+  if (e.key === 'Enter') {
+    if (nativeBtn) return;                     // let the focused button do its own thing
+    e.preventDefault();
+    if (gated) { st.shown = true; render(); }
+    else if (st.ans) next();
+    return;
+  }
+  if (e.key === 'ArrowRight') { e.preventDefault(); return next(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); return prev(); }
+  if (q.type === 'fill' || st.ans) return;
+  let d = -1;
+  const m = /^(Digit|Numpad)([1-4])$/.exec(e.code || '');
+  if (m) d = +m[2] - 1;
+  else if (L.includes(e.key)) d = L.indexOf(e.key);
+  if (d >= 0) { e.preventDefault(); if (!gated) pick(d); return; }   // hidden choices: Enter reveals first
+  const c = CONF_KEY[e.code];
+  if (c && st.pick !== null && !st.retry) { e.preventDefault(); finalize(c); }
+});
+
+/* fill: drag (mouse / touch) + tap-to-place */
+let drag = null;
+function curFill() {
+  if (screen !== 'q' || !R) return null;
+  const st = cur();
+  return st && !st.ans && Q[st.qi].type === 'fill' ? st : null;
+}
+function placeChip(f, chip, k, from) {
+  const prev = f.placed[k];
+  f.placed = f.placed.map(c => (c === chip ? null : c));
+  f.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) f.placed[from] = prev;
+}
+function fillKeyClick(target) {
+  const st = curFill(); if (!st) return;
+  const f = st.fill, chip = target.closest('.qp-chip'), slot = target.closest('.qp-slot');
+  if (chip && !chip.classList.contains('is-used')) { const i = +chip.dataset.chip; f.sel = f.sel === i ? null : i; render(); }
+  else if (slot) {
+    const k = +slot.dataset.slot;
+    if (f.sel !== null) { placeChip(f, f.sel, k, null); f.sel = null; } else f.placed[k] = null;
+    render();
+  }
+}
+function slotAt(x, y) { const el = document.elementFromPoint(x, y); return el ? el.closest('.qp-slot') : null; }
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  drag = null;
+}
+document.addEventListener('pointerdown', e => {
+  const st = curFill(); if (!st || e.button > 0) return;
+  const f = st.fill;
+  const chipEl = e.target.closest('.qp-chip'), slotEl = e.target.closest('.qp-slot');
+  if (chipEl && !chipEl.classList.contains('is-used')) drag = { chip: +chipEl.dataset.chip, from: null };
+  else if (slotEl && f.placed[+slotEl.dataset.slot] !== null) drag = { chip: f.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  else if (slotEl && f.sel !== null) { placeChip(f, f.sel, +slotEl.dataset.slot, null); f.sel = null; render(); return; }
+  else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'qp-chip is-ghost';
+    drag.ghost.innerHTML = Q[cur().qi].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  const s = slotAt(e.clientX, e.clientY);
+  if (s) s.classList.add('is-over');
+});
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = curFill();
+  endDrag();
+  if (!st) return;
+  const f = st.fill;
+  if (d.moved) {
+    const s = slotAt(e.clientX, e.clientY);
+    if (s) placeChip(f, d.chip, +s.dataset.slot, d.from);
+    else if (d.from !== null) f.placed[d.from] = null;
+    f.sel = null;
+  } else if (d.from !== null) {
+    if (f.sel !== null) placeChip(f, f.sel, d.from, null); else f.placed[d.from] = null;
+    f.sel = null;
+  } else f.sel = f.sel === d.chip ? null : d.chip;
+  render();
+});
+document.addEventListener('pointercancel', endDrag);
+
+/* ------------------------------------------------------------ boot */
+updateIndex();
+render();
+})();
+</script>
+<script>window.SN_BASE = "../../";</script><script src="../../assets/srs-catalog.js"></script><script src="../../assets/srs.js"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 10 – Node.js Part II (Express Framework) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L10</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/short.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/short.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/short.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/short.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/short.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/short.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/short.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/short.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li class='cur'><a href="../l10/short.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li><a href="../l11/short.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/short.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/short.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L10 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 10 – Node.js Part II (Express Framework)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 7 นาที · 14 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l10">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p>ไฟล์นี้จบที่ Form Handling (สไลด์ 53) — Cookies/Session, Env Variables, Database ใน Outline ไม่มีเนื้อหาในไฟล์นี้ (อยู่ Part III)</p>
+</blockquote>
+<h2 id="0-unit-objective-สไลด์-24">0. Unit + Objective (สไลด์ 2–4)</h2>
+<ul>
+<li>Part I: Hello World, Module System, first server | <strong>Part II: Express</strong> | Part III: Cookies, Session, Database</li>
+<li>เป้าหมาย: สร้าง server ด้วย Express | routing | form handling</li>
+</ul>
+<h2 id="1-recap-nodejs-http-server-สไลด์-59">1. RECAP Node.js + http server (สไลด์ 5–9)</h2>
+<ul>
+<li>⭐ Node.js = <strong>asynchronous JS runtime บน Chrome's V8</strong> | &quot;open-source server environment&quot;</li>
+<li>⭐ ไม่มี: <strong>DOM, <code>document</code>, <code>window</code>, Cookies</strong> | มี: JS code + modules (<strong>File system, HTTP, Utilities</strong>)</li>
+<li>server ตอบเป็น plain text / HTML / JSON | localhost <strong>port 8081</strong></li>
+<li>⭐ <code>http.createServer((req,res)=&gt;{ res.statusCode=200; res.setHeader(&quot;Content-Type&quot;,&quot;text/plain&quot;); res.write(&quot;Hello World!&quot;); res.end(); })</code> → <code>myServer.listen(8081, cb)</code></li>
+<li>ผล: console <code>Listening on the port 8081</code> | browser <code>Hello World!</code> | browser ขอ <code>/</code> และ <code>/favicon.ico</code></li>
+<li>⚠️ สไลด์ 9 log &quot;The new request comming&quot; ไม่มีในโค้ดสไลด์ 8 | URL ที่ถูก <code>http://localhost:8081</code></li>
+</ul>
+<h2 id="2-routing-ด้วย-http-module-สไลด์-1013">2. Routing ด้วย http module (สไลด์ 10–13)</h2>
+<ul>
+<li>routing = ส่ง request ไปโค้ดที่จัดการ | ใช้ <strong><code>req.url</code></strong></li>
+<li>⭐ <code>/</code> → 200 <code>text/plain</code> &quot;Greeting&quot; | <code>/shabu</code>, <code>/bbq</code> → <code>fs.readFile</code> → 200 <strong><code>text/html</code></strong> | อื่น ๆ → <strong>404</strong> <code>text/plain</code> &quot;Invalid requested :(&quot;</li>
+<li>console: <code>Req: /bbq</code> <code>Req: /SOMEPATH</code> <code>Req: /</code> <code>Req: /shabu</code></li>
+<li>⚠️ template สไลด์ 12 ขาด <code>});</code> ปิด createServer</li>
+</ul>
+<h2 id="3-express-สไลด์-1416">3. Express (สไลด์ 14–16)</h2>
+<ul>
+<li>⭐ <strong>minimal and flexible</strong> Node.js web application framework | robust features for web &amp; mobile</li>
+<li>ช่วย: <strong>routing</strong>, สร้าง <strong>API</strong>, ใช้ <strong>template engine (Pug, EJS)</strong> — แทนตัวแปรด้วยค่าจริงตอน runtime → แปลงเป็น HTML</li>
+<li>อันดับต้นของ Node.js frameworks | เปิดตัว <strong>2010</strong> | de facto standard | <strong>MIT license</strong> | MVC, routing table, 14+ engine templates, debugging</li>
+</ul>
+<h2 id="4-ตั้งโปรเจกต์-สไลด์-1724">4. ตั้งโปรเจกต์ (สไลด์ 17–24)</h2>
+<ul>
+<li>⭐ <code>npm init</code> (→ package.json, entry point <strong>app.js</strong>) → <code>npm install express</code> (→ dependencies) → [optional] <code>npm install nodemon</code> (restart อัตโนมัติ) → สร้าง <code>app.js</code></li>
+<li>NPM = package manager | package.json = meta-data + dependencies</li>
+<li>⭐ <code>const app = express(); app.get('/', (req,res)=&gt;res.send('Hello World from Root!')); app.listen(3000, ...)</code> → <code>Server listening on port: 3000</code></li>
+<li>⭐ <code>&quot;scripts&quot;: { &quot;start&quot;: &quot;nodemon app.js&quot; }</code> → <strong><code>npm start</code></strong></li>
+<li>โฟลเดอร์: node_modules, package-lock.json, package.json, app.js, html/(bbq, shabu)</li>
+</ul>
+<h2 id="5-expressrouter-สไลด์-2527">5. express.Router() (สไลด์ 25–27)</h2>
+<ul>
+<li>⭐ <strong>Middleware = ฟังก์ชันที่เข้าถึง <code>req</code> และ <code>res</code></strong></li>
+<li>⭐ <code>const router = express.Router(); app.use(router); router.get('/', ...)</code></li>
+<li>ตัวอย่าง route: <code>/</code>, <code>/shabu</code>, <code>/bbq</code>, <code>/product/view</code> = GET | <code>/product/add</code>, <code>/user/add</code> = <strong>POST</strong></li>
+<li>nodemon รันใหม่เมื่อแก้ app.js</li>
+</ul>
+<h2 id="6-sendfile-404-สไลด์-2830">6. sendFile + 404 (สไลด์ 28–30)</h2>
+<ul>
+<li>⭐ <code>router.get('/shabu', (req,res)=&gt;res.sendFile(path.join(`${__dirname}/html/shabu.html`)))</code></li>
+<li><code>__dirname</code> = absolute path ของโฟลเดอร์ไฟล์ที่รัน | <code>path.join</code> = รวม path</li>
+<li><code>/somewhere</code> ไม่ได้กำหนด → <strong><code>Cannot GET /somewhere</code></strong></li>
+<li>⭐ <code>router.use((req,res,next)=&gt;{ res.status(404).send(&quot;Invalid Path&quot;) })</code> วางท้ายสุด | <strong>ถูกเรียกทุก HTTP method</strong></li>
+<li>⚠️ อย่าตัดบรรทัดใน backtick ของ path (รันจริงได้ ENOENT)</li>
+</ul>
+<h2 id="7-navbar-สไลด์-31">7. Navbar (สไลด์ 31)</h2>
+<ul>
+<li><code>href=&quot;/&quot;</code>, <code>&quot;/shabu&quot;</code>, <code>&quot;/my-form&quot;</code> | ⭐ <strong>href ต้องตรงกับ route ใน app.js</strong></li>
+</ul>
+<h2 id="8-static-files-สไลด์-3234">8. Static files (สไลด์ 32–34)</h2>
+<ul>
+<li>relative path <code>../public/mystyle.css</code> <strong>ใช้ไม่ได้</strong> → No CSS or images</li>
+<li>⭐ <code>app.use('/', express.static(path.join(__dirname,'public')))</code> | <code>'/'</code> = mount path</li>
+<li>⭐ HTML อ้าง <strong><code>/mystyle.css</code></strong>, <strong><code>/images/sampleImg.png</code></strong> (public ถูก reset เป็นราก) | <code>/public/mystyle.css</code> → 404</li>
+</ul>
+<h2 id="9-modular-routes-สไลด์-3538">9. Modular routes (สไลด์ 35–38)</h2>
+<ul>
+<li>เว็บใหญ่ → แบ่ง router: app <code>/</code> | router1 <code>/product</code> (add, edit, delete) | router2 <code>/user</code> (add, edit, view) | routerN <code>/module</code></li>
+<li>⭐ <code>app.use(&quot;/product&quot;, router1)</code> + <code>router1.get('/add')</code> = <strong><code>/product/add</code></strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>URL (port 3030)</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>Homepage</td>
+</tr>
+<tr>
+<td><code>/product</code></td>
+<td>Module for product - Root</td>
+</tr>
+<tr>
+<td><code>/product/add</code></td>
+<td>Module for product - Add</td>
+</tr>
+<tr>
+<td><code>/user</code></td>
+<td>Module for user - Root</td>
+</tr>
+<tr>
+<td><code>/user/add</code></td>
+<td>Module for user - Add</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-form-handling-สไลด์-3945">10. Form handling (สไลด์ 39–45)</h2>
+<ul>
+<li>validate ที่ <strong>client เมื่อทำได้</strong> (JS, HTML5) | ส่งด้วย <strong>GET หรือ POST</strong> | validate เพิ่มที่ <strong>server</strong> ถ้าลง database</li>
+<li>Flow: GET → empty form → user กรอก → POST → validate → ไม่ผ่าน: form + error messages (กรอกใหม่) | ผ่าน: perform actions → <strong>redirect to &quot;success&quot; URL</strong></li>
+<li>⭐ <code>&lt;form action=&quot;ปลายทาง&quot; method=&quot;GET/POST&quot;&gt;</code> | server อ่านค่าตาม <strong><code>name</code></strong></li>
+<li><code>router.get('/my-form', ...)</code> sendFile myForm.html (fname=John, lname=Doe)</li>
+</ul>
+<h2 id="11-get-สไลด์-4648">11. GET (สไลด์ 46–48)</h2>
+<ul>
+<li>⭐ <code>action=&quot;/form-get&quot; method=&quot;GET&quot;</code> → URL <code>/form-get?fname=John&amp;lname=Doe</code></li>
+<li>⭐ <code>router.get(&quot;/form-get&quot;, ...)</code> → <strong><code>req.query.fname</code></strong> (<code>req.query</code> = ค่าหลัง <code>?</code>)</li>
+<li>path ตรงกับ <code>action</code> | method ตรงกับ <code>method</code></li>
+<li>console: <code>GET</code> + <code>{ fname: 'John', lname: 'Doe' }</code> | response: <strong><code>Form submitted by John Doe with GET</code></strong></li>
+</ul>
+<h2 id="12-post-สไลด์-4952">12. POST (สไลด์ 49–52)</h2>
+<ul>
+<li>⭐ <code>action=&quot;/form-post&quot; method=&quot;POST&quot;</code> → ข้อมูลอยู่ใน <strong>body</strong></li>
+<li>⭐ ต้องมี middleware (body-parser รวมใน Express ตั้งแต่ <strong>4.16</strong>): <code>router.use(express.json());</code> <code>router.use(express.urlencoded({ extended: true }));</code></li>
+<li><code>express.json()</code> = JSON payload | <code>express.urlencoded()</code> = urlencoded payload</li>
+<li>⭐ <code>router.post(&quot;/form-post&quot;, ...)</code> → <strong><code>req.body.fname</code></strong> (string หรือ JSON object)</li>
+<li>response: <strong><code>Form submitted by John Doe with POST</code></strong> | ไม่มี middleware → <code>req.body</code> = undefined</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกัน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>http module</td>
+<td>Express</td>
+<td>if/else + header/write/end เอง vs <code>router.get</code> + <code>res.send</code></td>
+</tr>
+<tr>
+<td><code>res.send</code></td>
+<td><code>res.sendFile</code></td>
+<td>ข้อความ vs ไฟล์ (absolute path)</td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>text/html</code></td>
+<td>ข้อความ/error vs หน้า HTML</td>
+</tr>
+<tr>
+<td><code>router.get</code></td>
+<td><code>router.use</code></td>
+<td>GET + path ตรง vs ทุก method (ดัก 404)</td>
+</tr>
+<tr>
+<td><code>app.use(router)</code></td>
+<td><code>app.use(&quot;/product&quot;, router1)</code></td>
+<td>ที่ root vs มี mount path นำหน้า</td>
+</tr>
+<tr>
+<td><code>node app.js</code></td>
+<td><code>npm start</code> (nodemon)</td>
+<td>รันครั้งเดียว vs restart อัตโนมัติ</td>
+</tr>
+<tr>
+<td><code>__dirname</code></td>
+<td><code>path.join</code></td>
+<td>โฟลเดอร์ไฟล์ที่รัน vs รวม path</td>
+</tr>
+<tr>
+<td><code>../public/x.css</code></td>
+<td><code>/x.css</code></td>
+<td>ไม่ทำงาน vs ทำงานหลังตั้ง express.static</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>POST</td>
+<td>URL → <code>req.query</code> vs body → <code>req.body</code> + middleware</td>
+</tr>
+<tr>
+<td><code>express.json()</code></td>
+<td><code>express.urlencoded()</code></td>
+<td>JSON vs urlencoded</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td><code>method</code></td>
+<td>ส่งไปไหน vs ส่งแบบไหน</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l9/short.html"><small>← บทก่อนหน้า</small><span>Lecture 9 – Node.js Part I (Intro to Node.js)</span></a><a class="pg next" href="../l11/short.html"><small>บทถัดไป →</small><span>Lecture 11 – Node.js Part III (Cookies, Session, and Database)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-unit-objective-สไลด์-24">Unit + Objective</a></li><li><a href="#1-recap-nodejs-http-server-สไลด์-59">RECAP Node.js + http server</a></li><li><a href="#2-routing-ด้วย-http-module-สไลด์-1013">Routing ด้วย http module</a></li><li><a href="#3-express-สไลด์-1416">Express</a></li><li><a href="#4-ตั้งโปรเจกต์-สไลด์-1724">ตั้งโปรเจกต์</a></li><li><a href="#5-expressrouter-สไลด์-2527">express.Router()</a></li><li><a href="#6-sendfile-404-สไลด์-2830">sendFile + 404</a></li><li><a href="#7-navbar-สไลด์-31">Navbar</a></li><li><a href="#8-static-files-สไลด์-3234">Static files</a></li><li><a href="#9-modular-routes-สไลด์-3538">Modular routes</a></li><li><a href="#10-form-handling-สไลด์-3945">Form handling</a></li><li><a href="#11-get-สไลด์-4648">GET</a></li><li><a href="#12-post-สไลด์-4952">POST</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l10", "u": "web/l10/short.html", "t": "⚡ สรุปสั้น · Lecture 10 – Node.js Part II (Express Framework)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

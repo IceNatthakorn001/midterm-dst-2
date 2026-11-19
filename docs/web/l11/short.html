@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุปสั้น · Lecture 11 – Node.js Part III (Cookies, Session, and Database) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L11</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/short.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/short.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/short.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/short.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/short.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/short.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/short.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/short.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/short.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li class='cur'><a href="../l11/short.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/short.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/short.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L11 · สรุปสั้น</div>
+    <h1 class="lesson-title">Lecture 11 – Node.js Part III (Cookies, Session, and Database)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 10 นาที · 17 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html">📖 ฉบับเต็ม</a><a href="short.html" aria-current='page'>⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l11">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p>โค้ด cookie / session / dotenv รันจริงแล้ว (Node 22, Express 5.3.0) | ส่วน DB ไม่ได้ต่อ MySQL จริง ตรวจเฉพาะฝั่ง Express ด้วย connection จำลอง</p>
+</blockquote>
+<h2 id="0-unit-objective-สไลด์-24">0. Unit + Objective (สไลด์ 2–4)</h2>
+<ul>
+<li>Part I: Hello World, Module System, first server | Part II: Express | <strong>Part III: Cookies, Session, Database</strong></li>
+<li>เป้าหมาย: สร้าง cookies/sessions | ต่อ Node.js กับ relational DB</li>
+<li>Outline: RECAP Express → Env Variables → Cookies + Session → Database + Node.js</li>
+</ul>
+<h2 id="1-recap-express-สไลด์-57">1. RECAP Express (สไลด์ 5–7)</h2>
+<ul>
+<li>⭐ <strong>minimal and flexible</strong> Node.js web application framework | ช่วย <strong>routing</strong>, สร้าง <strong>API</strong>, ใช้ <strong>template engine (Pug, EJS)</strong> → แทนตัวแปรด้วยค่าจริงตอน runtime → HTML</li>
+</ul>
+<h2 id="2-ตั้งโปรเจกต์-สไลด์-811">2. ตั้งโปรเจกต์ (สไลด์ 8–11)</h2>
+<ul>
+<li>⭐ <code>npm init</code> (ถามตอบ) | <code>npm init -y</code> (default) | <code>npm install</code> (<strong>ทั้งหมด</strong>ใน package.json, หลัง clone/pull) | <code>npm install &lt;pkg&gt;</code> (เพิ่ม library) | <code>npm uninstall &lt;pkg&gt;</code></li>
+<li>ขั้นตอน: โฟลเดอร์ → <code>npm init</code> → entry point <code>app.js</code> → ติดตั้ง express + nodemon → <code>&quot;start&quot;: &quot;nodemon app.js&quot;</code> → <code>npm start</code></li>
+<li>Router: <code>const router = express.Router(); app.use(router); router.get('/', ...)</code> | <code>/my-form</code> → <code>res.sendFile(path.join(...))</code></li>
+<li>⚠️ สไลด์ 10 เขียน <code>npm init &lt;package&gt;</code> → ที่ถูกคือ <code>npm install &lt;package&gt;</code> | ⚠️ เครื่องหมาย <code>’</code> ในโค้ดสไลด์ 11, 24, 27, 28 → SyntaxError</li>
+</ul>
+<h2 id="3-environment-variables-สไลด์-1214">3. Environment Variables (สไลด์ 12–14)</h2>
+<ul>
+<li>⭐ = <strong>key-value</strong> ของค่าตั้งค่า (PORT, API_KEY, DB_HOST, DB_NAME) <strong>นอก source code</strong></li>
+<li>ทำไม: รันได้หลายเครื่อง/cloud | ไม่ hardcode | โค้ดเดียว deploy ได้ทุกที่ | portable &amp; maintainable</li>
+<li>⭐ <code>npm install dotenv</code> → <code>.env</code> ที่ <strong>root</strong> (<code>PORT=3000</code>) → <code>require(&quot;dotenv&quot;)</code> + <strong><code>dotenv.config()</code></strong> → <code>process.env.PORT</code></li>
+<li>dotenv = <strong>zero-dependency</strong> module โหลด <code>.env</code> เข้า <code>process.env</code> | VSCode extension: DotENV</li>
+<li>รันจริง: dotenv พิมพ์ <code>◇ injected env (N) from .env</code> (N = จำนวนตัวแปร)</li>
+</ul>
+<h2 id="4-stateless-สไลด์-1517">4. Stateless (สไลด์ 15–17)</h2>
+<ul>
+<li>⭐ HTTP <strong>stateless</strong> = ไม่มีความเชื่อมโยงระหว่าง 2 request | cookies ทำให้เป็น <strong>stateful sessions</strong></li>
+<li>เก็บข้อมูล 2 แบบ: <strong>Cookies = client</strong> | <strong>Session = server</strong></li>
+</ul>
+<h2 id="5-cookie-สไลด์-1819">5. Cookie (สไลด์ 18–19)</h2>
+<ul>
+<li>⭐ ข้อมูลชิ้นเล็กที่ server ส่งให้ browser → browser เก็บ → ส่งกลับกับ request ไป <strong>server เดิม</strong></li>
+<li>ใช้: <strong>Session management | Personalization | Tracking</strong> (บอกว่า 2 request มาจาก browser เดียวกัน)</li>
+<li>⭐ server ส่ง <strong><code>Set-Cookie</code></strong> (response) | browser ส่งกลับใน <strong><code>Cookie</code></strong> header (request) | ใส่ unique identifier → ระบุตัว client ได้</li>
+</ul>
+<h2 id="6-ใช้-cookie-สไลด์-2026">6. ใช้ Cookie (สไลด์ 20–26)</h2>
+<ul>
+<li>⭐ <code>npm install cookie-parser</code> → <code>const cp = require(&quot;cookie-parser&quot;); router.use(cp());</code></li>
+<li>⭐ สร้าง <code>res.cookie('cookie#1','chocolate-chip-cookie')</code> | อ่านทั้งหมด <code>req.cookies</code> | อ่านตัวเดียว <code>req.cookies['cookie#1']</code></li>
+<li><code>/setCookie</code> → console <code>About to create a cookie</code> | ดูใน DevTools &gt; Application &gt; Cookies (Expires = Session)</li>
+<li><code>/showCookie</code> → <code>{&quot;cookie#1&quot;:&quot;chocolate-chip-cookie&quot;,&quot;cookie#2&quot;:&quot;peanut-butter-cookie&quot;}</code></li>
+<li>⭐ <code>/restrict</code>: มีครบ 2 ตัว → <code>You are allowed to see the content</code> | ขาดตัวใด → <strong>401</strong> <code>Error 401: You need to have our secret cookies</code></li>
+<li>⭐ <code>{expire: 360000 + Date.now()}</code> = วันเวลาหมดอายุ | <code>{maxAge: 360000}</code> = อายุ 360000 ms | <code>res.clearCookie(&quot;username&quot;)</code> = ลบ</li>
+<li>⚠️ รันจริง: <code>expire</code> (ไม่มี s) ไม่มีผล | <code>maxAge: 360000</code> → <code>Max-Age=360</code> (วินาที)</li>
+</ul>
+<h2 id="7-login-logout-สไลด์-2728">7. Login / Logout (สไลด์ 27–28)</h2>
+<ul>
+<li><code>/</code> → login.html | <code>/login</code> (ฟอร์ม GET) → <code>res.cookie('tokenID','some-random-session-ID')</code> → <code>Login !!</code> (ของจริงต้องตรวจ username/password ก่อน)</li>
+<li><code>/restrict</code> → มี tokenID → <code>Valid Only the ones with cookie only</code> | ไม่มี → 401 | console <code>Accessed the restricted page some-random-session-ID</code></li>
+<li>⭐ <code>/logout</code> → <code>res.clearCookie(&quot;tokenID&quot;)</code> → <code>Logout !!</code> → เข้า <code>/restrict</code> อีกได้ 401</li>
+</ul>
+<h2 id="8-cookie-vs-session-สไลด์-2930">8. Cookie vs Session (สไลด์ 29–30)</h2>
+<ul>
+<li>Cookies (และ URL parameters) ขนข้อมูล client↔server ได้ แต่ <strong>อ่านได้ฝั่ง client</strong></li>
+<li>⭐ Session = ข้อมูลใช้ได้ <strong>ทุกหน้า</strong> ในเว็บแอป เก็บ <strong>ฝั่ง server (protected from clients)</strong></li>
+</ul>
+<h2 id="9-express-session-สไลด์-3134">9. express-session (สไลด์ 31–34)</h2>
+<ul>
+<li>⭐ <code>npm install express-session</code> | middleware เก็บ session ใน storage — default <strong>MemoryStore</strong> (dev/debug เท่านั้น <strong>ไม่ใช่ production</strong>)</li>
+<li>⭐ <code>router.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }))</code></li>
+<li><code>secret</code> = sign session ID | <code>resave: false</code> = เซฟเมื่อถูกแก้ | <code>saveUninitialized: true</code> = สร้างให้ทุกคน</li>
+<li>⭐ <code>/pageview</code>: ไม่มี numviews → <code>=1</code> + <code>First time visited</code> | มี → <code>++</code> + <code>Visited${n} times</code> | ส่ง <code>Session created!!!</code> ทุกครั้ง</li>
+<li><code>req.session</code> สร้าง/อ่าน | <code>req.session.&lt;name&gt;</code> ใช้ได้จาก <strong>ทุก route</strong></li>
+<li>รันจริง: console <code>First time visited</code>, <code>Visited2 times</code>, <code>Visited3 times</code>… | restart server → MemoryStore หาย → <code>First time visited</code> ใหม่ | ไม่มี secret → 500 <code>secret option required for sessions</code></li>
+<li>⚠️ สไลด์ 34 แสดง <code>Visited 2 times</code> (โค้ดไม่มีเว้นวรรค → <code>Visited2 times</code>) และหน้าเว็บ <code>Visited 10 times</code> (โค้ดส่ง <code>Session created!!!</code> เสมอ) | ⚠️ สไลด์ 32 บรรทัด <code>const</code> ค้าง</li>
+</ul>
+<h2 id="1011-db-recap-สไลด์-3539">10–11. DB + RECAP (สไลด์ 35–39)</h2>
+<ul>
+<li>⭐ วิชานี้ใช้ <strong><code>mysql2</code></strong> (<code>npm install mysql2</code>) → query, insert, update, delete ผ่าน SQL</li>
+<li>DB หลายแบบ: Relational, Graph, XML | Relational = schemas, tables, queries, reports, views</li>
+<li>tinycollege 6 ตาราง: Department(🔑dept_code) | Professor(🔑emp_num) | Student(🔑stu_num) | Enroll(🔑class_code+stu_num) | Class(🔑class_code) | Course(🔑course_code)</li>
+<li>9 ความสัมพันธ์: (1) prof works in dept | (2) dept head = prof | (3) student in dept | (4) student advisor = prof | (5) class taught by prof | (6) course offered by dept | (7) students enroll many classes | (8) classes enrolled by many students | (9) class belongs to course</li>
+<li>SQL = ภาษามาตรฐานเก็บ/แก้/ดึงข้อมูล + จัดการ DB ใน DBMS | INSERT, UPDATE, DELETE, SELECT (WHERE, GROUP BY, HAVING, ORDER BY)</li>
+</ul>
+<h2 id="12-เตรียม-mysql-สไลด์-4044">12. เตรียม MySQL (สไลด์ 40–44)</h2>
+<ul>
+<li>ติดตั้ง MySQL Server + Workbench | เข้า server ด้วย <strong>root account</strong></li>
+<li>สร้าง DB/tables (GUI หรือ <code>tinycollege.sql</code>) → สร้าง user (<strong>Username, Password, Host = localhost</strong>) → privilege</li>
+<li>Workbench: <strong>Server &gt; Users and Privileges &gt; Add Account</strong> (เช่น <code>tinyCollegeUser</code>, host <code>localhost</code>) → <strong>Schema Privileges</strong> tinycollege = DELETE, INSERT, SELECT, UPDATE</li>
+</ul>
+<h2 id="13-เชื่อม-db-สไลด์-4546">13. เชื่อม DB (สไลด์ 45–46)</h2>
+<ul>
+<li><code>npm install express nodemon dotenv mysql2</code> | <code>.env</code> มี PORT + ค่าต่อ DB</li>
+<li>⭐ <code>mysql.createConnection({ host, user, password, database })</code> (ค่าจาก <code>process.env.MYSQL_*</code>) → <code>connection.connect(err =&gt; { if(err) throw err; ... })</code></li>
+<li>ผล: <code>Server listening at Port 3000</code> → <code>Connected DB: tinycollege</code></li>
+<li>⚠️ สไลด์ 45 ยกชื่อ DB_USER/DB_PWD/DB_HOST แต่โค้ดใช้ MYSQL_* → ชื่อต้องตรงกัน</li>
+</ul>
+<h2 id="14-select-สไลด์-4748">14. SELECT (สไลด์ 47–48)</h2>
+<ul>
+<li>⭐ <code>SELECT course_code, course_name FROM Course WHERE dept_code='CIS'</code> → <strong>6 rows</strong> (CIS-220, CIS-320, CIS-370, CIS-420, QM-261, QM-362)</li>
+<li>⭐ <code>connection.query(sql, function(error, results){ if(error) throw error; console.log(`${results.length} rows returned`); return res.send(results); })</code></li>
+<li><code>/cis-courses</code> → JSON array <code>[{&quot;course_code&quot;:&quot;CIS-220&quot;,&quot;course_name&quot;:&quot;Intro. to Microcomputing&quot;}, ...]</code></li>
+<li>⚠️ log ในโค้ด &quot;Retrieved CIS courses&quot; แต่ terminal สไลด์ &quot;Retrieved all courses&quot;</li>
+</ul>
+<h2 id="15-insert-สไลด์-49">15. INSERT (สไลด์ 49)</h2>
+<ul>
+<li>⭐ ตัวอย่างใช้ <strong>GET</strong> (<code>/add241</code>) เพื่อความง่าย — <strong>ปกติใช้ POST</strong></li>
+<li><code>INSERT INTO Course VALUES('CIS-223','Introduction to Web Development',3,'CIS')</code> → <code>results.affectedRows</code> → <code>1 record inserted</code> → <code>res.redirect(...)</code></li>
+<li>terminal: 6 rows → insert → <strong>7 rows returned</strong></li>
+<li>⚠️ <code>res.redirect(&quot;/cis-course&quot;)</code> ขาด s → รันจริงได้ <strong>404 <code>Cannot GET /cis-course</code></strong> | log <code>Adding 223</code> vs terminal <code>Adding CIS-212</code>, Port 8080</li>
+</ul>
+<h2 id="16-extra-สไลด์-50">16. Extra (สไลด์ 50)</h2>
+<ul>
+<li>INSERT/UPDATE/DELETE เพิ่มเติมที่ w3schools | mysql2 รองรับ <strong>Promise API</strong> + <strong>async/await (ES7)</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cookie</td>
+<td>Session</td>
+<td>client, อ่านได้ฝั่ง client · server, client อ่านไม่ได้</td>
+</tr>
+<tr>
+<td><code>cookie-parser</code></td>
+<td><code>express-session</code></td>
+<td><code>req.cookies</code> · <code>req.session</code></td>
+</tr>
+<tr>
+<td><code>Set-Cookie</code></td>
+<td><code>Cookie</code> header</td>
+<td>response (server→browser) · request (browser→server)</td>
+</tr>
+<tr>
+<td><code>res.cookie()</code></td>
+<td><code>req.cookies</code></td>
+<td>สร้าง · อ่าน</td>
+</tr>
+<tr>
+<td><code>res.cookie()</code></td>
+<td><code>res.clearCookie()</code></td>
+<td>สร้าง · ลบ</td>
+</tr>
+<tr>
+<td><code>expire</code></td>
+<td><code>maxAge</code></td>
+<td>วันเวลาหมดอายุ (ตามสไลด์; รันจริงไม่มีผล) · อายุเป็น ms</td>
+</tr>
+<tr>
+<td><code>resave: false</code></td>
+<td><code>saveUninitialized: true</code></td>
+<td>เซฟเมื่อถูกแก้ · สร้าง session ให้ทุกคน</td>
+</tr>
+<tr>
+<td>MemoryStore</td>
+<td>store อื่น</td>
+<td>dev/debug, restart แล้วหาย · production</td>
+</tr>
+<tr>
+<td><code>npm init</code></td>
+<td><code>npm install</code></td>
+<td>สร้าง package.json · ติดตั้ง package</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td><code>process.env</code></td>
+<td>ไฟล์เก็บค่า · object อ่านค่าในโค้ด</td>
+</tr>
+<tr>
+<td><code>createConnection</code></td>
+<td><code>connect</code></td>
+<td>สร้าง config การเชื่อมต่อ · เชื่อมต่อจริง</td>
+</tr>
+<tr>
+<td><code>results.length</code></td>
+<td><code>results.affectedRows</code></td>
+<td>แถวที่ SELECT ได้ · แถวที่ INSERT กระทบ</td>
+</tr>
+<tr>
+<td><code>res.send(results)</code></td>
+<td><code>res.redirect(path)</code></td>
+<td>ส่ง JSON · ส่ง browser ไป path อื่น</td>
+</tr>
+<tr>
+<td>401</td>
+<td>404</td>
+<td>ไม่มีสิทธิ์ (ไม่มี cookie) · ไม่พบ path</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l10/short.html"><small>← บทก่อนหน้า</small><span>Lecture 10 – Node.js Part II (Express Framework)</span></a><a class="pg next" href="../l12/short.html"><small>บทถัดไป →</small><span>Lecture 12 – Web Services</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-unit-objective-สไลด์-24">Unit + Objective</a></li><li><a href="#1-recap-express-สไลด์-57">RECAP Express</a></li><li><a href="#2-ตั้งโปรเจกต์-สไลด์-811">ตั้งโปรเจกต์</a></li><li><a href="#3-environment-variables-สไลด์-1214">Environment Variables</a></li><li><a href="#4-stateless-สไลด์-1517">Stateless</a></li><li><a href="#5-cookie-สไลด์-1819">Cookie</a></li><li><a href="#6-ใช้-cookie-สไลด์-2026">ใช้ Cookie</a></li><li><a href="#7-login-logout-สไลด์-2728">Login / Logout</a></li><li><a href="#8-cookie-vs-session-สไลด์-2930">Cookie vs Session</a></li><li><a href="#9-express-session-สไลด์-3134">express-session</a></li><li><a href="#1011-db-recap-สไลด์-3539">–11. DB + RECAP</a></li><li><a href="#12-เตรียม-mysql-สไลด์-4044">เตรียม MySQL</a></li><li><a href="#13-เชื่อม-db-สไลด์-4546">เชื่อม DB</a></li><li><a href="#14-select-สไลด์-4748">SELECT</a></li><li><a href="#15-insert-สไลด์-49">INSERT</a></li><li><a href="#16-extra-สไลด์-50">Extra</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="index.html">📖 <span>ฉบับเต็ม</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l11", "u": "web/l11/short.html", "t": "⚡ สรุปสั้น · Lecture 11 – Node.js Part III (Cookies, Session, and Database)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

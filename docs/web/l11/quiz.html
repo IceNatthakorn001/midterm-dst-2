@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html class="snq snq-pro" lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz: L11 — Node.js Part III: Cookies, Session, DB</title>
+<!-- quiz-pro template — build with build_quiz_pro.js (do not edit the BANK by hand) -->
+<style>
+:root {
+  --qp-font: "IBM Plex Sans Thai Looped", "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+  --qp-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  --qp-bg: #f5f1e8; --qp-surface: #fffdf8; --qp-surface-2: #efe9dc; --qp-sunken: #f7f3ea;
+  --qp-text: #24302a; --qp-text-2: #3e4a42; --qp-muted: #69725f;
+  --qp-border: #e3dccd; --qp-border-2: #cfc4ad;
+  --qp-accent: #2f5d46; --qp-accent-ink: #ffffff; --qp-accent-soft: #e3ece4;
+  --qp-ok: #2f7546; --qp-ok-bg: #e5f0e1; --qp-bad: #a9442b; --qp-bad-bg: #f8e4dc;
+  --qp-warn: #8a5a00; --qp-warn-bg: #f8edd2; --qp-info-bg: #e9eef3;
+  --qp-code-bg: #f1ece1; --qp-code-text: #2a2f2b;
+  --qp-shadow: 0 1px 2px rgba(70,56,30,.05), 0 10px 28px -16px rgba(70,56,30,.28);
+  --qp-t-recall: #2f6690; --qp-t-understand: #a0522d; --qp-t-apply: #3f7a3a; --qp-t-compare: #7048a8;
+  --qp-t-error: #b03a3a; --qp-t-calc: #9a3f6a; --qp-t-code: #23707a; --qp-t-fill: #4b56b0;
+  color-scheme: light;
+}
+/* dark: follow the OS when standalone; inside the study site (html.snq) follow its data-theme toggle only */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.snq) {
+    --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+    --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+    --qp-border: #2b362e; --qp-border-2: #3d4b40;
+    --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+    --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+    --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+    --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+    --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+    --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+  --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+  --qp-border: #2b362e; --qp-border-2: #3d4b40;
+  --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+  --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+  --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+  --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+  --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+  --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+  color-scheme: dark;
+}
+
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; background: var(--qp-bg); }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0 auto; max-width: 760px; padding: 0 16px 72px;
+  font-family: var(--qp-font); font-size: 17px; line-height: 1.65;
+  background: var(--qp-bg); color: var(--qp-text);
+  overflow-wrap: anywhere;
+}
+:root.snq body { background: var(--qp-bg); color: var(--qp-text); }
+@media (min-width: 720px) { body { font-size: 17.5px; } }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--qp-accent) 55%, transparent); outline-offset: 2px; }
+code, pre, kbd { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+code { font-family: var(--qp-mono); font-size: .9em; background: var(--qp-surface-2); padding: .05em .35em; border-radius: 6px; }
+kbd { font-family: var(--qp-mono); font-size: .75em; border: 1px solid var(--qp-border-2); border-bottom-width: 2px; border-radius: 5px; padding: 0 .35em; color: var(--qp-muted); background: var(--qp-surface); }
+
+/* header */
+.qp-head { padding: 26px 0 6px; }
+.qp-eyebrow { font-size: .8rem; letter-spacing: .02em; color: var(--qp-muted); font-weight: 600; }
+.qp-h1 { font-size: clamp(1.4rem, 4.6vw, 1.85rem); line-height: 1.35; margin: 4px 0 6px; font-weight: 700; color: var(--qp-text); }
+:root.snq .qp-h1 { color: var(--qp-text); }
+.qp-head .sub { color: var(--qp-muted); font-size: .92rem; line-height: 1.6; margin: 0 0 6px; }
+body.qp-run .qp-head { display: none; }
+
+/* generic */
+.qp-app { padding-top: 8px; }
+.qp-card { background: var(--qp-surface); border: 1px solid var(--qp-border); border-radius: 20px; padding: 20px; box-shadow: var(--qp-shadow); margin: 0 0 14px; min-width: 0; }
+@media (max-width: 420px) { .qp-card { padding: 16px 14px; border-radius: 16px; } }
+.qp-h2 { font-size: 1.12rem; line-height: 1.4; margin: 0 0 10px; font-weight: 700; }
+.qp-h3 { font-size: 1rem; margin: 18px 0 8px; font-weight: 700; color: var(--qp-text-2); }
+.qp-muted { color: var(--qp-muted); }
+.qp-small { font-size: .88rem; }
+.qp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.qp-spacer { flex: 1; }
+.qp-btn { display: inline-flex; align-items: center; justify-content: center; gap: .4em; min-height: 46px; padding: .5em 1.15em;
+  border-radius: 999px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); font-weight: 600; line-height: 1.3; text-align: center; }
+.qp-btn:hover:not(:disabled) { border-color: var(--qp-accent); }
+.qp-btn:disabled { opacity: .45; cursor: not-allowed; }
+.qp-btn-primary { background: var(--qp-accent); border-color: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.qp-btn-quiet { border-color: transparent; background: transparent; color: var(--qp-muted); font-weight: 500; }
+.qp-link { border: 0; background: none; padding: 6px 4px; color: var(--qp-accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+.qp-note { border-radius: 14px; padding: 10px 14px; margin: 10px 0; font-size: .94rem; line-height: 1.6; background: var(--qp-info-bg); }
+.qp-note.is-warn { background: var(--qp-warn-bg); }
+.qp-note.is-bad { background: var(--qp-bad-bg); }
+.qp-note.is-ok { background: var(--qp-ok-bg); }
+
+/* chips */
+.qp-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 10px; }
+.qp-type { --c: var(--qp-muted); display: inline-block; font-size: .78rem; font-weight: 700; line-height: 1.5; padding: 2px 10px; border-radius: 999px;
+  color: var(--c); background: var(--qp-surface-2); background: color-mix(in srgb, var(--c) 14%, var(--qp-surface)); white-space: nowrap; }
+.qp-type[data-t="recall"] { --c: var(--qp-t-recall); } .qp-type[data-t="understand"] { --c: var(--qp-t-understand); }
+.qp-type[data-t="apply"] { --c: var(--qp-t-apply); } .qp-type[data-t="compare"] { --c: var(--qp-t-compare); }
+.qp-type[data-t="error"] { --c: var(--qp-t-error); } .qp-type[data-t="calc"] { --c: var(--qp-t-calc); }
+.qp-type[data-t="code"] { --c: var(--qp-t-code); } .qp-type[data-t="fill"] { --c: var(--qp-t-fill); }
+.qp-topic { font-size: .82rem; color: var(--qp-muted); }
+.qp-retry-chip { font-size: .78rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--qp-warn-bg); color: var(--qp-warn); }
+
+/* start screen */
+.qp-stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.qp-modes { display: grid; gap: 10px; }
+.qp-mode { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; text-align: left; width: 100%; min-height: 64px;
+  padding: 12px 16px; border-radius: 16px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); }
+.qp-mode:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-mode:disabled { opacity: .55; cursor: not-allowed; }
+.qp-mode b { font-size: 1.02rem; }
+.qp-mode span { grid-column: 1; font-size: .86rem; color: var(--qp-muted); line-height: 1.45; }
+.qp-mode i { grid-column: 2; grid-row: 1 / span 2; font-style: normal; font-size: 1.3rem; color: var(--qp-accent); }
+.qp-mode.is-main { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-opts { display: grid; gap: 4px; margin-top: 6px; }
+.qp-check { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 10px 6px; min-height: 48px; border-radius: 12px; cursor: pointer; line-height: 1.5; }
+.qp-check:hover { background: var(--qp-sunken); }
+.qp-check input { width: 1.25em; height: 1.25em; margin: .2em 0 0; accent-color: var(--qp-accent); }
+.qp-check small { display: block; color: var(--qp-muted); font-size: .84rem; }
+.qp-check.is-on { background: var(--qp-ok-bg); }
+.qp-srs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 8px 0 4px; }
+.qp-stat { background: var(--qp-sunken); border: 1px solid var(--qp-border); border-radius: 14px; padding: 10px 12px; }
+.qp-stat b { display: block; font-size: 1.35rem; line-height: 1.2; }
+.qp-stat span { font-size: .82rem; color: var(--qp-muted); }
+.qp-boxes { display: flex; gap: 4px; align-items: flex-end; height: 46px; margin-top: 8px; }
+.qp-boxes div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; font-size: .7rem; color: var(--qp-muted); height: 100%; }
+.qp-boxes div i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--qp-accent); opacity: .75; min-height: 2px; }
+.qp-hist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.qp-hist span { font-size: .8rem; padding: 2px 9px; border-radius: 999px; background: var(--qp-surface-2); color: var(--qp-text-2); }
+details.qp-how summary { cursor: pointer; color: var(--qp-accent); font-weight: 600; padding: 6px 0; }
+details.qp-how ul { margin: 6px 0 0; padding-left: 1.2em; font-size: .92rem; color: var(--qp-text-2); }
+
+/* brain dump */
+.qp-timer { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--qp-text-2); margin: 6px 0 10px; }
+.qp-tbar { flex: 1; height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-tbar i { display: block; height: 100%; background: var(--qp-accent); transition: width 1s linear; }
+.qp-ta { display: block; width: 100%; min-height: 220px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2);
+  background: var(--qp-sunken); color: var(--qp-text); line-height: 1.7; resize: vertical; }
+:root.snq .qp-ta { background: var(--qp-sunken); color: var(--qp-text); border: 1.5px solid var(--qp-border-2); border-radius: 14px; }
+.qp-ta:focus { outline: none; border-color: var(--qp-accent); }
+.qp-mine { white-space: pre-wrap; background: var(--qp-sunken); border: 1px dashed var(--qp-border-2); border-radius: 14px; padding: 10px 14px; max-height: 240px; overflow: auto; font-size: .94rem; color: var(--qp-text-2); }
+.qp-kps { display: grid; gap: 6px; margin: 8px 0; }
+.qp-kps .qp-check { border: 1px solid var(--qp-border); }
+.qp-tally { font-weight: 700; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+
+/* session bar */
+.qp-bar { padding: 10px 0 6px; }
+.qp-bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: .9rem; color: var(--qp-muted); }
+.qp-bar-row b { color: var(--qp-text); }
+.qp-time { font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 4px; }
+.qp-prog { height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; margin-top: 6px; }
+.qp-prog i { display: block; height: 100%; background: var(--qp-accent); border-radius: 9px; transition: width .3s; }
+.qp-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+.qp-grid button { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text-2); font-size: .85rem; font-variant-numeric: tabular-nums; padding: 0; }
+.qp-grid button.is-cur { border: 2px solid var(--qp-accent); color: var(--qp-accent); font-weight: 700; }
+.qp-grid button.is-ok { background: var(--qp-ok-bg); border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-grid button.is-bad { background: var(--qp-bad-bg); border-color: var(--qp-bad); color: var(--qp-bad); }
+.qp-grid button.is-shaky { background: var(--qp-warn-bg); border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-grid-foot { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--qp-muted); margin: -2px 0 8px; align-items: center; }
+.qp-grid-foot i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+/* question */
+.qp-q { font-size: 1.1em; font-weight: 600; line-height: 1.6; margin: 0 0 14px; }
+.qp-code { margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; background: var(--qp-code-bg); color: var(--qp-code-text); border: 1px solid var(--qp-border);
+  font-family: var(--qp-mono); font-size: .84em; line-height: 1.55; white-space: pre; overflow-x: auto; tab-size: 4; max-width: 100%; overflow-wrap: normal; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.qp-choices { display: grid; gap: 10px; }
+.qp-choice { display: grid; grid-template-columns: 2em 1fr; gap: 10px; align-items: start; width: 100%; text-align: left; min-height: 54px;
+  padding: 11px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); line-height: 1.55;
+  transition: border-color .15s, background .15s, transform .08s; }
+.qp-choice:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-choice:active:not(:disabled) { transform: translateY(1px); }
+.qp-choice:disabled { cursor: default; }
+.qp-letter { display: inline-grid; place-items: center; width: 2em; height: 2em; border-radius: 50%; background: var(--qp-surface-2); font-weight: 700; font-size: .92em; line-height: 1; }
+.qp-ctext { padding-top: .12em; min-width: 0; }
+.qp-choice.is-picked { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-choice.is-picked .qp-letter { background: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-choice.is-correct { border-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-choice.is-correct .qp-letter { background: var(--qp-ok); color: var(--qp-surface); }
+.qp-choice.is-wrong { border-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-choice.is-wrong .qp-letter { background: var(--qp-bad); color: var(--qp-surface); }
+.qp-choice.is-dim { opacity: .62; }
+.qp-gate { text-align: center; padding: 18px 12px; border: 1.5px dashed var(--qp-border-2); border-radius: 16px; background: var(--qp-sunken); }
+.qp-gate p { margin: 0 0 12px; color: var(--qp-text-2); font-size: .95rem; }
+
+/* confidence */
+.qp-conf { margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--qp-sunken); border: 1px solid var(--qp-border); }
+.qp-conf-q { font-weight: 600; font-size: .95rem; margin: 0 0 8px; }
+.qp-conf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qp-cbtn { min-height: 50px; border-radius: 12px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); font-weight: 700; padding: 6px 4px; line-height: 1.25; }
+.qp-cbtn small { display: block; font-weight: 400; font-size: .72rem; color: var(--qp-muted); }
+.qp-cbtn[data-c="sure"] { border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-cbtn[data-c="unsure"] { border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-cbtn[data-c="guess"] { color: var(--qp-text-2); }
+.qp-cbtn:hover { filter: brightness(1.05); background: var(--qp-sunken); }
+
+/* feedback */
+.qp-fb { margin-top: 16px; }
+.qp-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-weight: 700; font-size: 1.05rem; padding: 10px 14px; border-radius: 14px; }
+.qp-verdict.is-ok { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-verdict.is-bad { background: var(--qp-bad-bg); color: var(--qp-bad); }
+.qp-verdict small { font-weight: 500; font-size: .85rem; color: var(--qp-text-2); }
+.qp-ex { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.qp-ex li { padding: 9px 12px 9px 14px; border-radius: 12px; border-left: 4px solid var(--qp-border-2); background: var(--qp-sunken); font-size: .95rem; line-height: 1.6; }
+.qp-ex li.is-correct { border-left-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-ex li.is-wrong { border-left-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-ex li b { display: block; font-size: .92rem; }
+.qp-ex li em { font-style: normal; font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--qp-surface); margin-left: 6px; vertical-align: 1px; }
+.qp-reread { margin-top: 10px; font-size: .92rem; color: var(--qp-text-2); padding: 8px 12px; border-radius: 12px; border: 1px dashed var(--qp-border-2); }
+.qp-reread b { color: var(--qp-accent); }
+
+/* fill */
+.qp-ftext { font-size: 1.02em; line-height: 2.55; margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; background: var(--qp-sunken); }
+.qp-slot { display: inline-block; min-width: 84px; min-height: 2em; padding: 0 10px; margin: 0 3px; line-height: 1.85; text-align: center; vertical-align: middle;
+  border: 2px dashed var(--qp-border-2); border-radius: 10px; background: var(--qp-surface); color: var(--qp-text); font-weight: 600; }
+.qp-slot.is-filled { border-style: solid; border-color: var(--qp-t-fill); cursor: grab; touch-action: none; user-select: none; }
+.qp-slot.is-target, .qp-slot.is-over { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-slot.is-correct { border-style: solid; border-color: var(--qp-ok); background: var(--qp-ok-bg); cursor: default; }
+.qp-slot.is-wrong { border-style: solid; border-color: var(--qp-bad); background: var(--qp-bad-bg); cursor: default; text-decoration: line-through; }
+.qp-slot-ans { color: var(--qp-ok); font-weight: 700; font-size: .92rem; margin-right: 4px; }
+.qp-bank-label { color: var(--qp-muted); font-size: .85rem; margin: 0 0 6px; }
+.qp-bank { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--qp-border); background: var(--qp-surface); min-height: 60px; }
+.qp-chip { padding: 7px 14px; min-height: 42px; border-radius: 999px; border: 1.5px solid var(--qp-t-fill); background: var(--qp-surface); color: var(--qp-text);
+  cursor: grab; touch-action: none; user-select: none; font-weight: 600; line-height: 1.4; }
+.qp-chip.is-sel { background: var(--qp-t-fill); color: var(--qp-surface); }
+.qp-chip.is-used { visibility: hidden; }
+.qp-chip.is-ghost { position: fixed; z-index: 99; pointer-events: none; transform: translate(-50%, -50%); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.qp-fill-wait { margin-top: 12px; font-size: .9rem; color: var(--qp-muted); }
+
+/* nav */
+.qp-nav { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.qp-nav .qp-btn { min-width: 110px; }
+.qp-keys { display: none; margin-top: 10px; font-size: .8rem; color: var(--qp-muted); line-height: 2; }
+.qp-kh { display: none; }
+@media (hover: hover) and (pointer: fine) { .qp-keys { display: block; } .qp-kh { display: inline; } }
+
+/* results */
+.qp-score { text-align: center; padding: 6px 0 4px; }
+.qp-score .qp-big { font-size: clamp(2.4rem, 11vw, 3.2rem); font-weight: 700; line-height: 1.1; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+.qp-score .qp-big small { font-size: .45em; color: var(--qp-muted); font-weight: 600; }
+.qp-bars { display: grid; gap: 10px; }
+.qp-bar-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
+.qp-bar-item .qp-meter { grid-column: 1 / -1; height: 8px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-bar-item .qp-meter i { display: block; height: 100%; border-radius: 9px; background: var(--qp-ok); }
+.qp-bar-item .qp-meter i.is-mid { background: var(--qp-warn); }
+.qp-bar-item .qp-meter i.is-low { background: var(--qp-bad); }
+.qp-bar-item .qp-hint { grid-column: 1 / -1; font-size: .86rem; color: var(--qp-text-2); }
+.qp-bar-item .qp-num { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .92rem; }
+.qp-matrix { display: grid; grid-template-columns: minmax(64px, auto) 1fr 1fr; gap: 6px; font-size: .9rem; }
+.qp-matrix > div { border-radius: 12px; padding: 8px 10px; min-width: 0; }
+.qp-mh { font-weight: 700; color: var(--qp-muted); font-size: .82rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.qp-cell b { display: block; font-size: 1.4rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.qp-cell span { font-size: .8rem; line-height: 1.35; display: block; }
+.qp-cell.c-know { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-cell.c-danger { background: var(--qp-bad-bg); color: var(--qp-bad); outline: 2px solid var(--qp-bad); outline-offset: -2px; }
+.qp-cell.c-shaky { background: var(--qp-warn-bg); color: var(--qp-warn); }
+.qp-cell.c-gap { background: var(--qp-surface-2); color: var(--qp-text-2); }
+.qp-revs { display: grid; gap: 8px; }
+details.qp-rev { border: 1px solid var(--qp-border); border-radius: 14px; background: var(--qp-surface); }
+details.qp-rev > summary { cursor: pointer; padding: 10px 14px; line-height: 1.55; list-style: none; display: grid; gap: 4px; }
+details.qp-rev > summary::-webkit-details-marker { display: none; }
+details.qp-rev > summary .qp-chips { margin: 0; }
+details.qp-rev[open] > summary { border-bottom: 1px solid var(--qp-border); }
+.qp-rev-body { padding: 10px 14px 12px; font-size: .94rem; }
+.qp-rev-body p { margin: 4px 0; }
+.qp-grp { font-weight: 700; font-size: .92rem; margin: 14px 0 6px; display: flex; align-items: center; gap: 8px; }
+.qp-grp i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.qp-model { white-space: pre-wrap; background: var(--qp-ok-bg); border-radius: 14px; padding: 12px 14px; line-height: 1.7; margin: 10px 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media print { .qp-nav, .qp-bar, .qp-grid, .qp-keys { display: none; } }
+</style>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="../../assets/quizpro.css"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>"><style>:root{--sn-accent:#94496a}</style>
+</head>
+<body>
+<nav class="snq-bar"><a class="snq-home" href="../../index.html" aria-label="หน้าแรก"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></a><a href="index.html">← กลับไปอ่านสรุป</a><span class="snq-sep">/</span><a href="../index.html">💻 ITDS241</a><span class="snq-sep">/</span><a href="../../index.html">หน้าแรก</a></nav>
+<header class="qp-head">
+  <div class="qp-eyebrow">แบบทดสอบ · ITDS241 Web Technologies and Applications</div>
+  <h1 class="qp-h1">L11 — Node.js Part III: Cookies, Session, DB</h1>
+  <div class="sub">40 ข้อ แบ่งเป็นความจำ 6 ข้อ ความเข้าใจ 8 ข้อ การนำไปใช้ 6 ข้อ แยกคู่สับสน 4 ข้อ หาจุดผิด 2 ข้อ ไล่โค้ด 10 ข้อ เติมคำ 4 ข้อ — นึกเองก่อน · บอกความมั่นใจก่อนดูเฉลย · ข้อที่พลาดวนกลับมาแก้ตัว · นัดรอบทบทวนให้ (คะแนนนับจากการตอบครั้งแรก)</div>
+</header>
+<main id="qp-app" class="qp-app"></main>
+<noscript><p>ต้องเปิด JavaScript เพื่อทำแบบทดสอบนี้</p></noscript>
+
+<script>
+(function () {
+'use strict';
+const BANK = {"id":"web-l11","title":"L11 — Node.js Part III: Cookies, Session, DB","subject":"ITDS241 Web Technologies and Applications","keypoints":["npm: init (ถามตอบ) / init -y (ค่า default) / install (ทุกตัวใน package.json) / install &lt;pkg&gt; / uninstall &lt;pkg&gt; และตั้ง \"start\": \"nodemon app.js\" แล้วรันด้วย npm start","Environment variable = คู่ key-value ของค่าตั้งค่า (PORT, API_KEY, DB_HOST) ที่อยู่นอก source code ทำให้โค้ดชุดเดียว deploy ได้ทุกที่ ไม่ต้อง hardcode","dotenv: npm install dotenv → สร้าง .env ที่ root → require(\"dotenv\") + dotenv.config() → อ่านด้วย process.env.PORT","HTTP เป็น stateless (request สองครั้งไม่เชื่อมกัน) จึงต้องเก็บข้อมูลข้าม request เอง: Cookies ฝั่ง client หรือ Session ฝั่ง server","Cookie: server ส่ง header Set-Cookie มากับ response → browser เก็บ → ส่งกลับใน header Cookie ไป server เดิม ใช้ทำ session management, personalization, tracking","cookie-parser (middleware) → router.use(cp()) แล้ว res.cookie(name, value) สร้าง, req.cookies / req.cookies[\"name\"] อ่าน, maxAge ตั้งอายุ, res.clearCookie(name) ลบ","Login/Logout: /login สร้าง cookie tokenID, /restrict เช็ก req.cookies['tokenID'] ถ้าไม่มีตอบ 401, /logout ใช้ res.clearCookie(\"tokenID\")","Session เก็บข้อมูลที่ server (client อ่านไม่ได้) ใช้ได้ทุกหน้า; express-session เก็บใน MemoryStore เป็นค่าเริ่มต้น ซึ่งไว้ใช้ตอน dev/debug ไม่ใช่ production","session({ secret, resave: false, saveUninitialized: true }) — secret ใช้ sign session ID; อ่าน/เขียนด้วย req.session.&lt;name&gt; ได้จากทุก route","DB: วิชานี้ใช้ mysql2 → เตรียม DB, user (host localhost) และ schema privileges ใน Workbench → mysql.createConnection({host, user, password, database}) จาก .env → connection.connect()","connection.query(sql, (error, results) =&gt; ...) — SELECT: results.length + res.send(results) ได้ JSON; INSERT: results.affectedRows แล้ว res.redirect (ตัวอย่างใช้ GET แต่ปกติใช้ POST)"],"feynman":{"prompt":"อธิบายให้เพื่อนที่ไม่ได้เรียนฟังว่า ทำไมเว็บต้องใช้ cookie หรือ session ถึงจะจำได้ว่าเรา login แล้ว และสองอย่างนี้ต่างกันยังไง","model":"HTTP เป็น stateless คือ server มองทุก request เป็นคนแปลกหน้าเสมอ ไม่มีอะไรเชื่อม request ครั้งก่อนกับครั้งนี้ ถ้าไม่ทำอะไรเพิ่ม เรา login เสร็จแล้วกดไปหน้าอื่น server ก็จำไม่ได้ว่าเราเป็นใคร\n\nCookie แก้ปัญหานี้: ตอน login server ส่ง header Set-Cookie (เช่น tokenID) มากับ response browser เก็บไว้ แล้วแนบกลับไปใน header Cookie ทุกครั้งที่ขอ server เดิม หน้า /restrict จึงเช็กได้ว่ามี tokenID ไหม ถ้าไม่มีก็ตอบ 401 และ logout ก็แค่ clearCookie ทิ้ง เหมือนบัตรสะสมแต้มที่ลูกค้าพกไปยื่นทุกครั้ง\n\nแต่ cookie อยู่ฝั่ง client จึงอ่านได้ ข้อมูลที่ต้องปกป้องจึงเก็บใน session ซึ่งอยู่ฝั่ง server (express-session เก็บใน MemoryStore โดยค่าเริ่มต้น) client ถือแค่ session ID ที่ sign ด้วย secret และทุก route อ่านค่าเดิมได้ผ่าน req.session.&lt;name&gt; เช่น ตัวนับ numviews","checklist":["HTTP เป็น stateless ไม่เชื่อม request สองครั้งเข้าด้วยกัน","server ส่ง Set-Cookie ใน response แล้ว browser ส่งกลับใน header Cookie","ตัวอย่าง login: สร้าง tokenID, /restrict เช็ก ไม่มีได้ 401, logout = clearCookie","cookie อยู่ฝั่ง client อ่านได้ ส่วน session อยู่ฝั่ง server ปกป้องจาก client","express-session เก็บใน MemoryStore โดยค่าเริ่มต้น ใช้ req.session.&lt;name&gt; ได้ทุก route"]},"review":{"0. บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร?":"Part I พื้นฐาน / Part II Express / Part III Cookies, Session, DB · objective = สร้าง cookie/session + ต่อ relational DB (สไลด์ 2–4)","1. RECAP: Express คืออะไร?":"Express = minimal &amp; flexible framework · routing, API, template engine (Pug/EJS) แทนตัวแปรแล้วแปลงเป็น HTML (สไลด์ 7)","2. ตั้งโปรเจกต์และ server ด้วย npm + Express ยังไง? (ทบทวน)":"ตาราง npm init / init -y / install / install &lt;pkg&gt; / uninstall · \"start\": \"nodemon app.js\" · npm start (สไลด์ 9–11)","3. Environment variable คืออะไร และใช้ `.env` ยังไง?":"key-value นอก source code · npm install dotenv → .env ที่ root → dotenv.config() → process.env.PORT (สไลด์ 12–14)","4. ทำไมต้องมี Cookie และ Session? (HTTP เป็น stateless)":"Cookies = client / Session = server · HTTP stateless, cookie ทำให้เป็น stateful session (สไลด์ 16–17)","5. Cookie คืออะไร และส่งไป-กลับยังไง?":"small piece of data · Set-Cookie ใน response / Cookie header ใน request · session management, personalization, tracking (สไลด์ 18–19)","6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?":"cookie-parser → res.cookie / req.cookies / req.cookies[\"name\"] / maxAge / clearCookie · restrict ต้องมีครบสองตัว (สไลด์ 20–26)","7. ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง?":"/login สร้าง tokenID · /restrict เช็ก ไม่มี → 401 · /logout clearCookie (สไลด์ 27–28)","8. Session ต่างจาก Cookie ยังไง?":"cookie อ่านได้ฝั่ง client · session อยู่ server, protected from clients, ใช้ได้ทุกหน้า (สไลด์ 29–30)","9. ใช้ `express-session` ยังไง?":"MemoryStore (dev เท่านั้น) · secret / resave: false / saveUninitialized: true · req.session.numviews (สไลด์ 31–34)","10. ต่อ Node.js กับ database ต้องใช้อะไร?":"หลาย package ต่อ MySQL ได้ วิชานี้ใช้ mysql2 (npm install mysql2) (สไลด์ 36)","11. RECAP Database: relational DB, tinycollege, SQL":"relational DB · tinycollege 6 ตาราง 9 ความสัมพันธ์ · SQL INSERT/UPDATE/DELETE/SELECT + WHERE ... (สไลด์ 37–39)","12. เตรียม MySQL Server, Workbench และ DB user ยังไง?":"Workbench ใช้ root เข้า · Server &gt; Users and Privileges &gt; Add Account (host localhost) · Schema Privileges (สไลด์ 40–44)","13. เชื่อม Node.js กับ MySQL ยังไง?":"npm install express nodemon dotenv mysql2 · createConnection({host, user, password, database}) จาก .env · connect(cb) (สไลด์ 45–46)","14. รัน SELECT แล้วส่งผลเป็น JSON ยังไง?":"connection.query(sql, function(error, results){...}) · results.length · res.send(results) = JSON (สไลด์ 47–48)","15. รัน INSERT ยังไง?":"INSERT INTO Course VALUES(...) · results.affectedRows · res.redirect · ตัวอย่างใช้ GET ปกติใช้ POST (สไลด์ 49)","16. [Extra] mysql2 ทำอะไรได้อีก?":"ศึกษา INSERT/UPDATE/DELETE เพิ่ม · mysql2 รองรับ Promise API และ ES7 async/await (สไลด์ 50)"},"questions":[{"id":"b5h1tw","type":"recall","topic":"0. บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร?","q":"Course Objective ของบทนี้ (สไลด์ 3) คือข้อใด?","choices":["สร้าง cookies/sessions และต่อ relational DB ได้","สร้าง web server เองด้วย http module ตั้งแต่ศูนย์","ใช้ template engine Pug/EJS สร้างหน้า HTML ได้","สร้าง API ด้วย Express Router และ middleware ได้"],"correct":0,"explain":["ถูก — Able to create cookies and sessions using Node.js และ Able to connect Node.js with the relational database","ผิด — Build your first server เป็นเนื้อหา Part I","ผิด — template engine ถูกพูดถึงแค่ใน RECAP Express (สไลด์ 7) ไม่ใช่ objective ของบทนี้","ผิด — Express Framework เป็นเนื้อหา Part II (บทก่อน) บทนี้ทบทวนแค่ RECAP"]},{"id":"pawzut","type":"recall","topic":"2. ตั้งโปรเจกต์และ server ด้วย npm + Express ยังไง? (ทบทวน)","q":"ตามตาราง npm (สไลด์ 9) \u003ccode>npm init -y\u003c/code> ต่างจาก \u003ccode>npm init\u003c/code> อย่างไร?","choices":["ลบ package ที่ไม่ได้ใช้ออกจากโปรเจกต์ให้เอง","สร้างโปรเจกต์ด้วยค่า default โดยข้ามคำถาม","สร้างโปรเจกต์พร้อมติดตั้ง express ให้ทันที","ติดตั้ง dependency ทุกตัวใน package.json"],"correct":1,"explain":["ผิด — การลบ package ใช้ npm uninstall &lt;package&gt;","ถูก — npm init -y = Initialize a project with default settings (skip prompts) ใช้ตอน Quick project setup ส่วน npm init เป็นแบบ interactive","ผิด — init แค่สร้าง package.json ต้องติดตั้ง express เองด้วย npm install express","ผิด — นี่คือหน้าที่ของ npm install (ไม่มีชื่อ package) ใช้หลัง clone หรือ pull โปรเจกต์"]},{"id":"maour2","type":"recall","topic":"9. ใช้ `express-session` ยังไง?","q":"express-session เก็บ session ไว้ที่ใดเป็นค่าเริ่มต้น (สไลด์ 31)?","choices":["ไฟล์ .env ที่อยู่ใน root ของโปรเจกต์นี้","cookie ที่เก็บในเครื่อง browser ผู้ใช้","ตาราง session ในฐานข้อมูล MySQL","MemoryStore ในหน่วยความจำ server"],"correct":3,"explain":["ผิด — .env เก็บค่าตั้งค่า เช่น SESSION_SECRET ไม่ได้เก็บข้อมูล session","ผิด — การเก็บที่ browser คือ cookie แต่ session เก็บฝั่ง server","ผิด — สไลด์บอกให้ใช้ store อื่นใน production แต่ค่าเริ่มต้นคือ MemoryStore","ถูก — express-session store them in the session storage (by default MemoryStore) ซึ่งตั้งใจไว้สำหรับ debugging/developing ไม่ใช่ production"]},{"id":"1nyvvk0","type":"recall","topic":"10. ต่อ Node.js กับ database ต้องใช้อะไร?","q":"สไลด์ 45 ติดตั้ง 4 package ตัวใดใช้เชื่อมต่อและส่ง SQL ไป MySQL?","choices":["express","nodemon","mysql2","dotenv"],"correct":2,"explain":["ผิด — express ใช้สร้าง server และ routing","ผิด — nodemon ใช้ restart server อัตโนมัติเมื่อแก้ไฟล์","ถูก — In our class, we use the package called mysql2 ใช้ connect DB และจัดการข้อมูลผ่าน SQL","ผิด — dotenv แค่โหลดค่าเชื่อมต่อ (MYSQL_HOST ฯลฯ) จาก .env ไม่ได้ต่อ DB เอง"]},{"id":"tzlwyz","type":"recall","topic":"12. เตรียม MySQL Server, Workbench และ DB user ยังไง?","q":"ใน MySQL Workbench สไลด์ 43 สร้าง user สำหรับเชื่อมต่อจากเมนูใด?","choices":["Schemas &gt; tinycollege &gt; Users","Database &gt; Users and Accounts","Server &gt; Users and Privileges","Server &gt; Schema Privileges"],"correct":2,"explain":["ผิด — แผง SCHEMAS แสดงตารางของ tinycollege ไม่ใช่ที่สร้าง user","ผิด — สไลด์ใช้เมนู Server ไม่ใช่ Database","ถูก — In MySQL Workbench, go to \"Server\" &gt; \"Users and Privileges\" แล้วกด Add Account","ผิด — Schema Privileges เป็นแท็บในหน้า Users and Privileges ไว้ตั้งสิทธิ์ (สไลด์ 44) หลังสร้าง user แล้ว"]},{"id":"1c554il","type":"recall","topic":"16. [Extra] mysql2 ทำอะไรได้อีก?","q":"สไลด์ 50 [Extra] บอกว่า mysql2 รองรับอะไรเพิ่มเติม?","choices":["Promise API และ ES7 async/await","สร้างตารางจากไฟล์ .env ให้อัตโนมัติ","ใช้ได้เฉพาะ callback แบบเดิมเท่านั้น","เก็บ session ลง MySQL ให้อัตโนมัติ"],"correct":0,"explain":["ถูก — mysql2 also support Promise API and works with ES7 async/await","ผิด — .env เก็บค่าเชื่อมต่อเท่านั้น ตารางสร้างด้วย Workbench หรือ script เช่น tinycollege.sql","ผิด — ตัวอย่างในบทใช้ callback ก็จริง แต่สไลด์ 50 บอกว่ารองรับ Promise / async-await ด้วย","ผิด — การเก็บ session เป็นงานของ express-session (ค่าเริ่มต้น MemoryStore) สไลด์ไม่ได้บอกว่า mysql2 ทำ"]},{"id":"1t2ow6v","type":"understand","topic":"1. RECAP: Express คืออะไร?","q":"template engine เช่น Pug หรือ EJS ทำอะไรตอน runtime (สไลด์ 7)?","choices":["เก็บค่าตัวแปรของผู้ใช้แต่ละคนไว้ใน session ให้เอง","กำหนดว่า URL ใดจะเรียก function ใดของ server","แปลงไฟล์ HTML เป็น JavaScript ให้รันใน browser","แทนตัวแปรใน template ด้วยค่าจริงแล้วแปลงเป็น HTML"],"correct":3,"explain":["ผิด — การเก็บข้อมูลผู้ใช้ข้ามหน้าเป็นงานของ session (express-session)","ผิด — การจับคู่ URL กับ function คือ routing ซึ่งเป็นสิ่งที่ Express ช่วย ไม่ใช่ template engine","ผิด — ทิศกลับกัน template engine สร้าง HTML ส่งให้ client ไม่ได้แปลง HTML เป็น JS","ถูก — template engine replaces variables in a template file with actual values และ transforms the template into an HTML file sent to the client"]},{"id":"v0zjeq","type":"understand","topic":"3. Environment variable คืออะไร และใช้ `.env` ยังไง?","q":"ทำไมสไลด์ 12 แนะนำให้เก็บค่า PORT, DB_HOST เป็น environment variable?","choices":["ป้องกันไม่ให้ browser อ่านค่า cookie ของผู้ใช้ได้เลย","โค้ดชุดเดิมรันได้ทุกเครื่องโดยไม่ต้องแก้ source code","ทำให้ไม่ต้องใช้ npm install ติดตั้ง package อีก","ให้ server ตอบ request ได้เร็วกว่าเขียนค่าในโค้ด"],"correct":1,"explain":["ผิด — environment variable อยู่ฝั่ง server ไม่เกี่ยวกับการปกป้อง cookie","ถูก — defined outside the source code allowing the app to run without changing the source code → same source code can be deployed anywhere, portable และ maintainable","ผิด — ยังต้องติดตั้ง package เช่น npm install dotenv อยู่ดี","ผิด — สไลด์ไม่ได้พูดถึงความเร็ว เหตุผลคือไม่ hardcode ค่าที่ขึ้นกับ environment"]},{"id":"7jp0se","type":"understand","topic":"4. ทำไมต้องมี Cookie และ Session? (HTTP เป็น stateless)","q":"ทำไมเว็บต้องใช้ cookie หรือ session จึงจะจำได้ว่าผู้ใช้ login แล้ว (สไลด์ 17)?","choices":["HTTP จำ state ของผู้ใช้ไว้ได้แต่ลบทิ้งทุกครั้งที่ปิด browser","HTTP เป็น stateless ไม่เชื่อม request สองครั้งเข้าด้วยกัน","browser ไม่ยอมส่ง request ซ้ำไปยัง server เดิมอีกครั้ง","Node.js มี thread เดียวจึงจำ request ก่อนหน้าไม่ได้เลย"],"correct":1,"explain":["ผิด — HTTP ไม่ได้จำ state ตั้งแต่แรก ไม่ใช่จำแล้วลบ","ถูก — HTTP is stateless; no link between any two HTTP requests จึงต้องใช้ cookie ทำให้เป็น stateful session (ใช้ context เดียวกัน)","ผิด — browser ส่ง request ไป server เดิมได้ตามปกติ และยังแนบ cookie กลับไปด้วย","ผิด — single thread เป็นเรื่องการรับ request ของ Node (L9) ไม่ใช่เหตุที่จำผู้ใช้ไม่ได้ ต้นเหตุคือ HTTP stateless"]},{"id":"1w2e0dr","type":"understand","topic":"5. Cookie คืออะไร และส่งไป-กลับยังไง?","q":"server รู้ได้อย่างไรว่า request สองครั้งมาจาก browser เดียวกัน (สไลด์ 18–19)?","choices":["server ส่ง header Cookie ไปถาม browser ก่อนทุก request","browser ส่งไฟล์ .env ของเครื่องผู้ใช้มาพร้อมกับ request ทุกครั้ง","browser แนบ cookie ที่มี unique identifier มากับ request","server จำ request ก่อนหน้าไว้เองเพราะ HTTP เป็น stateful"],"correct":2,"explain":["ผิด — server ส่ง Set-Cookie มากับ response ส่วน header Cookie เป็นของ browser ที่ส่งมาใน request","ผิด — .env อยู่ฝั่ง server เก็บค่าตั้งค่าของแอป ไม่ได้มากับ request","ถูก — cookie ถูกส่งกลับใน Cookie header ไป server เดิม ถ้าใส่ unique identifier ไว้ก็ uniquely identify clients และผูก request ของคนเดียวกันได้","ผิด — HTTP เป็น stateless server ไม่ได้จำ request เก่าเอง"]},{"id":"apwuks","type":"understand","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"ทำไมต้อง \u003ccode>router.use(cp())\u003c/code> ก่อนจึงจะอ่าน \u003ccode>req.cookies\u003c/code> ได้ (สไลด์ 20)?","choices":["cookie-parser โหลดค่าจาก .env เข้าไปไว้ใน process.env ให้","cookie-parser เก็บ cookie ทุกตัวไว้ใน MemoryStore ของ server","cookie-parser สร้าง cookie ส่งกลับไปเก็บไว้ในเครื่อง browser","cookie-parser เป็น middleware ที่ parse cookie มากับ request"],"correct":3,"explain":["ผิด — นั่นคือหน้าที่ของ dotenv.config()","ผิด — MemoryStore เป็นที่เก็บของ express-session ไม่ใช่ cookie-parser","ผิด — การสร้าง cookie ใช้ res.cookie(...) ซึ่งเป็น method ของ response","ถูก — cookie-parser is a middleware which parses cookies attached to the client request object จึงได้ object req.cookies"]},{"id":"1hk4dqh","type":"understand","topic":"7. ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง?","q":"ทำไม comment ใน \u003ccode>/login\u003c/code> (สไลด์ 27) เตือนให้ตรวจ username/password ก่อนสร้าง cookie?","choices":["ไม่งั้นใครเปิด /login ก็ได้ tokenID ไปผ่าน /restrict","เพราะ /restrict ตรวจรหัสผ่านซ้ำจาก cookie ทุกครั้ง","เพราะ browser จะไม่รับ cookie ถ้าไม่มีรหัสผ่านแนบ","เพราะ res.cookie จะ error ถ้ายังไม่ได้ตรวจรหัสผ่าน"],"correct":0,"explain":["ถูก — /restrict ดูแค่ว่ามี tokenID ไหม ถ้า /login แจก token โดยไม่ตรวจ ใครเข้า /login ก็ได้สิทธิ์ (In practice: you need to verify the username/password before proceed to this step)","ผิด — /restrict เช็กแค่ if(tokenID) ไม่ได้ตรวจรหัสผ่าน","ผิด — browser เก็บ cookie ได้โดยไม่เกี่ยวกับรหัสผ่าน (เห็นใน DevTools ทันที)","ผิด — res.cookie สร้าง cookie ได้เสมอ ตัวอย่างนี้ไม่ตรวจรหัสก็ยังได้ Login !!"]},{"id":"1j4xd3k","type":"understand","topic":"8. Session ต่างจาก Cookie ยังไง?","q":"ทำไมข้อมูลที่ต้องปกป้องจาก client ควรเก็บใน session แทน cookie (สไลด์ 29–30)?","choices":["cookie อ่านได้ฝั่ง client ส่วน session เก็บไว้ที่ server","session ถูกเก็บใน browser แบบเข้ารหัสไว้ให้แล้วเสมอ","cookie เก็บได้แค่ตัวเลข ส่วน session เก็บข้อความได้ด้วย","session ถูกส่งไปกับทุก request แต่ cookie ไม่ถูกส่งเลย"],"correct":0,"explain":["ถูก — cookies are readable and on the client side ส่วน session เก็บข้อมูลไว้ฝั่ง server (protected from clients)","ผิด — session ไม่ได้อยู่ใน browser แต่อยู่ใน session storage ของ server (MemoryStore)","ผิด — cookie เก็บข้อความได้ เช่น 'chocolate-chip-cookie'","ผิด — กลับกัน cookie คือตัวที่ถูกส่งไปกับ request ทุกครั้ง"]},{"id":"1gfclzc","type":"understand","topic":"9. ใช้ `express-session` ยังไง?","q":"terminal สไลด์ 34 หลังบรรทัด \u003ccode>[nodemon] restarting due to changes...\u003c/code> ทำไมขึ้น First time visited อีกครั้ง?","choices":["saveUninitialized: true สร้าง session ใหม่ทุก request","server restart แล้ว MemoryStore ถูกล้าง session เดิมหาย","resave: false ทำให้ไม่บันทึกค่า numviews ลง session เลย","browser ลบ cookie ทุกครั้งที่ไฟล์ app.js บน server ถูกแก้ไข"],"correct":1,"explain":["ผิด — ถ้าสร้างใหม่ทุก request จะไม่มีทางได้ Visited 2 times ... 10 times ต่อกัน","ถูก — session เก็บใน MemoryStore (หน่วยความจำของ server) nodemon restart = process ใหม่ ค่า numviews เดิมจึงหาย — รันจริง restart แล้วใช้ cookie เดิมก็ได้ First time visited","ผิด — resave: false บันทึกเมื่อ session ถูกแก้ ซึ่ง numviews++ คือการแก้ จึงบันทึกได้ (หลังจากนั้นนับ 2, 3, ... ต่อได้)","ผิด — browser ไม่รู้ว่า app.js ถูกแก้ ฝั่งที่ข้อมูลหายคือ server"]},{"id":"1mt2y1k","type":"apply","topic":"3. Environment variable คืออะไร และใช้ `.env` ยังไง?","q":"ย้ายแอปขึ้น cloud ที่ต้องใช้ port 8080 โค้ดอ่าน \u003ccode>process.env.PORT\u003c/code> อยู่แล้ว ควรทำอะไร?","choices":["เปลี่ยนชื่อไฟล์ .env เป็น .env8080 แทนเดิม","แก้เป็น app.listen(8080) ในโค้ดตรง ๆ","แก้ PORT=8080 ในไฟล์ .env โดยไม่แตะโค้ด","รัน npm install dotenv พร้อมเลข 8080"],"correct":2,"explain":["ผิด — dotenv โหลดไฟล์ชื่อ .env ที่ root เปลี่ยนชื่อแล้วจะไม่ถูกโหลด","ผิด — นี่คือการ hardcode ซึ่งสไลด์ 12 บอกให้หลีกเลี่ยง","ถูก — ค่าที่ขึ้นกับ environment อยู่ใน .env โค้ดอ่าน process.env.PORT จึงเปลี่ยนแค่ .env ได้เลย (same source code can be deployed anywhere)","ผิด — npm install แค่ติดตั้ง package ไม่ได้ตั้งค่าตัวแปร"]},{"id":"1dgwdbw","type":"apply","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"ต้องการ cookie ที่อยู่ได้ 10 นาทีนับจากตอนตั้ง ควรเขียนอย่างไร (สไลด์ 26)?","choices":["\u003ccode>res.clearCookie(\"c\", {maxAge: 600})\u003c/code>","\u003ccode>res.cookie(\"c\", \"v\", {maxAge: 60000})\u003c/code>","\u003ccode>res.cookie(\"c\", \"v\", {maxAge: 600})\u003c/code>","\u003ccode>res.cookie(\"c\", \"v\", {maxAge: 600000})\u003c/code>"],"correct":3,"explain":["ผิด — clearCookie ใช้ลบ cookie ไม่ได้ใช้สร้างหรือตั้งอายุ","ผิด — 60000 ms = 1 นาที (60 × 1000) ลืมคูณ 10 นาที","ผิด — 600 คือ 10 นาทีในหน่วยวินาที แต่ maxAge ใส่เป็น ms จึงอยู่ได้แค่ 0.6 วินาที","ถูก — maxAge เป็นหน่วย ms (สไลด์ 26: maxAge 360000 = 360000 ms) 10 นาที = 10 × 60 × 1000 = 600000"]},{"id":"9opgg6","type":"apply","topic":"11. RECAP Database: relational DB, tinycollege, SQL","q":"ต้องการชื่อวิชา (course_name) ทุกวิชาของภาค INFS จากฐาน tinycollege ใช้ SQL ใด?","choices":["SELECT course_name FROM Course WHERE dept_code='INFS'","SELECT course_name FROM Enroll WHERE dept_code='INFS'","SELECT course_name WHERE dept_code='INFS' FROM Course","SELECT Course FROM course_name WHERE dept_code='INFS'"],"correct":0,"explain":["ถูก — ใช้รูปเดียวกับสไลด์ 47: SELECT คอลัมน์ FROM ตาราง WHERE เงื่อนไข และ course_name, dept_code อยู่ในตาราง Course","ผิด — ตาราง Enroll มีแค่ class_code, stu_num, grade, credit ไม่มี course_name และ dept_code","ผิด — ลำดับ clause ผิด FROM ต้องมาก่อน WHERE","ผิด — สลับกัน หลัง SELECT คือชื่อคอลัมน์ หลัง FROM คือชื่อตาราง"]},{"id":"1cpnyeb","type":"apply","topic":"12. เตรียม MySQL Server, Workbench และ DB user ยังไง?","q":"user ของแอป Node ต้องอ่าน/เพิ่ม/แก้/ลบข้อมูลใน tinycollege ควรให้สิทธิ์ใด (สไลด์ 44)?","choices":["Schema mysql.sys: SELECT, INSERT, UPDATE, DELETE","Other Rights: GRANT OPTION และ LOCK TABLES ทั้งหมด","Schema tinycollege: CREATE, ALTER, DROP, TRIGGER","Schema tinycollege: SELECT, INSERT, UPDATE, DELETE"],"correct":3,"explain":["ผิด — ต้องให้สิทธิ์บน schema ที่แอปใช้ คือ tinycollege","ผิด — Other Rights ไม่ใช่สิทธิ์อ่าน/เขียนข้อมูล และในรูปไม่ได้ติ๊ก","ผิด — กลุ่มนี้อยู่ใน DDL Rights ใช้แก้โครงสร้างตาราง ไม่ใช่สิทธิ์อ่าน/เขียนข้อมูลที่โจทย์ต้องการ (ในรูปไม่ได้ติ๊ก)","ถูก — สไลด์ 44 ให้ tinyCollegeUser@localhost มี schema privilege บน tinycollege = DELETE, INSERT, SELECT, UPDATE (Allowed SQL operations)"]},{"id":"1fmm7ob","type":"apply","topic":"13. เชื่อม Node.js กับ MySQL ยังไง?","q":"แอปตามสไลด์ 46 ต้องเปลี่ยนไปต่อฐานข้อมูลชื่อ shopdb แทน tinycollege ควรแก้ตรงไหน?","choices":["แก้ MYSQL_HOST=shopdb ในไฟล์ .env แทน","แก้ user: \"shopdb\" ใน createConnection","แก้ MYSQL_DATABASE=shopdb ในไฟล์ .env","แก้ host: \"shopdb\" ใน createConnection"],"correct":2,"explain":["ผิด — MYSQL_HOST เป็นที่อยู่ server ชื่อฐานอยู่ใน MYSQL_DATABASE","ผิด — user คือชื่อบัญชีที่ใช้ login เข้า MySQL ไม่ใช่ชื่อฐาน","ถูก — database : process.env.MYSQL_DATABASE อ่านชื่อฐานจาก .env จึงแก้ค่าที่ .env ที่เดียว","ผิด — host คือที่อยู่ของ MySQL server (localhost) ไม่ใช่ชื่อฐานข้อมูล"]},{"id":"1r0se5f","type":"apply","topic":"15. รัน INSERT ยังไง?","q":"ทำฟอร์มเพิ่มวิชาใหม่ลง DB ในงานจริง ควรส่งด้วย HTTP method ใด (สไลด์ 49)?","choices":["GET","POST","TRACE","HEAD"],"correct":1,"explain":["ผิด — GET ใช้ในตัวอย่างเพื่อความง่ายเท่านั้น สไลด์บอกว่าปกติใช้ POST","ถูก — Note ในสไลด์ 49: for this example only, we use GET method for inserting new data. Typically, we use POST","ผิด — สไลด์ไม่ได้ใช้ TRACE ระบุว่าปกติการเพิ่มข้อมูลใช้ POST","ผิด — สไลด์ไม่ได้ใช้ HEAD ระบุว่าปกติการเพิ่มข้อมูลใช้ POST"]},{"id":"1m3qs1u","type":"compare","topic":"5. Cookie คืออะไร และส่งไป-กลับยังไง?","q":"header \u003ccode>Set-Cookie\u003c/code> กับ \u003ccode>Cookie\u003c/code> ต่างกันอย่างไร (สไลด์ 19)?","choices":["ทั้งคู่อยู่ใน response แต่ header Cookie ใช้ลบ cookie","ทั้งคู่อยู่ใน request แต่ Set-Cookie ใช้สร้าง cookie ใหม่","Set-Cookie อยู่ใน request / Cookie อยู่ใน response","Set-Cookie อยู่ใน response / Cookie อยู่ใน request"],"correct":3,"explain":["ผิด — Cookie header มากับ request จาก browser และการลบใช้ res.clearCookie","ผิด — Set-Cookie มากับ response จาก server ไม่ใช่ request","ผิด — สลับทิศ server เป็นคนสั่งเก็บ (Set-Cookie) ใน response","ถูก — Node ส่ง Set-Cookie header with the response ให้ browser เก็บ แล้ว browser ส่ง cookie กลับใน Cookie HTTP header ของ request"]},{"id":"omnum3","type":"compare","topic":"8. Session ต่างจาก Cookie ยังไง?","q":"ข้อใดจับคู่ package กับสิ่งที่ใช้อ่านข้อมูลใน route ได้ถูกต้อง?","choices":["cookie-parser → req.cookies / express-session → process.env","cookie-parser → req.session / express-session → req.cookies","cookie-parser → req.cookies / express-session → req.session","cookie-parser → res.cookie / express-session → res.session"],"correct":2,"explain":["ผิด — process.env มาจาก dotenv ไม่ใช่ express-session","ผิด — สลับกัน req.session มาจาก express-session","ถูก — cookie-parser parse cookie เป็น req.cookies (สไลด์ 23) ส่วน express-session ให้ req.session.&lt;name&gt; (สไลด์ 33)","ผิด — res.cookie ใช้สร้าง cookie ไม่ใช่อ่าน และไม่มี res.session ในสไลด์"]},{"id":"prlt0j","type":"compare","topic":"9. ใช้ `express-session` ยังไง?","q":"option \u003ccode>resave: false\u003c/code> กับ \u003ccode>saveUninitialized: true\u003c/code> ต่างกันอย่างไร (สไลด์ 32)?","choices":["resave: false เซฟเมื่อ session ถูกแก้ / saveUninitialized: true สร้างให้ทุกคน","resave: false สร้างให้ทุกคน / saveUninitialized: true เซฟเมื่อ session ถูกแก้","resave: false ลบ session เก่า / saveUninitialized: true ใช้ sign session ID","resave: false ไม่เซฟ session เลย / saveUninitialized: true เซฟทุก request"],"correct":0,"explain":["ถูก — resave: false saves only when the session is modified / saveUninitialized: true creates a session for every user (even if unused)","ผิด — สลับความหมายของสอง option","ผิด — การ sign session ID เป็นหน้าที่ของ secret และ resave ไม่ได้ลบ session","ผิด — resave: false ยังเซฟเมื่อ session ถูกแก้ ส่วน saveUninitialized ไม่ได้แปลว่าเซฟทุก request"]},{"id":"19xrffl","type":"compare","topic":"15. รัน INSERT ยังไง?","q":"\u003ccode>results.length\u003c/code> กับ \u003ccode>results.affectedRows\u003c/code> ในตัวอย่างสไลด์ 48–49 ต่างกันอย่างไร?","choices":["length = จำนวน error / affectedRows = จำนวนคอลัมน์ที่ SELECT","length = แถวที่ SELECT ได้ / affectedRows = แถวที่ INSERT กระทบ","length = จำนวนคอลัมน์ / affectedRows = จำนวนตารางที่ถูกแก้ไขไป","length = แถวที่ INSERT กระทบ / affectedRows = แถวที่ SELECT ได้"],"correct":1,"explain":["ผิด — length ของ results ที่ SELECT ได้คือจำนวนแถว (6) ไม่ใช่ error และ affectedRows นับแถวที่ INSERT กระทบ ไม่ใช่คอลัมน์","ถูก — SELECT ได้ results เป็น array ของแถว → results.length = 6 rows returned / INSERT ได้ results.affectedRows = 1 record inserted","ผิด — length นับแถว (6 วิชา) ไม่ใช่คอลัมน์ และ affectedRows นับแถว ไม่ใช่ตาราง","ผิด — สลับกัน length ใช้กับผล SELECT (6 rows returned) ส่วน affectedRows ใช้กับ INSERT (1 record inserted)"]},{"id":"voaziu","type":"error","topic":"15. รัน INSERT ยังไง?","q":"เปิด \u003ccode>/add241\u003c/code> แล้ว console ขึ้น \u003ccode>1 record inserted\u003c/code> แต่ browser ได้ \u003ccode>Cannot GET /cis-course\u003c/code> จุดที่ผิดคือข้อใด?","code":"router.get(\"/cis-courses\", function (req, res) {\n    let sql = `SELECT course_code, course_name FROM Course WHERE dept_code='CIS'`;\n    connection.query(sql, function (error, results) {\n        if (error) throw error;\n        return res.send(results);\n    });\n});\nrouter.get(\"/add241\", function (req, res) {\n    let sql = `INSERT INTO Course VALUES('CIS-223','Introduction to Web Development',3,'CIS')`;\n    connection.query(sql, function (error, results) {\n        if (error) throw error;\n        console.log(`${results.affectedRows} record inserted`);\n        return res.redirect(\"/cis-course\");\n    });\n});","choices":["INSERT ต้องระบุชื่อคอลัมน์ทุกตัวไว้ก่อน VALUES เสมอ","ต้องใช้ results.length แทน affectedRows ตรงนี้","redirect ไป /cis-course ขาด s ไม่ตรงกับ route","insert ต้องใช้ router.post จึงจะเพิ่มข้อมูลลงได้"],"correct":2,"explain":["ผิด — ข้อความนี้ไม่ใช่ปัญหา: VALUES ที่เรียงตามคอลัมน์ของ Course ใช้ได้ (สไลด์ 49) และ insert สำเร็จแล้ว","ผิด — ข้อความนี้ไม่ใช่ปัญหา: INSERT ใช้ affectedRows ถูกแล้ว และ log ก็ขึ้น 1 record inserted","ถูก — ข้อนี้คือจุดที่ผิด: route ที่มีคือ /cis-courses แต่ redirect ไป /cis-course — รันจริง (connection จำลอง) ได้ 302 ไป /cis-course แล้ว 404 Cannot GET /cis-course แก้เป็น res.redirect(\"/cis-courses\")","ผิด — ข้อความนี้ไม่ใช่ปัญหา: สไลด์ใช้ GET ได้ในตัวอย่างนี้ (ปกติใช้ POST) และ insert สำเร็จแล้ว 1 record"]},{"id":"a10n1c","type":"error","topic":"13. เชื่อม Node.js กับ MySQL ยังไง?","q":"log \u003ccode>process.env.MYSQL_USERNAME\u003c/code> ก่อนต่อ DB ได้ \u003ccode>undefined\u003c/code> ทั้งที่มีไฟล์ .env จุดที่ผิดคือข้อใด?","code":"# .env (อยู่ที่ root)\nPORT=3000\nDB_HOST=localhost\nDB_USER=tinyCollegeUser\nDB_PWD=secret\nDB_NAME=tinycollege\n\n// app.js\nconst dotenv = require(\"dotenv\");\ndotenv.config();\nconsole.log(process.env.MYSQL_USERNAME);\nvar connection = mysql.createConnection({\n    host     : process.env.MYSQL_HOST,\n    user     : process.env.MYSQL_USERNAME,\n    password : process.env.MYSQL_PASSWORD,\n    database : process.env.MYSQL_DATABASE\n});","choices":["ชื่อตัวแปรใน .env ไม่ตรงกับที่อ่านด้วย process.env","ไฟล์ .env ต้องย้ายไปไว้ในโฟลเดอร์ node_modules","ต้องเรียก dotenv.config() หลังบรรทัด log แทน","ต้องเพิ่ม port: 3000 ลงใน createConnection"],"correct":0,"explain":["ถูก — ข้อนี้คือจุดที่ผิด: .env ตั้งชื่อ DB_USER แต่โค้ดอ่าน MYSQL_USERNAME — รันจริง dotenv โหลด 5 ตัว แต่ process.env.MYSQL_USERNAME = undefined (DB_USER = tinyCollegeUser) ชื่อจะเป็นอะไรก็ได้แต่ต้องตรงกัน","ผิด — ข้อความนี้ไม่ใช่ปัญหา: .env ต้องอยู่ที่ root directory ของโปรเจกต์ (สไลด์ 13) ซึ่งถูกแล้ว","ผิด — ข้อความนี้ไม่ใช่ปัญหา: config() ต้องเรียกก่อนอ่านค่า ซึ่งโค้ดทำถูกแล้ว","ผิด — ข้อความนี้ไม่ใช่ปัญหา: 3000 คือ port ของ web server ไม่ใช่ของ MySQL และสไลด์ 46 ไม่ได้ใส่ port"]},{"id":"12fs73u","type":"fill","topic":"3. Environment variable คืออะไร และใช้ `.env` ยังไง?","q":"เติมขั้นตอนใช้ environment variable ด้วย dotenv (สไลด์ 13–14)","parts":["ติดตั้ง: `npm install ","`\u003cbr>สร้างไฟล์ชื่อ "," ที่ root ของโปรเจกต์ แล้วใส่ \u003ccode>PORT=3000\u003c/code>\u003cbr>โหลดตัวแปร: `dotenv.","();`\u003cbr>อ่านค่า: `",".PORT`"],"blanks":["dotenv",".env","config","process.env"],"bank":["req.env","process.env","load",".env","config","dotenv","package.json"],"explain":"npm install dotenv → สร้าง .env ที่ root → dotenv.config() โหลดทุกตัวแปรจาก .env → อ่านด้วย process.env.PORT — package.json เก็บ dependencies ไม่ใช่ตัวแปร, ไม่มี dotenv.load() หรือ req.env ในสไลด์"},{"id":"13qrx7t","type":"fill","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"เติม method/property ของ cookie ให้ตรงกับงาน (สไลด์ 20–26)","parts":["สร้าง cookie ส่งไปกับ response: `res.","(\"name\", \"value\")`\u003cbr>อ่าน cookie ทุกตัวที่มากับ request: `req.","`\u003cbr>ตั้งอายุ cookie เป็น ms: `{",": 360000}`\u003cbr>ลบ cookie ตามชื่อ: `res.","(\"username\")`"],"blanks":["cookie","cookies","maxAge","clearCookie"],"bank":["clearCookie","cookie","maxAge","setCookie","cookies","session","deleteCookie"],"explain":"res.cookie(name, value) สร้าง / req.cookies อ่านทั้งหมด (ต้องมี cookie-parser) / {maxAge: 360000} อายุ 360000 ms / res.clearCookie(name) ลบ — setCookie เป็นชื่อ route ในตัวอย่าง ไม่ใช่ method, ไม่มี deleteCookie, session เป็นของ express-session"},{"id":"ibcf19","type":"fill","topic":"2. ตั้งโปรเจกต์และ server ด้วย npm + Express ยังไง? (ทบทวน)","q":"เติมคำสั่ง npm และ script ให้ตรงกับสถานการณ์ (สไลด์ 9–11)","parts":["เพิ่งเริ่มโปรเจกต์ อยากได้ค่า default ไม่ต้องตอบคำถาม: `npm init ","`\u003cbr>clone โปรเจกต์ของเพื่อนมา ติดตั้งทุกตัวใน package.json: `npm ","`\u003cbr>เลิกใช้ package แล้ว: `npm "," &lt;package&gt;`\u003cbr>script ที่ restart เองเมื่อแก้ไฟล์: `\"start\": \""," app.js\"`"],"blanks":["-y","install","uninstall","nodemon"],"bank":["node","update","uninstall","install","remove","nodemon","-y"],"explain":"npm init -y = default settings (skip prompts) / npm install = ติดตั้งทุก dependency หลัง clone หรือ pull / npm uninstall &lt;package&gt; = ลบ / \"start\": \"nodemon app.js\" แล้วรันด้วย npm start — ถ้าใช้ node app.js จะไม่ restart เอง"},{"id":"1q2v66d","type":"fill","topic":"11. RECAP Database: relational DB, tinycollege, SQL","q":"เติมความสัมพันธ์ของฐาน tinycollege ตามสไลด์ 38","parts":["(4) Every student has a professor as his/her ","\u003cbr>(5) A class is taught by a ","\u003cbr>(6) A course is offered by a ","\u003cbr>(9) A class is belonged to a ",""],"blanks":["advisor","professor","department","course"],"bank":["course","enroll","professor","advisor","student","department","head"],"explain":"(4) advisor (Student.emp_num → Professor) / (5) professor (Class.emp_num) / (6) department (Course.dept_code) / (9) course (Class.course_code) — head ใช้ใน (2) department มี professor เป็น head, enroll เป็นตารางกลางของ (7)(8)"},{"id":"lj3z3t","type":"code","topic":"3. Environment variable คืออะไร และใช้ `.env` ยังไง?","q":"\u003ccode>.env\u003c/code> มี \u003ccode>PORT=3000\u003c/code> แต่ app.js เป็นดังนี้ รันแล้ว terminal ขึ้นอะไร?","code":"const express = require(\"express\");\nconst dotenv = require(\"dotenv\");\nconst app = express();\n\napp.listen(process.env.PORT, function () {\n    console.log(\"Server listening at Port \" + process.env.PORT);\n});","choices":["ReferenceError: PORT is not defined","Server listening at Port null (ว่าง)","Server listening at Port 3000 (.env)","Server listening at Port undefined"],"correct":3,"explain":["ผิด — process.env เป็น object อ่าน key ที่ไม่มีได้ undefined ไม่ error","ผิด — key ที่ไม่มีใน object มีค่า undefined ไม่ใช่ null","ผิด — จะได้ 3000 ต้องเรียก dotenv.config() ก่อน (สไลด์ 14: Load all variables from .env)","ถูก — require แล้วแต่ไม่ได้เรียก dotenv.config() ค่าจาก .env จึงไม่ถูกโหลดเข้า process.env — รันจริง: Server listening at Port undefined (ไม่มีบรรทัด injected env ด้วย)"]},{"id":"1wfi7mp","type":"code","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"เปิด \u003ccode>/setCookie\u003c/code> แล้วเปิด \u003ccode>/showCookie\u003c/code> ใน browser เดียวกัน หน้าเว็บแสดงอะไร?","code":"const express = require(\"express\");\nconst cp = require(\"cookie-parser\");\nconst app = express();\nconst router = express.Router();\napp.use(\"/\", router);\nrouter.use(cp());\n\nrouter.get(\"/setCookie\", (req, res) =&gt; {\n    res.cookie(\"flavor\", \"matcha\");\n    res.cookie(\"size\", \"L\");\n    res.send(\"ok\");\n});\nrouter.get(\"/showCookie\", (req, res) =&gt; {\n    res.send(req.cookies);\n});\napp.listen(3000);","choices":["\u003ccode>{}\u003c/code> เพราะ cookie เก็บอยู่ที่ browser","\u003ccode>{\"flavor\":\"matcha\",\"size\":\"L\"}\u003c/code>","\u003ccode>{\"size\":\"L\"}\u003c/code> เพราะตัวหลังทับตัวแรก","\u003ccode>flavor=matcha; size=L\u003c/code> เป็นข้อความ"],"correct":1,"explain":["ผิด — browser ส่ง cookie กลับมาใน Cookie header ของ request ถัดไป server จึงอ่านได้","ถูก — res.cookie 2 ครั้งได้ Set-Cookie 2 ตัวคนละชื่อ browser ส่งกลับทั้งคู่ cookie-parser แปลงเป็น object แล้ว res.send(object) ส่งเป็น JSON — รันจริง: {\"flavor\":\"matcha\",\"size\":\"L\"}","ผิด — ชื่อต่างกัน (flavor, size) จึงไม่ทับกัน เหมือน cookie#1 กับ cookie#2 ในสไลด์ 23","ผิด — นี่คือรูป header Cookie ดิบ cookie-parser แปลงเป็น object ให้แล้ว"]},{"id":"ak4gli","type":"code","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"browser มีแค่ \u003ccode>cookie#2\u003c/code> (ไม่มี cookie#1) เปิด \u003ccode>/restrict\u003c/code> ได้ผลอะไร?","code":"router.get('/restrict', (req, res) =&gt; {\n    const c1 = req.cookies['cookie#1'];\n    const c2 = req.cookies['cookie#2'];\n    if (c1 || c2)\n        res.send('Allowed');\n    else\n        res.status(401).end('Error 401');\n});","choices":["status 500 + undefined","status 200 + Error 401","status 200 + Allowed","status 401 + Error 401"],"correct":2,"explain":["ผิด — c1 เป็น undefined ได้ปกติ ไม่ทำให้ error","ผิด — Error 401 อยู่ในบล็อก else พร้อม status(401) ไม่ได้ส่งคู่กับ 200","ถูก — ใช้ || (หรือ) c2 มีค่าก็พอให้เงื่อนไขเป็นจริง — รันจริง: 200 Allowed","ผิด — จะได้ 401 ถ้าเป็น &amp;&amp; แบบสไลด์ 24 ซึ่งต้องมีครบทั้งสองตัว"]},{"id":"p75q3m","type":"code","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"ลืมบรรทัด \u003ccode>router.use(cp())\u003c/code> แล้ว browser ที่มี cookie \u003ccode>tokenID\u003c/code> เปิด \u003ccode>/restrict\u003c/code> ได้ผลอะไร?","code":"const express = require(\"express\");\nconst app = express();\nconst router = express.Router();\napp.use(\"/\", router);\n\nrouter.get('/restrict', (req, res) =&gt; {\n    const tokenID = req.cookies['tokenID'];\n    if (tokenID) res.send('Valid');\n    else res.status(401).end('Error 401');\n});\napp.listen(3000);","choices":["200 Valid เพราะ browser ส่ง cookie มา","404 เพราะ route /restrict ไม่ได้ลงทะเบียน","401 เพราะ tokenID อ่านได้เป็น undefined","500 เพราะ req.cookies เป็น undefined"],"correct":3,"explain":["ผิด — browser ส่ง Cookie header มาจริง แต่ถ้าไม่มี middleware parse ก็อ่านผ่าน req.cookies ไม่ได้","ผิด — router.get ลงทะเบียน /restrict ไว้แล้ว route จึงถูกเรียก","ผิด — ไม่ถึงขั้น if เพราะ error ตั้งแต่อ่าน property ของ undefined","ถูก — ไม่มี cookie-parser จึงไม่มีใคร parse cookie เป็น req.cookies (undefined) พอเข้าถึง ['tokenID'] ก็ TypeError — รันจริง: 500 TypeError: Cannot read properties of undefined (reading 'tokenID')"]},{"id":"101mtse","type":"code","topic":"6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?","q":"เปิด \u003ccode>/set\u003c/code> → \u003ccode>/out\u003c/code> → \u003ccode>/show\u003c/code> ตามลำดับใน browser เดียวกัน \u003ccode>/show\u003c/code> แสดงอะไร?","code":"router.get('/set', (req, res) =&gt; {\n    res.cookie('user', 'ice');\n    res.cookie('theme', 'dark');\n    res.send('set');\n});\nrouter.get('/out', (req, res) =&gt; {\n    res.clearCookie('user');\n    res.send('out');\n});\nrouter.get('/show', (req, res) =&gt; {\n    res.send(req.cookies);\n});","choices":["\u003ccode>{\"theme\":\"dark\"}\u003c/code> เหลือตัวเดียว","\u003ccode>{}\u003c/code> เพราะลบ cookie ทุกตัวทิ้งหมด","\u003ccode>{\"user\":\"\",\"theme\":\"dark\"}\u003c/code>","\u003ccode>{\"user\":\"ice\"}\u003c/code> เหลือแค่ตัวเดียว"],"correct":0,"explain":["ถูก — clearCookie('user') ลบเฉพาะ cookie ชื่อ user (ส่ง user ที่หมดอายุปี 1970) theme ยังอยู่ — รันจริง: {\"theme\":\"dark\"}","ผิด — clearCookie ลบตามชื่อที่ระบุ (Delete the cookie with the specific name) ไม่ได้ลบทุกตัว","ผิด — cookie ที่หมดอายุแล้ว browser ลบทิ้ง ไม่ได้เก็บไว้เป็นค่าว่าง","ผิด — ตัวที่ถูกลบคือ user จึงไม่ควรเหลือ user"]},{"id":"16rux9a","type":"code","topic":"7. ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง?","q":"ผู้ใช้ใหม่ (ยังไม่มี cookie) เปิด \u003ccode>/restrict\u003c/code> ทันที terminal พิมพ์อะไร?","code":"router.get('/restrict', (req, res) =&gt; {\n    const tokenID = req.cookies['tokenID'];\n    console.log(`Accessed the restricted page ${tokenID}`);\n    if (tokenID)\n        res.send('Valid Only the ones with cookie only');\n    else\n        res.status(401).end('Error 401: You need to have our secret cookies');\n});","choices":["Error 401: You need to have our secret","Accessed the restricted page undefined","Accessed the restricted page tokenID","Accessed the restricted page null (ว่าง)"],"correct":1,"explain":["ผิด — ข้อความ Error 401 ถูกส่งไปที่ browser ผ่าน res.end ไม่ได้พิมพ์ใน terminal","ถูก — ไม่มี cookie ชื่อ tokenID จึงได้ undefined แล้ว template literal แปลงเป็นข้อความ undefined (browser ได้ 401) — รันจริง: Accessed the restricted page undefined","ผิด — ${tokenID} แทนด้วยค่าของตัวแปร ไม่ใช่ชื่อตัวแปร","ผิด — key ที่ไม่มีใน req.cookies ได้ undefined ไม่ใช่ null"]},{"id":"1nraape","type":"code","topic":"7. ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง?","q":"ใช้ route ตามสไลด์ 27–28 เปิดตามลำดับ \u003ccode>/login\u003c/code> → \u003ccode>/restrict\u003c/code> → \u003ccode>/logout\u003c/code> → \u003ccode>/restrict\u003c/code> ได้ status ของ /restrict สองครั้งเป็นอะไร?","code":"router.get(\"/login\", function (req, res) {\n    res.cookie('tokenID', 'some-random-session-ID');\n    res.send('Login !!');\n});\nrouter.get('/restrict', (req, res) =&gt; {\n    const tokenID = req.cookies['tokenID'];\n    if (tokenID) res.send('Valid Only the ones with cookie only');\n    else res.status(401).end('Error 401: You need to have our secret cookies');\n});\nrouter.get(\"/logout\", function (req, res) {\n    res.clearCookie(\"tokenID\");\n    res.send('Logout !!');\n});","choices":["200 ทั้งสองครั้งเลย","401 ทั้งสองครั้งเลย","200 แล้วตามด้วย 401","401 แล้วตามด้วย 200"],"correct":2,"explain":["ผิด — /logout ลบ tokenID แล้ว ครั้งที่สองจึงไม่ผ่าน","ผิด — ครั้งแรกมี tokenID จาก /login แล้วจึงผ่าน","ถูก — หลัง /login มี tokenID → 200 Valid... / หลัง /logout cookie ถูก clearCookie → tokenID เป็น undefined → 401 — รันจริง: 200, 401","ผิด — สลับลำดับ login ก่อนจึงผ่าน logout ทีหลังจึงไม่ผ่าน"]},{"id":"po32t3","type":"code","topic":"9. ใช้ `express-session` ยังไง?","q":"session ตั้งค่าตามสไลด์ 32 แล้ว browser เดียวกันเปิด \u003ccode>/count\u003c/code> 3 ครั้ง terminal ขึ้นอะไร?","code":"router.get(\"/count\", function (req, res) {\n    if (req.session.count) {\n        req.session.count++;\n        console.log(\"Count \" + req.session.count);\n    } else {\n        req.session.count = 0;\n        console.log(\"New\");\n    }\n    res.send(\"ok\");\n});","choices":["New / Count 0 / Count 0","New / New / New ทั้งสามครั้ง","New / Count 2 / Count 3","New / Count 1 / Count 2"],"correct":1,"explain":["ผิด — count = 0 ทำให้ if เป็นเท็จทุกครั้ง จึงไม่เคยเข้าบล็อกที่พิมพ์ Count เลย","ถูก — else ตั้ง count = 0 ซึ่งเป็น falsy ครั้งต่อไป if (req.session.count) จึงเป็นเท็จ ตั้งเป็น 0 ซ้ำทุกครั้ง — รันจริง: New / New / New (สไลด์ 33 จึงเริ่มที่ numviews = 1)","ผิด — นี่คือผลถ้าเริ่มที่ 1 แบบสไลด์ 33","ผิด — จะได้แบบนี้ต้องเข้า if ได้ตอน count เป็น 0 แต่ 0 เป็น falsy จึงไม่เข้า if"]},{"id":"1ptuon7","type":"code","topic":"9. ใช้ `express-session` ยังไง?","q":"browser A เปิด \u003ccode>/pageview\u003c/code> 2 ครั้งแล้วเปิด \u003ccode>/other\u003c/code> ส่วน browser B (ใหม่) เปิด \u003ccode>/other\u003c/code> เลย ได้อะไร?","code":"router.get(\"/pageview\", function (req, res) {\n    if (req.session.numviews) req.session.numviews++;\n    else req.session.numviews = 1;\n    res.send(\"Session created!!!\");\n});\nrouter.get(\"/other\", function (req, res) {\n    res.send(\"n=\" + req.session.numviews);\n});","choices":["A: n=2 / B: n=2 (ร่วมกัน)","A: n=undefined / B: n=2","A: n=1 / B: n=undefined","A: n=2 / B: n=undefined"],"correct":3,"explain":["ผิด — session ผูกกับ session ID ใน cookie ของแต่ละ browser ไม่ได้ใช้ร่วมกันทุกคน","ผิด — สลับกัน A คือคนที่เคยเข้า /pageview","ผิด — A เข้า /pageview 2 ครั้ง ครั้งแรกตั้ง 1 ครั้งที่สอง ++ เป็น 2","ถูก — req.session.&lt;name&gt; อ่านได้จาก route อื่น (สไลด์ 34) A จึงได้ 2 แต่ session แยกตามผู้ใช้ B ไม่เคยตั้ง numviews — รันจริง: n=2 / n=undefined"]},{"id":"1ea09tq","type":"code","topic":"14. รัน SELECT แล้วส่งผลเป็น JSON ยังไง?","q":"สมมติ Course มีวิชาของภาค CIS 6 แถว เปิด \u003ccode>/add\u003c/code> แล้ว browser ตาม redirect ไป ลำดับใน terminal เป็นอย่างไร?","code":"router.get(\"/cis-courses\", function (req, res) {\n    console.log(\"Retrieved CIS courses\");\n    connection.query(selectSql, function (error, results) {\n        if (error) throw error;\n        console.log(`${results.length} rows returned`);\n        return res.send(results);\n    });\n});\nrouter.get(\"/add\", function (req, res) {\n    console.log(\"Adding ...\");\n    connection.query(insertSql, function (error, results) {\n        if (error) throw error;\n        console.log(`${results.affectedRows} record inserted`);\n        return res.redirect(\"/cis-courses\");\n    });\n});","choices":["Adding ... / 1 record inserted / Retrieved CIS courses / 7 rows returned","Adding ... / 7 record inserted / Retrieved CIS courses / 7 rows returned","Retrieved CIS courses / 6 rows returned / Adding ... / 1 record inserted","Adding ... / 1 record inserted / Retrieved CIS courses / 6 rows returned"],"correct":0,"explain":["ถูก — /add log ก่อน → INSERT เสร็จได้ affectedRows = 1 → redirect ทำให้ browser ขอ /cis-courses → SELECT ได้ 6 + 1 = 7 แถว (ตรงกับ terminal สไลด์ 49 ที่ขึ้น 7 rows returned) — รันจริงด้วย connection จำลอง ได้ลำดับนี้","ผิด — affectedRows คือแถวที่ INSERT กระทบ (1) ไม่ใช่จำนวนแถวทั้งตาราง","ผิด — browser เปิด /add ก่อน /cis-courses ถูกเรียกทีหลังจาก redirect","ผิด — SELECT รันหลัง INSERT เสร็จแล้ว จึงนับแถวใหม่ด้วยเป็น 7"]}]};
+
+const app = document.getElementById('qp-app');
+if (!BANK || !BANK.questions) {
+  app.innerHTML = '<div class="qp-card">นี่คือ template ของ quiz-pro — สร้างไฟล์จริงด้วย <code>node build_quiz_pro.js bank.js out.html</code></div>';
+  return;
+}
+
+/* ------------------------------------------------------------ constants */
+const TYPES = { recall: 'ความจำ', understand: 'ความเข้าใจ', apply: 'การนำไปใช้', compare: 'แยกคู่สับสน',
+  error: 'หาจุดผิด', calc: 'การคำนวณ', code: 'ไล่โค้ด', fill: 'เติมคำ' };
+const TYPE_ORDER = Object.keys(TYPES);
+const HARD_TYPES = { recall: 1, understand: 1, compare: 1 };
+const L = ['ก', 'ข', 'ค', 'ง'];
+const CONF = { sure: 'มั่นใจ', unsure: 'ไม่แน่ใจ', guess: 'เดา' };
+const CONF_KEY = { KeyZ: 'sure', KeyX: 'unsure', KeyC: 'guess' };
+const INTERVALS = [1, 3, 7, 16, 35];          // Leitner box 1..5 → days
+const DUMP_SECONDS = 180;
+const KEY = 'sn-srs:' + BANK.id, IDX = 'sn-srs-index', PREF = 'sn-quizpro-prefs';
+const Q = BANK.questions;
+const TOPICS = [];
+Q.forEach((q, i) => { q.i = i; if (!TOPICS.includes(q.topic)) TOPICS.push(q.topic); });
+const REVIEW = BANK.review || {};
+
+/* ------------------------------------------------------------ helpers */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = n => (n < 10 ? '0' : '') + n;
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+function today() {                       // #today=YYYY-MM-DD simulates another day (testing only)
+  const m = /today=(\d{4}-\d{2}-\d{2})/.exec(location.hash);
+  return m ? m[1] : iso(new Date());
+}
+function parseIso(s) { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function addDays(s, n) { const d = parseIso(s); d.setDate(d.getDate() + n); return iso(d); }
+function dayDiff(a, b) { return Math.round((parseIso(b) - parseIso(a)) / 864e5); }
+const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+function thDate(s) { const d = parseIso(s); return d.getDate() + ' ' + TH_MON[d.getMonth()]; }
+function relDay(s) {
+  const n = dayDiff(today(), s);
+  if (n <= 0) return 'วันนี้';
+  if (n === 1) return 'พรุ่งนี้ (' + thDate(s) + ')';
+  return 'อีก ' + n + ' วัน (' + thDate(s) + ')';
+}
+function shuffle(a) { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; }
+const range = n => Array.from({ length: n }, (_, k) => k);
+function mmss(ms) { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + pad(s % 60); }
+function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+const wide = () => window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
+
+/* ------------------------------------------------------------ storage (never throws) */
+const store = (function () {
+  let ls = null; const mem = {};
+  try { ls = window.localStorage; const k = '__qp_test'; ls.setItem(k, '1'); ls.removeItem(k); } catch (e) { ls = null; }
+  return {
+    ok: !!ls,
+    get(k) {
+      try { if (ls) { const v = ls.getItem(k); if (v != null) return JSON.parse(v); } } catch (e) {}
+      try { return k in mem ? JSON.parse(mem[k]) : null; } catch (e) { return null; }
+    },
+    set(k, v) { const s = JSON.stringify(v); mem[k] = s; try { if (ls) ls.setItem(k, s); } catch (e) {} }
+  };
+})();
+
+let S = store.get(KEY);
+if (!S || S.v !== 1 || typeof S.items !== 'object') S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] };
+const P = Object.assign({ dump: true, hard: false, byTopic: false }, store.get(PREF) || {});
+const saveS = () => store.set(KEY, S);
+const saveP = () => store.set(PREF, P);
+
+/* ------------------------------------------------------------ spaced repetition (Leitner) */
+// item: { b: box 1-5, d: due ISO date, n: times seen, w: times wrong, l: last result 1/0, c: last confidence, r: last review date }
+function srsUpdate(id, ok, conf) {
+  const t = today();
+  let it = S.items[id];
+  const isNew = !it;
+  if (!it) it = S.items[id] = { b: 0, n: 0, w: 0 };
+  const reviewedToday = !isNew && it.r === t;
+  if (!ok) { it.b = 1; it.w++; }
+  else if (conf === 'sure') {
+    if (isNew) it.b = 2;                         // known already on first sight → skip box 1
+    else if (!reviewedToday) it.b = Math.min(5, Math.max(1, it.b) + 1);  // no promotion twice in one day
+    else it.b = Math.max(1, it.b);
+  } else it.b = Math.max(1, it.b);               // correct but unsure / guessed → stay in box
+  it.d = addDays(t, ok && conf === 'sure' ? INTERVALS[it.b - 1] : 1);  // not sure or wrong → due again tomorrow
+  it.n++; it.l = ok ? 1 : 0; it.c = conf; it.r = t;
+}
+const seenQs = () => Q.filter(q => S.items[q.id]);
+const dueQs = () => { const t = today(); return Q.filter(q => S.items[q.id] && S.items[q.id].d <= t); };
+const missedQs = () => Q.filter(q => { const it = S.items[q.id]; return it && (it.l === 0 || (it.w > 0 && it.b <= 2)); });
+function nextDue() {
+  let min = null;
+  seenQs().forEach(q => { const d = S.items[q.id].d; if (!min || d < min) min = d; });
+  if (!min) return null;
+  const t = today(), day = min <= t ? t : min;
+  const count = seenQs().filter(q => (S.items[q.id].d <= t ? t : S.items[q.id].d) === day).length;
+  return { date: min, day, count };
+}
+function boxCounts() {
+  const c = [0, 0, 0, 0, 0, 0];                // 0 = never answered
+  Q.forEach(q => { const it = S.items[q.id]; c[it ? it.b : 0]++; });
+  return c;
+}
+function updateIndex() {
+  const idx = store.get(IDX) || {};
+  const nd = nextDue();
+  idx[BANK.id] = { title: BANK.title, subject: BANK.subject || '', url: location.pathname, due: dueQs().length,
+    next: nd ? nd.date : null, total: Q.length, seen: seenQs().length, updated: new Date().toISOString() };
+  store.set(IDX, idx);
+}
+
+/* ------------------------------------------------------------ ordering */
+// interleave: never two neighbours from the same topic when avoidable; also avoid same type back-to-back
+function interleave(list) {
+  const groups = new Map();
+  shuffle(list.slice()).forEach(i => { const t = Q[i].topic; if (!groups.has(t)) groups.set(t, []); groups.get(t).push(i); });
+  const out = []; let lastT = null, lastY = null;
+  while (out.length < list.length) {
+    let cands = [...groups.keys()].filter(t => groups.get(t).length && t !== lastT);
+    if (!cands.length) cands = [...groups.keys()].filter(t => groups.get(t).length);
+    const max = Math.max(...cands.map(t => groups.get(t).length));
+    const top = cands.filter(t => groups.get(t).length === max);
+    const t = top[Math.floor(Math.random() * top.length)];
+    const g = groups.get(t);
+    let k = g.findIndex(i => Q[i].type !== lastY); if (k < 0) k = 0;
+    const i = g.splice(k, 1)[0];
+    out.push(i); lastT = t; lastY = Q[i].type;
+  }
+  return out;
+}
+function byTopic(list) {
+  return list.slice().sort((a, b) => (TOPICS.indexOf(Q[a].topic) - TOPICS.indexOf(Q[b].topic)) ||
+    (TYPE_ORDER.indexOf(Q[a].type) - TYPE_ORDER.indexOf(Q[b].type)) || (a - b));
+}
+
+/* ------------------------------------------------------------ run state */
+let screen = 'start';
+let R = null;
+let notice = '';
+let resetArmed = false;
+
+function mkStep(qi, retry) {
+  const q = Q[qi];
+  const st = { qi, retry, ans: null, pick: null, shown: false, t0: null };
+  if (q.type === 'fill') st.fill = { placed: q.blanks.map(() => null), sel: null, order: retry ? shuffle(range(q.bank.length)) : range(q.bank.length) };
+  else if (!retry) st.perm = [0, 1, 2, 3];
+  else {                                         // reshuffle; move the answer to a new letter
+    let p; for (let k = 0; k < 12; k++) { p = shuffle([0, 1, 2, 3]); if (p.indexOf(q.correct) !== q.correct) break; }
+    st.perm = p;
+  }
+  return st;
+}
+const MODE_LABEL = { full: 'ทั้งชุด', due: 'ทบทวนตามรอบ', missed: 'ข้อที่เคยพลาด', quick: 'สุ่ม 10 ข้อ', redo: 'ทำข้อที่พลาดอีกรอบ' };
+function startRun(mode, list) {
+  if (!list.length) return;
+  const order = P.byTopic ? byTopic(list) : interleave(list);
+  R = { mode, qset: order, steps: order.map(qi => mkStep(qi, 0)), pos: 0, first: {}, fixed: {}, t0: Date.now(),
+    hard: P.hard, gridOpen: wide(), warnedUn: false, dump: null, feyn: { text: '', shown: false, ticks: [] }, done: false };
+  notice = '';
+  if (mode === 'full' && P.dump) { R.dump = { text: '', end: Date.now() + DUMP_SECONDS * 1000, got: [] }; go('dump'); }
+  else go('q');
+}
+function cur() { return R && R.steps[R.pos]; }
+function queueRetry(qi, retry) {
+  if (R.steps.some((s, k) => k > R.pos && s.qi === qi && !s.ans)) return -1;
+  const gap = 4 + Math.floor(Math.random() * 3);                         // 4–6 other questions in between
+  const at = Math.min(R.pos + 1 + gap, R.steps.length);
+  R.steps.splice(at, 0, mkStep(qi, retry + 1));
+  return at - R.pos - 1;
+}
+function isOk(qi) { const f = R.first[qi]; return f ? f.ok : null; }
+
+function finalize(conf) {
+  const st = cur(), q = Q[st.qi];
+  let ok;
+  if (q.type === 'fill') ok = st.fill.placed.every((c, k) => c !== null && q.bank[c] === q.blanks[k]);
+  else ok = st.perm[st.pick] === q.correct;
+  st.ans = { choice: st.pick, conf: conf || null, ok };
+  const main = st.retry === 0;
+  if (main && !R.first[st.qi]) {
+    R.first[st.qi] = { orig: q.type === 'fill' ? null : st.perm[st.pick], placed: q.type === 'fill' ? st.fill.placed.slice() : null,
+      conf, ok, ms: Date.now() - (st.t0 || Date.now()) };
+    srsUpdate(q.id, ok, conf); saveS(); updateIndex();
+  }
+  st.requeue = null;
+  if (!ok || (main && conf === 'guess')) { const d = queueRetry(st.qi, st.retry); if (d >= 0) st.requeue = d; }
+  if (!main && ok) R.fixed[st.qi] = true;
+  render();
+  requestAnimationFrame(() => {
+    const fb = app.querySelector('.qp-fb');
+    if (fb && fb.getBoundingClientRect().top > window.innerHeight * 0.7) fb.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+}
+
+function next() {
+  if (!R) return;
+  notice = '';
+  if (R.pos < R.steps.length - 1) { R.pos++; return go('q', true); }
+  const un = R.steps.filter(s => s.retry === 0 && !s.ans);
+  if (un.length && !R.warnedUn) {
+    R.warnedUn = true;
+    R.pos = R.steps.indexOf(un[0]);
+    notice = 'ยังไม่ได้ตอบอีก ' + un.length + ' ข้อ — พามาข้อแรกที่ยังไม่ตอบ (กด “จบและดูผล” ได้ตลอด)';
+    return go('q', true);
+  }
+  finish();
+}
+function prev() { if (R && R.pos > 0) { notice = ''; R.pos--; go('q', true); } }
+function finish() {
+  R.done = true; R.tEnd = Date.now();
+  const total = R.qset.length, score = R.qset.filter(qi => isOk(qi)).length;
+  if (Object.keys(R.first).length) {
+    S.hist.push({ t: today(), m: R.mode, s: score, n: total });
+    S.hist = S.hist.slice(-20); saveS();
+  }
+  updateIndex();
+  go('results', true);
+}
+
+/* ------------------------------------------------------------ rendering */
+function go(s, scroll) {
+  screen = s;
+  document.body.classList.toggle('qp-run', s !== 'start');
+  render();
+  if (scroll || s !== 'q') {
+    const top = app.getBoundingClientRect().top + window.scrollY - 64;
+    if (window.scrollY > top) window.scrollTo(0, Math.max(0, top));
+  }
+}
+function render() {
+  if (screen === 'start') app.innerHTML = startHtml();
+  else if (screen === 'dump') app.innerHTML = dumpHtml();
+  else if (screen === 'dumpcheck') app.innerHTML = dumpCheckHtml();
+  else if (screen === 'q') app.innerHTML = qHtml();
+  else if (screen === 'results') app.innerHTML = resultsHtml();
+  if (screen === 'dump') {
+    const ta = app.querySelector('textarea[data-in="dump"]');
+    if (ta) { ta.value = R.dump.text; try { ta.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  if (screen === 'dumpcheck') { const m = app.querySelector('.qp-mine'); if (m) m.textContent = R.dump.text.trim() || '(ไม่ได้เขียนอะไร)'; }
+  if (screen === 'results') {
+    const ta = app.querySelector('textarea[data-in="feyn"]'); if (ta) ta.value = R.feyn.text;
+    const mine = app.querySelector('.qp-feyn-mine'); if (mine) mine.textContent = R.feyn.text.trim() || '(ไม่ได้เขียน)';
+  }
+  tick();
+}
+const typeChip = t => '<span class="qp-type" data-t="' + t + '">' + TYPES[t] + '</span>';
+
+function startHtml() {
+  const counts = {}; Q.forEach(q => { counts[q.type] = (counts[q.type] || 0) + 1; });
+  const due = dueQs().length, missed = missedQs().length, seen = seenQs().length, nd = nextDue();
+  let h = '';
+  if (!store.ok) h += '<div class="qp-note is-warn">เบราว์เซอร์นี้บันทึกข้อมูลไม่ได้ (storage ถูกปิด) — ทำแบบทดสอบได้ปกติ แต่รอบทบทวนจะไม่ถูกจำไว้</div>';
+  h += '<section class="qp-card"><div class="qp-stats">' + TYPE_ORDER.filter(t => counts[t]).map(t => typeChip(t).replace('</span>', ' ' + counts[t] + '</span>')).join('') + '</div>';
+  h += '<p class="qp-muted qp-small" style="margin:8px 0 0">' + Q.length + ' ข้อ · ' + TOPICS.length + ' หัวข้อ · ตอบแล้วต้องบอกความมั่นใจก่อนดูเฉลย · ข้อที่ผิดจะวนกลับมาให้แก้ตัว</p></section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">ความคืบหน้าการทบทวน</h2>';
+  if (seen) {
+    const bc = boxCounts(), mx = Math.max(1, ...bc);
+    h += '<div class="qp-srs"><div class="qp-stat"><b>' + due + '</b><span>ข้อถึงรอบทบทวนวันนี้</span></div>' +
+      '<div class="qp-stat"><b>' + (nd ? (dayDiff(today(), nd.day) <= 0 ? 'วันนี้' : thDate(nd.day)) : '–') + '</b><span>รอบถัดไป' + (nd ? ' · ' + nd.count + ' ข้อ' : '') + '</span></div>' +
+      '<div class="qp-stat"><b>' + seen + '/' + Q.length + '</b><span>ข้อที่เคยทำ</span></div></div>';
+    h += '<div class="qp-boxes" aria-label="จำนวนข้อในแต่ละกล่อง">' + bc.map((c, b) =>
+      '<div title="' + (b ? 'กล่อง ' + b + ' (ทวนทุก ' + INTERVALS[b - 1] + ' วัน)' : 'ยังไม่เคยทำ') + ': ' + c + ' ข้อ"><span>' + c + '</span><i style="height:' + Math.round(30 * c / mx) + 'px;' + (b ? '' : 'opacity:.25') + '"></i></div>').join('') + '</div>';
+    h += '<div class="qp-boxes" style="height:auto;margin-top:2px">' + bc.map((c, b) => '<div>' + (b ? 'กล่อง ' + b : 'ใหม่') + '</div>').join('') + '</div>';
+    if (S.hist.length) h += '<div class="qp-hist">' + S.hist.slice(-6).map(x => '<span>' + thDate(x.t) + ' · ' + x.s + '/' + x.n + '</span>').join('') + '</div>';
+    const ld = S.dumps[S.dumps.length - 1];
+    if (ld) h += '<p class="qp-muted qp-small" style="margin:8px 0 0">brain dump ครั้งล่าสุด (' + thDate(ld.t) + ') นึกออก ' + ld.got.length + '/' + ld.n + ' ประเด็น</p>';
+  } else h += '<p class="qp-muted" style="margin:0">ยังไม่เคยทำชุดนี้ ทำครั้งแรกแล้วระบบจะนัดรอบทบทวนให้ (1 · 3 · 7 · 16 · 35 วัน)</p>';
+  h += '</section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">เลือกวิธีทำ</h2><div class="qp-modes">';
+  h += '<button class="qp-mode is-main" data-act="mode" data-m="full"><b>ทำทั้งชุด</b><span>' + Q.length + ' ข้อ ' + (P.byTopic ? 'เรียงตามหัวข้อ' : 'สลับหัวข้อกัน') + (P.dump ? ' · เริ่มด้วยเขียนทุกอย่างที่จำได้' : '') + '</span><i>→</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="due"' + (due ? '' : ' disabled') + '><b>ทบทวนที่ถึงรอบ (' + due + ' ข้อ)</b><span>' +
+    (due ? 'ข้อที่ถึงกำหนดทวนวันนี้ตามรอบ Leitner' : (nd ? 'ยังไม่มีข้อถึงรอบ — รอบถัดไป ' + relDay(nd.day) : 'ทำทั้งชุดก่อน แล้วระบบจะนัดรอบให้')) + '</span><i>↻</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="missed"' + (missed ? '' : ' disabled') + '><b>เฉพาะข้อที่เคยพลาด (' + missed + ' ข้อ)</b><span>ข้อที่ผิดครั้งล่าสุด หรือเคยผิดและยังไม่แน่น</span><i>✎</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="quick"><b>สุ่ม 10 ข้อ (ทวนเร็ว)</b><span>ใช้เวลาประมาณ 5 นาที</span><i>⚡</i></button>';
+  h += '</div><div class="qp-opts">';
+  h += optHtml('dump', 'เขียนทุกอย่างที่จำได้ก่อนเริ่ม (brain dump)', 'ใช้กับ “ทำทั้งชุด” — นึกเองก่อน 2–3 นาที แล้วเทียบกับประเด็นสำคัญของบท');
+  h += optHtml('hard', 'โหมดนึกก่อนเห็นตัวเลือก', 'ข้อความจำ / ความเข้าใจ / แยกคู่สับสน จะซ่อนตัวเลือกไว้จนกว่าจะนึกคำตอบในใจได้');
+  h += optHtml('byTopic', 'เรียงตามหัวข้อ', 'ปิดไว้ (ค่าเริ่มต้น) = สลับหัวข้อกัน ทำยากกว่าแต่จำได้นานกว่า');
+  h += '</div></section>';
+
+  h += '<section class="qp-card"><details class="qp-how"><summary>ทำไมต้องทำแบบนี้ / แป้นลัด</summary><ul>' +
+    '<li><b>นึกเองก่อน</b> (brain dump, โหมดนึกก่อน) — การดึงความจำออกมาเองช่วยให้จำได้นานกว่าการอ่านซ้ำ</li>' +
+    '<li><b>บอกความมั่นใจ</b> ก่อนดูเฉลย — จะได้รู้ว่าข้อไหน “มั่นใจแต่ผิด” ซึ่งอันตรายที่สุดตอนสอบ</li>' +
+    '<li><b>รอบแก้ตัว</b> — ข้อที่ผิดหรือเดาจะกลับมาอีกใน 4–6 ข้อ สลับตัวเลือกใหม่ จนตอบถูก (ไม่นับคะแนน)</li>' +
+    '<li><b>สลับหัวข้อ</b> และ <b>ทวนตามรอบ</b> 1 · 3 · 7 · 16 · 35 วัน — ตอบถูกแบบมั่นใจจะขยับกล่องขึ้น ผิดกลับไปกล่อง 1</li>' +
+    '<li>คะแนนนับจากการตอบครั้งแรกเท่านั้น</li>' +
+    '<li>แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> หรือ <kbd>ก</kbd> <kbd>ข</kbd> <kbd>ค</kbd> <kbd>ง</kbd> เลือกตัวเลือก · <kbd>Z</kbd> มั่นใจ <kbd>X</kbd> ไม่แน่ใจ <kbd>C</kbd> เดา · <kbd>Enter</kbd> ข้อถัดไป · <kbd>←</kbd> <kbd>→</kbd> เลื่อนข้อ</li>' +
+    '</ul></details>';
+  if (seen) h += '<div style="margin-top:6px"><button class="qp-link" data-act="reset" style="color:var(--qp-muted)">' + (resetArmed ? 'กดอีกครั้งเพื่อยืนยันการล้างประวัติชุดนี้' : 'ล้างประวัติการทบทวนของชุดนี้') + '</button></div>';
+  h += '</section>';
+  return h;
+}
+function optHtml(k, t, d) {
+  return '<label class="qp-check' + (P[k] ? ' is-on' : '') + '"><input type="checkbox" data-pref="' + k + '"' + (P[k] ? ' checked' : '') + '><span>' + t + '<small>' + d + '</small></span></label>';
+}
+
+function dumpHtml() {
+  const left = R.dump.end - Date.now();
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 1 · นึกเองก่อน</span></div>' +
+    '<h2 class="qp-h2">เขียนทุกอย่างที่จำได้จากบทนี้</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 4px">ไม่ต้องเรียบร้อย เขียนเป็นคำ ๆ ได้ ห้ามเปิดสรุป — ยิ่งนึกยากยิ่งจำได้นาน</p>' +
+    '<div class="qp-timer"><span id="qp-dtimer">' + (left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว') + '</span><div class="qp-tbar"><i id="qp-dbar" style="width:' + Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%"></i></div></div>' +
+    '<textarea class="qp-ta" data-in="dump" placeholder="เช่น นิยาม คำสำคัญ ขั้นตอน สูตร ตัวอย่าง คู่ที่สับสน…" aria-label="เขียนทุกอย่างที่จำได้"></textarea>' +
+    '<p id="qp-dsoft" class="qp-muted qp-small"' + (left > 0 ? ' hidden' : '') + '>ครบเวลาที่แนะนำแล้ว — ยังนึกออกก็เขียนต่อได้</p>' +
+    '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="dump-skip">ข้ามขั้นนี้</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn qp-btn-primary" data-act="dump-done">เสร็จแล้ว ดูประเด็นสำคัญ →</button></div></section>';
+}
+function dumpCheckHtml() {
+  const kp = BANK.keypoints, got = R.dump.got;
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 2 · เทียบกับประเด็นสำคัญ</span></div>' +
+    '<h2 class="qp-h2">ติ๊กประเด็นที่คุณนึกออกเอง</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 8px">ติ๊กเฉพาะที่เขียนไว้แล้ว (หรือใจความเดียวกัน) — ข้อที่ไม่ได้ติ๊กคือจุดที่ต้องเก็บเพิ่ม</p>' +
+    '<p style="margin:0 0 4px">นึกออก <span class="qp-tally" id="qp-kp-n">' + got.length + '/' + kp.length + '</span></p>' +
+    '<div class="qp-kps">' + kp.map((k, i) => '<label class="qp-check' + (got.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-kp="' + i + '"' + (got.includes(i) ? ' checked' : '') + '><span>' + k + '</span></label>').join('') + '</div>' +
+    '<h3 class="qp-h3">สิ่งที่คุณเขียน</h3><div class="qp-mine"></div>' +
+    '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="dump-start">เริ่มทำข้อสอบ →</button></div></section>';
+}
+
+function barHtml() {
+  const total = R.qset.length, answered = Object.keys(R.first).length;
+  const okN = R.qset.filter(qi => isOk(qi)).length;
+  const st = cur(), mainNo = R.qset.indexOf(st.qi) + 1;
+  const pendingRetry = R.steps.filter((s, k) => k > R.pos && s.retry && !s.ans).length;
+  let h = '<div class="qp-bar"><div class="qp-bar-row">' +
+    '<span>' + (st.retry ? 'แก้ตัว · ข้อ <b>' + mainNo + '</b>' : 'ข้อ <b>' + mainNo + '</b>/' + total) + '</span>' +
+    '<span>ตอบแล้ว ' + answered + ' · ถูก ' + okN + '</span>' +
+    (pendingRetry ? '<span>รอแก้ตัว ' + pendingRetry + '</span>' : '') +
+    '<span class="qp-time" title="เวลาที่ใช้"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span id="qp-time">' + mmss(Date.now() - R.t0) + '</span></span>' +
+    '<span class="qp-spacer"></span>' +
+    '<button class="qp-link" data-act="grid" aria-expanded="' + R.gridOpen + '">' + (R.gridOpen ? 'ซ่อนตาราง' : 'ข้อทั้งหมด') + '</button>' +
+    '</div><div class="qp-prog" aria-hidden="true"><i style="width:' + pct(answered, total) + '%"></i></div></div>';
+  if (R.gridOpen) {
+    h += '<div class="qp-grid">' + R.qset.map((qi, k) => {
+      const f = R.first[qi];
+      let c = '';
+      if (f) c = f.ok ? (f.conf === 'sure' ? 'is-ok' : 'is-shaky') : 'is-bad';
+      if (st.qi === qi) c += ' is-cur';
+      return '<button class="' + c + '" data-act="jump" data-qi="' + qi + '" aria-label="ข้อ ' + (k + 1) + '">' + (k + 1) + '</button>';
+    }).join('') + '</div>' +
+      '<div class="qp-grid-foot"><span><i style="background:var(--qp-ok)"></i>ถูก มั่นใจ</span><span><i style="background:var(--qp-warn)"></i>ถูก ไม่แน่ใจ/เดา</span><span><i style="background:var(--qp-bad)"></i>ผิด</span><span class="qp-spacer"></span><button class="qp-link" data-act="finish">จบและดูผล</button></div>';
+  }
+  return h;
+}
+
+function qHtml() {
+  const st = cur(), q = Q[st.qi];
+  if (!st.t0) st.t0 = Date.now();
+  let h = barHtml();
+  if (notice) h += '<div class="qp-note is-warn">' + notice + '</div>';
+  h += '<article class="qp-card"><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (st.retry ? '<span class="qp-retry-chip">รอบแก้ตัว' + (st.retry > 1 ? ' ×' + st.retry : '') + ' · ไม่นับคะแนน</span>' : '') + '</div>';
+  h += '<div class="qp-q">' + q.q + '</div>';
+  if (q.code) h += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') h += fillHtml(q, st);
+  else {
+    const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null;
+    if (gated) h += '<div class="qp-gate"><p>ลองนึกคำตอบในใจ (หรือพูดออกมา) ให้ชัดก่อน แล้วค่อยเทียบกับตัวเลือก</p>' +
+      '<button class="qp-btn qp-btn-primary" data-act="reveal">นึกคำตอบในใจแล้ว → ดูตัวเลือก <span class="qp-kh"><kbd>Enter</kbd></span></button></div>';
+    else h += choicesHtml(q, st);
+  }
+  if (st.ans) h += feedbackHtml(q, st);
+  const last = R.pos === R.steps.length - 1;
+  h += '<div class="qp-nav"><button class="qp-btn" data-act="prev"' + (R.pos ? '' : ' disabled') + '>← ก่อนหน้า</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn' + (st.ans ? ' qp-btn-primary' : '') + '" data-act="next">' + (st.ans ? (last ? 'ดูผล →' : 'ข้อถัดไป →') : 'ข้าม →') + '</button></div>';
+  h += '<div class="qp-keys">แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> / <kbd>ก</kbd><kbd>ข</kbd><kbd>ค</kbd><kbd>ง</kbd> เลือก · <kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd> ความมั่นใจ · <kbd>Enter</kbd> ถัดไป · <kbd>←</kbd><kbd>→</kbd> เลื่อนข้อ</div>';
+  h += '</article>';
+  return h;
+}
+function choicesHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-choices" role="group" aria-label="ตัวเลือก">';
+  st.perm.forEach((orig, d) => {
+    let c = 'qp-choice';
+    if (a) {
+      if (orig === q.correct) c += ' is-correct';
+      else if (d === a.choice) c += ' is-wrong';
+      else c += ' is-dim';
+    } else if (st.pick === d) c += ' is-picked';
+    h += '<button class="' + c + '" data-act="pick" data-i="' + d + '"' + (a ? ' disabled' : '') + ' aria-pressed="' + (st.pick === d) + '">' +
+      '<span class="qp-letter">' + L[d] + '</span><span class="qp-ctext">' + q.choices[orig] + '</span></button>';
+  });
+  h += '</div>';
+  if (!a && st.pick !== null && !st.retry) h += confHtml('คุณมั่นใจคำตอบ ' + L[st.pick] + ' แค่ไหน? (เลือกแล้วจะเห็นเฉลย)');
+  return h;
+}
+function confHtml(label) {
+  return '<div class="qp-conf"><p class="qp-conf-q">' + label + '</p><div class="qp-conf-row">' +
+    '<button class="qp-cbtn" data-act="conf" data-c="sure">มั่นใจ<small>รู้แน่ <span class="qp-kh"><kbd>Z</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="unsure">ไม่แน่ใจ<small>พอนึกได้ <span class="qp-kh"><kbd>X</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="guess">เดา<small>ไม่รู้ <span class="qp-kh"><kbd>C</kbd></span></small></button>' +
+    '</div></div>';
+}
+function rereadHtml(q) {
+  return '<div class="qp-reread">อ่านทวน: <b>' + q.topic + '</b>' + (REVIEW[q.topic] ? ' — ' + REVIEW[q.topic] : '') + '</div>';
+}
+function calibNote(st) {
+  const a = st.ans;
+  if (st.retry) return a.ok ? '<div class="qp-note is-ok">แก้ตัวสำเร็จ — ครั้งนี้ตอบถูกแล้ว</div>' : '';
+  if (!a.ok && a.conf === 'sure') return '<div class="qp-note is-bad"><b>มั่นใจแต่ผิด = จุดอันตราย</b> — ความเข้าใจผิดแบบนี้มักพลาดซ้ำในห้องสอบ อ่านเหตุผลของตัวที่ถูกให้ละเอียด</div>';
+  if (a.ok && a.conf === 'guess') return '<div class="qp-note is-warn">เดาถูก — ยังไม่นับว่ารู้ ข้อนี้จะกลับมาให้ตอบอีกรอบ</div>';
+  if (a.ok && a.conf === 'unsure') return '<div class="qp-note is-warn">ถูกแต่ยังไม่แน่ใจ — ระบบจะนัดทวนข้อนี้เร็วขึ้น (พรุ่งนี้)</div>';
+  return '';
+}
+function requeueNote(st) {
+  if (st.requeue === null || st.requeue === undefined) return '';
+  return '<div class="qp-note">' + (st.requeue > 0 ? 'ข้อนี้จะกลับมาให้แก้ตัวหลังจากอีก ' + st.requeue + ' ข้อ' : 'ข้อนี้จะกลับมาให้แก้ตัวเป็นข้อถัดไป') + ' (สลับตัวเลือกใหม่ ไม่นับคะแนน)</div>';
+}
+function feedbackHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-fb" aria-live="polite">';
+  if (q.type === 'fill') {
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกทุกช่อง' : '✗ ยังไม่ถูกทุกช่อง') +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st) + '<ul class="qp-ex"><li class="is-correct"><b>เฉลย</b>' + q.explain + '</li></ul>';
+  } else {
+    const dc = st.perm.indexOf(q.correct);
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกต้อง' : '✗ ยังไม่ถูก — คำตอบคือ ' + L[dc]) +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st);
+    const order = [dc].concat(a.choice !== dc ? [a.choice] : [], [0, 1, 2, 3].filter(d => d !== dc && d !== a.choice));
+    h += '<ul class="qp-ex">' + order.map(d => {
+      const orig = st.perm[d];
+      const cls = orig === q.correct ? 'is-correct' : (d === a.choice ? 'is-wrong' : '');
+      const tag = orig === q.correct ? '<em>คำตอบ</em>' : (d === a.choice ? '<em>คุณเลือก</em>' : '');
+      return '<li class="' + cls + '"><b>' + L[d] + '. ' + q.choices[orig] + tag + '</b>' + q.explain[orig] + '</li>';
+    }).join('') + '</ul>';
+  }
+  h += rereadHtml(q) + requeueNote(st) + '</div>';
+  return h;
+}
+
+function fillHtml(q, st) {
+  const f = st.fill, a = st.ans;
+  let h = '<div class="qp-ftext">';
+  q.parts.forEach((p, k) => {
+    h += p;
+    if (k >= q.blanks.length) return;
+    const c = f.placed[k], ok = c !== null && q.bank[c] === q.blanks[k];
+    let cls = 'qp-slot';
+    if (a) cls += ok ? ' is-correct' : ' is-wrong';
+    else if (c !== null) cls += ' is-filled';
+    else if (f.sel !== null) cls += ' is-target';
+    h += '<button type="button" class="' + cls + '" data-slot="' + k + '"' + (a ? ' disabled' : '') + ' aria-label="ช่องที่ ' + (k + 1) + '">' + (c !== null ? q.bank[c] : '&nbsp;') + '</button>';
+    if (a && !ok) h += '<span class="qp-slot-ans">→ ' + q.blanks[k] + '</span>';
+  });
+  h += '</div>';
+  if (!a) {
+    h += '<p class="qp-bank-label">ลากคำไปวางในช่อง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</p><div class="qp-bank">';
+    f.order.forEach(i => {
+      h += '<button type="button" class="qp-chip' + (f.placed.includes(i) ? ' is-used' : '') + (f.sel === i ? ' is-sel' : '') + '" data-chip="' + i + '">' + q.bank[i] + '</button>';
+    });
+    h += '</div>';
+    const left = f.placed.filter(c => c === null).length;
+    if (left) h += '<p class="qp-fill-wait">วางคำให้ครบทุกช่องก่อน (เหลือ ' + left + ' ช่อง) <button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+    else if (st.retry) h += '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="fill-clear">ล้างช่อง</button><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="conf" data-c="">ตรวจคำตอบ</button></div>';
+    else h += confHtml('ครบทุกช่องแล้ว — มั่นใจแค่ไหน? (เลือกแล้วจะตรวจทันที)') + '<p class="qp-fill-wait"><button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+  }
+  return h;
+}
+
+function meter(ok, n) {
+  const p = pct(ok, n);
+  return '<div class="qp-meter"><i class="' + (p >= 80 ? '' : p >= 50 ? 'is-mid' : 'is-low') + '" style="width:' + Math.max(p, 2) + '%"></i></div>';
+}
+function resultsHtml() {
+  const total = R.qset.length, fs = R.qset.map(qi => ({ qi, f: R.first[qi] }));
+  const answered = fs.filter(x => x.f), score = fs.filter(x => x.f && x.f.ok).length;
+  const end = R.tEnd || Date.now(), spent = end - R.t0;
+  let h = '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">' + MODE_LABEL[R.mode] + '</span></div>' +
+    '<div class="qp-score"><div class="qp-muted qp-small">คะแนน (นับจากการตอบครั้งแรก)</div><div class="qp-big">' + score + '<small> / ' + total + '</small></div>' +
+    '<div class="qp-muted">' + pct(score, total) + '% · ใช้เวลา ' + mmss(spent) + ' นาที' + (answered.length ? ' · เฉลี่ย ' + Math.round(answered.reduce((s, x) => s + x.f.ms, 0) / answered.length / 1000) + ' วินาที/ข้อ' : '') + '</div>';
+  const retried = R.qset.filter(qi => R.steps.some(s => s.qi === qi && s.retry));
+  if (retried.length) h += '<div class="qp-muted qp-small">รอบแก้ตัว: แก้ได้ ' + retried.filter(qi => R.fixed[qi]).length + '/' + retried.length + ' ข้อ</div>';
+  if (answered.length < total) h += '<div class="qp-note is-warn" style="text-align:left">ยังไม่ได้ตอบ ' + (total - answered.length) + ' ข้อ (นับเป็นยังไม่ได้คะแนน)</div>';
+  h += '</div></section>';
+
+  // calibration matrix
+  const sure = x => x.f && x.f.conf === 'sure';
+  const m = { know: answered.filter(x => sure(x) && x.f.ok), danger: answered.filter(x => sure(x) && !x.f.ok),
+    shaky: answered.filter(x => !sure(x) && x.f.ok), gap: answered.filter(x => !sure(x) && !x.f.ok) };
+  const sureN = m.know.length + m.danger.length;
+  h += '<section class="qp-card"><h2 class="qp-h2">ความมั่นใจ vs ความถูกต้อง</h2><div class="qp-matrix">' +
+    '<div></div><div class="qp-mh">ถูก</div><div class="qp-mh">ผิด</div>' +
+    '<div class="qp-mh">มั่นใจ</div><div class="qp-cell c-know"><b>' + m.know.length + '</b><span>รู้จริง</span></div>' +
+    '<div class="qp-cell c-danger"><b>' + m.danger.length + '</b><span>จุดอันตราย — เข้าใจผิดแบบมั่นใจ</span></div>' +
+    '<div class="qp-mh">ไม่แน่ใจ / เดา</div><div class="qp-cell c-shaky"><b>' + m.shaky.length + '</b><span>ยังไม่แน่น</span></div>' +
+    '<div class="qp-cell c-gap"><b>' + m.gap.length + '</b><span>ยังไม่รู้ — เรียนใหม่</span></div></div>';
+  h += '<p class="qp-small" style="margin:10px 0 0">' + (sureN ? 'ตอนที่บอกว่า “มั่นใจ” ตอบถูก ' + pct(m.know.length, sureN) + '%' : 'ยังไม่มีข้อที่ตอบว่ามั่นใจ') +
+    (m.danger.length ? ' — มีจุดอันตราย ' + m.danger.length + ' ข้อ อ่านเฉลยข้อเหล่านี้ก่อนเป็นอันดับแรก' : (sureN ? ' — ความมั่นใจของคุณเชื่อถือได้' : '')) + '</p></section>';
+
+  // per topic (weakest first)
+  const tp = {};
+  fs.forEach(x => { const t = Q[x.qi].topic; tp[t] = tp[t] || [0, 0]; tp[t][1]++; if (x.f && x.f.ok) tp[t][0]++; });
+  const tlist = Object.keys(tp).sort((a, b) => (tp[a][0] / tp[a][1] - tp[b][0] / tp[b][1]) || (tp[b][1] - tp[a][1]) || (TOPICS.indexOf(a) - TOPICS.indexOf(b)));
+  h += '<section class="qp-card"><h2 class="qp-h2">แยกตามหัวข้อ <span class="qp-muted qp-small">(อ่อนสุดอยู่บน)</span></h2><div class="qp-bars">' + tlist.map(t => {
+    const [ok, n] = tp[t];
+    return '<div class="qp-bar-item"><span>' + t + '</span><span class="qp-num">' + ok + '/' + n + '</span>' + meter(ok, n) +
+      (ok < n ? '<span class="qp-hint">อ่านทวน: ' + (REVIEW[t] || 'หัวข้อ “' + t + '” ในสรุป') + '</span>' : '') + '</div>';
+  }).join('') + '</div>';
+  // per type
+  const ty = {};
+  fs.forEach(x => { const t = Q[x.qi].type; ty[t] = ty[t] || [0, 0]; ty[t][1]++; if (x.f && x.f.ok) ty[t][0]++; });
+  h += '<h3 class="qp-h3">แยกตามประเภทข้อ</h3><div class="qp-bars">' + TYPE_ORDER.filter(t => ty[t]).map(t =>
+    '<div class="qp-bar-item"><span>' + typeChip(t) + '</span><span class="qp-num">' + ty[t][0] + '/' + ty[t][1] + '</span>' + meter(ty[t][0], ty[t][1]) + '</div>').join('') + '</div></section>';
+
+  // review list
+  const unans = fs.filter(x => !x.f);
+  if (m.danger.length || m.gap.length || m.shaky.length || unans.length) {
+    h += '<section class="qp-card"><h2 class="qp-h2">ข้อที่ควรทวน</h2>';
+    const grp = (list, title, color) => list.length ? '<div class="qp-grp"><i style="background:' + color + '"></i>' + title + ' (' + list.length + ')</div><div class="qp-revs">' + list.map(x => revHtml(x)).join('') + '</div>' : '';
+    h += grp(m.danger, 'จุดอันตราย — มั่นใจแต่ผิด', 'var(--qp-bad)') + grp(m.gap, 'ผิด และไม่มั่นใจ', 'var(--qp-text-2)') +
+      grp(m.shaky, 'ถูก แต่ยังไม่แน่น (ไม่แน่ใจ / เดา)', 'var(--qp-warn)') + grp(unans, 'ยังไม่ได้ตอบ', 'var(--qp-border-2)');
+    h += '</section>';
+  }
+
+  // spaced repetition + actions
+  const nd = nextDue(), redo = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok);
+  h += '<section class="qp-card"><h2 class="qp-h2">รอบทบทวนถัดไป</h2><p style="margin:0 0 12px">' +
+    (nd ? relDay(nd.day) + ' — ' + nd.count + ' ข้อ' : '–') + (store.ok ? '' : ' <span class="qp-muted qp-small">(บันทึกไม่ได้ในเบราว์เซอร์นี้)</span>') + '</p>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 12px">ตอบถูกแบบมั่นใจ → ขยับกล่องขึ้น (ทวนห่างขึ้น 1·3·7·16·35 วัน) · ไม่แน่ใจ/เดา → ทวนพรุ่งนี้ · ผิด → กลับกล่อง 1</p>' +
+    '<div class="qp-row"><button class="qp-btn qp-btn-primary" data-act="redo"' + (redo.length ? '' : ' disabled') + '>ทำข้อที่พลาดอีกรอบ (' + redo.length + ')</button>' +
+    '<button class="qp-btn" data-act="home">กลับหน้าแรก</button></div></section>';
+
+  // Feynman
+  const F = BANK.feynman;
+  h += '<section class="qp-card" id="qp-feyn"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ปิดท้าย · Feynman</span></div>' +
+    '<h2 class="qp-h2">อธิบายให้เพื่อนที่ไม่ได้เรียนฟัง</h2><p style="margin:0 0 10px">' + F.prompt + '</p>';
+  if (!R.feyn.shown) {
+    h += '<textarea class="qp-ta" data-in="feyn" style="min-height:170px" placeholder="เขียนเหมือนอธิบายให้เพื่อนที่ไม่เคยเรียนวิชานี้ ใช้คำง่าย ๆ ยกตัวอย่างประกอบ"></textarea>' +
+      '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="feyn-show">ดูคำอธิบายตัวอย่าง →</button></div>';
+    if (S.feyn) h += '<p class="qp-muted qp-small">ครั้งก่อน (' + thDate(S.feyn.t) + ') ครอบคลุม ' + S.feyn.ticks.length + '/' + F.checklist.length + ' ประเด็น</p>';
+  } else {
+    h += '<h3 class="qp-h3">ที่คุณเขียน</h3><div class="qp-mine qp-feyn-mine"></div>' +
+      '<h3 class="qp-h3">คำอธิบายตัวอย่าง</h3><div class="qp-model">' + F.model + '</div>' +
+      '<h3 class="qp-h3">คำอธิบายของคุณครอบคลุมประเด็นไหนบ้าง? <span class="qp-tally" id="qp-fc-n">' + R.feyn.ticks.length + '/' + F.checklist.length + '</span></h3>' +
+      '<div class="qp-kps">' + F.checklist.map((c, i) => '<label class="qp-check' + (R.feyn.ticks.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-fc="' + i + '"' + (R.feyn.ticks.includes(i) ? ' checked' : '') + '><span>' + c + '</span></label>').join('') + '</div>' +
+      '<p class="qp-muted qp-small">ประเด็นที่ยังไม่ได้ติ๊ก = จุดที่ยังอธิบายไม่ได้ ลองกลับไปอ่านแล้วอธิบายใหม่</p>';
+  }
+  h += '</section>';
+  return h;
+}
+function revHtml(x) {
+  const q = Q[x.qi], f = x.f;
+  let body = '';
+  if (q.code) body += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') {
+    body += '<p><b>คำตอบที่ถูก:</b> ' + q.parts.map((p, k) => p + (k < q.blanks.length ? '<b style="color:var(--qp-ok)">[' + q.blanks[k] + ']</b>' : '')).join('') + '</p>';
+    body += '<p>' + q.explain + '</p>';
+  } else {
+    if (f && f.orig !== q.correct) body += '<p style="color:var(--qp-bad)"><b>คุณตอบ ' + L[f.orig] + '.</b> ' + q.choices[f.orig] + ' — ' + q.explain[f.orig] + '</p>';
+    body += '<p style="color:var(--qp-ok)"><b>เฉลย ' + L[q.correct] + '.</b> ' + q.choices[q.correct] + '</p><p>' + q.explain[q.correct] + '</p>';
+  }
+  body += rereadHtml(q);
+  return '<details class="qp-rev"><summary><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (f && f.conf ? '<span class="qp-topic">· ตอบว่า' + CONF[f.conf] + '</span>' : '') + '</div><span>' + q.q + '</span></summary><div class="qp-rev-body">' + body + '</div></details>';
+}
+
+/* ------------------------------------------------------------ timers */
+function tick() {
+  const t = document.getElementById('qp-time');
+  if (t && R) t.textContent = mmss(Date.now() - R.t0);
+  if (screen === 'dump' && R && R.dump) {
+    const left = R.dump.end - Date.now();
+    const a = document.getElementById('qp-dtimer'), b = document.getElementById('qp-dbar'), s = document.getElementById('qp-dsoft');
+    if (a) a.textContent = left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว';
+    if (b) b.style.width = Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%';
+    if (s) s.hidden = left > 0;
+  }
+}
+setInterval(tick, 1000);
+
+/* ------------------------------------------------------------ events */
+function pick(d) {
+  const st = cur(); if (!st || st.ans) return;
+  const q = Q[st.qi];
+  if (q.type === 'fill') return;
+  if (R.hard && HARD_TYPES[q.type] && !st.shown) st.shown = true;
+  st.pick = d;
+  if (st.retry) return finalize(null);
+  render();
+}
+function jumpToQ(qi) {
+  const k = R.steps.findIndex(s => s.qi === qi && s.retry === 0);
+  if (k >= 0) { notice = ''; R.pos = k; go('q', true); }
+}
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) {
+    // keyboard activation (detail 0) of fill chips / slots — pointer handlers cover mouse and touch
+    if (e.detail === 0) fillKeyClick(e.target);
+    return;
+  }
+  const act = el.dataset.act;
+  if (act === 'mode') {
+    resetArmed = false;
+    const m = el.dataset.m;
+    const list = m === 'full' ? range(Q.length) : m === 'due' ? dueQs().map(q => q.i) : m === 'missed' ? missedQs().map(q => q.i) : shuffle(range(Q.length)).slice(0, 10);
+    startRun(m, list);
+  } else if (act === 'dump-skip') { R.dump = null; go('q'); }
+  else if (act === 'dump-done') { go('dumpcheck'); }
+  else if (act === 'dump-start') {
+    S.dumps.push({ t: today(), text: R.dump.text.slice(0, 4000), got: R.dump.got.slice(), n: BANK.keypoints.length });
+    S.dumps = S.dumps.slice(-5); saveS();
+    go('q');
+  }
+  else if (act === 'reveal') { const st = cur(); st.shown = true; render(); }
+  else if (act === 'pick') pick(+el.dataset.i);
+  else if (act === 'conf') { const st = cur(); if (!st || st.ans) return; const q = Q[st.qi];
+    if (q.type === 'fill' ? st.fill.placed.includes(null) : st.pick === null) return;
+    finalize(el.dataset.c || null); }
+  else if (act === 'fill-clear') { const st = cur(); st.fill.placed = st.fill.placed.map(() => null); st.fill.sel = null; render(); }
+  else if (act === 'next') next();
+  else if (act === 'prev') prev();
+  else if (act === 'grid') { R.gridOpen = !R.gridOpen; render(); }
+  else if (act === 'jump') jumpToQ(+el.dataset.qi);
+  else if (act === 'finish') finish();
+  else if (act === 'redo') { const list = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok); startRun('redo', list); }
+  else if (act === 'home') { R = null; go('start', true); }
+  else if (act === 'feyn-show') {
+    R.feyn.shown = true;
+    S.feyn = { t: today(), text: R.feyn.text.slice(0, 4000), ticks: [] }; saveS();
+    render();
+  }
+  else if (act === 'reset') {
+    if (!resetArmed) { resetArmed = true; render(); return; }
+    resetArmed = false; S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] }; saveS(); updateIndex(); render();
+  }
+});
+app.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.pref) { P[el.dataset.pref] = el.checked; saveP(); render(); }
+  else if (el.dataset.kp !== undefined) {
+    const i = +el.dataset.kp, g = R.dump.got;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-kp-n').textContent = g.length + '/' + BANK.keypoints.length;
+  } else if (el.dataset.fc !== undefined) {
+    const i = +el.dataset.fc, g = R.feyn.ticks;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-fc-n').textContent = g.length + '/' + BANK.feynman.checklist.length;
+    if (S.feyn) { S.feyn.ticks = g.slice(); saveS(); }
+  }
+});
+app.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.in;
+  if (k === 'dump' && R && R.dump) R.dump.text = e.target.value;
+  if (k === 'feyn' && R) R.feyn.text = e.target.value;
+});
+
+document.addEventListener('keydown', e => {
+  if (screen !== 'q' || !R || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target;
+  if (tg && tg.closest && tg.closest('textarea, input, select, [contenteditable="true"]')) return;
+  const nativeBtn = tg && tg.closest && tg.closest('button, a, summary, label');
+  const st = cur(), q = Q[st.qi];
+  const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null && q.type !== 'fill';
+  if (e.key === 'Enter') {
+    if (nativeBtn) return;                     // let the focused button do its own thing
+    e.preventDefault();
+    if (gated) { st.shown = true; render(); }
+    else if (st.ans) next();
+    return;
+  }
+  if (e.key === 'ArrowRight') { e.preventDefault(); return next(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); return prev(); }
+  if (q.type === 'fill' || st.ans) return;
+  let d = -1;
+  const m = /^(Digit|Numpad)([1-4])$/.exec(e.code || '');
+  if (m) d = +m[2] - 1;
+  else if (L.includes(e.key)) d = L.indexOf(e.key);
+  if (d >= 0) { e.preventDefault(); if (!gated) pick(d); return; }   // hidden choices: Enter reveals first
+  const c = CONF_KEY[e.code];
+  if (c && st.pick !== null && !st.retry) { e.preventDefault(); finalize(c); }
+});
+
+/* fill: drag (mouse / touch) + tap-to-place */
+let drag = null;
+function curFill() {
+  if (screen !== 'q' || !R) return null;
+  const st = cur();
+  return st && !st.ans && Q[st.qi].type === 'fill' ? st : null;
+}
+function placeChip(f, chip, k, from) {
+  const prev = f.placed[k];
+  f.placed = f.placed.map(c => (c === chip ? null : c));
+  f.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) f.placed[from] = prev;
+}
+function fillKeyClick(target) {
+  const st = curFill(); if (!st) return;
+  const f = st.fill, chip = target.closest('.qp-chip'), slot = target.closest('.qp-slot');
+  if (chip && !chip.classList.contains('is-used')) { const i = +chip.dataset.chip; f.sel = f.sel === i ? null : i; render(); }
+  else if (slot) {
+    const k = +slot.dataset.slot;
+    if (f.sel !== null) { placeChip(f, f.sel, k, null); f.sel = null; } else f.placed[k] = null;
+    render();
+  }
+}
+function slotAt(x, y) { const el = document.elementFromPoint(x, y); return el ? el.closest('.qp-slot') : null; }
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  drag = null;
+}
+document.addEventListener('pointerdown', e => {
+  const st = curFill(); if (!st || e.button > 0) return;
+  const f = st.fill;
+  const chipEl = e.target.closest('.qp-chip'), slotEl = e.target.closest('.qp-slot');
+  if (chipEl && !chipEl.classList.contains('is-used')) drag = { chip: +chipEl.dataset.chip, from: null };
+  else if (slotEl && f.placed[+slotEl.dataset.slot] !== null) drag = { chip: f.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  else if (slotEl && f.sel !== null) { placeChip(f, f.sel, +slotEl.dataset.slot, null); f.sel = null; render(); return; }
+  else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'qp-chip is-ghost';
+    drag.ghost.innerHTML = Q[cur().qi].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  const s = slotAt(e.clientX, e.clientY);
+  if (s) s.classList.add('is-over');
+});
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = curFill();
+  endDrag();
+  if (!st) return;
+  const f = st.fill;
+  if (d.moved) {
+    const s = slotAt(e.clientX, e.clientY);
+    if (s) placeChip(f, d.chip, +s.dataset.slot, d.from);
+    else if (d.from !== null) f.placed[d.from] = null;
+    f.sel = null;
+  } else if (d.from !== null) {
+    if (f.sel !== null) placeChip(f, f.sel, d.from, null); else f.placed[d.from] = null;
+    f.sel = null;
+  } else f.sel = f.sel === d.chip ? null : d.chip;
+  render();
+});
+document.addEventListener('pointercancel', endDrag);
+
+/* ------------------------------------------------------------ boot */
+updateIndex();
+render();
+})();
+</script>
+<script>window.SN_BASE = "../../";</script><script src="../../assets/srs-catalog.js"></script><script src="../../assets/srs.js"></script>
+</body>
+</html>

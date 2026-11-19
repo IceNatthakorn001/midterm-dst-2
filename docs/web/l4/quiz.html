@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html class="snq snq-pro" lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz: L4 — CSS Part II: Layout, Responsive &amp; Bootstrap</title>
+<!-- quiz-pro template — build with build_quiz_pro.js (do not edit the BANK by hand) -->
+<style>
+:root {
+  --qp-font: "IBM Plex Sans Thai Looped", "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+  --qp-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  --qp-bg: #f5f1e8; --qp-surface: #fffdf8; --qp-surface-2: #efe9dc; --qp-sunken: #f7f3ea;
+  --qp-text: #24302a; --qp-text-2: #3e4a42; --qp-muted: #69725f;
+  --qp-border: #e3dccd; --qp-border-2: #cfc4ad;
+  --qp-accent: #2f5d46; --qp-accent-ink: #ffffff; --qp-accent-soft: #e3ece4;
+  --qp-ok: #2f7546; --qp-ok-bg: #e5f0e1; --qp-bad: #a9442b; --qp-bad-bg: #f8e4dc;
+  --qp-warn: #8a5a00; --qp-warn-bg: #f8edd2; --qp-info-bg: #e9eef3;
+  --qp-code-bg: #f1ece1; --qp-code-text: #2a2f2b;
+  --qp-shadow: 0 1px 2px rgba(70,56,30,.05), 0 10px 28px -16px rgba(70,56,30,.28);
+  --qp-t-recall: #2f6690; --qp-t-understand: #a0522d; --qp-t-apply: #3f7a3a; --qp-t-compare: #7048a8;
+  --qp-t-error: #b03a3a; --qp-t-calc: #9a3f6a; --qp-t-code: #23707a; --qp-t-fill: #4b56b0;
+  color-scheme: light;
+}
+/* dark: follow the OS when standalone; inside the study site (html.snq) follow its data-theme toggle only */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.snq) {
+    --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+    --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+    --qp-border: #2b362e; --qp-border-2: #3d4b40;
+    --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+    --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+    --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+    --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+    --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+    --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --qp-bg: #131a15; --qp-surface: #1a221c; --qp-surface-2: #222c25; --qp-sunken: #161e18;
+  --qp-text: #ebe6d8; --qp-text-2: #d2ccba; --qp-muted: #9da593;
+  --qp-border: #2b362e; --qp-border-2: #3d4b40;
+  --qp-accent: #8fc0a1; --qp-accent-ink: #10291b; --qp-accent-soft: #1f3327;
+  --qp-ok: #8cc79a; --qp-ok-bg: #1b2d20; --qp-bad: #eb9c84; --qp-bad-bg: #33211b;
+  --qp-warn: #e7c06b; --qp-warn-bg: #2f2817; --qp-info-bg: #1d252c;
+  --qp-code-bg: #0f1511; --qp-code-text: #dcd7c8; --qp-shadow: none;
+  --qp-t-recall: #8fbde0; --qp-t-understand: #e2a07a; --qp-t-apply: #9ccc8a; --qp-t-compare: #c3a6ec;
+  --qp-t-error: #ef9a9a; --qp-t-calc: #e59bc0; --qp-t-code: #82cfd6; --qp-t-fill: #a9b2ef;
+  color-scheme: dark;
+}
+
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; background: var(--qp-bg); }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0 auto; max-width: 760px; padding: 0 16px 72px;
+  font-family: var(--qp-font); font-size: 17px; line-height: 1.65;
+  background: var(--qp-bg); color: var(--qp-text);
+  overflow-wrap: anywhere;
+}
+:root.snq body { background: var(--qp-bg); color: var(--qp-text); }
+@media (min-width: 720px) { body { font-size: 17.5px; } }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--qp-accent) 55%, transparent); outline-offset: 2px; }
+code, pre, kbd { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+code { font-family: var(--qp-mono); font-size: .9em; background: var(--qp-surface-2); padding: .05em .35em; border-radius: 6px; }
+kbd { font-family: var(--qp-mono); font-size: .75em; border: 1px solid var(--qp-border-2); border-bottom-width: 2px; border-radius: 5px; padding: 0 .35em; color: var(--qp-muted); background: var(--qp-surface); }
+
+/* header */
+.qp-head { padding: 26px 0 6px; }
+.qp-eyebrow { font-size: .8rem; letter-spacing: .02em; color: var(--qp-muted); font-weight: 600; }
+.qp-h1 { font-size: clamp(1.4rem, 4.6vw, 1.85rem); line-height: 1.35; margin: 4px 0 6px; font-weight: 700; color: var(--qp-text); }
+:root.snq .qp-h1 { color: var(--qp-text); }
+.qp-head .sub { color: var(--qp-muted); font-size: .92rem; line-height: 1.6; margin: 0 0 6px; }
+body.qp-run .qp-head { display: none; }
+
+/* generic */
+.qp-app { padding-top: 8px; }
+.qp-card { background: var(--qp-surface); border: 1px solid var(--qp-border); border-radius: 20px; padding: 20px; box-shadow: var(--qp-shadow); margin: 0 0 14px; min-width: 0; }
+@media (max-width: 420px) { .qp-card { padding: 16px 14px; border-radius: 16px; } }
+.qp-h2 { font-size: 1.12rem; line-height: 1.4; margin: 0 0 10px; font-weight: 700; }
+.qp-h3 { font-size: 1rem; margin: 18px 0 8px; font-weight: 700; color: var(--qp-text-2); }
+.qp-muted { color: var(--qp-muted); }
+.qp-small { font-size: .88rem; }
+.qp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.qp-spacer { flex: 1; }
+.qp-btn { display: inline-flex; align-items: center; justify-content: center; gap: .4em; min-height: 46px; padding: .5em 1.15em;
+  border-radius: 999px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); font-weight: 600; line-height: 1.3; text-align: center; }
+.qp-btn:hover:not(:disabled) { border-color: var(--qp-accent); }
+.qp-btn:disabled { opacity: .45; cursor: not-allowed; }
+.qp-btn-primary { background: var(--qp-accent); border-color: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.qp-btn-quiet { border-color: transparent; background: transparent; color: var(--qp-muted); font-weight: 500; }
+.qp-link { border: 0; background: none; padding: 6px 4px; color: var(--qp-accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+.qp-note { border-radius: 14px; padding: 10px 14px; margin: 10px 0; font-size: .94rem; line-height: 1.6; background: var(--qp-info-bg); }
+.qp-note.is-warn { background: var(--qp-warn-bg); }
+.qp-note.is-bad { background: var(--qp-bad-bg); }
+.qp-note.is-ok { background: var(--qp-ok-bg); }
+
+/* chips */
+.qp-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 10px; }
+.qp-type { --c: var(--qp-muted); display: inline-block; font-size: .78rem; font-weight: 700; line-height: 1.5; padding: 2px 10px; border-radius: 999px;
+  color: var(--c); background: var(--qp-surface-2); background: color-mix(in srgb, var(--c) 14%, var(--qp-surface)); white-space: nowrap; }
+.qp-type[data-t="recall"] { --c: var(--qp-t-recall); } .qp-type[data-t="understand"] { --c: var(--qp-t-understand); }
+.qp-type[data-t="apply"] { --c: var(--qp-t-apply); } .qp-type[data-t="compare"] { --c: var(--qp-t-compare); }
+.qp-type[data-t="error"] { --c: var(--qp-t-error); } .qp-type[data-t="calc"] { --c: var(--qp-t-calc); }
+.qp-type[data-t="code"] { --c: var(--qp-t-code); } .qp-type[data-t="fill"] { --c: var(--qp-t-fill); }
+.qp-topic { font-size: .82rem; color: var(--qp-muted); }
+.qp-retry-chip { font-size: .78rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--qp-warn-bg); color: var(--qp-warn); }
+
+/* start screen */
+.qp-stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.qp-modes { display: grid; gap: 10px; }
+.qp-mode { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; text-align: left; width: 100%; min-height: 64px;
+  padding: 12px 16px; border-radius: 16px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); }
+.qp-mode:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-mode:disabled { opacity: .55; cursor: not-allowed; }
+.qp-mode b { font-size: 1.02rem; }
+.qp-mode span { grid-column: 1; font-size: .86rem; color: var(--qp-muted); line-height: 1.45; }
+.qp-mode i { grid-column: 2; grid-row: 1 / span 2; font-style: normal; font-size: 1.3rem; color: var(--qp-accent); }
+.qp-mode.is-main { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-opts { display: grid; gap: 4px; margin-top: 6px; }
+.qp-check { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 10px 6px; min-height: 48px; border-radius: 12px; cursor: pointer; line-height: 1.5; }
+.qp-check:hover { background: var(--qp-sunken); }
+.qp-check input { width: 1.25em; height: 1.25em; margin: .2em 0 0; accent-color: var(--qp-accent); }
+.qp-check small { display: block; color: var(--qp-muted); font-size: .84rem; }
+.qp-check.is-on { background: var(--qp-ok-bg); }
+.qp-srs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 8px 0 4px; }
+.qp-stat { background: var(--qp-sunken); border: 1px solid var(--qp-border); border-radius: 14px; padding: 10px 12px; }
+.qp-stat b { display: block; font-size: 1.35rem; line-height: 1.2; }
+.qp-stat span { font-size: .82rem; color: var(--qp-muted); }
+.qp-boxes { display: flex; gap: 4px; align-items: flex-end; height: 46px; margin-top: 8px; }
+.qp-boxes div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; font-size: .7rem; color: var(--qp-muted); height: 100%; }
+.qp-boxes div i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--qp-accent); opacity: .75; min-height: 2px; }
+.qp-hist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.qp-hist span { font-size: .8rem; padding: 2px 9px; border-radius: 999px; background: var(--qp-surface-2); color: var(--qp-text-2); }
+details.qp-how summary { cursor: pointer; color: var(--qp-accent); font-weight: 600; padding: 6px 0; }
+details.qp-how ul { margin: 6px 0 0; padding-left: 1.2em; font-size: .92rem; color: var(--qp-text-2); }
+
+/* brain dump */
+.qp-timer { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--qp-text-2); margin: 6px 0 10px; }
+.qp-tbar { flex: 1; height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-tbar i { display: block; height: 100%; background: var(--qp-accent); transition: width 1s linear; }
+.qp-ta { display: block; width: 100%; min-height: 220px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2);
+  background: var(--qp-sunken); color: var(--qp-text); line-height: 1.7; resize: vertical; }
+:root.snq .qp-ta { background: var(--qp-sunken); color: var(--qp-text); border: 1.5px solid var(--qp-border-2); border-radius: 14px; }
+.qp-ta:focus { outline: none; border-color: var(--qp-accent); }
+.qp-mine { white-space: pre-wrap; background: var(--qp-sunken); border: 1px dashed var(--qp-border-2); border-radius: 14px; padding: 10px 14px; max-height: 240px; overflow: auto; font-size: .94rem; color: var(--qp-text-2); }
+.qp-kps { display: grid; gap: 6px; margin: 8px 0; }
+.qp-kps .qp-check { border: 1px solid var(--qp-border); }
+.qp-tally { font-weight: 700; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+
+/* session bar */
+.qp-bar { padding: 10px 0 6px; }
+.qp-bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: .9rem; color: var(--qp-muted); }
+.qp-bar-row b { color: var(--qp-text); }
+.qp-time { font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 4px; }
+.qp-prog { height: 6px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; margin-top: 6px; }
+.qp-prog i { display: block; height: 100%; background: var(--qp-accent); border-radius: 9px; transition: width .3s; }
+.qp-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+.qp-grid button { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text-2); font-size: .85rem; font-variant-numeric: tabular-nums; padding: 0; }
+.qp-grid button.is-cur { border: 2px solid var(--qp-accent); color: var(--qp-accent); font-weight: 700; }
+.qp-grid button.is-ok { background: var(--qp-ok-bg); border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-grid button.is-bad { background: var(--qp-bad-bg); border-color: var(--qp-bad); color: var(--qp-bad); }
+.qp-grid button.is-shaky { background: var(--qp-warn-bg); border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-grid-foot { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--qp-muted); margin: -2px 0 8px; align-items: center; }
+.qp-grid-foot i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+/* question */
+.qp-q { font-size: 1.1em; font-weight: 600; line-height: 1.6; margin: 0 0 14px; }
+.qp-code { margin: 0 0 14px; padding: 12px 14px; border-radius: 12px; background: var(--qp-code-bg); color: var(--qp-code-text); border: 1px solid var(--qp-border);
+  font-family: var(--qp-mono); font-size: .84em; line-height: 1.55; white-space: pre; overflow-x: auto; tab-size: 4; max-width: 100%; overflow-wrap: normal; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.qp-choices { display: grid; gap: 10px; }
+.qp-choice { display: grid; grid-template-columns: 2em 1fr; gap: 10px; align-items: start; width: 100%; text-align: left; min-height: 54px;
+  padding: 11px 14px; border-radius: 14px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); color: var(--qp-text); line-height: 1.55;
+  transition: border-color .15s, background .15s, transform .08s; }
+.qp-choice:hover:not(:disabled) { border-color: var(--qp-accent); background: var(--qp-sunken); }
+.qp-choice:active:not(:disabled) { transform: translateY(1px); }
+.qp-choice:disabled { cursor: default; }
+.qp-letter { display: inline-grid; place-items: center; width: 2em; height: 2em; border-radius: 50%; background: var(--qp-surface-2); font-weight: 700; font-size: .92em; line-height: 1; }
+.qp-ctext { padding-top: .12em; min-width: 0; }
+.qp-choice.is-picked { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-choice.is-picked .qp-letter { background: var(--qp-accent); color: var(--qp-accent-ink); }
+.qp-choice.is-correct { border-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-choice.is-correct .qp-letter { background: var(--qp-ok); color: var(--qp-surface); }
+.qp-choice.is-wrong { border-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-choice.is-wrong .qp-letter { background: var(--qp-bad); color: var(--qp-surface); }
+.qp-choice.is-dim { opacity: .62; }
+.qp-gate { text-align: center; padding: 18px 12px; border: 1.5px dashed var(--qp-border-2); border-radius: 16px; background: var(--qp-sunken); }
+.qp-gate p { margin: 0 0 12px; color: var(--qp-text-2); font-size: .95rem; }
+
+/* confidence */
+.qp-conf { margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--qp-sunken); border: 1px solid var(--qp-border); }
+.qp-conf-q { font-weight: 600; font-size: .95rem; margin: 0 0 8px; }
+.qp-conf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qp-cbtn { min-height: 50px; border-radius: 12px; border: 1.5px solid var(--qp-border-2); background: var(--qp-surface); font-weight: 700; padding: 6px 4px; line-height: 1.25; }
+.qp-cbtn small { display: block; font-weight: 400; font-size: .72rem; color: var(--qp-muted); }
+.qp-cbtn[data-c="sure"] { border-color: var(--qp-ok); color: var(--qp-ok); }
+.qp-cbtn[data-c="unsure"] { border-color: var(--qp-warn); color: var(--qp-warn); }
+.qp-cbtn[data-c="guess"] { color: var(--qp-text-2); }
+.qp-cbtn:hover { filter: brightness(1.05); background: var(--qp-sunken); }
+
+/* feedback */
+.qp-fb { margin-top: 16px; }
+.qp-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-weight: 700; font-size: 1.05rem; padding: 10px 14px; border-radius: 14px; }
+.qp-verdict.is-ok { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-verdict.is-bad { background: var(--qp-bad-bg); color: var(--qp-bad); }
+.qp-verdict small { font-weight: 500; font-size: .85rem; color: var(--qp-text-2); }
+.qp-ex { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.qp-ex li { padding: 9px 12px 9px 14px; border-radius: 12px; border-left: 4px solid var(--qp-border-2); background: var(--qp-sunken); font-size: .95rem; line-height: 1.6; }
+.qp-ex li.is-correct { border-left-color: var(--qp-ok); background: var(--qp-ok-bg); }
+.qp-ex li.is-wrong { border-left-color: var(--qp-bad); background: var(--qp-bad-bg); }
+.qp-ex li b { display: block; font-size: .92rem; }
+.qp-ex li em { font-style: normal; font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--qp-surface); margin-left: 6px; vertical-align: 1px; }
+.qp-reread { margin-top: 10px; font-size: .92rem; color: var(--qp-text-2); padding: 8px 12px; border-radius: 12px; border: 1px dashed var(--qp-border-2); }
+.qp-reread b { color: var(--qp-accent); }
+
+/* fill */
+.qp-ftext { font-size: 1.02em; line-height: 2.55; margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; background: var(--qp-sunken); }
+.qp-slot { display: inline-block; min-width: 84px; min-height: 2em; padding: 0 10px; margin: 0 3px; line-height: 1.85; text-align: center; vertical-align: middle;
+  border: 2px dashed var(--qp-border-2); border-radius: 10px; background: var(--qp-surface); color: var(--qp-text); font-weight: 600; }
+.qp-slot.is-filled { border-style: solid; border-color: var(--qp-t-fill); cursor: grab; touch-action: none; user-select: none; }
+.qp-slot.is-target, .qp-slot.is-over { border-color: var(--qp-accent); background: var(--qp-accent-soft); }
+.qp-slot.is-correct { border-style: solid; border-color: var(--qp-ok); background: var(--qp-ok-bg); cursor: default; }
+.qp-slot.is-wrong { border-style: solid; border-color: var(--qp-bad); background: var(--qp-bad-bg); cursor: default; text-decoration: line-through; }
+.qp-slot-ans { color: var(--qp-ok); font-weight: 700; font-size: .92rem; margin-right: 4px; }
+.qp-bank-label { color: var(--qp-muted); font-size: .85rem; margin: 0 0 6px; }
+.qp-bank { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--qp-border); background: var(--qp-surface); min-height: 60px; }
+.qp-chip { padding: 7px 14px; min-height: 42px; border-radius: 999px; border: 1.5px solid var(--qp-t-fill); background: var(--qp-surface); color: var(--qp-text);
+  cursor: grab; touch-action: none; user-select: none; font-weight: 600; line-height: 1.4; }
+.qp-chip.is-sel { background: var(--qp-t-fill); color: var(--qp-surface); }
+.qp-chip.is-used { visibility: hidden; }
+.qp-chip.is-ghost { position: fixed; z-index: 99; pointer-events: none; transform: translate(-50%, -50%); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.qp-fill-wait { margin-top: 12px; font-size: .9rem; color: var(--qp-muted); }
+
+/* nav */
+.qp-nav { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.qp-nav .qp-btn { min-width: 110px; }
+.qp-keys { display: none; margin-top: 10px; font-size: .8rem; color: var(--qp-muted); line-height: 2; }
+.qp-kh { display: none; }
+@media (hover: hover) and (pointer: fine) { .qp-keys { display: block; } .qp-kh { display: inline; } }
+
+/* results */
+.qp-score { text-align: center; padding: 6px 0 4px; }
+.qp-score .qp-big { font-size: clamp(2.4rem, 11vw, 3.2rem); font-weight: 700; line-height: 1.1; color: var(--qp-accent); font-variant-numeric: tabular-nums; }
+.qp-score .qp-big small { font-size: .45em; color: var(--qp-muted); font-weight: 600; }
+.qp-bars { display: grid; gap: 10px; }
+.qp-bar-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
+.qp-bar-item .qp-meter { grid-column: 1 / -1; height: 8px; border-radius: 9px; background: var(--qp-surface-2); overflow: hidden; }
+.qp-bar-item .qp-meter i { display: block; height: 100%; border-radius: 9px; background: var(--qp-ok); }
+.qp-bar-item .qp-meter i.is-mid { background: var(--qp-warn); }
+.qp-bar-item .qp-meter i.is-low { background: var(--qp-bad); }
+.qp-bar-item .qp-hint { grid-column: 1 / -1; font-size: .86rem; color: var(--qp-text-2); }
+.qp-bar-item .qp-num { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .92rem; }
+.qp-matrix { display: grid; grid-template-columns: minmax(64px, auto) 1fr 1fr; gap: 6px; font-size: .9rem; }
+.qp-matrix > div { border-radius: 12px; padding: 8px 10px; min-width: 0; }
+.qp-mh { font-weight: 700; color: var(--qp-muted); font-size: .82rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.qp-cell b { display: block; font-size: 1.4rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.qp-cell span { font-size: .8rem; line-height: 1.35; display: block; }
+.qp-cell.c-know { background: var(--qp-ok-bg); color: var(--qp-ok); }
+.qp-cell.c-danger { background: var(--qp-bad-bg); color: var(--qp-bad); outline: 2px solid var(--qp-bad); outline-offset: -2px; }
+.qp-cell.c-shaky { background: var(--qp-warn-bg); color: var(--qp-warn); }
+.qp-cell.c-gap { background: var(--qp-surface-2); color: var(--qp-text-2); }
+.qp-revs { display: grid; gap: 8px; }
+details.qp-rev { border: 1px solid var(--qp-border); border-radius: 14px; background: var(--qp-surface); }
+details.qp-rev > summary { cursor: pointer; padding: 10px 14px; line-height: 1.55; list-style: none; display: grid; gap: 4px; }
+details.qp-rev > summary::-webkit-details-marker { display: none; }
+details.qp-rev > summary .qp-chips { margin: 0; }
+details.qp-rev[open] > summary { border-bottom: 1px solid var(--qp-border); }
+.qp-rev-body { padding: 10px 14px 12px; font-size: .94rem; }
+.qp-rev-body p { margin: 4px 0; }
+.qp-grp { font-weight: 700; font-size: .92rem; margin: 14px 0 6px; display: flex; align-items: center; gap: 8px; }
+.qp-grp i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.qp-model { white-space: pre-wrap; background: var(--qp-ok-bg); border-radius: 14px; padding: 12px 14px; line-height: 1.7; margin: 10px 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media print { .qp-nav, .qp-bar, .qp-grid, .qp-keys { display: none; } }
+</style>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="../../assets/quizpro.css"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>"><style>:root{--sn-accent:#94496a}</style>
+</head>
+<body>
+<nav class="snq-bar"><a class="snq-home" href="../../index.html" aria-label="หน้าแรก"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></a><a href="index.html">← กลับไปอ่านสรุป</a><span class="snq-sep">/</span><a href="../index.html">💻 ITDS241</a><span class="snq-sep">/</span><a href="../../index.html">หน้าแรก</a></nav>
+<header class="qp-head">
+  <div class="qp-eyebrow">แบบทดสอบ · ITDS241 Web Technologies and Applications</div>
+  <h1 class="qp-h1">L4 — CSS Part II: Layout, Responsive &amp; Bootstrap</h1>
+  <div class="sub">50 ข้อ แบ่งเป็นความจำ 6 ข้อ ความเข้าใจ 8 ข้อ การนำไปใช้ 6 ข้อ แยกคู่สับสน 4 ข้อ หาจุดผิด 2 ข้อ การคำนวณ 10 ข้อ ไล่โค้ด 10 ข้อ เติมคำ 4 ข้อ — นึกเองก่อน · บอกความมั่นใจก่อนดูเฉลย · ข้อที่พลาดวนกลับมาแก้ตัว · นัดรอบทบทวนให้ (คะแนนนับจากการตอบครั้งแรก)</div>
+</header>
+<main id="qp-app" class="qp-app"></main>
+<noscript><p>ต้องเปิด JavaScript เพื่อทำแบบทดสอบนี้</p></noscript>
+
+<script>
+(function () {
+'use strict';
+const BANK = {"id":"web-l4","title":"L4 — CSS Part II: Layout, Responsive &amp; Bootstrap","subject":"ITDS241 Web Technologies and Applications","keypoints":["กฎ CSS = selector + declaration block { } ที่มี declaration แบบ property : value; และ comment เขียนใน /* */","ใส่ CSS ได้ 3 วิธี: External (ไฟล์ .css ลิงก์ด้วย &lt;link&gt; ใน &lt;head&gt;), Internal (&lt;style&gt; ใน &lt;head&gt;), Inline (attribute style)","Cascading Order: Inline &gt; Internal &gt; External &gt; Browser Default","layout ควรเปลี่ยนตามอุปกรณ์ (มือถือ 1 คอลัมน์ / แท็บเล็ต-แล็ปท็อป 2 / เดสก์ท็อป 3) สร้างด้วย tag แบบกล่อง header, nav, footer, article, section, div","ทำ multicolumn ได้ 5 วิธี: table (ไม่แนะนำ ใช้แสดงข้อมูลตาราง), float, flexbox, framework (Bootstrap), grid","float: left/right ทำให้ลอยชิดข้างให้ของอื่นไหลอ้อม; clear: left/both ห้ามมี float อยู่ข้างนั้น; 3 คอลัมน์ = float: left + width: 33.33%","Flexbox: display: flex ที่กล่องแม่ (flex container) → ลูกโดยตรงเป็น flex items คุมด้วย flex-direction, flex-wrap, justify-content, align-items — ไม่ต้องใช้ float/clear","RWD = แนวทางให้เว็บแสดงผลดีทุกอุปกรณ์ ใช้แค่ HTML + CSS (Media Query); Mobile first = ออกแบบมือถือก่อน (ตรงข้ามแบบดั้งเดิม)","@media mediatype and (expressions) { ... } — max-width = ไม่เกิน X, min-width = ตั้งแต่ X ขึ้นไป","ต้องใส่ &lt;meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"&gt; ใน &lt;head&gt; — viewport = พื้นที่ที่ผู้ใช้มองเห็น","Bootstrap 4 ขั้น: HTML5 template (+viewport) → ใส่ CSS/JS จาก CDN ใน &lt;head&gt; → grid system → class/components","Bootstrap grid สร้างด้วย flexbox: container → row → column (≤ 12 หน่วยต่อแถว); container / container-fluid / container-{bp}; breakpoints sm 576, md 768, lg 992, xl 1200, xxl 1400"],"feynman":{"prompt":"อธิบายให้เพื่อนที่ไม่ได้เรียนฟังว่า ถ้าจะทำหน้าเว็บที่มือถือเห็นเนื้อหาเรียงลงคอลัมน์เดียว แต่จอใหญ่เห็น 3 คอลัมน์เคียงกัน ต้องใช้อะไรบ้าง (flexbox, media query, viewport, mobile first) และ Bootstrap ช่วยตรงไหน","model":"ขั้นแรกต้องใส่ &lt;meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"&gt; ใน &lt;head&gt; เพื่อบอก browser ว่าให้หน้ากว้างเท่าจอจริงของอุปกรณ์และเริ่มที่ซูมปกติ ไม่งั้นมือถือจะย่อหน้าเว็บขนาด desktop มาแสดงแทน\n\nจากนั้นใช้แนว Mobile first คือเขียน CSS ปกติให้มือถือก่อน เช่นกล่องครอบคอลัมน์ใส่ display: flex กับ flex-direction: column ให้ Column1–3 ซ้อนกันลงมา แล้วค่อยเขียน @media screen and (min-width: 600px) { .container { flex-direction: row; } } แปลว่าถ้าจอกว้างตั้งแต่ 600px ขึ้นไป ให้เปลี่ยนเป็นเรียงแนวนอน 3 คอลัมน์ เหมือนเสื้อที่ตัดไซซ์เล็กไว้ก่อนแล้วค่อยมีชิ้นเสริมสำหรับคนตัวใหญ่ ข้อดีของ flexbox คือไม่ต้องใช้ float และ clear\n\nถ้าใช้ Bootstrap จะง่ายขึ้นอีก: ครอบด้วย &lt;main class=\"container\"&gt; ใส่ &lt;section class=\"row\"&gt; แล้วใส่ &lt;div class=\"col-md-4\"&gt; 3 อัน (4+4+4 = 12 หน่วย) พอจอกว้างตั้งแต่ md (768px) จะเคียงกัน 3 คอลัมน์ ถ้าจอแคบกว่านั้นจะซ้อนลงมาเอง เพราะ Bootstrap เขียน media query ไว้ให้แล้วตาม breakpoint","checklist":["ต้องมี meta viewport (width=device-width, initial-scale=1.0) ใน &lt;head&gt;","Mobile first: CSS ปกติ = แบบมือถือ (column) แล้วใช้ @media (min-width: ...) ทับสำหรับจอใหญ่ (row)","display: flex ที่กล่องแม่ + flex-direction เปลี่ยน column/row — ไม่ต้องใช้ float และ clear","media query: max-width = ไม่เกิน X / min-width = ตั้งแต่ X ขึ้นไป","Bootstrap: container → row → col-{bp}-{n} รวม ≤ 12 หน่วย ซ้อนลงเมื่อจอเล็กกว่า breakpoint"]},"review":{"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?":"สไลด์ 4–11: syntax, External/Internal/Inline, Cascading Order","2. Web Page Layout หน้าตาแบบไหน และมีกี่วิธีสร้าง?":"สไลด์ 13–17: layout 1/2/3 คอลัมน์, tag ทำ layout, 5 วิธีทำ multicolumn","3. จัด layout ด้วย CSS Float ทำยังไง?":"สไลด์ 18–23: float + clear, ตัวอย่าง 3 คอลัมน์ width 33.33%","4. จัด layout ด้วย CSS Flexbox ทำยังไง?":"สไลด์ 24–31: container/items, flex-direction, flex-wrap, justify-content, Ex1","5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?":"สไลด์ 33–44: RWD, @media max/min-width, Ex2, viewport, mobile first","6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?":"สไลด์ 46–61: 4 ขั้น, container 3 แบบ + ตาราง max-width, grid 12 หน่วย, breakpoints"},"questions":[{"id":"140s1cl","type":"recall","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"ถ้ามี style หลายแบบกำหนดค่าให้ element เดียวกัน ลำดับที่ชนะตามสไลด์ 11 คือข้อใด?","choices":["Inline &gt; Internal &gt; External &gt; Browser Default","Internal &gt; Inline &gt; External &gt; Browser Default","Inline &gt; External &gt; Internal &gt; Browser Default","External &gt; Internal &gt; Inline &gt; Browser Default"],"correct":0,"explain":["ถูก — สไลด์ 11: Inline CSS &gt; Internal CSS &gt; External CSS &gt; Browser Default (ค่าจาก inline ทับตัวอื่นตามลำดับ)","ผิด — inline (attribute style ใน tag) ชนะ internal ไม่ใช่แพ้","ผิด — สลับ internal กับ external: สไลด์ให้ internal ชนะ external","ผิด — กลับลำดับทั้งหมด: external อยู่ไกล tag ที่สุดจึงแพ้ ไม่ใช่ชนะ"]},{"id":"18j21y2","type":"recall","topic":"2. Web Page Layout หน้าตาแบบไหน และมีกี่วิธีสร้าง?","q":"วิธีสร้าง multicolumn layout ข้อใดที่สไลด์ 17 บอกว่าไม่แนะนำ?","choices":["CSS grid","CSS float","CSS flexbox","HTML tables"],"correct":3,"explain":["ผิด — grid เป็นระบบ rows + columns ที่สไลด์ให้ไปลองในโปรเจกต์ ไม่ได้บอกว่าไม่แนะนำ","ผิด — float เป็นวิธีที่ 2 ในสไลด์ และสอนในตัวอย่างสไลด์ 18–23","ผิด — flexbox เป็นวิธีที่สอนในบท ใช้ทำ layout ที่ยืดหยุ่น responsive","ถูก — HTML tables (not recommended for layout) เพราะ &lt;table&gt; มีไว้แสดงข้อมูลแบบตาราง (tabular data)"]},{"id":"xfyowy","type":"recall","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ค่า content ของ \u003ccode>&lt;meta name=\"viewport\"&gt;\u003c/code> ที่สไลด์ 38 บอกให้ใส่ใน &lt;head&gt; สำหรับ RWD คือข้อใด?","choices":["\u003ccode>height=device-width, initial-scale=1.0\u003c/code>","\u003ccode>width=device-width, initial-scale=1.0\u003c/code>","\u003ccode>width=device-width, initial-zoom=1.0\u003c/code>","\u003ccode>width=device-height, initial-scale=1.0\u003c/code>"],"correct":1,"explain":["ผิด — สไลด์กำหนด width ให้เท่า device-width ไม่ได้กำหนด height","ถูก — width=device-width = ให้หน้ากว้างตามจอของอุปกรณ์, initial-scale=1.0 = ระดับซูมตอนโหลดหน้า","ผิด — ค่าซูมเริ่มต้นในสไลด์ชื่อ initial-scale ไม่ใช่ zoom-level","ผิด — ความกว้างของหน้าต้องตาม device-width (ความกว้างจอ) ไม่ใช่ความสูง"]},{"id":"19werca","type":"recall","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"breakpoint \u003ccode>md\u003c/code> ของ Bootstrap (สไลด์ 56) เริ่มที่ความกว้างจอเท่าไร?","choices":["≥576px","≥992px","≥768px","≥1200px"],"correct":2,"explain":["ผิด — ≥576px คือ Small (sm)","ผิด — ≥992px คือ Large (lg)","ถูก — Medium (md) ≥768px","ผิด — ≥1200px คือ Extra large (xl)"]},{"id":"1dxomqy","type":"recall","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"grid system ของ Bootstrap สร้างด้วยอะไร และ 1 row มีได้สูงสุดกี่ columns (สไลด์ 56)?","choices":["flexbox · สูงสุด 10 columns","flexbox · สูงสุด 12 columns","float · สูงสุด 12 columns","table · สูงสุด 16 columns"],"correct":1,"explain":["ผิด — สร้างด้วย flexbox ถูก แต่สูงสุด 12 columns ต่อ row ไม่ใช่ 10","ถูก — Built with flexbox and allows up to 12 columns across the page per row","ผิด — จำนวน 12 ถูก แต่ grid ของ Bootstrap สร้างด้วย flexbox ไม่ใช่ float","ผิด — ไม่ได้ใช้ table (สไลด์ 17 บอกว่าไม่แนะนำสำหรับ layout) และสูงสุด 12 ไม่ใช่ 16"]},{"id":"1nbp3j5","type":"recall","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"\u003ccode>p { clear: left; }\u003c/code> มีความหมายตามสไลด์ 18 ว่าอย่างไร?","choices":["ลบ style ทางด้านซ้ายทั้งหมดของย่อหน้าออก","ให้ข้อความไหลอ้อมไปอยู่ทางด้านซ้ายของรูป","ห้ามมี element ที่ float อยู่ทางซ้ายของมัน","ทำให้ย่อหน้าลอยไปชิดอยู่ทางซ้ายของกล่อง"],"correct":2,"explain":["ผิด — clear ไม่ได้ลบ style ใด ๆ แค่ห้ามมี float อยู่ข้างที่ระบุ","ผิด — ข้อความไหลอ้อมรูปเป็นผลของ float ส่วน clear ทำให้ไม่ไหลอ้อม","ถูก — clear: left = \"Not allowed any float elements on its left\" ย่อหน้าจึงลงไปเริ่มใต้รูปที่ float: left","ผิด — การลอยชิดซ้ายคือ float: left ไม่ใช่ clear"]},{"id":"xthq93","type":"understand","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"สไลด์ 3 บอกว่า CSS \"separates the style formatting from the HTML tags\" หมายความว่าอะไร?","choices":["HTML ดูแลเนื้อหา ส่วน CSS ดูแลหน้าตาการแสดงผล","CSS ใช้ได้เฉพาะการแสดงผลบนจอ ไม่ใช่บนกระดาษ","CSS ต้องเขียนแยกเป็นไฟล์ .css เท่านั้นจึงจะใช้ได้","HTML tags ทุกตัวถูกแทนที่ด้วย CSS selector หมด"],"correct":0,"explain":["ถูก — CSS อธิบายว่า element จะแสดงผลยังไง จึงแยกเรื่องหน้าตาออกจาก tag ที่บอกเนื้อหา","ผิด — สไลด์ 3 บอกว่า CSS ใช้กับ screen, paper หรือสื่ออื่นได้","ผิด — CSS ใส่ได้ 3 วิธี (external, internal, inline) ไม่จำเป็นต้องเป็นไฟล์แยก","ผิด — tag ยังอยู่ครบ CSS แค่ใช้ selector เลือก tag ไปแต่งหน้าตา"]},{"id":"wotrav","type":"understand","topic":"2. Web Page Layout หน้าตาแบบไหน และมีกี่วิธีสร้าง?","q":"ทำไมสไลด์ 14 แสดง layout แบบ 1, 2 และ 3 คอลัมน์แยกกันตามอุปกรณ์?","choices":["เพราะจอมือถือแสดงคอลัมน์ได้มากกว่าเดสก์ท็อป","เพราะจำนวนคอลัมน์ขึ้นกับ browser ไม่ใช่ขนาดจอ","เพราะทุกอุปกรณ์ต้องใช้ 3 คอลัมน์เหมือนกันหมด","เพราะ layout ควรเปลี่ยนตามขนาดจอของอุปกรณ์"],"correct":3,"explain":["ผิด — กลับกัน: มือถือจอแคบจึงใช้คอลัมน์เดียว เดสก์ท็อปจอกว้างใช้ 3","ผิด — สไลด์ผูกจำนวนคอลัมน์กับชนิดอุปกรณ์ (ขนาดจอ) ไม่ได้ผูกกับ browser","ผิด — สไลด์ให้จำนวนคอลัมน์ต่างกันตามอุปกรณ์ ไม่ได้ใช้ 3 คอลัมน์ทุกเครื่อง","ถูก — \"the Web Content Layout should vary by the devices\": มือถือ 1 คอลัมน์, แท็บเล็ต/แล็ปท็อป 2, เดสก์ท็อป 3"]},{"id":"6ef0au","type":"understand","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"ในตัวอย่าง Float Layout (สไลด์ 23) ทำไม \u003ccode>.column\u003c/code> ตั้ง \u003ccode>width: 33.33%\u003c/code>?","choices":["ให้แต่ละคอลัมน์สูง 33.33% ของความสูงหน้าจอ","ให้ 3 คอลัมน์รวมไม่เกิน 100% จึงอยู่แถวเดียว","ให้มีช่องว่างระหว่างคอลัมน์ 33.33px ทุกช่อง","float ต้องใช้ width ที่เป็นทศนิยมสองตำแหน่ง"],"correct":1,"explain":["ผิด — width คือความกว้าง ไม่ใช่ความสูง","ถูก — 3 × 33.33% = 99.99% พอดีความกว้างกล่อง คอลัมน์ที่ float: left จึงเรียงต่อกันได้ครบ 3 อัน (\"Create 3 equal columns floating next to each other\")","ผิด — width กำหนดความกว้างของคอลัมน์เอง ไม่ได้กำหนดช่องว่างระหว่างคอลัมน์","ผิด — ทศนิยมเป็นแค่ผลของ 100 ÷ 3 ไม่ใช่กฎของ float"]},{"id":"16b3416","type":"understand","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"ข้อดีของ Flexbox ที่สไลด์ 24 และ 31 เน้นเมื่อเทียบกับวิธี Float คืออะไร?","choices":["ไม่ต้องกำหนด display ใด ๆ ให้กับกล่องแม่","บังคับให้ทุก item กว้างเท่ากันโดยอัตโนมัติ","ใช้ได้กับ layout ที่มีสามคอลัมน์เท่านั้นเอง","จัด layout ได้โดยไม่ใช้ float และ clear"],"correct":3,"explain":["ผิด — ต้องใส่ display: flex ที่กล่องแม่ จึงจะเปิด flex layout","ผิด — flexbox จัดวางและกระจายพื้นที่ แต่ไม่ได้บังคับให้ทุก item กว้างเท่ากัน","ผิด — flexbox ใช้กับ items กี่ตัวก็ได้ เช่น nav ที่มีลิงก์ 3 อัน หรือ Ex1 ที่มี 5 กล่อง","ถูก — สไลด์ 24: design flexible layout \"without using float or positioning\" และสไลด์ 31: \"No more float and clear :)\""]},{"id":"1967av","type":"understand","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"ใน [Ex1] (สไลด์ 27) ทำไม \u003ccode>.item\u003c/code> ต้องใส่ \u003ccode>display: flex\u003c/code> ด้วย ทั้งที่เป็น item อยู่แล้ว?","choices":["ให้ .item ทุกกล่องกว้างเท่ากันโดยอัตโนมัติเอง","ให้ .item ขึ้นแถวใหม่เองเมื่อหน้าจอแคบลงไป","ให้ .item เป็น flex container จัดเลขกลาง","ให้ .item ทั้ง 5 กล่องเรียงต่อกันเป็นแนวนอน"],"correct":2,"explain":["ผิด — ความกว้างกล่องมาจาก width: 60px ไม่ใช่จาก display: flex","ผิด — การขึ้นแถวใหม่คือ flex-wrap ที่ .container ไม่ใช่ display ของ .item","ถูก — ตัวเลขข้างในเป็นลูกของ .item พอ .item เป็น flex container ก็ใช้ justify-content: center + align-items: center ให้ตัวเลขอยู่กลางกล่องได้","ผิด — การเรียง 5 กล่องเป็นหน้าที่ของ .container (กล่องแม่) ที่มี display: flex"]},{"id":"jtcasd","type":"understand","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ข้อใดอธิบาย Responsive Web Design ได้ตรงกับสไลด์ 33 มากที่สุด?","choices":["แนวทางให้เว็บแสดงผลดีหลายจอ ด้วย HTML+CSS","สร้างเว็บแยกหนึ่งชุดต่ออุปกรณ์ แล้วเลือกส่งไป","ใช้ JavaScript ตรวจขนาดจอแล้วโหลดหน้าใหม่","เทคนิคบีบอัดรูปให้หน้าเว็บโหลดเร็วขึ้นบนมือถือ"],"correct":0,"explain":["ถูก — RWD = approach ที่ทำให้หน้าเว็บ render well on a variety of devices and screen sizes ใช้แค่ HTML และ CSS (Media Query)","ผิด — RWD ใช้หน้าเดียวกันแต่ปรับ layout ตามขนาดจอ ไม่ได้ทำเว็บแยกหลายชุด","ผิด — สไลด์บอกว่าใช้ only HTML and CSS ไม่ได้ใช้ JavaScript","ผิด — RWD คือการปรับเนื้อหา/layout ตามจอ ไม่ใช่เรื่องบีบอัดรูป"]},{"id":"s6hh0n","type":"understand","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ตัวอย่าง Mobile first (สไลด์ 41–43) ทำไม CSS ปกติ (นอก @media) จึงตั้ง nav และ .container เป็น \u003ccode>column\u003c/code>?","choices":["เพราะ CSS ปกติคือแบบมือถือ จอใหญ่ทับใน @media","เพราะ column แสดงผลเร็วกว่า row บนทุก browser","เพราะต้องออกแบบ desktop ก่อนแล้วค่อยย่อลงมือถือ","เพราะ @media ในตัวอย่างนี้ทำงานเฉพาะบนจอมือถือ"],"correct":0,"explain":["ถูก — mobile first ออกแบบให้มือถือก่อน (ทุกอย่างเรียงลง) แล้ว @media screen and (min-width: 600px) เปลี่ยนเป็น row สำหรับจอที่ใหญ่ขึ้น","ผิด — สไลด์ไม่ได้พูดเรื่องความเร็ว เลือก column เพราะจอมือถือแคบ","ผิด — นั่นคือ traditional design ที่ mobile first ตรงข้าม","ผิด — กลับกัน: @media (min-width: 600px) ทำงานกับจอที่กว้างตั้งแต่ 600px ขึ้นไป"]},{"id":"1qsifs5","type":"understand","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"ทำไม Bootstrap ต้องมี element ที่มี class \u003ccode>container\u003c/code> ครอบเนื้อหาเว็บ?","choices":["เพื่อให้ทุกหน้ากว้าง 100% ตลอดทุกขนาดจอ","เป็น layout พื้นฐานที่ grid system ต้องใช้","เพื่อใช้แทน &lt;body&gt; ที่ Bootstrap ไม่รองรับ","เพื่อโหลดไฟล์ JS ของ Bootstrap จาก CDN"],"correct":1,"explain":["ผิด — กว้าง 100% เสมอคือ .container-fluid ส่วน .container มี max-width ตาม breakpoint","ถูก — สไลด์ 53: \"Containers are the most basic layout element in Bootstrap and are required when using our default grid system\"","ผิด — container อยู่ข้างใน &lt;body&gt; (เช่น &lt;main class=\"container\"&gt;) ไม่ได้แทน body","ผิด — JS โหลดด้วย &lt;script src&gt; ใน &lt;head&gt; (สไลด์ 50) ไม่เกี่ยวกับ container"]},{"id":"6mv2c9","type":"apply","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"เว็บมี 20 หน้าที่ต้องหน้าตาเหมือนกัน และอยากแก้สีทีเดียวแล้วเปลี่ยนทุกหน้า ควรใส่ CSS แบบไหน?","choices":["Internal CSS: ใส่ &lt;style&gt; ในหน้าแรกหน้าเดียว","Inline CSS: ใส่ attribute style ทุก tag ทุกหน้า","External CSS: ไฟล์ .css เดียว &lt;link&gt; ทุกหน้า","Internal CSS: ใส่ &lt;style&gt; ชุดเดียวกันในทุกหน้า"],"correct":2,"explain":["ผิด — internal CSS มีผลเฉพาะหน้าที่มี &lt;style&gt; นั้น หน้าอื่นไม่ได้ด้วย","ผิด — inline มีผลกับ element ตัวเดียว ต้องแก้ทุก tag ทุกหน้า","ถูก — สไลด์ 6: one CSS file applies to the whole collection of HTML pages แต่ละหน้าต้องมี &lt;link&gt; ใน &lt;head&gt; แก้ไฟล์เดียวเปลี่ยนทุกหน้า","ผิด — ใช้ได้แต่ต้องแก้ทั้ง 20 หน้าทุกครั้ง ไม่ประหยัดแรง"]},{"id":"vb8bpq","type":"apply","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"nav เป็น \u003ccode>display: flex\u003c/code> (flex-direction: row) อยากให้ลิงก์ทั้งหมดไปรวมชิดขวาโดยไม่ใช้ float ต้องเพิ่มอะไร?","choices":["\u003ccode>justify-content: center\u003c/code>","\u003ccode>flex-wrap: wrap-reverse\u003c/code>","\u003ccode>flex-direction: column\u003c/code>","\u003ccode>justify-content: flex-end\u003c/code>"],"correct":3,"explain":["ผิด — center รวมลิงก์ไว้ตรงกลาง nav ไม่ใช่ชิดขวา","ผิด — flex-wrap คุมการขึ้นแถวใหม่ ไม่ได้คุมว่าชิดซ้ายหรือขวา","ผิด — column ทำให้ลิงก์เรียงลงแนวตั้ง (แบบ nav มือถือในสไลด์ 41) ไม่ได้ไปชิดขวา","ถูก — สไลด์ 30: nav { display:flex; flex-direction: row; justify-content: flex-end; } ลิงก์ไปชิดขวาแทน float: right"]},{"id":"109smxy","type":"apply","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"มี 3 คอลัมน์ใน flex container อยากให้ช่องว่างเท่ากันทุกช่อง รวมช่องที่ขอบซ้ายและขวาด้วย ต้องตั้ง justify-content เป็นค่าใด?","choices":["\u003ccode>space-evenly\u003c/code>","\u003ccode>flex-start\u003c/code>","\u003ccode>space-around\u003c/code>","\u003ccode>space-between\u003c/code>"],"correct":0,"explain":["ถูก — space-evenly ให้ช่องว่างเท่ากันทุกช่องรวมขอบ (ภาพ space-evenly สไลด์ 26 และ .container สไลด์ 31) (Chrome: กล่อง 100px 3 อันใน 400px ได้ช่องละ 25px)","ผิด — flex-start ไม่กระจายช่องว่าง คอลัมน์ไปรวมชิดจุดเริ่ม (ซ้าย)","ผิด — space-around ช่องที่ขอบแคบกว่าช่องระหว่างคอลัมน์ (ครึ่งหนึ่ง) จึงไม่เท่ากันทุกช่อง","ผิด — space-between ไม่มีช่องที่ขอบ คอลัมน์แรกและสุดท้ายชิดขอบ (Chrome: x = 0, 150, 300)"]},{"id":"1lpus6m","type":"apply","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"อยากให้ CSS บล็อกหนึ่งทำงานเฉพาะเมื่อจอกว้างไม่เกิน 480px ต้องเขียนแบบไหน?","choices":["\u003ccode>@media screen and (max-height: 480px)\u003c/code>","\u003ccode>@media screen and (min-width: 480px)\u003c/code>","\u003ccode>@media screen and (min-height: 480px)\u003c/code>","\u003ccode>@media screen and (max-width: 480px)\u003c/code>"],"correct":3,"explain":["ผิด — max-height ตรวจความสูง ไม่ใช่ความกว้าง","ผิด — min-width: 480px ทำงานเมื่อจอกว้างตั้งแต่ 480px ขึ้นไป ตรงข้ามกับที่ต้องการ","ผิด — min-height ตรวจความสูงและเป็นเงื่อนไข \"ตั้งแต่\" ผิดทั้งสองส่วน","ถูก — max-width: 480px = ใช้เมื่อความกว้าง ≤ 480px (แบบเดียวกับ max-width: 768px ในสไลด์ 35)"]},{"id":"md55n1","type":"apply","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"อยากให้กล่อง Bootstrap กว้างเต็มหน้าต่างทุกขนาดจอ (ไม่เว้นขอบซ้ายขวา) ควรใช้ class ใด?","choices":["\u003ccode>.container-xxl\u003c/code>","\u003ccode>.container-fluid\u003c/code>","\u003ccode>.container-sm\u003c/code>","\u003ccode>.container-lg\u003c/code>"],"correct":1,"explain":["ผิด — .container-xxl กว้าง 100% จนถึง xxl (≥1400px) แล้วมี max-width 1320px","ถูก — .container-fluid = width: 100% at all breakpoints (สไลด์ 53–55)","ผิด — .container-sm มี max-width เหมือน .container ตั้งแต่ sm (540, 720, ...) จึงเว้นขอบ","ผิด — .container-lg กว้าง 100% แค่ก่อนถึง lg (992px) ตั้งแต่นั้นมี max-width 960/1140/1320px"]},{"id":"laqpz0","type":"apply","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"อยากได้ 2 คอลัมน์กว้าง 8 กับ 4 หน่วยเคียงกันเมื่อจอ ≥768px แต่จอเล็กกว่านั้นให้ซ้อนลง ควรเขียนแบบไหน?","choices":["\u003ccode>col-sm-8\u003c/code> กับ \u003ccode>col-sm-4\u003c/code>","\u003ccode>col-lg-8\u003c/code> กับ \u003ccode>col-lg-4\u003c/code>","\u003ccode>col-md-8\u003c/code> กับ \u003ccode>col-md-4\u003c/code>","\u003ccode>col-md-8\u003c/code> กับ \u003ccode>col-md-6\u003c/code>"],"correct":2,"explain":["ผิด — sm เริ่มที่ 576px จอ 576–767px จะยังเคียงกันอยู่","ผิด — lg เริ่มที่ 992px จอ 768–991px จะซ้อนลงทั้งที่ต้องการให้เคียงกัน","ถูก — infix md = ≥768px: ตั้งแต่ 768px เคียงกัน 8 + 4 = 12 หน่วย ต่ำกว่านั้นซ้อนลง","ผิด — 8 + 6 = 14 เกิน 12 หน่วย (สไลด์ 57: sum of cols adds up to 12 or fewer) คอลัมน์ที่สองจะตกลงแถวใหม่"]},{"id":"siua3j","type":"compare","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"\u003ccode>&lt;link&gt;\u003c/code> กับ \u003ccode>&lt;style&gt;\u003c/code> ในการใส่ CSS ต่างกันอย่างไร?","choices":["link เขียน CSS ไว้ในหน้าเลย / style ลิงก์ไฟล์ .css ภายนอก","link ลิงก์ไฟล์ .css ภายนอก / style เขียน CSS ไว้ในหน้าเลย","link ใช้กับ inline CSS / style ใช้กับ external CSS เสมอ","link ใส่ใน tag ที่จะแต่ง / style ต้องอยู่ใน &lt;head&gt; เท่านั้น"],"correct":1,"explain":["ผิด — สลับหน้าที่กัน","ถูก — &lt;link rel=\"stylesheet\" href=\"...\"&gt; ใช้กับ External CSS (สไลด์ 6–7) ส่วน &lt;style&gt; ใน &lt;head&gt; คือ Internal CSS (สไลด์ 8–9)","ผิด — inline CSS ใช้ attribute style ไม่ใช่ &lt;link&gt; และ &lt;style&gt; คือ internal ไม่ใช่ external","ผิด — &lt;link&gt; ก็อยู่ใน &lt;head&gt; การเขียนใน tag ที่จะแต่งคือ attribute style (inline)"]},{"id":"dvjxpy","type":"compare","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"\u003ccode>(max-width: 768px)\u003c/code> กับ \u003ccode>(min-width: 768px)\u003c/code> ใน media query ต่างกันอย่างไร?","choices":["max = ใช้เมื่อจอไม่เกิน 768 / min = ใช้เมื่อจอตั้งแต่ 768","ทั้งสองแบบทำงานเหมือนกันเมื่อจอกว้างกว่า 768px ขึ้นไป","max = ใช้เมื่อจอเท่ากับ 768 / min = เมื่อจอน้อยกว่า 768","max = ใช้เมื่อจอตั้งแต่ 768 / min = ใช้เมื่อจอไม่เกิน 768"],"correct":0,"explain":["ถูก — max-width = เพดาน (≤ X) ใช้กับจอแคบ / min-width = พื้น (≥ X) ใช้กับจอกว้าง เช่นสไลด์ 35: ≤768 เขียว, ≥1000 แดง","ผิด — max-width: 768px ไม่ทำงานเมื่อจอกว้างกว่า 768","ผิด — max-width ไม่ได้ใช้แค่ค่าเท่ากันพอดี แต่รวมทุกความกว้างที่ไม่เกิน","ผิด — สลับความหมาย: max คือค่าสูงสุดที่ยอม จึงเป็นจอแคบ"]},{"id":"9lq579","type":"compare","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"\u003ccode>.container\u003c/code> กับ \u003ccode>.container-fluid\u003c/code> ของ Bootstrap ต่างกันอย่างไร?","choices":["container 100% / fluid มี max-width ตาม breakpoint","container ใช้บนมือถือเท่านั้น / fluid ใช้บนเดสก์ท็อปเท่านั้น","container ใช้กับ grid ได้ / fluid ใช้กับ grid ไม่ได้เลย","container มี max-width ตาม breakpoint / fluid 100%"],"correct":3,"explain":["ผิด — สลับกัน","ผิด — ทั้งสองใช้ได้ทุกขนาดจอ ต่างกันแค่ความกว้าง","ผิด — สไลด์ 51 ให้เลือกใช้ container หรือ container-fluid ครอบเนื้อหาได้ทั้งคู่","ถูก — สไลด์ 53–54: .container ตั้ง max-width ที่แต่ละ breakpoint (540/720/960/1140/1320) ส่วน .container-fluid = width: 100% ทุก breakpoint"]},{"id":"1bo6m19","type":"compare","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"ที่จอกว้าง 400px คอลัมน์ \u003ccode>col-6\u003c/code> กับ \u003ccode>col-sm-6\u003c/code> แสดงต่างกันอย่างไร?","choices":["ทั้งสองแบบกว้างครึ่งแถวเหมือนกันทุก ๆ ขนาดหน้าจอ","ทั้งสองแบบซ้อนลงเต็มแถวเหมือนกันเพราะจอแคบกว่า","col-6 ยังกว้างครึ่งแถว / col-sm-6 ซ้อนลงเต็มแถว","col-6 ซ้อนลงเต็มแถว / col-sm-6 ยังกว้างครึ่งแถว"],"correct":2,"explain":["ผิด — col-sm-6 ซ้อนลงเมื่อจอเล็กกว่า 576px","ผิด — col-6 ไม่มี breakpoint จึงไม่ซ้อนลงแม้จอแคบ","ถูก — ไม่มี infix = X-Small (&lt;576px) ขึ้นไป คือทุกขนาดจอ ส่วน sm มีผลตั้งแต่ 576px จอ 400px จึงซ้อนลง (สไลด์ 56–57)","ผิด — สลับกัน: col-6 ใช้ได้ทุกขนาดจอ"]},{"id":"62nhb0","type":"error","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"ข้อใดเป็นข้อความที่ผิดเกี่ยวกับ Bootstrap ตามสไลด์?","choices":["ต้องมี container เมื่อใช้ default grid system","grid ของ Bootstrap สร้างด้วย float เป็นหลัก","responsive และ mobile-first อยู่ในแกนหลัก","Bootstrap ต้องใช้ HTML5 doctype ในเอกสาร"],"correct":1,"explain":["ผิด — ข้อความนี้ถูกต้อง: containers are required when using our default grid system (สไลด์ 53)","ถูก — ข้อนี้คือข้อที่ผิด: สไลด์ 56 บอกว่า grid built with flexbox ไม่ใช่ float","ผิด — ข้อความนี้ถูกต้อง: Responsive features and Mobile-first approach are part of the core framework (สไลด์ 47)","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 49 \"BS requires the HTML5 doctype\""]},{"id":"mo9mu9","type":"error","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ข้อใดเป็นข้อความที่ผิดเกี่ยวกับ RWD และ media query ตามสไลด์?","choices":["media query ตรวจ orientation ของแท็บเล็ตได้","viewport คือพื้นที่ส่วนของหน้าเว็บที่ผู้ใช้มองเห็นได้","RWD ใช้เพียง HTML กับ CSS (คือ Media Query)","Mobile first คือออกแบบ desktop ก่อนแล้วค่อยย่อ"],"correct":3,"explain":["ผิด — ข้อความนี้ถูกต้อง: สไลด์ 34 media query ตรวจ orientation (landscape/portrait) ได้","ผิด — ข้อความนี้ถูกต้อง: Viewport = the user's visible area of a web page (สไลด์ 38)","ผิด — ข้อความนี้ถูกต้อง: สไลด์ 33 Uses only HTML and CSS (i.e. Media Query)","ถูก — ข้อนี้คือข้อที่ผิด: Mobile first = design for mobile before the desktop ซึ่งตรงข้ามกับ traditional design (สไลด์ 33)"]},{"id":"1h14til","type":"fill","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"เติมชื่อส่วนของกฎ CSS ในตัวอย่าง \u003ccode>body { background-color: red; } /* ... */\u003c/code> (สไลด์ 4)","parts":["\u003ccode>body\u003c/code> = "," เลือกว่าจะแต่ง element ไหน\u003cbr>ทุกอย่างใน \u003ccode>{ }\u003c/code> = ","\u003cbr>\u003ccode>background-color: red;\u003c/code> หนึ่งข้อ = "," รูปแบบ property : value;\u003cbr>\u003ccode>/* ... */\u003c/code> = ",""],"blanks":["Selector","Declaration block","Declaration","Comment"],"bank":["Declaration block","Declaration","Comment","Selector","Attribute","Element","Tag"],"explain":"Selector เลือก element → Declaration block คือก้อนใน { } → Declaration คือคำสั่งแต่งหนึ่งข้อ property : value; → Comment อยู่ใน /* */ — Attribute/Element/Tag เป็นศัพท์ของ HTML ไม่ใช่ส่วนของกฎ CSS"},{"id":"1yb5toq","type":"fill","topic":"2. Web Page Layout หน้าตาแบบไหน และมีกี่วิธีสร้าง?","q":"เติม tag ให้ตรงกับหน้าที่ในการทำ layout (สไลด์ 15)","parts":[""," แถบ navigation ของหน้าเว็บ\u003cbr>"," ส่วนเนื้อหา (content part)\u003cbr>"," section ภายในส่วนเนื้อหา\u003cbr>"," กล่องครอบ element อื่นเพื่อแต่งด้วย CSS\u003cbr>"," ส่วนท้ายของหน้าเว็บ"],"blanks":["&lt;nav&gt;","&lt;article&gt;","&lt;section&gt;","&lt;div&gt;","&lt;footer&gt;"],"bank":["&lt;div&gt;","&lt;head&gt;","&lt;header&gt;","&lt;footer&gt;","&lt;table&gt;","&lt;section&gt;","&lt;article&gt;","&lt;nav&gt;"],"explain":"nav = navigation bar, article = content part, section = section ใน content, div = division/กล่องครอบ, footer = ส่วนท้าย — &lt;header&gt; คือส่วนหัว, &lt;head&gt; เก็บข้อมูลเอกสาร (ไม่แสดงเป็น layout), &lt;table&gt; ไม่แนะนำให้ใช้ทำ layout"},{"id":"mse7e9","type":"fill","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"เติม property ของ flex container ให้ตรงกับหน้าที่ (สไลด์ 25–27)","parts":[""," ใส่ที่กล่องแม่ เพื่อเปิด flex layout ให้ลูกโดยตรงทุกตัว\u003cbr>"," กำหนดทิศที่ items เรียง เช่น row, column\u003cbr>"," กำหนดว่าล้นแล้วขึ้นบรรทัดใหม่หรือไม่\u003cbr>"," กระจายช่องว่างตามแนวที่เรียง เช่น space-evenly"],"blanks":["display: flex","flex-direction","flex-wrap","justify-content"],"bank":["flex-wrap","display: flex","clear","overflow","flex-direction","float","justify-content"],"explain":"display: flex เปิด flex context → flex-direction (row | row-reverse | column | column-reverse) → flex-wrap (nowrap | wrap | wrap-reverse) → justify-content (flex-start, flex-end, center, space-between, space-around, space-evenly ...) — float/clear เป็นของวิธี Float ที่ flexbox ไม่ต้องใช้"},{"id":"1535nd","type":"fill","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"เรียงขั้นตอนสร้างหน้าเว็บด้วย Bootstrap (สไลด์ 48)","parts":["ขั้น 1: สร้าง "," ที่มี viewport\u003cbr>ขั้น 2: ใส่ "," ใน &lt;head&gt;\u003cbr>ขั้น 3: จัด layout ด้วย ","\u003cbr>ขั้น 4: ใส่ "," แล้ว enjoy"],"blanks":["HTML5 doc template","Bootstrap CSS และ JS","grid system","class/components"],"bank":["class/components","grid system","Bootstrap CSS และ JS","float layout","Media Query","External CSS","HTML5 doc template"],"explain":"template (doctype + viewport) → include CSS/JS ที่ compile แล้วจาก CDN → grid (container → row → column) → class/components (เช่น Card, Navbar, Modal)"},{"id":"d7nm7h","type":"code","topic":"1. ทบทวน: CSS คืออะไร เขียนยังไง ใส่ได้กี่วิธี และถ้าชนกันใครชนะ?","q":"สีและขนาดตัวอักษรของ A และ B เป็นอย่างไร?","code":"/* myStyle.css */\np { color: blue; font-size: 20px; }\n\n&lt;!-- index.html --&gt;\n&lt;head&gt;\n  &lt;link rel=\"stylesheet\" href=\"myStyle.css\" /&gt;\n  &lt;style&gt;\n    p { color: green; }\n  &lt;/style&gt;\n&lt;/head&gt;\n&lt;body&gt;\n  &lt;p id=\"a\" style=\"color: red;\"&gt;A&lt;/p&gt;\n  &lt;p id=\"b\"&gt;B&lt;/p&gt;\n&lt;/body&gt;","choices":["A แดง, B เขียว — ทั้งคู่ขนาด 20px","A เขียว, B เขียว — ทั้งคู่ขนาด 20px","A แดง, B เขียว — ทั้งคู่ขนาดปกติ","A แดง, B น้ำเงิน — ทั้งคู่ขนาด 20px"],"correct":0,"explain":["ถูก — สี: inline (แดง) ชนะ internal (เขียว) ชนะ external (น้ำเงิน) / font-size มีแค่ใน external ไม่มีใครทับจึงได้ 20px ทั้งคู่ (Chrome: A rgb(255,0,0) 20px, B rgb(0,128,0) 20px)","ผิด — A มี inline style=\"color: red;\" ซึ่งชนะ internal","ผิด — internal ทับแค่ color ส่วน font-size: 20px จาก external ยังมีผล","ผิด — B ไม่มี inline แต่ internal (เขียว) ยังชนะ external (น้ำเงิน)"]},{"id":"13l2yai","type":"code","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"ลิงก์ใน nav แสดงเรียงจากซ้ายไปขวาอย่างไร?","code":"&lt;style&gt;\n  nav a { float: right; display: block; padding: 14px 16px; }\n&lt;/style&gt;\n&lt;nav&gt;\n  &lt;a href=\"#\"&gt;Link1&lt;/a&gt;\n  &lt;a href=\"#\"&gt;Link2&lt;/a&gt;\n  &lt;a href=\"#\"&gt;Link3&lt;/a&gt;\n&lt;/nav&gt;","choices":["Link1 Link2 Link3 ชิดขวา","Link1 Link2 Link3 ชิดซ้าย","Link3 Link2 Link1 ชิดขวา","Link3 Link2 Link1 ชิดซ้าย"],"correct":2,"explain":["ผิด — ชิดขวาถูก แต่ลำดับกลับ: ตัวแรกในโค้ดไปอยู่ขวาสุด","ผิด — เป็นผลของ float: left (หรือไม่ float) ไม่ใช่ float: right","ถูก — float: right ทำให้ตัวแรก (Link1) ลอยไปขวาสุดก่อน ตัวถัดไปต่อทางซ้ายของมัน (Chrome: Link1 x≈914, Link2 x≈844, Link3 x≈773 ใน nav กว้าง 984px)","ผิด — float: right ทำให้ลอยชิดขวา ไม่ใช่ซ้าย"]},{"id":"16ezmut","type":"code","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"ลิงก์ใน nav แสดงเรียงจากซ้ายไปขวาและชิดด้านใด?","code":"&lt;style&gt;\n  nav {\n    display: flex;\n    flex-direction: row-reverse;\n    justify-content: flex-end;\n  }\n&lt;/style&gt;\n&lt;nav&gt;\n  &lt;a href=\"#\"&gt;Home&lt;/a&gt;\n  &lt;a href=\"#\"&gt;About&lt;/a&gt;\n  &lt;a href=\"#\"&gt;Contact&lt;/a&gt;\n&lt;/nav&gt;","choices":["Home About Contact ชิดซ้าย","Contact About Home ชิดขวา","Contact About Home ชิดซ้าย","Home About Contact ชิดขวา"],"correct":2,"explain":["ผิด — ลำดับนี้คือ row ปกติ แต่ row-reverse กลับลำดับเป็น Contact About Home","ผิด — ชิดขวาคือ row-reverse + flex-start แบบสไลด์ 43 แต่โจทย์นี้ใช้ flex-end","ถูก — row-reverse เริ่มวางจากขวา (Home ขวาสุดของกลุ่ม) จุดเริ่ม = ขวา จุดจบ = ซ้าย flex-end จึงดันทั้งกลุ่มไปชิดซ้าย (Chrome: Contact x=0, About x≈82, Home x≈154)","ผิด — เป็นผลของ row + flex-end (สไลด์ 30) ไม่ใช่ row-reverse"]},{"id":"10umexq","type":"code","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"ย่อหน้า First และ Second อยู่ตรงไหนเมื่อเทียบกับกล่องสีส้ม?","code":"&lt;style&gt;\n  .box { float: left; width: 100px; height: 100px; background: orange; }\n  .note { clear: left; }\n&lt;/style&gt;\n&lt;div class=\"box\"&gt;&lt;/div&gt;\n&lt;p&gt;First&lt;/p&gt;\n&lt;p class=\"note\"&gt;Second&lt;/p&gt;","choices":["ทั้งสองย่อหน้าลงไปอยู่ใต้กล่องส้มเหมือนกันหมด","First อยู่ข้างขวากล่อง, Second ลงไปใต้กล่อง","First ลงไปใต้กล่อง, Second อยู่ข้างขวากล่อง","ทั้งสองย่อหน้าอยู่ข้างขวาของกล่องส้มเหมือนกัน"],"correct":1,"explain":["ผิด — First ไม่มี clear จึงไหลอ้อมกล่องเหมือนข้อความในภาพสไลด์ 18","ถูก — First ไม่มี clear จึงไหลอ้อมกล่องที่ float: left (อยู่ทางขวา) ส่วน Second มี clear: left จึงเริ่มใต้กล่อง (Chrome: กล่องสูง 100px, Second y = 100)","ผิด — สลับกัน: class note (clear: left) อยู่ที่ Second","ผิด — Second มี clear: left ห้ามมี float อยู่ทางซ้าย จึงอยู่ข้างกล่องไม่ได้"]},{"id":"v1sj1x","type":"code","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"ตัวเลข 1, 2, 3 แสดงผลอย่างไร?","code":"&lt;style&gt;\n  .list { display: flex; flex-direction: column-reverse; }\n&lt;/style&gt;\n&lt;div class=\"list\"&gt;\n  &lt;div&gt;1&lt;/div&gt;\n  &lt;div&gt;2&lt;/div&gt;\n  &lt;div&gt;3&lt;/div&gt;\n&lt;/div&gt;","choices":["3 / 2 / 1 เรียงจากบนลงล่าง","3 2 1 เรียงแนวนอนจากซ้าย","1 2 3 เรียงแนวนอนจากซ้าย","1 / 2 / 3 เรียงจากบนลงล่าง"],"correct":0,"explain":["ถูก — column = แนวตั้ง, reverse = กลับลำดับ จึงเห็น 3 อยู่บนสุด (Chrome: 3 y=0, 2 y=18, 1 y=36)","ผิด — นี่คือ row-reverse (แนวนอน) แต่โจทย์ใช้ column-reverse","ผิด — นี่คือ row ปกติ ทั้งทิศและลำดับไม่ตรง","ผิด — นี่คือ flex-direction: column ปกติ ไม่ได้กลับลำดับ"]},{"id":"89d3m7","type":"code","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ถ้าเปิดที่จอกว้าง 600px, 750px และ 900px ตามลำดับ \u003ccode>&lt;h1&gt;\u003c/code> จะเป็นสีอะไร?","code":"h1 { color: black; }\n@media screen and (max-width: 600px) {\n  h1 { color: green; }\n}\n@media screen and (min-width: 900px) {\n  h1 { color: red; }\n}","choices":["ดำ / ดำ / แดง","แดง / ดำ / เขียว","เขียว / ดำ / ดำ","เขียว / ดำ / แดง"],"correct":3,"explain":["ผิด — max-width: 600px รวมค่า 600 ด้วย (ไม่เกิน 600) จึงต้องเป็นเขียว","ผิด — สลับความหมาย max/min: max-width: 600px ใช้กับจอแคบ (600 → เขียว) ส่วน min-width: 900px ใช้กับจอกว้าง (900 → แดง)","ผิด — min-width: 900px รวมค่า 900 ด้วย (ตั้งแต่ 900) จึงต้องเป็นแดง","ถูก — 600 ≤ 600 เข้า max-width → เขียว / 750 ไม่เข้าเงื่อนไขไหน → ค่า default ดำ / 900 ≥ 900 เข้า min-width → แดง (Chrome: 600 เขียว, 601 ดำ, 899 ดำ, 900 แดง)"]},{"id":"1ddxwf4","type":"code","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"A, B, C แสดงผลอย่างไร (p เป็น block element)?","code":"&lt;style&gt;\n  .box { display: flex; }\n&lt;/style&gt;\n&lt;section class=\"box\"&gt;\n  &lt;div&gt;A&lt;/div&gt;\n  &lt;div&gt;\n    &lt;p&gt;B&lt;/p&gt;\n    &lt;p&gt;C&lt;/p&gt;\n  &lt;/div&gt;\n&lt;/section&gt;","choices":["A, B, C เรียงเป็นแถวเดียวกันแนวนอน","A อยู่บน ส่วน B กับ C เรียงกันข้างล่าง","A อยู่ซ้าย ส่วน B กับ C ซ้อนกันอยู่ทางขวา","A, B, C ซ้อนกันลงมาเป็นแนวตั้งทั้งหมด"],"correct":2,"explain":["ผิด — B และ C เป็นหลานของ .box ไม่ใช่ flex items จึงไม่ได้ถูกเรียงแนวนอน","ผิด — A กับกล่อง B/C เป็น flex items ที่เรียงแนวนอน A จึงอยู่ซ้าย ไม่ใช่บน","ถูก — display: flex มีผลกับลูกโดยตรง (direct children) คือ div A และ div ที่ครอบ B, C เท่านั้น สองกล่องนี้จึงเคียงกัน ส่วน B, C ยังเป็น block ซ้อนกันในกล่องขวา (Chrome: A x=8, B และ C x≈19.6 คนละ y)","ผิด — ลูกโดยตรงสองกล่องเรียงแนวนอน (flex-direction เริ่มต้นเป็น row)"]},{"id":"jx8v3d","type":"code","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"ที่จอกว้าง 500px (โหลด Bootstrap แล้ว) Left และ Right แสดงอย่างไร?","code":"&lt;main class=\"container\"&gt;\n  &lt;section class=\"row\"&gt;\n    &lt;div class=\"col-sm-6\"&gt;Left&lt;/div&gt;\n    &lt;div class=\"col-sm-6\"&gt;Right&lt;/div&gt;\n  &lt;/section&gt;\n&lt;/main&gt;","choices":["Right ถูกซ่อนไว้ แสดงแค่ Left","ซ้อนกันลงมา กว้างเต็มแถวทั้งสองอัน","เคียงกัน Left กว้างกว่า Right","เคียงกัน กว้างครึ่งแถวคนละครึ่ง"],"correct":1,"explain":["ผิด — Bootstrap ไม่ได้ซ่อนคอลัมน์ แค่ซ้อนลงมา","ถูก — 500 &lt; 576 (sm) คอลัมน์ col-sm-* จึงซ้อนกันลงมา (สไลด์ 57) (Chrome: 500px ได้ Left/Right กว้าง 500 คนละบรรทัด, 600px ได้ 270 | 270 เคียงกัน)","ผิด — 6 + 6 กว้างเท่ากัน และที่ 500px ไม่ได้เคียงกันอยู่แล้ว","ผิด — เคียงกันครึ่ง-ครึ่งเกิดเมื่อจอ ≥576px เท่านั้น"]},{"id":"1s21tgk","type":"code","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"ที่จอกว้าง 800px (โหลด Bootstrap แล้ว) A และ B แสดงอย่างไร?","code":"&lt;main class=\"container\"&gt;\n  &lt;section class=\"row\"&gt;\n    &lt;div class=\"col-sm-8\"&gt;A&lt;/div&gt;\n    &lt;div class=\"col-sm-6\"&gt;B&lt;/div&gt;\n  &lt;/section&gt;\n&lt;/main&gt;","choices":["ไม่แสดง B เพราะรวมเกิน 12 หน่วย","A กับ B ถูกบีบให้อยู่ในแถวเดียวกัน","B ล้นออกไปนอก container ทางขวา","A อยู่แถวแรก ส่วน B ตกไปขึ้นแถวใหม่"],"correct":3,"explain":["ผิด — B ยังแสดงอยู่ แค่ย้ายไปแถวถัดไป","ผิด — คอลัมน์ไม่ถูกบีบ ยังกว้าง 8/12 และ 6/12 ของ container ตามเดิม","ผิด — B ไม่ล้นออกขวา แต่ลงไปแถวใหม่","ถูก — 8 + 6 = 14 เกิน 12 หน่วย (สไลด์ 57 ให้รวม ≤ 12) row ของ Bootstrap เป็น flexbox ที่ wrap ได้ B จึงขึ้นแถวใหม่ (Chrome: A y=0 กว้าง 480, B y=24 กว้าง 360 ใน container 720)"]},{"id":"1oamk1x","type":"code","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"กล่อง 1–4 แสดงเป็นแถวอย่างไร (container กว้าง 200px วางได้แถวละ 3 กล่อง)?","code":".c {\n  display: flex;\n  flex-direction: row-reverse;\n  flex-wrap: wrap;\n  width: 200px;\n}\n.item { width: 60px; height: 60px; }\n/* HTML: 4 กล่อง .item เลข 1 2 3 4 ตามลำดับ */","choices":["บน 3 2 1 · ล่าง 4 อยู่ชิดขวา","บน 3 2 1 · ล่าง 4 อยู่ชิดซ้าย","บน 4 · ล่าง 3 2 1 อยู่ชิดขวา","บน 1 2 3 · ล่าง 4 อยู่ชิดซ้าย"],"correct":0,"explain":["ถูก — row-reverse วางจากขวา: แถวแรก 1 ขวาสุด ต่อด้วย 2, 3 ทางซ้าย → เห็น 3 2 1 / 4 ล้นไปแถวใหม่ข้างล่าง (wrap) และเริ่มจากขวาเช่นกัน (Chrome: 1 x=140, 2 x=80, 3 x=20, 4 x=140 y=60)","ผิด — แถวใหม่ของ row-reverse ก็เริ่มวางจากขวา 4 จึงอยู่ชิดขวา","ผิด — แถวแรกอยู่ล่างเป็นผลของ wrap-reverse แต่โจทย์ใช้ wrap","ผิด — นี่คือผลของ row + wrap ไม่ได้กลับทิศ"]},{"id":"1oh68vu","type":"calc","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"container กว้าง 400px มี 3 กล่องกว้าง 100px ช่องว่างแต่ละช่องกว้างเท่าไร และกล่องแรกเริ่มที่ x เท่าไร?","code":".c { display: flex; justify-content: space-evenly; width: 400px; }\n.c div { width: 100px; }\n/* HTML: 3 div ใน .c */","choices":["ช่องละ 50px · กล่องแรกที่ x = 0px","ช่องละ 25px · กล่องแรกที่ x = 25px","ช่องละ 33px · กล่องแรกที่ x = 33px","ช่องละ 25px · กล่องแรกที่ x = 0px"],"correct":1,"explain":["ผิด — นี่คือแบบ space-between (ไม่มีช่องที่ขอบ 100 ÷ 2 = 50) ไม่ใช่ space-evenly","ถูก — พื้นที่ว่าง 400 − 3×100 = 100px space-evenly แบ่งเท่ากันทุกช่องรวมขอบ = 4 ช่อง → 25px กล่องแรกจึงเริ่มที่ 25 (Chrome: x = 25, 150, 275)","ผิด — หาร 100 ด้วย 3 (นับแค่ 3 ช่อง) แต่ 3 กล่องมีช่องว่าง 4 ช่องรวมขอบซ้ายขวา","ผิด — space-evenly มีช่องว่างที่ขอบด้วย กล่องแรกจึงไม่ชิด x = 0"]},{"id":"1ytrm4i","type":"calc","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"เปิดที่จอกว้าง 640px ข้อความ TEST มี font-size กี่ px (1em = 16px)?","code":"div { font-size: 3em; }\n@media screen and (max-width: 640px) {\n  div { font-size: 1.5em; }\n}\n@media screen and (min-width: 1100px) {\n  div { font-size: 5em; }\n}","choices":["80px","48px","16px","24px"],"correct":3,"explain":["ผิด — 80px = 5em ใช้เมื่อจอ ≥ 1100px","ผิด — 48px = 3em คือค่าเมื่อไม่เข้า @media ไหนเลย แต่ 640 เข้า max-width: 640px (รวมค่าเท่ากัน)","ผิด — 16px คือ 1em ค่า default ของ browser แต่มีกฎ div ทับอยู่","ถูก — 640 ≤ 640 เข้า max-width: 640px → 1.5em × 16 = 24px (Chrome: 640 → 24px, 641 → 48px)"]},{"id":"jeyojd","type":"calc","topic":"5. Responsive Web Design: ทำให้หน้าเว็บเปลี่ยนตามขนาดจอยังไง?","q":"ใช้โค้ดเดิม เปิดที่จอกว้าง 1000px ข้อความ TEST มี font-size กี่ px (1em = 16px)?","code":"div { font-size: 3em; }\n@media screen and (max-width: 640px) {\n  div { font-size: 1.5em; }\n}\n@media screen and (min-width: 1100px) {\n  div { font-size: 5em; }\n}","choices":["24px","80px","48px","64px"],"correct":2,"explain":["ผิด — 24px ใช้เมื่อจอ ≤ 640px","ผิด — 80px ใช้เมื่อจอ ≥ 1100px แต่ 1000 ยังไม่ถึง","ถูก — 1000 เกิน 640 และยังไม่ถึง 1100 จึงไม่เข้า @media ไหน ใช้ 3em × 16 = 48px (Chrome: 1000 → 48px, 1099 → 48px, 1100 → 80px)","ผิด — 64px = 4em คือค่าของ Ex2 ในสไลด์ 36 ไม่ใช่โค้ดนี้ (3em)"]},{"id":"qssyax","type":"calc","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"จอกว้าง 900px ใช้ \u003ccode>.container\u003c/code> ที่มี \u003ccode>col-sm-4\u003c/code> 3 คอลัมน์ แต่ละคอลัมน์กว้างเท่าไร?","choices":["240px","320px","180px","300px"],"correct":0,"explain":["ถูก — 900 อยู่ช่วง md (768–991) → .container max-width 720px (สไลด์ 54) → 720 × 4/12 = 240px (Chrome: container 720, col 240)","ผิด — 960 ÷ 3 ใช้ max-width ของ lg ซึ่งเริ่มที่ 992px","ผิด — 540 ÷ 3 ใช้ max-width ของ sm แต่ 900 ≥ 768 เข้าช่วง md แล้ว","ผิด — 900 ÷ 3 ใช้ความกว้างจอทั้งหมด แต่ .container จำกัด max-width ไว้ที่ 720px"]},{"id":"10nrzyr","type":"calc","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"จอกว้าง 1200px ใช้ \u003ccode>.container\u003c/code> คอลัมน์ \u003ccode>col-sm-3\u003c/code> กว้างเท่าไร?","choices":["300px","330px","285px","240px"],"correct":2,"explain":["ผิด — 1200 × 3/12 ใช้ความกว้างจอ ลืมว่า .container มี max-width","ผิด — 1320 × 3/12 ใช้ max-width ของ xxl ซึ่งเริ่มที่ 1400px","ถูก — 1200 ≥ 1200 เข้า X-Large → .container max-width 1140px → 1140 × 3/12 = 285px (Chrome: 1200 → 285, ส่วน 1199 → 240)","ผิด — 960 × 3/12 ใช้ max-width ของ lg แต่ xl เริ่มที่ ≥1200px (รวม 1200)"]},{"id":"54gbw3","type":"calc","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"จอกว้าง 700px กล่อง \u003ccode>.container\u003c/code> และ \u003ccode>.container-md\u003c/code> กว้างเท่าไรตามลำดับ?","choices":["540px และ 720px","540px และ 700px","720px และ 720px","700px และ 540px"],"correct":1,"explain":["ผิด — 720px เป็น max-width ช่วง Medium (≥768) แต่จอ 700 ยังไม่ถึง","ถูก — 700 อยู่ช่วง Small (576–767): .container = 540px, .container-md ยัง 100% (จนถึง md 768px) = 700px (สไลด์ 54; Chrome: 540, 700)","ผิด — ทั้งสองยังไม่ถึง md จึงไม่ใช่ 720px","ผิด — สลับกัน: .container มี max-width ตั้งแต่ sm ส่วน .container-md เป็น 100% ก่อนถึง md"]},{"id":"k2fi6k","type":"calc","topic":"6. CSS Framework: ใช้ Bootstrap สร้างหน้าเว็บยังไง?","q":"จอกว้าง 1000px ใน \u003ccode>.container\u003c/code> แถวหนึ่งมี \u003ccode>col-sm-2\u003c/code>, \u003ccode>col-sm-7\u003c/code>, \u003ccode>col-sm-3\u003c/code> แต่ละคอลัมน์กว้างเท่าไร?","choices":["120 | 420 | 180 px","190 | 665 | 285 px","167 | 583 | 250 px","160 | 560 | 240 px"],"correct":3,"explain":["ผิด — ใช้ 720px (Medium) แต่ 1000 ≥ 992 เข้าช่วง Large แล้ว","ผิด — ใช้ 1140px (X-Large) ซึ่งเริ่มที่ 1200px","ผิด — ใช้ 1000 (ความกว้างจอ) หาร 12 ลืม max-width ของ .container","ถูก — 1000 อยู่ช่วง Large (992–1199) → .container 960px → 960/12 = 80 ต่อหน่วย → 2×80, 7×80, 3×80 (Chrome: 160 | 560 | 240)"]},{"id":"12vuuz9","type":"calc","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"มี .column 6 อันที่ \u003ccode>float: left; width: 20%;\u003c/code> แถวแรกจะมีกี่คอลัมน์?","code":".column { float: left; width: 20%; }\n/* HTML: 6 กล่อง .column ต่อกันในกล่องเดียว */","choices":["แถวแรก 5 · แถวสอง 1 คอลัมน์","แถวแรก 3 · แถวสอง 3 คอลัมน์","แถวแรก 4 · แถวสอง 2 คอลัมน์","แถวแรก 6 · ไม่มีแถวสองเลย"],"correct":0,"explain":["ถูก — 5 × 20% = 100% เต็มพอดี คอลัมน์ที่ 6 ไม่มีที่ จึงลอยลงไปขึ้นแถวใหม่ (Chrome: คอลัมน์ 1–5 y=0, คอลัมน์ 6 x=0 y=18)","ผิด — 3 × 20% = 60% ยังเหลือที่อีก 40% วางได้อีก 2 อัน","ผิด — 4 อันรวมแค่ 80% ยังเหลือที่ให้อันที่ 5","ผิด — 6 × 20% = 120% เกินความกว้างกล่อง float ไม่บีบให้พอดี"]},{"id":"1tzjy0f","type":"calc","topic":"3. จัด layout ด้วย CSS Float ทำยังไง?","q":"ถ้าเปลี่ยนตัวอย่าง 3 คอลัมน์ให้ \u003ccode>.column { float: left; width: 34%; }\u003c/code> จะเกิดอะไร?","choices":["คอลัมน์ 1 ตกลงไปอยู่ในแถวล่างแทน","คอลัมน์ 3 ตกไปแถวใหม่ (รวม 102%)","อยู่แถวเดียว แต่ล้นออกทางขวาไป 2%","ถูกบีบเหลือ 33.33% ให้พอดีเองทุกอัน"],"correct":1,"explain":["ผิด — วางตามลำดับในโค้ด 1 และ 2 ได้ที่ก่อน ตัวสุดท้ายที่ไม่พอคือคอลัมน์ 3","ถูก — 3 × 34% = 102% เกิน 100% คอลัมน์ที่ 3 ไม่มีที่พอจึงลงไปแถวถัดไป (Chrome: คอลัมน์ 3 x=0 y=18) — นี่คือเหตุผลที่สไลด์ใช้ 33.33%","ผิด — float ไม่ยอมล้นออกนอกกล่อง ตัวที่ไม่พอจะย้ายลงไปแถวใหม่","ผิด — float ไม่ได้ปรับ width ให้อัตโนมัติ (การปรับขนาดให้พอดีเป็นงานของ flexbox)"]},{"id":"1erz3i4","type":"calc","topic":"4. จัด layout ด้วย CSS Flexbox ทำยังไง?","q":"flex container กว้าง 250px มี 7 กล่องกว้าง 60px และ \u003ccode>flex-wrap: wrap\u003c/code> จะได้กี่แถว?","code":".c { display: flex; flex-wrap: wrap; width: 250px; }\n.c div { width: 60px; height: 40px; }\n/* HTML: 7 div ใน .c */","choices":["1 แถว: 7 กล่องเรียงต่อกัน","3 แถว: 3 + 3 + 1 กล่อง","2 แถว: 5 กล่อง + 2 กล่อง","2 แถว: 4 กล่อง + 3 กล่อง"],"correct":3,"explain":["ผิด — แถวเดียวคือพฤติกรรมของ nowrap แต่โจทย์ตั้ง wrap","ผิด — แถวละ 3 กล่อง (180px) ยังเหลือที่วางกล่องที่ 4 ได้","ผิด — 5 กล่องต้องใช้ 300px เกิน 250px","ถูก — 250 ÷ 60 = 4.17 → แถวละ 4 กล่อง (240px) กล่องที่ 5 ไม่พอ (300px) จึงขึ้นแถวใหม่ → 4 + 3 (Chrome: กล่อง 1–4 y=0, 5–7 y=40)"]}]};
+
+const app = document.getElementById('qp-app');
+if (!BANK || !BANK.questions) {
+  app.innerHTML = '<div class="qp-card">นี่คือ template ของ quiz-pro — สร้างไฟล์จริงด้วย <code>node build_quiz_pro.js bank.js out.html</code></div>';
+  return;
+}
+
+/* ------------------------------------------------------------ constants */
+const TYPES = { recall: 'ความจำ', understand: 'ความเข้าใจ', apply: 'การนำไปใช้', compare: 'แยกคู่สับสน',
+  error: 'หาจุดผิด', calc: 'การคำนวณ', code: 'ไล่โค้ด', fill: 'เติมคำ' };
+const TYPE_ORDER = Object.keys(TYPES);
+const HARD_TYPES = { recall: 1, understand: 1, compare: 1 };
+const L = ['ก', 'ข', 'ค', 'ง'];
+const CONF = { sure: 'มั่นใจ', unsure: 'ไม่แน่ใจ', guess: 'เดา' };
+const CONF_KEY = { KeyZ: 'sure', KeyX: 'unsure', KeyC: 'guess' };
+const INTERVALS = [1, 3, 7, 16, 35];          // Leitner box 1..5 → days
+const DUMP_SECONDS = 180;
+const KEY = 'sn-srs:' + BANK.id, IDX = 'sn-srs-index', PREF = 'sn-quizpro-prefs';
+const Q = BANK.questions;
+const TOPICS = [];
+Q.forEach((q, i) => { q.i = i; if (!TOPICS.includes(q.topic)) TOPICS.push(q.topic); });
+const REVIEW = BANK.review || {};
+
+/* ------------------------------------------------------------ helpers */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = n => (n < 10 ? '0' : '') + n;
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+function today() {                       // #today=YYYY-MM-DD simulates another day (testing only)
+  const m = /today=(\d{4}-\d{2}-\d{2})/.exec(location.hash);
+  return m ? m[1] : iso(new Date());
+}
+function parseIso(s) { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function addDays(s, n) { const d = parseIso(s); d.setDate(d.getDate() + n); return iso(d); }
+function dayDiff(a, b) { return Math.round((parseIso(b) - parseIso(a)) / 864e5); }
+const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+function thDate(s) { const d = parseIso(s); return d.getDate() + ' ' + TH_MON[d.getMonth()]; }
+function relDay(s) {
+  const n = dayDiff(today(), s);
+  if (n <= 0) return 'วันนี้';
+  if (n === 1) return 'พรุ่งนี้ (' + thDate(s) + ')';
+  return 'อีก ' + n + ' วัน (' + thDate(s) + ')';
+}
+function shuffle(a) { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; }
+const range = n => Array.from({ length: n }, (_, k) => k);
+function mmss(ms) { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + pad(s % 60); }
+function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+const wide = () => window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
+
+/* ------------------------------------------------------------ storage (never throws) */
+const store = (function () {
+  let ls = null; const mem = {};
+  try { ls = window.localStorage; const k = '__qp_test'; ls.setItem(k, '1'); ls.removeItem(k); } catch (e) { ls = null; }
+  return {
+    ok: !!ls,
+    get(k) {
+      try { if (ls) { const v = ls.getItem(k); if (v != null) return JSON.parse(v); } } catch (e) {}
+      try { return k in mem ? JSON.parse(mem[k]) : null; } catch (e) { return null; }
+    },
+    set(k, v) { const s = JSON.stringify(v); mem[k] = s; try { if (ls) ls.setItem(k, s); } catch (e) {} }
+  };
+})();
+
+let S = store.get(KEY);
+if (!S || S.v !== 1 || typeof S.items !== 'object') S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] };
+const P = Object.assign({ dump: true, hard: false, byTopic: false }, store.get(PREF) || {});
+const saveS = () => store.set(KEY, S);
+const saveP = () => store.set(PREF, P);
+
+/* ------------------------------------------------------------ spaced repetition (Leitner) */
+// item: { b: box 1-5, d: due ISO date, n: times seen, w: times wrong, l: last result 1/0, c: last confidence, r: last review date }
+function srsUpdate(id, ok, conf) {
+  const t = today();
+  let it = S.items[id];
+  const isNew = !it;
+  if (!it) it = S.items[id] = { b: 0, n: 0, w: 0 };
+  const reviewedToday = !isNew && it.r === t;
+  if (!ok) { it.b = 1; it.w++; }
+  else if (conf === 'sure') {
+    if (isNew) it.b = 2;                         // known already on first sight → skip box 1
+    else if (!reviewedToday) it.b = Math.min(5, Math.max(1, it.b) + 1);  // no promotion twice in one day
+    else it.b = Math.max(1, it.b);
+  } else it.b = Math.max(1, it.b);               // correct but unsure / guessed → stay in box
+  it.d = addDays(t, ok && conf === 'sure' ? INTERVALS[it.b - 1] : 1);  // not sure or wrong → due again tomorrow
+  it.n++; it.l = ok ? 1 : 0; it.c = conf; it.r = t;
+}
+const seenQs = () => Q.filter(q => S.items[q.id]);
+const dueQs = () => { const t = today(); return Q.filter(q => S.items[q.id] && S.items[q.id].d <= t); };
+const missedQs = () => Q.filter(q => { const it = S.items[q.id]; return it && (it.l === 0 || (it.w > 0 && it.b <= 2)); });
+function nextDue() {
+  let min = null;
+  seenQs().forEach(q => { const d = S.items[q.id].d; if (!min || d < min) min = d; });
+  if (!min) return null;
+  const t = today(), day = min <= t ? t : min;
+  const count = seenQs().filter(q => (S.items[q.id].d <= t ? t : S.items[q.id].d) === day).length;
+  return { date: min, day, count };
+}
+function boxCounts() {
+  const c = [0, 0, 0, 0, 0, 0];                // 0 = never answered
+  Q.forEach(q => { const it = S.items[q.id]; c[it ? it.b : 0]++; });
+  return c;
+}
+function updateIndex() {
+  const idx = store.get(IDX) || {};
+  const nd = nextDue();
+  idx[BANK.id] = { title: BANK.title, subject: BANK.subject || '', url: location.pathname, due: dueQs().length,
+    next: nd ? nd.date : null, total: Q.length, seen: seenQs().length, updated: new Date().toISOString() };
+  store.set(IDX, idx);
+}
+
+/* ------------------------------------------------------------ ordering */
+// interleave: never two neighbours from the same topic when avoidable; also avoid same type back-to-back
+function interleave(list) {
+  const groups = new Map();
+  shuffle(list.slice()).forEach(i => { const t = Q[i].topic; if (!groups.has(t)) groups.set(t, []); groups.get(t).push(i); });
+  const out = []; let lastT = null, lastY = null;
+  while (out.length < list.length) {
+    let cands = [...groups.keys()].filter(t => groups.get(t).length && t !== lastT);
+    if (!cands.length) cands = [...groups.keys()].filter(t => groups.get(t).length);
+    const max = Math.max(...cands.map(t => groups.get(t).length));
+    const top = cands.filter(t => groups.get(t).length === max);
+    const t = top[Math.floor(Math.random() * top.length)];
+    const g = groups.get(t);
+    let k = g.findIndex(i => Q[i].type !== lastY); if (k < 0) k = 0;
+    const i = g.splice(k, 1)[0];
+    out.push(i); lastT = t; lastY = Q[i].type;
+  }
+  return out;
+}
+function byTopic(list) {
+  return list.slice().sort((a, b) => (TOPICS.indexOf(Q[a].topic) - TOPICS.indexOf(Q[b].topic)) ||
+    (TYPE_ORDER.indexOf(Q[a].type) - TYPE_ORDER.indexOf(Q[b].type)) || (a - b));
+}
+
+/* ------------------------------------------------------------ run state */
+let screen = 'start';
+let R = null;
+let notice = '';
+let resetArmed = false;
+
+function mkStep(qi, retry) {
+  const q = Q[qi];
+  const st = { qi, retry, ans: null, pick: null, shown: false, t0: null };
+  if (q.type === 'fill') st.fill = { placed: q.blanks.map(() => null), sel: null, order: retry ? shuffle(range(q.bank.length)) : range(q.bank.length) };
+  else if (!retry) st.perm = [0, 1, 2, 3];
+  else {                                         // reshuffle; move the answer to a new letter
+    let p; for (let k = 0; k < 12; k++) { p = shuffle([0, 1, 2, 3]); if (p.indexOf(q.correct) !== q.correct) break; }
+    st.perm = p;
+  }
+  return st;
+}
+const MODE_LABEL = { full: 'ทั้งชุด', due: 'ทบทวนตามรอบ', missed: 'ข้อที่เคยพลาด', quick: 'สุ่ม 10 ข้อ', redo: 'ทำข้อที่พลาดอีกรอบ' };
+function startRun(mode, list) {
+  if (!list.length) return;
+  const order = P.byTopic ? byTopic(list) : interleave(list);
+  R = { mode, qset: order, steps: order.map(qi => mkStep(qi, 0)), pos: 0, first: {}, fixed: {}, t0: Date.now(),
+    hard: P.hard, gridOpen: wide(), warnedUn: false, dump: null, feyn: { text: '', shown: false, ticks: [] }, done: false };
+  notice = '';
+  if (mode === 'full' && P.dump) { R.dump = { text: '', end: Date.now() + DUMP_SECONDS * 1000, got: [] }; go('dump'); }
+  else go('q');
+}
+function cur() { return R && R.steps[R.pos]; }
+function queueRetry(qi, retry) {
+  if (R.steps.some((s, k) => k > R.pos && s.qi === qi && !s.ans)) return -1;
+  const gap = 4 + Math.floor(Math.random() * 3);                         // 4–6 other questions in between
+  const at = Math.min(R.pos + 1 + gap, R.steps.length);
+  R.steps.splice(at, 0, mkStep(qi, retry + 1));
+  return at - R.pos - 1;
+}
+function isOk(qi) { const f = R.first[qi]; return f ? f.ok : null; }
+
+function finalize(conf) {
+  const st = cur(), q = Q[st.qi];
+  let ok;
+  if (q.type === 'fill') ok = st.fill.placed.every((c, k) => c !== null && q.bank[c] === q.blanks[k]);
+  else ok = st.perm[st.pick] === q.correct;
+  st.ans = { choice: st.pick, conf: conf || null, ok };
+  const main = st.retry === 0;
+  if (main && !R.first[st.qi]) {
+    R.first[st.qi] = { orig: q.type === 'fill' ? null : st.perm[st.pick], placed: q.type === 'fill' ? st.fill.placed.slice() : null,
+      conf, ok, ms: Date.now() - (st.t0 || Date.now()) };
+    srsUpdate(q.id, ok, conf); saveS(); updateIndex();
+  }
+  st.requeue = null;
+  if (!ok || (main && conf === 'guess')) { const d = queueRetry(st.qi, st.retry); if (d >= 0) st.requeue = d; }
+  if (!main && ok) R.fixed[st.qi] = true;
+  render();
+  requestAnimationFrame(() => {
+    const fb = app.querySelector('.qp-fb');
+    if (fb && fb.getBoundingClientRect().top > window.innerHeight * 0.7) fb.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+}
+
+function next() {
+  if (!R) return;
+  notice = '';
+  if (R.pos < R.steps.length - 1) { R.pos++; return go('q', true); }
+  const un = R.steps.filter(s => s.retry === 0 && !s.ans);
+  if (un.length && !R.warnedUn) {
+    R.warnedUn = true;
+    R.pos = R.steps.indexOf(un[0]);
+    notice = 'ยังไม่ได้ตอบอีก ' + un.length + ' ข้อ — พามาข้อแรกที่ยังไม่ตอบ (กด “จบและดูผล” ได้ตลอด)';
+    return go('q', true);
+  }
+  finish();
+}
+function prev() { if (R && R.pos > 0) { notice = ''; R.pos--; go('q', true); } }
+function finish() {
+  R.done = true; R.tEnd = Date.now();
+  const total = R.qset.length, score = R.qset.filter(qi => isOk(qi)).length;
+  if (Object.keys(R.first).length) {
+    S.hist.push({ t: today(), m: R.mode, s: score, n: total });
+    S.hist = S.hist.slice(-20); saveS();
+  }
+  updateIndex();
+  go('results', true);
+}
+
+/* ------------------------------------------------------------ rendering */
+function go(s, scroll) {
+  screen = s;
+  document.body.classList.toggle('qp-run', s !== 'start');
+  render();
+  if (scroll || s !== 'q') {
+    const top = app.getBoundingClientRect().top + window.scrollY - 64;
+    if (window.scrollY > top) window.scrollTo(0, Math.max(0, top));
+  }
+}
+function render() {
+  if (screen === 'start') app.innerHTML = startHtml();
+  else if (screen === 'dump') app.innerHTML = dumpHtml();
+  else if (screen === 'dumpcheck') app.innerHTML = dumpCheckHtml();
+  else if (screen === 'q') app.innerHTML = qHtml();
+  else if (screen === 'results') app.innerHTML = resultsHtml();
+  if (screen === 'dump') {
+    const ta = app.querySelector('textarea[data-in="dump"]');
+    if (ta) { ta.value = R.dump.text; try { ta.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  if (screen === 'dumpcheck') { const m = app.querySelector('.qp-mine'); if (m) m.textContent = R.dump.text.trim() || '(ไม่ได้เขียนอะไร)'; }
+  if (screen === 'results') {
+    const ta = app.querySelector('textarea[data-in="feyn"]'); if (ta) ta.value = R.feyn.text;
+    const mine = app.querySelector('.qp-feyn-mine'); if (mine) mine.textContent = R.feyn.text.trim() || '(ไม่ได้เขียน)';
+  }
+  tick();
+}
+const typeChip = t => '<span class="qp-type" data-t="' + t + '">' + TYPES[t] + '</span>';
+
+function startHtml() {
+  const counts = {}; Q.forEach(q => { counts[q.type] = (counts[q.type] || 0) + 1; });
+  const due = dueQs().length, missed = missedQs().length, seen = seenQs().length, nd = nextDue();
+  let h = '';
+  if (!store.ok) h += '<div class="qp-note is-warn">เบราว์เซอร์นี้บันทึกข้อมูลไม่ได้ (storage ถูกปิด) — ทำแบบทดสอบได้ปกติ แต่รอบทบทวนจะไม่ถูกจำไว้</div>';
+  h += '<section class="qp-card"><div class="qp-stats">' + TYPE_ORDER.filter(t => counts[t]).map(t => typeChip(t).replace('</span>', ' ' + counts[t] + '</span>')).join('') + '</div>';
+  h += '<p class="qp-muted qp-small" style="margin:8px 0 0">' + Q.length + ' ข้อ · ' + TOPICS.length + ' หัวข้อ · ตอบแล้วต้องบอกความมั่นใจก่อนดูเฉลย · ข้อที่ผิดจะวนกลับมาให้แก้ตัว</p></section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">ความคืบหน้าการทบทวน</h2>';
+  if (seen) {
+    const bc = boxCounts(), mx = Math.max(1, ...bc);
+    h += '<div class="qp-srs"><div class="qp-stat"><b>' + due + '</b><span>ข้อถึงรอบทบทวนวันนี้</span></div>' +
+      '<div class="qp-stat"><b>' + (nd ? (dayDiff(today(), nd.day) <= 0 ? 'วันนี้' : thDate(nd.day)) : '–') + '</b><span>รอบถัดไป' + (nd ? ' · ' + nd.count + ' ข้อ' : '') + '</span></div>' +
+      '<div class="qp-stat"><b>' + seen + '/' + Q.length + '</b><span>ข้อที่เคยทำ</span></div></div>';
+    h += '<div class="qp-boxes" aria-label="จำนวนข้อในแต่ละกล่อง">' + bc.map((c, b) =>
+      '<div title="' + (b ? 'กล่อง ' + b + ' (ทวนทุก ' + INTERVALS[b - 1] + ' วัน)' : 'ยังไม่เคยทำ') + ': ' + c + ' ข้อ"><span>' + c + '</span><i style="height:' + Math.round(30 * c / mx) + 'px;' + (b ? '' : 'opacity:.25') + '"></i></div>').join('') + '</div>';
+    h += '<div class="qp-boxes" style="height:auto;margin-top:2px">' + bc.map((c, b) => '<div>' + (b ? 'กล่อง ' + b : 'ใหม่') + '</div>').join('') + '</div>';
+    if (S.hist.length) h += '<div class="qp-hist">' + S.hist.slice(-6).map(x => '<span>' + thDate(x.t) + ' · ' + x.s + '/' + x.n + '</span>').join('') + '</div>';
+    const ld = S.dumps[S.dumps.length - 1];
+    if (ld) h += '<p class="qp-muted qp-small" style="margin:8px 0 0">brain dump ครั้งล่าสุด (' + thDate(ld.t) + ') นึกออก ' + ld.got.length + '/' + ld.n + ' ประเด็น</p>';
+  } else h += '<p class="qp-muted" style="margin:0">ยังไม่เคยทำชุดนี้ ทำครั้งแรกแล้วระบบจะนัดรอบทบทวนให้ (1 · 3 · 7 · 16 · 35 วัน)</p>';
+  h += '</section>';
+
+  h += '<section class="qp-card"><h2 class="qp-h2">เลือกวิธีทำ</h2><div class="qp-modes">';
+  h += '<button class="qp-mode is-main" data-act="mode" data-m="full"><b>ทำทั้งชุด</b><span>' + Q.length + ' ข้อ ' + (P.byTopic ? 'เรียงตามหัวข้อ' : 'สลับหัวข้อกัน') + (P.dump ? ' · เริ่มด้วยเขียนทุกอย่างที่จำได้' : '') + '</span><i>→</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="due"' + (due ? '' : ' disabled') + '><b>ทบทวนที่ถึงรอบ (' + due + ' ข้อ)</b><span>' +
+    (due ? 'ข้อที่ถึงกำหนดทวนวันนี้ตามรอบ Leitner' : (nd ? 'ยังไม่มีข้อถึงรอบ — รอบถัดไป ' + relDay(nd.day) : 'ทำทั้งชุดก่อน แล้วระบบจะนัดรอบให้')) + '</span><i>↻</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="missed"' + (missed ? '' : ' disabled') + '><b>เฉพาะข้อที่เคยพลาด (' + missed + ' ข้อ)</b><span>ข้อที่ผิดครั้งล่าสุด หรือเคยผิดและยังไม่แน่น</span><i>✎</i></button>';
+  h += '<button class="qp-mode" data-act="mode" data-m="quick"><b>สุ่ม 10 ข้อ (ทวนเร็ว)</b><span>ใช้เวลาประมาณ 5 นาที</span><i>⚡</i></button>';
+  h += '</div><div class="qp-opts">';
+  h += optHtml('dump', 'เขียนทุกอย่างที่จำได้ก่อนเริ่ม (brain dump)', 'ใช้กับ “ทำทั้งชุด” — นึกเองก่อน 2–3 นาที แล้วเทียบกับประเด็นสำคัญของบท');
+  h += optHtml('hard', 'โหมดนึกก่อนเห็นตัวเลือก', 'ข้อความจำ / ความเข้าใจ / แยกคู่สับสน จะซ่อนตัวเลือกไว้จนกว่าจะนึกคำตอบในใจได้');
+  h += optHtml('byTopic', 'เรียงตามหัวข้อ', 'ปิดไว้ (ค่าเริ่มต้น) = สลับหัวข้อกัน ทำยากกว่าแต่จำได้นานกว่า');
+  h += '</div></section>';
+
+  h += '<section class="qp-card"><details class="qp-how"><summary>ทำไมต้องทำแบบนี้ / แป้นลัด</summary><ul>' +
+    '<li><b>นึกเองก่อน</b> (brain dump, โหมดนึกก่อน) — การดึงความจำออกมาเองช่วยให้จำได้นานกว่าการอ่านซ้ำ</li>' +
+    '<li><b>บอกความมั่นใจ</b> ก่อนดูเฉลย — จะได้รู้ว่าข้อไหน “มั่นใจแต่ผิด” ซึ่งอันตรายที่สุดตอนสอบ</li>' +
+    '<li><b>รอบแก้ตัว</b> — ข้อที่ผิดหรือเดาจะกลับมาอีกใน 4–6 ข้อ สลับตัวเลือกใหม่ จนตอบถูก (ไม่นับคะแนน)</li>' +
+    '<li><b>สลับหัวข้อ</b> และ <b>ทวนตามรอบ</b> 1 · 3 · 7 · 16 · 35 วัน — ตอบถูกแบบมั่นใจจะขยับกล่องขึ้น ผิดกลับไปกล่อง 1</li>' +
+    '<li>คะแนนนับจากการตอบครั้งแรกเท่านั้น</li>' +
+    '<li>แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> หรือ <kbd>ก</kbd> <kbd>ข</kbd> <kbd>ค</kbd> <kbd>ง</kbd> เลือกตัวเลือก · <kbd>Z</kbd> มั่นใจ <kbd>X</kbd> ไม่แน่ใจ <kbd>C</kbd> เดา · <kbd>Enter</kbd> ข้อถัดไป · <kbd>←</kbd> <kbd>→</kbd> เลื่อนข้อ</li>' +
+    '</ul></details>';
+  if (seen) h += '<div style="margin-top:6px"><button class="qp-link" data-act="reset" style="color:var(--qp-muted)">' + (resetArmed ? 'กดอีกครั้งเพื่อยืนยันการล้างประวัติชุดนี้' : 'ล้างประวัติการทบทวนของชุดนี้') + '</button></div>';
+  h += '</section>';
+  return h;
+}
+function optHtml(k, t, d) {
+  return '<label class="qp-check' + (P[k] ? ' is-on' : '') + '"><input type="checkbox" data-pref="' + k + '"' + (P[k] ? ' checked' : '') + '><span>' + t + '<small>' + d + '</small></span></label>';
+}
+
+function dumpHtml() {
+  const left = R.dump.end - Date.now();
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 1 · นึกเองก่อน</span></div>' +
+    '<h2 class="qp-h2">เขียนทุกอย่างที่จำได้จากบทนี้</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 4px">ไม่ต้องเรียบร้อย เขียนเป็นคำ ๆ ได้ ห้ามเปิดสรุป — ยิ่งนึกยากยิ่งจำได้นาน</p>' +
+    '<div class="qp-timer"><span id="qp-dtimer">' + (left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว') + '</span><div class="qp-tbar"><i id="qp-dbar" style="width:' + Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%"></i></div></div>' +
+    '<textarea class="qp-ta" data-in="dump" placeholder="เช่น นิยาม คำสำคัญ ขั้นตอน สูตร ตัวอย่าง คู่ที่สับสน…" aria-label="เขียนทุกอย่างที่จำได้"></textarea>' +
+    '<p id="qp-dsoft" class="qp-muted qp-small"' + (left > 0 ? ' hidden' : '') + '>ครบเวลาที่แนะนำแล้ว — ยังนึกออกก็เขียนต่อได้</p>' +
+    '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="dump-skip">ข้ามขั้นนี้</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn qp-btn-primary" data-act="dump-done">เสร็จแล้ว ดูประเด็นสำคัญ →</button></div></section>';
+}
+function dumpCheckHtml() {
+  const kp = BANK.keypoints, got = R.dump.got;
+  return '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ขั้นที่ 2 · เทียบกับประเด็นสำคัญ</span></div>' +
+    '<h2 class="qp-h2">ติ๊กประเด็นที่คุณนึกออกเอง</h2>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 8px">ติ๊กเฉพาะที่เขียนไว้แล้ว (หรือใจความเดียวกัน) — ข้อที่ไม่ได้ติ๊กคือจุดที่ต้องเก็บเพิ่ม</p>' +
+    '<p style="margin:0 0 4px">นึกออก <span class="qp-tally" id="qp-kp-n">' + got.length + '/' + kp.length + '</span></p>' +
+    '<div class="qp-kps">' + kp.map((k, i) => '<label class="qp-check' + (got.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-kp="' + i + '"' + (got.includes(i) ? ' checked' : '') + '><span>' + k + '</span></label>').join('') + '</div>' +
+    '<h3 class="qp-h3">สิ่งที่คุณเขียน</h3><div class="qp-mine"></div>' +
+    '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="dump-start">เริ่มทำข้อสอบ →</button></div></section>';
+}
+
+function barHtml() {
+  const total = R.qset.length, answered = Object.keys(R.first).length;
+  const okN = R.qset.filter(qi => isOk(qi)).length;
+  const st = cur(), mainNo = R.qset.indexOf(st.qi) + 1;
+  const pendingRetry = R.steps.filter((s, k) => k > R.pos && s.retry && !s.ans).length;
+  let h = '<div class="qp-bar"><div class="qp-bar-row">' +
+    '<span>' + (st.retry ? 'แก้ตัว · ข้อ <b>' + mainNo + '</b>' : 'ข้อ <b>' + mainNo + '</b>/' + total) + '</span>' +
+    '<span>ตอบแล้ว ' + answered + ' · ถูก ' + okN + '</span>' +
+    (pendingRetry ? '<span>รอแก้ตัว ' + pendingRetry + '</span>' : '') +
+    '<span class="qp-time" title="เวลาที่ใช้"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span id="qp-time">' + mmss(Date.now() - R.t0) + '</span></span>' +
+    '<span class="qp-spacer"></span>' +
+    '<button class="qp-link" data-act="grid" aria-expanded="' + R.gridOpen + '">' + (R.gridOpen ? 'ซ่อนตาราง' : 'ข้อทั้งหมด') + '</button>' +
+    '</div><div class="qp-prog" aria-hidden="true"><i style="width:' + pct(answered, total) + '%"></i></div></div>';
+  if (R.gridOpen) {
+    h += '<div class="qp-grid">' + R.qset.map((qi, k) => {
+      const f = R.first[qi];
+      let c = '';
+      if (f) c = f.ok ? (f.conf === 'sure' ? 'is-ok' : 'is-shaky') : 'is-bad';
+      if (st.qi === qi) c += ' is-cur';
+      return '<button class="' + c + '" data-act="jump" data-qi="' + qi + '" aria-label="ข้อ ' + (k + 1) + '">' + (k + 1) + '</button>';
+    }).join('') + '</div>' +
+      '<div class="qp-grid-foot"><span><i style="background:var(--qp-ok)"></i>ถูก มั่นใจ</span><span><i style="background:var(--qp-warn)"></i>ถูก ไม่แน่ใจ/เดา</span><span><i style="background:var(--qp-bad)"></i>ผิด</span><span class="qp-spacer"></span><button class="qp-link" data-act="finish">จบและดูผล</button></div>';
+  }
+  return h;
+}
+
+function qHtml() {
+  const st = cur(), q = Q[st.qi];
+  if (!st.t0) st.t0 = Date.now();
+  let h = barHtml();
+  if (notice) h += '<div class="qp-note is-warn">' + notice + '</div>';
+  h += '<article class="qp-card"><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (st.retry ? '<span class="qp-retry-chip">รอบแก้ตัว' + (st.retry > 1 ? ' ×' + st.retry : '') + ' · ไม่นับคะแนน</span>' : '') + '</div>';
+  h += '<div class="qp-q">' + q.q + '</div>';
+  if (q.code) h += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') h += fillHtml(q, st);
+  else {
+    const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null;
+    if (gated) h += '<div class="qp-gate"><p>ลองนึกคำตอบในใจ (หรือพูดออกมา) ให้ชัดก่อน แล้วค่อยเทียบกับตัวเลือก</p>' +
+      '<button class="qp-btn qp-btn-primary" data-act="reveal">นึกคำตอบในใจแล้ว → ดูตัวเลือก <span class="qp-kh"><kbd>Enter</kbd></span></button></div>';
+    else h += choicesHtml(q, st);
+  }
+  if (st.ans) h += feedbackHtml(q, st);
+  const last = R.pos === R.steps.length - 1;
+  h += '<div class="qp-nav"><button class="qp-btn" data-act="prev"' + (R.pos ? '' : ' disabled') + '>← ก่อนหน้า</button><span class="qp-spacer"></span>' +
+    '<button class="qp-btn' + (st.ans ? ' qp-btn-primary' : '') + '" data-act="next">' + (st.ans ? (last ? 'ดูผล →' : 'ข้อถัดไป →') : 'ข้าม →') + '</button></div>';
+  h += '<div class="qp-keys">แป้นลัด: <kbd>1</kbd>–<kbd>4</kbd> / <kbd>ก</kbd><kbd>ข</kbd><kbd>ค</kbd><kbd>ง</kbd> เลือก · <kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd> ความมั่นใจ · <kbd>Enter</kbd> ถัดไป · <kbd>←</kbd><kbd>→</kbd> เลื่อนข้อ</div>';
+  h += '</article>';
+  return h;
+}
+function choicesHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-choices" role="group" aria-label="ตัวเลือก">';
+  st.perm.forEach((orig, d) => {
+    let c = 'qp-choice';
+    if (a) {
+      if (orig === q.correct) c += ' is-correct';
+      else if (d === a.choice) c += ' is-wrong';
+      else c += ' is-dim';
+    } else if (st.pick === d) c += ' is-picked';
+    h += '<button class="' + c + '" data-act="pick" data-i="' + d + '"' + (a ? ' disabled' : '') + ' aria-pressed="' + (st.pick === d) + '">' +
+      '<span class="qp-letter">' + L[d] + '</span><span class="qp-ctext">' + q.choices[orig] + '</span></button>';
+  });
+  h += '</div>';
+  if (!a && st.pick !== null && !st.retry) h += confHtml('คุณมั่นใจคำตอบ ' + L[st.pick] + ' แค่ไหน? (เลือกแล้วจะเห็นเฉลย)');
+  return h;
+}
+function confHtml(label) {
+  return '<div class="qp-conf"><p class="qp-conf-q">' + label + '</p><div class="qp-conf-row">' +
+    '<button class="qp-cbtn" data-act="conf" data-c="sure">มั่นใจ<small>รู้แน่ <span class="qp-kh"><kbd>Z</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="unsure">ไม่แน่ใจ<small>พอนึกได้ <span class="qp-kh"><kbd>X</kbd></span></small></button>' +
+    '<button class="qp-cbtn" data-act="conf" data-c="guess">เดา<small>ไม่รู้ <span class="qp-kh"><kbd>C</kbd></span></small></button>' +
+    '</div></div>';
+}
+function rereadHtml(q) {
+  return '<div class="qp-reread">อ่านทวน: <b>' + q.topic + '</b>' + (REVIEW[q.topic] ? ' — ' + REVIEW[q.topic] : '') + '</div>';
+}
+function calibNote(st) {
+  const a = st.ans;
+  if (st.retry) return a.ok ? '<div class="qp-note is-ok">แก้ตัวสำเร็จ — ครั้งนี้ตอบถูกแล้ว</div>' : '';
+  if (!a.ok && a.conf === 'sure') return '<div class="qp-note is-bad"><b>มั่นใจแต่ผิด = จุดอันตราย</b> — ความเข้าใจผิดแบบนี้มักพลาดซ้ำในห้องสอบ อ่านเหตุผลของตัวที่ถูกให้ละเอียด</div>';
+  if (a.ok && a.conf === 'guess') return '<div class="qp-note is-warn">เดาถูก — ยังไม่นับว่ารู้ ข้อนี้จะกลับมาให้ตอบอีกรอบ</div>';
+  if (a.ok && a.conf === 'unsure') return '<div class="qp-note is-warn">ถูกแต่ยังไม่แน่ใจ — ระบบจะนัดทวนข้อนี้เร็วขึ้น (พรุ่งนี้)</div>';
+  return '';
+}
+function requeueNote(st) {
+  if (st.requeue === null || st.requeue === undefined) return '';
+  return '<div class="qp-note">' + (st.requeue > 0 ? 'ข้อนี้จะกลับมาให้แก้ตัวหลังจากอีก ' + st.requeue + ' ข้อ' : 'ข้อนี้จะกลับมาให้แก้ตัวเป็นข้อถัดไป') + ' (สลับตัวเลือกใหม่ ไม่นับคะแนน)</div>';
+}
+function feedbackHtml(q, st) {
+  const a = st.ans;
+  let h = '<div class="qp-fb" aria-live="polite">';
+  if (q.type === 'fill') {
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกทุกช่อง' : '✗ ยังไม่ถูกทุกช่อง') +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st) + '<ul class="qp-ex"><li class="is-correct"><b>เฉลย</b>' + q.explain + '</li></ul>';
+  } else {
+    const dc = st.perm.indexOf(q.correct);
+    h += '<div class="qp-verdict ' + (a.ok ? 'is-ok' : 'is-bad') + '">' + (a.ok ? '✓ ถูกต้อง' : '✗ ยังไม่ถูก — คำตอบคือ ' + L[dc]) +
+      (a.conf ? '<small>คุณตอบว่า ' + CONF[a.conf] + '</small>' : '') + '</div>';
+    h += calibNote(st);
+    const order = [dc].concat(a.choice !== dc ? [a.choice] : [], [0, 1, 2, 3].filter(d => d !== dc && d !== a.choice));
+    h += '<ul class="qp-ex">' + order.map(d => {
+      const orig = st.perm[d];
+      const cls = orig === q.correct ? 'is-correct' : (d === a.choice ? 'is-wrong' : '');
+      const tag = orig === q.correct ? '<em>คำตอบ</em>' : (d === a.choice ? '<em>คุณเลือก</em>' : '');
+      return '<li class="' + cls + '"><b>' + L[d] + '. ' + q.choices[orig] + tag + '</b>' + q.explain[orig] + '</li>';
+    }).join('') + '</ul>';
+  }
+  h += rereadHtml(q) + requeueNote(st) + '</div>';
+  return h;
+}
+
+function fillHtml(q, st) {
+  const f = st.fill, a = st.ans;
+  let h = '<div class="qp-ftext">';
+  q.parts.forEach((p, k) => {
+    h += p;
+    if (k >= q.blanks.length) return;
+    const c = f.placed[k], ok = c !== null && q.bank[c] === q.blanks[k];
+    let cls = 'qp-slot';
+    if (a) cls += ok ? ' is-correct' : ' is-wrong';
+    else if (c !== null) cls += ' is-filled';
+    else if (f.sel !== null) cls += ' is-target';
+    h += '<button type="button" class="' + cls + '" data-slot="' + k + '"' + (a ? ' disabled' : '') + ' aria-label="ช่องที่ ' + (k + 1) + '">' + (c !== null ? q.bank[c] : '&nbsp;') + '</button>';
+    if (a && !ok) h += '<span class="qp-slot-ans">→ ' + q.blanks[k] + '</span>';
+  });
+  h += '</div>';
+  if (!a) {
+    h += '<p class="qp-bank-label">ลากคำไปวางในช่อง หรือแตะคำแล้วแตะช่อง — แตะคำในช่องเพื่อเอาออก</p><div class="qp-bank">';
+    f.order.forEach(i => {
+      h += '<button type="button" class="qp-chip' + (f.placed.includes(i) ? ' is-used' : '') + (f.sel === i ? ' is-sel' : '') + '" data-chip="' + i + '">' + q.bank[i] + '</button>';
+    });
+    h += '</div>';
+    const left = f.placed.filter(c => c === null).length;
+    if (left) h += '<p class="qp-fill-wait">วางคำให้ครบทุกช่องก่อน (เหลือ ' + left + ' ช่อง) <button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+    else if (st.retry) h += '<div class="qp-nav"><button class="qp-btn qp-btn-quiet" data-act="fill-clear">ล้างช่อง</button><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="conf" data-c="">ตรวจคำตอบ</button></div>';
+    else h += confHtml('ครบทุกช่องแล้ว — มั่นใจแค่ไหน? (เลือกแล้วจะตรวจทันที)') + '<p class="qp-fill-wait"><button class="qp-link" data-act="fill-clear">ล้างช่อง</button></p>';
+  }
+  return h;
+}
+
+function meter(ok, n) {
+  const p = pct(ok, n);
+  return '<div class="qp-meter"><i class="' + (p >= 80 ? '' : p >= 50 ? 'is-mid' : 'is-low') + '" style="width:' + Math.max(p, 2) + '%"></i></div>';
+}
+function resultsHtml() {
+  const total = R.qset.length, fs = R.qset.map(qi => ({ qi, f: R.first[qi] }));
+  const answered = fs.filter(x => x.f), score = fs.filter(x => x.f && x.f.ok).length;
+  const end = R.tEnd || Date.now(), spent = end - R.t0;
+  let h = '<section class="qp-card"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">' + MODE_LABEL[R.mode] + '</span></div>' +
+    '<div class="qp-score"><div class="qp-muted qp-small">คะแนน (นับจากการตอบครั้งแรก)</div><div class="qp-big">' + score + '<small> / ' + total + '</small></div>' +
+    '<div class="qp-muted">' + pct(score, total) + '% · ใช้เวลา ' + mmss(spent) + ' นาที' + (answered.length ? ' · เฉลี่ย ' + Math.round(answered.reduce((s, x) => s + x.f.ms, 0) / answered.length / 1000) + ' วินาที/ข้อ' : '') + '</div>';
+  const retried = R.qset.filter(qi => R.steps.some(s => s.qi === qi && s.retry));
+  if (retried.length) h += '<div class="qp-muted qp-small">รอบแก้ตัว: แก้ได้ ' + retried.filter(qi => R.fixed[qi]).length + '/' + retried.length + ' ข้อ</div>';
+  if (answered.length < total) h += '<div class="qp-note is-warn" style="text-align:left">ยังไม่ได้ตอบ ' + (total - answered.length) + ' ข้อ (นับเป็นยังไม่ได้คะแนน)</div>';
+  h += '</div></section>';
+
+  // calibration matrix
+  const sure = x => x.f && x.f.conf === 'sure';
+  const m = { know: answered.filter(x => sure(x) && x.f.ok), danger: answered.filter(x => sure(x) && !x.f.ok),
+    shaky: answered.filter(x => !sure(x) && x.f.ok), gap: answered.filter(x => !sure(x) && !x.f.ok) };
+  const sureN = m.know.length + m.danger.length;
+  h += '<section class="qp-card"><h2 class="qp-h2">ความมั่นใจ vs ความถูกต้อง</h2><div class="qp-matrix">' +
+    '<div></div><div class="qp-mh">ถูก</div><div class="qp-mh">ผิด</div>' +
+    '<div class="qp-mh">มั่นใจ</div><div class="qp-cell c-know"><b>' + m.know.length + '</b><span>รู้จริง</span></div>' +
+    '<div class="qp-cell c-danger"><b>' + m.danger.length + '</b><span>จุดอันตราย — เข้าใจผิดแบบมั่นใจ</span></div>' +
+    '<div class="qp-mh">ไม่แน่ใจ / เดา</div><div class="qp-cell c-shaky"><b>' + m.shaky.length + '</b><span>ยังไม่แน่น</span></div>' +
+    '<div class="qp-cell c-gap"><b>' + m.gap.length + '</b><span>ยังไม่รู้ — เรียนใหม่</span></div></div>';
+  h += '<p class="qp-small" style="margin:10px 0 0">' + (sureN ? 'ตอนที่บอกว่า “มั่นใจ” ตอบถูก ' + pct(m.know.length, sureN) + '%' : 'ยังไม่มีข้อที่ตอบว่ามั่นใจ') +
+    (m.danger.length ? ' — มีจุดอันตราย ' + m.danger.length + ' ข้อ อ่านเฉลยข้อเหล่านี้ก่อนเป็นอันดับแรก' : (sureN ? ' — ความมั่นใจของคุณเชื่อถือได้' : '')) + '</p></section>';
+
+  // per topic (weakest first)
+  const tp = {};
+  fs.forEach(x => { const t = Q[x.qi].topic; tp[t] = tp[t] || [0, 0]; tp[t][1]++; if (x.f && x.f.ok) tp[t][0]++; });
+  const tlist = Object.keys(tp).sort((a, b) => (tp[a][0] / tp[a][1] - tp[b][0] / tp[b][1]) || (tp[b][1] - tp[a][1]) || (TOPICS.indexOf(a) - TOPICS.indexOf(b)));
+  h += '<section class="qp-card"><h2 class="qp-h2">แยกตามหัวข้อ <span class="qp-muted qp-small">(อ่อนสุดอยู่บน)</span></h2><div class="qp-bars">' + tlist.map(t => {
+    const [ok, n] = tp[t];
+    return '<div class="qp-bar-item"><span>' + t + '</span><span class="qp-num">' + ok + '/' + n + '</span>' + meter(ok, n) +
+      (ok < n ? '<span class="qp-hint">อ่านทวน: ' + (REVIEW[t] || 'หัวข้อ “' + t + '” ในสรุป') + '</span>' : '') + '</div>';
+  }).join('') + '</div>';
+  // per type
+  const ty = {};
+  fs.forEach(x => { const t = Q[x.qi].type; ty[t] = ty[t] || [0, 0]; ty[t][1]++; if (x.f && x.f.ok) ty[t][0]++; });
+  h += '<h3 class="qp-h3">แยกตามประเภทข้อ</h3><div class="qp-bars">' + TYPE_ORDER.filter(t => ty[t]).map(t =>
+    '<div class="qp-bar-item"><span>' + typeChip(t) + '</span><span class="qp-num">' + ty[t][0] + '/' + ty[t][1] + '</span>' + meter(ty[t][0], ty[t][1]) + '</div>').join('') + '</div></section>';
+
+  // review list
+  const unans = fs.filter(x => !x.f);
+  if (m.danger.length || m.gap.length || m.shaky.length || unans.length) {
+    h += '<section class="qp-card"><h2 class="qp-h2">ข้อที่ควรทวน</h2>';
+    const grp = (list, title, color) => list.length ? '<div class="qp-grp"><i style="background:' + color + '"></i>' + title + ' (' + list.length + ')</div><div class="qp-revs">' + list.map(x => revHtml(x)).join('') + '</div>' : '';
+    h += grp(m.danger, 'จุดอันตราย — มั่นใจแต่ผิด', 'var(--qp-bad)') + grp(m.gap, 'ผิด และไม่มั่นใจ', 'var(--qp-text-2)') +
+      grp(m.shaky, 'ถูก แต่ยังไม่แน่น (ไม่แน่ใจ / เดา)', 'var(--qp-warn)') + grp(unans, 'ยังไม่ได้ตอบ', 'var(--qp-border-2)');
+    h += '</section>';
+  }
+
+  // spaced repetition + actions
+  const nd = nextDue(), redo = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok);
+  h += '<section class="qp-card"><h2 class="qp-h2">รอบทบทวนถัดไป</h2><p style="margin:0 0 12px">' +
+    (nd ? relDay(nd.day) + ' — ' + nd.count + ' ข้อ' : '–') + (store.ok ? '' : ' <span class="qp-muted qp-small">(บันทึกไม่ได้ในเบราว์เซอร์นี้)</span>') + '</p>' +
+    '<p class="qp-muted qp-small" style="margin:0 0 12px">ตอบถูกแบบมั่นใจ → ขยับกล่องขึ้น (ทวนห่างขึ้น 1·3·7·16·35 วัน) · ไม่แน่ใจ/เดา → ทวนพรุ่งนี้ · ผิด → กลับกล่อง 1</p>' +
+    '<div class="qp-row"><button class="qp-btn qp-btn-primary" data-act="redo"' + (redo.length ? '' : ' disabled') + '>ทำข้อที่พลาดอีกรอบ (' + redo.length + ')</button>' +
+    '<button class="qp-btn" data-act="home">กลับหน้าแรก</button></div></section>';
+
+  // Feynman
+  const F = BANK.feynman;
+  h += '<section class="qp-card" id="qp-feyn"><div class="qp-chips"><span class="qp-retry-chip" style="background:var(--qp-accent-soft);color:var(--qp-accent)">ปิดท้าย · Feynman</span></div>' +
+    '<h2 class="qp-h2">อธิบายให้เพื่อนที่ไม่ได้เรียนฟัง</h2><p style="margin:0 0 10px">' + F.prompt + '</p>';
+  if (!R.feyn.shown) {
+    h += '<textarea class="qp-ta" data-in="feyn" style="min-height:170px" placeholder="เขียนเหมือนอธิบายให้เพื่อนที่ไม่เคยเรียนวิชานี้ ใช้คำง่าย ๆ ยกตัวอย่างประกอบ"></textarea>' +
+      '<div class="qp-nav"><span class="qp-spacer"></span><button class="qp-btn qp-btn-primary" data-act="feyn-show">ดูคำอธิบายตัวอย่าง →</button></div>';
+    if (S.feyn) h += '<p class="qp-muted qp-small">ครั้งก่อน (' + thDate(S.feyn.t) + ') ครอบคลุม ' + S.feyn.ticks.length + '/' + F.checklist.length + ' ประเด็น</p>';
+  } else {
+    h += '<h3 class="qp-h3">ที่คุณเขียน</h3><div class="qp-mine qp-feyn-mine"></div>' +
+      '<h3 class="qp-h3">คำอธิบายตัวอย่าง</h3><div class="qp-model">' + F.model + '</div>' +
+      '<h3 class="qp-h3">คำอธิบายของคุณครอบคลุมประเด็นไหนบ้าง? <span class="qp-tally" id="qp-fc-n">' + R.feyn.ticks.length + '/' + F.checklist.length + '</span></h3>' +
+      '<div class="qp-kps">' + F.checklist.map((c, i) => '<label class="qp-check' + (R.feyn.ticks.includes(i) ? ' is-on' : '') + '"><input type="checkbox" data-fc="' + i + '"' + (R.feyn.ticks.includes(i) ? ' checked' : '') + '><span>' + c + '</span></label>').join('') + '</div>' +
+      '<p class="qp-muted qp-small">ประเด็นที่ยังไม่ได้ติ๊ก = จุดที่ยังอธิบายไม่ได้ ลองกลับไปอ่านแล้วอธิบายใหม่</p>';
+  }
+  h += '</section>';
+  return h;
+}
+function revHtml(x) {
+  const q = Q[x.qi], f = x.f;
+  let body = '';
+  if (q.code) body += '<pre class="qp-code">' + q.code + '</pre>';
+  if (q.type === 'fill') {
+    body += '<p><b>คำตอบที่ถูก:</b> ' + q.parts.map((p, k) => p + (k < q.blanks.length ? '<b style="color:var(--qp-ok)">[' + q.blanks[k] + ']</b>' : '')).join('') + '</p>';
+    body += '<p>' + q.explain + '</p>';
+  } else {
+    if (f && f.orig !== q.correct) body += '<p style="color:var(--qp-bad)"><b>คุณตอบ ' + L[f.orig] + '.</b> ' + q.choices[f.orig] + ' — ' + q.explain[f.orig] + '</p>';
+    body += '<p style="color:var(--qp-ok)"><b>เฉลย ' + L[q.correct] + '.</b> ' + q.choices[q.correct] + '</p><p>' + q.explain[q.correct] + '</p>';
+  }
+  body += rereadHtml(q);
+  return '<details class="qp-rev"><summary><div class="qp-chips">' + typeChip(q.type) + '<span class="qp-topic">' + q.topic + '</span>' +
+    (f && f.conf ? '<span class="qp-topic">· ตอบว่า' + CONF[f.conf] + '</span>' : '') + '</div><span>' + q.q + '</span></summary><div class="qp-rev-body">' + body + '</div></details>';
+}
+
+/* ------------------------------------------------------------ timers */
+function tick() {
+  const t = document.getElementById('qp-time');
+  if (t && R) t.textContent = mmss(Date.now() - R.t0);
+  if (screen === 'dump' && R && R.dump) {
+    const left = R.dump.end - Date.now();
+    const a = document.getElementById('qp-dtimer'), b = document.getElementById('qp-dbar'), s = document.getElementById('qp-dsoft');
+    if (a) a.textContent = left > 0 ? 'เหลือ ' + mmss(left) : 'ครบเวลาแล้ว';
+    if (b) b.style.width = Math.max(0, pct(left, DUMP_SECONDS * 1000)) + '%';
+    if (s) s.hidden = left > 0;
+  }
+}
+setInterval(tick, 1000);
+
+/* ------------------------------------------------------------ events */
+function pick(d) {
+  const st = cur(); if (!st || st.ans) return;
+  const q = Q[st.qi];
+  if (q.type === 'fill') return;
+  if (R.hard && HARD_TYPES[q.type] && !st.shown) st.shown = true;
+  st.pick = d;
+  if (st.retry) return finalize(null);
+  render();
+}
+function jumpToQ(qi) {
+  const k = R.steps.findIndex(s => s.qi === qi && s.retry === 0);
+  if (k >= 0) { notice = ''; R.pos = k; go('q', true); }
+}
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) {
+    // keyboard activation (detail 0) of fill chips / slots — pointer handlers cover mouse and touch
+    if (e.detail === 0) fillKeyClick(e.target);
+    return;
+  }
+  const act = el.dataset.act;
+  if (act === 'mode') {
+    resetArmed = false;
+    const m = el.dataset.m;
+    const list = m === 'full' ? range(Q.length) : m === 'due' ? dueQs().map(q => q.i) : m === 'missed' ? missedQs().map(q => q.i) : shuffle(range(Q.length)).slice(0, 10);
+    startRun(m, list);
+  } else if (act === 'dump-skip') { R.dump = null; go('q'); }
+  else if (act === 'dump-done') { go('dumpcheck'); }
+  else if (act === 'dump-start') {
+    S.dumps.push({ t: today(), text: R.dump.text.slice(0, 4000), got: R.dump.got.slice(), n: BANK.keypoints.length });
+    S.dumps = S.dumps.slice(-5); saveS();
+    go('q');
+  }
+  else if (act === 'reveal') { const st = cur(); st.shown = true; render(); }
+  else if (act === 'pick') pick(+el.dataset.i);
+  else if (act === 'conf') { const st = cur(); if (!st || st.ans) return; const q = Q[st.qi];
+    if (q.type === 'fill' ? st.fill.placed.includes(null) : st.pick === null) return;
+    finalize(el.dataset.c || null); }
+  else if (act === 'fill-clear') { const st = cur(); st.fill.placed = st.fill.placed.map(() => null); st.fill.sel = null; render(); }
+  else if (act === 'next') next();
+  else if (act === 'prev') prev();
+  else if (act === 'grid') { R.gridOpen = !R.gridOpen; render(); }
+  else if (act === 'jump') jumpToQ(+el.dataset.qi);
+  else if (act === 'finish') finish();
+  else if (act === 'redo') { const list = R.qset.filter(qi => !R.first[qi] || !R.first[qi].ok); startRun('redo', list); }
+  else if (act === 'home') { R = null; go('start', true); }
+  else if (act === 'feyn-show') {
+    R.feyn.shown = true;
+    S.feyn = { t: today(), text: R.feyn.text.slice(0, 4000), ticks: [] }; saveS();
+    render();
+  }
+  else if (act === 'reset') {
+    if (!resetArmed) { resetArmed = true; render(); return; }
+    resetArmed = false; S = { v: 1, items: {}, dumps: [], feyn: null, hist: [] }; saveS(); updateIndex(); render();
+  }
+});
+app.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.pref) { P[el.dataset.pref] = el.checked; saveP(); render(); }
+  else if (el.dataset.kp !== undefined) {
+    const i = +el.dataset.kp, g = R.dump.got;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-kp-n').textContent = g.length + '/' + BANK.keypoints.length;
+  } else if (el.dataset.fc !== undefined) {
+    const i = +el.dataset.fc, g = R.feyn.ticks;
+    if (el.checked) { if (!g.includes(i)) g.push(i); } else g.splice(g.indexOf(i), 1);
+    el.closest('.qp-check').classList.toggle('is-on', el.checked);
+    document.getElementById('qp-fc-n').textContent = g.length + '/' + BANK.feynman.checklist.length;
+    if (S.feyn) { S.feyn.ticks = g.slice(); saveS(); }
+  }
+});
+app.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.in;
+  if (k === 'dump' && R && R.dump) R.dump.text = e.target.value;
+  if (k === 'feyn' && R) R.feyn.text = e.target.value;
+});
+
+document.addEventListener('keydown', e => {
+  if (screen !== 'q' || !R || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target;
+  if (tg && tg.closest && tg.closest('textarea, input, select, [contenteditable="true"]')) return;
+  const nativeBtn = tg && tg.closest && tg.closest('button, a, summary, label');
+  const st = cur(), q = Q[st.qi];
+  const gated = R.hard && HARD_TYPES[q.type] && !st.shown && !st.ans && st.pick === null && q.type !== 'fill';
+  if (e.key === 'Enter') {
+    if (nativeBtn) return;                     // let the focused button do its own thing
+    e.preventDefault();
+    if (gated) { st.shown = true; render(); }
+    else if (st.ans) next();
+    return;
+  }
+  if (e.key === 'ArrowRight') { e.preventDefault(); return next(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); return prev(); }
+  if (q.type === 'fill' || st.ans) return;
+  let d = -1;
+  const m = /^(Digit|Numpad)([1-4])$/.exec(e.code || '');
+  if (m) d = +m[2] - 1;
+  else if (L.includes(e.key)) d = L.indexOf(e.key);
+  if (d >= 0) { e.preventDefault(); if (!gated) pick(d); return; }   // hidden choices: Enter reveals first
+  const c = CONF_KEY[e.code];
+  if (c && st.pick !== null && !st.retry) { e.preventDefault(); finalize(c); }
+});
+
+/* fill: drag (mouse / touch) + tap-to-place */
+let drag = null;
+function curFill() {
+  if (screen !== 'q' || !R) return null;
+  const st = cur();
+  return st && !st.ans && Q[st.qi].type === 'fill' ? st : null;
+}
+function placeChip(f, chip, k, from) {
+  const prev = f.placed[k];
+  f.placed = f.placed.map(c => (c === chip ? null : c));
+  f.placed[k] = chip;
+  if (from !== null && from !== k && prev !== null) f.placed[from] = prev;
+}
+function fillKeyClick(target) {
+  const st = curFill(); if (!st) return;
+  const f = st.fill, chip = target.closest('.qp-chip'), slot = target.closest('.qp-slot');
+  if (chip && !chip.classList.contains('is-used')) { const i = +chip.dataset.chip; f.sel = f.sel === i ? null : i; render(); }
+  else if (slot) {
+    const k = +slot.dataset.slot;
+    if (f.sel !== null) { placeChip(f, f.sel, k, null); f.sel = null; } else f.placed[k] = null;
+    render();
+  }
+}
+function slotAt(x, y) { const el = document.elementFromPoint(x, y); return el ? el.closest('.qp-slot') : null; }
+function endDrag() {
+  if (drag && drag.ghost) drag.ghost.remove();
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  drag = null;
+}
+document.addEventListener('pointerdown', e => {
+  const st = curFill(); if (!st || e.button > 0) return;
+  const f = st.fill;
+  const chipEl = e.target.closest('.qp-chip'), slotEl = e.target.closest('.qp-slot');
+  if (chipEl && !chipEl.classList.contains('is-used')) drag = { chip: +chipEl.dataset.chip, from: null };
+  else if (slotEl && f.placed[+slotEl.dataset.slot] !== null) drag = { chip: f.placed[+slotEl.dataset.slot], from: +slotEl.dataset.slot };
+  else if (slotEl && f.sel !== null) { placeChip(f, f.sel, +slotEl.dataset.slot, null); f.sel = null; render(); return; }
+  else return;
+  e.preventDefault();
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved = false; drag.ghost = null;
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    drag.moved = true;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'qp-chip is-ghost';
+    drag.ghost.innerHTML = Q[cur().qi].bank[drag.chip];
+    document.body.appendChild(drag.ghost);
+  }
+  drag.ghost.style.left = e.clientX + 'px';
+  drag.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.qp-slot.is-over').forEach(el => el.classList.remove('is-over'));
+  const s = slotAt(e.clientX, e.clientY);
+  if (s) s.classList.add('is-over');
+});
+document.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag, st = curFill();
+  endDrag();
+  if (!st) return;
+  const f = st.fill;
+  if (d.moved) {
+    const s = slotAt(e.clientX, e.clientY);
+    if (s) placeChip(f, d.chip, +s.dataset.slot, d.from);
+    else if (d.from !== null) f.placed[d.from] = null;
+    f.sel = null;
+  } else if (d.from !== null) {
+    if (f.sel !== null) placeChip(f, f.sel, d.from, null); else f.placed[d.from] = null;
+    f.sel = null;
+  } else f.sel = f.sel === d.chip ? null : d.chip;
+  render();
+});
+document.addEventListener('pointercancel', endDrag);
+
+/* ------------------------------------------------------------ boot */
+updateIndex();
+render();
+})();
+</script>
+<script>window.SN_BASE = "../../";</script><script src="../../assets/srs-catalog.js"></script><script src="../../assets/srs.js"></script>
+</body>
+</html>

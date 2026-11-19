@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 11 – Node.js Part III (Cookies, Session, and Database) · ITDS241</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#94496a}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS241</a><span>/</span><b>L11</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">💻 ITDS241</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>Intro. to the Internet and the WWW + Intro. to HTML/HTML5 (Part I)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>Intro. to HTML/HTML5 (Part II)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>Cascading Style Sheet (Part I)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>Cascading Style Sheet (Part II)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>Introduction to JavaScript (JavaScript Part 1)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>JavaScript Part 2 (Object-Oriented Programming in JavaScript)</a></li><li><a href="../ecmascript/index.html"><span class="nl">ECMAScript</span>ECMAScript Version (ITDS241)</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>Node.js Part I (Intro to Node.js)</a></li><li><a href="../l10/index.html"><span class="nl">L10</span>Node.js Part II (Express Framework)</a></li><li class='cur'><a href="../l11/index.html"><span class="nl">L11</span>Node.js Part III (Cookies, Session, and Database)</a></li><li><a href="../l12/index.html"><span class="nl">L12</span>Web Services</a></li><li><a href="../l13/index.html"><span class="nl">L13</span>Web Services with Node.js</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS241</a> · L11</div>
+    <h1 class="lesson-title">Lecture 11 – Node.js Part III (Cookies, Session, and Database)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 53 นาที · 20 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l11">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> บทสุดท้ายของ Node.js Unit ต่อจาก Express (L10) เริ่มจาก <strong>ทบทวน</strong> การตั้งโปรเจกต์ด้วย npm และ routing แล้วเรียน 3 เรื่องใหม่: <strong>Environment Variables</strong> (เก็บค่าตั้งค่าไว้ในไฟล์ <code>.env</code> แล้วอ่านผ่าน <code>process.env</code> ด้วย <code>dotenv</code>), <strong>Cookies + Session</strong> (HTTP เป็น stateless จึงต้องมีที่เก็บข้อมูลข้าม request: cookie เก็บที่ <strong>client</strong>, session เก็บที่ <strong>server</strong>) และ <strong>Database + Node.js</strong> (ต่อ MySQL ด้วย <code>mysql2</code> แล้วรัน SELECT / INSERT)</p>
+<p>บทนี้ไม่มีโจทย์คำนวณ แต่มี <strong>โค้ด Node.js/Express</strong> หลายชุด ส่วน cookie, session และ dotenv <strong>รันจริงแล้ว</strong> ด้วย Node v22.16.0 + express 5.3.0, cookie-parser 1.4.7, express-session 1.19.0, dotenv 18.0.10 ส่วน database <strong>ไม่ได้ต่อ MySQL จริง</strong> (ไม่มีฐาน tinycollege กับ user สำหรับทดสอบ) จึงใช้ connection จำลองตรวจเฉพาะฝั่ง Express และอธิบายผลที่เหลือตามสไลด์</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L11-00-overview.png" alt="แผนผังภาพรวม Lecture 11" /></p>
+<h2 id="0-บทนี้อยู่ตรงไหนของ-nodejs-unit-และเรียนอะไร-สไลด์-24">0. บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร? <span class="slide-ref">สไลด์ 2–4</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Node.js Unit มี 3 ส่วน บทนี้คือ Part III (Cookies, Session, Database) เป้าหมายคือสร้าง cookie/session ได้ และต่อ Node.js กับ relational database ได้</strong></p>
+<p><strong>Node.js Unit</strong> (สไลด์ 2):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>เนื้อหา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Part I – Intro Node.js</td>
+<td>Getting Started + &quot;Hello World&quot;, Node Module System, Build your first server</td>
+</tr>
+<tr>
+<td>Part II – Express Framework</td>
+<td>(L10)</td>
+</tr>
+<tr>
+<td><strong>Part III – Cookies, Session, and Database</strong></td>
+<td>← บทนี้</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Course Objective</strong> (สไลด์ 3) — หลังเรียนควรทำได้:</p>
+<ul>
+<li>สร้าง <strong>cookies และ sessions</strong> ด้วย Node.js</li>
+<li><strong>เชื่อม Node.js กับ relational database</strong></li>
+</ul>
+<p><strong>Outline</strong> (สไลด์ 4): RECAP: Express Framework → Environmental Variables → Cookies + Session → Database + Node.js</p>
+<hr />
+<h2 id="1-recap-express-คืออะไร-สไลด์-57">1. RECAP: Express คืออะไร? <span class="slide-ref">สไลด์ 5–7</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Express คือ Node.js web application framework ที่ minimal และ flexible ช่วยเรื่อง routing, สร้าง API และใช้กับ template engine (Pug, EJS)</strong></p>
+<p>(สไลด์ 5 &quot;RECAP: Node.js&quot; และสไลด์ 6 &quot;Express Framework&quot; เป็นหน้าคั่นหัวข้อ ไม่มีเนื้อหา)</p>
+<ul>
+<li><strong>Express</strong> = <em>a minimal and flexible <strong>Node.js web application framework</strong> that provides a robust set of features for web and mobile applications</em></li>
+<li>ช่วยเรื่อง <strong>routing</strong> (กำหนดว่า URL ไหนให้ทำอะไร)</li>
+<li>ช่วย <strong>สร้าง API</strong></li>
+<li>ใช้คู่กับ <strong>template engine</strong> เช่น <strong>Pug</strong> หรือ <strong>EJS</strong> (สไลด์เขียนเป็นสีจาง):
+<ul>
+<li>ตอน runtime template engine <strong>แทนตัวแปรใน template ด้วยค่าจริง</strong></li>
+<li>แล้ว <strong>แปลง template เป็นไฟล์ HTML</strong> ส่งให้ client</li>
+<li>ทำให้ออกแบบหน้า HTML ได้ง่ายขึ้น</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="2-ตั้งโปรเจกต์และ-server-ด้วย-npm-express-ยังไง-ทบทวน-สไลด์-811">2. ตั้งโปรเจกต์และ server ด้วย npm + Express ยังไง? (ทบทวน) <span class="slide-ref">สไลด์ 8–11</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ npm จัดการ dependency — <code>npm init</code> สร้าง package.json, <code>npm install &lt;package&gt;</code> ติดตั้ง library แล้วตั้ง script <code>&quot;start&quot;: &quot;nodemon app.js&quot;</code> เพื่อรันด้วย <code>npm start</code> ที่ restart เองเมื่อแก้ไฟล์</strong></p>
+<p>(สไลด์ 8 &quot;Project Setup &amp; Configuration&quot; เป็นหน้าคั่นหัวข้อ)</p>
+<h3 id="21-คำสั่ง-npm-ที่ต้องรู้-สไลด์-9">2.1 คำสั่ง npm ที่ต้องรู้ <span class="slide-ref">สไลด์ 9</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>npm ใช้จัดการ dependencies และตั้งค่าโปรเจกต์ใน Node.js</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>ทำอะไร</th>
+<th>ใช้ตอนไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npm init</code></td>
+<td>สร้างโปรเจกต์ Node.js ใหม่แบบ <strong>ถามตอบ (interactive)</strong></td>
+<td>สร้างโปรเจกต์ใหม่และอยากกำหนดรายละเอียดเอง</td>
+</tr>
+<tr>
+<td><code>npm init -y</code></td>
+<td>สร้างโปรเจกต์ด้วย <strong>ค่า default</strong> (ข้ามคำถาม)</td>
+<td>ตั้งโปรเจกต์เร็ว ๆ</td>
+</tr>
+<tr>
+<td><code>npm install</code></td>
+<td>ติดตั้ง dependencies <strong>ทั้งหมด</strong> ที่อยู่ใน <code>package.json</code></td>
+<td>หลัง <strong>clone หรือ pull</strong> โปรเจกต์มา</td>
+</tr>
+<tr>
+<td><code>npm install &lt;package&gt;</code></td>
+<td>ติดตั้ง package เดียวแบบ local</td>
+<td>ตอนเพิ่ม library ใหม่ (เช่น express)</td>
+</tr>
+<tr>
+<td><code>npm uninstall &lt;package&gt;</code></td>
+<td>ลบ package ออกจากโปรเจกต์</td>
+<td>เมื่อไม่ใช้ package นั้นแล้ว</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 <code>npm install</code> เฉย ๆ (ไม่มีชื่อ package) = ติดตั้ง <strong>ทุกตัว</strong> ตาม package.json — ใช้หลัง clone โปรเจกต์ของเพื่อนมา</p>
+</blockquote>
+<h3 id="22-ขั้นตอนตั้งโปรเจกต์-สไลด์-10">2.2 ขั้นตอนตั้งโปรเจกต์ <span class="slide-ref">สไลด์ 10</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้างโฟลเดอร์ → <code>npm init</code> → กำหนด entry point (app.js) → ติดตั้ง express + nodemon → ตั้ง start script</strong></p>
+<ol>
+<li>สร้าง working directory ของโปรเจกต์</li>
+<li>รัน <code>npm init</code> เพื่อสร้าง <code>package.json</code></li>
+<li>กำหนด <strong>entry point</strong> (เช่น <code>app.js</code>) ใน <code>package.json</code></li>
+<li>ติดตั้ง dependencies ที่ต้องใช้:
+<ul>
+<li><code>express</code> — สร้าง server</li>
+<li><code>nodemon</code> — restart อัตโนมัติระหว่างพัฒนา</li>
+</ul>
+</li>
+<li>ตั้ง <code>start</code> script ใน <code>package.json</code> ให้ restart server เองเมื่อไฟล์เปลี่ยน:<pre><code class="language-json">&quot;scripts&quot;: {
+  &quot;start&quot;: &quot;nodemon app.js&quot;
+}
+</code></pre>
+</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 10 เขียนคำสั่งติดตั้งว่า <code>npm init &lt;package&gt;</code> แต่ตารางสไลด์ 9 (และสไลด์ 13, 20, 31, 36, 45) ใช้ <strong><code>npm install &lt;package&gt;</code></strong> — คำสั่งติดตั้ง package คือ <code>npm install</code></p>
+</blockquote>
+<h3 id="23-web-server-routing-ด้วย-router-สไลด์-11">2.3 Web server + Routing ด้วย Router <span class="slide-ref">สไลด์ 11</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>สร้าง router ด้วย <code>express.Router()</code> → ลงทะเบียน <code>app.use(router)</code> → กำหนด route ด้วย <code>router.get(...)</code> → <code>app.listen(port)</code></strong></p>
+<pre><code class="language-js">const express = require('express');
+const path = require('path')
+const port=3000
+
+const app = express();
+
+/* 1. Create a router object and register the router */
+const router = express.Router();
+app.use(router)
+
+/* 2. Apply the created router to the route */
+router.get('/', (req, res) =&gt; {
+   res.send('Hello World from Root!')
+})
+
+router.get('/my-form', (req, res) =&gt; {
+  console.log('Retrieve the form...')
+  res.sendFile(path.join(`${__dirname}/html/myForm.html`))
+})
+
+app.listen(port, () =&gt; {
+    console.log(`Server listening on port: ${port}`)
+})
+</code></pre>
+<ul>
+<li><code>/</code> → ส่งข้อความ <code>Hello World from Root!</code></li>
+<li><code>/my-form</code> → log <code>Retrieve the form...</code> แล้วส่งไฟล์ <code>html/myForm.html</code></li>
+<li><strong>Note:</strong> ใช้ <strong><code>npm start</code></strong> เพื่อรัน script ที่ตั้งไว้ (= <code>nodemon app.js</code>)</li>
+<li>ผลใน terminal: <code>[nodemon] 3.1.14</code> … <code>[nodemon] watching extensions: js,mjs,json</code> … <code>[nodemon] starting \</code>node app.js`<code> → **</code>Server listening on port: 3000`**</li>
+<li><strong>Note:</strong> ถ้าแก้ <code>app.js</code> nodemon จะ <strong>รันใหม่ให้อัตโนมัติ</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ โค้ดในสไลด์ 11 บรรทัด <code>console.log('Retrieve the form...’)</code> ปิดด้วย <strong>เครื่องหมายคำพูดโค้ง <code>’</code></strong> (จาก PowerPoint) ถ้าพิมพ์ตามจริงจะได้ <code>SyntaxError: Invalid or unexpected token</code> (ทดลองรันแล้ว) ต้องใช้ <code>'</code> ธรรมดา — สไลด์ 24, 27, 28 ก็มีจุดแบบเดียวกัน โค้ดในสรุปนี้แก้เป็น <code>'</code> แล้ว</p>
+</blockquote>
+<hr />
+<h2 id="3-environment-variable-คืออะไร-และใช้-env-ยังไง-สไลด์-1214">3. Environment variable คืออะไร และใช้ <code>.env</code> ยังไง? <span class="slide-ref">สไลด์ 12–14</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>environment variable คือคู่ key=value สำหรับค่าตั้งค่า (PORT, API_KEY, DB_HOST …) ที่อยู่นอก source code เก็บในไฟล์ <code>.env</code> แล้วใช้ <code>dotenv.config()</code> โหลดเข้า <code>process.env</code> เพื่อให้โค้ดเดิมรันได้ทุกเครื่องโดยไม่ต้องแก้โค้ด</strong></p>
+<h3 id="31-คืออะไร-ทำไมต้องใช้-สไลด์-12">3.1 คืออะไร ทำไมต้องใช้? <span class="slide-ref">สไลด์ 12</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>แยกค่าที่ขึ้นกับเครื่อง/สภาพแวดล้อมออกจากโค้ด → โค้ดชุดเดียว deploy ได้ทุกที่</strong></p>
+<ul>
+<li><strong>Environment variable</strong> = <strong>key-value pair</strong> ที่ใช้เก็บ <strong>configuration settings</strong> เช่น <code>PORT</code>, <code>API_KEY</code>, <code>DB_HOST</code>, <code>DB_NAME</code></li>
+<li>ถูกกำหนด <strong>นอก source code</strong> → แอปรันได้โดย <strong>ไม่ต้องแก้ source code</strong></li>
+<li><strong>ทำไมต้องใช้:</strong>
+<ul>
+<li>ให้แอปรันได้บน <strong>เครื่องต่าง ๆ หรือ cloud environment</strong></li>
+<li><strong>ไม่ต้อง hardcode</strong> ค่าที่ขึ้นกับ environment ลงในโค้ด</li>
+<li><strong>source code เดียวกัน deploy ได้ทุกที่</strong></li>
+<li>ทำให้แอป <strong>portable และ maintainable</strong></li>
+</ul>
+</li>
+<li>ใช้ไฟล์ <strong><code>.env</code></strong> จัดระเบียบและดูแลตัวแปรเหล่านี้</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสูตรอาหาร (โค้ด) กับใบสั่งของประจำร้าน (.env) — สูตรเดียวใช้ได้ทุกสาขา แต่ละสาขาแค่เปลี่ยนใบสั่งของ ไม่ต้องแก้สูตร</p>
+</blockquote>
+<h3 id="32-ตั้งค่า-env-สไลด์-13">3.2 ตั้งค่า <code>.env</code> <span class="slide-ref">สไลด์ 13</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>npm install dotenv</code> → สร้าง <code>.env</code> ที่ root → ใส่ตัวแปร → โหลดในแอป → อ่านด้วย <code>process.env</code></strong></p>
+<ol>
+<li>ติดตั้ง package: <code>npm install dotenv</code></li>
+<li>สร้างไฟล์ชื่อ <strong><code>.env</code></strong> ใน <strong>root directory</strong> ของโปรเจกต์ (ระดับเดียวกับ <code>package.json</code>, <code>node_modules/</code>, <code>src/</code>)</li>
+<li>ใส่ environment variables ในไฟล์ <code>.env</code>:<pre><code># Node.js Environmental Variables
+PORT=3000
+</code></pre>
+</li>
+<li><strong>โหลด <code>.env</code></strong> ในแอป</li>
+<li>อ่านค่าด้วย <strong><code>process.env</code></strong></li>
+</ol>
+<ul>
+<li>โครงโฟลเดอร์ตามสไลด์: <code>project-folder/</code> มี <code>node_modules/</code>, <code>src/</code>, <code>package.json</code>, <strong><code>.env</code></strong></li>
+<li>ใน VSCode ติดตั้ง extension <strong>DotENV</strong> (mikestead.dotenv) เพื่อจัดรูปแบบไฟล์ <code>.env</code> ได้</li>
+</ul>
+<h3 id="33-โหลด-env-ในโค้ด-สไลด์-14">3.3 โหลด <code>.env</code> ในโค้ด <span class="slide-ref">สไลด์ 14</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>dotenv</code> เป็น zero-dependency module ที่โหลดตัวแปรจาก <code>.env</code> เข้า <code>process.env</code> — เรียก <code>dotenv.config()</code> ครั้งเดียวแล้วใช้ <code>process.env.PORT</code> ได้เลย</strong></p>
+<p><img loading="lazy" src="diagrams/L11-01-dotenv.png" alt=".env → dotenv.config() → process.env" /></p>
+<pre><code class="language-js">/* Import and use Environmental Variable */
+const dotenv = require(&quot;dotenv&quot;);
+dotenv.config();              // Load all variables from .env
+/*... More lines hidden here ... */
+// Server listening
+app.listen(process.env.PORT, function () {   // Access to PORT in .env
+    console.log(&quot;Server listening at Port &quot;
+       + process.env.PORT);});
+</code></pre>
+<ul>
+<li><code>package.json</code> จะมี <code>&quot;dotenv&quot;: &quot;^18.0.9&quot;</code> เพิ่มใน <code>dependencies</code> (คู่กับ <code>express ^5.3.0</code>, <code>nodemon ^3.1.14</code>)</li>
+<li><code>.env</code> มี <code>PORT=3000</code></li>
+</ul>
+<p><strong>ผลรันจริง</strong> (<code>.env</code> มี 2 ตัวแปร):</p>
+<pre><code>◇ injected env (2) from .env
+Server listening at Port 3911
+</code></pre>
+<ul>
+<li>บรรทัด <code>◇ injected env (N) from .env</code> <strong>dotenv พิมพ์เอง</strong> ตอน <code>config()</code> — N คือจำนวนตัวแปรที่โหลด (ในสไลด์ 22 เห็นเป็น <code>injected env (5)</code> คือ <code>.env</code> ของอาจารย์มี 5 ตัว)</li>
+</ul>
+<hr />
+<h2 id="4-ทำไมต้องมี-cookie-และ-session-http-เป็น-stateless-สไลด์-1517">4. ทำไมต้องมี Cookie และ Session? (HTTP เป็น stateless) <span class="slide-ref">สไลด์ 15–17</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>HTTP เป็น stateless — request แต่ละครั้งไม่รู้จักกัน ถ้าต้องจำข้อมูลข้ามหน้า ต้องเก็บเอง 2 แบบ: Cookies (ฝั่ง client) หรือ Session (ฝั่ง server)</strong></p>
+<p>(สไลด์ 15 เป็นหน้าคั่นหัวข้อ &quot;Cookies and Sessions&quot;)</p>
+<p><strong>Cookie and Session</strong> (สไลด์ 16):</p>
+<ul>
+<li>บางครั้งต้อง <strong>เก็บข้อมูลชั่วคราว</strong> เพื่อส่งต่อระหว่างหน้า ทั้งฝั่ง server หรือส่งให้ client</li>
+<li>เก็บได้ 2 วิธี:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>วิธี</th>
+<th>เก็บที่ไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cookies</strong></td>
+<td>ฝั่ง <strong>client</strong></td>
+</tr>
+<tr>
+<td><strong>Session</strong></td>
+<td>ฝั่ง <strong>server</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>HTTP &quot;Stateless&quot;</strong> (สไลด์ 17):</p>
+<ul>
+<li>HTTP (HyperText Transfer Protocol) เป็น <strong>stateless</strong> = <strong>ไม่มีความเชื่อมโยงระหว่าง HTTP request สองครั้งใด ๆ</strong></li>
+<li><strong>HTTP cookies</strong> ทำให้ใช้ <strong>stateful sessions</strong> ได้ คือให้ทุก HTTP request <strong>ใช้ context / state เดียวกัน</strong></li>
+<li>รูปในสไลด์: client ส่ง <strong>(First request)</strong> ไป server → server ส่ง <strong>cookie</strong> กลับมา → request ครั้งต่อไป client <strong>แนบ cookie กลับไป</strong>ด้วย</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนพนักงานร้านที่ความจำสั้นมาก ลูกค้าเดินมากี่ครั้งก็จำไม่ได้ (stateless) ร้านจึงแจกบัตรสะสมแต้ม (cookie) ให้ลูกค้ายื่นทุกครั้งที่มา พนักงานจะได้รู้ว่าเป็นคนเดิม</p>
+</blockquote>
+<hr />
+<h2 id="5-cookie-คืออะไร-และส่งไป-กลับยังไง-สไลด์-1819">5. Cookie คืออะไร และส่งไป-กลับยังไง? <span class="slide-ref">สไลด์ 18–19</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>cookie คือข้อมูลชิ้นเล็กที่ server ส่งให้ browser ผ่าน header <code>Set-Cookie</code> browser เก็บไว้แล้วแนบกลับไปใน header <code>Cookie</code> ทุกครั้งที่ขอ server เดิม ทำให้ server รู้ว่า request มาจาก browser เดียวกัน</strong></p>
+<p><strong>Cookies</strong> (สไลด์ 18):</p>
+<ul>
+<li><strong>Cookie</strong> = <em>a small piece of data that a server sends to the user's web browser</em> — browser <strong>อาจเก็บไว้</strong> แล้ว <strong>ส่งกลับมากับ request ครั้งถัดไปไปยัง server เดิม</strong> (<em>the same server</em>)</li>
+<li>ปกติใช้บอกว่า <strong>request สองครั้งมาจาก browser เดียวกัน</strong> ใช้ทำ:
+<ul>
+<li><strong>Session management</strong> — เช่น จำว่า login อยู่ (รูปในสไลด์เป็นตะกร้าสินค้า)</li>
+<li><strong>Personalization</strong> — จำค่าที่ผู้ใช้ตั้งไว้</li>
+<li><strong>Tracking</strong> — ติดตามพฤติกรรมผู้ใช้</li>
+</ul>
+</li>
+</ul>
+<p><strong>Cookies (cont.)</strong> (สไลด์ 19):</p>
+<ul>
+<li>Cookies เป็น <strong>ส่วนขยาย (extension) ของ HTTP protocol</strong></li>
+<li>ใน Node.js เรา <strong>ส่ง</strong> header <strong><code>Set-Cookie</code></strong> ไปกับ response</li>
+<li>browser มักเก็บ cookie ไว้ เมื่อ cookie ถูกส่งมากับ request ไป server เดิมใน header <strong><code>Cookie</code></strong> เราจะ <strong>อ่าน (retrieve)</strong> มันได้</li>
+<li>ถ้าใส่ <strong>unique identifier</strong> ใน cookie ของทุก request → เริ่ม <strong>ระบุตัว client ได้ (uniquely identify clients)</strong> และ <strong>ผูก request ของคนเดียวกันเข้าด้วยกัน</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L11-02-cookie-flow.png" alt="Cookie flow: Set-Cookie แล้วส่งกลับใน Cookie header" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ จำทิศให้ถูก: <strong><code>Set-Cookie</code></strong> = server → browser (ใน response) | <strong><code>Cookie</code></strong> = browser → server (ใน request)</p>
+</blockquote>
+<hr />
+<h2 id="6-สร้าง-อ่าน-ลบ-cookie-ใน-nodejs-ยังไง-สไลด์-2026">6. สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง? <span class="slide-ref">สไลด์ 20–26</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้งและลงทะเบียน <code>cookie-parser</code> → สร้างด้วย <code>res.cookie(name, value)</code> → อ่านทั้งหมดด้วย <code>req.cookies</code> หรือตัวเดียวด้วย <code>req.cookies[&quot;name&quot;]</code> → ตั้งอายุด้วย option <code>maxAge</code> → ลบด้วย <code>res.clearCookie(name)</code></strong></p>
+<h3 id="61-ติดตั้ง-cookie-parser-สไลด์-20">6.1 ติดตั้ง cookie-parser <span class="slide-ref">สไลด์ 20</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>cookie-parser</code> เป็น middleware ที่ parse cookie ที่แนบมากับ request ให้กลายเป็น object ใน <code>req.cookies</code></strong></p>
+<ul>
+<li>ต้องติดตั้งและตั้งค่า Express ก่อน</li>
+<li>ติดตั้ง: <code>npm install cookie-parser</code></li>
+<li><strong>cookie-parser</strong> = middleware ที่ <strong>parse cookies ที่แนบมากับ request object ของ client</strong></li>
+<li>import และใช้:<pre><code class="language-js">const cp = require(&quot;cookie-parser&quot;);
+router.use(cp());
+</code></pre>
+</li>
+<li><code>package.json</code> → <code>&quot;cookie-parser&quot;: &quot;^1.4.7&quot;</code>, <code>&quot;express&quot;: &quot;^5.3.0&quot;</code>, <code>&quot;nodemon&quot;: &quot;^3.1.14&quot;</code></li>
+</ul>
+<h3 id="62-สร้าง-cookie-rescookie-สไลด์-2122">6.2 สร้าง cookie (<code>res.cookie</code>) <span class="slide-ref">สไลด์ 21–22</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>res.cookie(name, value)</code> สร้าง cookie แล้วส่งไปกับ response — ดูผลได้ใน DevTools &gt; Application &gt; Cookies</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const app = express();
+const dotenv = require('dotenv');
+
+const router = express.Router();
+app.use(&quot;/&quot;, router); // Register the router
+
+/* Import cookie-parser */
+const cp = require(&quot;cookie-parser&quot;);
+router.use(cp()); // Register cookie-parser
+...
+router.get('/setCookie', function (req, res) {
+    /* Create a cookie with the given name and value */
+    console.log('About to create a cookie');
+    res.cookie('cookie#1', 'chocolate-chip-cookie');
+    res.cookie('cookie#2', 'peanut-butter-cookie');
+    res.send('Cookie has been created and hiding at your browser!!');
+});
+...
+app.listen(process.env.PORT, () =&gt; {
+    console.log(`Server listening on port: ${process.env.PORT}`);
+})
+</code></pre>
+<ul>
+<li><strong><code>res.cookie</code></strong> สร้าง cookie ตาม <strong>ชื่อและค่า</strong> ที่กำหนด แล้ว <strong>ส่ง cookie ไปกับ response</strong></li>
+<li>ทดสอบ (สไลด์ 22): เปิด <code>http://localhost:3000/setCookie</code>
+<ul>
+<li>terminal: <code>◇ injected env (5) from .env</code> → <code>Server listening on port: 3000</code> → <strong><code>About to create a cookie</code></strong></li>
+<li>browser แสดง <code>Cookie has been created and hiding at your browser!!</code></li>
+<li>ดู cookie ที่ <strong>developer tool &gt; Application &gt; Cookies</strong> — ตารางในรูปมี 2 แถว:</li>
+</ul>
+</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Domain</th>
+<th>Path</th>
+<th>Expires / Max-Age</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cookie#2</td>
+<td>peanut-butter-cookie</td>
+<td>localhost</td>
+<td>/</td>
+<td>Session</td>
+<td>28</td>
+</tr>
+<tr>
+<td>cookie#1</td>
+<td>chocolate-chip-cookie</td>
+<td>localhost</td>
+<td>/</td>
+<td>Session</td>
+<td>29</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 Expires/Max-Age = <strong>Session</strong> เพราะโค้ดไม่ได้ตั้งอายุ cookie (ดูวิธีตั้งอายุในหัวข้อ 6.5)</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ โค้ดสไลด์ 21 <code>require('dotenv')</code> แต่ส่วนที่เห็น <strong>ไม่มี <code>dotenv.config()</code></strong> (อาจซ่อนอยู่ใน <code>...</code>) — ถ้าไม่เรียก <code>config()</code> ค่า <code>process.env.PORT</code> จะไม่ถูกโหลดจาก <code>.env</code> ส่วน package.json ในสไลด์ 20 ก็ไม่มี dotenv</p>
+</blockquote>
+<p><strong>ผลรันจริง</strong> — GET <code>/setCookie</code> ได้ status 200 และ header:</p>
+<pre><code>Set-Cookie: cookie#1=chocolate-chip-cookie; Path=/
+Set-Cookie: cookie#2=peanut-butter-cookie; Path=/
+</code></pre>
+<p>(ไม่มี Expires/Max-Age → browser แสดงเป็น Session ตรงกับรูป)</p>
+<h3 id="63-อ่าน-cookie-ทั้งหมด-reqcookies-สไลด์-23">6.3 อ่าน cookie ทั้งหมด (<code>req.cookies</code>) <span class="slide-ref">สไลด์ 23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>req.cookies</code> คือ object ของทุก cookie ที่ browser ส่งมา</strong></p>
+<pre><code class="language-js">router.get('/showCookie', (req, res)=&gt;{
+    console.log('About to show the created cookies');
+    console.log(req.cookies);
+    res.send(req.cookies);
+});
+</code></pre>
+<ul>
+<li><strong><code>req.cookies</code></strong> = ค่าของ <strong>cookie ทั้งหมด</strong> ที่สร้างไว้</li>
+<li>terminal:<pre><code>About to show the created cookies
+{
+  'cookie#1': 'chocolate-chip-cookie',
+  'cookie#2': 'peanut-butter-cookie'
+}
+</code></pre>
+</li>
+<li>browser (<code>localhost:3000/showCookie</code>): <code>{&quot;cookie#1&quot;:&quot;chocolate-chip-cookie&quot;,&quot;cookie#2&quot;:&quot;peanut-butter-cookie&quot;}</code> — <code>res.send(object)</code> ส่งเป็น JSON</li>
+</ul>
+<p><strong>ผลรันจริง:</strong> ตรงกับสไลด์ทั้ง console และ body ✓</p>
+<h3 id="64-อ่าน-cookie-ตัวเดียว-ทำหน้าจำกัดสิทธิ์-สไลด์-2425">6.4 อ่าน cookie ตัวเดียว + ทำหน้าจำกัดสิทธิ์ <span class="slide-ref">สไลด์ 24–25</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>req.cookies[&quot;name&quot;]</code> อ่าน cookie ตามชื่อ ตัวอย่างนี้ให้ดูเนื้อหาได้เฉพาะเมื่อมีครบทั้ง cookie#1 และ cookie#2 ไม่งั้นตอบ 401</strong></p>
+<pre><code class="language-js">router.get('/restrict', (req, res)=&gt;{
+    const mycookie1 = req.cookies['cookie#1'];
+    const mycookie2 = req.cookies['cookie#2'];
+
+    if(mycookie1 &amp;&amp; mycookie2) // If both cookies exists
+         res.send('You are allowed to see the content');
+    else
+         res.status(401).end('Error 401: You need to have our secret cookies');
+});
+</code></pre>
+<ul>
+<li><strong><code>req.cookies[&quot;name&quot;]</code></strong> = อ่าน cookie ที่มี <strong>ชื่อ</strong> ตามที่ระบุ (ถ้าไม่มีได้ <code>undefined</code>)</li>
+<li>ใช้ cookie ทำ <strong>restricted content</strong>: ถ้า <strong>ไม่มีครบทั้ง</strong> cookie#1 <strong>และ</strong> cookie#2 → แสดงข้อความ error</li>
+<li><code>res.status(401).end(...)</code> = ตั้ง status 401 แล้วจบ response พร้อมข้อความ</li>
+</ul>
+<p><strong>ผลตามรูปสไลด์ 25:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สถานการณ์</th>
+<th>cookie ใน DevTools</th>
+<th>ผลบนหน้า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ผู้ใช้เคยเข้า <code>/setCookie</code> มาก่อน → มีทั้งสองตัว</td>
+<td>cookie#1, cookie#2</td>
+<td><code>You are allowed to see the content</code></td>
+</tr>
+<tr>
+<td>ผู้ใช้ไม่เคยเข้า <code>/setCookie</code> หรือ cookie ถูกลบ</td>
+<td>เหลือแค่ cookie#2</td>
+<td><code>Error 401: You need to have our secret cookies</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cookie ที่ส่งไป</th>
+<th>status</th>
+<th>body</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cookie#1 + cookie#2</td>
+<td>200</td>
+<td><code>You are allowed to see the content</code></td>
+</tr>
+<tr>
+<td>cookie#2 อย่างเดียว</td>
+<td>401</td>
+<td><code>Error 401: You need to have our secret cookies</code></td>
+</tr>
+<tr>
+<td>ไม่มีเลย</td>
+<td>401</td>
+<td><code>Error 401: You need to have our secret cookies</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เงื่อนไขใช้ <code>&amp;&amp;</code> → ขาดตัวใดตัวหนึ่งก็ไม่ผ่าน (กรณีในรูปที่เหลือ cookie#2 ตัวเดียวก็ได้ 401)</p>
+</blockquote>
+<h3 id="65-ตั้งอายุและลบ-cookie-สไลด์-26">6.5 ตั้งอายุและลบ cookie <span class="slide-ref">สไลด์ 26</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>option ที่สามของ <code>res.cookie</code> ใช้ตั้งเวลาหมดอายุ (<code>expire</code> ตามสไลด์) หรืออายุ (<code>maxAge</code>) ส่วน <code>res.clearCookie(name)</code> ใช้ลบ</strong></p>
+<pre><code class="language-js">// Expires after 360000 ms from the time it is set.
+res.cookie(name, &quot;value&quot;, {expire: 360000 + Date.now()});
+
+// Expires after 360000 ms after the time is set
+res.cookie(name, &quot;value&quot;, {maxAge: 360000});
+
+// Delete the cookie with the specific name e.g. &quot;username&quot;
+res.clearCookie(&quot;username&quot;);
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ต้องการ</th>
+<th>วิธีตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ตั้ง <strong>วันเวลาหมดอายุ</strong> (expiration date/time)</td>
+<td><code>{expire: 360000 + Date.now()}</code> — เวลาปัจจุบัน + 360000 ms</td>
+</tr>
+<tr>
+<td>ตั้ง <strong>ระยะเวลา (age)</strong></td>
+<td><code>{maxAge: 360000}</code> — อยู่ได้ 360000 ms (= 6 นาที) นับจากตอนตั้ง</td>
+</tr>
+<tr>
+<td><strong>ลบ</strong> cookie</td>
+<td><code>res.clearCookie(&quot;username&quot;)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ผลรันจริง</strong> (header <code>Set-Cookie</code> ที่ได้):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>โค้ด</th>
+<th>Set-Cookie ที่ได้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{expire: 360000 + Date.now()}</code></td>
+<td><code>a=value; Path=/</code> — <strong>ไม่มี Expires</strong></td>
+</tr>
+<tr>
+<td><code>{maxAge: 360000}</code></td>
+<td><code>b=value; Max-Age=360; Path=/; Expires=&lt;อีก 6 นาที&gt;</code></td>
+</tr>
+<tr>
+<td><code>res.clearCookie(&quot;username&quot;)</code></td>
+<td><code>username=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ตอนรันจริง option <strong><code>expire</code></strong> (ไม่มี s) ตามสไลด์ <strong>ไม่มีผล</strong> cookie ยังเป็นแบบ Session ส่วน <code>maxAge</code> ใช้ได้ (ใส่หน่วย ms แต่ header เป็นวินาที: 360000 ms → <code>Max-Age=360</code>) ถ้าต้องการกำหนดวันหมดอายุจริง ตอนทดลองต้องใช้ <code>expires: new Date(360000 + Date.now())</code> จึงจะได้ header Expires — ถ้าข้อสอบถามตามสไลด์ ให้ตอบตามสไลด์ (<code>expire</code> = วันเวลาหมดอายุ, <code>maxAge</code> = อายุ)</p>
+<p class="c-tip">💡 <code>clearCookie</code> ทำงานโดยส่ง cookie ชื่อเดิมที่ <strong>หมดอายุไปแล้ว (ปี 1970)</strong> browser จึงลบทิ้ง</p>
+</blockquote>
+<hr />
+<h2 id="7-ตัวอย่าง-login-logout-ด้วย-cookie-ทำงานยังไง-สไลด์-2728">7. ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง? <span class="slide-ref">สไลด์ 27–28</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>login = สร้าง cookie <code>tokenID</code> เป็นเหมือนบัตรผ่าน, หน้า <code>/restrict</code> เช็กว่ามี <code>tokenID</code> ไหม, logout = <code>res.clearCookie(&quot;tokenID&quot;)</code></strong></p>
+<p><strong>ส่วนที่ 1 — ฟอร์มและ login</strong> (สไลด์ 27):</p>
+<pre><code class="language-js">/* Require: express and cookie-parser */
+...
+/* Request at /: showing the login form */
+router.get('/', (req, res) =&gt; {
+    res.sendFile(path.join(`${__dirname}/html/login.html`));
+})
+
+// Form submitted via HTTP GET
+router.get(&quot;/login&quot;, function (req, res) {
+   /* Create a cookie as a token
+   Note: In practice: you need to verify the username/
+         password before proceed to this step. */
+   console.log(&quot;Access login&quot;);
+   res.cookie('tokenID', 'some-random-session-ID');
+   console.log('Cookie created!!')
+   res.send('Login !!');
+});
+</code></pre>
+<ul>
+<li><code>/</code> ส่งฟอร์ม <code>login.html</code> (ในรูป: ช่อง Username, Password, ปุ่ม Login / Cancel — แท็บชื่อ Authentication)</li>
+<li>ฟอร์มส่งแบบ <strong>HTTP GET</strong> ไป <code>/login</code> → สร้าง cookie <strong><code>tokenID = 'some-random-session-ID'</code></strong> เป็น token</li>
+<li><strong>Note ในโค้ด:</strong> ของจริงต้อง <strong>ตรวจ username/password ก่อน</strong> ถึงจะสร้าง token (ตัวอย่างนี้ข้ามไป)</li>
+<li>terminal: <code>Server listening on port: 3000</code> → <code>Access login</code> → <code>Cookie created!!</code></li>
+</ul>
+<p><strong>ส่วนที่ 2 — หน้าจำกัดสิทธิ์และ logout</strong> (สไลด์ 28):</p>
+<pre><code class="language-js">/* Check whether user hold the secret token or not */
+router.get('/restrict', (req, res)=&gt;{
+   /* Retrive only 'tokenID' cookie */
+   const tokenID = req.cookies['tokenID'];
+   console.log(`Accessed the restricted page ${tokenID}`)
+
+   if(tokenID) // If tokenID is not null
+       res.send('Valid Only the ones with cookie only')
+   else
+       res.status(401).end('Error 401: You need to have our secret cookies')
+})
+
+/*When loging out, clear a token cookie */
+router.get(&quot;/logout&quot;, function (req, res) {
+    /* Create a cookie with the given name and value */
+    console.log(&quot;I need to logout&quot;);
+    res.clearCookie(&quot;tokenID&quot;);
+    console.log('Cookie deleted!!')
+    res.send('Logout !!');
+});
+...
+</code></pre>
+<ul>
+<li>terminal หลัง login แล้วเข้า <code>/restrict</code>: <code>Access login</code> → <code>Cookie created!!</code> → <strong><code>Accessed the restricted page some-random-session-ID</code></strong></li>
+<li>browser <code>localhost:3000/restrict</code>: <strong><code>Valid Only the ones with cookie only</code></strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L11-03-login-logout.png" alt="ลำดับ login → restrict → logout" /></p>
+<p><strong>ผลรันจริง</strong> (ทำตามลำดับ):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>request</th>
+<th>status / body</th>
+<th>console</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>GET <code>/restrict</code> (ยังไม่ login)</td>
+<td>401 <code>Error 401: You need to have our secret cookies</code></td>
+<td><code>Accessed the restricted page undefined</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>GET <code>/login</code></td>
+<td>200 <code>Login !!</code> + <code>Set-Cookie: tokenID=some-random-session-ID; Path=/</code></td>
+<td><code>Access login</code> / <code>Cookie created!!</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>GET <code>/restrict</code> (มี tokenID)</td>
+<td>200 <code>Valid Only the ones with cookie only</code></td>
+<td><code>Accessed the restricted page some-random-session-ID</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>GET <code>/logout</code></td>
+<td>200 <code>Logout !!</code> + <code>Set-Cookie: tokenID=; ... Expires=Thu, 01 Jan 1970</code></td>
+<td><code>I need to logout</code> / <code>Cookie deleted!!</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>GET <code>/restrict</code> (cookie ถูกลบแล้ว)</td>
+<td>401 <code>Error 401: ...</code></td>
+<td><code>Accessed the restricted page undefined</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ comment ใน <code>/logout</code> เขียนว่า &quot;Create a cookie with the given name and value&quot; แต่โค้ดจริง <strong>ลบ</strong> cookie (<code>clearCookie</code>) — comment ลอกมาจากตัวอย่างก่อนหน้า</p>
+<p class="c-warn">⚠️ สไลด์ 27 terminal แสดง <code>[nodemon] 3.0.1</code> ส่วนหน้าอื่นเป็น 3.1.14 — แค่ภาพจับคนละเวอร์ชัน ไม่กระทบเนื้อหา</p>
+</blockquote>
+<hr />
+<h2 id="8-session-ต่างจาก-cookie-ยังไง-สไลด์-2930">8. Session ต่างจาก Cookie ยังไง? <span class="slide-ref">สไลด์ 29–30</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>cookie ส่งข้อมูลระหว่าง client กับ server ได้ แต่ client อ่านได้ ส่วน session เก็บข้อมูลไว้ที่ server (client แก้/อ่านไม่ได้) และใช้ได้ทุกหน้าในเว็บแอปเดียวกัน</strong></p>
+<p><strong>Cookies</strong> (สไลด์ 29):</p>
+<ul>
+<li>Cookies (และ <strong>URL parameters</strong>) ใช้ <strong>ขนส่งข้อมูลระหว่าง client กับ server</strong> ได้</li>
+<li>เมื่อสร้าง cookie แล้ว มันจะ <strong>ถูกส่งไปกับทุก request</strong></li>
+<li><strong>แต่</strong> cookie <strong>อ่านได้และอยู่ฝั่ง client</strong></li>
+<li>คำถามที่สไลด์ทิ้งไว้: <em>แล้วข้อมูลที่ต้องการเก็บไว้ฝั่ง server ล่ะ?</em> → คำตอบคือ Session</li>
+</ul>
+<p><strong>Session</strong> (สไลด์ 30):</p>
+<ul>
+<li>ใช้ session เก็บข้อมูลที่ <strong>ใช้ได้ทุกหน้า</strong> ในเว็บแอปพลิเคชันเดียว</li>
+<li>เก็บได้ทั้ง <strong>ข้อมูลของ server</strong> หรือ <strong>ข้อมูลของ client</strong> โดยเก็บไว้ <strong>ฝั่ง server (protected from clients)</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L11-04-cookie-vs-session.png" alt="Cookie ฝั่ง client vs Session ฝั่ง server" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Cookie</th>
+<th>Session</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เก็บที่</td>
+<td><strong>client</strong> (browser)</td>
+<td><strong>server</strong></td>
+</tr>
+<tr>
+<td>client อ่านได้ไหม</td>
+<td><strong>อ่านได้</strong></td>
+<td>ไม่ได้ (protected from clients)</td>
+</tr>
+<tr>
+<td>package ใน Node.js</td>
+<td><code>cookie-parser</code></td>
+<td><code>express-session</code></td>
+</tr>
+<tr>
+<td>สร้าง/อ่าน</td>
+<td><code>res.cookie(...)</code> / <code>req.cookies</code></td>
+<td><code>req.session.&lt;name&gt; = ...</code> / <code>req.session.&lt;name&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนฝากของที่ตู้ล็อกเกอร์: <strong>cookie</strong> คือพกของติดตัวไปเอง ใครก็เปิดกระเป๋าดูได้ | <strong>session</strong> คือของอยู่ในตู้ที่ร้าน (server) ลูกค้าถือแค่กุญแจ/เลขตู้ไว้แสดงตัว</p>
+</blockquote>
+<hr />
+<h2 id="9-ใช้-express-session-ยังไง-สไลด์-3134">9. ใช้ <code>express-session</code> ยังไง? <span class="slide-ref">สไลด์ 31–34</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง <code>express-session</code> → <code>router.use(session({secret, resave, saveUninitialized}))</code> → อ่าน/เขียนข้อมูลผ่าน <code>req.session.&lt;name&gt;</code> ซึ่งใช้ได้จากทุก route ค่าเริ่มต้นเก็บใน MemoryStore (หายเมื่อ restart server)</strong></p>
+<h3 id="91-ติดตั้งและที่เก็บ-session-สไลด์-31">9.1 ติดตั้งและที่เก็บ session <span class="slide-ref">สไลด์ 31</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>express-session</code> คือ middleware จัดการ session และเก็บไว้ใน session storage ซึ่งค่าเริ่มต้นคือ MemoryStore (ใช้ตอนพัฒนาเท่านั้น)</strong></p>
+<ul>
+<li>ติดตั้ง: <code>npm install express-session</code></li>
+<li><strong>express-session</strong> = middleware ที่ <strong>จัดการ sessions</strong> และ <strong>เก็บไว้ใน session storage</strong> (ค่าเริ่มต้น <strong><code>MemoryStore</code></strong>)</li>
+<li><strong>Note:</strong> <code>MemoryStore</code> <strong>ตั้งใจไม่ออกแบบมาสำหรับ production</strong> — ทำไว้สำหรับ <strong>debugging และ developing</strong> ถ้าขึ้น production ให้ใช้ session store อื่นที่เข้ากันได้แทน</li>
+<li><code>package.json</code>: <code>&quot;cookie-parser&quot;: &quot;^1.4.7&quot;</code>, <code>&quot;dotenv&quot;: &quot;^18.0.9&quot;</code>, <code>&quot;express&quot;: &quot;^5.3.0&quot;</code>, <strong><code>&quot;express-session&quot;: &quot;^1.19.0&quot;</code></strong>, <code>&quot;nodemon&quot;: &quot;^3.1.14&quot;</code></li>
+</ul>
+<h3 id="92-ตั้งค่า-session-middleware-สไลด์-32">9.2 ตั้งค่า session middleware <span class="slide-ref">สไลด์ 32</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong><code>secret</code> ใช้ sign session ID, <code>resave: false</code> = บันทึกเฉพาะเมื่อ session ถูกแก้, <code>saveUninitialized: true</code> = สร้าง session ให้ทุกผู้ใช้แม้ยังไม่ได้ใช้</strong></p>
+<pre><code class="language-js">const express = require('express');
+const app = express();
+const
+const router = express.Router();
+app.use('/', router);
+
+/* Session */
+const session = require('express-session');
+router.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+}));
+
+// ...to be continued next slide ...
+</code></pre>
+<p><code>.env</code>:</p>
+<pre><code>PORT=3000
+SESSION_SECRET=mysecretkey
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>ค่าในตัวอย่าง</th>
+<th>ความหมายตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>secret</code></strong></td>
+<td><code>process.env.SESSION_SECRET</code></td>
+<td>สตริงลับที่ใช้ <strong>sign session ID</strong> (เช่น สตริงสุ่ม) — เก็บไว้ใน <code>.env</code></td>
+</tr>
+<tr>
+<td><strong><code>resave</code></strong></td>
+<td><code>false</code></td>
+<td><strong>บันทึกเฉพาะเมื่อ session ถูกแก้ไข</strong></td>
+</tr>
+<tr>
+<td><strong><code>saveUninitialized</code></strong></td>
+<td><code>true</code></td>
+<td><strong>สร้าง session ให้ผู้ใช้ทุกคน</strong> (แม้ยังไม่ได้ใช้)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ บรรทัดที่ 3 ในสไลด์ 32 มีแค่คำว่า <code>const</code> ไม่จบประโยค (น่าจะเป็นบรรทัด require dotenv ที่ตกหล่น) — ถ้าพิมพ์ตามจะ SyntaxError และ <strong>ต้องเรียก <code>dotenv.config()</code></strong> ไม่งั้น <code>process.env.SESSION_SECRET</code> เป็น <code>undefined</code>
+<strong>ผลรันจริงเมื่อไม่มี secret:</strong> server เปิดได้ (มี warning <code>express-session deprecated req.secret; provide secret option</code>) แต่พอมี request เข้ามา ได้ <strong>500</strong> พร้อม <code>Error: secret option required for sessions</code></p>
+</blockquote>
+<h3 id="93-สร้างอ่านตัวแปร-session-นับจำนวนครั้งที่เข้าหน้า-สไลด์-33">9.3 สร้าง/อ่านตัวแปร session: นับจำนวนครั้งที่เข้าหน้า <span class="slide-ref">สไลด์ 33</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ถ้า <code>req.session.numviews</code> มีค่าแล้วให้ +1 ถ้ายังไม่มีให้ตั้งเป็น 1 — ข้อมูลอยู่ที่ server แยกตามผู้ใช้แต่ละคน</strong></p>
+<pre><code class="language-js">/* continue from the previous slide */
+router.get(&quot;/pageview&quot;, function (req, res) {
+    /* Set Session */
+    // Check &quot;numviews&quot; exists
+    if(req.session.numviews){
+        req.session.numviews++;
+        console.log(`Visited${req.session.numviews} times`);
+    }
+    else {
+        //Create numviews
+        req.session.numviews=1;
+        console.log(&quot;First time visited&quot;);
+    }
+    res.send(&quot;Session created!!!&quot;);
+});
+/* ...Server listening at Port 3000 ... */
+</code></pre>
+<ul>
+<li><strong><code>req.session</code></strong> = ใช้ <strong>สร้างและอ่าน</strong> ตัวแปร session</li>
+<li><strong><code>req.session.&lt;name&gt;</code></strong> = อ่านตัวแปร session ตาม <strong>ชื่อ</strong> ที่ระบุ (ที่นี่คือ <code>numviews</code>)</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L11-05-pageview.png" alt="ลำดับการทำงานของ /pageview" /></p>
+<p><strong>เฉลยทีละขั้น</strong> (ผู้ใช้คนเดียวกด <code>/pageview</code> ซ้ำ ๆ):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ครั้งที่</th>
+<th><code>numviews</code> ก่อน</th>
+<th>เข้า if หรือ else</th>
+<th><code>numviews</code> หลัง</th>
+<th>console</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>undefined</code> (falsy)</td>
+<td>else</td>
+<td>1</td>
+<td><code>First time visited</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>if</td>
+<td>2</td>
+<td><code>Visited2 times</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>2</td>
+<td>if</td>
+<td>3</td>
+<td><code>Visited3 times</code></td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>10</td>
+<td>9</td>
+<td>if</td>
+<td>10</td>
+<td><code>Visited10 times</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>ทุกครั้ง browser ได้ข้อความเดียวกันคือ <strong><code>Session created!!!</code></strong></p>
+<h3 id="94-ผลลัพธ์ตามสไลด์-และผลรันจริง-สไลด์-34">9.4 ผลลัพธ์ตามสไลด์ และผลรันจริง <span class="slide-ref">สไลด์ 34</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>session ใช้ได้จากทุก route ผ่าน <code>req.session.&lt;name&gt;</code> และตัวนับเพิ่มต่อเนื่องตราบที่ server ไม่ restart</strong></p>
+<p>ตามสไลด์:</p>
+<ul>
+<li>browser ซ้าย: <code>Session created!!!</code> | terminal: <code>[nodemon] restarting due to changes...</code> → <code>Server listening on port: 3000</code> → <code>First time visited</code></li>
+<li>browser ขวา: <code>Visited 10 times</code> | terminal: restart → <code>First time visited</code> → <code>Visited 2 times</code> … <code>Visited 10 times</code></li>
+<li><strong>The session can be accessed from other routes across the server using <code>req.session.&lt;name&gt;</code></strong></li>
+</ul>
+<p><strong>ผลรันจริง:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>การทดลอง</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เข้า <code>/pageview</code> 4 ครั้งด้วย browser เดียวกัน</td>
+<td>body ทุกครั้ง <code>Session created!!!</code> · console <code>First time visited</code>, <code>Visited2 times</code>, <code>Visited3 times</code>, <code>Visited4 times</code> · ครั้งแรก server ส่ง <code>Set-Cookie: connect.sid=...</code> มาครั้งเดียว</td>
+</tr>
+<tr>
+<td>route อื่น (<code>/other</code>) อ่าน <code>req.session.numviews</code></td>
+<td>ได้ <code>4</code> → ยืนยันว่าใช้ข้าม route ได้</td>
+</tr>
+<tr>
+<td>request ที่ไม่มี cookie (เหมือน browser อื่น)</td>
+<td>console <code>First time visited</code> — แต่ละผู้ใช้มี session ของตัวเอง</td>
+</tr>
+<tr>
+<td><strong>restart server</strong> แล้วใช้ cookie เดิม</td>
+<td>console กลับไปเป็น <code>First time visited</code> — ข้อมูลใน <strong>MemoryStore หายเมื่อ restart</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>3 จุดในสไลด์ 33–34 ไม่ตรงกับโค้ด:</strong></p>
+<ol>
+<li>โค้ดเขียน <code>`Visited${...} times`</code> (ไม่มีเว้นวรรคหลัง Visited) → ผลจริงคือ <strong><code>Visited2 times</code></strong> ส่วน terminal ในสไลด์ 34 แสดง <code>Visited 2 times</code></li>
+<li>browser ขวาในสไลด์ 34 แสดง <strong><code>Visited 10 times</code></strong> แต่โค้ด <code>res.send(&quot;Session created!!!&quot;)</code> ทุกครั้ง → ผลจริงหน้าเว็บขึ้น <code>Session created!!!</code> เสมอ (ข้อความ &quot;Visited …&quot; อยู่แค่ใน console)</li>
+<li>terminal ในสไลด์ 34 มี <code>First time visited</code> <strong>สองครั้ง</strong> หลัง <code>[nodemon] restarting due to changes...</code> — เป็นเพราะ nodemon restart server แล้ว MemoryStore ถูกล้าง (ตรงกับผลรันจริงข้อสุดท้าย)</li>
+</ol>
+<p class="c-tip">💡 cookie ชื่อ <code>connect.sid</code> ที่เห็นตอนรันคือตัวที่พก <strong>session ID</strong> (ที่ sign ด้วย <code>secret</code>) ให้ server รู้ว่าเป็น session ของใคร — ตรงกับแนวคิด &quot;unique identifier ใน Cookie header&quot; ของสไลด์ 19</p>
+</blockquote>
+<hr />
+<h2 id="10-ต่อ-nodejs-กับ-database-ต้องใช้อะไร-สไลด์-3536">10. ต่อ Node.js กับ database ต้องใช้อะไร? <span class="slide-ref">สไลด์ 35–36</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>มีหลาย package สำหรับต่อ MySQL วิชานี้ใช้ <code>mysql2</code> (<code>npm install mysql2</code>) เพื่อต่อ DB และจัดการข้อมูลด้วย SQL ทั้ง query, insert, update, delete</strong></p>
+<p>(สไลด์ 35 เป็นหน้าคั่นหัวข้อ &quot;Node.js + Database&quot;)</p>
+<ul>
+<li>มีหลาย package สำหรับต่อ <strong>MySQL</strong> กับ Node.js/Express เช่น <code>mysql2</code></li>
+<li><strong>ในวิชานี้ใช้ <code>mysql2</code></strong>: <code>npm install mysql2</code></li>
+<li>ใช้ <strong>เชื่อมต่อ database</strong> และ <strong>จัดการข้อมูลผ่าน SQL</strong> เช่น query แสดง records, insert record ใหม่, update และ delete</li>
+</ul>
+<hr />
+<h2 id="11-recap-database-relational-db-tinycollege-sql-สไลด์-3739">11. RECAP Database: relational DB, tinycollege, SQL <span class="slide-ref">สไลด์ 37–39</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>relational database ประกอบด้วย schemas, tables, queries ฯลฯ ตัวอย่างในบทคือฐาน tinycollege 6 ตาราง 9 ความสัมพันธ์ และใช้ SQL (INSERT/UPDATE/DELETE/SELECT) จัดการข้อมูล</strong></p>
+<h3 id="111-database-คืออะไร-สไลด์-37">11.1 Database คืออะไร? <span class="slide-ref">สไลด์ 37</span></h3>
+<ul>
+<li><strong>Database</strong> = ชุดข้อมูลที่จัดระเบียบไว้ มีหลายประเภท เช่น <strong>Relational database</strong>, <strong>Graph database</strong>, <strong>XML database</strong></li>
+<li><strong>Relational database</strong> = ชุดของ <strong>schemas, tables, queries, reports, views</strong> และองค์ประกอบอื่น ๆ</li>
+</ul>
+<h3 id="112-ฐานข้อมูลตัวอย่าง-tinycollege-สไลด์-38">11.2 ฐานข้อมูลตัวอย่าง <code>tinycollege</code> <span class="slide-ref">สไลด์ 38</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>6 ตาราง (Department, Professor, Student, Enroll, Class, Course) เชื่อมกันด้วย 9 ความสัมพันธ์</strong></p>
+<p><img loading="lazy" src="diagrams/L11-06-tinycollege.png" alt="โครงสร้าง tinycollege (วาดใหม่จากสไลด์ 38)" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ตาราง</th>
+<th>คอลัมน์ (🔑 = ขีดเส้นใต้ในสไลด์ / primary key)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Department</strong></td>
+<td>🔑 dept_code, dept_name, emp_num, dept_address, dept_extension</td>
+</tr>
+<tr>
+<td><strong>Professor</strong></td>
+<td>🔑 emp_num, emp_fname, emp_lname, emp_dob, dept_code, prof_extension</td>
+</tr>
+<tr>
+<td><strong>Student</strong></td>
+<td>🔑 stu_num, stu_fname, stu_lname, stu_class, stu_gpa, dept_code, emp_num</td>
+</tr>
+<tr>
+<td><strong>Enroll</strong></td>
+<td>🔑 class_code, 🔑 stu_num, grade, credit</td>
+</tr>
+<tr>
+<td><strong>Class</strong></td>
+<td>🔑 class_code, course_code, class_section, class_time, class_room, emp_num</td>
+</tr>
+<tr>
+<td><strong>Course</strong></td>
+<td>🔑 course_code, course_name, crs_credit, dept_code</td>
+</tr>
+</tbody>
+</table></div>
+<p>ความสัมพันธ์ (1)–(9) ตามสไลด์:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ความหมาย</th>
+<th>เชื่อมผ่านคอลัมน์ (ตามเส้นในรูป)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>Every professor works in a department</td>
+<td>Professor.dept_code → Department</td>
+</tr>
+<tr>
+<td>(2)</td>
+<td>Every department has a professor as the head of the department</td>
+<td>Department.emp_num → Professor</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td>Every student study in a department</td>
+<td>Student.dept_code → Department</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Every student has a professor as his/her advisor</td>
+<td>Student.emp_num → Professor</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>A class is taught by a professor</td>
+<td>Class.emp_num → Professor</td>
+</tr>
+<tr>
+<td>(6)</td>
+<td>A course is offered by a department</td>
+<td>Course.dept_code → Department</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td>Students enroll many classes</td>
+<td>Enroll.stu_num → Student</td>
+</tr>
+<tr>
+<td>(8)</td>
+<td>Classes have been enrolled by many students</td>
+<td>Enroll.class_code → Class</td>
+</tr>
+<tr>
+<td>(9)</td>
+<td>A class is belonged to a course</td>
+<td>Class.course_code → Course</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 Enroll มี key 2 ตัว (class_code + stu_num) เพราะเป็นตารางกลางที่จับคู่ &quot;นักศึกษาหลายคน ↔ คลาสหลายคลาส&quot; ตาม (7) และ (8)</p>
+</blockquote>
+<h3 id="113-sql-สไลด์-39">11.3 SQL <span class="slide-ref">สไลด์ 39</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>SQL เป็นภาษามาตรฐานสำหรับเก็บ แก้ไข และดึงข้อมูลใน database และจัดการ database ใน DBMS</strong></p>
+<ul>
+<li><strong>SQL</strong> = <em>a standard language for storing, manipulating and retrieving data in databases and manage the database in the database management system</em></li>
+<li><strong>Basic SQL Command:</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กลุ่ม</th>
+<th>คำสั่ง</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เปลี่ยนข้อมูล</td>
+<td><strong>INSERT</strong>, <strong>UPDATE</strong>, <strong>DELETE</strong></td>
+</tr>
+<tr>
+<td>ดึงข้อมูล</td>
+<td><strong>SELECT</strong> พร้อม clause: <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, <code>ORDER BY</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="12-เตรียม-mysql-server-workbench-และ-db-user-ยังไง-สไลด์-4044">12. เตรียม MySQL Server, Workbench และ DB user ยังไง? <span class="slide-ref">สไลด์ 40–44</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง MySQL Server + MySQL Workbench → สร้าง DB/ตาราง (GUI หรือ script) → สร้าง user (username, password, host = localhost) → ให้สิทธิ์ schema ที่ต้องใช้</strong></p>
+<p><img loading="lazy" src="diagrams/L11-07-db-setup.png" alt="ขั้นตอนเตรียม DB จนถึง query จาก Node" /></p>
+<p><strong>MySQL Server &amp; Workbench</strong> (สไลด์ 40):</p>
+<ul>
+<li>ใช้ <strong>MySQL Workbench</strong> เข้าถึง <strong>MySQL server</strong> เพื่อจัดการ relational database</li>
+<li>ดาวน์โหลด MySQL Server: <code>https://dev.mysql.com/downloads/mysql/</code></li>
+<li>ดาวน์โหลด MySQL Workbench: <code>https://dev.mysql.com/downloads/workbench/</code></li>
+</ul>
+<p><strong>MySQL Workbench</strong> (สไลด์ 41):</p>
+<ul>
+<li>หน้า Welcome มีกล่อง connection <strong>Local instance 3306</strong> (user <code>root</code>, <code>localhost:3306</code>)</li>
+<li><strong>Note: ต้องใช้ root account และ credentials</strong> เพื่อเข้า server</li>
+<li>หลังเข้าแล้ว แผง SCHEMAS แสดงฐาน <strong>tinycollege</strong> ซึ่งมี Tables: class, course, department, enroll, professor, student</li>
+</ul>
+<p><strong>Prepare DB and User</strong> (สไลด์ 42):</p>
+<ul>
+<li>สร้าง <strong>DB / tables / attributes</strong> ด้วย GUI ของ Workbench หรือ <strong>รัน script</strong> (เช่น <code>tinycollege.sql</code>)</li>
+<li>สร้าง <strong>user account</strong> ไว้ใช้เชื่อมต่อ:
+<ul>
+<li><strong>Username</strong></li>
+<li><strong>Password</strong></li>
+<li><strong>Host</strong> เช่น <code>localhost</code></li>
+</ul>
+</li>
+<li>เพิ่ม <strong>privilege</strong> เช่น SQL commands, DDL commands</li>
+</ul>
+<p><strong>สร้าง user</strong> (สไลด์ 43): Workbench → <strong>&quot;Server&quot; &gt; &quot;Users and Privileges&quot;</strong> → <strong>Add Account</strong></p>
+<ul>
+<li>ในรูป: Login Name = <code>tinyCollegeUser</code>, Authentication Type = Standard, <strong>Limit to Hosts Matching = <code>localhost</code></strong>, ใส่ Password และ Confirm Password</li>
+</ul>
+<p><strong>ให้สิทธิ์</strong> (สไลด์ 44): แท็บ <strong>Schema Privileges</strong> → ตั้ง <strong>schema privilege / roles</strong></p>
+<ul>
+<li>ในรูป: บัญชี <code>tinyCollegeUser@localhost</code> ได้สิทธิ์บน schema <strong>tinycollege</strong> = <strong>DELETE, INSERT, SELECT, UPDATE</strong> (Object Rights = Allowed SQL operations)</li>
+<li>หน้าเดียวกันยังมีกลุ่ม DDL Rights (CREATE, ALTER, DROP …) และ Other Rights (GRANT OPTION …) ที่ในรูปไม่ได้ติ๊ก</li>
+</ul>
+<hr />
+<h2 id="13-เชื่อม-nodejs-กับ-mysql-ยังไง-สไลด์-4546">13. เชื่อม Node.js กับ MySQL ยังไง? <span class="slide-ref">สไลด์ 45–46</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตั้ง express, nodemon, dotenv, mysql2 → เก็บข้อมูลเชื่อมต่อใน <code>.env</code> → <code>mysql.createConnection({host, user, password, database})</code> → <code>connection.connect(cb)</code></strong></p>
+<h3 id="131-ตั้งโปรเจกต์-สไลด์-45">13.1 ตั้งโปรเจกต์ <span class="slide-ref">สไลด์ 45</span></h3>
+<ol>
+<li>สร้างโปรเจกต์ใหม่:<pre><code>npm init
+npm install express
+npm install nodemon
+npm install dotenv
+npm install mysql2
+</code></pre>
+</li>
+<li>สร้าง entry point เช่น <code>app.js</code> ที่มี routing พื้นฐานและรัน server</li>
+<li>สร้าง <code>.env</code> ที่มีตัวแปร เช่น <code>PORT</code>, <code>DB_USER</code>, <code>DB_PWD</code>, <code>DB_HOST</code> ฯลฯ</li>
+</ol>
+<p><code>package.json</code> → <code>&quot;dotenv&quot;: &quot;^18.0.9&quot;</code>, <code>&quot;express&quot;: &quot;^5.3.0&quot;</code>, <strong><code>&quot;mysql2&quot;: &quot;^3.24.6&quot;</code></strong>, <code>&quot;nodemon&quot;: &quot;^3.1.14&quot;</code></p>
+<h3 id="132-โค้ดเชื่อมต่อ-สไลด์-46">13.2 โค้ดเชื่อมต่อ <span class="slide-ref">สไลด์ 46</span></h3>
+<pre><code class="language-js">/* Import modules here: express, dotenv, router */
+/* Config dotenv and router */
+
+/* Connection to MySQL */
+const mysql = require('mysql2');
+var connection = mysql.createConnection({
+    host     : process.env.MYSQL_HOST,
+    user     : process.env.MYSQL_USERNAME,
+    password : process.env.MYSQL_PASSWORD,
+    database : process.env.MYSQL_DATABASE
+});
+
+/* Connect to DB */
+connection.connect(function(err){
+    if(err) throw err;
+    console.log(`Connected DB: ${process.env.MYSQL_DATABASE}`);
+});
+
+/* Run Server */
+app.listen(process.env.PORT, function() {...});
+</code></pre>
+<p><code>.env</code>:</p>
+<pre><code># Node Env. Var
+PORT=3000
+
+# For DB connection string
+MYSQL_HOST=localhost
+MYSQL_USERNAME=&lt;YOUR USERNAME&gt;
+MYSQL_PASSWORD=*************
+MYSQL_DATABASE=tinycollege
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>ทำอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mysql.createConnection({...})</code></td>
+<td>สร้าง object การเชื่อมต่อจาก 4 ค่า: <strong>host, user, password, database</strong> (อ่านจาก <code>.env</code>)</td>
+</tr>
+<tr>
+<td><code>connection.connect(callback)</code></td>
+<td>เชื่อมต่อจริง ถ้า <code>err</code> → <code>throw err</code> ถ้าสำเร็จ log ชื่อฐาน</td>
+</tr>
+</tbody>
+</table></div>
+<p>ผลใน terminal (สไลด์ 46):</p>
+<pre><code>[nodemon] starting `node app.js`
+Server listening at Port 3000
+Connected DB: tinycollege
+</code></pre>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 45 ยกตัวอย่างชื่อตัวแปร <code>DB_USER</code>, <code>DB_PWD</code>, <code>DB_HOST</code> แต่โค้ดสไลด์ 46 ใช้ <code>MYSQL_HOST</code>, <code>MYSQL_USERNAME</code>, <code>MYSQL_PASSWORD</code>, <code>MYSQL_DATABASE</code> — ชื่อจะเป็นอะไรก็ได้ แต่ <strong>ชื่อใน <code>.env</code> ต้องตรงกับที่อ่านด้วย <code>process.env.XXX</code></strong></p>
+</blockquote>
+<hr />
+<h2 id="14-รัน-select-แล้วส่งผลเป็น-json-ยังไง-สไลด์-4748">14. รัน SELECT แล้วส่งผลเป็น JSON ยังไง? <span class="slide-ref">สไลด์ 47–48</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เขียน SQL เป็น string → <code>connection.query(sql, function(error, results){...})</code> → <code>results</code> คือ array ของแถว ส่งตรงด้วย <code>res.send(results)</code> ได้ JSON</strong></p>
+<h3 id="141-sql-ตัวอย่าง-สไลด์-47">14.1 SQL ตัวอย่าง <span class="slide-ref">สไลด์ 47</span></h3>
+<p>โจทย์: เลือกวิชาทั้งหมด (รหัสและชื่อ) ที่อยู่ในภาควิชา <code>dept_code='CIS'</code></p>
+<pre><code class="language-sql">SELECT course_code, course_name
+FROM Course
+WHERE dept_code='CIS'
+</code></pre>
+<p>ผล <strong>6 row(s) returned</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>course_code</th>
+<th>course_name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CIS-220</td>
+<td>Intro. to Microcomputing</td>
+</tr>
+<tr>
+<td>CIS-320</td>
+<td>Spreadsheet Applications</td>
+</tr>
+<tr>
+<td>CIS-370</td>
+<td>Intro. to Systems Analysis</td>
+</tr>
+<tr>
+<td>CIS-420</td>
+<td>Database Design and Implementation</td>
+</tr>
+<tr>
+<td>QM-261</td>
+<td>Intro. to Statistics</td>
+</tr>
+<tr>
+<td>QM-362</td>
+<td>Statistical Applications</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 QM-261 กับ QM-362 ก็ออกมาด้วย เพราะเงื่อนไขกรองที่ <strong>dept_code</strong> ของวิชา ไม่ใช่ตัวอักษรนำหน้ารหัสวิชา — ในข้อมูลนี้สองวิชานี้อยู่ภาค CIS</p>
+</blockquote>
+<h3 id="142-รันจาก-nodejs-สไลด์-48">14.2 รันจาก Node.js <span class="slide-ref">สไลด์ 48</span></h3>
+<pre><code class="language-js">...
+/* SELECT */
+router.get(&quot;/cis-courses&quot;, function (req, res) {
+    console.log(&quot;Retrieved CIS courses in tinycollege...&quot;)
+    let sql = `SELECT course_code, course_name
+               FROM Course WHERE dept_code='CIS'`;
+    connection.query( sql, function (error, results) {
+            if (error) throw error;
+            console.log(`${results.length} rows returned`);
+            return res.send(results);
+    });
+});
+...
+</code></pre>
+<p><img loading="lazy" src="diagrams/L11-08-query-flow.png" alt="SELECT และ INSERT ผ่าน mysql2" /></p>
+<p><strong>เฉลยทีละขั้น</strong> เมื่อเปิด <code>localhost:3000/cis-courses</code>:</p>
+<ol>
+<li>log <code>Retrieved CIS courses in tinycollege...</code></li>
+<li><code>connection.query(sql, cb)</code> ส่ง SQL ไป MySQL</li>
+<li>เมื่อเสร็จ callback ได้ <code>(error, results)</code> — ถ้ามี error → <code>throw error</code></li>
+<li><code>results</code> เป็น array 6 แถว → log <strong><code>6 rows returned</code></strong> (<code>results.length</code>)</li>
+<li><code>res.send(results)</code> → browser ได้ <strong>JSON array</strong>:<pre><code>[{&quot;course_code&quot;:&quot;CIS-220&quot;,&quot;course_name&quot;:&quot;Intro. to Microcomputing&quot;},
+ {&quot;course_code&quot;:&quot;CIS-320&quot;,&quot;course_name&quot;:&quot;Spreadsheet Applications&quot;},
+ {&quot;course_code&quot;:&quot;CIS-370&quot;,&quot;course_name&quot;:&quot;Intro. to Systems Analysis&quot;},
+ {&quot;course_code&quot;:&quot;CIS-420&quot;,&quot;course_name&quot;:&quot;Database Design and Implementation&quot;},
+ {&quot;course_code&quot;:&quot;QM-261&quot;,&quot;course_name&quot;:&quot;Intro. to Statistics&quot;},
+ {&quot;course_code&quot;:&quot;QM-362&quot;,&quot;course_name&quot;:&quot;Statistical Applications&quot;}]
+</code></pre>
+แต่ละแถวเป็น object ที่ key = ชื่อคอลัมน์ใน SELECT</li>
+</ol>
+<p><strong>ผลรันจริง (ใช้ connection จำลองที่คืน 6 แถวนี้):</strong> status 200, <code>Content-Type: application/json; charset=utf-8</code>, console <code>6 rows returned</code> ✓</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ โค้ด log ว่า <code>Retrieved CIS courses in tinycollege...</code> แต่ terminal ในสไลด์ 48 แสดง <code>Retrieved all courses in tinycollege...</code> — ภาพ terminal มาจากโค้ดคนละเวอร์ชัน ถ้ารันโค้ดตามสไลด์จะได้ข้อความ &quot;CIS courses&quot;</p>
+</blockquote>
+<hr />
+<h2 id="15-รัน-insert-ยังไง-สไลด์-49">15. รัน INSERT ยังไง? <span class="slide-ref">สไลด์ 49</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>INSERT ใช้ <code>connection.query</code> เหมือนกัน แต่ <code>results.affectedRows</code> บอกจำนวนแถวที่เพิ่ม แล้ว <code>res.redirect</code> กลับไปหน้ารายการ — ตัวอย่างใช้ GET เพื่อความง่าย ปกติควรใช้ POST</strong></p>
+<pre><code class="language-js">...
+/* INSERT */
+/* Note: for this example only, we use GET method for inserting
+new data. Typically, we use POST */
+router.get(&quot;/add241&quot;, function (req, res) {
+    console.log(&quot;Adding 223 ...&quot;);
+    let sql = `INSERT INTO Course
+               VALUES('CIS-223','Introduction to Web
+                      Development',3,'CIS')`;
+    connection.query( sql, function (error, results) {
+            if (error) throw error;
+            console.log(`${results.affectedRows} record inserted`);
+            /* Go back to show all courses at /cis-courses */
+            return res.redirect(&quot;/cis-course&quot;);
+    });
+});
+...
+</code></pre>
+<ul>
+<li><strong>Note:</strong> ตัวอย่างนี้ใช้ <strong>GET</strong> เพื่อ insert ข้อมูลใหม่ <strong>เฉพาะตัวอย่างนี้</strong> — ปกติใช้ <strong>POST</strong></li>
+<li><code>INSERT INTO Course VALUES(...)</code> ไม่ระบุชื่อคอลัมน์ → ค่าต้องเรียงตามคอลัมน์ของ Course: <code>course_code</code>='CIS-223', <code>course_name</code>='Introduction to Web Development', <code>crs_credit</code>=3, <code>dept_code</code>='CIS'</li>
+<li><strong><code>results.affectedRows</code></strong> = จำนวนแถวที่ได้รับผล → <code>1 record inserted</code></li>
+<li><strong><code>res.redirect(...)</code></strong> = ส่ง browser ไปหน้าอื่น (ตั้งใจให้กลับไปแสดงรายการวิชา)</li>
+</ul>
+<p>ผลใน terminal ตามสไลด์:</p>
+<pre><code>Server listening at Port 8080
+Connected DB: tinycollege
+Retrieved all courses in tinycollege...
+6 rows returned
+Adding CIS-212 ...
+1 record inserted
+Retrieved all courses in tinycollege...
+7 rows returned
+</code></pre>
+<p>→ ก่อน insert มี 6 แถว หลัง insert และ redirect กลับมาเป็น <strong>7 แถว</strong> (มี CIS-223 เพิ่ม) รูป browser แสดงแถว <code>CIS-223</code> / <code>Introduction to Web Development</code> / 3 / <code>CIS</code> ในผลลัพธ์</p>
+<p><strong>ผลรันจริง (connection จำลอง ตรวจเฉพาะฝั่ง Express):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET <code>/add241</code></td>
+<td>console <code>Adding 223 ...</code> → <code>1 record inserted</code> → ตอบ <strong>302</strong> <code>Location: /cis-course</code></td>
+</tr>
+<tr>
+<td>browser ตาม redirect ไป <code>/cis-course</code></td>
+<td><strong>404 <code>Cannot GET /cis-course</code></strong> — เพราะ route ที่มีคือ <code>/cis-courses</code> (มี s)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>สไลด์ 49 มีหลายจุดไม่ตรงกัน:</strong></p>
+<ol>
+<li><code>res.redirect(&quot;/cis-course&quot;)</code> ขาด <strong>s</strong> ขณะที่ comment และ route จริงคือ <code>/cis-courses</code> → ถ้ารันตามสไลด์จะได้ 404 (ยืนยันแล้ว) ต้องแก้เป็น <code>res.redirect(&quot;/cis-courses&quot;)</code></li>
+<li>ชื่อ route <code>/add241</code> แต่ log <code>Adding 223 ...</code> และ insert <code>CIS-223</code> ส่วน terminal ในรูปแสดง <code>Adding CIS-212 ...</code> และ <code>Server listening at Port 8080</code> (ไม่ใช่ 3000)</li>
+<li>รูป browser แสดง key ตัวพิมพ์ใหญ่ 4 คอลัมน์ (<code>COURSE_CODE</code>, <code>COURSE_NAME</code>, <code>CRS_CREDIT</code>, <code>DEPT_CODE</code>) ที่ <code>localhost:3001</code> ซึ่งไม่ใช่ผลของโค้ด <code>/cis-courses</code> ที่ SELECT แค่ 2 คอลัมน์ — เป็นภาพจากโค้ดคนละชุด</li>
+</ol>
+<p>ถ้าทำโจทย์ให้ยึดโค้ด แล้วถามอาจารย์ถ้าเจอคำถามเรื่อง output ข้อนี้</p>
+</blockquote>
+<hr />
+<h2 id="16-extra-mysql2-ทำอะไรได้อีก-สไลด์-5051">16. [Extra] mysql2 ทำอะไรได้อีก? <span class="slide-ref">สไลด์ 50–51</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ศึกษาคำสั่ง INSERT / UPDATE / DELETE เพิ่มได้จาก w3schools และ mysql2 รองรับ Promise API และ async/await (ES7)</strong></p>
+<ul>
+<li>เรียนคำสั่ง SQL อื่นเพิ่มเติม:
+<ul>
+<li>INSERT — <code>https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp</code></li>
+<li>UPDATE — <code>https://www.w3schools.com/nodejs/nodejs_mysql_update.asp</code></li>
+<li>DELETE — <code>https://www.w3schools.com/nodejs/nodejs_mysql_delete.asp</code></li>
+</ul>
+</li>
+<li><code>mysql2</code> รองรับ <strong>Promise API</strong> และใช้กับ <strong>ES7 async/await</strong> ได้</li>
+</ul>
+<p>(สไลด์ 51 &quot;Happy Coding&quot; เป็นหน้าปิด)</p>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>npm</td>
+<td>ตัวจัดการ dependencies และตั้งค่าโปรเจกต์ Node.js</td>
+<td><code>init</code> / <code>install</code> / <code>uninstall</code></td>
+</tr>
+<tr>
+<td><code>npm init -y</code></td>
+<td>สร้าง package.json ด้วยค่า default ไม่ถาม</td>
+<td>ตั้งโปรเจกต์เร็ว</td>
+</tr>
+<tr>
+<td><code>npm install</code> (ไม่มีชื่อ)</td>
+<td>ติดตั้งทุก dependency ใน package.json</td>
+<td>หลัง clone/pull</td>
+</tr>
+<tr>
+<td>nodemon / <code>npm start</code></td>
+<td>restart server อัตโนมัติเมื่อไฟล์เปลี่ยน / รัน script start</td>
+<td>แก้แล้วรันเอง</td>
+</tr>
+<tr>
+<td>Environment variable</td>
+<td>คู่ key-value ของค่าตั้งค่า (PORT, API_KEY, DB_HOST) อยู่นอก source code</td>
+<td>ค่าที่เปลี่ยนตามเครื่อง</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>ไฟล์เก็บ environment variables ที่ root ของโปรเจกต์</td>
+<td>ใบตั้งค่า</td>
+</tr>
+<tr>
+<td><code>dotenv</code></td>
+<td>zero-dependency module โหลด <code>.env</code> เข้า <code>process.env</code></td>
+<td><code>dotenv.config()</code></td>
+</tr>
+<tr>
+<td><code>process.env</code></td>
+<td>object ที่เก็บ environment variables</td>
+<td><code>process.env.PORT</code></td>
+</tr>
+<tr>
+<td>Stateless</td>
+<td>HTTP ไม่เชื่อมโยง request สองครั้งเข้าด้วยกัน</td>
+<td>ความจำสั้น</td>
+</tr>
+<tr>
+<td>Stateful session</td>
+<td>ให้หลาย request ใช้ context/state เดียวกัน (ทำได้ด้วย cookies)</td>
+<td>จำได้ว่าเป็นคนเดิม</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>ข้อมูลชิ้นเล็กที่ server ส่งให้ browser แล้ว browser ส่งกลับมาที่ server เดิม</td>
+<td>บัตรสมาชิกฝั่ง client</td>
+</tr>
+<tr>
+<td><code>Set-Cookie</code> / <code>Cookie</code> header</td>
+<td>header ใน response ที่สั่งให้ browser เก็บ cookie / header ใน request ที่ส่ง cookie กลับมา</td>
+<td>server→browser / browser→server</td>
+</tr>
+<tr>
+<td><code>cookie-parser</code></td>
+<td>middleware ที่ parse cookie ใน request เป็น <code>req.cookies</code></td>
+<td>ต้องมีก่อนอ่าน cookie</td>
+</tr>
+<tr>
+<td><code>res.cookie(name, value, options)</code></td>
+<td>สร้าง cookie และส่งไปกับ response</td>
+<td>สร้าง</td>
+</tr>
+<tr>
+<td><code>req.cookies</code> / <code>req.cookies[&quot;name&quot;]</code></td>
+<td>cookie ทั้งหมด / cookie ตามชื่อ</td>
+<td>อ่าน</td>
+</tr>
+<tr>
+<td><code>res.clearCookie(name)</code></td>
+<td>ลบ cookie ตามชื่อ</td>
+<td>ลบ (logout)</td>
+</tr>
+<tr>
+<td><code>maxAge</code></td>
+<td>อายุ cookie (ms) นับจากตอนตั้ง</td>
+<td>อยู่ได้กี่ ms</td>
+</tr>
+<tr>
+<td>401</td>
+<td>status code ที่ใช้ตอบเมื่อไม่มีสิทธิ์ (ไม่มี cookie ลับ)</td>
+<td>ห้ามเข้า</td>
+</tr>
+<tr>
+<td>Session</td>
+<td>ที่เก็บข้อมูลฝั่ง server ใช้ได้ทุกหน้าในเว็บแอป client อ่านไม่ได้</td>
+<td>ตู้ฝากของที่ร้าน</td>
+</tr>
+<tr>
+<td><code>express-session</code></td>
+<td>middleware จัดการ session เก็บใน session storage</td>
+<td><code>router.use(session({...}))</code></td>
+</tr>
+<tr>
+<td>MemoryStore</td>
+<td>session storage เริ่มต้น เก็บในหน่วยความจำ ใช้ตอน dev/debug ไม่ใช่ production</td>
+<td>restart แล้วหาย</td>
+</tr>
+<tr>
+<td><code>secret</code></td>
+<td>สตริงลับใช้ sign session ID</td>
+<td>เก็บใน .env</td>
+</tr>
+<tr>
+<td><code>resave: false</code></td>
+<td>บันทึก session เฉพาะเมื่อถูกแก้</td>
+<td>ไม่แก้ไม่เซฟ</td>
+</tr>
+<tr>
+<td><code>saveUninitialized: true</code></td>
+<td>สร้าง session ให้ทุกผู้ใช้แม้ยังไม่ได้ใช้</td>
+<td>ใครมาก็ได้ session</td>
+</tr>
+<tr>
+<td><code>req.session.&lt;name&gt;</code></td>
+<td>ตัวแปร session ตามชื่อ อ่าน/เขียนได้จากทุก route</td>
+<td><code>req.session.numviews</code></td>
+</tr>
+<tr>
+<td>Relational database</td>
+<td>ชุดของ schemas, tables, queries, reports, views ฯลฯ</td>
+<td>ข้อมูลเป็นตาราง</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>ภาษามาตรฐานสำหรับเก็บ แก้ ดึงข้อมูล และจัดการ DB ใน DBMS</td>
+<td>INSERT/UPDATE/DELETE/SELECT</td>
+</tr>
+<tr>
+<td>MySQL Workbench</td>
+<td>GUI เข้าถึง MySQL server เพื่อจัดการ DB</td>
+<td>ใช้ root เข้า</td>
+</tr>
+<tr>
+<td>Schema privileges</td>
+<td>สิทธิ์ของ user บน schema เช่น SELECT, INSERT, UPDATE, DELETE</td>
+<td>ให้เท่าที่ต้องใช้</td>
+</tr>
+<tr>
+<td><code>mysql2</code></td>
+<td>package ต่อ MySQL จาก Node.js (รองรับ Promise / async-await)</td>
+<td>ตัวที่วิชานี้ใช้</td>
+</tr>
+<tr>
+<td><code>mysql.createConnection({...})</code></td>
+<td>สร้าง connection ด้วย host, user, password, database</td>
+<td>กรอกที่อยู่ DB</td>
+</tr>
+<tr>
+<td><code>connection.connect(cb)</code></td>
+<td>เชื่อมต่อจริง ถ้า err ให้ throw</td>
+<td><code>Connected DB: ...</code></td>
+</tr>
+<tr>
+<td><code>connection.query(sql, cb)</code></td>
+<td>ส่ง SQL แล้วได้ <code>(error, results)</code> ใน callback</td>
+<td>ยิง SQL</td>
+</tr>
+<tr>
+<td><code>results.length</code> / <code>results.affectedRows</code></td>
+<td>จำนวนแถวที่ SELECT ได้ / จำนวนแถวที่ INSERT กระทบ</td>
+<td>6 rows / 1 record</td>
+</tr>
+<tr>
+<td><code>res.redirect(path)</code></td>
+<td>ส่ง browser ไป path อื่น</td>
+<td>กลับหน้ารายการ</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li>⭐ npm: <code>npm init</code> (ถามตอบ) vs <code>npm init -y</code> (default) | <code>npm install</code> (ทั้งหมดใน package.json) vs <code>npm install &lt;pkg&gt;</code> (ตัวเดียว) | <code>npm uninstall &lt;pkg&gt;</code></li>
+<li>⭐ <code>&quot;scripts&quot;: { &quot;start&quot;: &quot;nodemon app.js&quot; }</code> → รันด้วย <code>npm start</code> | nodemon รันใหม่เองเมื่อแก้ไฟล์</li>
+<li>⭐ Environment variable = key-value นอก source code → portable, ไม่ hardcode, โค้ดเดียว deploy ได้ทุกที่</li>
+<li>⭐ ขั้นตอน .env: <code>npm install dotenv</code> → <code>.env</code> ที่ <strong>root</strong> → <code>require(&quot;dotenv&quot;)</code> + <strong><code>dotenv.config()</code></strong> → <code>process.env.PORT</code></li>
+<li>⭐ HTTP เป็น <strong>stateless</strong> → ใช้ <strong>Cookies (client)</strong> หรือ <strong>Session (server)</strong> เก็บข้อมูลข้าม request</li>
+<li>⭐ Cookie: server ส่ง <strong><code>Set-Cookie</code></strong> ใน response → browser เก็บ → ส่งกลับใน header <strong><code>Cookie</code></strong> ไป server เดิม | ใช้ทำ session management, personalization, tracking</li>
+<li>⭐ <code>npm install cookie-parser</code> → <code>router.use(cp())</code> → <code>res.cookie(name, value)</code> / <code>req.cookies</code> / <code>req.cookies[&quot;name&quot;]</code> / <code>res.clearCookie(name)</code></li>
+<li>⭐ ตั้งอายุ: <code>{expire: 360000 + Date.now()}</code> (วันเวลาหมดอายุ ตามสไลด์) | <code>{maxAge: 360000}</code> (อายุ 360000 ms)</li>
+<li>⭐ ตัวอย่าง restrict: ต้องมี <strong>ทั้ง</strong> cookie#1 <strong>และ</strong> cookie#2 ไม่งั้น <code>res.status(401).end('Error 401: ...')</code></li>
+<li>⭐ Login/Logout: <code>/login</code> → <code>res.cookie('tokenID', ...)</code> | <code>/restrict</code> เช็ก <code>req.cookies['tokenID']</code> | <code>/logout</code> → <code>res.clearCookie(&quot;tokenID&quot;)</code></li>
+<li>⭐ Cookie อ่านได้ฝั่ง client → ข้อมูลที่ต้องปกป้องเก็บใน <strong>Session</strong> ฝั่ง server</li>
+<li>⭐ <code>npm install express-session</code> | เก็บใน <strong>MemoryStore</strong> โดย default (สำหรับ dev/debug <strong>ไม่ใช่ production</strong>)</li>
+<li>⭐ options: <code>secret</code> (sign session ID) | <code>resave: false</code> (เซฟเมื่อแก้) | <code>saveUninitialized: true</code> (สร้างให้ทุกคน)</li>
+<li>⭐ <code>/pageview</code>: ไม่มี <code>numviews</code> → ตั้ง 1 + <code>First time visited</code> | มีแล้ว → <code>++</code> + <code>Visited${n} times</code> | ส่ง <code>Session created!!!</code> ทุกครั้ง</li>
+<li>⭐ <code>req.session.&lt;name&gt;</code> ใช้ได้จาก <strong>ทุก route</strong> ใน server</li>
+<li>⭐ DB: วิชานี้ใช้ <strong><code>mysql2</code></strong> | เตรียม DB ด้วย Workbench (root) → สร้าง user (host localhost) → ให้ schema privileges</li>
+<li>⭐ <code>mysql.createConnection({host, user, password, database})</code> → <code>connection.connect(cb)</code> → <code>connection.query(sql, function(error, results){...})</code></li>
+<li>⭐ SELECT: <code>results.length</code> = จำนวนแถว, <code>res.send(results)</code> = JSON array | INSERT: <code>results.affectedRows</code>, ตัวอย่างใช้ GET แต่ <strong>ปกติใช้ POST</strong></li>
+<li>tinycollege: 6 ตาราง 9 ความสัมพันธ์ | SQL พื้นฐาน INSERT/UPDATE/DELETE/SELECT (+ WHERE, GROUP BY, HAVING, ORDER BY)</li>
+<li>mysql2 รองรับ Promise API และ async/await</li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cookie</td>
+<td>Session</td>
+<td>cookie เก็บที่ <strong>client</strong> อ่านได้ฝั่ง client · session เก็บที่ <strong>server</strong> client อ่านไม่ได้</td>
+</tr>
+<tr>
+<td><code>cookie-parser</code></td>
+<td><code>express-session</code></td>
+<td>parse cookie ใน request → <code>req.cookies</code> · จัดการ session → <code>req.session</code></td>
+</tr>
+<tr>
+<td><code>Set-Cookie</code> header</td>
+<td><code>Cookie</code> header</td>
+<td>อยู่ใน <strong>response</strong> (server สั่งเก็บ) · อยู่ใน <strong>request</strong> (browser ส่งกลับ)</td>
+</tr>
+<tr>
+<td><code>res.cookie(...)</code></td>
+<td><code>req.cookies</code></td>
+<td><strong>สร้าง</strong> cookie ส่งไปกับ response · <strong>อ่าน</strong> cookie ที่มากับ request</td>
+</tr>
+<tr>
+<td><code>req.cookies</code></td>
+<td><code>req.cookies[&quot;name&quot;]</code></td>
+<td>ทุก cookie (object) · cookie ตัวเดียวตามชื่อ</td>
+</tr>
+<tr>
+<td><code>expire</code></td>
+<td><code>maxAge</code></td>
+<td>ตามสไลด์: วันเวลาหมดอายุ (<code>360000 + Date.now()</code>) · ระยะเวลา (<code>360000</code>) — ตอนรันจริง <code>expire</code> ไม่มีผล</td>
+</tr>
+<tr>
+<td><code>res.cookie(...)</code></td>
+<td><code>res.clearCookie(name)</code></td>
+<td>สร้าง · ลบ</td>
+</tr>
+<tr>
+<td><code>resave: false</code></td>
+<td><code>saveUninitialized: true</code></td>
+<td>เซฟ session <strong>เฉพาะเมื่อถูกแก้</strong> · <strong>สร้าง</strong> session ให้ทุกคนแม้ยังไม่ใช้</td>
+</tr>
+<tr>
+<td>MemoryStore</td>
+<td>session store อื่น</td>
+<td>ค่าเริ่มต้น ใช้ dev/debug restart แล้วหาย · ใช้ใน production</td>
+</tr>
+<tr>
+<td><code>npm init</code></td>
+<td><code>npm install</code></td>
+<td>สร้าง package.json · ติดตั้ง package</td>
+</tr>
+<tr>
+<td><code>npm install</code></td>
+<td><code>npm install &lt;package&gt;</code></td>
+<td>ติดตั้งทุกตัวใน package.json · ติดตั้งตัวที่ระบุ</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td><code>process.env</code></td>
+<td>ไฟล์ที่เก็บตัวแปร · object ในโค้ดที่อ่านค่า (หลัง <code>dotenv.config()</code>)</td>
+</tr>
+<tr>
+<td><code>createConnection</code></td>
+<td><code>connect</code></td>
+<td>สร้าง object การเชื่อมต่อจาก config · เชื่อมต่อจริงและแจ้ง error</td>
+</tr>
+<tr>
+<td><code>results.length</code></td>
+<td><code>results.affectedRows</code></td>
+<td>จำนวนแถวที่ SELECT ได้ · จำนวนแถวที่ INSERT/UPDATE/DELETE กระทบ</td>
+</tr>
+<tr>
+<td><code>res.send(results)</code></td>
+<td><code>res.redirect(path)</code></td>
+<td>ส่งข้อมูล (JSON) กลับ · สั่ง browser ไปอีก path</td>
+</tr>
+<tr>
+<td>GET สำหรับ insert (ตัวอย่าง)</td>
+<td>POST (ปกติ)</td>
+<td>สไลด์ใช้ GET เพื่อความง่ายเท่านั้น · การเพิ่มข้อมูลปกติใช้ POST</td>
+</tr>
+<tr>
+<td>status 401</td>
+<td>status 404</td>
+<td>ไม่มีสิทธิ์ (ไม่มี cookie ลับ) · ไม่พบ path (เช่น redirect ไป <code>/cis-course</code>)</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l10/index.html"><small>← บทก่อนหน้า</small><span>Lecture 10 – Node.js Part II (Express Framework)</span></a><a class="pg next" href="../l12/index.html"><small>บทถัดไป →</small><span>Lecture 12 – Web Services</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-บทนี้อยู่ตรงไหนของ-nodejs-unit-และเรียนอะไร-สไลด์-24">บทนี้อยู่ตรงไหนของ Node.js Unit และเรียนอะไร?</a></li><li><a href="#1-recap-express-คืออะไร-สไลด์-57">RECAP: Express คืออะไร?</a></li><li><a href="#2-ตั้งโปรเจกต์และ-server-ด้วย-npm-express-ยังไง-ทบทวน-สไลด์-811">ตั้งโปรเจกต์และ server ด้วย npm + Express ยังไง? (ทบทวน)</a></li><li><a href="#3-environment-variable-คืออะไร-และใช้-env-ยังไง-สไลด์-1214">Environment variable คืออะไร และใช้ .env ยังไง?</a></li><li><a href="#4-ทำไมต้องมี-cookie-และ-session-http-เป็น-stateless-สไลด์-1517">ทำไมต้องมี Cookie และ Session? (HTTP เป็น stateless)</a></li><li><a href="#5-cookie-คืออะไร-และส่งไป-กลับยังไง-สไลด์-1819">Cookie คืออะไร และส่งไป-กลับยังไง?</a></li><li><a href="#6-สร้าง-อ่าน-ลบ-cookie-ใน-nodejs-ยังไง-สไลด์-2026">สร้าง / อ่าน / ลบ cookie ใน Node.js ยังไง?</a></li><li><a href="#7-ตัวอย่าง-login-logout-ด้วย-cookie-ทำงานยังไง-สไลด์-2728">ตัวอย่าง Login / Logout ด้วย cookie ทำงานยังไง?</a></li><li><a href="#8-session-ต่างจาก-cookie-ยังไง-สไลด์-2930">Session ต่างจาก Cookie ยังไง?</a></li><li><a href="#9-ใช้-express-session-ยังไง-สไลด์-3134">ใช้ express-session ยังไง?</a></li><li><a href="#10-ต่อ-nodejs-กับ-database-ต้องใช้อะไร-สไลด์-3536">ต่อ Node.js กับ database ต้องใช้อะไร?</a></li><li><a href="#11-recap-database-relational-db-tinycollege-sql-สไลด์-3739">RECAP Database: relational DB, tinycollege, SQL</a></li><li><a href="#12-เตรียม-mysql-server-workbench-และ-db-user-ยังไง-สไลด์-4044">เตรียม MySQL Server, Workbench และ DB user ยังไง?</a></li><li><a href="#13-เชื่อม-nodejs-กับ-mysql-ยังไง-สไลด์-4546">เชื่อม Node.js กับ MySQL ยังไง?</a></li><li><a href="#14-รัน-select-แล้วส่งผลเป็น-json-ยังไง-สไลด์-4748">รัน SELECT แล้วส่งผลเป็น JSON ยังไง?</a></li><li><a href="#15-รัน-insert-ยังไง-สไลด์-49">รัน INSERT ยังไง?</a></li><li><a href="#16-extra-mysql2-ทำอะไรได้อีก-สไลด์-5051">[Extra] mysql2 ทำอะไรได้อีก?</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      <p class="otp-note">⭐ = เรื่องสำคัญ มักออกสอบ</p>
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "web/l11", "u": "web/l11/index.html", "t": "Lecture 11 – Node.js Part III (Cookies, Session, and Database)", "s": "ITDS241"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

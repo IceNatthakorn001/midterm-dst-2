@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L14 – Windows System Admin (Lecture 14 + Lab 14) · ITDS212</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#3b6787}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS212</a><span>/</span><b>L14</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🐧 ITDS212</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../l1/index.html"><span class="nl">L1</span>L1 – Computer Systems + Lab 1 (VirtualBox and Ubuntu)</a></li><li><a href="../l2/index.html"><span class="nl">L2</span>L2 – OS Introduction + Lab 2 (Basic Unix Commands)</a></li><li><a href="../l3/index.html"><span class="nl">L3</span>L3 – File Management + Lab 3 (File System Commands)</a></li><li><a href="../l4/index.html"><span class="nl">L4</span>L4 – User Management + Lab 4 (User Management)</a></li><li><a href="../l5/index.html"><span class="nl">L5</span>L5 – File Permissions + Lab 5 (File Permissions)</a></li><li><a href="../l6/index.html"><span class="nl">L6</span>L6 – Editor (nano และ vim) + Lab 6 (Editor)</a></li><li><a href="../l7/index.html"><span class="nl">L7</span>L7 – Storage + Lab 7 (Storage)</a></li><li><a href="../l8/index.html"><span class="nl">L8</span>L8 – Process and Memory + Lab 8 (Process + Memory)</a></li><li><a href="../l9/index.html"><span class="nl">L9</span>L9 – Observability และ Environment Variables</a></li><li class='cur'><a href="../l14/index.html"><span class="nl">L14</span>L14 – Windows System Admin (Lecture 14 + Lab 14)</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS212</a> · L14</div>
+    <h1 class="lesson-title">L14 – Windows System Admin (Lecture 14 + Lab 14)</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 51 นาที · 21 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="l14">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> สัปดาห์ 14 ของวิชาเปลี่ยนจาก Linux มาเป็น <strong>การบริหารระบบปฏิบัติการ Windows</strong> เนื้อหาไล่จากพื้นฐาน (ประวัติรุ่น, boot manager) ไปที่ <strong>สถาปัตยกรรม</strong> (user mode / kernel mode, Windows NT) แล้วลงลึกที่ <strong>file system</strong> 2 ตระกูล คือ <strong>FAT</strong> (เก็บไฟล์เป็นสายโซ่ cluster) กับ <strong>NTFS</strong> (มี PBS, MFT, MFT mirror, log file, meta files) ต่อด้วย <strong>Windows Registry</strong> (ฐานข้อมูลการตั้งค่าแบบลำดับชั้น) และจบด้วยงาน admin จริง 3 อย่าง: <strong>สร้าง user</strong>, <strong>ตั้ง permission ไฟล์/โฟลเดอร์ 6 แบบ</strong> และ <strong>ดู/kill process ด้วย Task Manager</strong></p>
+<p>ภาค Lab ให้ลงมือทำตามสไลด์ทั้งหมด เก็บผลเป็น PDF ไฟล์เดียวส่ง MyCourses</p>
+<p>มีตัวเลขที่ต้องเข้าใจ: จำนวน cluster ของ FAT16 (16 bit → 65,536), การไล่สายโซ่ใน FAT, ตาราง offset ของ boot sector (รวม 512 bytes) — ไม่มีโค้ดหรือคำสั่ง PowerShell/cmd ในสไลด์ ทุกงานทำผ่าน GUI</p>
+</blockquote>
+<blockquote class="callout">
+<p>📌 เลขสไลด์ในสรุปนี้ = เลขหน้า PDF ซึ่งตรงกับเลขที่พิมพ์มุมขวาล่างของสไลด์ · Lecture มี 37 หน้า · Lab มี 4 หน้า</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L14-00-overview.png" alt="แผนผังภาพรวม L14" /></p>
+<h2 id="สารบัญ">สารบัญ</h2>
+<p><strong>ภาค Lecture</strong></p>
+<ol>
+<li>บทนี้อยู่ตรงไหนของวิชา และตั้งเป้าเรียนอะไร?</li>
+<li>Windows มีรุ่นอะไรบ้าง ออกปีไหน?</li>
+<li>Boot Manager, Boot loader และ F12 Boot Menu คืออะไร?</li>
+<li>สถาปัตยกรรมของ Windows แบ่งชั้นยังไง?</li>
+<li>หน้าต่างโปรแกรม (Windows Components) มีส่วนอะไรบ้าง?</li>
+<li>Volume, Directory, File ต่างกันยังไง และมุมมองผู้ใช้ Linux กับ Windows ต่างกันยังไง?</li>
+<li>Windows มี file system อะไรบ้าง และ FAT32 / NTFS / exFAT ต่างกันยังไง?</li>
+<li>FAT เก็บไฟล์ยังไง? (สายโซ่ cluster)</li>
+<li>Disk Management แสดงข้อมูลอะไร?</li>
+<li>NTFS มีโครงสร้างอะไรบ้าง?</li>
+<li>Partition Boot Sector (PBS) เก็บอะไร?</li>
+<li>MFT ทำงานยังไง และกันข้อมูลเสียยังไง?</li>
+<li>NTFS metadata / system files คืออะไร?</li>
+<li>Windows Registry คืออะไร มีโครงสร้างยังไง?</li>
+<li>สร้าง user account ใน Windows ยังไง?</li>
+<li>Permission ของไฟล์/โฟลเดอร์มีกี่แบบ และตั้งยังไง?</li>
+<li>ดูและ kill process ใน Windows ยังไง?</li>
+</ol>
+<p><strong>ภาค Lab</strong></p>
+<ol start="18">
+<li>Lab 14 ต้องทำอะไร และส่งอะไร?</li>
+</ol>
+<p><strong>ท้ายบท:</strong> คำศัพท์สำคัญ · จุดที่มักออกสอบ · คู่ที่มักสับสน</p>
+<hr />
+<h1>ภาค Lecture</h1>
+<h2 id="1-บทนี้อยู่ตรงไหนของวิชา-และตั้งเป้าเรียนอะไร-lecture-สไลด์-14">1. บทนี้อยู่ตรงไหนของวิชา และตั้งเป้าเรียนอะไร? <sub>(Lecture สไลด์ 1–4)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>สัปดาห์ 14 = &quot;การบริหารจัดการระบบปฏิบัติการวินโดว์&quot; เป้าคือรู้จัก architecture, file system, registry แล้วทำ admin ได้ 3 ด้าน: user, file system, process</strong></p>
+<ul>
+<li><strong>สไลด์ 1</strong> – ITDS212 Computer System Lab #14 Windows System Admin, Faculty of ICT มหิดล, วันที่ November 12, 2026</li>
+<li><strong>สไลด์ 2 (Tentative Schedule)</strong> – ตารางทั้งเทอม บทนี้คือข้อ 14 ต่อจากข้อ 13 (บริหารจัดการ Linux) และก่อนข้อ 15 (System monitoring)</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+<th>สัปดาห์</th>
+<th>หัวข้อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ติดตั้ง VM + Ubuntu, login</td>
+<td>9</td>
+<td>คำสั่งจัดการสภาพแวดล้อม</td>
+</tr>
+<tr>
+<td>2</td>
+<td>โครงสร้าง Linux + คำสั่งเบื้องต้น</td>
+<td>10</td>
+<td>เขียน shell script</td>
+</tr>
+<tr>
+<td>3</td>
+<td>จัดการแฟ้มข้อมูล</td>
+<td>11</td>
+<td>โปรแกรมจัดการ process และ thread</td>
+</tr>
+<tr>
+<td>4</td>
+<td>จัดการผู้ใช้และกลุ่ม</td>
+<td>12</td>
+<td>ติดตั้ง Apache, MySQL, PHP</td>
+</tr>
+<tr>
+<td>5</td>
+<td>สิทธิ์ของผู้ใช้</td>
+<td>13</td>
+<td>บริหารจัดการ Linux</td>
+</tr>
+<tr>
+<td>6</td>
+<td>nano และ vim</td>
+<td><strong>14</strong></td>
+<td><strong>บริหารจัดการ Windows</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td>จัดการ storage</td>
+<td>15</td>
+<td>System monitoring</td>
+</tr>
+<tr>
+<td>8</td>
+<td>process และ memory</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>สไลด์ 3 (Objectives)</strong> – เรียน 4 เรื่อง
+<ol>
+<li><strong>Windows Architecture</strong> – OS แบ่งเป็นชั้นอะไรบ้าง</li>
+<li><strong>Windows File Systems</strong> – FAT / NTFS เก็บไฟล์ยังไง</li>
+<li><strong>Windows Registry</strong> – ที่เก็บการตั้งค่าของระบบ</li>
+<li><strong>การ admin Windows OS</strong> – แยกเป็น <strong>User management</strong>, <strong>File System management</strong>, <strong>Process management</strong></li>
+</ol>
+</li>
+<li><strong>สไลด์ 4 (Outline)</strong> – Windows Evolution → Windows Boot Manager → Windows Architecture → Windows File Systems → Windows User Management</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เทียบกับ Linux ที่เรียนมา: user management ≈ L4, permission ≈ L5, storage ≈ L7, process ≈ L8 — บทนี้คือทำเรื่องเดิมบน Windows ผ่าน GUI</p>
+</blockquote>
+<hr />
+<h2 id="2-windows-มีรุ่นอะไรบ้าง-ออกปีไหน-lecture-สไลด์-5">2. Windows มีรุ่นอะไรบ้าง ออกปีไหน? <sub>(Lecture สไลด์ 5)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>จาก Windows 1.0 (Nov 1985) ถึง Windows 11 (October 2021) รวม 13 รุ่นตามสไลด์</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>รุ่น</th>
+<th>ออกเมื่อ</th>
+<th>รุ่น</th>
+<th>ออกเมื่อ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows 1.0</td>
+<td>Nov 1985</td>
+<td>Windows Vista</td>
+<td>Nov 2006</td>
+</tr>
+<tr>
+<td>Windows 2.0</td>
+<td>Dec 1987</td>
+<td>Windows 7</td>
+<td>July 2009</td>
+</tr>
+<tr>
+<td>Windows 3.0</td>
+<td>May 1990</td>
+<td>Windows 8.0</td>
+<td>Oct 2012</td>
+</tr>
+<tr>
+<td>Windows 95</td>
+<td>Aug 1995</td>
+<td>Windows 8.1</td>
+<td>Oct 2013</td>
+</tr>
+<tr>
+<td>Windows 98</td>
+<td>June 1998</td>
+<td>Windows 10</td>
+<td>July 2015</td>
+</tr>
+<tr>
+<td>Windows ME</td>
+<td>Sep 2000</td>
+<td>Windows 11</td>
+<td>October 2021</td>
+</tr>
+<tr>
+<td>Windows XP</td>
+<td>Oct 2001</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำเป็นช่วง: ยุค 80 (1.0, 2.0) → 90 (3.0, 95, 98) → 2000s (ME, XP, Vista) → 2009–2013 (7, 8.0, 8.1) → 10 (2015) → 11 (2021)</p>
+</blockquote>
+<hr />
+<h2 id="3-boot-manager-boot-loader-และ-f12-boot-menu-คืออะไร-lecture-สไลด์-6">3. Boot Manager, Boot loader และ F12 Boot Menu คืออะไร? <sub>(Lecture สไลด์ 6)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>boot loader (= boot manager) คือโปรแกรมเล็ก ๆ ที่โหลด OS เข้า memory · เข้า Windows Boot Manager ด้วย F8 ตอนเปิดเครื่อง · เลือกอุปกรณ์ที่จะบูตด้วย F12 ระหว่าง POST</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เรื่อง</th>
+<th>รายละเอียดตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Windows Boot Manager</strong></td>
+<td>ในคอมส่วนใหญ่ เข้าได้ด้วยการกด <strong>F8</strong> ทันทีที่เครื่องเริ่มทำงาน</td>
+</tr>
+<tr>
+<td><strong>Boot loader</strong> (หรือ <strong>boot manager</strong>)</td>
+<td><strong>โปรแกรมเล็ก ๆ ที่วาง (โหลด) OS ของเครื่องเข้าไปใน memory</strong></td>
+</tr>
+<tr>
+<td><strong>F12 Boot Menu</strong></td>
+<td>ให้ <strong>เลือกอุปกรณ์ที่จะใช้บูต OS</strong> โดยกด <strong>F12</strong> ระหว่าง <strong>POST (Power On Self Test)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>รูปในสไลด์คือหน้าจอ <strong>Boot Menu</strong> มีตัวเลือก 1. Removable Devices 2. Hard Drive 3. CD-ROM Drive 4. Network boot from Intel E1000 และ <code>&lt;Enter Setup&gt;</code></li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ อย่าสลับปุ่ม: <strong>F8 = Windows Boot Manager</strong> · <strong>F12 = Boot Menu (เลือกอุปกรณ์บูต)</strong> ระหว่าง POST</p>
+</blockquote>
+<hr />
+<h2 id="4-สถาปัตยกรรมของ-windows-แบ่งชั้นยังไง-lecture-สไลด์-7-15">4. สถาปัตยกรรมของ Windows แบ่งชั้นยังไง? <sub>(Lecture สไลด์ 7, 15)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Windows แบ่งเป็น 2 โหมดใหญ่ — user mode (โปรแกรม, subsystem, DLL) กับ kernel mode (executive/manager ต่าง ๆ, kernel, driver, HAL) โดย HAL เป็นชั้นล่างสุดที่คุยกับ hardware</strong></p>
+<blockquote class="callout">
+<p>สไลด์ 15 (Windows NT Architecture) ในไฟล์วางคั่นอยู่กลางเรื่อง file system แต่สรุปรวมไว้ตรงนี้เพราะเป็นเรื่อง architecture เหมือนกัน</p>
+</blockquote>
+<h3 id="41-รูปซ้ายของสไลด์-7-windows-architecture-microsoft-corporation-2006-v3-สไลด์-7">4.1 รูปซ้ายของสไลด์ 7: Windows Architecture (© Microsoft Corporation 2006, v3) <span class="slide-ref">สไลด์ 7</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เส้นหนาแบ่ง user-mode ด้านบน กับ kernel-mode ด้านล่าง ชั้นบนสุดคือ Applications ชั้นล่างสุดคือ Kernel run-time / Hardware Abstraction Layer</strong></p>
+<p>รูปเป็นกล่องซ้อนเป็นชั้น (บน → ล่าง):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ฝั่ง</th>
+<th>ชั้น</th>
+<th>กล่องในชั้นนั้น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User-mode</strong></td>
+<td>บนสุด</td>
+<td><strong>Applications</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ชั้นกลาง</td>
+<td><strong>Subsystem servers</strong> (ด้านซ้าย), <strong>DLLs</strong>, <strong>System Services</strong>, <strong>Login/GINA</strong></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><strong>Kernel32</strong>, <strong>Critical services</strong>, <strong>User32 / GDI</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ล่างสุดของ user-mode</td>
+<td><strong>ntdll / run-time library</strong></td>
+</tr>
+<tr>
+<td><strong>Kernel-mode</strong></td>
+<td>บนสุดของ kernel</td>
+<td><strong>Trap interface / LPC</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ส่วนประกอบหลัก</td>
+<td><strong>Security refmon</strong>, <strong>I/O Manager</strong>, <strong>Memory Manager</strong>, <strong>Procs &amp; threads</strong>, <strong>Win32 GUI</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ส่วนย่อย</td>
+<td>Net devices, Net protocols, Net Interfaces, Device stacks · File filters, File systems, Volume mgrs · Filesys run-time, Cache mgr · Scheduler, Synchronization</td>
+</tr>
+<tr>
+<td></td>
+<td>เกือบล่าง</td>
+<td><strong>Object Manager / Configuration Management (registry)</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ล่างสุด</td>
+<td><strong>Kernel run-time / Hardware Abstraction Layer</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 7 สะกด &quot;Memory <strong>Manger</strong>&quot; — คือ Memory Manager</p>
+</blockquote>
+<h3 id="42-รูปขวาของสไลด์-7-windows-รุ่นใหม่ที่มี-hyper-v-สไลด์-7">4.2 รูปขวาของสไลด์ 7: Windows รุ่นใหม่ที่มี Hyper-V <span class="slide-ref">สไลด์ 7</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุกอย่างใน user mode (subsystem, system process, service, application) ผ่าน NTDLL.DLL แล้วข้ามเส้นเข้า kernel mode ที่ System Service Dispatcher ลงไปถึง Kernel, HAL และมี Hyper-V Hypervisor อยู่ใต้สุด</strong></p>
+<p><img loading="lazy" src="diagrams/L14-01-arch-modern.png" alt="สถาปัตยกรรม Windows (รูปขวาสไลด์ 7) วาดใหม่" /></p>
+<ul>
+<li><strong>User Mode</strong> มี 4 กลุ่ม
+<ul>
+<li><strong>Environment Subsystems</strong> – Session Manager, <strong>CSRSS</strong></li>
+<li><strong>System Processes</strong> – <strong>Wininit</strong>, <strong>Winlogon</strong>, <strong>SCM</strong> (แต่ละตัวมี Subsystem DLLs)</li>
+<li><strong>Services</strong> – <strong>Spooler</strong>, <strong>SvcHost</strong> (มี Subsystem DLLs)</li>
+<li><strong>Applications</strong> – <strong>User Process</strong> (มี Subsystem DLLs)</li>
+<li>ทั้งหมดชี้ลงไปที่ <strong>NTDLL.DLL</strong> ซึ่งเป็นแถบล่างสุดของ user mode</li>
+</ul>
+</li>
+<li><strong>Kernel Mode</strong> (ใต้เส้นแดง)
+<ul>
+<li><strong>System Service Dispatcher</strong> – จุดแรกที่รับการเรียกจาก user mode</li>
+<li>ชั้นของ manager: <strong>I/O Manager, Security Reference Monitor, Power Manager, Plug and Play Manager, Memory Manager, Process Manager, Object Manager, Configuration Manager, ALPC</strong></li>
+<li><strong>Windows USER and GDI</strong> + <strong>Graphic Drivers</strong> (ด้านขวา)</li>
+<li><strong>Device and File System Drivers</strong> (ด้านซ้ายล่าง), <strong>Kernel</strong></li>
+<li><strong>Hardware Abstraction Layer (HAL)</strong> + <strong>HAL Extensions</strong></li>
+</ul>
+</li>
+<li>ใต้เส้นแดงเส้นล่าง: <strong>Hyper-V Hypervisor</strong></li>
+</ul>
+<blockquote class="callout">
+<p>ℹ️ ในสไลด์ ส่วนของ kernel mode วาดเป็นชั้นซ้อนกัน ลูกศรภายใน kernel mode ในรูปวาดใหม่ใช้แทน &quot;ชั้นบน → ชั้นล่าง&quot; เท่านั้น</p>
+</blockquote>
+<h3 id="43-windows-nt-architecture-สไลด์-15">4.3 Windows NT Architecture <span class="slide-ref">สไลด์ 15</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Windows NT เป็น layered design มี 2 ส่วนหลักคือ user mode กับ kernel mode เป็น OS แบบ multitasking ที่ preemptive และ reentrant ใช้ได้ทั้งเครื่อง CPU เดียวและหลาย CPU</strong></p>
+<p>ข้อความในสไลด์:</p>
+<ul>
+<li><strong>The architecture of Windows NT is a layered design</strong> ที่มี 2 องค์ประกอบหลัก: <strong>user mode</strong> และ <strong>kernel mode</strong></li>
+<li>เป็น <strong>preemptive, reentrant multitasking OS</strong> ออกแบบให้ทำงานได้กับเครื่อง <strong>uniprocessor</strong> และ <strong>multiprocessor</strong></li>
+<li>ที่มา: en.wikipedia.org/wiki/Architecture_of_Windows_NT</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L14-02-nt-arch.png" alt="Windows NT Architecture วาดใหม่" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ส่วนประกอบในรูป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>โปรแกรมด้านบน</td>
+<td><strong>Win32 Application</strong>, <strong>POSIX Application</strong>, <strong>OS/2 Application</strong> (แต่ละตัวต่อกับ subsystem ชื่อเดียวกัน)</td>
+</tr>
+<tr>
+<td><strong>User mode</strong> – Integral subsystems</td>
+<td><strong>Work-station service</strong>, <strong>Server service</strong>, <strong>Security</strong></td>
+</tr>
+<tr>
+<td><strong>User mode</strong> – Environment subsystems</td>
+<td><strong>Win32</strong>, <strong>POSIX</strong>, <strong>OS/2</strong> (มีลูกศรระหว่าง Win32 กับ POSIX และ OS/2 และลูกศรระหว่าง Security ↔ Win32)</td>
+</tr>
+<tr>
+<td><strong>Kernel mode</strong> – Executive</td>
+<td><strong>Executive Services</strong> → I/O Manager, Security Reference Monitor, IPC Manager, <strong>Virtual Memory Manager (VMM)</strong>, Process Manager, PnP Manager, Power Manager, Window Manager + <strong>GDI</strong> → <strong>Object Manager</strong></td>
+</tr>
+<tr>
+<td><strong>Kernel mode</strong> – ชั้นล่าง</td>
+<td><strong>Kernel mode drivers</strong>, <strong>Microkernel</strong></td>
+</tr>
+<tr>
+<td><strong>Kernel mode</strong> – ล่างสุด</td>
+<td><strong>Hardware Abstraction Layer (HAL)</strong></td>
+</tr>
+<tr>
+<td>ใต้ kernel</td>
+<td><strong>Hardware</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนอาคาร: user mode คือชั้นที่ลูกค้าเดินได้ kernel mode คือห้องเครื่องที่เฉพาะเจ้าหน้าที่เข้าได้ ส่วน HAL คือแผงต่อสายที่เชื่อมห้องเครื่องเข้ากับระบบไฟจริง (hardware)</p>
+</blockquote>
+<hr />
+<h2 id="5-หน้าต่างโปรแกรม-windows-components-มีส่วนอะไรบ้าง-lecture-สไลด์-8">5. หน้าต่างโปรแกรม (Windows Components) มีส่วนอะไรบ้าง? <sub>(Lecture สไลด์ 8)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>หน้าต่างหนึ่งบาน (ตัวอย่าง &quot;About Windows&quot;) มี 10 ส่วนที่สไลด์ชี้ชื่อไว้</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ส่วน</th>
+<th>อยู่ตรงไหนในรูป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application icon</strong></td>
+<td>มุมซ้ายบนของแถบชื่อ</td>
+</tr>
+<tr>
+<td><strong>Title bar</strong></td>
+<td>แถบบนสุดที่มีชื่อ &quot;About Windows&quot;</td>
+</tr>
+<tr>
+<td><strong>Minimize button</strong></td>
+<td>ปุ่ม <code>_</code> มุมขวาบน</td>
+</tr>
+<tr>
+<td><strong>Maximize button</strong></td>
+<td>ปุ่มสี่เหลี่ยม มุมขวาบน</td>
+</tr>
+<tr>
+<td><strong>Close button</strong></td>
+<td>ปุ่ม <code>X</code> มุมขวาบน</td>
+</tr>
+<tr>
+<td><strong>Menu bar</strong></td>
+<td>แถบ File / Edit / View</td>
+</tr>
+<tr>
+<td><strong>Client area</strong></td>
+<td>พื้นที่ว่างตรงกลาง (ที่แสดงเนื้อหา)</td>
+</tr>
+<tr>
+<td><strong>Vertical scroll bar</strong></td>
+<td>แถบเลื่อนแนวตั้งด้านขวา</td>
+</tr>
+<tr>
+<td><strong>Horizontal scroll bar</strong></td>
+<td>แถบเลื่อนแนวนอนด้านล่าง</td>
+</tr>
+<tr>
+<td><strong>Sizing border</strong></td>
+<td>ขอบหน้าต่างที่ลากเพื่อปรับขนาด</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์สะกด &quot;<strong>Mazimize</strong> button&quot; — คือ Maximize button</p>
+</blockquote>
+<hr />
+<h2 id="6-volume-directory-file-ต่างกันยังไง-และมุมมองผู้ใช้-linux-กับ-windows-ต่างกันยังไง-lecture-สไลด์-910">6. Volume, Directory, File ต่างกันยังไง และมุมมองผู้ใช้ Linux กับ Windows ต่างกันยังไง? <sub>(Lecture สไลด์ 9–10)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>volume = กลุ่มของ directory + file · directory = กลุ่มแบบลำดับชั้นของ directory + file · file = กลุ่มข้อมูลที่เกี่ยวข้องกัน</strong></p>
+<h3 id="61-นิยาม-3-คำ-สไลด์-9">6.1 นิยาม 3 คำ <span class="slide-ref">สไลด์ 9</span></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำ</th>
+<th>นิยามตามสไลด์</th>
+<th>อธิบาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Volume</strong></td>
+<td>a collection of directories and files</td>
+<td>ใหญ่สุด เช่นไดรฟ์หนึ่งลูกที่รวมทุกอย่างไว้</td>
+</tr>
+<tr>
+<td><strong>Directory</strong></td>
+<td>a <strong>hierarchical</strong> collection of directories and files</td>
+<td>โฟลเดอร์ ซ้อนกันเป็นชั้นได้</td>
+</tr>
+<tr>
+<td><strong>File</strong></td>
+<td>a <strong>logical grouping of related data</strong></td>
+<td>หน่วยเก็บข้อมูลจริง</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนตู้เอกสาร: volume = ตู้ทั้งตู้, directory = ลิ้นชัก/แฟ้ม (ซ้อนแฟ้มในแฟ้มได้), file = เอกสารแต่ละฉบับ</p>
+</blockquote>
+<h3 id="62-users-view-linux-vs-windows-สไลด์-10">6.2 User's View: Linux vs Windows <span class="slide-ref">สไลด์ 10</span></h3>
+<p>สไลด์วางภาพหน้าต่างจัดการไฟล์ 2 ระบบเทียบกัน:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Linux (file manager)</th>
+<th>Windows (File Explorer)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>แถบซ้าย</td>
+<td>Recent, Starred, Home, Documents, Downloads, Music, Pictures, Videos, Trash, Other Locations</td>
+<td>Favorites (Desktop, Downloads, Recent places), <strong>This PC</strong> (Desktop, Documents, Downloads, Music, Pictures, Videos, <strong>Local Disk (C:)</strong>, <strong>CD Drive (D:)</strong>), Network</td>
+</tr>
+<tr>
+<td>ที่กำลังเปิด</td>
+<td>ราก (root) ของระบบ: bin, boot, dev, etc, home, lib, lib64, media, mnt, opt, proc, root, run, sbin, srv, sys, tmp, usr, var (และไฟล์ @System.solv)</td>
+<td><strong>This PC › Local Disk (C:)</strong>: PerfLogs, Program Files, Program Files (x86), Users, Windows (5 items)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จากรูป: Linux เปิดดูทุกอย่างจากรากเดียว (โฟลเดอร์ระบบอย่าง bin, etc, home อยู่ระดับบนสุด) ส่วน Windows แสดงเป็น <strong>ไดรฟ์ที่มีตัวอักษร</strong> (C:, D:) แล้วค่อยมีโฟลเดอร์ระบบ (Windows, Program Files, Users) อยู่ข้างในไดรฟ์</p>
+</blockquote>
+<hr />
+<h2 id="7-windows-มี-file-system-อะไรบ้าง-และ-fat32-ntfs-exfat-ต่างกันยังไง-lecture-สไลด์-1112">7. Windows มี file system อะไรบ้าง และ FAT32 / NTFS / exFAT ต่างกันยังไง? <sub>(Lecture สไลด์ 11–12)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>FAT พัฒนาโดย Microsoft ปี 1977 ตระกูล FAT = FAT12, FAT16, FAT32, exFAT · ตารางเทียบ: FAT32 เข้ากันได้กว้างสุดแต่จำกัด volume 32GB / ไฟล์ 4GB, NTFS มี auto repair + compression, exFAT รองรับขนาดใหญ่มาก</strong></p>
+<h3 id="71-ข้อความสไลด์-11">7.1 ข้อความสไลด์ 11</h3>
+<ul>
+<li>Windows offers <strong>three file systems: NTFS, FAT32 and FAT16</strong></li>
+<li><strong>FAT (File Allocation Table)</strong> was developed by <strong>Microsoft in 1977</strong></li>
+<li>The <strong>family of FAT</strong> file systems includes <strong>FAT12, FAT16, FAT32 and exFAT</strong></li>
+<li>รูป <strong>FAT FILE SYSTEM</strong>: เรียงเป็นช่อง <strong>Boot Sector → File Allocation Table → Root Directory → Directory → Cluster ...</strong> มีลูกศรจาก Directory ชี้กลับไปที่ File Allocation Table และลูกศรกระโดดต่อกันไประหว่าง cluster จนถึงช่อง <strong>EOF</strong> (รายละเอียดการต่อสายดูข้อ 8)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 11 บอกว่า Windows มี 3 file system คือ <strong>NTFS, FAT32, FAT16</strong> แต่ตารางสไลด์ 12 เทียบ <strong>FAT32, NTFS, exFAT</strong> — ถ้าข้อสอบถาม &quot;Windows offers three file systems&quot; ให้ตอบตามสไลด์ 11 ถ้าถามจากตารางเทียบให้ใช้สไลด์ 12</p>
+</blockquote>
+<h3 id="72-file-system-comparison-สไลด์-12">7.2 File System Comparison <span class="slide-ref">สไลด์ 12</span></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th><strong>FAT32</strong></th>
+<th><strong>NTFS</strong></th>
+<th><strong>exFAT</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compatibility</td>
+<td>All Windows versions, macOS, Linux, videogame consoles (PlayStation 3 &amp; 4), media players, Android, iPhone และอุปกรณ์อื่น</td>
+<td>All Windows versions, Mac OS X (<strong>read-only access</strong>), Linux</td>
+<td>All Windows versions, videogame consoles (PlayStation 4 &amp; 5)</td>
+</tr>
+<tr>
+<td>Max Volume Size</td>
+<td><strong>32GB</strong></td>
+<td><strong>16TB</strong></td>
+<td><strong>128 PB</strong> (512 TB recommended)</td>
+</tr>
+<tr>
+<td>Max File Size</td>
+<td><strong>4GB</strong></td>
+<td><strong>16TB</strong></td>
+<td><strong>128 PB</strong> (theoretical 16 EB – 1 byte)</td>
+</tr>
+<tr>
+<td>Cluster Size</td>
+<td>4 KB to 32 KB</td>
+<td>4 KB</td>
+<td>32MB</td>
+</tr>
+<tr>
+<td>Fault Tolerance</td>
+<td>No</td>
+<td><strong>Auto repair</strong></td>
+<td>Yes, if <strong>TFAT</strong> activated</td>
+</tr>
+<tr>
+<td>Conversion</td>
+<td>Possible</td>
+<td>Not Allowed</td>
+<td>Not available</td>
+</tr>
+<tr>
+<td>Compression</td>
+<td>No</td>
+<td><strong>Yes</strong></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>High on small volumes, Low on large</td>
+<td>Low on small volumes, High on large</td>
+<td>High</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 จำแบบเรื่องเล่า: <strong>FAT32</strong> = ตัวเก่าที่ &quot;ทุกเครื่องอ่านได้&quot; แต่ไฟล์ใหญ่เกิน 4GB ใส่ไม่ได้ · <strong>NTFS</strong> = ตัวหลักของ Windows ซ่อมตัวเองได้ บีบอัดได้ แต่ Mac อ่านได้อย่างเดียว · <strong>exFAT</strong> = รองรับขนาดมหาศาล</p>
+</blockquote>
+<hr />
+<h2 id="8-fat-เก็บไฟล์ยังไง-สายโซ่-cluster-lecture-สไลด์-1314">8. FAT เก็บไฟล์ยังไง? (สายโซ่ cluster) <sub>(Lecture สไลด์ 13–14)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>directory entry เก็บชื่อไฟล์ ขนาด และเลข cluster แรก ส่วนตาราง FAT ช่องที่ N บอกว่า cluster ถัดจาก N คือเบอร์อะไร ไล่ต่อกันไปจนเจอ EOF — cluster ของไฟล์ไม่จำเป็นต้องติดกัน</strong></p>
+<h3 id="81-fat16-ใช้เลข-16-bit-สไลด์-13">8.1 FAT16 ใช้เลข 16 bit <span class="slide-ref">สไลด์ 13</span></h3>
+<ul>
+<li><strong>The FAT16 file system uses a 16-bit number to identify each allocation unit (called cluster)</strong> → ได้ทั้งหมด <strong>65.536 clusters</strong></li>
+<li>ตรวจ: 2¹⁶ = <strong>65,536</strong> ✔</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์เขียน &quot;65**.**536&quot; — จุดตรงนี้คือ <strong>ตัวคั่นหลักพัน</strong> (แบบยุโรป) หมายถึง <strong>65,536</strong> ไม่ใช่ 65.5</p>
+</blockquote>
+<h3 id="82-ตัวอย่าง-filetxt-ใน-fat16-สไลด์-13">8.2 ตัวอย่าง file.txt ใน FAT16 <span class="slide-ref">สไลด์ 13</span></h3>
+<p>ข้อมูลในรูป:</p>
+<ul>
+<li>ดิสก์เรียงเป็น <strong>boot sector → FAT → root directory → clusters</strong></li>
+<li><strong>Root directory</strong> มี entry: <code>file.txt ... 20000 ... 50</code> → <strong>&quot;Directory entry contains file size and number of the first cluster in the file.&quot;</strong> (ขนาด 20000, cluster แรก = 50)</li>
+<li>สมมติ: file.txt ใช้ cluster <strong>50, 51, 52, 160, 130</strong> และดิสก์แบ่งเป็น cluster ขนาด <strong>4k</strong></li>
+<li>ตาราง FAT: <code>50: 51</code> · <code>51: 52</code> · <code>52: 160</code> · ... · <code>130: EOF</code> · ... · <code>160: 130</code></li>
+</ul>
+<p><strong>ไล่สายโซ่ทีละขั้น:</strong></p>
+<ol>
+<li>อ่าน root directory → file.txt เริ่มที่ cluster <strong>50</strong></li>
+<li>ดู FAT ช่อง 50 → ได้ <strong>51</strong> (cluster ถัดไป)</li>
+<li>FAT ช่อง 51 → <strong>52</strong></li>
+<li>FAT ช่อง 52 → <strong>160</strong> (กระโดดไกล ไม่ต้องติดกัน)</li>
+<li>FAT ช่อง 160 → <strong>130</strong> (ย้อนกลับมาเลขน้อยกว่าก็ได้)</li>
+<li>FAT ช่อง 130 → <strong>EOF</strong> = จบไฟล์</li>
+</ol>
+<p><img loading="lazy" src="diagrams/L14-03-fat16-chain.png" alt="สายโซ่ cluster ของ file.txt" /></p>
+<ul>
+<li>ตรวจจำนวน cluster: 20000 ÷ 4096 ≈ 4.88 → ต้องใช้ <strong>5 cluster</strong> ตรงกับที่สไลด์บอกว่าใช้ 5 cluster (50, 51, 52, 160, 130) ✔</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนล่าสมบัติ: ป้ายแรก (directory entry) บอกว่าไปจุดที่ 50 ที่จุด 50 มีกระดาษเขียนว่า &quot;ไปต่อที่ 51&quot; ... จนถึงจุดที่เขียนว่า &quot;จบ (EOF)&quot;</p>
+</blockquote>
+<h3 id="83-อีก-2-ตัวอย่างในสไลด์-14-สไลด์-14">8.3 อีก 2 ตัวอย่างในสไลด์ 14 <span class="slide-ref">สไลด์ 14</span></h3>
+<p><strong>รูปบน:</strong> Directory entry มี 3 ช่อง <strong>File name / File size / Starting cluster address</strong> → <code>File.dat | 10000 Bytes | Cluster 16</code></p>
+<ul>
+<li>FAT: ช่อง 16 = 17, ช่อง 17 = 18, ช่อง 18 = 19, ช่อง 19 = 20, ช่อง 20 = <strong>EOF</strong></li>
+<li>แต่ละช่องของ FAT ชี้ไปที่ <strong>Cluster 16–20</strong> ที่เก็บ <strong>File data</strong> จริง</li>
+<li>→ File.dat ใช้ cluster <strong>16, 17, 18, 19, 20</strong> (5 cluster ต่อเนื่องกัน)</li>
+</ul>
+<p><strong>รูปล่าง (File directory entries):</strong> 3 ไฟล์ใช้ตาราง FAT เดียวกัน (ช่อง 2–9)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ช่อง FAT</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ค่าในช่อง</td>
+<td>0003</td>
+<td>0004</td>
+<td>FFFF</td>
+<td>0006</td>
+<td>0008</td>
+<td>FFFF</td>
+<td>FFFF</td>
+<td>0000</td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>cluster แรก (จาก entry)</th>
+<th>ไล่สาย</th>
+<th>cluster ที่ใช้</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FILE1</strong></td>
+<td>0002</td>
+<td>2 → 3 → 4 (FFFF)</td>
+<td><strong>2, 3, 4</strong></td>
+</tr>
+<tr>
+<td><strong>FILE2</strong></td>
+<td>0005</td>
+<td>5 → 6 → 8 (FFFF)</td>
+<td><strong>5, 6, 8</strong> (ข้าม 7)</td>
+</tr>
+<tr>
+<td><strong>FILE3</strong></td>
+<td>0007</td>
+<td>7 (FFFF)</td>
+<td><strong>7</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>FFFF</strong> อยู่ท้ายสายทุกไฟล์ ทำหน้าที่เดียวกับ <strong>EOF</strong> ในรูปบน</li>
+<li>ช่อง 9 มีค่า <strong>0000</strong> และไม่มีไฟล์ไหนชี้มา (สไลด์ไม่ได้อธิบายความหมายของ 0000)</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L14-04-fat-files.png" alt="FAT ของ File.dat และ FILE1–FILE3" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ จุดที่มักพลาด: ค่าในช่อง N คือ &quot;<strong>cluster ถัดไป</strong>&quot; ไม่ใช่ข้อมูลของไฟล์ เช่น FAT[6] = 0008 แปลว่าหลัง cluster 6 ไปต่อที่ cluster 8 (ไม่ใช่ 7)</p>
+</blockquote>
+<hr />
+<h2 id="9-disk-management-แสดงข้อมูลอะไร-lecture-สไลด์-16">9. Disk Management แสดงข้อมูลอะไร? <sub>(Lecture สไลด์ 16)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Disk Management แสดงทุก volume (layout, type, file system, status, capacity, free space) และแสดงแต่ละดิสก์แยกเป็น partition</strong></p>
+<p>รูปเป็นหน้าต่าง <strong>Disk Management</strong> (เมนู File / Action / View / Help):</p>
+<p><strong>ตารางด้านบน (ทุก volume)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Volume</th>
+<th>Layout</th>
+<th>Type</th>
+<th>File System</th>
+<th>Status</th>
+<th>Capacity</th>
+<th>Free Space</th>
+<th>% Free</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(C:)</td>
+<td>Simple</td>
+<td>Basic</td>
+<td>NTFS</td>
+<td>Healthy (B...)</td>
+<td>118.02 GB</td>
+<td>54.50 GB</td>
+<td>46 %</td>
+</tr>
+<tr>
+<td>(D:)</td>
+<td>Simple</td>
+<td>Basic</td>
+<td>NTFS</td>
+<td>Healthy (P...)</td>
+<td>931.50 GB</td>
+<td>436.74 GB</td>
+<td>47 %</td>
+</tr>
+<tr>
+<td>(Disk 1 partition 1)</td>
+<td>Simple</td>
+<td>Basic</td>
+<td>–</td>
+<td>Healthy (E...)</td>
+<td>500 MB</td>
+<td>500 MB</td>
+<td>100 %</td>
+</tr>
+<tr>
+<td>(Disk 1 partition 5)</td>
+<td>Simple</td>
+<td>Basic</td>
+<td>–</td>
+<td>Healthy (R...)</td>
+<td>637 MB</td>
+<td>637 MB</td>
+<td>100 %</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ด้านล่าง (แยกตามดิสก์)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ดิสก์</th>
+<th>ข้อมูล</th>
+<th>partition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Disk 0</strong></td>
+<td>Basic, 931.50 GB, Online</td>
+<td><strong>(D:)</strong> 931.50 GB NTFS – Healthy (Page File, Basic Data Partition)</td>
+</tr>
+<tr>
+<td><strong>Disk 1</strong></td>
+<td>Basic, 119.23 GB, Online</td>
+<td>500 MB – Healthy (<strong>EFI System Partition</strong>) · 100 MB · <strong>(C:)</strong> 118.02 GB NTFS – Healthy (<strong>Boot</strong>, Crash Dump, Basic Data Partition) · 637 MB – Healthy (<strong>Recovery Partition</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>คำอธิบายสีด้านล่าง: <strong>Unallocated</strong> (ดำ), <strong>Primary partition</strong> (น้ำเงิน)</li>
+<li>ตรวจตัวเลขในรูป: % Free ของ C: = 54.50 ÷ 118.02 ≈ 46% ✔ · D: = 436.74 ÷ 931.50 ≈ 47% ✔</li>
+<li>สถานะย่อ &quot;Healthy (B...)&quot; ของ C: และ &quot;Healthy (R...)&quot; ของ partition 5 ตรงกับคำเต็มด้านล่าง (Boot..., Recovery Partition)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เทียบ L7 (Storage บน Linux): หน้านี้คือ &quot;lsblk / df ในแบบ GUI&quot; ของ Windows — ดูดิสก์ partition file system และพื้นที่ว่างได้ในหน้าเดียว</p>
+</blockquote>
+<hr />
+<h2 id="10-ntfs-มีโครงสร้างอะไรบ้าง-lecture-สไลด์-1718">10. NTFS มีโครงสร้างอะไรบ้าง? <sub>(Lecture สไลด์ 17–18)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>NTFS (New Technology File System) มีหัวใจคือ Master File Table (MFT) และเก็บสำเนาส่วนสำคัญของ MFT หลายชุดกันข้อมูลเสีย · ประกอบด้วย PBS, MFT และ meta files</strong></p>
+<h3 id="101-mft-คือโครงสร้างศูนย์กลาง-สไลด์-17">10.1 MFT คือโครงสร้างศูนย์กลาง <span class="slide-ref">สไลด์ 17</span></h3>
+<ul>
+<li><strong>The central system structure of the NTFS file system is the master file table (MFT).</strong></li>
+<li><strong>NTFS keeps multiple copies of the critical portion of the MFT</strong> to protect against <strong>corruption and data loss</strong></li>
+<li>รูป <strong>Figure 1: MFT layout structure</strong> (ไล่จากบนลงล่าง):
+<ul>
+<li><strong>Partition 1</strong> on the digital electronic storage devices → ข้างในคือ <strong>NTFS File System</strong> → แบ่งเป็น <strong>Sectors</strong></li>
+<li>ขยายออกมาเป็น <strong>MFT Entry</strong> หนึ่งแถว ซึ่งมีส่วน: <strong>MFT Entry Header</strong>, <strong>MFT Attributes Header</strong>, <strong>MFT Attributes Content</strong> (หลายช่อง) และ <strong>Unused Space</strong> (ท้าย entry)</li>
+</ul>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ในรูปสไลด์ 17 สะกด &quot;<strong>MTF</strong> Attributes Header&quot; — คือ <strong>MFT</strong> Attributes Header</p>
+</blockquote>
+<h3 id="102-ส่วนประกอบของ-ntfs-สไลด์-18">10.2 ส่วนประกอบของ NTFS <span class="slide-ref">สไลด์ 18</span></h3>
+<p>NTFS consists of several components:</p>
+<ol>
+<li><strong>Partition boot sector (PBS)</strong> – an information-containing partition boot sector (ส่วนบูตที่เก็บข้อมูลของ partition)</li>
+<li><strong>Master file table</strong> – keeps a <strong>record of all files and directories</strong> in the filesystem</li>
+<li><strong>A set of meta files</strong> – facilitate more effective structuring of <strong>metadata</strong></li>
+</ol>
+<p>รูปวางเรียงซ้ายไปขวา: <strong>Partition Boot Sector | Master File Table | System Files | File Area</strong> (ทั้งหมดคือ NTFS File System)</p>
+<p><img loading="lazy" src="diagrams/L14-05-ntfs-layout.png" alt="โครงสร้าง NTFS (สไลด์ 18 + 24)" /></p>
+<hr />
+<h2 id="11-partition-boot-sector-pbs-เก็บอะไร-lecture-สไลด์-19">11. Partition Boot Sector (PBS) เก็บอะไร? <sub>(Lecture สไลด์ 19)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตอน format NTFS โปรแกรม format จองพื้นที่ 16 sector แรกไว้ให้ boot sector และ bootstrap code · boot sector แบ่งเป็น 6 field เรียงตาม byte offset</strong></p>
+<ul>
+<li>The boot sector of an NTFS-formatted drive is described in the table</li>
+<li><strong>The format program sets aside the first 16 sectors</strong> of an NTFS when formatting it for the <strong>boot sector and the bootstrap code</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Byte Offset</th>
+<th>Field Length</th>
+<th>Field Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>3 bytes</td>
+<td><strong>Jump Instruction</strong></td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>LONGLONG</td>
+<td><strong>OEM ID</strong></td>
+</tr>
+<tr>
+<td>0x0B</td>
+<td>25 bytes</td>
+<td><strong>BPB</strong></td>
+</tr>
+<tr>
+<td>0x24</td>
+<td>48 bytes</td>
+<td><strong>Extended BPB</strong></td>
+</tr>
+<tr>
+<td>0x54</td>
+<td>426 bytes</td>
+<td><strong>Bootstrap Code</strong></td>
+</tr>
+<tr>
+<td>0x01FE</td>
+<td>WORD</td>
+<td><strong>End of Sector Marker</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ไล่ offset ทีละขั้น</strong> (offset ถัดไป = offset เดิม + ความยาว field; LONGLONG = 8 bytes, WORD = 2 bytes):</p>
+<ol>
+<li>0x00 + 3 = <strong>0x03</strong> ✔</li>
+<li>0x03 + 8 = 11 = <strong>0x0B</strong> ✔</li>
+<li>0x0B (11) + 25 = 36 = <strong>0x24</strong> ✔</li>
+<li>0x24 (36) + 48 = 84 = <strong>0x54</strong> ✔</li>
+<li>0x54 (84) + 426 = 510 = <strong>0x1FE</strong> ✔</li>
+<li>0x1FE (510) + 2 = <strong>512 bytes</strong> = จบ sector พอดี</li>
+</ol>
+<blockquote class="callout">
+<p>ℹ️ ขนาด LONGLONG = 8 และ WORD = 2 ไม่ได้เขียนในสไลด์ แต่เป็นค่าที่ทำให้ offset ในตารางต่อกันพอดี (ตรวจด้วย node แล้วรวมได้ 512)</p>
+</blockquote>
+<hr />
+<h2 id="12-mft-ทำงานยังไง-และกันข้อมูลเสียยังไง-lecture-สไลด์-2023">12. MFT ทำงานยังไง และกันข้อมูลเสียยังไง? <sub>(Lecture สไลด์ 20–23)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>MFT มี record ของทุกไฟล์ · 16 record แรกจองไว้ให้ข้อมูลพิเศษ (record 1 = MFT เอง, record 2 = MFT mirror, record 3 = log file) · ถ้า record แรกเสียจะไปใช้ MFT mirror · ไฟล์เล็ก ≤ 1500 bytes เก็บใน record ได้ทั้งไฟล์</strong></p>
+<h3 id="121-master-file-table-mft-สไลด์-20">12.1 Master File Table (MFT) <span class="slide-ref">สไลด์ 20</span></h3>
+<ul>
+<li>MFT เป็น <strong>unique file</strong> ที่มี <strong>record ของทุกไฟล์</strong> บน NTFS drive</li>
+<li>NTFS <strong>กัน 16 record แรก</strong> ของตารางไว้สำหรับ <strong>special data</strong>
+<ul>
+<li><strong>entry แรก</strong> = อธิบายตัว <strong>master file table</strong> เองโดยละเอียด</li>
+<li>ตามด้วย entry ของ <strong>MFT mirror</strong></li>
+</ul>
+</li>
+<li><strong>ถ้า record แรกของ MFT เสีย (corrupted)</strong> → NTFS อ่าน <strong>record ที่สอง</strong> เพื่อหาไฟล์ <strong>MFT mirror</strong> ซึ่ง <strong>record แรกของ mirror เหมือนกับ record แรกของ MFT ทุกประการ</strong></li>
+<li><strong>Boot sector</strong> เก็บตำแหน่งของ data segments ของ <strong>MFT</strong> และ <strong>MFT mirror</strong></li>
+<li><strong>กึ่งกลางทางตรรกะของดิสก์ (logical center of the disk)</strong> มี <strong>สำเนาของ boot sector</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสมุดรายชื่อห้องสมุด: MFT คือสมุดรายชื่อหนังสือทุกเล่ม และห้องสมุดถ่ายสำเนาหน้าแรกเก็บไว้อีกที่ (MFT mirror) ถ้าหน้าแรกขาดก็เปิดสำเนาแทน</p>
+</blockquote>
+<h3 id="122-รูป-mft-กับ-extent-สไลด์-21">12.2 รูป MFT กับ extent <span class="slide-ref">สไลด์ 21</span></h3>
+<p>รูปแสดง <strong>Master File Table</strong> เป็นแถว record เรียงจากบนลงล่าง: <strong>MFT</strong>, (แถวว่าง), <strong>Log file record</strong>, ..., <strong>Small file record</strong>, (แถวว่าง), <strong>Large file record</strong>, <strong>Small directory record</strong>, ...</p>
+<ul>
+<li>record <strong>MFT</strong> มีเส้นออกไปที่ <strong>Extent</strong> 2 ชุด</li>
+<li><strong>Log file record</strong> ชี้ไปที่ <strong>Extent</strong> 1 ชุด</li>
+<li><strong>Large file record</strong> ชี้ไปที่ <strong>Extent 1, Extent 2, Extent 3</strong></li>
+<li><strong>Small file record</strong> และ <strong>Small directory record</strong> ไม่มีเส้นออกไป extent</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L14-06-mft-records.png" alt="MFT record กับ extent" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 อ่านรูปนี้คู่กับสไลด์ 23: ไฟล์/โฟลเดอร์เล็กอยู่ใน record ได้ทั้งก้อน จึงไม่มีเส้นออกไป extent ส่วนไฟล์ใหญ่ต้องเก็บข้อมูลเป็นหลายช่วง (extent) ข้างนอก</p>
+</blockquote>
+<h3 id="123-รูป-ntfs-file-system-สไลด์-22">12.3 รูป NTFS FILE SYSTEM <span class="slide-ref">สไลด์ 22</span></h3>
+<ul>
+<li><strong>Master File Table</strong> (แถบสีแดง) มีแถวที่ป้ายว่า <strong>1024</strong> ลากเส้นไปที่ <strong>File Entry</strong> ใน <strong>Directory Data</strong></li>
+<li>จาก File Entry มีเส้นวนกลับไปที่ <strong>record อีกแถวใน MFT</strong> และจาก record นั้นมีเส้นไปที่ <strong>File</strong></li>
+<li>มีกล่อง <strong>Bitmap</strong> และกล่องคำพูด &quot;<strong>0,1 Marking for Each Cluster</strong>&quot; (บิตแมปใช้ 0/1 ทำเครื่องหมายแต่ละ cluster)</li>
+<li>แถวล่างคือการวางบนดิสก์: ... <strong>MFT</strong> ... <strong>MFT Mirror</strong> ... <strong>Directory</strong> ... <strong>File</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L14-07-ntfs-lookup.png" alt="เส้นทางในรูป NTFS FILE SYSTEM" /></p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 22 เป็นรูปล้วนไม่มีคำอธิบาย สรุปนี้บรรยายตามเส้นที่เห็นในรูปเท่านั้น สไลด์ไม่ได้บอกว่าเลข 1024 หมายถึงอะไร</p>
+</blockquote>
+<h3 id="124-log-file-และไฟล์เล็กใน-mft-สไลด์-23">12.4 Log file และไฟล์เล็กใน MFT <span class="slide-ref">สไลด์ 23</span></h3>
+<ul>
+<li><strong>The log file</strong> ใช้สำหรับ <strong>file recovery</strong> และเป็น <strong>record ที่ 3</strong> ของ MFT</li>
+<li><strong>แต่ละ file entry ได้พื้นที่เฉพาะ</strong> ใน MFT</li>
+<li><strong>attributes ของไฟล์</strong> ถูกเขียนลงพื้นที่ที่กำหนดไว้ใน MFT</li>
+<li><strong>ไฟล์และ directory ขนาดเล็ก ≤ 1500 bytes</strong> เก็บ <strong>อยู่ใน MFT record ได้ทั้งหมด</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ลำดับ record ใน MFT</th>
+<th>คืออะไร</th>
+<th>ที่มา</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ที่ 1</td>
+<td>MFT (อธิบายตัวเอง)</td>
+<td>สไลด์ 20</td>
+</tr>
+<tr>
+<td>ที่ 2</td>
+<td>MFT mirror</td>
+<td>สไลด์ 20</td>
+</tr>
+<tr>
+<td>ที่ 3</td>
+<td>Log file (ใช้กู้ไฟล์)</td>
+<td>สไลด์ 23</td>
+</tr>
+<tr>
+<td>16 record แรก</td>
+<td>จองไว้ให้ special data</td>
+<td>สไลด์ 20</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-ntfs-metadata-system-files-คืออะไร-lecture-สไลด์-24">13. NTFS metadata / system files คืออะไร? <sub>(Lecture สไลด์ 24)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>NTFS มี system file หลายไฟล์ที่ซ่อนอยู่ ใช้สร้าง file system และเก็บ metadata · โปรแกรม Format เป็นตัวเขียนลง volume</strong></p>
+<ul>
+<li><strong>Several system files</strong> เป็นส่วนหนึ่งของ NTFS และ <strong>ถูกซ่อน (hidden) ทั้งหมด</strong> บน NTFS drive</li>
+<li><strong>System file</strong> = ไฟล์ที่ file system ใช้ <strong>implement ตัว file system และเก็บ metadata ของมัน</strong></li>
+<li><strong>The Format utility writes system files to the volume</strong> (system file ถูกเขียนตอน format)</li>
+<li>รูป: volume แบ่งเป็น <strong>File System Metadata | User Files</strong> และ File System Metadata ขยายเป็น <strong>Partition Boot Sector | Master File Table | System Files</strong> (ดูรูปในข้อ 10.2)</li>
+<li>ที่มา: recoverit.wondershare.com/file-system/ntfs-file-system.html</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 metadata = &quot;ข้อมูลเกี่ยวกับข้อมูล&quot; เช่นรายชื่อไฟล์ ตำแหน่ง ขนาด ไม่ใช่เนื้อไฟล์เอง</p>
+</blockquote>
+<hr />
+<h2 id="14-windows-registry-คืออะไร-มีโครงสร้างยังไง-lecture-สไลด์-2527">14. Windows Registry คืออะไร มีโครงสร้างยังไง? <sub>(Lecture สไลด์ 25–27)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Registry = ฐานข้อมูลแบบลำดับชั้นที่เก็บการตั้งค่าระดับล่างของ Windows และโปรแกรม · โครงสร้างซ้อนเหมือนโฟลเดอร์: subtree (ราก, มี 5 ตัว HKEY_...) → key → subkey</strong></p>
+<h3 id="141-registry-คืออะไร-สไลด์-25">14.1 Registry คืออะไร <span class="slide-ref">สไลด์ 25</span></h3>
+<ul>
+<li><strong>hierarchical database</strong> ที่เก็บ <strong>low-level settings</strong> ของ Windows OS และของ <strong>โปรแกรมที่เลือกใช้ registry</strong></li>
+<li>ผู้ใช้ registry: <strong>kernel, device drivers, services, Security Accounts Manager (SAM), user interfaces</strong></li>
+<li>ให้เข้าถึง <strong>counters สำหรับ profiling system performance</strong> ได้ด้วย</li>
+<li>พูดอีกแบบ: registry เก็บ <strong>ข้อมูล, การตั้งค่า, ตัวเลือก และค่าอื่น ๆ ของโปรแกรมและ hardware</strong> ที่ติดตั้งบน Windows ทุกเวอร์ชัน</li>
+<li><strong>ตัวอย่าง:</strong> ติดตั้งโปรแกรมใหม่ → มี <strong>subkey ใหม่</strong> ถูกเพิ่มเข้า registry ซึ่งเก็บ <strong>ตำแหน่งโปรแกรม, เวอร์ชัน และวิธีเริ่มโปรแกรม</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนสมุดตั้งค่ากลางของทั้งเครื่อง: OS, driver, service และโปรแกรมต่าง ๆ มาเปิดสมุดเล่มเดียวกันนี้เพื่ออ่าน/จดค่าของตัวเอง แบ่งหมวดเป็นชั้น ๆ เหมือนโฟลเดอร์</p>
+</blockquote>
+<h3 id="142-เปิด-registry-editor-สไลด์-26">14.2 เปิด Registry Editor <span class="slide-ref">สไลด์ 26</span></h3>
+<ul>
+<li><strong>At the command prompt, search for Registry editor</strong> (สไลด์ไม่ได้ระบุคำสั่งที่พิมพ์)</li>
+<li>รูปหน้าต่าง <strong>Registry Editor</strong> (เมนู File, Edit, View, Favorites, Help) ช่อง path แสดง <code>Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control</code></li>
+<li>ป้ายในรูปชี้ 3 ระดับ: <strong>subtrees</strong> (เช่น HKEY_CURRENT_USER), <strong>keys</strong> (เช่น SECURITY ใต้ HKEY_LOCAL_MACHINE), <strong>subkeys</strong> (เช่น CurrentControlSet ใต้ SYSTEM)</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L14-08-registry-tree.png" alt="ลำดับชั้นของ registry ในรูปสไลด์ 26" /></p>
+<p>ช่องขวาของ Registry Editor แสดงค่าใน <strong>Control</strong> เป็น 3 คอลัมน์ <strong>Name / Type / Data</strong> เช่น</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(Default)</td>
+<td>REG_SZ</td>
+<td>(value not set)</td>
+</tr>
+<tr>
+<td>BootDriverFlags</td>
+<td>REG_DWORD</td>
+<td>0x0000001c (28)</td>
+</tr>
+<tr>
+<td>CurrentUser</td>
+<td>REG_SZ</td>
+<td>USERNAME</td>
+</tr>
+<tr>
+<td>EarlyStartServices</td>
+<td>REG_MULTI_SZ</td>
+<td>RpcSs Power BrokerInfrastructure System</td>
+</tr>
+<tr>
+<td>FirmwareBootD...</td>
+<td>REG_SZ</td>
+<td>multi(0)disk(0)rdisk(0)partition(2)</td>
+</tr>
+<tr>
+<td>LastBootShutdo... / LastBootSuccee...</td>
+<td>REG_DWORD</td>
+<td>0x00000001 (1)</td>
+</tr>
+<tr>
+<td>PreshutdownOr...</td>
+<td>REG_MULTI_SZ</td>
+<td>UsoSvc DeviceInstall gpsvc trustedinstalle...</td>
+</tr>
+<tr>
+<td>SvcHostSplitThr...</td>
+<td>REG_DWORD</td>
+<td>0x00380000 (3670016)</td>
+</tr>
+<tr>
+<td>SystemBootDevi...</td>
+<td>REG_SZ</td>
+<td>multi(0)disk(0)rdisk(0)partition(4)</td>
+</tr>
+<tr>
+<td>SystemStartOpti...</td>
+<td>REG_SZ</td>
+<td>NOEXECUTE=OPTIN NOVGA</td>
+</tr>
+<tr>
+<td>WaitToKillServic...</td>
+<td>REG_SZ</td>
+<td>5000</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>ℹ️ ชื่อที่ลงท้าย &quot;...&quot; ถูกตัดในรูปสไลด์ สไลด์ไม่ได้อธิบายความหมายของแต่ละ Type</p>
+</blockquote>
+<h3 id="143-structure-of-windows-registry-สไลด์-27">14.3 Structure of Windows Registry <span class="slide-ref">สไลด์ 27</span></h3>
+<ul>
+<li>registry ส่วนใหญ่เป็น <strong>ภาชนะซ้อนกัน (nested containers)</strong> เรียกว่า <strong>subtrees, keys, subkeys</strong> ซึ่ง <strong>เหมือนโฟลเดอร์</strong></li>
+<li><strong>Subtrees</strong> = <strong>ราก (root)</strong> หรือการแบ่งหลักของ registry</li>
+<li>ชื่อ subtree มี 5 ตัว:
+<ol>
+<li><strong>HKEY_CLASSES_ROOT</strong></li>
+<li><strong>HKEY_CURRENT_USER</strong></li>
+<li><strong>HKEY_LOCAL_MACHINE</strong></li>
+<li><strong>HKEY_USERS</strong></li>
+<li><strong>HKEY_CURRENT_CONFIG</strong></li>
+</ol>
+</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ไม่ได้อธิบายหน้าที่ของแต่ละ HKEY — ข้อสอบน่าจะถามแค่ชื่อ / จำนวน (5) / ลำดับชั้น subtree → key → subkey</p>
+</blockquote>
+<hr />
+<h2 id="15-สร้าง-user-account-ใน-windows-ยังไง-lecture-สไลด์-2831">15. สร้าง user account ใน Windows ยังไง? <sub>(Lecture สไลด์ 28–31)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Start &gt; Settings &gt; Accounts &gt; Family &amp; other users &gt; (Other users) Add someone else to this PC → ได้ user ใหม่ เช่น &quot;test&quot; แบบ Local account</strong></p>
+<p><img loading="lazy" src="diagrams/L14-09-create-user.png" alt="ขั้นตอนสร้าง user" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สไลด์</th>
+<th>หน้าจอ</th>
+<th>สิ่งที่เห็น / ทำ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>28</td>
+<td><strong>Windows Settings</strong></td>
+<td>หมวด: System, Devices, Phone, Network &amp; Internet, Personalization, Apps, <strong>Accounts</strong> (Your accounts, email, sync, work, family), Time &amp; Language, Gaming, Ease of Access, Search, Privacy, Update &amp; Security → เลือก <strong>Accounts</strong></td>
+</tr>
+<tr>
+<td>29</td>
+<td><strong>Accounts &gt; Your info</strong></td>
+<td>เมนูซ้าย: Your info, Email &amp; accounts, Sign-in options, Access work or school, <strong>Family &amp; other users</strong>, Sync your settings · หน้า Your info แสดงบัญชีปัจจุบันเป็น <strong>Local Account, Administrator</strong> และลิงก์ &quot;Sign in with a Microsoft account instead&quot;</td>
+</tr>
+<tr>
+<td>30</td>
+<td><strong>Family &amp; other users</strong></td>
+<td>ส่วน <strong>Your family</strong> – &quot;Add your family so everybody gets their own sign-in and desktop...&quot; ปุ่ม <strong>Add a family member</strong> · ส่วน <strong>Other users</strong> – &quot;Allow people who are not part of your family to sign in with their own accounts. This won't add them to your family.&quot; ปุ่ม <strong>Add someone else to this PC</strong></td>
+</tr>
+<tr>
+<td>31</td>
+<td>หลังสร้างเสร็จ</td>
+<td>ใต้ Other users มี <strong>test – Local account</strong> เพิ่มขึ้นมา</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>คำสั่งในสไลด์ 29–31: <strong>&quot;Select Start &gt; Settings &gt; Accounts and then select Family &amp; other users.&quot;</strong></li>
+<li>ข้อความสีแดงในรูป &quot;We couldn't connect to Microsoft family right now...&quot; เป็นข้อความแจ้งเตือนของเครื่องตัวอย่าง</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ <strong>Add a family member</strong> (ส่วน Your family) ≠ <strong>Add someone else to this PC</strong> (ส่วน Other users) — การสร้าง user &quot;test&quot; ในสไลด์ใช้ <strong>Other users</strong> ซึ่ง <strong>ไม่ถูกเพิ่มเข้า family</strong></p>
+</blockquote>
+<hr />
+<h2 id="16-permission-ของไฟล์โฟลเดอร์มีกี่แบบ-และตั้งยังไง-lecture-สไลด์-3236">16. Permission ของไฟล์/โฟลเดอร์มีกี่แบบ และตั้งยังไง? <sub>(Lecture สไลด์ 32–36)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Windows มี standard permission 6 แบบ (Full Control, Modify, Read &amp; Execute, List Folder Contents, Read, Write) · ตั้งผ่าน Properties &gt; Security: Edit → Add user → ติ๊ก Allow/Deny → Apply → OK</strong></p>
+<h3 id="161-permission-6-แบบ-สไลด์-32">16.1 Permission 6 แบบ <span class="slide-ref">สไลด์ 32</span></h3>
+<p>There are <strong>six standard permission types</strong> which apply to files and folders in Windows:</p>
+<ol>
+<li><strong>Full Control</strong></li>
+<li><strong>Modify</strong></li>
+<li><strong>Read &amp; Execute</strong></li>
+<li><strong>List Folder Contents</strong></li>
+<li><strong>Read</strong></li>
+<li><strong>Write</strong></li>
+</ol>
+<p><strong>Full Control</strong> (กรอบแดงในสไลด์) — <strong>Permits the user(s) to:</strong></p>
+<ul>
+<li>view file name and subfolders (ดูชื่อไฟล์และโฟลเดอร์ย่อย)</li>
+<li>navigate to subfolders (เข้าไปในโฟลเดอร์ย่อย)</li>
+<li>view data in the folder's files (ดูข้อมูลในไฟล์)</li>
+<li>add files and subfolders to the folder (เพิ่มไฟล์/โฟลเดอร์ย่อย)</li>
+<li>change the folder's files (แก้ไฟล์)</li>
+<li>delete the folder and its files (ลบโฟลเดอร์และไฟล์)</li>
+<li><strong>change permissions</strong> (เปลี่ยนสิทธิ์)</li>
+<li><strong>take ownership</strong> of the folder and its files (ยึดความเป็นเจ้าของ)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์อธิบายรายละเอียดแค่ <strong>Full Control</strong> อีก 5 แบบมีแค่ชื่อ — จุดเด่นของ Full Control ที่ควรจำคือ <strong>change permissions</strong> และ <strong>take ownership</strong></p>
+<p class="c-tip">💡 เทียบ L5 (Linux): Linux มีแค่ r / w / x ต่อ owner / group / others ส่วน Windows มี 6 ระดับ และกำหนดให้ทีละ user หรือ group ได้</p>
+</blockquote>
+<h3 id="162-ตัวอย่างโฟลเดอร์ที่จะตั้งสิทธิ์-สไลด์-33">16.2 ตัวอย่างโฟลเดอร์ที่จะตั้งสิทธิ์ <span class="slide-ref">สไลด์ 33</span></h3>
+<ul>
+<li>File Explorer ที่ path <strong>This PC › Desktop › ITDS212 Comp System Lab › Lectures and Labs</strong></li>
+<li>ในโฟลเดอร์มี: Labs, <strong>Lectures</strong> (เลือกอยู่ — เป็นโฟลเดอร์ที่จะตั้งสิทธิ์), apache_w11, apt-install, Lab 9 Memory, Lecture 9 Memory, page1-695px-Unix_command_cheatsheet, temp doc for labs, Unix_command_cheatsheet, virtualbox</li>
+</ul>
+<h3 id="163-ขั้นตอนตั้งสิทธิ์-สไลด์-3436">16.3 ขั้นตอนตั้งสิทธิ์ <span class="slide-ref">สไลด์ 34–36</span></h3>
+<p><img loading="lazy" src="diagrams/L14-10-permission-steps.png" alt="ขั้นตอนตั้ง permission" /></p>
+<p><strong>ขั้น 1: เพิ่ม user ให้มีสิทธิ์เข้าถึงโฟลเดอร์</strong> (สไลด์ 34 และ 36)</p>
+<ol>
+<li>เปิด <strong>Properties</strong> dialog box</li>
+<li>เลือกแท็บ <strong>Security</strong></li>
+<li>คลิก <strong>Edit</strong> → หน้าต่าง security เปิดเป็น <strong>หน้าต่างใหม่</strong></li>
+<li>คลิก <strong>Add...</strong> → มี dialog <strong>Select Users, Computers, or Groups</strong> ขึ้นมา</li>
+<li>ในช่อง <strong>Enter the object names to select</strong> พิมพ์ชื่อ user (<strong>&quot;test&quot;</strong>) ที่จะให้เข้าถึงโฟลเดอร์</li>
+<li>คลิก <strong>OK</strong> → กลับมาที่ Properties dialog</li>
+<li>คลิก <strong>OK</strong> บนหน้าต่าง Security</li>
+<li>ทำต่อที่ &quot;Setting Permissions&quot; (ขั้น 2)</li>
+</ol>
+<p><strong>ขั้น 2: ตั้งระดับสิทธิ์</strong> (สไลด์ 35)</p>
+<ol>
+<li>เปิด <strong>Properties</strong> → แท็บ <strong>Security</strong> — ส่วนบนของ dialog แสดง <strong>users/groups ที่เข้าถึงไฟล์หรือโฟลเดอร์นี้ได้</strong></li>
+<li>ในส่วน <strong>Group or user name</strong> เลือก user ที่จะตั้งสิทธิ์</li>
+<li>ในส่วน <strong>Permissions</strong> ใช้ checkbox เลือกระดับสิทธิ์ที่เหมาะสม</li>
+<li>คลิก <strong>Apply</strong></li>
+<li>คลิก <strong>Okay</strong> → สิทธิ์ใหม่ถูกเพิ่มให้ไฟล์หรือโฟลเดอร์</li>
+</ol>
+<p><strong>สิ่งที่เห็นในรูป dialog</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>สไลด์</th>
+<th>หน้าต่าง</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>34</td>
+<td><strong>Lectures Properties</strong> แท็บ Security</td>
+<td>แท็บ: General, Sharing, <strong>Security</strong>, Previous Versions, Customize · Group or user names: <strong>SYSTEM</strong>, บัญชีเจ้าของเครื่อง, <strong>Administrators</strong> · &quot;To change permissions, click Edit.&quot; · Permissions for SYSTEM: ติ๊ก <strong>Allow</strong> ครบทั้ง 6 แบบ · ปุ่ม <strong>Advanced</strong> (&quot;For special permissions or advanced settings, click Advanced.&quot;)</td>
+</tr>
+<tr>
+<td>35, 36</td>
+<td><strong>Permissions for Lectures</strong></td>
+<td>Group or user names มี <strong>test</strong> เพิ่มเข้ามา · ปุ่ม <strong>Add... / Remove</strong> · <strong>Permissions for test</strong>: Allow ติ๊กที่ <strong>Read &amp; execute, List folder contents, Read</strong> ส่วน Full control และ Modify ไม่ติ๊ก (แถว Write ถูกตัดขอบในรูป) · มีคอลัมน์ <strong>Allow</strong> และ <strong>Deny</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 36 ใช้ข้อความชุดเดียวกับสไลด์ 34 (ขั้น Add user) แต่รูปเป็นหน้าต่าง Permissions for Lectures ที่เลือก user test แล้ว (เหมือนสไลด์ 35)</p>
+</blockquote>
+<hr />
+<h2 id="17-ดูและ-kill-process-ใน-windows-ยังไง-lecture-สไลด์-37">17. ดูและ kill process ใน Windows ยังไง? <sub>(Lecture สไลด์ 37)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เปิด Task Manager จาก Start → คลิกขวาที่หัวคอลัมน์เพื่อเลือกข้อมูลที่จะแสดง (Type, PID, CPU ฯลฯ) → kill process ด้วยคลิกขวาที่โปรแกรมแล้วเลือก End Task</strong></p>
+<p><strong>Viewing Process</strong> (ตามเลขในสไลด์):</p>
+<ol>
+<li><strong>(1)</strong> คลิกไอคอน <strong>Start</strong> แล้ว <strong>(2)</strong> คลิก <strong>Task Manager</strong></li>
+<li>ใน Task Manager <strong>คลิกขวา (3) ที่ชื่อคอลัมน์</strong> แล้วเลือกรายละเอียดที่ต้องการ เช่น <strong>(4) Type, PID, ..., CPU</strong> ฯลฯ</li>
+<li><strong>Kill process</strong> → <strong>คลิกขวาที่โปรแกรมนั้น</strong> แล้วเลือก <strong>&quot;End Task&quot;</strong></li>
+</ol>
+<p><strong>สิ่งที่เห็นในรูป Task Manager</strong></p>
+<ul>
+<li>แท็บ <strong>Processes</strong> · แถบเครื่องมือ: <strong>Run new task, End task, Efficiency mode, View</strong></li>
+<li>เมนูเลือกคอลัมน์ (คลิกขวาที่หัวคอลัมน์ Name): <strong>Type</strong>, Status, Publisher, <strong>PID</strong>, Process name, Command line, <strong>CPU</strong>, <strong>Memory</strong>, <strong>Disk</strong>, <strong>Network</strong>, GPU, GPU engine, Power usage, Power usage trend, Resource values</li>
+<li>หัวตารางแสดงภาพรวม: CPU 3%, Memory 44%, Disk 0%</li>
+<li>กลุ่ม <strong>Apps (4)</strong>: Microsoft Edge (9), Microsoft Store (2), MyASUS (2), Task Manager · กลุ่ม <strong>Background processes (71)</strong> เช่น Antimalware Service Executable, Application Frame Host, ASUS App Service ฯลฯ</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เทียบ L8–L9 (Linux): Task Manager ≈ <code>top</code>/<code>htop</code> แบบ GUI · คอลัมน์ <strong>PID</strong> คือเลข process เหมือนใน <code>ps</code> · <strong>End Task</strong> ≈ <code>kill</code></p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์พิมพ์ &quot;Click Start icon <strong>them</strong>&quot; — หมายถึง <strong>then</strong></p>
+</blockquote>
+<hr />
+<h1>ภาค Lab</h1>
+<h2 id="18-lab-14-ต้องทำอะไร-และส่งอะไร-lab-หน้า-14">18. Lab 14 ต้องทำอะไร และส่งอะไร? <sub>(Lab หน้า 1–4)</sub></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทำงาน admin Windows ทุกอย่างตามสไลด์ Lecture เก็บผลเป็น PDF ไฟล์เดียว ตั้งชื่อ 6887xxx_lab14.pdf ส่ง MyCourses ภายในเที่ยงคืนวันที่ November 12, 2026</strong></p>
+<h3 id="181-objectives-lab-หน้า-12">18.1 Objectives <sub>(Lab หน้า 1–2)</sub></h3>
+<ul>
+<li>Lab #14 (ITDS212 Computer System Lab, November 12, 2026) — เรียนรู้:
+<ul>
+<li><strong>วิธีการบริหารจัดการผู้ใช้งานเบื้องต้น</strong></li>
+<li><strong>วิธีการบริหารระบบไฟล์เบื้องต้น</strong></li>
+<li><strong>วิธีการติดตั้ง access permission</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="182-what-to-submit-lab-หน้า-3">18.2 What to Submit <sub>(Lab หน้า 3)</sub></h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>หัวข้อ</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ทำอะไร</td>
+<td>Do the windows operating system admins <strong>as said on the lecture slides</strong></td>
+</tr>
+<tr>
+<td>เก็บผล</td>
+<td>Save the outputs in <strong>one PDF file</strong></td>
+</tr>
+<tr>
+<td>ส่งที่</td>
+<td>link บน <strong>MyCourses</strong></td>
+</tr>
+<tr>
+<td>ชื่อไฟล์</td>
+<td><strong>6887xxx_lab14.pdf</strong> (xxx = รหัสนักศึกษาของตัวเอง)</td>
+</tr>
+<tr>
+<td>กำหนดส่ง</td>
+<td><strong>November 12, 2026 at midnight</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="183-what-to-do-in-the-lab-lab-หน้า-4">18.3 What to Do in the Lab <sub>(Lab หน้า 4)</sub></h3>
+<p>งาน 6 ข้อ และส่วนของ Lecture ที่ใช้ทำ:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>งานใน Lab</th>
+<th>ทำตาม Lecture</th>
+<th>ผลที่ควรเก็บใส่ PDF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Explore the volume, folder and files</strong> บนเครื่องที่ใช้ในแลป</td>
+<td>ข้อ 6 (สไลด์ 9–10)</td>
+<td>ภาพ File Explorer แสดง drive / folder / file</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Explore Disk Management</strong></td>
+<td>ข้อ 9 (สไลด์ 16)</td>
+<td>ภาพหน้าต่าง Disk Management (volume, file system, capacity, partition)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Explore the Windows Registry and its structure</strong></td>
+<td>ข้อ 14 (สไลด์ 25–27)</td>
+<td>ภาพ Registry Editor ที่เห็น subtree / key / subkey</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Set up the folder/file permission on the folder of your own</strong></td>
+<td>ข้อ 16 (สไลด์ 32–36)</td>
+<td>ภาพ Properties &gt; Security ก่อน/หลังเพิ่ม user และติ๊กสิทธิ์</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>View the current processes via the Task Manager</strong></td>
+<td>ข้อ 17 (สไลด์ 37)</td>
+<td>ภาพ Task Manager ที่เปิดคอลัมน์เพิ่ม (เช่น PID, Type)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Create a new user on your own machine at home</strong></td>
+<td>ข้อ 15 (สไลด์ 28–31)</td>
+<td>ภาพ Family &amp; other users ที่มี user ใหม่</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>ℹ️ คอลัมน์ &quot;ผลที่ควรเก็บ&quot; เป็นการจับคู่จากหน้าจอที่สไลด์ Lecture แสดง — Lab บอกแค่ให้ &quot;save the outputs in one PDF file&quot; ไม่ได้กำหนดว่าต้องแคปหน้าไหน</p>
+<p class="c-warn">⚠️ ข้อ 6 ให้ทำ <strong>ที่เครื่องตัวเองที่บ้าน</strong> (at home) ไม่ใช่เครื่องในแลป · ข้อ 4 ให้ตั้งสิทธิ์บน <strong>โฟลเดอร์ของตัวเอง</strong></p>
+<p>ℹ️ ทั้ง Lecture และ Lab ไม่มีคำสั่ง PowerShell / cmd ให้รัน ทุกขั้นทำผ่าน GUI (Settings, Properties, Disk Management, Registry Editor, Task Manager)</p>
+</blockquote>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Boot loader / boot manager</strong></td>
+<td>โปรแกรมเล็ก ๆ ที่โหลด OS เข้า memory</td>
+<td>คนเปิดประตูให้ OS เข้าบ้าน</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td>Power On Self Test ช่วงเครื่องตรวจตัวเองตอนเปิด</td>
+<td>กด F12 ตอนนี้เพื่อเลือกอุปกรณ์บูต</td>
+</tr>
+<tr>
+<td><strong>User mode / Kernel mode</strong></td>
+<td>2 ส่วนหลักของสถาปัตยกรรม Windows (NT)</td>
+<td>ชั้นลูกค้า / ห้องเครื่อง</td>
+</tr>
+<tr>
+<td><strong>HAL</strong></td>
+<td>Hardware Abstraction Layer ชั้นล่างสุดของ kernel ติดกับ hardware</td>
+<td>ตัวแปลงหัวปลั๊ก</td>
+</tr>
+<tr>
+<td><strong>NTDLL.DLL</strong></td>
+<td>แถบล่างสุดของ user mode ที่ทุกโปรแกรมผ่านก่อนเข้า kernel</td>
+<td>ประตูทางออกของ user mode</td>
+</tr>
+<tr>
+<td><strong>Preemptive, reentrant</strong></td>
+<td>คุณสมบัติ multitasking ของ Windows NT</td>
+<td>NT = layered + preemptive + reentrant</td>
+</tr>
+<tr>
+<td><strong>Volume</strong></td>
+<td>กลุ่มของ directory และ file</td>
+<td>ตู้เอกสารทั้งตู้</td>
+</tr>
+<tr>
+<td><strong>Cluster</strong></td>
+<td>หน่วยจัดสรรพื้นที่ (allocation unit) ของดิสก์</td>
+<td>FAT16 มีได้ 65,536 อัน</td>
+</tr>
+<tr>
+<td><strong>FAT</strong></td>
+<td>File Allocation Table — ตารางบอก cluster ถัดไปของไฟล์ (Microsoft, 1977)</td>
+<td>ป้ายบอกทางล่าสมบัติ</td>
+</tr>
+<tr>
+<td><strong>EOF</strong></td>
+<td>End Of File — จุดจบของสายโซ่ cluster</td>
+<td>FFFF ในรูปล่างสไลด์ 14 ก็อยู่ท้ายสาย</td>
+</tr>
+<tr>
+<td><strong>NTFS</strong></td>
+<td>New Technology File System</td>
+<td>auto repair + compression</td>
+</tr>
+<tr>
+<td><strong>MFT</strong></td>
+<td>Master File Table — มี record ของทุกไฟล์ใน NTFS</td>
+<td>สมุดรายชื่อทุกไฟล์</td>
+</tr>
+<tr>
+<td><strong>MFT mirror</strong></td>
+<td>สำเนาที่ record แรกเหมือน record แรกของ MFT</td>
+<td>ใช้เมื่อ record แรกเสีย</td>
+</tr>
+<tr>
+<td><strong>PBS</strong></td>
+<td>Partition Boot Sector — จอง 16 sector แรกให้ boot sector + bootstrap code</td>
+<td>6 field รวม 512 bytes</td>
+</tr>
+<tr>
+<td><strong>Extent</strong></td>
+<td>ช่วงพื้นที่ข้อมูลที่ record ใน MFT ชี้ออกไป (รูปสไลด์ 21)</td>
+<td>ไฟล์ใหญ่มีหลาย extent</td>
+</tr>
+<tr>
+<td><strong>Metadata / System file</strong></td>
+<td>ไฟล์ซ่อนที่ file system ใช้เก็บ metadata เขียนตอน Format</td>
+<td>ข้อมูลเกี่ยวกับข้อมูล</td>
+</tr>
+<tr>
+<td><strong>Registry</strong></td>
+<td>ฐานข้อมูลแบบลำดับชั้นเก็บ low-level settings</td>
+<td>สมุดตั้งค่ากลางของเครื่อง</td>
+</tr>
+<tr>
+<td><strong>Subtree / Key / Subkey</strong></td>
+<td>ชั้นของ registry (ราก → ลูก → หลาน) เหมือนโฟลเดอร์</td>
+<td>HKEY_ = subtree</td>
+</tr>
+<tr>
+<td><strong>Local account</strong></td>
+<td>บัญชีที่สร้างในเครื่อง (เช่น user test)</td>
+<td>ไม่ใช่ Microsoft account</td>
+</tr>
+<tr>
+<td><strong>Full Control</strong></td>
+<td>สิทธิ์สูงสุด รวม change permissions + take ownership</td>
+<td>1 ใน 6 standard permissions</td>
+</tr>
+<tr>
+<td><strong>Task Manager</strong></td>
+<td>เครื่องมือดู process เลือกคอลัมน์ (PID, CPU...) และ End Task</td>
+<td>top + kill ของ Windows</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li><strong>Windows 1.0 = Nov 1985 · Windows 11 = October 2021</strong> (ทั้งหมด 13 รุ่นในสไลด์)</li>
+<li><strong>F8</strong> = Windows Boot Manager · <strong>F12</strong> = Boot Menu เลือกอุปกรณ์บูตระหว่าง <strong>POST</strong> · boot loader = <strong>boot manager</strong></li>
+<li><strong>Windows NT</strong> = <strong>layered</strong> (user mode + kernel mode), <strong>preemptive, reentrant multitasking</strong>, ใช้ได้กับ <strong>uni- และ multiprocessor</strong></li>
+<li>Volume / Directory (<strong>hierarchical</strong>) / File (<strong>logical grouping of related data</strong>)</li>
+<li><strong>FAT</strong> พัฒนาโดย Microsoft <strong>1977</strong> · ตระกูล FAT = <strong>FAT12, FAT16, FAT32, exFAT</strong> · Windows มี 3 file system = <strong>NTFS, FAT32, FAT16</strong> (สไลด์ 11)</li>
+<li>ตารางเทียบ: <strong>FAT32</strong> volume 32GB / ไฟล์ 4GB / ไม่มี fault tolerance · <strong>NTFS</strong> 16TB / 16TB / cluster 4KB / <strong>auto repair</strong> / <strong>compression</strong> / Mac <strong>read-only</strong> · <strong>exFAT</strong> 128 PB / cluster 32MB / fault tolerance ถ้าเปิด <strong>TFAT</strong></li>
+<li><strong>FAT16 = 16 bit → 65,536 clusters</strong></li>
+<li>ไล่ FAT: entry บอก <strong>cluster แรก</strong> → ช่อง FAT N เก็บ <strong>cluster ถัดไป</strong> → จบที่ <strong>EOF</strong> (file.txt: 50→51→52→160→130)</li>
+<li>NTFS = <strong>PBS + MFT + meta files</strong> · MFT คือ <strong>central structure</strong> · เก็บ <strong>หลายสำเนา</strong> ของส่วนสำคัญ</li>
+<li>PBS: format จอง <strong>16 sector แรก</strong> · field: Jump Instruction (0x00, 3) → OEM ID (0x03) → BPB (0x0B, 25) → Extended BPB (0x24, 48) → Bootstrap Code (0x54, 426) → End of Sector Marker (0x01FE, WORD)</li>
+<li>MFT: <strong>16 record แรก</strong> จองไว้ · record 1 = MFT · record 2 = <strong>MFT mirror</strong> · record 3 = <strong>log file</strong> (file recovery) · record แรกเสีย → ใช้ mirror · <strong>สำเนา boot sector อยู่กลางดิสก์ (logical center)</strong> · ไฟล์/dir <strong>≤ 1500 bytes</strong> อยู่ใน MFT record ได้ทั้งหมด</li>
+<li>System files ของ NTFS <strong>ซ่อนทั้งหมด</strong> · <strong>Format utility</strong> เป็นผู้เขียน</li>
+<li>Registry = <strong>hierarchical database</strong> · ผู้ใช้: kernel, drivers, services, SAM, UI · <strong>subtrees → keys → subkeys</strong> · 5 subtree: <strong>HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS, HKEY_CURRENT_CONFIG</strong></li>
+<li>สร้าง user: <strong>Start &gt; Settings &gt; Accounts &gt; Family &amp; other users &gt; Add someone else to this PC</strong></li>
+<li>Permission <strong>6 แบบ</strong>: Full Control, Modify, Read &amp; Execute, List Folder Contents, Read, Write · ตั้งที่ <strong>Properties &gt; Security &gt; Edit &gt; Add &gt; ติ๊ก &gt; Apply &gt; OK</strong></li>
+<li>Process: <strong>Task Manager</strong> → คลิกขวาหัวคอลัมน์เลือก Type/PID/CPU → คลิกขวาโปรแกรม → <strong>End Task</strong></li>
+<li>Lab: PDF ไฟล์เดียว <strong>6887xxx_lab14.pdf</strong> ส่ง MyCourses ภายใน <strong>November 12, 2026 เที่ยงคืน</strong></li>
+</ul>
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>F8</strong></td>
+<td><strong>F12</strong></td>
+<td>F8 = เข้า <strong>Windows Boot Manager</strong> ตอนเครื่องเริ่ม · F12 = <strong>Boot Menu</strong> เลือกอุปกรณ์บูตระหว่าง POST</td>
+</tr>
+<tr>
+<td><strong>User mode</strong></td>
+<td><strong>Kernel mode</strong></td>
+<td>user = applications, subsystems, DLL, NTDLL · kernel = executive/manager, kernel, drivers, HAL</td>
+</tr>
+<tr>
+<td><strong>Integral subsystems</strong></td>
+<td><strong>Environment subsystems</strong> (NT)</td>
+<td>integral = Workstation service, Server service, Security · environment = Win32, POSIX, OS/2</td>
+</tr>
+<tr>
+<td><strong>Volume</strong></td>
+<td><strong>Directory</strong></td>
+<td>volume = กลุ่มของ directory+file ทั้งก้อน · directory = กลุ่มแบบ <strong>ลำดับชั้น</strong> ซ้อนได้</td>
+</tr>
+<tr>
+<td>Windows มี 3 FS (<strong>NTFS, FAT32, FAT16</strong>)</td>
+<td>ตารางเทียบ (<strong>FAT32, NTFS, exFAT</strong>)</td>
+<td>สไลด์ 11 กับ 12 ใช้ชุดต่างกัน ตอบตามที่โจทย์อ้าง</td>
+</tr>
+<tr>
+<td><strong>FAT32</strong></td>
+<td><strong>NTFS</strong></td>
+<td>FAT32: 32GB/4GB, ไม่มี fault tolerance, ไม่บีบอัด, เข้ากันได้กว้าง · NTFS: 16TB/16TB, auto repair, บีบอัดได้, Mac อ่านได้อย่างเดียว</td>
+</tr>
+<tr>
+<td><strong>Directory entry</strong></td>
+<td><strong>ช่องใน FAT</strong></td>
+<td>entry = ชื่อ + ขนาด + <strong>cluster แรก</strong> · ช่อง FAT N = <strong>cluster ถัดไป</strong> หลัง N</td>
+</tr>
+<tr>
+<td><strong>EOF</strong></td>
+<td><strong>0000</strong> (สไลด์ 14)</td>
+<td>EOF/FFFF อยู่ท้ายสายของไฟล์ · 0000 ที่ช่อง 9 ไม่มีไฟล์ชี้มา</td>
+</tr>
+<tr>
+<td><strong>16 sectors แรก</strong> (PBS)</td>
+<td><strong>16 records แรก</strong> (MFT)</td>
+<td>sector = format จองให้ boot sector + bootstrap code · record = MFT จองให้ special data</td>
+</tr>
+<tr>
+<td><strong>MFT</strong></td>
+<td><strong>MFT mirror</strong></td>
+<td>MFT = ตารางหลัก · mirror = สำเนาที่ record แรกเหมือนกัน ใช้เมื่อ record แรกของ MFT เสีย</td>
+</tr>
+<tr>
+<td><strong>MFT mirror</strong></td>
+<td><strong>สำเนา boot sector</strong></td>
+<td>mirror = สำเนา MFT · สำเนา boot sector อยู่ที่ <strong>logical center of the disk</strong></td>
+</tr>
+<tr>
+<td><strong>Record 2</strong></td>
+<td><strong>Record 3</strong> ของ MFT</td>
+<td>record 2 = MFT mirror · record 3 = <strong>log file</strong> (file recovery)</td>
+</tr>
+<tr>
+<td><strong>Small file record</strong></td>
+<td><strong>Large file record</strong> (สไลด์ 21)</td>
+<td>ไฟล์เล็ก (≤1500 bytes) อยู่ใน record ทั้งหมด · ไฟล์ใหญ่ชี้ออกไปหลาย extent</td>
+</tr>
+<tr>
+<td><strong>Subtree</strong></td>
+<td><strong>Key / Subkey</strong></td>
+<td>subtree = ราก (HKEY_ 5 ตัว) · key = ชั้นถัดมา (เช่น SYSTEM) · subkey = ชั้นลึกลงไป (เช่น CurrentControlSet)</td>
+</tr>
+<tr>
+<td><strong>Add a family member</strong></td>
+<td><strong>Add someone else to this PC</strong></td>
+<td>family = สมาชิกครอบครัว · other users = คนนอกครอบครัว <strong>ไม่ถูกเพิ่มเข้า family</strong> (สไลด์สร้าง test ด้วยอันนี้)</td>
+</tr>
+<tr>
+<td><strong>Full Control</strong></td>
+<td><strong>อีก 5 permission</strong></td>
+<td>Full Control เท่านั้นที่ <strong>change permissions + take ownership</strong> ได้ (ตามรายการในสไลด์)</td>
+</tr>
+<tr>
+<td><strong>Edit</strong> (Security tab)</td>
+<td><strong>Advanced</strong></td>
+<td>Edit = เปลี่ยนสิทธิ์ / เพิ่ม user · Advanced = special permissions หรือ advanced settings</td>
+</tr>
+<tr>
+<td><strong>Allow</strong></td>
+<td><strong>Deny</strong></td>
+<td>2 คอลัมน์ checkbox ใน Permissions for <user> ตัวอย่างในสไลด์ติ๊กเฉพาะ Allow</td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../l9/index.html"><small>← บทก่อนหน้า</small><span>L9 – Observability และ Environment Variables</span></a><span></span></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#1-บทนี้อยู่ตรงไหนของวิชา-และตั้งเป้าเรียนอะไร-lecture-สไลด์-14">บทนี้อยู่ตรงไหนของวิชา และตั้งเป้าเรียนอะไร? (Lecture สไลด์ 1–4)</a></li><li><a href="#2-windows-มีรุ่นอะไรบ้าง-ออกปีไหน-lecture-สไลด์-5">Windows มีรุ่นอะไรบ้าง ออกปีไหน? (Lecture สไลด์ 5)</a></li><li><a href="#3-boot-manager-boot-loader-และ-f12-boot-menu-คืออะไร-lecture-สไลด์-6">Boot Manager, Boot loader และ F12 Boot Menu คืออะไร? (Lecture สไลด์ 6)</a></li><li><a href="#4-สถาปัตยกรรมของ-windows-แบ่งชั้นยังไง-lecture-สไลด์-7-15">สถาปัตยกรรมของ Windows แบ่งชั้นยังไง? (Lecture สไลด์ 7, 15)</a></li><li><a href="#5-หน้าต่างโปรแกรม-windows-components-มีส่วนอะไรบ้าง-lecture-สไลด์-8">หน้าต่างโปรแกรม (Windows Components) มีส่วนอะไรบ้าง? (Lecture สไลด์ 8)</a></li><li><a href="#6-volume-directory-file-ต่างกันยังไง-และมุมมองผู้ใช้-linux-กับ-windows-ต่างกันยังไง-lecture-สไลด์-910">Volume, Directory, File ต่างกันยังไง และมุมมองผู้ใช้ Linux กับ Windows ต่างกันยังไง? (Lecture สไลด์ 9–10)</a></li><li><a href="#7-windows-มี-file-system-อะไรบ้าง-และ-fat32-ntfs-exfat-ต่างกันยังไง-lecture-สไลด์-1112">Windows มี file system อะไรบ้าง และ FAT32 / NTFS / exFAT ต่างกันยังไง? (Lecture สไลด์ 11–12)</a></li><li><a href="#8-fat-เก็บไฟล์ยังไง-สายโซ่-cluster-lecture-สไลด์-1314">FAT เก็บไฟล์ยังไง? (สายโซ่ cluster) (Lecture สไลด์ 13–14)</a></li><li><a href="#9-disk-management-แสดงข้อมูลอะไร-lecture-สไลด์-16">Disk Management แสดงข้อมูลอะไร? (Lecture สไลด์ 16)</a></li><li><a href="#10-ntfs-มีโครงสร้างอะไรบ้าง-lecture-สไลด์-1718">NTFS มีโครงสร้างอะไรบ้าง? (Lecture สไลด์ 17–18)</a></li><li><a href="#11-partition-boot-sector-pbs-เก็บอะไร-lecture-สไลด์-19">Partition Boot Sector (PBS) เก็บอะไร? (Lecture สไลด์ 19)</a></li><li><a href="#12-mft-ทำงานยังไง-และกันข้อมูลเสียยังไง-lecture-สไลด์-2023">MFT ทำงานยังไง และกันข้อมูลเสียยังไง? (Lecture สไลด์ 20–23)</a></li><li><a href="#13-ntfs-metadata-system-files-คืออะไร-lecture-สไลด์-24">NTFS metadata / system files คืออะไร? (Lecture สไลด์ 24)</a></li><li><a href="#14-windows-registry-คืออะไร-มีโครงสร้างยังไง-lecture-สไลด์-2527">Windows Registry คืออะไร มีโครงสร้างยังไง? (Lecture สไลด์ 25–27)</a></li><li><a href="#15-สร้าง-user-account-ใน-windows-ยังไง-lecture-สไลด์-2831">สร้าง user account ใน Windows ยังไง? (Lecture สไลด์ 28–31)</a></li><li><a href="#16-permission-ของไฟล์โฟลเดอร์มีกี่แบบ-และตั้งยังไง-lecture-สไลด์-3236">Permission ของไฟล์/โฟลเดอร์มีกี่แบบ และตั้งยังไง? (Lecture สไลด์ 32–36)</a></li><li><a href="#17-ดูและ-kill-process-ใน-windows-ยังไง-lecture-สไลด์-37">ดูและ kill process ใน Windows ยังไง? (Lecture สไลด์ 37)</a></li><li><a href="#18-lab-14-ต้องทำอะไร-และส่งอะไร-lab-หน้า-14">Lab 14 ต้องทำอะไร และส่งอะไร? (Lab หน้า 1–4)</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "systemlab/l14", "u": "systemlab/l14/index.html", "t": "L14 – Windows System Admin (Lecture 14 + Lab 14)", "s": "ITDS212"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

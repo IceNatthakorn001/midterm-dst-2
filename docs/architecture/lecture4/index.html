@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 4 — Memory Management · ITDS211</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;document.documentElement.dataset.bg=localStorage.getItem('bg')||'forest';if(localStorage.getItem('sn-nav')==='0')document.documentElement.classList.add('nav-hidden');}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<style>:root{--accent-base:#b0552c}</style>
+
+</head>
+<body class="is-lesson">
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="../../index.html"><svg class="leaf" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4.5 19.5C4.5 11 10 4.8 20 4c-.8 10-7 15.5-15.5 15.5z" fill="currentColor"/><path d="M4.8 19.2C8 15 11 12 15.5 8.5" stroke="var(--bg)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><span>Study Notes</span></a>
+  <nav class="topcrumbs"><a href="../../index.html">หน้าแรก</a><span>/</span><a href="../index.html">ITDS211</a><span>/</span><b>Lecture4</b></nav>
+  <button class="icon-btn bg-btn" id="bgBtn" title="เปลี่ยนพื้นหลัง (ป่าลึก / ภูเขา / ใบไม้)" aria-label="เปลี่ยนพื้นหลัง"><span class="bg-i bg-forest">🌲</span><span class="bg-i bg-hills">🌄</span><span class="bg-i bg-leaves">🍃</span></button>
+  <button class="icon-btn" id="themeBtn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="lesson-layout">
+  <aside class="lnav" aria-label="บทเรียนทั้งหมด">
+    <div class="lnav-head"><a href="../index.html">🖥️ ITDS211</a>
+      <button class="lnav-hide" data-nav-toggle title="ซ่อนรายชื่อบท (กด [)" aria-label="ซ่อนรายชื่อบท">«</button></div>
+    <ol><li><a href="../chapter00/index.html"><span class="nl">Chapter00</span>Course Information (ครึ่ง Computer Architecture)</a></li><li><a href="../chapter01/index.html"><span class="nl">Chapter01</span>Basic Computer Components &amp; Introduction to Computer Architecture</a></li><li><a href="../chapter02/index.html"><span class="nl">Chapter02</span>Computer Systems, Computer Functions, Processor Structure and Function</a></li><li><a href="../chapter03/index.html"><span class="nl">Chapter03</span>Data Representation, ISA &amp; Assembly Language (RISC-V)</a></li><li><a href="../chapter04/index.html"><span class="nl">Chapter04</span>Memory System Organization, Hierarchy, Cache Memory</a></li><li><a href="../chapter05/index.html"><span class="nl">Chapter05</span>I/O Systems</a></li><li><a href="../chapter06/index.html"><span class="nl">Chapter06</span>Storage Systems (External Memory)</a></li><li><a href="../chapter07/index.html"><span class="nl">Chapter07</span>Computing Unit (Pipelining)</a></li><li><a href="../chapter08/index.html"><span class="nl">Chapter08</span>Parallel Processors from Client to Cloud</a></li><li><a href="../lecture1/index.html"><span class="nl">Lecture1</span>Introduction to Operating Systems</a></li><li><a href="../lecture2/index.html"><span class="nl">Lecture2</span>Process</a></li><li><a href="../lecture3/index.html"><span class="nl">Lecture3</span>CPU Scheduling</a></li><li class='cur'><a href="../lecture4/index.html"><span class="nl">Lecture4</span>Memory Management</a></li><li><a href="../lecture10/index.html"><span class="nl">Lecture10</span>Shell Script (+ Lab 10)</a></li></ol>
+  </aside>
+  <button class="lnav-rail" data-nav-toggle title="แสดงรายชื่อบท (กด [)" aria-label="แสดงรายชื่อบท"><span>☰</span><span class="rail-label">บททั้งหมด</span></button>
+  <main class="lesson" id="main">
+    <div class="eyebrow"><a href="../index.html">ITDS211</a> · Lecture4</div>
+    <h1 class="lesson-title">Lecture 4 — Memory Management</h1>
+    <p class="read-meta">⏱ อ่านประมาณ 57 นาที · 27 หัวข้อ</p>
+    <div class="lesson-meta"><div class="seg" role="group" aria-label="เลือกฉบับ"><a href="index.html" aria-current='page'>📖 ฉบับเต็ม</a><a href="short.html">⚡ สรุปสั้น</a></div><a class="btn btn-ghost btn-pro" href="quiz.html" data-l="lecture4">🧠 <span class="qm-l">Quiz Pro</span></a></div>
+    <article class="prose"><blockquote class="callout">
+<p><strong>ภาพรวมบทนี้:</strong> (ITDS211, รศ.ดร.สุดสงวน งามสุริยโรจน์, 10 November 2026) บทนี้ตอบว่า OS <strong>จัดการหน่วยความจำ</strong> ยังไงให้หลาย process ใช้ RAM ร่วมกันได้อย่างปลอดภัยและคุ้มค่า</p>
+<p>เริ่มจาก <strong>memory hierarchy</strong> → ยุคที่ <strong>ไม่มี abstraction</strong> (address เป็น absolute) → <strong>address space</strong> ด้วย <strong>base/limit registers</strong> และ <strong>swapping</strong> (bitmap, linked list, first/next/best/worst/quick fit) → <strong>virtual memory + MMU</strong> → <strong>paging</strong> (page table, page fault, TLB, multilevel / inverted page table) → <strong>page replacement algorithms</strong> 9 แบบ
+<strong>มีโจทย์คำนวณ:</strong> แปลง virtual → physical address (base+limit, paging 4 KB, ฐานสอง), multilevel page table (PT1/PT2/offset), ไล่ reference string แบบ Optimal / FIFO / LRU, Aging counter และ Working set (age vs threshold) — ทุกตัวเลขตรวจด้วย python แล้ว</p>
+</blockquote>
+<blockquote class="callout">
+<p>เลขสไลด์ = เลขหน้า PDF (ตรงกับเลขที่พิมพ์บนสไลด์ทุกหน้า)</p>
+</blockquote>
+<p><img loading="lazy" src="diagrams/L4-00-overview.png" alt="แผนผังภาพรวม Lecture 4" /></p>
+<h2 id="0-ตารางเรียนและหัวข้อวิชา-os-สไลด์-23">0. ตารางเรียนและหัวข้อวิชา OS <span class="slide-ref">สไลด์ 2–3</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Memory Management คือคาบ OS#4 ของวิชา ต่อจาก Process Scheduling (OS#3) และก่อน File Systems (OS#5)</strong></p>
+<p><strong>OS Outline (สไลด์ 3)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Tentative Topic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS#1</td>
+<td>Introduction to OS</td>
+</tr>
+<tr>
+<td>OS#2</td>
+<td>Process Concept</td>
+</tr>
+<tr>
+<td>OS#3</td>
+<td>Process Scheduling</td>
+</tr>
+<tr>
+<td><strong>OS#4</strong></td>
+<td><strong>Memory Management</strong> ← บทนี้</td>
+</tr>
+<tr>
+<td>OS#5</td>
+<td>File Systems</td>
+</tr>
+<tr>
+<td>OS#6</td>
+<td>Disk and I/O Management</td>
+</tr>
+<tr>
+<td>OS#7</td>
+<td>Synchronization &amp; Deadlock</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Class Schedule (สไลด์ 2)</strong> — อาจารย์ รศ.ดร.สุดสงวน ทุกคาบ</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Section 1</th>
+<th>Section 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS#1</td>
+<td>พฤหัส 3 ก.ย. 10–12 น. IT325 (Make up for Oct 6)</td>
+<td>พฤหัส 3 ก.ย. 14–16 น. IT304 (Make up for Oct 8)</td>
+</tr>
+<tr>
+<td>OS#2</td>
+<td>พฤหัส 10 ก.ย. 10–12 น. IT325 (Make up for Oct 13)</td>
+<td>พฤหัส 10 ก.ย. 14–16 น. IT304 (Make up for Oct 15)</td>
+</tr>
+<tr>
+<td>OS#3</td>
+<td><s>พฤหัส 24 ก.ย. 10–12 น. IT325 (Make up for Oct 20)</s> <strong>cancelled</strong> → อังคาร 27 ต.ค. 9–11 น. IT311 (เรียนปกติ)</td>
+<td>พฤหัส 24 ก.ย. 14–16 น. IT323 (Make up for Oct 22)</td>
+</tr>
+<tr>
+<td>OS#4</td>
+<td>อังคาร 10 พ.ย. 9–11 น. IT311 (เรียนปกติ)</td>
+<td>พฤหัส 12 พ.ย. 9–11 น. IT324 (เรียนปกติ)</td>
+</tr>
+<tr>
+<td>OS#5</td>
+<td>พฤหัส 12 พ.ย. 11–13 น. IT325 (Make up for Oct 20)</td>
+<td>พฤหัส 12 พ.ย. 14–16 น. IT323 (Make up for Oct 29)</td>
+</tr>
+<tr>
+<td>OS#6</td>
+<td>อังคาร 17 พ.ย. 9–11 น. IT311 (เรียนปกติ)</td>
+<td>พฤหัส 26 พ.ย. 10–12 น. IT323 (เรียนปกติ)</td>
+</tr>
+<tr>
+<td>OS#7</td>
+<td>อังคาร 24 พ.ย. 10–12 น. IT311 (Make up for Nov 3)</td>
+<td>พฤหัส 26 พ.ย. 14–16 น. IT323 (Make up for Nov 5)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="1-memory-hierarchy-คืออะไร-และ-memory-manager-ทำอะไร-สไลด์-56">1. Memory hierarchy คืออะไร และ memory manager ทำอะไร? <span class="slide-ref">สไลด์ 5–6</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>memory เป็นชั้น ๆ — ยิ่งเร็วยิ่งแพงและเล็ก ยิ่งใหญ่ยิ่งช้าและถูก ส่วน memory manager คือส่วนของ OS ที่คอย track / allocate / deallocate memory ให้ process</strong></p>
+<h3 id="11-memory-hierarchy-มีกี่ชั้น-สไลด์-5">1.1 Memory hierarchy มีกี่ชั้น? <span class="slide-ref">สไลด์ 5</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>cache (MB, เร็วมาก แพง volatile) → RAM (GB, ปานกลาง volatile) → disk/SSD (TB, ช้า ถูก non-volatile)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>ขนาด</th>
+<th>ความเร็ว / ราคา</th>
+<th>ข้อมูลหายเมื่อปิดเครื่อง?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache memory</strong></td>
+<td>a few <strong>MB</strong></td>
+<td>very fast, <strong>expensive</strong></td>
+<td><strong>volatile</strong> (หาย)</td>
+</tr>
+<tr>
+<td><strong>Main memory (RAM)</strong></td>
+<td>a few <strong>GB</strong></td>
+<td>medium-speed, medium-priced</td>
+<td><strong>volatile</strong> (หาย)</td>
+</tr>
+<tr>
+<td><strong>Magnetic disk / SSD</strong></td>
+<td>a few <strong>TB</strong></td>
+<td>slow, <strong>cheap</strong></td>
+<td><strong>non-volatile</strong> (ไม่หาย)</td>
+</tr>
+</tbody>
+</table></div>
+<p>รูปพีระมิดในสไลด์แบ่งละเอียดกว่าเป็น 6 level:</p>
+<p><img loading="lazy" src="diagrams/L4-01-hierarchy.png" alt="Memory hierarchy 6 level" /></p>
+<ul>
+<li>ยิ่ง <strong>ขึ้นบน</strong> (ไป Registers) → <strong>cost per bit แพงขึ้น</strong></li>
+<li>ยิ่ง <strong>ลงล่าง</strong> (ไป Optical disk / tapes) → <strong>capacity มากขึ้น และ access time นานขึ้น</strong></li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนโต๊ะทำงาน (เล็ก หยิบเร็ว) → ชั้นหนังสือในห้อง → ห้องสมุด (ใหญ่ แต่ต้องเดินไปไกล)</p>
+</blockquote>
+<h3 id="12-memory-manager-มีหน้าที่อะไร-สไลด์-6">1.2 Memory manager มีหน้าที่อะไร? <span class="slide-ref">สไลด์ 6</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เป็นส่วนของ OS ที่ดูแล memory hierarchy (บางส่วน) — manage, keep track, allocate, deallocate</strong></p>
+<p>สิ่งที่คาดหวังจาก memory manager:</p>
+<ul>
+<li><strong>Efficiently manage</strong> memory — ใช้ memory ให้คุ้ม</li>
+<li><strong>Keep track</strong> ว่าส่วนไหนของ memory กำลังถูกใช้อยู่</li>
+<li><strong>Allocate</strong> memory ให้ process เมื่อมันต้องการ</li>
+<li><strong>Deallocate</strong> คืนเมื่อ process ใช้เสร็จ</li>
+</ul>
+<p>รูปในสไลด์: memory manager บอกว่า <em>&quot;Process 1, you can use memory address 10 to 39.&quot;</em> แล้ว process ตอบ <em>&quot;OK sir!&quot;</em> — คือการ allocate ช่วง address ให้ process</p>
+<hr />
+<h2 id="2-ถ้า-ไม่มี-memory-abstraction-จะเกิดอะไรขึ้น-สไลด์-79">2. ถ้า &quot;ไม่มี memory abstraction&quot; จะเกิดอะไรขึ้น? <span class="slide-ref">สไลด์ 7–9</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>โปรแกรมเห็น physical memory ตรง ๆ (absolute address) → มี process ได้ทีละตัว, เขียนทับ OS ได้, รันหลายโปรแกรมพร้อมกันยาก</strong></p>
+<h3 id="21-abstraction-คืออะไร-สไลด์-7">2.1 Abstraction คืออะไร? <span class="slide-ref">สไลด์ 7</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>abstraction = ชั้นที่คั่นกลางระหว่าง 2 ระบบ จัดการการสื่อสารให้ ทั้งสองฝั่งไม่ต้องรู้ว่าอีกฝั่งทำงานยังไง</strong></p>
+<ul>
+<li>รูปในสไลด์: <strong>Programmer</strong> (เขียน <code>int x; x = 12;</code>) ⇄ <strong>Memory Abstraction provided by OS</strong> (Windows / Ubuntu) ⇄ <strong>Memory (RAM)</strong> (เห็นเป็นบิต <code>00100010110110010010</code>)</li>
+<li>programmer ไม่ต้องรู้ว่า x ไปอยู่บิตไหนใน RAM — OS จัดการให้</li>
+</ul>
+<h3 id="22-วางโปรแกรมใน-memory-แบบไม่มี-abstraction-ได้กี่แบบ-สไลด์-8">2.2 วางโปรแกรมใน memory แบบไม่มี abstraction ได้กี่แบบ? <span class="slide-ref">สไลด์ 8</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>3 แบบง่าย ๆ สำหรับ OS + user process 1 ตัว (แบบอื่นก็มีได้)</strong></p>
+<p>(ล่าง = address 0, บน = 0xFFF…)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>แบบ</th>
+<th>ส่วนบน</th>
+<th>ส่วนกลาง</th>
+<th>ส่วนล่าง (address 0)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a)</td>
+<td>User program</td>
+<td>—</td>
+<td>Operating system in <strong>RAM</strong></td>
+</tr>
+<tr>
+<td>(b)</td>
+<td>Operating system in <strong>ROM</strong></td>
+<td>—</td>
+<td>User program</td>
+</tr>
+<tr>
+<td>(c)</td>
+<td>Device drivers in <strong>ROM</strong></td>
+<td>User program</td>
+<td>Operating system in <strong>RAM</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="23-ปัญหาของการไม่มี-abstraction-คืออะไร-สไลด์-9">2.3 ปัญหาของการไม่มี abstraction คืออะไร? <span class="slide-ref">สไลด์ 9</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>address เป็น absolute → โปรแกรมเข้าถึงได้ทุก byte จึงทำลาย OS ได้ และรันหลายโปรแกรมพร้อมกันยาก</strong></p>
+<ul>
+<li><strong>Only one process in memory</strong> — มีได้ทีละ process</li>
+<li>หลาย process ทำได้ แต่ต้อง <strong>switching and swapping</strong> (memory ⇄ disk)</li>
+<li><strong>All memory addresses are absolute</strong> — address ในโปรแกรม = ตำแหน่งจริงใน RAM</li>
+<li>user program เข้าถึง <strong>ทุก byte</strong> ได้ → <strong>trash/erase OS</strong> ได้ทั้งตั้งใจและไม่ตั้งใจ</li>
+<li><strong>ยาก</strong> ที่จะรันหลายโปรแกรมพร้อมกัน</li>
+</ul>
+<p><strong>รูปตัวอย่างในสไลด์ 9</strong> (โปรแกรมละ 16 KB, address ขึ้นทีละ 4):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>โปรแกรม (a)</th>
+<th>โปรแกรม (b)</th>
+<th>(c) โหลดทั้งคู่ต่อกันใน memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>address 0</td>
+<td><code>JMP 24</code></td>
+<td><code>JMP 28</code></td>
+<td>(a) อยู่ช่วง 0–16380: <code>JMP 24</code> ที่ 0, <code>MOV</code> ที่ 24, <code>ADD</code> ที่ 28</td>
+</tr>
+<tr>
+<td>address 24</td>
+<td><code>MOV</code></td>
+<td>—</td>
+<td>(b) ถูกวางต่อที่ 16384–32764: <code>JMP 28</code> ที่ <strong>16384</strong>, <code>CMP</code> ที่ <strong>16412</strong></td>
+</tr>
+<tr>
+<td>address 28</td>
+<td><code>ADD</code></td>
+<td><code>CMP</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>จากรูป (c): <code>JMP 28</code> ของโปรแกรม (b) ยังเป็น address <strong>absolute 28</strong> → ชี้ไปที่ <code>ADD</code> ของโปรแกรม (a) ไม่ใช่ <code>CMP</code> ของตัวเอง (ซึ่งตอนนี้อยู่ที่ 16412)</li>
+<li>นี่คือเหตุผลที่ต้องมี address space (หัวข้อถัดไป) และ base register (หัวข้อ 4) จะแก้ปัญหานี้</li>
+</ul>
+<hr />
+<h2 id="3-address-space-คืออะไร-สไลด์-10">3. Address space คืออะไร? <span class="slide-ref">สไลด์ 10</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>address space = ชุดของ memory address ที่ process หนึ่งใช้ได้ แต่ละ process มีของตัวเอง เข้าถึงนอกพื้นที่ตัวเองไม่ได้</strong></p>
+<ul>
+<li><strong>Address space</strong> = the set of memory addresses that a process can use</li>
+<li>แต่ละ process มี address space <strong>ของตัวเอง</strong> แยกจาก process อื่น และ <strong>เข้าถึง address นอก address space ตัวเองไม่ได้</strong></li>
+<li><strong>คำถามหลัก:</strong> จะให้แต่ละโปรแกรมมี address space ของตัวเองยังไง ให้ <strong>address 28 ในโปรแกรมหนึ่ง</strong> หมายถึง <strong>ตำแหน่ง physical คนละที่</strong> กับ address 28 ในอีกโปรแกรม (รูป: process P0–P4 นั่งโต๊ะแยกกัน)</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนบ้านเลขที่ &quot;28&quot; ที่มีได้ในหลายซอย — เลขเดียวกันแต่คนละบ้าน</p>
+</blockquote>
+<p>คำตอบในสไลด์มี 2 วิธี: <strong>วิธีที่ 1 Base and Limit Registers</strong> และ <strong>วิธีที่ 2 Swapping</strong></p>
+<hr />
+<h2 id="4-base-และ-limit-registers-ทำงานยังไง-สไลด์-1112">4. Base และ Limit registers ทำงานยังไง? <span class="slide-ref">สไลด์ 11–12</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>CPU บวก base เข้ากับทุก address ที่ process สร้าง และเช็กกับ limit เพื่อกันออกนอกพื้นที่ — ข้อเสียคือต้องบวก+เทียบทุกครั้งที่อ้าง memory</strong></p>
+<h3 id="41-ขั้นตอนการทำงาน-สไลด์-11">4.1 ขั้นตอนการทำงาน <span class="slide-ref">สไลด์ 11</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>physical address = address ของ process + base, ถ้า address ≥ limit = fault</strong></p>
+<ul>
+<li>ใช้ hardware register พิเศษ 2 ตัว:
+<ul>
+<li><strong>Base</strong> — เก็บ physical address ที่โปรแกรม <strong>เริ่มต้น</strong> ใน memory</li>
+<li><strong>Limit</strong> — เก็บ <strong>ความยาว</strong> ของโปรแกรม</li>
+</ul>
+</li>
+<li>ทุกครั้งที่ process อ้าง memory → CPU <strong>บวก base</strong> เข้ากับ address ที่ process สร้าง <strong>ก่อนส่งออกไป</strong> โดยอัตโนมัติ</li>
+<li>พร้อมกันนั้น CPU <strong>เช็กว่า address ≥ limit หรือไม่</strong> เพื่อกัน fault</li>
+</ul>
+<p><strong>ตัวอย่างจากรูปสไลด์ 11</strong> (base = 16384, limit = 16384, โปรแกรมที่ 2 ถูกวางที่ 16384):</p>
+<ol>
+<li>โปรแกรมสั่ง <code>JMP 28</code> → address ที่ process สร้าง = 28</li>
+<li>เช็ก limit: 28 ≥ 16384 ? → <strong>ไม่</strong> → ผ่าน</li>
+<li>บวก base: 28 + 16384 = <strong>16412</strong></li>
+<li>ส่ง 16412 ออกไป → เจอ <code>CMP</code> ซึ่งเป็นคำสั่งที่โปรแกรมตั้งใจจะกระโดดไปจริง ✔ (แก้ปัญหาในหัวข้อ 2.3)</li>
+</ol>
+<p><img loading="lazy" src="diagrams/L4-02-base-limit.png" alt="Base and limit registers" /></p>
+<h3 id="42-ข้อเสียของ-baselimit-คืออะไร-สไลด์-12">4.2 ข้อเสียของ base/limit คืออะไร? <span class="slide-ref">สไลด์ 12</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ต้องทำ &quot;บวก 1 ครั้ง + เทียบ 1 ครั้ง&quot; ทุก memory reference — การเทียบเร็ว แต่การบวกช้าเพราะ carry-propagation time</strong></p>
+<ul>
+<li><strong>Comparison</strong> → ทำได้เร็ว</li>
+<li><strong>Addition</strong> → <strong>ช้า</strong> เพราะต้องรอ <strong>carry-propagation</strong> (ตัวทดส่งต่อทีละบิต)</li>
+</ul>
+<hr />
+<h2 id="5-swapping-คืออะไร-และสร้างปัญหาอะไร-สไลด์-1315">5. Swapping คืออะไร และสร้างปัญหาอะไร? <span class="slide-ref">สไลด์ 13–15</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>swapping = เอา process ทั้งตัวเข้า memory รันสักพัก แล้วเอากลับไปเก็บบน disk — ทำให้เกิด hole หลายช่อง และต้องเผื่อที่ให้ segment ที่โตได้</strong></p>
+<h3 id="51-swapping-ทำงานยังไง-สไลด์-13">5.1 Swapping ทำงานยังไง? <span class="slide-ref">สไลด์ 13</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>process ที่ idle อยู่บน disk จึงไม่กิน memory ตอนไม่ได้รัน</strong></p>
+<ul>
+<li>นำ process เข้ามา <strong>ทั้งตัว (in its entirety)</strong> → <strong>รันสักพัก</strong> → <strong>เอากลับไปไว้บน disk</strong></li>
+<li>process ที่ <strong>idle</strong> ส่วนใหญ่อยู่บน disk → <strong>ไม่กิน memory</strong> ตอนไม่ได้รัน</li>
+</ul>
+<p><strong>รูปในสไลด์ 13</strong> — memory allocation เปลี่ยนไปตามเวลา (a)→(g) เมื่อ process เข้า/ออก (ล่างสุดคือ OS เสมอ, ส่วนแรเงา = memory ว่าง):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>เวลา</th>
+<th>ใน memory (จากล่างขึ้นบน ไม่นับ OS)</th>
+<th>เกิดอะไรขึ้น</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a)</td>
+<td>A</td>
+<td>A เข้ามา</td>
+</tr>
+<tr>
+<td>(b)</td>
+<td>A, B</td>
+<td>B เข้ามา</td>
+</tr>
+<tr>
+<td>(c)</td>
+<td>A, B, C</td>
+<td>C เข้ามา</td>
+</tr>
+<tr>
+<td>(d)</td>
+<td>(ว่าง), B, C</td>
+<td>A ถูก swap ออก → เกิดช่องว่าง</td>
+</tr>
+<tr>
+<td>(e)</td>
+<td>D, (ว่าง), B, C</td>
+<td>D เข้ามาใช้ส่วนล่างของที่ว่าง เหลือ hole เล็ก ๆ</td>
+</tr>
+<tr>
+<td>(f)</td>
+<td>D, (ว่าง), C</td>
+<td>B ถูก swap ออก</td>
+</tr>
+<tr>
+<td>(g)</td>
+<td>D, A, C</td>
+<td>A กลับเข้ามา — <strong>คนละตำแหน่งกับครั้งแรก</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-hole-และ-memory-compaction-คืออะไร-สไลด์-14">5.2 Hole และ memory compaction คืออะไร? <span class="slide-ref">สไลด์ 14</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>swapping ทำให้เกิด hole หลายช่อง แก้ได้ด้วย compaction (ย้ายทุก process ลงล่างรวม hole เป็นก้อนเดียว) แต่ไม่ค่อยทำเพราะเปลือง CPU time</strong></p>
+<ul>
+<li><strong>Hole</strong> = ช่องว่างใน memory ที่เกิดจาก process ออกไป</li>
+<li><strong>Memory compaction</strong> = รวม hole ทั้งหมดเป็น <strong>hole ใหญ่ก้อนเดียว</strong> โดย <strong>ย้าย process ทั้งหมดลงล่างให้มากที่สุด</strong></li>
+<li>แต่ <strong>ไม่ค่อยทำ</strong> เพราะ <strong>ใช้ CPU time มาก</strong></li>
+<li>ถ้าขนาด process <strong>fixed &amp; static</strong> → OS จัดสรรให้พอดีได้เลย</li>
+<li>แต่จริง ๆ <strong>data segment (และ stack) โตได้ (dynamically grow)</strong> → process อาจต้องการที่เพิ่ม หรือต้อง swap process อื่นออกไป disk</li>
+</ul>
+<blockquote class="callout">
+<p class="c-tip">💡 compaction เปรียบเหมือนเลื่อนรถทุกคันในลานจอดให้ชิดกันเพื่อให้เหลือที่ว่างก้อนใหญ่ — ได้ที่ว่าง แต่ต้องเสียเวลาขยับทุกคัน</p>
+</blockquote>
+<h3 id="53-segment-ที่โตได้มีอะไรบ้าง-และเผื่อที่ยังไง-สไลด์-15">5.3 Segment ที่โตได้มีอะไรบ้าง และเผื่อที่ยังไง? <span class="slide-ref">สไลด์ 15</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>process มี 2 segment ที่โตได้ — data segment (ตัวแปรที่ allocate แบบ dynamic) และ stack segment (local variable + return address) จึงต้องเผื่อ &quot;room for growth&quot;</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>เก็บอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data segment</strong></td>
+<td>ตัวแปรที่ <strong>dynamically allocated</strong></td>
+</tr>
+<tr>
+<td><strong>Stack segment</strong></td>
+<td><strong>local variables</strong> และ <strong>return addresses</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>รูปในสไลด์:</p>
+<ul>
+<li><strong>(a) เผื่อที่ให้ data segment ที่โต</strong> — แต่ละ process (A, B) มีส่วน &quot;Actually in use&quot; และเหนือขึ้นไปมี &quot;Room for growth&quot; (ลูกศรชี้ขึ้น)</li>
+<li><strong>(b) เผื่อที่ให้ทั้ง stack และ data ที่โต</strong> — แต่ละ process เรียงจากล่าง: Program → Data (โตขึ้นบน) → <em>Room for growth</em> → Stack (โตลงล่าง) คือ data กับ stack <strong>โตเข้าหากัน</strong> ในช่องว่างตรงกลาง</li>
+</ul>
+<hr />
+<h2 id="6-os-จำว่า-memory-ส่วนไหนว่างได้ยังไง-สไลด์-1617">6. OS จำว่า memory ส่วนไหนว่างได้ยังไง? <span class="slide-ref">สไลด์ 16–17</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>มี 2 วิธี — Bitmap (1 บิตต่อ allocation unit) และ Linked list ของ process/hole — bitmap หาช่องว่างต่อเนื่องได้ช้า ส่วน list ต้องอัปเดตและรวม hole เมื่อ process จบ</strong></p>
+<h3 id="61-bitmap-กับ-linked-list-เก็บข้อมูลยังไง-สไลด์-16">6.1 Bitmap กับ Linked list เก็บข้อมูลยังไง? <span class="slide-ref">สไลด์ 16</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>แบ่ง memory เป็น allocation units — bitmap ใช้ 1 บิตต่อ unit (1 = ใช้อยู่, 0 = ว่าง), list เก็บเป็นโหนด (P/H, จุดเริ่ม, ความยาว)</strong></p>
+<p><strong>ตัวอย่างในสไลด์:</strong> memory 32 units มี 5 process (A–E) และ 3 hole</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>units</th>
+<th>0–4</th>
+<th>5–7</th>
+<th>8–13</th>
+<th>14–17</th>
+<th>18–19</th>
+<th>20–25</th>
+<th>26–28</th>
+<th>29–31</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>เจ้าของ</td>
+<td>A</td>
+<td><strong>hole</strong></td>
+<td>B</td>
+<td>C</td>
+<td><strong>hole</strong></td>
+<td>D</td>
+<td>E</td>
+<td><strong>hole</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Bitmap</strong> (แถวละ 8 units):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>units</th>
+<th>bitmap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–7</td>
+<td><code>11111000</code></td>
+</tr>
+<tr>
+<td>8–15</td>
+<td><code>11111111</code></td>
+</tr>
+<tr>
+<td>16–23</td>
+<td><code>11001111</code></td>
+</tr>
+<tr>
+<td>24–31</td>
+<td><code>11111000</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Linked list</strong> — แต่ละโหนด = (P = process / H = hole, starts at, length):</p>
+<p><code>P 0 5</code> → <code>H 5 3</code> → <code>P 8 6</code> → <code>P 14 4</code> → <code>H 18 2</code> → <code>P 20 6</code> → <code>P 26 3</code> → <code>H 29 3</code> → X (จบ)</p>
+<ul>
+<li>เช่นโหนด <code>H 18 2</code> = <strong>Hole</strong> ที่ <strong>starts at 18</strong> ยาว <strong>2</strong></li>
+</ul>
+<blockquote class="callout">
+<p>✔ ตรวจด้วย python แล้ว: bitmap 4 แถวและ list 8 โหนดตรงกับตำแหน่ง A–E ในรูปทุกตัว</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ คำบรรยายใต้รูปสไลด์ 16 ใส่ป้ายสลับกัน — เขียนว่า &quot;(b) The shaded region are free. (c) The corresponding bitmap. (c) The same information as a list.&quot; แต่ในรูปจริง <strong>(a) = memory, (b) = bitmap, (c) = list</strong></p>
+</blockquote>
+<h3 id="62-แต่ละวิธีมีปัญหาอะไร-สไลด์-17">6.2 แต่ละวิธีมีปัญหาอะไร? <span class="slide-ref">สไลด์ 17</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>bitmap — ต้องค้นหา 0 ติดกัน k ตัว ซึ่งช้า | list — เมื่อ process จบต้องอัปเดต list และรวมกับเพื่อนบ้านที่เป็น hole</strong></p>
+<p><strong>ปัญหาของ Bitmap:</strong></p>
+<ul>
+<li>ถ้าจะใส่ process ขนาด <strong>k units</strong> → ต้องค้น bitmap หา <strong>0 ติดกัน (consecutive) k ตัว</strong> → <strong>slow operation</strong></li>
+</ul>
+<p><strong>ปัญหาของ Linked list:</strong></p>
+<ul>
+<li>ต้องดูแล list ของ segment ที่ใช้อยู่และที่ว่าง (แต่ละโหนดเป็น process หรือ hole)</li>
+<li>เมื่อ process หนึ่ง <strong>จบ</strong> → list ต้อง <strong>อัปเดต</strong> และต้องตัดสินใจว่าที่ว่างนั้นจะให้ process ใหม่ตัวไหน</li>
+</ul>
+<p><strong>4 กรณีเพื่อนบ้านของ process X ที่กำลังจบ</strong> (รูปในสไลด์):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>กรณี</th>
+<th>ก่อน X จบ</th>
+<th>หลัง X จบ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a)</td>
+<td>A · X · B</td>
+<td>A · <strong>hole</strong> · B</td>
+</tr>
+<tr>
+<td>(b)</td>
+<td>A · X · hole</td>
+<td>A · <strong>hole ใหญ่</strong> (X รวมกับ hole ขวา)</td>
+</tr>
+<tr>
+<td>(c)</td>
+<td>hole · X · B</td>
+<td><strong>hole ใหญ่</strong> (hole ซ้ายรวมกับ X) · B</td>
+</tr>
+<tr>
+<td>(d)</td>
+<td>hole · X · hole</td>
+<td><strong>hole ใหญ่ก้อนเดียว</strong> (3 ช่องรวมกัน)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-จะเลือก-hole-ไหนให้-process-ใหม่-สไลด์-1822">7. จะเลือก hole ไหนให้ process ใหม่? <span class="slide-ref">สไลด์ 18–22</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>มี 5 อัลกอริทึม — First fit (เจอแรกที่พอ), Next fit (เหมือน first แต่ค้นต่อจากที่เดิม), Best fit (เล็กสุดที่พอ), Worst fit (ใหญ่สุด), Quick fit (แยก list ตามขนาดที่ขอบ่อย)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>อัลกอริทึม</th>
+<th>วิธีเลือก hole</th>
+<th>ข้อดี / ข้อเสียตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>First fit</strong></td>
+<td>ไล่ list จากต้น จนเจอ hole แรกที่ <strong>ใหญ่พอ</strong> แล้วแบ่ง hole เป็น 2 ส่วน: ส่วนของ process + ส่วนที่เหลือว่าง</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Next fit</strong></td>
+<td>เหมือน first fit แต่ <strong>จำตำแหน่งที่เจอ hole ล่าสุด</strong> ครั้งต่อไป <strong>เริ่มค้นจากตรงที่ค้างไว้</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Best fit</strong></td>
+<td>ค้น <strong>ทั้ง list</strong> เลือก <strong>hole เล็กสุดที่ยังพอ</strong></td>
+<td>ไม่ทำลาย hole ใหญ่ที่อาจต้องใช้ภายหลัง แต่ <strong>ช้ากว่า first fit</strong> เพราะต้องค้นทั้ง list ทุกครั้ง</td>
+</tr>
+<tr>
+<td><strong>Worst fit</strong></td>
+<td>ตรงข้าม best fit — เลือก <strong>hole ใหญ่สุด</strong></td>
+<td>hole ที่เหลือจะ <strong>ใหญ่พอใช้งานต่อได้</strong></td>
+</tr>
+<tr>
+<td><strong>Quick fit</strong></td>
+<td>มี <strong>list แยกตามขนาดที่ขอบ่อย</strong> เช่น ตาราง n entries: entry 1 ชี้หัว list ของ hole 4 KB, entry 2 ชี้ list ของ hole 8 KB, …</td>
+<td>หา hole ขนาดที่ต้องการได้ <strong>เร็วมาก</strong> แต่ตอน process จบ/ถูก swap out การ <strong>หาเพื่อนบ้านเพื่อ merge</strong> แพง (ช้า)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนหาที่นั่งในโรงอาหาร: first fit = นั่งโต๊ะแรกที่ว่างพอ | best fit = เดินดูทุกโต๊ะ เลือกโต๊ะที่พอดีที่สุด | worst fit = เลือกโต๊ะใหญ่สุด | quick fit = มีป้ายแยกโซนโต๊ะ 2 คน / 4 คนไว้แล้ว</p>
+</blockquote>
+<h3 id="71-ทำให้-4-อัลกอริทึมแรกเร็วขึ้นได้ยังไง-สไลด์-22">7.1 ทำให้ 4 อัลกอริทึมแรกเร็วขึ้นได้ยังไง? <span class="slide-ref">สไลด์ 22</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>แยก list ของ process กับ list ของ hole และเรียง hole list ตามขนาด → first fit กับ best fit เร็วเท่ากัน และ next fit ไม่มีประโยชน์</strong></p>
+<ul>
+<li>แยก <strong>list ของ process</strong> กับ <strong>list ของ hole</strong> ออกจากกัน → first / next / best / worst fit เร็วขึ้น</li>
+<li>เรียง <strong>hole list ตามขนาด</strong> → best fit เร็วขึ้น</li>
+<li>เมื่อ hole list เรียงตามขนาดแล้ว → <strong>first fit กับ best fit เร็วเท่ากัน</strong> และ <strong>next fit ไม่มีประโยชน์ (pointless)</strong></li>
+<li>ยัง optimize ได้อีกนิด โดย <strong>เก็บข้อมูลไว้ใน hole เอง</strong> แทนการมีโครงสร้างข้อมูลแยก</li>
+</ul>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ถามว่า <strong>&quot;Why is next fit pointless?&quot;</strong> แต่ไม่ได้เฉลย — แนวคิดจากข้อความในสไลด์เอง: เมื่อ list เรียงจากเล็กไปใหญ่ hole แรกที่ &quot;พอ&quot; (first fit) ก็คือ hole ที่เล็กสุดที่พอ (= best fit) อยู่แล้ว การ &quot;ค้นต่อจากที่ค้างไว้&quot; ของ next fit จึงไม่ได้ช่วยอะไร — ถ้าเจอข้อนี้ในข้อสอบควรถามอาจารย์ยืนยันเหตุผลที่ต้องการ</p>
+</blockquote>
+<hr />
+<h2 id="8-virtual-memory-คืออะไร-และ-mmu-ทำหน้าที่อะไร-สไลด์-2325">8. Virtual memory คืออะไร และ MMU ทำหน้าที่อะไร? <span class="slide-ref">สไลด์ 23–25</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>base/limit + swapping ไม่พอ (ปัญหา bloatware) → virtual memory แบ่ง address space เป็น page ซึ่งไม่ต้องอยู่ใน RAM พร้อมกันทั้งหมด โดย MMU แปลง virtual address เป็น physical address</strong></p>
+<h3 id="81-ทำไมต้องมี-virtual-memory-สไลด์-23">8.1 ทำไมต้องมี virtual memory? <span class="slide-ref">สไลด์ 23</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>base/limit มีปัญหา bloatware — จึงใช้ virtual memory เพื่อให้มี process ใน memory ได้มากขึ้นเสมอ</strong></p>
+<ul>
+<li>ปัญหาใหญ่ของ base/limit registers คือ <strong>bloatware</strong></li>
+<li><strong>Bloatware</strong> = ซอฟต์แวร์ที่ไม่จำเป็นซึ่ง <strong>preloaded</strong> มา ทำให้ระบบช้า</li>
+<li>แนวคิด base/limit + swapping จึง <strong>ไม่ใช่ทางเลือกที่ดี</strong></li>
+<li>ทางเลือกใหม่: <strong>Virtual memory</strong> → <strong>เรามี process ใน memory ได้มากขึ้นเสมอ</strong></li>
+</ul>
+<h3 id="82-virtual-memory-ทำงานยังไง-สไลด์-24">8.2 Virtual memory ทำงานยังไง? <span class="slide-ref">สไลด์ 24</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>address space ถูกหั่นเป็น page (ช่วง address ต่อเนื่อง) — page อยู่ใน RAM หรือ disk ก็ได้ ถ้าอ้างถึง page ที่ไม่อยู่ใน RAM OS จะไปดึงมาแล้ว re-execute คำสั่ง</strong></p>
+<ul>
+<li>แต่ละโปรแกรมมี address space ของตัวเอง ถูกแบ่งเป็นก้อน ๆ เรียกว่า <strong>pages</strong></li>
+<li>แต่ละ page = <strong>contiguous range of addresses</strong> (ช่วง address ต่อเนื่อง)</li>
+<li>page แต่ละอันอยู่ได้ทั้งใน <strong>secondary memory</strong> หรือใน <strong>page frame ของ main memory</strong></li>
+<li><strong>แต่ไม่จำเป็นต้องมีทุก page อยู่ใน physical memory พร้อมกัน</strong></li>
+<li>เมื่อโปรแกรมอ้างถึงส่วนที่:
+<ul>
+<li><strong>อยู่ใน</strong> physical memory → execute คำสั่งตามปกติ</li>
+<li><strong>ไม่อยู่ใน</strong> physical memory → OS ถูกแจ้งให้ไปดึงส่วนที่ขาดมา แล้ว <strong>re-execute</strong> คำสั่งนั้น</li>
+</ul>
+</li>
+<li>frame <strong>ไม่จำเป็น</strong> ต้องเป็นพื้นที่ต่อเนื่องก้อนเดียวใน secondary storage</li>
+</ul>
+<h3 id="83-virtual-address-และ-mmu-คืออะไร-สไลด์-25">8.3 Virtual address และ MMU คืออะไร? <span class="slide-ref">สไลด์ 25</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>virtual address = address ที่โปรแกรมสร้าง ซึ่งไม่ไปที่ memory bus ตรง ๆ แต่ผ่าน MMU ก่อน — MMU map เป็น physical address</strong></p>
+<ul>
+<li><strong>Virtual address</strong> = address ที่ <strong>โปรแกรมสร้างขึ้น</strong> (ระดับ high-level) — รวมกันเป็น <strong>virtual address space</strong></li>
+<li>virtual address <strong>ไม่ได้ไปที่ memory bus โดยตรง</strong> แต่ไปที่ <strong>MMU (Memory Management Unit)</strong></li>
+<li><strong>MMU maps</strong> virtual address → <strong>physical memory address</strong></li>
+</ul>
+<p><img loading="lazy" src="diagrams/L4-03-mmu.png" alt="ตำแหน่งของ MMU" /></p>
+<p>ตามรูปสไลด์: MMU อยู่ <strong>ใน CPU package</strong> ร่วมกับ CPU — CPU ส่ง virtual address ให้ MMU → MMU ส่ง physical address ออกไปบน <strong>bus</strong> ที่ต่อกับ <strong>Memory</strong> และ <strong>Disk controller</strong></p>
+<hr />
+<h2 id="9-paging-page-กับ-page-frame-แปลง-address-ยังไง-สไลด์-2627">9. Paging: page กับ page frame แปลง address ยังไง? <span class="slide-ref">สไลด์ 26–27</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>page (ฝั่ง virtual) กับ page frame (ฝั่ง physical) มีขนาดเท่ากัน — แปลง address = หาเลข page → ดูว่า map ไป frame ไหน → physical = frame × ขนาด page + offset; ถ้า page ไม่ถูก map = page fault</strong></p>
+<h3 id="91-page-กับ-page-frame-ต่างกันยังไง-สไลด์-26">9.1 Page กับ page frame ต่างกันยังไง? <span class="slide-ref">สไลด์ 26</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>page = หน่วยขนาดคงที่ใน virtual address space, page frame = หน่วยที่คู่กันใน physical memory, ขนาดเท่ากันแต่จำนวนไม่เท่ากัน</strong></p>
+<ul>
+<li><strong>Page</strong> — หน่วยขนาดคงที่ (fixed-size) ใน <strong>virtual address space</strong></li>
+<li><strong>Page frame</strong> — หน่วยที่คู่กันใน <strong>physical memory</strong></li>
+<li>page กับ page frame มัก <strong>ขนาดเท่ากัน</strong></li>
+<li>แต่ <strong>จำนวน</strong> page ใน virtual address space กับ page frame ใน physical memory <strong>ไม่เท่ากัน</strong></li>
+</ul>
+<p><strong>ตารางการ map ในรูปสไลด์ 26</strong> — virtual 64 KB (16 pages), physical 32 KB (8 frames), page ละ <strong>4 KB = 4096 bytes</strong> (X = ไม่ได้ map)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Virtual page</th>
+<th>ช่วง virtual</th>
+<th>→ Page frame</th>
+<th>ช่วง physical</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0K–4K</td>
+<td><strong>2</strong></td>
+<td>8K–12K</td>
+</tr>
+<tr>
+<td>1</td>
+<td>4K–8K</td>
+<td><strong>1</strong></td>
+<td>4K–8K</td>
+</tr>
+<tr>
+<td>2</td>
+<td>8K–12K</td>
+<td><strong>6</strong></td>
+<td>24K–28K</td>
+</tr>
+<tr>
+<td>3</td>
+<td>12K–16K</td>
+<td><strong>0</strong></td>
+<td>0K–4K</td>
+</tr>
+<tr>
+<td>4</td>
+<td>16K–20K</td>
+<td><strong>4</strong></td>
+<td>16K–20K</td>
+</tr>
+<tr>
+<td>5</td>
+<td>20K–24K</td>
+<td><strong>3</strong></td>
+<td>12K–16K</td>
+</tr>
+<tr>
+<td>6</td>
+<td>24K–28K</td>
+<td>X</td>
+<td>—</td>
+</tr>
+<tr>
+<td>7</td>
+<td>28K–32K</td>
+<td>X</td>
+<td>—</td>
+</tr>
+<tr>
+<td>8</td>
+<td>32K–36K</td>
+<td>X</td>
+<td>—</td>
+</tr>
+<tr>
+<td>9</td>
+<td>36K–40K</td>
+<td><strong>5</strong></td>
+<td>20K–24K</td>
+</tr>
+<tr>
+<td>10</td>
+<td>40K–44K</td>
+<td>X</td>
+<td>—</td>
+</tr>
+<tr>
+<td>11</td>
+<td>44K–48K</td>
+<td><strong>7</strong></td>
+<td>28K–32K</td>
+</tr>
+<tr>
+<td>12–15</td>
+<td>48K–64K</td>
+<td>X</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="92-ตัวอย่างแปลง-address-สไลด์-2627">9.2 ตัวอย่างแปลง address (สไลด์ 26–27)</h3>
+<p><strong>สูตรที่ใช้ (page size 4096):</strong> page # = virtual ÷ 4096 (ปัดเศษทิ้ง), offset = virtual mod 4096, physical = frame × 4096 + offset</p>
+<p><strong>ตัวอย่าง 1: virtual address 8192</strong> <span class="slide-ref">สไลด์ 26</span></p>
+<ol>
+<li>page # = 8192 ÷ 4096 = <strong>2</strong>, offset = <strong>0</strong></li>
+<li>page 2 → frame <strong>6</strong></li>
+<li>physical = 6 × 4096 + 0 = <strong>24576</strong> ✔ ตรงกับสไลด์</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 26 เขียนเรียงกันว่า &quot;Page 0 is mapped to page frame 2&quot; แล้วตามด้วย &quot;Virtual address 8192 is mapped to physical address 24576&quot; — แต่ <strong>8192 อยู่ใน page 2</strong> (8K–12K) ซึ่ง map ไป <strong>frame 6</strong> ไม่ใช่ตัวอย่างของ page 0 (ถ้าเป็น page 0: virtual 0 → frame 2 → physical 2 × 4096 = <strong>8192</strong>) ตัวเลขทั้งสองข้อถูก แค่เป็นคนละตัวอย่าง</p>
+</blockquote>
+<p><strong>ตัวอย่าง 2: virtual address 20500</strong> <span class="slide-ref">สไลด์ 26 ถามไว้ ไม่ได้เฉลย</span></p>
+<ol>
+<li>page # = 20500 ÷ 4096 = <strong>5</strong> (เพราะ 5 × 4096 = 20480)</li>
+<li>offset = 20500 − 20480 = <strong>20</strong></li>
+<li>page 5 → frame <strong>3</strong></li>
+<li>physical = 3 × 4096 + 20 = 12288 + 20 = <strong>12308</strong></li>
+</ol>
+<p><strong>ตัวอย่าง 3: virtual address 32780 → page fault</strong> <span class="slide-ref">สไลด์ 27</span></p>
+<ol>
+<li>page # = 32780 ÷ 4096 = <strong>8</strong> (8 × 4096 = 32768), offset = 12</li>
+<li>page 8 → <strong>X (unmapped)</strong> → MMU สังเกตว่า page 8 ไม่ได้ map</li>
+<li>MMU ทำให้ CPU <strong>trap ไปหา OS</strong> — trap นี้เรียกว่า <strong>page fault</strong></li>
+<li>OS เลือก <strong>page frame ที่ไม่ค่อยถูกใช้ (little-used)</strong> แล้ว <strong>เขียนเนื้อหากลับลง disk</strong></li>
+<li>OS ดึง page ที่ถูกอ้างถึงมาใส่ frame ที่ว่างนั้น → <strong>แก้ map</strong> → <strong>restart คำสั่ง</strong></li>
+</ol>
+<blockquote class="callout">
+<p>✔ ตรวจด้วย python: 8192 → 24576, 20500 → 12308, 32780 → page 8 = page fault</p>
+</blockquote>
+<hr />
+<h2 id="10-page-table-หน้าตาเป็นยังไง-และแปลง-address-ทีละขั้นยังไง-สไลด์-2830">10. Page table หน้าตาเป็นยังไง และแปลง address ทีละขั้นยังไง? <span class="slide-ref">สไลด์ 28–30</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ของจริงใช้ page table (ไม่ใช่ pointer หลายตัว) — ใช้เลข page เป็น index ดู frame number และ present/absent bit แล้วเอา frame ต่อกับ offset เป็น physical address</strong></p>
+<h3 id="101-ตัวอย่างแปลง-8196-ด้วยเลขฐานสอง-สไลด์-28">10.1 ตัวอย่างแปลง 8196 ด้วยเลขฐานสอง <span class="slide-ref">สไลด์ 28</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>virtual 16 บิต = page # 4 บิต + offset 12 บิต → offset ถูกคัดลอกตรงไปยัง output, page # ถูกแทนด้วย frame # 3 บิต</strong></p>
+<ul>
+<li>page table บอกด้วยว่า page <strong>อยู่ใน memory ไหม</strong> ผ่าน <strong>present/absent bit</strong></li>
+</ul>
+<p><strong>Page table ในรูปสไลด์ 28</strong> (ตรงกับการ map ของสไลด์ 26):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>page</th>
+<th>frame (ฐานสอง)</th>
+<th>present</th>
+<th></th>
+<th>page</th>
+<th>frame</th>
+<th>present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>010</td>
+<td>1</td>
+<td></td>
+<td>8</td>
+<td>000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>001</td>
+<td>1</td>
+<td></td>
+<td>9</td>
+<td>101</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>110</strong></td>
+<td><strong>1</strong></td>
+<td></td>
+<td>10</td>
+<td>000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>000</td>
+<td>1</td>
+<td></td>
+<td>11</td>
+<td>111</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>12</td>
+<td>000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>011</td>
+<td>1</td>
+<td></td>
+<td>13</td>
+<td>000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>6</td>
+<td>000</td>
+<td>0</td>
+<td></td>
+<td>14</td>
+<td>000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>7</td>
+<td>000</td>
+<td>0</td>
+<td></td>
+<td>15</td>
+<td>000</td>
+<td>0</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ทีละขั้น: virtual 8196 → physical 24580</strong></p>
+<p><img loading="lazy" src="diagrams/L4-04-translate.png" alt="แปลง 8196 เป็น 24580" /></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>virtual 8196 เป็นฐานสอง 16 บิต</td>
+<td><code>0010</code> <code>000000000100</code></td>
+</tr>
+<tr>
+<td>page # (4 บิตแรก)</td>
+<td><code>0010</code> = <strong>2</strong></td>
+</tr>
+<tr>
+<td>offset (12 บิตหลัง)</td>
+<td><code>000000000100</code> = <strong>4</strong> — <strong>copied directly from input to output</strong></td>
+</tr>
+<tr>
+<td>page table แถว 2</td>
+<td>frame <code>110</code> (= 6), present = 1</td>
+</tr>
+<tr>
+<td>ต่อ frame + offset (15 บิต)</td>
+<td><code>110</code> <code>000000000100</code></td>
+</tr>
+<tr>
+<td>physical address</td>
+<td>6 × 4096 + 4 = <strong>24580</strong> ✔</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-page-table-entry-มีกี่-field-สไลด์-29">10.2 Page table entry มีกี่ field? <span class="slide-ref">สไลด์ 29</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>6 field — page frame number, present/absent, protection, modified (dirty), referenced, caching disabled</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>ความหมายของค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Page frame number</strong></td>
+<td>เลข frame ใน physical memory</td>
+</tr>
+<tr>
+<td><strong>Present/absent</strong></td>
+<td>1 = present (อยู่ใน memory), 0 = absent (ไม่อยู่)</td>
+</tr>
+<tr>
+<td><strong>Protection</strong></td>
+<td>1 = read only, 0 = read and write</td>
+</tr>
+<tr>
+<td><strong>Modified (dirty bit)</strong></td>
+<td>1 = ถูกแก้ ต้องเขียนลง disk, 0 = ไม่ถูกแก้</td>
+</tr>
+<tr>
+<td><strong>Referenced</strong></td>
+<td>1 = กำลังถูกอ้างถึง, 0 = ไม่มีใครใช้</td>
+</tr>
+<tr>
+<td><strong>Caching disabled</strong></td>
+<td>1 = disabled, 0 = not disabled</td>
+</tr>
+</tbody>
+</table></div>
+<p>ลำดับใน entry ตามรูป (ซ้ายไปขวา): (ส่วนแรเงา) · Caching disabled · Referenced · Modified · Protection · Present/absent · <strong>Page frame number</strong> (ช่องใหญ่สุดทางขวา)</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ระวังสับสน: <strong>Protection = 1 คือ read only</strong> (ไม่ใช่ &quot;อนุญาต&quot;)</p>
+</blockquote>
+<h3 id="103-ขั้นตอน-paging-สรุป-สไลด์-30">10.3 ขั้นตอน paging สรุป <span class="slide-ref">สไลด์ 30</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ได้ virtual address → อ่าน 4 บิตแรกเป็น page # → ไปแถวนั้นใน page table → ถ้า present = 0 ต้อง re-execute, ถ้า 1 เอา frame ต่อกับ offset</strong></p>
+<ol>
+<li>Get a virtual address</li>
+<li>Convert to a physical address</li>
+<li>อ่าน <strong>4 บิตแรก</strong> = page #</li>
+<li>ค้น page table ไปที่แถวของ page # นั้น</li>
+<li>เช็ก <strong>present bit</strong> ถ้า <strong>0</strong> → re-execute the instruction</li>
+<li>ถ้า <strong>1</strong> → ดึง page frame number มา <strong>ต่อกับ offset</strong> = physical address</li>
+</ol>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ข้อความสไลด์ 30 มีจุดที่อาจทำให้งง: (1) ขั้น 2 เขียนว่า &quot;Convert to a physical address&quot; ก่อนที่จะยังไม่ได้ดูตาราง — ตามรูปสไลด์ 28 ขั้นนี้คือการเขียน virtual address เป็นเลขฐานสอง (2) ขั้น 5 present = 0 ตามสไลด์ 24, 27 คือ <strong>page fault</strong> → OS ดึง page มาก่อน แล้วจึง re-execute (3) &quot;4 บิตแรก&quot; ใช้กับตัวอย่าง 16 บิต / page 4 KB นี้ — ถ้าโจทย์ขนาดต่างไป จำนวนบิตก็ต่างไป ถ้าตอบข้อสอบให้ยึดตามสไลด์</p>
+</blockquote>
+<hr />
+<h2 id="11-tlb-ช่วยให้แปลง-address-เร็วขึ้นยังไง-สไลด์-3133">11. TLB ช่วยให้แปลง address เร็วขึ้นยังไง? <span class="slide-ref">สไลด์ 31–33</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>paging มี 2 ปัญหา (ต้องเร็ว + ตารางใหญ่) — TLB คือ hardware เล็ก ๆ ใน MMU ที่ map virtual → physical ได้โดยไม่ต้องผ่าน page table</strong></p>
+<h3 id="111-ปัญหาหลักของ-paging-และทางแก้-สไลด์-31">11.1 ปัญหาหลักของ paging และทางแก้ <span class="slide-ref">สไลด์ 31</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ตารางใน register เร็วแต่แพงมาก, ตารางใน memory ถูกแต่ช้า (อ่าน memory 2 ครั้ง), TLB คือทางสายกลาง</strong></p>
+<p><strong>2 ปัญหาใหญ่:</strong></p>
+<ul>
+<li>การ map virtual → physical <strong>ต้องเร็ว</strong></li>
+<li>ถ้า virtual address space <strong>ใหญ่</strong> → page table ก็ <strong>ใหญ่</strong></li>
+</ul>
+<p><strong>ทางแก้:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ทางแก้</th>
+<th>ข้อดี / ข้อเสีย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>page table เดียวใน <strong>fast H/W registers</strong> (1 entry ต่อ virtual page)</td>
+<td><strong>เร็ว แต่แพงมาก</strong></td>
+</tr>
+<tr>
+<td>เก็บ page table ทั้งหมดใน <strong>memory</strong></td>
+<td><strong>ช้า</strong> เพราะต้อง <strong>อ่าน memory 2 ครั้ง</strong></td>
+</tr>
+<tr>
+<td><strong>Translation Lookaside Buffers (TLB)</strong></td>
+<td>ดูหัวข้อถัดไป</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="112-tlb-คืออะไร-เก็บอะไร-สไลด์-32">11.2 TLB คืออะไร เก็บอะไร? <span class="slide-ref">สไลด์ 32</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>hardware ขนาดเล็ก (associative memory) มักอยู่ใน MMU แต่ละ entry เก็บข้อมูล 1 page</strong></p>
+<ul>
+<li><strong>small H/W device</strong> ที่ map virtual → physical <strong>โดยไม่ต้องผ่าน page table</strong></li>
+<li>บางทีเรียกว่า <strong>associative memory</strong></li>
+<li>มักอยู่ <strong>ใน MMU</strong></li>
+<li>แต่ละ entry มี: <strong>virtual page number</strong>, <strong>modified bit</strong>, <strong>protection code</strong>, <strong>physical page frame</strong>, <strong>valid/invalid bit</strong></li>
+</ul>
+<p><strong>ตัวอย่าง TLB ในสไลด์:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Valid</th>
+<th>Virtual page</th>
+<th>Modified</th>
+<th>Protection</th>
+<th>Page frame</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>140</td>
+<td>1</td>
+<td>RW</td>
+<td>31</td>
+</tr>
+<tr>
+<td>1</td>
+<td>20</td>
+<td>0</td>
+<td>R X</td>
+<td>38</td>
+</tr>
+<tr>
+<td>1</td>
+<td>130</td>
+<td>1</td>
+<td>RW</td>
+<td>29</td>
+</tr>
+<tr>
+<td>1</td>
+<td>129</td>
+<td>1</td>
+<td>RW</td>
+<td>62</td>
+</tr>
+<tr>
+<td>1</td>
+<td>19</td>
+<td>0</td>
+<td>R X</td>
+<td>50</td>
+</tr>
+<tr>
+<td>1</td>
+<td>21</td>
+<td>0</td>
+<td>R X</td>
+<td>45</td>
+</tr>
+<tr>
+<td>1</td>
+<td>860</td>
+<td>1</td>
+<td>RW</td>
+<td>14</td>
+</tr>
+<tr>
+<td>1</td>
+<td>861</td>
+<td>1</td>
+<td>RW</td>
+<td>75</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="113-tlb-ทำงานยังไง-สไลด์-33">11.3 TLB ทำงานยังไง? <span class="slide-ref">สไลด์ 33</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>เทียบ virtual page กับทุก entry พร้อมกัน — เจอและไม่ผิด protection = ได้ frame ทันที, เจอแต่ผิด protection = protection fault, ไม่เจอ = lookup page table ปกติแล้วเอา entry นั้นมาแทน entry เก่าใน TLB</strong></p>
+<p><img loading="lazy" src="diagrams/L4-05-tlb.png" alt="การทำงานของ TLB" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 TLB เปรียบเหมือนโพสต์อิทแปะหน้าจอที่จดเบอร์โทรที่ใช้บ่อย — ไม่ต้องเปิดสมุดโทรศัพท์ (page table) ทุกครั้ง ถ้าไม่มีในโพสต์อิทค่อยเปิดสมุด แล้วจดเบอร์นั้นทับโพสต์อิทเก่าแผ่นหนึ่ง</p>
+</blockquote>
+<hr />
+<h2 id="12-ถ้า-address-space-ใหญ่มาก-จะเก็บ-page-table-ยังไง-สไลด์-3438">12. ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง? <span class="slide-ref">สไลด์ 34–38</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>2 วิธี — Multilevel page tables (แบ่ง page table เป็นชั้น สร้างเฉพาะส่วนที่ใช้) และ Inverted page tables (1 entry ต่อ page frame จริง แต่แปลง address ยากเพราะต้องค้นทั้งตาราง)</strong></p>
+<h3 id="121-multilevel-page-table-แบ่ง-address-ยังไง-สไลด์-35">12.1 Multilevel page table แบ่ง address ยังไง? <span class="slide-ref">สไลด์ 35</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>virtual address 32 บิต = PT1 (10 บิต) + PT2 (10 บิต) + Offset (12 บิต)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>10</th>
+<th>10</th>
+<th>12</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Field</td>
+<td><strong>PT1</strong></td>
+<td><strong>PT2</strong></td>
+<td><strong>Offset</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>โจทย์ตั้งต้นในสไลด์:</p>
+<ul>
+<li>process ต้องการ <strong>พอดี 12 MB</strong>:
+<ul>
+<li><strong>ล่างสุด 4 MB</strong> = program text</li>
+<li><strong>ถัดมา 4 MB</strong> = data</li>
+<li><strong>บนสุด 4 MB</strong> = stack</li>
+</ul>
+</li>
+<li>memory ขนาด <strong>4 GB</strong></li>
+<li>แต่ละ page table มี <strong>K = 2^10 = 1024</strong> entries พอดี (สไลด์เขียนว่า &quot;K pages&quot;) <strong>ไม่ว่า page จะขนาดเท่าไหร่</strong></li>
+</ul>
+<h3 id="122-ใช้-pt1-pt2-หา-page-ยังไง-สไลด์-37">12.2 ใช้ PT1 / PT2 หา page ยังไง? <span class="slide-ref">สไลด์ 37</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>PT1 เป็น index ใน top-level table → ได้ตำแหน่ง second-level table → PT2 เป็น index ใน second-level table → ได้ page frame number</strong></p>
+<ol>
+<li>MMU ดึง <strong>PT1</strong> มาใช้เป็น index ใน <strong>top-level page table</strong></li>
+<li>entry ที่ได้ให้ <strong>address / page frame number ของ second-level page table</strong>
+<ul>
+<li><strong>Entry 0</strong> → page table ของ <strong>program text</strong></li>
+<li><strong>Entry 1</strong> → page table ของ <strong>data</strong></li>
+<li><strong>Entry 1023</strong> → page table ของ <strong>stack</strong></li>
+<li><strong>entry อื่น ๆ ไม่ได้ใช้</strong></li>
+</ul>
+</li>
+<li>ใช้ <strong>PT2</strong> เป็น index ใน second-level table ที่เลือก → ได้ <strong>page frame number</strong></li>
+</ol>
+<p><img loading="lazy" src="diagrams/L4-06-multilevel.png" alt="Two-level page table" /></p>
+<h3 id="123-คำนวณ-address-จาก-pt1pt2offset-ยังไง-สไลด์-36">12.3 คำนวณ address จาก PT1/PT2/offset ยังไง? <span class="slide-ref">สไลด์ 36</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>Physical address = PT1 × 4M + PT2 × 4K + offset (K = 2^10, M = 2^20)</strong></p>
+<p><strong>สูตรในสไลด์:</strong></p>
+<p><code>Physical address = (PT1)(size of top-level page) + (PT2)(size of second-level page) + offset</code></p>
+<p><strong>ทำไม top-level = 4M และ second-level = 4K?</strong> (สไลด์ถามไว้ — คำนวณจากการแบ่งบิตในสไลด์ 35)</p>
+<ul>
+<li>offset มี 12 บิต → 1 page = 2^12 = 4096 = <strong>4K</strong> → แต่ละ entry ของ second-level ครอบคลุม 4K</li>
+<li>second-level table มี 2^10 entries × 4K = 2^10 × 2^12 = 2^22 = <strong>4M</strong> → แต่ละ entry ของ top-level ครอบคลุม 4M</li>
+<li>(สอดคล้องกับโจทย์: แต่ละส่วน 4 MB ÷ 4 KB = 1024 pages = second-level table 1 ตารางพอดี)</li>
+</ul>
+<p><strong>ตัวอย่าง: virtual address = 0x00403004</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ขั้น</th>
+<th>ค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00403004 เป็นฐานสอง</td>
+<td><code>0000 0000 0100 0000 0011 0000 0000 0100</code></td>
+</tr>
+<tr>
+<td>PT1 = 10 บิตแรก</td>
+<td><code>0000000001</code> = <strong>1</strong></td>
+</tr>
+<tr>
+<td>PT2 = 10 บิตถัดมา</td>
+<td><code>0000000011</code> = <strong>3</strong></td>
+</tr>
+<tr>
+<td>offset = 12 บิตท้าย</td>
+<td><code>000000000100</code> = <strong>4</strong></td>
+</tr>
+<tr>
+<td>แทนสูตร</td>
+<td>(1)(4M) + (3)(4K) + 4</td>
+</tr>
+<tr>
+<td></td>
+<td>= 4194304 + 12288 + 4</td>
+</tr>
+<tr>
+<td></td>
+<td>= <strong>4206596</strong> ✔</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>PT1 = 1 → entry 1 ของ top-level = page table ของ <strong>data</strong></li>
+</ul>
+<blockquote class="callout">
+<p>✔ ตรวจด้วย python แล้วได้ PT1 = 1, PT2 = 3, offset = 4, ผลรวม 4206596 ตรงกับสไลด์</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สังเกต: 4206596 คือค่าฐานสิบของ 0x00403004 เอง (สูตรนี้คือการถอดเลข virtual address กลับเป็นฐานสิบ) ส่วนเลข frame จริงขึ้นกับค่าใน second-level table ซึ่งสไลด์ไม่ได้ให้มา — <strong>ทำข้อสอบให้ใช้สูตรและเรียกผลว่า physical address ตามสไลด์</strong></p>
+</blockquote>
+<h3 id="124-inverted-page-table-คืออะไร-สไลด์-38">12.4 Inverted page table คืออะไร? <span class="slide-ref">สไลด์ 38</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>มี 1 entry ต่อ page frame ใน memory จริง (ตารางเล็กลงมาก) แต่แปลง address ยากเพราะ hardware ต้องค้นทั้งตาราง</strong></p>
+<ul>
+<li><strong>1 entry ต่อ page frame ใน real memory</strong> (ไม่ใช่ต่อ virtual page)</li>
+<li><strong>ข้อเสียร้ายแรง:</strong> แปลง virtual → physical <strong>ยากขึ้นมาก</strong> เพราะ H/W ต้อง <strong>ค้นทั้ง inverted page table</strong></li>
+</ul>
+<p><strong>เทียบตามรูปในสไลด์:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Traditional page table</th>
+<th>Inverted page table (แบบ hash table)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>จำนวน entry</td>
+<td>1 entry ต่อ virtual page → <strong>2^52</strong> entries</td>
+<td>1 entry ต่อ page frame → ตัวอย่าง <strong>1-GB physical memory มี 2^18 frames ขนาด 4-KB</strong></td>
+</tr>
+<tr>
+<td>index ด้วย</td>
+<td><strong>virtual page</strong></td>
+<td><strong>hash ของ virtual page</strong></td>
+</tr>
+<tr>
+<td>ใน entry</td>
+<td>page frame</td>
+<td>โซ่ของคู่ <strong>(virtual page, page frame)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>✔ 1 GB ÷ 4 KB = 2^30 ÷ 2^12 = <strong>2^18</strong> frames (ตรวจด้วย python)</p>
+</blockquote>
+<hr />
+<h2 id="13-page-replacement-ทำไมต้องมี-และมีอัลกอริทึมอะไรบ้าง-สไลด์-3940">13. Page replacement: ทำไมต้องมี และมีอัลกอริทึมอะไรบ้าง? <span class="slide-ref">สไลด์ 39–40</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>เมื่อเกิด page fault และ memory เต็ม OS ต้องเลือก page ไป evict — เป้าหมายคือ page fault rate ต่ำที่สุด ควรเลือก page ที่ไม่ค่อยถูกใช้</strong></p>
+<ul>
+<li><strong>เป้าหมายหลัก:</strong> <strong>lowest page fault rate</strong></li>
+<li>เมื่อเกิด page fault OS ต้อง <strong>เลือก page ไป evict</strong> (เอาออกจาก memory) เพื่อให้ page ใหม่เข้ามา</li>
+<li>จะสุ่มก็ได้ แต่ระบบจะดีกว่ามากถ้าเลือก <strong>page ที่ไม่ได้ถูกใช้หนัก</strong></li>
+<li>ถ้า page ที่ evict <strong>ถูกแก้ไขแล้ว</strong> → ต้อง <strong>อัปเดต disk</strong></li>
+<li>อีก 2 ประเด็น:
+<ul>
+<li><strong>Local</strong> — evict page ของ <strong>process เดียวกัน</strong></li>
+<li><strong>Global</strong> — evict page ของ <strong>process อื่น</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>รายการอัลกอริทึมในสไลด์ 40:</strong> Optimal, Not Recently Used (NRU), FIFO, Second-Chance, Clock, Least Recently Used (LRU), Working Set, WSClock</p>
+<blockquote class="callout">
+<p class="c-warn">⚠️ รายการในสไลด์ 40 ไม่มี NFU และ Aging แต่มีสไลด์อธิบาย (48–49) และอยู่ในตารางสรุป (54) — ส่วน <strong>WSClock</strong> อยู่ในรายการและตารางสรุป แต่ <strong>ไม่มีสไลด์อธิบายวิธีทำงาน</strong></p>
+</blockquote>
+<p><strong>Reference string ที่สไลด์ใช้ (3 frames):</strong> <code>7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1</code> (20 ครั้ง)</p>
+<ul>
+<li>รูปในสไลด์ 41, 43, 44 แสดงแค่ <strong>11 ครั้งแรก</strong> (ถึง <code>… 4 2 3 0</code>) แล้วเหลือช่องว่าง 1 ช่อง</li>
+<li>ตารางด้านล่างแสดงส่วนที่สไลด์แสดง และ <strong>คำนวณต่อจนครบ 20 ครั้งด้วยกฎเดียวกัน</strong> (ตรวจด้วย python) — ส่วนที่คำนวณต่อจะมีขีดคั่น</li>
+</ul>
+<hr />
+<h2 id="14-optimal-สไลด์-41">14. Optimal <span class="slide-ref">สไลด์ 41</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>evict page ที่จะถูกใช้อีก &quot;ช้าที่สุด&quot; (label สูงสุด) — ดีที่สุดแต่ทำจริงไม่ได้ เพราะ OS ไม่รู้อนาคต</strong></p>
+<ul>
+<li><strong>ติด label</strong> ให้ทุก page = <strong>จำนวนคำสั่งที่จะ execute ก่อน page นั้นถูกอ้างถึงครั้งแรก</strong></li>
+<li><strong>evict page ที่ label สูงสุด</strong> (จะถูกใช้อีกนานที่สุด)</li>
+<li><strong>ไม่ realistic</strong> — OS ไม่มีทางรู้ว่า page ไหนจะถูกอ้างถึงต่อไป</li>
+</ul>
+<p><strong>วิธีคิดแต่ละครั้งที่ต้อง evict:</strong> ดูไปข้างหน้าใน reference string ว่าแต่ละ page ใน frame จะถูกใช้อีกครั้งเมื่อไร → เอาตัวที่ไกลสุด (หรือไม่ถูกใช้อีกเลย) ออก</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ref</th>
+<th>frames หลังทำ</th>
+<th>ผล</th>
+<th>เหตุผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>7</td>
+<td>7</td>
+<td>fault</td>
+<td>ว่าง</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>7 0</td>
+<td>fault</td>
+<td>ว่าง</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>7 0 1</td>
+<td>fault</td>
+<td>ว่าง</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td><strong>2</strong> 0 1</td>
+<td>fault</td>
+<td>ครั้งถัดไป: 7 → #18, 0 → #5, 1 → #14 → evict <strong>7</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>2 0 1</td>
+<td><strong>HIT</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>3</td>
+<td>2 0 <strong>3</strong></td>
+<td>fault</td>
+<td>2 → #9, 0 → #7, 1 → #14 → evict <strong>1</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>2 0 3</td>
+<td><strong>HIT</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>2 <strong>4</strong> 3</td>
+<td>fault</td>
+<td>2 → #9, 0 → #11, 3 → #10 → evict <strong>0</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>2</td>
+<td>2 4 3</td>
+<td><strong>HIT</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>3</td>
+<td>2 4 3</td>
+<td><strong>HIT</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>0</td>
+<td>2 <strong>0</strong> 3</td>
+<td>fault</td>
+<td>2 → #13, 4 → ไม่ใช้อีก, 3 → #12 → evict <strong>4</strong></td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><em>ต่อจากนี้คำนวณต่อจากสไลด์</em></td>
+</tr>
+<tr>
+<td>12</td>
+<td>3</td>
+<td>2 0 3</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>2</td>
+<td>2 0 3</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>1</td>
+<td>2 0 <strong>1</strong></td>
+<td>fault</td>
+<td>2 → #15, 0 → #16, 3 → ไม่ใช้อีก → evict <strong>3</strong></td>
+</tr>
+<tr>
+<td>15–17</td>
+<td>2 0 1</td>
+<td>2 0 1</td>
+<td>HIT ×3</td>
+<td></td>
+</tr>
+<tr>
+<td>18</td>
+<td>7</td>
+<td><strong>7</strong> 0 1</td>
+<td>fault</td>
+<td>2 → ไม่ใช้อีก → evict <strong>2</strong></td>
+</tr>
+<tr>
+<td>19–20</td>
+<td>0 1</td>
+<td>7 0 1</td>
+<td>HIT ×2</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>11 ครั้งแรก (ที่สไลด์แสดง): <strong>7 faults, 4 HITs</strong> ✔ ตรงกับรูป</li>
+<li>ครบ 20 ครั้ง: <strong>9 page faults</strong></li>
+</ul>
+<hr />
+<h2 id="15-nru-not-recently-used-สไลด์-4243">15. NRU (Not Recently Used) <span class="slide-ref">สไลด์ 42–43</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ R bit กับ M bit แบ่ง page เป็น 4 class แล้ว evict จาก class ต่ำสุด — เข้าใจง่าย ทำได้ค่อนข้างมีประสิทธิภาพ ไม่ optimal แต่อาจพอใช้</strong></p>
+<ul>
+<li><strong>เอนเอียงไปทางเก็บ page ที่เพิ่งถูกใช้</strong> ไว้ใน memory</li>
+<li>แต่ละ page มี status bit 2 ตัว:
+<ul>
+<li><strong>R</strong> — set เมื่อ page ถูก <strong>อ้างถึง</strong> (read หรือ write)</li>
+<li><strong>M</strong> — set เมื่อ page ถูก <strong>เขียน</strong> (modified)</li>
+</ul>
+</li>
+<li>เมื่อเกิด page fault → OS ตรวจทุก page แบ่งเป็น <strong>4 class</strong> ตามค่า R, M ปัจจุบัน → <strong>เลือกจาก class ต่ำสุด</strong></li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>R</th>
+<th>M</th>
+<th>ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>0</td>
+<td>0</td>
+<td>not referenced, not modified ← <strong>evict ก่อน</strong></td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>not referenced, modified</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>referenced, not modified</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>referenced, modified ← เก็บไว้ที่สุด</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ข้อดี (สไลด์ 43):</strong> เข้าใจง่าย | implement ได้ <strong>ค่อนข้างมีประสิทธิภาพ (moderately efficient)</strong> | ให้ performance ได้
+<strong>ข้อเสีย:</strong> <strong>ไม่ optimal</strong> แต่ <strong>อาจพอใช้ได้ (adequate)</strong></p>
+<p><strong>รูปตัวอย่างในสไลด์ 43</strong> (reference string เดิม, 11 ครั้งแรก):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+<th>11</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ref</td>
+<td>7</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>4</td>
+<td>2</td>
+<td>3</td>
+<td>0</td>
+</tr>
+<tr>
+<td>frames</td>
+<td>7</td>
+<td>7 0</td>
+<td>7 0 1</td>
+<td>2 0 1</td>
+<td>2 0 1</td>
+<td>2 0 3</td>
+<td>2 0 3</td>
+<td>4 0 3</td>
+<td>4 0 2</td>
+<td>4 3 2</td>
+<td>0 3 2</td>
+</tr>
+<tr>
+<td>ผล</td>
+<td>F</td>
+<td>F</td>
+<td>F</td>
+<td>F</td>
+<td><strong>HIT</strong></td>
+<td>F</td>
+<td><strong>HIT</strong></td>
+<td>F</td>
+<td>F</td>
+<td>F</td>
+<td>F</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p class="c-warn">⚠️ ลำดับ frame ในรูปสไลด์ 43 <strong>ตรงกับการไล่แบบ LRU ทุกช่อง</strong> (ตรวจด้วย python — ดูตาราง LRU หัวข้อ 19) สไลด์ไม่ได้ให้ค่า R/M ของแต่ละ page จึงคำนวณ NRU แบบ 4 class จากรูปนี้ไม่ได้ — ถ้าข้อสอบถามเรื่อง NRU ให้ตอบตามกฎ 4 class ข้างบน</p>
+</blockquote>
+<hr />
+<h2 id="16-fifo-first-in-first-out-สไลด์-44">16. FIFO (First-In, First-Out) <span class="slide-ref">สไลด์ 44</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>evict page ที่อยู่ใน memory นานที่สุด (หัว list) — ง่ายมาก แต่ไม่สนว่า page ถูกใช้บ่อยแค่ไหน อาจโยน page สำคัญทิ้ง</strong></p>
+<ul>
+<li>แทนที่ page ที่ <strong>อยู่ใน memory นานที่สุด</strong></li>
+<li>เก็บ page ใน <strong>list</strong>: <strong>ใหม่สุดอยู่ท้าย (tail)</strong>, <strong>เก่าสุดอยู่หัว (head)</strong></li>
+<li><strong>ไม่ใช้ประโยชน์</strong> จาก access pattern หรือความถี่การใช้</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(really) easy to implement</strong></td>
+<td>page ที่อยู่นานสุดอาจเป็นตัวที่ <strong>ถูกใช้บ่อย</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>บังคับ page ออก <strong>โดยไม่สนการใช้งาน</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ข้อมูลการใช้งานอาจช่วยตัดสินว่าควรเก็บ page ไหน (แต่ FIFO ไม่ใช้)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ไล่ reference string (3 frames)</strong> — evict ตัวที่ <strong>เข้ามาก่อน</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ref</th>
+<th>frames หลังทำ</th>
+<th>ผล</th>
+<th>evict (ตัวที่เข้ามาก่อนสุด)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>7</td>
+<td>7</td>
+<td>fault</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>7 0</td>
+<td>fault</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>7 0 1</td>
+<td>fault</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>2 0 1</td>
+<td>fault</td>
+<td>7</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>2 0 1</td>
+<td><strong>HIT</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>3</td>
+<td>2 3 1</td>
+<td>fault</td>
+<td>0</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>2 3 0</td>
+<td>fault</td>
+<td>1</td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>4 3 0</td>
+<td>fault</td>
+<td>2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>2</td>
+<td>4 2 0</td>
+<td>fault</td>
+<td>3</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3</td>
+<td>4 2 3</td>
+<td>fault</td>
+<td>0</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0</td>
+<td>0 2 3</td>
+<td>fault</td>
+<td>4</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><em>ต่อจากนี้คำนวณต่อจากสไลด์</em></td>
+</tr>
+<tr>
+<td>12</td>
+<td>3</td>
+<td>0 2 3</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>2</td>
+<td>0 2 3</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>1</td>
+<td>0 1 3</td>
+<td>fault</td>
+<td>2</td>
+</tr>
+<tr>
+<td>15</td>
+<td>2</td>
+<td>0 1 2</td>
+<td>fault</td>
+<td>3</td>
+</tr>
+<tr>
+<td>16</td>
+<td>0</td>
+<td>0 1 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>17</td>
+<td>1</td>
+<td>0 1 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>18</td>
+<td>7</td>
+<td>7 1 2</td>
+<td>fault</td>
+<td>0</td>
+</tr>
+<tr>
+<td>19</td>
+<td>0</td>
+<td>7 0 2</td>
+<td>fault</td>
+<td>1</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>7 0 1</td>
+<td>fault</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>11 ครั้งแรก: <strong>10 faults, 1 HIT</strong> ✔ ตรงกับรูปสไลด์</li>
+<li>ครบ 20 ครั้ง: <strong>15 page faults</strong> (มากกว่า Optimal 9 และ LRU 12)</li>
+</ul>
+<hr />
+<h2 id="17-second-chance-สไลด์-45">17. Second-Chance <span class="slide-ref">สไลด์ 45</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>FIFO + ดู R bit — ถ้า page เก่าสุดมี R = 0 แทนที่เลย, ถ้า R = 1 ให้ &quot;โอกาสที่สอง&quot; (clear R แล้วย้ายไปท้าย list เหมือนเพิ่งโหลด)</strong></p>
+<ul>
+<li>เป็นการดัดแปลง FIFO เพื่อ <strong>ไม่ evict page ที่ถูกใช้หนัก</strong></li>
+<li>ตรวจ <strong>R bit</strong> ของ page หัว list:
+<ul>
+<li><strong>R = 0</strong> → page ทั้ง <strong>เก่าและไม่ถูกใช้</strong> → <strong>แทนที่ทันที</strong></li>
+<li><strong>R = 1</strong> → <strong>clear bit</strong>, ย้าย page ไป <strong>ท้าย list</strong>, ถือว่าเป็น <strong>page ที่เพิ่งโหลด</strong></li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L4-07-second-chance.png" alt="Second-chance" /></p>
+<p><strong>ตัวอย่างในสไลด์ (Figure 3-15)</strong> — ตัวเลขบน page = เวลาที่โหลด</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>ลำดับใน list (หัว → ท้าย)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a) เรียงแบบ FIFO</td>
+<td>A(0) → B(3) → C(7) → D(8) → E(12) → F(14) → G(15) → H(18)</td>
+</tr>
+<tr>
+<td>(b) page fault ที่เวลา 20 และ <strong>A มี R = 1</strong></td>
+<td>B(3) → C(7) → D(8) → E(12) → F(14) → G(15) → H(18) → <strong>A(20)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>A ถูก clear R แล้วย้ายไปท้าย พร้อมเวลาโหลดใหม่เป็น <strong>20</strong> — &quot;A is treated like a newly loaded page&quot;</li>
+</ul>
+<hr />
+<h2 id="18-clock-สไลด์-46">18. Clock <span class="slide-ref">สไลด์ 46</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>second-chance แบบวงกลม — เข็มชี้ page ใด ถ้า R = 0 evict แล้วใส่ page ใหม่แทนตรงนั้น ถ้า R = 1 clear แล้วเลื่อนเข็ม (ไม่ต้องย้าย page ใน list)</strong></p>
+<ul>
+<li>ดัดแปลงจาก FIFO</li>
+<li>เก็บ page frame ทั้งหมดใน <strong>circular list รูปนาฬิกา</strong> (รูปในสไลด์: page A–L วนเป็นวง เข็มชี้ที่ C)</li>
+<li>เมื่อเกิด page fault → ตรวจ page ที่ <strong>เข็ม (hand)</strong> ชี้อยู่:
+<ul>
+<li><strong>R = 0</strong> → <strong>evict</strong> page นั้น, ใส่ page ใหม่ <strong>แทนที่ตำแหน่งเดิม</strong>, <strong>เลื่อนเข็มไป 1 ตำแหน่ง</strong></li>
+<li><strong>R = 1</strong> → <strong>clear R</strong>, เลื่อนเข็มไป page ถัดไป</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="diagrams/L4-08-clock.png" alt="Clock" /></p>
+<blockquote class="callout">
+<p class="c-tip">💡 เปรียบเหมือนยามเดินตรวจห้องเป็นวงกลม: ห้องไหนมีป้าย &quot;ใช้อยู่&quot; (R = 1) ก็แค่ปลดป้ายแล้วเดินต่อ ห้องแรกที่ไม่มีป้ายคือห้องที่ถูกเชิญออก</p>
+</blockquote>
+<hr />
+<h2 id="19-lru-least-recently-used-สไลด์-47">19. LRU (Least Recently Used) <span class="slide-ref">สไลด์ 47</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>evict page ที่ไม่ได้ใช้นานที่สุด อาศัยว่าที่เพิ่งใช้หนักจะใช้อีกเร็ว ๆ นี้ — ดีมากแต่ทำยาก เพราะต้องอัปเดต list ทุก memory reference</strong></p>
+<p><strong>หลักการประมาณ (Do the approximation):</strong></p>
+<ul>
+<li>page ที่ <strong>ถูกใช้หนัก</strong> ในไม่กี่คำสั่งที่ผ่านมา → <strong>น่าจะถูกใช้หนักอีกเร็ว ๆ นี้</strong></li>
+<li>page ที่ <strong>ไม่ได้ใช้มานาน</strong> → <strong>น่าจะไม่ถูกใช้ไปอีกนาน</strong></li>
+</ul>
+<p><strong>ข้อเสีย:</strong> implement <strong>ยาก</strong> — ต้องดูแล <strong>linked list ของทุก page</strong> ใน memory และต้อง <strong>อัปเดตทุกครั้งที่อ้าง memory</strong></p>
+<p><strong>LRU ต่างจาก NRU ยังไง?</strong> LRU ติดตามการใช้ page <strong>ตลอดช่วงเวลาสั้น ๆ</strong> ส่วน NRU ดูแค่การใช้ใน <strong>clock interval ล่าสุด</strong></p>
+<p><strong>ไล่ reference string ด้วยกฎ LRU (3 frames)</strong> — evict ตัวที่ <strong>ถูกใช้ครั้งล่าสุดนานที่สุด</strong> <em>(สไลด์ 47 ไม่มีรูปไล่ — ตารางนี้คำนวณตามกฎ ซึ่ง 11 ครั้งแรกตรงกับรูปในสไลด์ 43)</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>ref</th>
+<th>frames หลังทำ</th>
+<th>ผล</th>
+<th>evict (ใช้ล่าสุดนานสุด)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–3</td>
+<td>7 0 1</td>
+<td>7 0 1</td>
+<td>fault ×3</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>2 0 1</td>
+<td>fault</td>
+<td>7</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>2 0 1</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>3</td>
+<td>2 0 3</td>
+<td>fault</td>
+<td>1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>2 0 3</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>4 0 3</td>
+<td>fault</td>
+<td>2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>2</td>
+<td>4 0 2</td>
+<td>fault</td>
+<td>3</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3</td>
+<td>4 3 2</td>
+<td>fault</td>
+<td>0</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0</td>
+<td>0 3 2</td>
+<td>fault</td>
+<td>4</td>
+</tr>
+<tr>
+<td>12</td>
+<td>3</td>
+<td>0 3 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>2</td>
+<td>0 3 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>1</td>
+<td>1 3 2</td>
+<td>fault</td>
+<td>0</td>
+</tr>
+<tr>
+<td>15</td>
+<td>2</td>
+<td>1 3 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>0</td>
+<td>1 0 2</td>
+<td>fault</td>
+<td>3</td>
+</tr>
+<tr>
+<td>17</td>
+<td>1</td>
+<td>1 0 2</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>18</td>
+<td>7</td>
+<td>1 0 7</td>
+<td>fault</td>
+<td>2</td>
+</tr>
+<tr>
+<td>19</td>
+<td>0</td>
+<td>1 0 7</td>
+<td>HIT</td>
+<td></td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>1 0 7</td>
+<td>HIT</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>ครบ 20 ครั้ง: <strong>12 page faults</strong></li>
+<li>เทียบ 3 แบบกับ string เดียวกัน: <strong>Optimal 9 &lt; LRU 12 &lt; FIFO 15</strong></li>
+</ul>
+<hr />
+<h2 id="20-nfu-not-frequently-used-สไลด์-48">20. NFU (Not Frequently Used) <span class="slide-ref">สไลด์ 48</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>ใช้ software counter ต่อ page บวก R bit ทุก clock interrupt แล้ว evict ตัว counter ต่ำสุด — ปัญหาคือ &quot;ไม่เคยลืม&quot; อะไรเลย</strong></p>
+<p>NFU (ใช้ implement LRU) ทำงานดังนี้:</p>
+<ol>
+<li>มี <strong>software counter</strong> ต่อ page เริ่มที่ <strong>0</strong></li>
+<li>ทุก <strong>clock interrupt</strong> OS scan ทุก page ใน memory</li>
+<li>แต่ละ page เอา <strong>R bit (0 หรือ 1) บวกเข้า counter</strong></li>
+<li>counter จึงบอกคร่าว ๆ ว่า page ถูกอ้าง <strong>บ่อยแค่ไหน</strong></li>
+<li>เมื่อ page fault → เลือก page ที่ <strong>counter ต่ำสุด</strong> ไปแทนที่</li>
+</ol>
+<ul>
+<li><strong>ปัญหาหลัก: it never forgets anything</strong> — การใช้งานเมื่อนานมาแล้วยังนับรวมอยู่ตลอด</li>
+</ul>
+<hr />
+<h2 id="21-aging-สไลด์-49">21. Aging <span class="slide-ref">สไลด์ 49</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>แก้ NFU 2 จุด — shift counter ขวา 1 บิตก่อน แล้วใส่ R bit ที่บิตซ้ายสุด → การใช้งานเก่าค่อย ๆ จางหายไป ประมาณ LRU ได้ดี</strong></p>
+<p>การดัดแปลงจาก NFU 2 ส่วน:</p>
+<ol>
+<li><strong>shift counter ไปทางขวา 1 บิต</strong> ก่อนใส่ R bit</li>
+<li>ใส่ R bit ที่ <strong>บิตซ้ายสุด</strong> (ไม่ใช่ขวาสุด)</li>
+</ol>
+<p><strong>ตัวอย่างในสไลด์ (Figure 3-17)</strong> — 6 pages, 5 clock ticks, counter 8 บิต</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>tick 0</th>
+<th>tick 1</th>
+<th>tick 2</th>
+<th>tick 3</th>
+<th>tick 4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R bits ของ page 0–5</strong></td>
+<td><code>101011</code></td>
+<td><code>110010</code></td>
+<td><code>110101</code></td>
+<td><code>100010</code></td>
+<td><code>011000</code></td>
+</tr>
+<tr>
+<td>page 0</td>
+<td>10000000</td>
+<td>11000000</td>
+<td>11100000</td>
+<td>11110000</td>
+<td>01111000</td>
+</tr>
+<tr>
+<td>page 1</td>
+<td>00000000</td>
+<td>10000000</td>
+<td>11000000</td>
+<td>01100000</td>
+<td>10110000</td>
+</tr>
+<tr>
+<td>page 2</td>
+<td>10000000</td>
+<td>01000000</td>
+<td>00100000</td>
+<td>00010000</td>
+<td>10001000</td>
+</tr>
+<tr>
+<td>page 3</td>
+<td>00000000</td>
+<td>00000000</td>
+<td>10000000</td>
+<td>01000000</td>
+<td><strong>00100000</strong></td>
+</tr>
+<tr>
+<td>page 4</td>
+<td>10000000</td>
+<td>11000000</td>
+<td>01100000</td>
+<td>10110000</td>
+<td>01011000</td>
+</tr>
+<tr>
+<td>page 5</td>
+<td>10000000</td>
+<td>01000000</td>
+<td>10100000</td>
+<td>01010000</td>
+<td>00101000</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ไล่ทีละขั้น — ตัวอย่าง page 0:</strong></p>
+<ul>
+<li>เริ่ม 00000000, tick 0 R = 1 → shift ขวา <code>00000000</code> → ใส่ 1 ซ้ายสุด → <code>10000000</code></li>
+<li>tick 1 R = 1 → shift <code>01000000</code> → ใส่ 1 → <code>11000000</code></li>
+<li>tick 2 R = 1 → <code>11100000</code> | tick 3 R = 1 → <code>11110000</code></li>
+<li>tick 4 R = <strong>0</strong> → shift <code>01111000</code> → ใส่ 0 → <code>01111000</code> (บิตซ้ายสุดเป็น 0 เพราะ tick ล่าสุดไม่ถูกใช้)</li>
+</ul>
+<p><strong>ถ้าเกิด page fault หลัง tick 4</strong> (ใช้กฎ &quot;counter ต่ำสุดถูกเลือก&quot; จากสไลด์ 48 — สไลด์ 49 ไม่ได้ถามข้อนี้ตรง ๆ): counter ต่ำสุด = page 3 (<code>00100000</code> = 32) → <strong>evict page 3</strong></p>
+<blockquote class="callout">
+<p>✔ ตรวจด้วย python: counter ทุกช่องทั้ง 5 tick ตรงกับรูปสไลด์</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-tip">💡 Aging เปรียบเหมือนคะแนนความนิยมที่ &quot;ลดครึ่งทุกสัปดาห์&quot; — ใครถูกใช้ล่าสุดได้คะแนนก้อนใหญ่ (บิตซ้ายสุด) ส่วนการใช้เมื่อนานมาแล้วค่อย ๆ หดเหลือนิดเดียว</p>
+</blockquote>
+<hr />
+<h2 id="22-working-set-สไลด์-5053">22. Working Set <span class="slide-ref">สไลด์ 50–53</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>working set = ชุด page ที่ process กำลังใช้ — ต้องอยู่ใน memory ไม่งั้น thrashing; อัลกอริทึม evict page ที่ไม่อยู่ใน working set (R = 0 และ age &gt; threshold)</strong></p>
+<h3 id="221-คำศัพท์หลัก-สไลด์-50">22.1 คำศัพท์หลัก <span class="slide-ref">สไลด์ 50</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>working set, demand paging, locality of reference, thrashing</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำ</th>
+<th>ความหมายตามสไลด์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Working set</strong></td>
+<td>ชุดของ page ที่ process <strong>กำลังใช้อยู่</strong></td>
+</tr>
+<tr>
+<td><strong>Working set algorithm</strong></td>
+<td>หา working set แล้ว <strong>evict page ที่ไม่อยู่ใน working set ปัจจุบัน</strong> เมื่อเกิด page fault</td>
+</tr>
+<tr>
+<td><strong>Demand paging</strong></td>
+<td>เริ่ม process ด้วย <strong>0 pages</strong> แล้ว <strong>โหลดเฉพาะที่ต้องใช้</strong></td>
+</tr>
+<tr>
+<td><strong>Locality of reference</strong></td>
+<td>ในแต่ละช่วงการทำงาน process อ้างถึง page เพียง <strong>ส่วนน้อย</strong> ของทั้งหมด</td>
+</tr>
+<tr>
+<td><strong>Thrashing</strong></td>
+<td>โปรแกรมเกิด <strong>page fault ทุก ๆ ไม่กี่คำสั่ง</strong> — ถ้า working set ไม่อยู่ใน memory จะ fault หนัก</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="222-working-set-model-และ-prepaging-สไลด์-51">22.2 Working set model และ prepaging <span class="slide-ref">สไลด์ 51</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ติดตาม working set ของแต่ละ process และโหลดให้ครบก่อนรัน (prepaging) เพื่อลด page fault rate</strong></p>
+<ul>
+<li><strong>Working set model</strong> = ติดตาม working set ของแต่ละ process และ <strong>ทำให้แน่ใจว่าอยู่ใน memory ก่อนให้ process รัน</strong></li>
+<li>ออกแบบมาเพื่อ <strong>ลด page fault rate</strong></li>
+<li>โหลด page <strong>ก่อน</strong> ให้ process รัน เรียกว่า <strong>prepaging</strong></li>
+<li>ข้อมูล working set ที่เก็บ: <strong>Time of last use</strong>, <strong>R bit</strong> (แสดงในรูป), <strong>M bit</strong> (ไม่แสดงในรูป)</li>
+</ul>
+<p><strong>นิยาม:</strong>
+<code>ws(k, t) = { pages p ที่ p ถูกอ้างถึงใน k memory references ล่าสุด ณ เวลา t }</code> (k = <strong>WS window size</strong>)</p>
+<h3 id="223-อัลกอริทึม-working-set-ทำงานยังไง-สไลด์-5253">22.3 อัลกอริทึม working set ทำงานยังไง? <span class="slide-ref">สไลด์ 52–53</span></h3>
+<p class="core"><span class="core-tag">แก่น</span><strong>ทุก clock interrupt scan ตาราง — R = 1 อัปเดตเวลา, R = 0 คำนวณ age ถ้าเกิน threshold เอาออก — ปัญหาคือต้อง scan ทั้งตาราง</strong></p>
+<p><img loading="lazy" src="diagrams/L4-09-working-set.png" alt="Working set algorithm" /></p>
+<ul>
+<li><strong>R = 1?</strong> → เขียน <strong>Current Virtual Time (CVT)</strong> ลง <strong>Time of Last Use</strong></li>
+<li><strong>R = 0?</strong> → ถ้า <strong>CVT − Time of Last Use (age) &gt; Threshold (τ)</strong> → <strong>out!</strong></li>
+<li>ไม่งั้น → ดูว่ามีตัวอื่นไหม แล้ว evict ตัวที่ <strong>เก่าสุด (R = 0)</strong></li>
+<li>ถ้า <strong>ทุกตัวอยู่ใน WS (R = 1 หมด)</strong> → <strong>สุ่ม</strong> โดยควรเลือกตัว <strong>clean (M = 0)</strong></li>
+<li>มี candidate ≥ 1 → evict candidate ที่ <strong>age สูงสุด</strong></li>
+<li>ไม่มี candidate → evict <strong>page ที่เก่าที่สุดใน working set</strong></li>
+<li><strong>ปัญหาของ WS algorithm:</strong> ต้อง <strong>scan ทั้งตาราง</strong></li>
+</ul>
+<p><strong>รูปสไลด์ 52</strong> — CVT = <strong>2204</strong>, Time of last use / R ของแต่ละ page: 2084/1, 2003/1, 1980/1, <strong>1213/0</strong>, 2014/1, 2020/1, 2032/1, <strong>1620/0</strong> (สไลด์ 52 ไม่ได้ระบุค่า τ)</p>
+<p><strong>ตัวอย่างคำนวณ สไลด์ 53</strong> — CVT = <strong>2204</strong>, Threshold = <strong>700</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Time of last use (ก่อน)</th>
+<th>R</th>
+<th>คำนวณ</th>
+<th>ผล</th>
+<th>Time of last use (หลัง)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1213</td>
+<td>0</td>
+<td>age = 2204 − 1213 = <strong>991</strong> &gt; 700</td>
+<td><strong>page to remove</strong></td>
+<td>1213</td>
+</tr>
+<tr>
+<td>2014</td>
+<td>1</td>
+<td>R = 1 → เขียน CVT</td>
+<td>อยู่ใน WS</td>
+<td><strong>2204</strong></td>
+</tr>
+<tr>
+<td>2020</td>
+<td>1</td>
+<td>R = 1 → เขียน CVT</td>
+<td>อยู่ใน WS</td>
+<td><strong>2204</strong></td>
+</tr>
+<tr>
+<td>2032</td>
+<td>1</td>
+<td>R = 1 → เขียน CVT</td>
+<td>อยู่ใน WS</td>
+<td><strong>2204</strong></td>
+</tr>
+<tr>
+<td>1620</td>
+<td>0</td>
+<td>age = 2204 − 1620 = <strong>584</strong> ≤ 700</td>
+<td>ยังอยู่ (เป็น candidate)</td>
+<td>1620</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="callout">
+<p>✔ ตรวจด้วย python: age 991 และ 584 ตรงกับผลในรูป (ตัว 1213 ถูกชี้ว่า &quot;Page to remove&quot;)</p>
+</blockquote>
+<blockquote class="callout">
+<p class="c-warn">⚠️ สไลด์ 53 มีข้อความ <strong>ซ้ำกับสไลด์ 52 ทุกบรรทัด</strong> ต่างกันแค่รูปตัวอย่าง (threshold = 700)</p>
+</blockquote>
+<hr />
+<h2 id="23-ตารางสรุปอัลกอริทึมทั้งหมด-สไลด์-54">23. ตารางสรุปอัลกอริทึมทั้งหมด <span class="slide-ref">สไลด์ 54</span></h2>
+<p class="core"><span class="core-tag">แก่น</span><strong>Optimal ใช้เป็น benchmark, LRU ดีแต่ทำยาก, Aging ประมาณ LRU ได้ดี, WSClock ดีและมีประสิทธิภาพ, FIFO อาจโยน page สำคัญทิ้ง</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Comment (ตามสไลด์)</th>
+<th>แปลสั้น ๆ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Optimal</strong></td>
+<td>Not implementable, but useful as a benchmark</td>
+<td>ทำจริงไม่ได้ แต่ใช้เป็นมาตรฐานเทียบ</td>
+</tr>
+<tr>
+<td><strong>NRU</strong></td>
+<td>Very crude approximation of LRU</td>
+<td>ประมาณ LRU แบบหยาบมาก</td>
+</tr>
+<tr>
+<td><strong>FIFO</strong></td>
+<td>Might throw out important pages</td>
+<td>อาจโยน page สำคัญทิ้ง</td>
+</tr>
+<tr>
+<td><strong>Second chance</strong></td>
+<td>Big improvement over FIFO</td>
+<td>ดีกว่า FIFO มาก</td>
+</tr>
+<tr>
+<td><strong>Clock</strong></td>
+<td>Realistic</td>
+<td>ใช้งานจริงได้</td>
+</tr>
+<tr>
+<td><strong>LRU</strong></td>
+<td>Excellent, but difficult to implement exactly</td>
+<td>ดีเยี่ยม แต่ทำให้ตรงเป๊ะยาก</td>
+</tr>
+<tr>
+<td><strong>NFU</strong></td>
+<td>Fairly crude approximation to LRU</td>
+<td>ประมาณ LRU ค่อนข้างหยาบ</td>
+</tr>
+<tr>
+<td><strong>Aging</strong></td>
+<td>Efficient algorithm that approximates LRU well</td>
+<td>มีประสิทธิภาพ ประมาณ LRU ได้ดี</td>
+</tr>
+<tr>
+<td><strong>Working set</strong></td>
+<td>Somewhat expensive to implement</td>
+<td>ค่อนข้างแพงในการ implement</td>
+</tr>
+<tr>
+<td><strong>WSClock</strong></td>
+<td>Good efficient algorithm</td>
+<td>ดีและมีประสิทธิภาพ</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="คำศัพท์สำคัญ">คำศัพท์สำคัญ</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>คำศัพท์</th>
+<th>ความหมาย</th>
+<th>จำง่าย ๆ ว่า</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory manager</td>
+<td>ส่วนของ OS ที่ track / allocate / deallocate memory</td>
+<td>ผู้จัดสรรที่นั่ง</td>
+</tr>
+<tr>
+<td>Abstraction</td>
+<td>ชั้นคั่นกลางที่ทำให้ 2 ฝั่งไม่ต้องรู้รายละเอียดกัน</td>
+<td>ล่าม</td>
+</tr>
+<tr>
+<td>Absolute address</td>
+<td>address ในโปรแกรม = ตำแหน่งจริงใน RAM</td>
+<td>ไม่มีการแปล</td>
+</tr>
+<tr>
+<td>Address space</td>
+<td>ชุด address ที่ process หนึ่งใช้ได้</td>
+<td>&quot;บ้าน&quot; ของ process</td>
+</tr>
+<tr>
+<td>Base register</td>
+<td>เก็บ physical address ที่โปรแกรมเริ่ม</td>
+<td>ตัวบวก</td>
+</tr>
+<tr>
+<td>Limit register</td>
+<td>เก็บความยาวโปรแกรม</td>
+<td>รั้วกั้น</td>
+</tr>
+<tr>
+<td>Swapping</td>
+<td>เอา process ทั้งตัวเข้า-ออกระหว่าง memory กับ disk</td>
+<td>ยกทั้งคนเข้าออกห้อง</td>
+</tr>
+<tr>
+<td>Hole</td>
+<td>ช่องว่างใน memory</td>
+<td>ที่จอดรถว่าง</td>
+</tr>
+<tr>
+<td>Memory compaction</td>
+<td>ย้าย process ลงล่างรวม hole เป็นก้อนเดียว</td>
+<td>เลื่อนรถชิดกัน — เปลือง CPU</td>
+</tr>
+<tr>
+<td>Allocation unit</td>
+<td>หน่วยย่อยของ memory ที่ bitmap ใช้ 1 บิตแทน</td>
+<td>1 ช่อง = 1 บิต</td>
+</tr>
+<tr>
+<td>Virtual address</td>
+<td>address ที่โปรแกรมสร้าง</td>
+<td>ยังไม่ใช่ที่อยู่จริง</td>
+</tr>
+<tr>
+<td>MMU</td>
+<td>hardware แปลง virtual → physical</td>
+<td>เครื่องแปลที่อยู่</td>
+</tr>
+<tr>
+<td>Page / Page frame</td>
+<td>หน่วยขนาดคงที่ใน virtual / physical</td>
+<td>page = ฝั่งโปรแกรม, frame = ฝั่ง RAM</td>
+</tr>
+<tr>
+<td>Page table</td>
+<td>ตาราง map page → frame + bit สถานะ</td>
+<td>สมุดที่อยู่</td>
+</tr>
+<tr>
+<td>Present/absent bit</td>
+<td>1 = อยู่ใน memory, 0 = ไม่อยู่</td>
+<td>ไฟบอกว่ามีคนอยู่บ้าน</td>
+</tr>
+<tr>
+<td>Dirty bit (Modified)</td>
+<td>1 = ถูกแก้ ต้องเขียนลง disk</td>
+<td>สกปรกแล้วต้องล้าง</td>
+</tr>
+<tr>
+<td>Page fault</td>
+<td>trap เมื่ออ้าง page ที่ไม่อยู่ใน memory</td>
+<td>ไปหาแล้วไม่เจอ ต้องไปเอามา</td>
+</tr>
+<tr>
+<td>TLB</td>
+<td>hardware เล็กใน MMU เก็บ mapping ที่ใช้บ่อย (associative memory)</td>
+<td>โพสต์อิทเบอร์ที่ใช้บ่อย</td>
+</tr>
+<tr>
+<td>Protection fault</td>
+<td>เจอใน TLB แต่การเข้าถึงขัดกับ protection bits</td>
+<td>ไม่มีสิทธิ์</td>
+</tr>
+<tr>
+<td>Multilevel page table</td>
+<td>แบ่ง page table เป็นชั้น (PT1, PT2)</td>
+<td>สารบัญซ้อนสารบัญ</td>
+</tr>
+<tr>
+<td>Inverted page table</td>
+<td>1 entry ต่อ page frame จริง</td>
+<td>ตารางเล็ก แต่ค้นยาก</td>
+</tr>
+<tr>
+<td>R bit / M bit</td>
+<td>Referenced / Modified</td>
+<td>ถูกใช้ / ถูกแก้</td>
+</tr>
+<tr>
+<td>Working set</td>
+<td>ชุด page ที่ process กำลังใช้</td>
+<td>ของบนโต๊ะตอนนี้</td>
+</tr>
+<tr>
+<td>Demand paging</td>
+<td>เริ่ม 0 page โหลดเมื่อต้องใช้</td>
+<td>สั่งเมื่อหิว</td>
+</tr>
+<tr>
+<td>Prepaging</td>
+<td>โหลด working set ก่อนให้ process รัน</td>
+<td>เตรียมของก่อนเริ่มงาน</td>
+</tr>
+<tr>
+<td>Locality of reference</td>
+<td>แต่ละช่วงใช้ page แค่ส่วนน้อย</td>
+<td>ใช้ของซ้ำ ๆ ไม่กี่ชิ้น</td>
+</tr>
+<tr>
+<td>Thrashing</td>
+<td>page fault ทุกไม่กี่คำสั่ง</td>
+<td>วุ่นแต่ขนของเข้าออก ไม่ได้ทำงาน</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</h2>
+<ul>
+<li><strong>Memory hierarchy:</strong> cache (MB, เร็ว แพง volatile) → RAM (GB, volatile) → disk/SSD (TB, ช้า ถูก non-volatile)</li>
+<li><strong>Memory manager:</strong> manage, keep track, allocate, deallocate</li>
+<li><strong>ไม่มี abstraction:</strong> process เดียว, address absolute, ทับ OS ได้, รันหลายโปรแกรมยาก</li>
+<li><strong>Base/limit:</strong> physical = address + base; address ≥ limit → fault | ข้อเสีย: บวก+เทียบทุก reference (การบวกช้าเพราะ carry-propagation)</li>
+<li><strong>Swapping:</strong> เกิด hole → compaction (เปลือง CPU) | data segment &amp; stack โตได้ → เผื่อ room for growth</li>
+<li><strong>Bitmap</strong> (1 = ใช้, 0 = ว่าง) หา 0 ติดกัน k ตัวช้า | <strong>List</strong> (P/H, start, length) ต้องรวม hole 4 กรณี</li>
+<li><strong>First / Next / Best / Worst / Quick fit</strong> — best fit ช้ากว่า first fit; quick fit หาเร็วแต่ merge แพง; hole list เรียงตามขนาด → first = best, next fit pointless</li>
+<li><strong>Paging 4 KB:</strong> page # = addr ÷ 4096, offset = addr mod 4096, physical = frame × 4096 + offset
+<ul>
+<li>8192 → 24576 | 20500 → 12308 | 32780 → page 8 = <strong>page fault</strong> | 8196 → 24580</li>
+</ul>
+</li>
+<li><strong>Page table entry 6 fields:</strong> frame #, present/absent, protection (1 = read only), modified, referenced, caching disabled</li>
+<li><strong>TLB:</strong> ใน MMU, เทียบ parallel; hit → frame ทันที, ผิด protection → protection fault, miss → lookup แล้วแทน entry</li>
+<li><strong>Multilevel:</strong> 32 บิต = PT1 10 + PT2 10 + offset 12; Physical = PT1 × 4M + PT2 × 4K + offset; <strong>0x00403004 → PT1 1, PT2 3, offset 4 → 4206596</strong></li>
+<li><strong>Inverted:</strong> 1 entry ต่อ frame (1 GB / 4 KB = 2^18) แต่ต้องค้นทั้งตาราง</li>
+<li><strong>Page replacement:</strong> เป้าหมาย lowest page fault rate; local vs global</li>
+<li><strong>Reference string 7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1 (3 frames):</strong> Optimal <strong>9</strong> faults, LRU <strong>12</strong>, FIFO <strong>15</strong></li>
+<li><strong>NRU class:</strong> 0 = (R0, M0) → 3 = (R1, M1), evict class ต่ำสุด</li>
+<li><strong>Second-chance / Clock:</strong> R = 1 → clear + ให้โอกาส, R = 0 → evict</li>
+<li><strong>NFU:</strong> counter += R ทุก tick, evict ต่ำสุด, ปัญหา &quot;never forgets&quot; | <strong>Aging:</strong> shift ขวา แล้วใส่ R ซ้ายสุด</li>
+<li><strong>Working set:</strong> R = 1 → time = CVT; R = 0 และ age &gt; τ → out (ตัวอย่าง CVT 2204, τ 700: 1213 age 991 ถูกเอาออก, 1620 age 584 อยู่ต่อ)</li>
+</ul>
+<hr />
+<h2 id="คู่ที่มักสับสน">คู่ที่มักสับสน</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>ต่างกันตรงไหน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Page</td>
+<td>Page frame</td>
+<td>page อยู่ฝั่ง <strong>virtual</strong>, frame อยู่ฝั่ง <strong>physical</strong> — ขนาดเท่ากัน จำนวนไม่เท่ากัน</td>
+</tr>
+<tr>
+<td>Virtual address</td>
+<td>Physical address</td>
+<td>virtual = โปรแกรมสร้าง → ผ่าน MMU</td>
+</tr>
+<tr>
+<td>Base register</td>
+<td>Limit register</td>
+<td>base = <strong>จุดเริ่ม</strong> (เอาไปบวก)</td>
+</tr>
+<tr>
+<td>Page fault</td>
+<td>Protection fault</td>
+<td>page fault = page <strong>ไม่อยู่ใน memory</strong></td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td>Linked list</td>
+<td>bitmap = 1 บิตต่อ unit, หา k units ช้า</td>
+</tr>
+<tr>
+<td>First fit</td>
+<td>Next fit</td>
+<td>first เริ่มค้นจาก <strong>ต้น list</strong> ทุกครั้ง</td>
+</tr>
+<tr>
+<td>Best fit</td>
+<td>Worst fit</td>
+<td>best = hole <strong>เล็กสุดที่พอ</strong> (ค้นทั้ง list, ช้า)</td>
+</tr>
+<tr>
+<td>Swapping</td>
+<td>Paging (virtual memory)</td>
+<td>swapping ย้าย process <strong>ทั้งตัว</strong></td>
+</tr>
+<tr>
+<td>Multilevel page table</td>
+<td>Inverted page table</td>
+<td>multilevel = index ด้วย PT1 → PT2</td>
+</tr>
+<tr>
+<td>NRU</td>
+<td>LRU</td>
+<td>NRU ดูแค่ <strong>clock interval ล่าสุด</strong> (R, M)</td>
+</tr>
+<tr>
+<td>NFU</td>
+<td>Aging</td>
+<td>NFU <strong>บวก R</strong> ที่ขวา → ไม่เคยลืม</td>
+</tr>
+<tr>
+<td>Second-chance</td>
+<td>Clock</td>
+<td>second-chance <strong>ย้าย page ไปท้าย list</strong></td>
+</tr>
+<tr>
+<td>FIFO</td>
+<td>LRU</td>
+<td>FIFO ดูว่า <strong>เข้ามาก่อน</strong></td>
+</tr>
+<tr>
+<td>Demand paging</td>
+<td>Prepaging</td>
+<td>demand = เริ่ม 0 page โหลด <strong>เมื่อต้องใช้</strong></td>
+</tr>
+<tr>
+<td>Protection bit = 1</td>
+<td>Protection bit = 0</td>
+<td>1 = <strong>read only</strong></td>
+</tr>
+<tr>
+<td>Local replacement</td>
+<td>Global replacement</td>
+<td>evict page ของ <strong>process เดียวกัน</strong></td>
+</tr>
+</tbody>
+</table></div>
+</article>
+    <div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong><p>Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้</p></div><div class="end-btns"><a class="btn btn-primary" href="quiz.html">🧠 Quiz Pro</a></div></div>
+    <nav class="pager"><a class="pg prev" href="../lecture3/index.html"><small>← บทก่อนหน้า</small><span>Lecture 3 — CPU Scheduling</span></a><a class="pg next" href="../lecture10/index.html"><small>บทถัดไป →</small><span>Lecture 10 – Shell Script (+ Lab 10)</span></a></nav>
+  </main>
+  <aside class="otp" id="toc" aria-label="ในหน้านี้">
+    <div class="otp-inner">
+      <div class="otp-head"><span>ในหน้านี้</span><button type="button" class="otp-close" id="sheetClose" aria-label="ปิด">✕</button></div>
+      <ol><li><a href="#0-ตารางเรียนและหัวข้อวิชา-os-สไลด์-23">ตารางเรียนและหัวข้อวิชา OS</a></li><li><a href="#1-memory-hierarchy-คืออะไร-และ-memory-manager-ทำอะไร-สไลด์-56">Memory hierarchy คืออะไร และ memory manager ทำอะไร?</a></li><li><a href="#2-ถ้า-ไม่มี-memory-abstraction-จะเกิดอะไรขึ้น-สไลด์-79">ถ้า &quot;ไม่มี memory abstraction&quot; จะเกิดอะไรขึ้น?</a></li><li><a href="#3-address-space-คืออะไร-สไลด์-10">Address space คืออะไร?</a></li><li><a href="#4-base-และ-limit-registers-ทำงานยังไง-สไลด์-1112">Base และ Limit registers ทำงานยังไง?</a></li><li><a href="#5-swapping-คืออะไร-และสร้างปัญหาอะไร-สไลด์-1315">Swapping คืออะไร และสร้างปัญหาอะไร?</a></li><li><a href="#6-os-จำว่า-memory-ส่วนไหนว่างได้ยังไง-สไลด์-1617">OS จำว่า memory ส่วนไหนว่างได้ยังไง?</a></li><li><a href="#7-จะเลือก-hole-ไหนให้-process-ใหม่-สไลด์-1822">จะเลือก hole ไหนให้ process ใหม่?</a></li><li><a href="#8-virtual-memory-คืออะไร-และ-mmu-ทำหน้าที่อะไร-สไลด์-2325">Virtual memory คืออะไร และ MMU ทำหน้าที่อะไร?</a></li><li><a href="#9-paging-page-กับ-page-frame-แปลง-address-ยังไง-สไลด์-2627">Paging: page กับ page frame แปลง address ยังไง?</a></li><li><a href="#10-page-table-หน้าตาเป็นยังไง-และแปลง-address-ทีละขั้นยังไง-สไลด์-2830">Page table หน้าตาเป็นยังไง และแปลง address ทีละขั้นยังไง?</a></li><li><a href="#11-tlb-ช่วยให้แปลง-address-เร็วขึ้นยังไง-สไลด์-3133">TLB ช่วยให้แปลง address เร็วขึ้นยังไง?</a></li><li><a href="#12-ถ้า-address-space-ใหญ่มาก-จะเก็บ-page-table-ยังไง-สไลด์-3438">ถ้า address space ใหญ่มาก จะเก็บ page table ยังไง?</a></li><li><a href="#13-page-replacement-ทำไมต้องมี-และมีอัลกอริทึมอะไรบ้าง-สไลด์-3940">Page replacement: ทำไมต้องมี และมีอัลกอริทึมอะไรบ้าง?</a></li><li><a href="#14-optimal-สไลด์-41">Optimal</a></li><li><a href="#15-nru-not-recently-used-สไลด์-4243">NRU (Not Recently Used)</a></li><li><a href="#16-fifo-first-in-first-out-สไลด์-44">FIFO (First-In, First-Out)</a></li><li><a href="#17-second-chance-สไลด์-45">Second-Chance</a></li><li><a href="#18-clock-สไลด์-46">Clock</a></li><li><a href="#19-lru-least-recently-used-สไลด์-47">LRU (Least Recently Used)</a></li><li><a href="#20-nfu-not-frequently-used-สไลด์-48">NFU (Not Frequently Used)</a></li><li><a href="#21-aging-สไลด์-49">Aging</a></li><li><a href="#22-working-set-สไลด์-5053">Working Set</a></li><li><a href="#23-ตารางสรุปอัลกอริทึมทั้งหมด-สไลด์-54">ตารางสรุปอัลกอริทึมทั้งหมด</a></li><li><a href="#คำศัพท์สำคัญ">คำศัพท์สำคัญ</a></li><li><a href="#สรุปท้ายบท-จุดที่มักออกสอบ">สรุปท้ายบท / จุดที่มักออกสอบ</a></li><li><a href="#คู่ที่มักสับสน">คู่ที่มักสับสน</a></li></ol>
+      
+    </div>
+  </aside>
+</div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<nav class="bottombar"><button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button><a href="short.html">⚡ <span>สรุปสั้น</span></a><a href="quiz.html">🧠 <span>แบบทดสอบ</span></a><button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>
+<footer class="foot">สรุปโดย Claude จากสไลด์ประกอบการเรียน · Mahidol ICT ปี 2<span class="credit">ภาพพื้นหลังจาก Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mossy_branches_and_fern_leaves_(Unsplash).jpg">ป่า — Matthew Smith (CC0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Breathtaking_beauty_of_Dzukou_Valley_in_Manipur-Nagaland_border_(edit).jpg">ภูเขา — Samudra Bikash Hazarika (CC BY-SA 4.0)</a> · <a href="https://commons.wikimedia.org/wiki/File:Fern_Leaves_(Unsplash).jpg">ใบเฟิร์น — Becky Phan (CC0)</a></span></footer>
+<script>window.SN_BASE = "../../";</script>
+<script>window.SN_TRACK = {"k": "architecture/lecture4", "u": "architecture/lecture4/index.html", "t": "Lecture 4 — Memory Management", "s": "ITDS211"};</script>
+<script src="../../assets/app.js"></script>
+
+</body>
+</html>

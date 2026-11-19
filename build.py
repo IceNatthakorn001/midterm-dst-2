@@ -5,6 +5,7 @@ Output: ./docs  (served by GitHub Pages)
 """
 import html
 import json
+import posixpath
 import re
 import shutil
 from pathlib import Path
@@ -50,7 +51,7 @@ SUBJECTS = [
         "icon": "🖥️",
         "accent": "#b0552c",
         "order": ["Chapter00", "Chapter01", "Chapter02", "Chapter03", "Chapter04", "Chapter05",
-                  "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2", "Lecture3"],
+                  "Chapter06", "Chapter07", "Chapter08", "Lecture1", "Lecture2", "Lecture3", "Lecture4", "Lecture10"],
     },
     {
         "slug": "systemlab",
@@ -60,7 +61,7 @@ SUBJECTS = [
         "th": "ปฏิบัติการระบบคอมพิวเตอร์ (Linux)",
         "icon": "🐧",
         "accent": "#3b6787",
-        "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"],
+        "order": ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10", "L11", "L12", "L13", "L14"],
     },
     {
         "slug": "web",
@@ -70,7 +71,11 @@ SUBJECTS = [
         "th": "เทคโนโลยีเว็บและการประยุกต์ (HTML/CSS/JavaScript)",
         "icon": "💻",
         "accent": "#94496a",
-        "order": None,
+        # explicit teaching order (a plain name sort would put L10 before L2, ECMAScript first)
+        "order": ["L1", "L2", "L3", "L4", "L6", "L7", "ECMAScript", "L9", "L10", "L11", "L12", "L13"],
+        # lessons whose quizzes live in a separate Quiz-* folder (published as their own pages)
+        "quiz_dirs": {"L6": "Quiz-L6-JS-Part1", "L7": "Quiz-L7-JS-Part2", "ECMAScript": "Quiz-ECMAScript"},
+        "badges": {"ECMAScript": ("ES", "เสริม")},
     },
 ]
 
@@ -190,13 +195,23 @@ def quiz_bar(links):
     return f'<nav class="snq-bar"><a class="snq-home" href="{links[-1][0]}" aria-label="หน้าแรก">{LEAF}</a>{items}</nav>'
 
 
-def inject_quiz(doc, bar, depth):
+def inject_quiz(doc, bar, depth, subj=None):
+    """classic quizzes get quiz.css (re-skins the old template); quiz-pro pages already follow the
+    site palette when <html class="snq">, so they only get the bar + quizpro.css + the review hand-off"""
     base = "../" * depth
-    head = (f'{THEME_BOOT}{FONTS}<link rel="stylesheet" href="{base}assets/quiz.css">'
+    pro = is_quiz_pro(doc)
+    head = (f'{THEME_BOOT}{FONTS}<link rel="stylesheet" href="{base}assets/{"quizpro.css" if pro else "quiz.css"}">'
             f'<link rel="icon" href="{ICON}">')
+    if pro and subj:
+        head += f'<style>:root{{--sn-accent:{subj["accent"]}}}</style>'
     doc = doc.replace("</head>", head + "\n</head>", 1)
-    doc = doc.replace("<html", '<html class="snq"', 1)
+    doc = doc.replace("<html", '<html class="snq snq-pro"' if pro else '<html class="snq"', 1)
     doc = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, doc, count=1)
+    if pro:  # "ทบทวนที่ถึงรอบ" hand-off between quizzes (review.html) — assets/srs.js
+        tail = (f'<script>window.SN_BASE = {jsn(base)};</script><script src="{base}assets/srs-catalog.js"></script>'
+                f'<script src="{base}assets/srs.js"></script>\n')
+        i = doc.rfind("</body>")
+        doc = doc[:i] + tail + doc[i:] if i >= 0 else doc + tail
     if 'name="viewport"' not in doc:
         doc = doc.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
     return doc
@@ -208,7 +223,28 @@ def inject_bar(doc, bar, margin_fix=False):
     doc = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + "\n" + bar, doc, count=1)
     if 'name="viewport"' not in doc:
         doc = doc.replace("<head>", '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1)
+    if 'rel="icon"' not in doc:  # otherwise the browser asks for /favicon.ico (404)
+        doc = doc.replace("</head>", f'<link rel="icon" href="{ICON}">\n</head>', 1)
     return doc
+
+
+def srs_entry(doc, subj, label, url):
+    """one quiz-pro set in the cross-quiz review catalog (assets/srs-catalog.js)"""
+    meta = quiz_bank_meta(doc) or {}
+    return {"id": meta.get("id") or url, "t": meta.get("title") or label, "n": meta.get("n", 0),
+            "s": subj["slug"], "c": subj["code"], "i": subj["icon"], "l": label, "u": url}
+
+
+SRS_SCRIPTS = '<script src="{b}assets/srs-catalog.js"></script><script src="{b}assets/srs.js"></script>'
+
+
+def srs_box(href, subj=""):
+    """'ทบทวนที่ถึงรอบ' banner — filled in by assets/srs.js from localStorage"""
+    return (f'<a class="srs-due" id="srsDue" href="{href}" data-subj="{subj}" hidden><span class="srs-ic">↻</span>'
+            '<span class="srs-tx"><small>ทบทวนตามรอบ · Quiz Pro</small><strong></strong></span><b class="srs-n"></b></a>')
+
+
+srs_catalog: list = []
 
 
 # ---------------------------------------------------------------- content
@@ -243,6 +279,23 @@ def lesson_desc(md_text: str, limit: int = 150) -> str:
     return text if len(text) <= limit else text[:limit].rstrip(" ,·(") + "…"
 
 
+def is_quiz_pro(doc: str) -> bool:
+    """quiz-pro pages (skills/quiztest/template_pro.html) mount into <main id="qp-app">"""
+    return 'id="qp-app"' in doc
+
+
+def quiz_bank_meta(doc: str):
+    """id / title of a quiz-pro bank, for the cross-quiz review page"""
+    m = re.search(r'const BANK = (\{.*?\});\s*\n', doc, re.S)
+    if not m:
+        return None
+    try:
+        b = json.loads(m.group(1))
+    except ValueError:
+        return None
+    return {"id": b.get("id"), "title": html.unescape(b.get("title", "")), "n": len(b.get("questions", []))}
+
+
 def find_lessons(subj):
     folders = [p for p in subj["dir"].iterdir() if p.is_dir()]
     if subj["order"]:
@@ -275,16 +328,25 @@ def find_lessons(subj):
             atitle = re.sub(r"<[^>]+>", "", am.group(1)).strip() if am else p.stem
             anims.append({"name": p.name, "title": atitle, "short": atitle.split(":")[0].strip(), "html": ah,
                           "heads": [re.sub(r"<[^>]+>", "", x).strip() for x in re.findall(r"<h2[^>]*>(.*?)</h2>", ah, re.S)]})
-        quiz_list = [(k, n, l) for k, n, l, src in (
-            ("quiz", "quiz.html", "ชุดที่ 1", quizzes), ("quiz2", "quiz2.html", "ชุดที่ 2", quizzes2),
-            ("quiz3", "quiz3.html", "ชุดที่ 3", quizzes3)) if src]
+        quiz_list = []
+        for key, out_name, lbl, src in (("quiz", "quiz.html", "ชุดที่ 1", quizzes), ("quiz2", "quiz2.html", "ชุดที่ 2", quizzes2),
+                                        ("quiz3", "quiz3.html", "ชุดที่ 3", quizzes3)):
+            if src:
+                quiz_list.append({"key": key, "src": src[0], "out": out_name, "href": out_name, "label": lbl,
+                                  "pro": is_quiz_pro(src[0].read_text(encoding="utf-8")), "own": True})
+        qdir = (subj.get("quiz_dirs") or {}).get(f.name)
+        if qdir and (subj["dir"] / qdir).is_dir():  # quizzes published from a separate Quiz-* folder
+            d = subj["dir"] / qdir
+            for out_name, lbl, pat in (("index.html", "ชุดที่ 1", "quiz-*.html"), ("quiz2.html", "ชุดที่ 2", "quiz2-*.html")):
+                src = sorted(d.glob(pat))
+                if src:
+                    quiz_list.append({"key": None, "src": src[0], "out": None, "href": f"../{slug_path(qdir)}/{out_name}",
+                                      "label": lbl, "pro": is_quiz_pro(src[0].read_text(encoding="utf-8")), "own": False})
         short_text = short.read_text(encoding="utf-8") if short.exists() else None
         lessons.append({"folder": f, "slug": slug_path(f.name), "label": f.name, "title": title, "anims": anims,
                         "desc": lesson_desc(text), "mins": read_minutes(text),
                         "short_mins": read_minutes(short_text) if short_text else 0,
-                        "md": text, "quiz": quizzes[0] if quizzes else None,
-                        "quiz2": quizzes2[0] if quizzes2 else None,
-                        "quiz3": quizzes3[0] if quizzes3 else None, "quizzes": quiz_list,
+                        "md": text, "quizzes": quiz_list, "badge": (subj.get("badges") or {}).get(f.name),
                         "short": short_text})
     return lessons
 
@@ -324,6 +386,10 @@ def render_lesson(lesson, key="md"):
     _slug_seen = {}
     text = lesson[key]
     text = re.sub(r"^#\s+.+\n", "", text, count=1)  # title rendered in the header
+    # links between summaries (../Ch1-Intro/สรุป-….md, สรุปสั้นๆ.md) -> the published pages
+    text = re.sub(r"\]\(\.\./([^/)]+)/สรุป[^)]*?\.md(#[^)]*)?\)",
+                  lambda m: f"](../{slug_path(m.group(1))}/index.html{m.group(2) or ''})", text)
+    text = re.sub(r"\]\(สรุปสั้นๆ\.md\)", "](short.html)", text)
     # consecutive "> text" lines are separate notes in the source; keep them as separate paragraphs
     text = re.sub(r"^(>[ \t]*\S.*)\n(?=>[ \t]*[^\s\-*|\d>])", r"\1\n>\n", text, flags=re.M)
     body = md.render(text)
@@ -354,14 +420,25 @@ SKIP_TOPICS = ("คำศัพท์", "สรุปท้ายบท", "ค�
                "Chapter Overview", "Course Logistics", "Summary")
 
 
+def qhref(prefix, q):
+    return posixpath.normpath(prefix + q["href"])
+
+
+def qname(q):
+    """button label: quiz-pro sets are marked so they read differently from the classic quizzes"""
+    return ("🧠 Quiz Pro", "Quiz Pro") if q["pro"] else ("📝 แบบทดสอบ", "แบบทดสอบ")
+
+
 def quiz_menu(prefix, quizzes, data_l, cls="qm"):
     """one 'แบบทดสอบ' control instead of one button per quiz set"""
     if not quizzes:
         return ""
     if len(quizzes) == 1:
-        k, name, label = quizzes[0]
-        return f'<a class="btn btn-ghost" href="{prefix}{name}" data-l="{data_l}">📝 <span class="qm-l">แบบทดสอบ</span></a>'
-    links = "".join(f'<a href="{prefix}{name}" data-l="{data_l}">📝 แบบทดสอบ{label}</a>' for k, name, label in quizzes)
+        q = quizzes[0]
+        icon, word = qname(q)
+        return (f'<a class="btn btn-ghost{" btn-pro" if q["pro"] else ""}" href="{qhref(prefix, q)}" data-l="{data_l}">'
+                f'{icon.split()[0]} <span class="qm-l">{word}</span></a>')
+    links = "".join(f'<a href="{qhref(prefix, q)}" data-l="{data_l}">{qname(q)[0]} {q["label"]}</a>' for q in quizzes)
     return (f'<details class="{cls}"><summary class="btn btn-ghost">📝 <span class="qm-l">แบบทดสอบ</span> <b>{len(quizzes)}</b>'
             f'<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
             f'</summary><div class="qm-pop">{links}</div></details>')
@@ -373,11 +450,11 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
     is_arch = slug == "architecture"
     if is_arch:
         groups = [("arch", "🖥️", "ส่วนที่ 1 · Computer Architecture", "Chapter 00–08 · ฮาร์ดแวร์ ตัวเลข หน่วยความจำ I/O pipeline"),
-                  ("os", "⚙️", "ส่วนที่ 2 · Operating Systems", "Lecture 1–3 · OS, Process, CPU Scheduling")]
+                  ("os", "⚙️", "ส่วนที่ 2 · Operating Systems", "Lecture 1–4, 10 · OS, Process, CPU Scheduling, Memory Management, Shell script")]
     else:
         groups = [("les", "📖", "สรุปรายบท", f"{len(lessons)} บท เรียงตามลำดับที่เรียน")]
     groups += [("review", "🎯", "รีวิวก่อนสอบ", "สรุปรวมหลายบท พร้อมโจทย์ฝึก"),
-               ("quiz", "📝", "แบบทดสอบ", "ชุดข้อสอบที่ไม่ผูกกับบทใดบทหนึ่ง"),
+               ("quiz", "📝", "แบบทดสอบ", "ชุดข้อสอบที่แยกโฟลเดอร์จากสรุป"),
                ("anim", "🎬", "แอนิเมชัน", "ดูการทำงานทีละขั้นแบบโต้ตอบได้")]
     data, cards = [], {g[0]: "" for g in groups}
     n_anim = sum(len(l["anims"]) for l in lessons) + len(anim_pages)
@@ -407,6 +484,8 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
         else:
             m = re.fullmatch(r"[A-Za-z]*\s*(\d+)", les["label"])  # L6 -> 06 (keeps gaps like a missing L5)
             num, small = (m.group(1).zfill(2) if m else f"{i:02d}"), "บท"
+            if les["badge"]:
+                num, small = les["badge"]
         topics = [(a, topic(t)) for a, t in les["toc"]]
         shown = [t for _, t in topics if t and not any(k in t for k in SKIP_TOPICS)][:4]
         s = les["slug"]
@@ -420,6 +499,10 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
         meta = [f"⏱ ~{les['mins']} นาที", f"{len(topics)} หัวข้อ"]
         if les["short"]:
             meta.append(f"สรุปสั้น ~{les['short_mins']} นาที")
+        if any(q["pro"] for q in les["quizzes"]):
+            meta.append('<b class="pro-tag" title="แบบทดสอบแบบใหม่: นึกเองก่อน · บอกความมั่นใจ · รอบแก้ตัว · ทวนตามรอบ">Quiz Pro</b>')
+        elif les["quizzes"]:
+            meta.append(f'<b class="q-tag">แบบทดสอบ {len(les["quizzes"])} ชุด</b>')
         cards[g] += card(g, s, small, num, short_title(les["title"]), f"{s}/index.html",
                          les["desc"] or " · ".join(shown), actions, extra,
                          "<span>" + "</span><span>".join(meta) + "</span>")
@@ -472,6 +555,7 @@ def subject_page(subj, lessons, nq, reviews, anim_pages, quizpages):
     </div>
   </section>
   <a class="continue" id="cont" hidden><span class="continue-play">▶</span><span><small>อ่านต่อจากครั้งก่อน</small><strong id="contTitle"></strong></span></a>
+  {srs_box("../review.html#s=" + slug, slug) if any(q["pro"] for l in lessons for q in l["quizzes"]) else ""}
   <div class="tools">
     <label class="searchbox"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="sq" type="search" placeholder="ค้นหาหัวข้อในวิชานี้…" autocomplete="off"><kbd>/</kbd></label>
     {tabs}
@@ -512,16 +596,20 @@ def lesson_page(subj, lessons, i, les, is_short, body, toc):
     pager += (f'<a class="pg next" href="../{next_l["slug"]}/{nb(next_l)}"><small>บทถัดไป →</small>'
               f'<span>{esc(next_l["title"])}</span></a>' if next_l else "<span></span>")
     pager += "</nav>"
-    quiz_links = "".join(f'<a class="btn btn-primary" href="{n}">📝 แบบทดสอบ{lbl if len(les["quizzes"]) > 1 else ""}</a>'
-                         for k, n, lbl in les["quizzes"])
+    multi = len(les["quizzes"]) > 1
+    quiz_links = "".join(f'<a class="btn btn-primary" href="{qhref("", q)}">{qname(q)[0]}{" " + q["label"] if multi else ""}</a>'
+                         for q in les["quizzes"])
+    any_pro = any(q["pro"] for q in les["quizzes"])
+    cta_note = ("Quiz Pro: เขียนสิ่งที่จำได้ก่อน ตอบแล้วบอกความมั่นใจ ข้อที่ผิดวนกลับมาให้แก้ตัว และระบบนัดวันทวนให้"
+                if any_pro else "ข้อสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที ยิ่งลองตอบเองก่อนยิ่งจำได้ดี")
     quiz_end = (f'<div class="end-cta"><div><strong>อ่านจบแล้ว ลองทดสอบความเข้าใจ</strong>'
-                f'<p>ข้อสอบ 4 ตัวเลือก เฉลยพร้อมเหตุผลทันที ยิ่งลองตอบเองก่อนยิ่งจำได้ดี</p></div>'
+                f'<p>{cta_note}</p></div>'
                 f'<div class="end-btns">{quiz_links}</div></div>' if les["quizzes"] else "")
     other = ("index.html" if is_short else "short.html") if les["short"] else ""
     bottom = (f'<nav class="bottombar">'
               f'<button type="button" id="sheetBtn">☰ <span>สารบัญ</span></button>'
               + (f'<a href="{other}">{"📖 <span>ฉบับเต็ม</span>" if is_short else "⚡ <span>สรุปสั้น</span>"}</a>' if other else "")
-              + (f'<a href="{les["quizzes"][0][1]}">📝 <span>แบบทดสอบ</span></a>' if les["quizzes"] else "")
+              + (f'<a href="{qhref("", les["quizzes"][0])}">{qname(les["quizzes"][0])[0].split()[0]} <span>แบบทดสอบ</span></a>' if les["quizzes"] else "")
               + '<button type="button" id="topBtn">↑ <span>บนสุด</span></button></nav>')
     title = ("⚡ สรุปสั้น · " if is_short else "") + les["title"]
     content = f"""
@@ -569,6 +657,7 @@ def build():
     (OUT / ".nojekyll").write_text("")
 
     search_index = []
+    srs_catalog.clear()
     subject_cards = []
     home_lessons = {}
     for subj in SUBJECTS:
@@ -598,9 +687,14 @@ def build():
                 (ldir / ("short.html" if is_short else "index.html")).write_text(
                     lesson_page(subj, lessons, i, les, is_short, body, toc), encoding="utf-8")
 
-            for key, n, lbl in les["quizzes"]:
+            for q in les["quizzes"]:
+                if not q["own"]:
+                    continue
                 bar = quiz_bar([("index.html", "← กลับไปอ่านสรุป"), ("../index.html", code), ("../../index.html", "หน้าแรก")])
-                (ldir / n).write_text(inject_quiz(les[key].read_text(encoding="utf-8"), bar, 2), encoding="utf-8")
+                doc = q["src"].read_text(encoding="utf-8")
+                (ldir / q["out"]).write_text(inject_quiz(doc, bar, 2, subj), encoding="utf-8")
+                if q["pro"]:
+                    srs_catalog.append(srs_entry(doc, subj, les["label"], f"{subj['slug']}/{les['slug']}/{q['out']}"))
 
             search_index.append({"s": subj["code"], "t": short_title(les["title"]), "l": les["label"],
                                  "u": f"{subj['slug']}/{les['slug']}/index.html",
@@ -617,11 +711,15 @@ def build():
         for qp in quizpages:
             qdir = sdir / qp["slug"]
             qdir.mkdir(parents=True, exist_ok=True)
-            bar = quiz_bar([("../index.html", f"← {code}"), ("../../index.html", "หน้าแรก")])
+            back = next((l for l in lessons if (subj.get("quiz_dirs") or {}).get(l["label"]) == qp["label"]), None)
+            bar = quiz_bar(([(f"../{back['slug']}/index.html", f"← กลับไปอ่านสรุป {esc(back['label'])}"), ("../index.html", code)]
+                            if back else [("../index.html", f"← {code}")]) + [("../../index.html", "หน้าแรก")])
             q2files = sorted((subj["dir"] / qp["label"]).glob("quiz2-*.html"))
             qp["quiz2"] = bool(q2files)
             for out_name, text in [("index.html", qp["html"])] + [("quiz2.html", f.read_text(encoding="utf-8")) for f in q2files[:1]]:
-                (qdir / out_name).write_text(inject_quiz(text, bar, 2), encoding="utf-8")
+                (qdir / out_name).write_text(inject_quiz(text, bar, 2, subj), encoding="utf-8")
+                if is_quiz_pro(text):
+                    srs_catalog.append(srs_entry(text, subj, qp["label"], f"{subj['slug']}/{qp['slug']}/{out_name}"))
             qp["title"] = re.sub(r"^(Quiz:\s*|ข้อสอบจริง\s*)", "", qp["title"])
             search_index.append({"s": subj["code"], "t": qp["title"], "u": f"{subj['slug']}/{qp['slug']}/index.html", "h": []})
         for rv in reviews + anim_pages:
@@ -632,12 +730,13 @@ def build():
             search_index.append({"s": subj["code"], "t": rv["title"], "u": f"{subj['slug']}/{rv['slug']}/index.html",
                                  "h": rv["heads"]})
 
-        nq = sum(len(l["quizzes"]) for l in lessons) + sum(1 + qp["quiz2"] for qp in quizpages)
+        nq = sum(1 for l in lessons for q in l["quizzes"] if q["own"]) + sum(1 + qp["quiz2"] for qp in quizpages)
         sbody, sscripts = subject_page(subj, lessons, nq, reviews, anim_pages, quizpages)
         crumbs = f'<a href="../index.html">หน้าแรก</a><span>/</span><b>{esc(subj["code"])}</b>'
         (sdir / "index.html").write_text(page(f"{subj['code']} {subj['name']}", sbody, 1, subj["accent"],
                                               crumbs=crumbs, scripts=sscripts,
-                                              after='<script src="../assets/subject.js"></script>'), encoding="utf-8")
+                                              after=SRS_SCRIPTS.format(b="../") + '<script src="../assets/subject.js"></script>'),
+                                         encoding="utf-8")
         home_lessons[subj["slug"]] = [l["slug"] for l in lessons]
         meta = [f"{len(lessons)} บท" if lessons else f"{len(reviews)} รีวิว"] + ([f"{nq} แบบทดสอบ"] if nq else [])
         subject_cards.append(
@@ -659,11 +758,37 @@ def build():
     </div>
   </section>
   <a class="continue" id="cont" hidden><span class="continue-play">▶</span><span><small>อ่านต่อจากครั้งก่อน</small><strong id="contTitle"></strong></span></a>
+  {srs_box("review.html")}
   <h2 class="section-title">วิชาทั้งหมด</h2>
   <section class="subject-grid">{''.join(subject_cards)}</section>
 </main>"""
     scripts = (f"<script>window.SEARCH_INDEX = {jsn(search_index)};window.SN_LESSONS = {jsn(home_lessons)};</script>")
-    (OUT / "index.html").write_text(page("Study Notes · สรุปบทเรียน", home, 0, scripts=scripts), encoding="utf-8")
+    (OUT / "index.html").write_text(page("Study Notes · สรุปบทเรียน", home, 0, scripts=scripts,
+                                         after=SRS_SCRIPTS.format(b="")), encoding="utf-8")
+    (OUT / "assets" / "srs-catalog.js").write_text(
+        "// generated by build.py: every quiz-pro set on the site (id = localStorage key suffix)\n"
+        f"window.SN_SRS = {jsn(srs_catalog)};\n", encoding="utf-8")
+    review = f"""
+<main class="wrap review-page">
+  <section class="subject-hero">
+    <div class="big-icon">↻</div>
+    <div>
+      <div class="code">Quiz Pro · {len(srs_catalog)} ชุด</div>
+      <h1>ทบทวนที่ถึงรอบ</h1>
+      <p>รวมข้อที่ถึงกำหนดทวนวันนี้จาก Quiz Pro ทุกวิชา (นัดรอบแบบ Leitner 1 · 3 · 7 · 16 · 35 วัน เก็บในเบราว์เซอร์นี้)</p>
+    </div>
+  </section>
+  <section class="srs-panel">
+    <div class="srs-stats" id="srsTotal"></div>
+    <p class="srs-note" id="srsNote"></p>
+    <a class="btn btn-primary srs-start" id="srsStart" hidden>↻ <span>เริ่มทบทวนทั้งหมด</span></a>
+  </section>
+  <div id="srsList"></div>
+  <noscript><p>ต้องเปิด JavaScript เพื่อดูรอบทบทวน</p></noscript>
+</main>"""
+    (OUT / "review.html").write_text(page("ทบทวนที่ถึงรอบ · Study Notes", review, 0,
+                                          crumbs='<a href="index.html">หน้าแรก</a><span>/</span><b>ทบทวนที่ถึงรอบ</b>',
+                                          after=SRS_SCRIPTS.format(b="")), encoding="utf-8")
     print("built", sum(1 for _ in OUT.rglob("*.html")), "html files")
 
 
